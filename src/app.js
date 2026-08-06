@@ -9,13 +9,15 @@ import {
 } from './ui/draggable-bottom-sheet.js';
 import './ui/draggable-bottom-sheet.css';
 import data from '../data/london.json';
+
+import {
+  NearbyFeature
+} from './features/nearby/nearby-feature.js';
 import { MapController, LeafletMapAdapter } from './map.js';
 import {GpsController} from './gps.js';
 import {
   TripFeature
 } from './features/trip/trip-feature.js';
-import {queryNearby, nearbyCardHtml} from './nearby.js';
-import {escapeHtml, formatDistance, googleWalkingDirections} from './utils.js';
 
 export function createApp(root) {
   root.innerHTML = `
@@ -204,12 +206,10 @@ export function createApp(root) {
     expandSheet();
     searchAreaButton.hidden = true;
 
-    await findNearby(mapCenterAnchor);
+    await nearbyFeature.search(mapCenterAnchor);
   });
   const appState = {
     userPosition: null,
-    nearby: [],
-    category: 'all',
     followMode: true
   };
 
@@ -237,6 +237,8 @@ export function createApp(root) {
 
   updateFollowButton();
 
+  let nearbyFeature = null;
+
   const tripFeature = new TripFeature({
     map,
     panelController,
@@ -245,8 +247,17 @@ export function createApp(root) {
       root.querySelector('#daySelect'),
     status,
     onPlaceSelected: place => {
-      findNearby(place);
+      nearbyFeature?.search(place);
     }
+  });
+
+  nearbyFeature = new NearbyFeature({
+    map,
+    panelController,
+    listElement: root.querySelector('#list'),
+    chipElements:
+      root.querySelectorAll('.chip'),
+    status
   });
 
   const gps = new GpsController({
@@ -307,8 +318,8 @@ export function createApp(root) {
 
   root.querySelector('#nearBtn').addEventListener('click', () => {
     expandSheet();
-    if (tripFeature.selected) findNearby(tripFeature.selected);
-    else if (appState.userPosition) findNearby(appState.userPosition);
+    if (tripFeature.selected) nearbyFeature.search(tripFeature.selected);
+    else if (appState.userPosition) nearbyFeature.search(appState.userPosition);
     else status('Nearby unavailable', 'Select a stop or enable GPS first.');
   });
 
@@ -403,53 +414,13 @@ export function createApp(root) {
     );
   });
 
-  root.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
-    root.querySelectorAll('.chip').forEach(node => node.classList.remove('on'));
-    chip.classList.add('on');
-    appState.category = chip.dataset.cat;
-    renderNearby();
-  }));
 
-  async function findNearby(anchor) {
-    map.clearNearby();
-    status('Searching nearby…', 'Searching the installed local region database.');
-    try {
-      appState.nearby = await queryNearby(anchor);
-      renderNearby();
-      status(`Nearby: ${appState.nearby.length} places`, `Within about 900 m of ${anchor.name ?? 'your location'}.`);
-    } catch (error) {
-      console.error(error);
-      status('Nearby search unavailable', error.message || 'Local region data could not be loaded.');
-    }
-  }
-
-  function renderNearby() {
-    const existing = root.querySelector('.nearby');
-    existing?.remove();
-    map.clearNearby();
-    const items = appState.nearby
-      .filter(place => appState.category === 'all' || place.type === appState.category)
-      .slice(0, 40);
-    if (!items.length) return;
-
-    const box = document.createElement('div');
-    box.className = 'nearby';
-    box.innerHTML = `<div class="section-title">Nearby discoveries <span>${items.length}</span></div>`;
-    items.forEach(place => {
-      const card = document.createElement('div');
-      card.className = 'nearby-card';
-      card.innerHTML = nearbyCardHtml(place);
-      box.appendChild(card);
-      const popup = `<b>${escapeHtml(place.name)}</b><br>${escapeHtml(place.amenity || 'place')}<br>${formatDistance(place.distance)} away<br><br><a target="_blank" rel="noopener" href="${googleWalkingDirections(place.name)}">Open Google Maps →</a>`;
-      map.addNearby(place, popup);
-    });
-    root.querySelector('#list').appendChild(box);
-  }
 
   return {
     map,
     panelController,
     tripFeature,
+    nearbyFeature,
     gps
   };
 }
