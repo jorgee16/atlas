@@ -48,8 +48,9 @@ export class TripPlugin {
     );
   }
 
-  stop() {
+  stop(context) {
     this.feature?.unload();
     this.feature = null;
+    context.remove('tripFeature');
   }
 }

@@ -48,4 +48,12 @@ export class AppContext {
   has(name) {
     return this.services.has(name);
   }
+
+  remove(name) {
+    return this.services.delete(name);
+  }
+
+  clear() {
+    this.services.clear();
+  }
 }

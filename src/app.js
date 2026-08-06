@@ -2,8 +2,10 @@ import {
   AppBootstrap
 } from './core/app-bootstrap.js';
 
-export function createApp(root) {
+export async function createApp(root) {
   const app = new AppBootstrap(root);
 
-  return app.start();
+  await app.start();
+
+  return app;
 }

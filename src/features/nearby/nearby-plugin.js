@@ -26,8 +26,9 @@ export class NearbyPlugin {
     );
   }
 
-  stop() {
+  stop(context) {
     this.feature?.clear();
     this.feature = null;
+    context.remove('nearbyFeature');
   }
 }

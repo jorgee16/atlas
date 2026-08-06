@@ -163,6 +163,9 @@ export class AppBootstrap {
     context: appContext
   });
 
+  this.appContext = appContext;
+  this.pluginManager = pluginManager;
+
   pluginManager.register(
     new NearbyPlugin()
   );
@@ -264,5 +267,13 @@ export class AppBootstrap {
     statusController,
     gps
   };
+  }
+
+  async destroy() {
+    await this.pluginManager?.stop();
+    this.appContext?.clear();
+
+    this.pluginManager = null;
+    this.appContext = null;
   }
 }

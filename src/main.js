@@ -1,8 +1,16 @@
 import './styles.css';
-import {createApp} from './app.js';
+import { createApp } from './app.js';
 
-createApp(document.querySelector('#app'));
+const root = document.querySelector('#app');
+
+window.roamApp = await createApp(root);
 
 if ('serviceWorker' in navigator) {
-  // window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(console.error));
+  // window.addEventListener(
+  //   'load',
+  //   () => navigator.serviceWorker
+  //     .register('/sw.js')
+  //     .catch(console.error)
+  // );
 }
+
