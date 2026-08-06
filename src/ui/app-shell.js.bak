@@ -15,28 +15,11 @@ export function renderAppShell(root) {
             <span class="brand-mark">🌍</span>
             <div>
               <strong id="map-context-title">Roam</strong>
-              <small id="map-context-subtitle">Explore the map</small>
+              <small id="map-context-subtitle">Exploring London</small>
             </div>
           </div>
 
           <div class="map-header-actions">
-              <button
-                id="loadTripBtn"
-                class="icon-btn"
-                type="button"
-                aria-label="Load trip"
-                title="Load trip"
-              >
-                🧳
-              </button>
-
-              <input
-                id="tripFileInput"
-                type="file"
-                accept="application/json,.json"
-                hidden
-              >
-
             <button
               id="followBtn"
               class="icon-btn on"

@@ -14,6 +14,7 @@ import {
   DraggableBottomSheet
 } from '../ui/draggable-bottom-sheet.js';
 import '../ui/draggable-bottom-sheet.css';
+import data from '../../data/london.json';
 
 import {
   AppContext
@@ -32,18 +33,15 @@ import {
 } from '../features/trip/trip-plugin.js';
 
 import {
-  TripLoader
-} from '../features/trip/trip-loader.js';
+  FollowPlugin
+} from '../features/follow/follow-plugin.js';
 
 import {
-  FollowModeController
-} from '../features/follow/follow-mode-controller.js';
+  GpsPlugin
+} from '../features/gps/gps-plugin.js';
 
 
 import { MapController, LeafletMapAdapter } from '../map.js';
-import {
-  GpsController
-} from '../gps.js';
 
 export class AppBootstrap {
   constructor(root) {
@@ -98,15 +96,7 @@ export class AppBootstrap {
       root.querySelector('#map-context-subtitle')
   });
 
-  const followMode = new FollowModeController({
-    map,
-    mapContext,
-    followButton:
-      root.querySelector('#followBtn'),
-    recenterButton:
-      root.querySelector('#recenterBtn'),
-    status
-  });
+  let followMode = null;
 
   const searchAreaButton =
     root.querySelector('#searchAreaBtn');
@@ -178,7 +168,7 @@ export class AppBootstrap {
 
   pluginManager.register(
     new TripPlugin({
-        data: null,
+      data,
       initialDay: '12',
       snap: 'half',
       onPlaceSelected: place => {
@@ -196,14 +186,6 @@ export class AppBootstrap {
 
   const tripFeature =
     appContext.get('tripFeature');
-
-    const tripLoader = new TripLoader();
-
-    const loadTripButton =
-      root.querySelector('#loadTripBtn');
-
-    const tripFileInput =
-      root.querySelector('#tripFileInput');
 
   const gps = new GpsController({
     onStatus: status,
@@ -226,55 +208,11 @@ export class AppBootstrap {
       );
     }
   });
-loadTripButton?.addEventListener(
-      'click',
-      () => {
-        tripFileInput?.click();
-      }
-    );
 
-    tripFileInput?.addEventListener(
-      'change',
-      async event => {
-        const file =
-          event.currentTarget.files?.[0];
-
-        if (!file) {
-          return;
-        }
-
-        try {
-          const tripData =
-            await tripLoader.loadFromFile(file);
-
-          const firstDay =
-            Object.keys(
-              tripData.trip?.days ?? {}
-            )[0] ?? '1';
-
-          tripFeature.load(tripData, {
-            initialDay: firstDay,
-            snap: 'half'
-          });
-
-          status(
-            'Trip loaded',
-            file.name
-          );
-        } catch (error) {
-          console.error(error);
-
-          status(
-            'Could not load trip',
-            error.message
-          );
-        } finally {
-          event.currentTarget.value = '';
-        }
-      }
-    );
-
-
+  tripFeature.load(data, {
+    initialDay: '12',
+    snap: 'half'
+  });
 
   draggableSheet = new DraggableBottomSheet({
     sheet: bottomSheet,
