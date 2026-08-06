@@ -17,17 +17,27 @@ import '../ui/draggable-bottom-sheet.css';
 import data from '../../data/london.json';
 
 import {
+  AppContext
+} from './app-context.js';
+
+import {
+  PluginManager
+} from './plugin-manager.js';
+
+import {
+  NearbyPlugin
+} from '../features/nearby/nearby-plugin.js';
+
+import {
+  TripPlugin
+} from '../features/trip/trip-plugin.js';
+
+import {
   FollowModeController
 } from '../features/follow/follow-mode-controller.js';
 
-import {
-  NearbyFeature
-} from '../features/nearby/nearby-feature.js';
 import { MapController, LeafletMapAdapter } from '../map.js';
 import {GpsController} from '../gps.js';
-import {
-  TripFeature
-} from '../features/trip/trip-feature.js';
 
 export class AppBootstrap {
   constructor(root) {
@@ -40,7 +50,7 @@ export class AppBootstrap {
     this.root = root;
   }
 
-  start() {
+  async start() {
     const root = this.root;
   renderAppShell(root);
 
@@ -140,28 +150,43 @@ export class AppBootstrap {
   };
 
 
-  let nearbyFeature = null;
-
-  const tripFeature = new TripFeature({
+  const appContext = new AppContext({
+    root,
     map,
     panelController,
-    listElement: root.querySelector('#list'),
-    daySelectElement:
-      root.querySelector('#daySelect'),
-    status,
-    onPlaceSelected: place => {
-      nearbyFeature?.search(place);
-    }
-  });
-
-  nearbyFeature = new NearbyFeature({
-    map,
-    panelController,
-    listElement: root.querySelector('#list'),
-    chipElements:
-      root.querySelectorAll('.chip'),
+    mapContext,
+    statusController,
     status
   });
+
+  const pluginManager = new PluginManager({
+    context: appContext
+  });
+
+  pluginManager.register(
+    new NearbyPlugin()
+  );
+
+  pluginManager.register(
+    new TripPlugin({
+      data,
+      initialDay: '12',
+      snap: 'half',
+      onPlaceSelected: place => {
+        appContext
+          .get('nearbyFeature')
+          .search(place);
+      }
+    })
+  );
+
+  await pluginManager.start();
+
+  const nearbyFeature =
+    appContext.get('nearbyFeature');
+
+  const tripFeature =
+    appContext.get('tripFeature');
 
   const gps = new GpsController({
     onStatus: status,
