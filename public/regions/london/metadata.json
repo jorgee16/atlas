@@ -8,6 +8,8 @@
     0.35,
     51.75
   ],
+  "attribution": "© OpenStreetMap contributors",
+  "dataLicense": "ODbL-1.0",
   "poiUrl": "/regions/london/pois.geojson",
   "indexUrl": "/regions/london/poi-index.json",
   "poiCount": 46325,
@@ -18,6 +20,11 @@
     "cellCount": 4310
   },
   "generatedAt": "2026-08-06T15:12:06.747Z",
-  "attribution": "© OpenStreetMap contributors",
-  "dataLicense": "ODbL-1.0"
+  "map": {
+    "url": "/regions/london/map.pmtiles",
+    "format": "pmtiles",
+    "tileType": "vector",
+    "sizeBytes": 59462540,
+    "generatedAt": "2026-08-06T16:46:05.340Z"
+  }
 }

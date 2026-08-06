@@ -45,6 +45,23 @@ export class OsmiumAdapter {
     }
   }
 
+  async extractRegion({ input, bbox, output }) {
+    await fs.mkdir(path.dirname(output), {
+      recursive: true
+    });
+
+    await run('osmium', [
+      'extract',
+      '--bbox', bbox.join(','),
+      '--strategy', 'complete_ways',
+      '--overwrite',
+      '--output', output,
+      input
+    ]);
+
+    return output;
+  }
+
   async buildIntermediate({ input, bbox, categories, workDir }) {
     await fs.mkdir(workDir, { recursive: true });
 
@@ -52,14 +69,11 @@ export class OsmiumAdapter {
     const filteredPbf = path.join(workDir, 'pois.osm.pbf');
     const rawGeoJson = path.join(workDir, 'raw-pois.geojson');
 
-    await run('osmium', [
-      'extract',
-      '--bbox', bbox.join(','),
-      '--strategy', 'complete_ways',
-      '--overwrite',
-      '--output', extractedPbf,
-      input
-    ]);
+    await this.extractRegion({
+      input,
+      bbox,
+      output: extractedPbf
+    });
 
     const expressions = filterExpression(categories);
 
