@@ -1,4 +1,7 @@
 import {
+  StatusController
+} from './ui/status-controller.js';
+import {
   PanelController
 } from './ui/panel-controller.js';
 import {
@@ -115,15 +118,14 @@ export function createApp(root) {
   const panelController = new PanelController({
     sheet: bottomSheet
   });
-  const statusElement = root.querySelector('#status');
-  let statusTimer = null;
+  const statusController =
+    new StatusController({
+      element: root.querySelector('#status'),
+      hideAfterMs: 2500
+    });
 
-  const status = (title, subtitle) => {
-    statusElement.querySelector('b').textContent = title;
-    statusElement.querySelector('span').textContent = subtitle;
-    statusElement.classList.add('visible');
-    window.clearTimeout(statusTimer);
-    statusTimer = window.setTimeout(() => statusElement.classList.remove('visible'), 2500);
+  const status = (title, subtitle = '') => {
+    statusController.show(title, subtitle);
   };
 
   let draggableSheet = null;
@@ -421,6 +423,7 @@ export function createApp(root) {
     panelController,
     tripFeature,
     nearbyFeature,
+    statusController,
     gps
   };
 }
