@@ -1,4 +1,7 @@
 import {
+  PanelController
+} from './ui/panel-controller.js';
+import {
   MapContextController
 } from './ui/map-context-controller.js';
 import {
@@ -104,6 +107,10 @@ export function createApp(root) {
     </div>`;
 
   const bottomSheet = root.querySelector('#bottomSheet');
+
+  const panelController = new PanelController({
+    sheet: bottomSheet
+  });
   const statusElement = root.querySelector('#status');
   let statusTimer = null;
 
@@ -118,7 +125,7 @@ export function createApp(root) {
   let draggableSheet = null;
 
   const expandSheet = () => {
-    draggableSheet?.expand();
+    panelController.expand();
   };
   const mapAdapter = new LeafletMapAdapter({
     elementId: 'map',
@@ -286,6 +293,14 @@ export function createApp(root) {
         300
       );
     }
+  });
+
+  panelController.attachDraggableSheet(
+    draggableSheet
+  );
+
+  panelController.show('trip', {
+    snap: 'half'
   });
 
   root.querySelector('#nearBtn').addEventListener('click', () => {
