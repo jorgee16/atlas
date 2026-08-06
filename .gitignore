@@ -10,3 +10,9 @@ data/osm/*.osm.pbf
 # Generated region databases and maps
 public/regions/*/pois.geojson
 public/regions/*/*.pmtiles
+
+# Generated spatial indexes
+public/regions/*/poi-index.json
+
+# Temporary patch archives
+roam-*.zip

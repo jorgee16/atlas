@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+const DEFAULT_CELL_SIZE_DEGREES = 0.005;
+
 function flattenCoordinates(value, output = []) {
   if (!Array.isArray(value)) return output;
 
@@ -86,6 +88,35 @@ function compactProperties(tags, category) {
   return output;
 }
 
+function gridCell(value, cellSize) {
+  return Math.floor(value / cellSize);
+}
+
+function gridKey(lon, lat, cellSize) {
+  return `${gridCell(lon, cellSize)}:${gridCell(lat, cellSize)}`;
+}
+
+function buildSpatialIndex(features, cellSize) {
+  const cells = {};
+
+  features.forEach((feature, featureIndex) => {
+    const [lon, lat] = feature.geometry.coordinates;
+    const key = gridKey(lon, lat, cellSize);
+
+    if (!cells[key]) cells[key] = [];
+    cells[key].push(featureIndex);
+  });
+
+  return {
+    version: 1,
+    kind: 'uniform-grid',
+    cellSizeDegrees: cellSize,
+    featureCount: features.length,
+    cellCount: Object.keys(cells).length,
+    cells
+  };
+}
+
 export async function normalizeRegion({
   rawGeoJson,
   config,
@@ -125,6 +156,15 @@ export async function normalizeRegion({
 
   await fs.mkdir(outputDir, { recursive: true });
 
+  const cellSizeDegrees =
+    config.spatialIndex?.cellSizeDegrees ??
+    DEFAULT_CELL_SIZE_DEGREES;
+
+  const spatialIndex = buildSpatialIndex(
+    features,
+    cellSizeDegrees
+  );
+
   const poiDocument = {
     type: 'FeatureCollection',
     metadata: {
@@ -141,7 +181,14 @@ export async function normalizeRegion({
     country: config.country,
     bounds: config.bbox,
     poiUrl: `/regions/${config.id}/pois.geojson`,
+    indexUrl: `/regions/${config.id}/poi-index.json`,
     poiCount: features.length,
+    spatialIndex: {
+      kind: spatialIndex.kind,
+      version: spatialIndex.version,
+      cellSizeDegrees,
+      cellCount: spatialIndex.cellCount
+    },
     generatedAt: new Date().toISOString(),
     attribution: '© OpenStreetMap contributors',
     dataLicense: 'ODbL-1.0'
@@ -150,6 +197,12 @@ export async function normalizeRegion({
   await fs.writeFile(
     path.join(outputDir, 'pois.geojson'),
     JSON.stringify(poiDocument),
+    'utf8'
+  );
+
+  await fs.writeFile(
+    path.join(outputDir, 'poi-index.json'),
+    JSON.stringify(spatialIndex),
     'utf8'
   );
 

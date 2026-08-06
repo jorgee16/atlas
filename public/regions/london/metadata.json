@@ -9,8 +9,15 @@
     51.75
   ],
   "poiUrl": "/regions/london/pois.geojson",
+  "indexUrl": "/regions/london/poi-index.json",
   "poiCount": 46325,
-  "generatedAt": "2026-08-06T14:23:09.382Z",
+  "spatialIndex": {
+    "kind": "uniform-grid",
+    "version": 1,
+    "cellSizeDegrees": 0.005,
+    "cellCount": 4310
+  },
+  "generatedAt": "2026-08-06T15:12:06.747Z",
   "attribution": "© OpenStreetMap contributors",
   "dataLicense": "ODbL-1.0"
 }
