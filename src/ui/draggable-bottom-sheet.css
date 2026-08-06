@@ -1,0 +1,31 @@
+@media (max-width: 800px) {
+  .bottom-sheet {
+    top: 0;
+    bottom: auto;
+    height: 100%;
+    max-height: none;
+    will-change: transform;
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .bottom-sheet.is-dragging {
+    transition: none;
+    user-select: none;
+  }
+
+  .sheet-handle {
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .sheet-handle:active {
+    cursor: grabbing;
+  }
+
+  .bottom-sheet[data-snap="collapsed"] .chips,
+  .bottom-sheet[data-snap="collapsed"] .list {
+    opacity: 0;
+    pointer-events: none;
+  }
+}

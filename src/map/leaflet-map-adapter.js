@@ -8,6 +8,77 @@ import {
 
 const DEFAULT_CENTER = [51.5074, -0.1278];
 const DEFAULT_ZOOM = 13;
+const MIN_HEADING_SPEED_METERS_PER_SECOND = 0.8;
+
+function createUserLocationIcon({
+  heading,
+  showHeading
+}) {
+  const rotation = Number.isFinite(heading) ? heading : 0;
+
+  const html = showHeading
+    ? `
+      <div
+        style="
+          position:relative;
+          width:42px;
+          height:42px;
+          transform:rotate(${rotation}deg);
+          transition:transform 220ms ease;
+        "
+      >
+        <div
+          style="
+            position:absolute;
+            top:0;
+            left:50%;
+            width:0;
+            height:0;
+            transform:translateX(-50%);
+            border-left:9px solid transparent;
+            border-right:9px solid transparent;
+            border-bottom:22px solid #2563eb;
+            filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));
+          "
+        ></div>
+
+        <div
+          style="
+            position:absolute;
+            left:50%;
+            bottom:5px;
+            width:18px;
+            height:18px;
+            transform:translateX(-50%);
+            background:#2563eb;
+            border:3px solid #fff;
+            border-radius:50%;
+            box-shadow:0 2px 8px rgba(0,0,0,.28);
+          "
+        ></div>
+      </div>
+    `
+    : `
+      <div
+        style="
+          width:20px;
+          height:20px;
+          background:#2563eb;
+          border:4px solid #fff;
+          border-radius:50%;
+          box-shadow:0 2px 9px rgba(0,0,0,.30);
+        "
+      ></div>
+    `;
+
+  return L.divIcon({
+    className: '',
+    html,
+    iconSize: showHeading ? [42, 42] : [20, 20],
+    iconAnchor: showHeading ? [21, 34] : [10, 10],
+    popupAnchor: [0, -20]
+  });
+}
 
 export class LeafletMapAdapter {
   constructor({
@@ -102,21 +173,37 @@ export class LeafletMapAdapter {
   }
 
   updateUserLocation(
-    { latitude, longitude, accuracy },
+    {
+      latitude,
+      longitude,
+      accuracy,
+      heading = null,
+      speed = null
+    },
     firstFix = false
   ) {
     const latLng = [latitude, longitude];
 
+    const showHeading =
+      Number.isFinite(heading) &&
+      Number.isFinite(speed) &&
+      speed >= MIN_HEADING_SPEED_METERS_PER_SECOND;
+
+    const icon = createUserLocationIcon({
+      heading,
+      showHeading
+    });
+
     if (!this.userMarker) {
-      this.userMarker = L.circleMarker(latLng, {
-        radius: 8,
-        weight: 3,
-        fillOpacity: 1
+      this.userMarker = L.marker(latLng, {
+        icon,
+        zIndexOffset: 1000
       })
         .addTo(this.map)
         .bindPopup('<b>📍 You are here</b>');
     } else {
       this.userMarker.setLatLng(latLng);
+      this.userMarker.setIcon(icon);
     }
 
     if (!this.userAccuracy) {
@@ -152,6 +239,68 @@ export class LeafletMapAdapter {
 
   invalidateSize() {
     this.map.invalidateSize();
+  }
+
+  onUserMoveStart(callback) {
+    if (typeof callback !== 'function') {
+      throw new TypeError(
+        'onUserMoveStart requires a callback.'
+      );
+    }
+
+    const container = this.map.getContainer();
+
+    this.map.on('dragstart', callback);
+
+    container.addEventListener(
+      'wheel',
+      callback,
+      { passive: true }
+    );
+
+    container.addEventListener(
+      'dblclick',
+      callback
+    );
+
+    container.addEventListener(
+      'touchstart',
+      event => {
+        if (event.touches.length >= 2) {
+          callback();
+        }
+      },
+      { passive: true }
+    );
+
+    container.addEventListener(
+      'click',
+      event => {
+        if (
+          event.target.closest(
+            '.leaflet-control-zoom'
+          )
+        ) {
+          callback();
+        }
+      }
+    );
+  }
+
+  onMoveEnd(callback) {
+    if (typeof callback !== 'function') {
+      throw new TypeError('onMoveEnd requires a callback.');
+    }
+
+    this.map.on('moveend', () => {
+      const center = this.map.getCenter();
+
+      callback({
+        lat: center.lat,
+        lon: center.lng,
+        zoom: this.map.getZoom()
+      });
+    });
   }
 
   async #registerOfflineLayer({

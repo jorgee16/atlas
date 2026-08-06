@@ -34,4 +34,12 @@ export class MapController {
   invalidateSize() {
     this.adapter.invalidateSize();
   }
+
+  onMoveEnd(callback) {
+    this.adapter.onMoveEnd(callback);
+  }
+
+  onUserMoveStart(callback) {
+    this.adapter.onUserMoveStart(callback);
+  }
 }

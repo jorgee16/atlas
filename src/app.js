@@ -1,3 +1,10 @@
+import {
+  MapContextController
+} from './ui/map-context-controller.js';
+import {
+  DraggableBottomSheet
+} from './ui/draggable-bottom-sheet.js';
+import './ui/draggable-bottom-sheet.css';
 import data from '../data/london.json';
 import { MapController, LeafletMapAdapter } from './map.js';
 import {GpsController} from './gps.js';
@@ -14,13 +21,54 @@ export function createApp(root) {
         <header class="map-header">
           <div class="brand-inline">
             <span class="brand-mark">🌍</span>
-            <div><strong>Roam</strong><small>London trip</small></div>
+            <div>
+              <strong id="map-context-title">Roam</strong>
+              <small id="map-context-subtitle">Exploring London</small>
+            </div>
           </div>
-          <button id="gpsBtn" class="icon-btn" type="button" aria-label="Toggle GPS">📍</button>
+
+          <div class="map-header-actions">
+            <button
+              id="followBtn"
+              class="icon-btn on"
+              type="button"
+              aria-label="Stop following my location"
+              title="Stop following"
+            >
+              👁
+            </button>
+
+            <button
+              id="gpsBtn"
+              class="icon-btn"
+              type="button"
+              aria-label="Toggle GPS"
+              title="Toggle GPS"
+            >
+              📍
+            </button>
+          </div>
         </header>
 
         <div class="map-actions">
-          <button id="recenterBtn" class="map-action" type="button" aria-label="Recenter on my location" title="Recenter on my location">🎯</button>
+          <button
+            id="searchAreaBtn"
+            class="search-area-btn"
+            type="button"
+            hidden
+          >
+            Search this area
+          </button>
+
+          <button
+            id="recenterBtn"
+            class="map-action"
+            type="button"
+            aria-label="Recenter on my location"
+            title="Recenter on my location"
+          >
+            🎯
+          </button>
         </div>
 
         <div class="status-toast" id="status" aria-live="polite">
@@ -64,21 +112,121 @@ export function createApp(root) {
     statusElement.querySelector('span').textContent = subtitle;
     statusElement.classList.add('visible');
     window.clearTimeout(statusTimer);
-    statusTimer = window.setTimeout(() => statusElement.classList.remove('visible'), 4200);
+    statusTimer = window.setTimeout(() => statusElement.classList.remove('visible'), 2500);
   };
 
-  const expandSheet = () => bottomSheet.classList.remove('collapsed');
+  let draggableSheet = null;
+
+  const expandSheet = () => {
+    draggableSheet?.expand();
+  };
   const mapAdapter = new LeafletMapAdapter({
     elementId: 'map',
     offlineMapUrl:
       `${import.meta.env.BASE_URL}regions/london/map.pmtiles`,
-    preferOffline: true
+    preferOffline: false
   });
 
   const map = new MapController({
     adapter: mapAdapter
   });
-  const appState = {userPosition:null, nearby:[], category:'all'};
+
+  const mapContext = new MapContextController({
+    titleElement:
+      root.querySelector('#map-context-title'),
+    subtitleElement:
+      root.querySelector('#map-context-subtitle')
+  });
+
+  const searchAreaButton =
+    root.querySelector('#searchAreaBtn');
+
+  let mapCenterAnchor = null;
+  let searchAreaTimer = null;
+
+  map.onUserMoveStart(() => {
+    appState.followMode = false;
+    updateFollowButton();
+
+    const recenterButton =
+      root.querySelector('#recenterBtn');
+
+    recenterButton.classList.remove('following');
+    recenterButton.textContent = '🎯';
+
+    mapContext.showExploring({
+      lat: mapCenterAnchor?.lat ?? 0,
+      lon: mapCenterAnchor?.lon ?? 0,
+      zoom: mapCenterAnchor?.zoom ?? 0
+    });
+  });
+
+  map.onMoveEnd(({ lat, lon, zoom }) => {
+    mapCenterAnchor = {
+      lat,
+      lon,
+      name: 'this map area'
+    };
+
+    if (appState.followMode) {
+      return;
+    }
+
+    mapContext.showExploring({
+      lat,
+      lon,
+      zoom
+    });
+
+    searchAreaButton.hidden = true;
+
+    window.clearTimeout(searchAreaTimer);
+
+    searchAreaTimer = window.setTimeout(() => {
+      searchAreaButton.hidden = false;
+    }, 500);
+  });
+
+  searchAreaButton.addEventListener('click', async () => {
+    if (!mapCenterAnchor) {
+      return;
+    }
+
+    expandSheet();
+    searchAreaButton.hidden = true;
+
+    await findNearby(mapCenterAnchor);
+  });
+  const appState = {
+    userPosition: null,
+    nearby: [],
+    category: 'all',
+    followMode: true
+  };
+
+  const followButton =
+    root.querySelector('#followBtn');
+
+  const updateFollowButton = () => {
+    followButton.classList.toggle(
+      'on',
+      appState.followMode
+    );
+
+    followButton.setAttribute(
+      'aria-label',
+      appState.followMode
+        ? 'Stop following my location'
+        : 'Start following my location'
+    );
+
+    followButton.title =
+      appState.followMode
+        ? 'Stop following'
+        : 'Start following';
+  };
+
+  updateFollowButton();
 
   const itinerary = new ItineraryController({
     data,
@@ -92,9 +240,33 @@ export function createApp(root) {
     onStatus: status,
     onUpdate: position => {
       const firstFix = !appState.userPosition;
-      appState.userPosition = {name:'My location', lat:position.latitude, lon:position.longitude};
+      appState.userPosition = {
+        name: 'My location',
+        lat: position.latitude,
+        lon: position.longitude,
+        heading: position.heading,
+        speed: position.speed
+      };
+
       map.updateUserLocation(position, firstFix);
-      status('📍 You are here', `Accuracy: ${Math.round(position.accuracy)} m`);
+
+      if (appState.followMode) {
+        map.focus(
+          appState.userPosition.lat,
+          appState.userPosition.lon,
+          16
+        );
+
+        mapContext.showFollowing({
+          heading: position.heading,
+          speed: position.speed
+        });
+      }
+
+      status(
+        '📍 You are here',
+        `Accuracy: ${Math.round(position.accuracy)} m`
+      );
     }
   });
 
@@ -104,9 +276,16 @@ export function createApp(root) {
   });
   itinerary.render('12');
 
-  root.querySelector('#sheetToggle').addEventListener('click', () => {
-    bottomSheet.classList.toggle('collapsed');
-    window.setTimeout(() => map.invalidateSize(), 260);
+  draggableSheet = new DraggableBottomSheet({
+    sheet: bottomSheet,
+    handle: root.querySelector('#sheetToggle'),
+    initialSnap: 'half',
+    onSettled: () => {
+      window.setTimeout(
+        () => map.invalidateSize(),
+        300
+      );
+    }
   });
 
   root.querySelector('#nearBtn').addEventListener('click', () => {
@@ -114,6 +293,53 @@ export function createApp(root) {
     if (itinerary.selected) findNearby(itinerary.selected);
     else if (appState.userPosition) findNearby(appState.userPosition);
     else status('Nearby unavailable', 'Select a stop or enable GPS first.');
+  });
+
+  followButton.addEventListener('click', () => {
+    if (appState.followMode) {
+      appState.followMode = false;
+      updateFollowButton();
+
+      if (mapCenterAnchor) {
+        mapContext.showExploring(mapCenterAnchor);
+      } else {
+        mapContext.showIdle();
+      }
+
+      status(
+        'Follow mode paused',
+        'GPS remains active, but the map will not auto-center.'
+      );
+
+      return;
+    }
+
+    if (!appState.userPosition) {
+      status(
+        'No GPS position',
+        'Enable GPS and wait for a location fix first.'
+      );
+      return;
+    }
+
+    appState.followMode = true;
+    updateFollowButton();
+
+    map.focus(
+      appState.userPosition.lat,
+      appState.userPosition.lon,
+      16
+    );
+
+    mapContext.showFollowing({
+      heading: appState.userPosition.heading,
+      speed: appState.userPosition.speed
+    });
+
+    status(
+      'Follow mode enabled',
+      'The map will follow your live GPS position.'
+    );
   });
 
   root.querySelector('#gpsBtn').addEventListener('click', event => {
@@ -129,13 +355,35 @@ export function createApp(root) {
     }
   });
 
-  root.querySelector('#recenterBtn').addEventListener('click', () => {
+  root.querySelector('#recenterBtn').addEventListener('click', event => {
     if (!appState.userPosition) {
-      status('No GPS position', 'Enable GPS and wait for a location fix.');
+      status(
+        'No GPS position',
+        'Enable GPS and wait for a location fix.'
+      );
       return;
     }
-    map.focus(appState.userPosition.lat, appState.userPosition.lon, 16);
-    status('📍 Recentered', 'Map returned to your current location.');
+
+    appState.followMode = true;
+    updateFollowButton();
+    event.currentTarget.classList.add('following');
+    event.currentTarget.textContent = '◎';
+
+    map.focus(
+      appState.userPosition.lat,
+      appState.userPosition.lon,
+      16
+    );
+
+    mapContext.showFollowing({
+      heading: appState.userPosition?.heading ?? null,
+      speed: appState.userPosition?.speed ?? null
+    });
+
+    status(
+      'Follow mode enabled',
+      'The map will follow your GPS position.'
+    );
   });
 
   root.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
