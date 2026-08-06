@@ -1,5 +1,5 @@
 import data from '../data/london.json';
-import {MapController} from './map.js';
+import { MapController, LeafletMapAdapter } from './map.js';
 import {GpsController} from './gps.js';
 import {ItineraryController} from './itinerary.js';
 import {queryNearby, nearbyCardHtml} from './nearby.js';
@@ -68,7 +68,13 @@ export function createApp(root) {
   };
 
   const expandSheet = () => bottomSheet.classList.remove('collapsed');
-  const map = new MapController('map');
+  const mapAdapter = new LeafletMapAdapter({
+    elementId: 'map'
+  });
+
+  const map = new MapController({
+    adapter: mapAdapter
+  });
   const appState = {userPosition:null, nearby:[], category:'all'};
 
   const itinerary = new ItineraryController({
@@ -97,7 +103,7 @@ export function createApp(root) {
 
   root.querySelector('#sheetToggle').addEventListener('click', () => {
     bottomSheet.classList.toggle('collapsed');
-    window.setTimeout(() => map.map.invalidateSize(), 260);
+    window.setTimeout(() => map.invalidateSize(), 260);
   });
 
   root.querySelector('#nearBtn').addEventListener('click', () => {
