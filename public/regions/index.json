@@ -1,0 +1,16 @@
+{
+  "regions": [
+    {
+      "id": "london",
+      "name": "London",
+      "country": "United Kingdom",
+      "bounds": [
+        -0.55,
+        51.25,
+        0.35,
+        51.75
+      ],
+      "poiUrl": "/regions/london/pois.geojson"
+    }
+  ]
+}

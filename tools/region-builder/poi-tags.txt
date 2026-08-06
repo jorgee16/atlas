@@ -1,0 +1,11 @@
+# Food and drink
+nwr/amenity=cafe,restaurant,fast_food,pub,bar,food_court,ice_cream
+
+# Visitor attractions and culture
+nwr/tourism=museum,gallery,attraction,viewpoint,zoo,aquarium,theme_park
+nwr/historic
+nwr/amenity=theatre,cinema,arts_centre
+
+# Useful outdoor places
+nwr/leisure=park,garden,nature_reserve
+nwr/natural=beach,peak

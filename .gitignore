@@ -3,3 +3,10 @@ dist/
 .vite/
 .DS_Store
 npm-debug.log*
+
+# Downloaded OpenStreetMap extracts
+data/osm/*.osm.pbf
+
+# Generated region databases and maps
+public/regions/*/pois.geojson
+public/regions/*/*.pmtiles

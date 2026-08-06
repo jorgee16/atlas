@@ -1,0 +1,78 @@
+{
+  "id": "london",
+  "name": "London",
+  "country": "United Kingdom",
+  "bbox": [
+    -0.55,
+    51.25,
+    0.35,
+    51.75
+  ],
+  "output": "public/regions/london",
+  "categories": {
+    "cafe": [
+      {
+        "key": "amenity",
+        "values": [
+          "cafe",
+          "ice_cream"
+        ]
+      }
+    ],
+    "restaurant": [
+      {
+        "key": "amenity",
+        "values": [
+          "restaurant",
+          "fast_food",
+          "food_court"
+        ]
+      }
+    ],
+    "pub": [
+      {
+        "key": "amenity",
+        "values": [
+          "pub",
+          "bar"
+        ]
+      }
+    ],
+    "attraction": [
+      {
+        "key": "tourism",
+        "values": [
+          "museum",
+          "gallery",
+          "attraction",
+          "viewpoint",
+          "zoo",
+          "aquarium",
+          "theme_park"
+        ]
+      },
+      {
+        "key": "amenity",
+        "values": [
+          "theatre",
+          "cinema",
+          "arts_centre"
+        ]
+      },
+      {
+        "key": "leisure",
+        "values": [
+          "park",
+          "garden",
+          "nature_reserve"
+        ]
+      },
+      {
+        "key": "historic",
+        "values": [
+          "*"
+        ]
+      }
+    ]
+  }
+}

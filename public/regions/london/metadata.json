@@ -1,0 +1,16 @@
+{
+  "id": "london",
+  "name": "London",
+  "country": "United Kingdom",
+  "bounds": [
+    -0.55,
+    51.25,
+    0.35,
+    51.75
+  ],
+  "poiUrl": "/regions/london/pois.geojson",
+  "poiCount": 46325,
+  "generatedAt": "2026-08-06T14:23:09.382Z",
+  "attribution": "© OpenStreetMap contributors",
+  "dataLicense": "ODbL-1.0"
+}
