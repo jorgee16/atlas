@@ -853,3 +853,7 @@ select:focus-visible,
   opacity: 1;
   box-shadow: 0 12px 28px rgba(49, 94, 251, 0.30);
 }
+
+.bottom-sheet[hidden] {
+  display: none !important;
+}

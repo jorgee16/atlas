@@ -11,7 +11,9 @@ import './ui/draggable-bottom-sheet.css';
 import data from '../data/london.json';
 import { MapController, LeafletMapAdapter } from './map.js';
 import {GpsController} from './gps.js';
-import {ItineraryController} from './itinerary.js';
+import {
+  TripFeature
+} from './features/trip/trip-feature.js';
 import {queryNearby, nearbyCardHtml} from './nearby.js';
 import {escapeHtml, formatDistance, googleWalkingDirections} from './utils.js';
 
@@ -235,12 +237,16 @@ export function createApp(root) {
 
   updateFollowButton();
 
-  const itinerary = new ItineraryController({
-    data,
+  const tripFeature = new TripFeature({
     map,
-    listElement:root.querySelector('#list'),
-    daySelect:root.querySelector('#daySelect'),
-    status
+    panelController,
+    listElement: root.querySelector('#list'),
+    daySelectElement:
+      root.querySelector('#daySelect'),
+    status,
+    onPlaceSelected: place => {
+      findNearby(place);
+    }
   });
 
   const gps = new GpsController({
@@ -277,11 +283,10 @@ export function createApp(root) {
     }
   });
 
-  itinerary.setSelectHandler(place => {
-    expandSheet();
-    findNearby(place);
+  tripFeature.load(data, {
+    initialDay: '12',
+    snap: 'half'
   });
-  itinerary.render('12');
 
   draggableSheet = new DraggableBottomSheet({
     sheet: bottomSheet,
@@ -299,13 +304,10 @@ export function createApp(root) {
     draggableSheet
   );
 
-  panelController.show('trip', {
-    snap: 'half'
-  });
 
   root.querySelector('#nearBtn').addEventListener('click', () => {
     expandSheet();
-    if (itinerary.selected) findNearby(itinerary.selected);
+    if (tripFeature.selected) findNearby(tripFeature.selected);
     else if (appState.userPosition) findNearby(appState.userPosition);
     else status('Nearby unavailable', 'Select a stop or enable GPS first.');
   });
@@ -444,5 +446,10 @@ export function createApp(root) {
     root.querySelector('#list').appendChild(box);
   }
 
-  return {map, itinerary, gps};
+  return {
+    map,
+    panelController,
+    tripFeature,
+    gps
+  };
 }
