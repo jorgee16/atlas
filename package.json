@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
+    "maplibre-gl": "^6.2.0",
     "pmtiles": "^4.4.1",
     "protomaps-leaflet": "^5.1.0"
   },
