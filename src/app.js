@@ -69,7 +69,10 @@ export function createApp(root) {
 
   const expandSheet = () => bottomSheet.classList.remove('collapsed');
   const mapAdapter = new LeafletMapAdapter({
-    elementId: 'map'
+    elementId: 'map',
+    offlineMapUrl:
+      `${import.meta.env.BASE_URL}regions/london/map.pmtiles`,
+    preferOffline: true
   });
 
   const map = new MapController({

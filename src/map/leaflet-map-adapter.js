@@ -1,5 +1,10 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { createOnlineOsmLayer } from './layers/online-osm-layer.js';
+import {
+  createPmtilesVectorLayer,
+  pmtilesArchiveExists
+} from './layers/pmtiles-vector-layer.js';
 
 const DEFAULT_CENTER = [51.5074, -0.1278];
 const DEFAULT_ZOOM = 13;
@@ -8,7 +13,9 @@ export class LeafletMapAdapter {
   constructor({
     elementId,
     center = DEFAULT_CENTER,
-    zoom = DEFAULT_ZOOM
+    zoom = DEFAULT_ZOOM,
+    offlineMapUrl = null,
+    preferOffline = true
   }) {
     if (!elementId) {
       throw new TypeError(
@@ -17,27 +24,36 @@ export class LeafletMapAdapter {
     }
 
     this.map = L.map(elementId, {
-      zoomControl: true
+      zoomControl: true,
+      maxZoom: 18
     }).setView(center, zoom);
 
-    this.streets = L.tileLayer(
-      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-      }
-    ).addTo(this.map);
+    this.onlineLayer = createOnlineOsmLayer()
+      .addTo(this.map);
 
-    L.control.layers(
-      { '🗺️ Streets': this.streets },
+    this.offlineLayer = null;
+
+    this.layerControl = L.control.layers(
+      {
+        '🌐 Online streets': this.onlineLayer
+      },
       null,
-      { collapsed: true }
+      {
+        collapsed: true
+      }
     ).addTo(this.map);
 
     this.itineraryMarkers = [];
     this.nearbyMarkers = [];
     this.userMarker = null;
     this.userAccuracy = null;
+
+    if (offlineMapUrl) {
+      void this.#registerOfflineLayer({
+        url: offlineMapUrl,
+        preferOffline
+      });
+    }
   }
 
   clearItinerary() {
@@ -136,6 +152,34 @@ export class LeafletMapAdapter {
 
   invalidateSize() {
     this.map.invalidateSize();
+  }
+
+  async #registerOfflineLayer({
+    url,
+    preferOffline
+  }) {
+    const exists = await pmtilesArchiveExists(url);
+
+    if (!exists) {
+      console.info(
+        'Offline map was not found; using online OpenStreetMap.'
+      );
+      return;
+    }
+
+    this.offlineLayer = createPmtilesVectorLayer({
+      url
+    });
+
+    this.layerControl.addBaseLayer(
+      this.offlineLayer,
+      '📦 Offline London'
+    );
+
+    if (preferOffline) {
+      this.map.removeLayer(this.onlineLayer);
+      this.offlineLayer.addTo(this.map);
+    }
   }
 
   #removeLayers(layers) {
