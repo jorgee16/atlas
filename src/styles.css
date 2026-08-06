@@ -204,3 +204,8 @@ button{-webkit-tap-highlight-color:transparent}
   .toolbar button{padding-inline:11px}
   .chip{font-size:11px;padding:6px 9px}
 }
+
+/* Keep Leaflet layer selector below Roam's top-right GPS control */
+.leaflet-control-layers {
+  margin-top: 92px !important;
+}
