@@ -68,6 +68,35 @@ export class BookmarksFeature {
     this.render();
   }
 
+  rename(id, name) {
+    const trimmedName = name?.trim();
+
+    if (!trimmedName) {
+      return false;
+    }
+
+    const bookmark =
+      this.bookmarks.find(
+        item => item.id === id
+      );
+
+    if (!bookmark) {
+      return false;
+    }
+
+    bookmark.name = trimmedName;
+
+    this.store.save(this.bookmarks);
+    this.render();
+
+    this.status(
+      'Bookmark renamed',
+      trimmedName
+    );
+
+    return true;
+  }
+
   show() {
     this.panelController.show(
       'bookmarks',
@@ -130,6 +159,31 @@ export class BookmarksFeature {
         }
       );
 
+      const editButton =
+        document.createElement('button');
+
+      editButton.type = 'button';
+      editButton.textContent = 'Rename';
+
+      editButton.addEventListener(
+        'click',
+        () => {
+          const nextName = window.prompt(
+            'Bookmark name',
+            bookmark.name
+          );
+
+          if (nextName === null) {
+            return;
+          }
+
+          this.rename(
+            bookmark.id,
+            nextName
+          );
+        }
+      );
+
       const removeButton =
         document.createElement('button');
 
@@ -143,6 +197,7 @@ export class BookmarksFeature {
 
       card.append(
         focusButton,
+        editButton,
         removeButton
       );
 
