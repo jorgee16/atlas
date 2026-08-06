@@ -14,6 +14,10 @@ import './ui/draggable-bottom-sheet.css';
 import data from '../data/london.json';
 
 import {
+  FollowModeController
+} from './features/follow/follow-mode-controller.js';
+
+import {
   NearbyFeature
 } from './features/nearby/nearby-feature.js';
 import { MapController, LeafletMapAdapter } from './map.js';
@@ -151,28 +155,22 @@ export function createApp(root) {
       root.querySelector('#map-context-subtitle')
   });
 
+  const followMode = new FollowModeController({
+    map,
+    mapContext,
+    followButton:
+      root.querySelector('#followBtn'),
+    recenterButton:
+      root.querySelector('#recenterBtn'),
+    status
+  });
+
   const searchAreaButton =
     root.querySelector('#searchAreaBtn');
 
   let mapCenterAnchor = null;
   let searchAreaTimer = null;
 
-  map.onUserMoveStart(() => {
-    appState.followMode = false;
-    updateFollowButton();
-
-    const recenterButton =
-      root.querySelector('#recenterBtn');
-
-    recenterButton.classList.remove('following');
-    recenterButton.textContent = '🎯';
-
-    mapContext.showExploring({
-      lat: mapCenterAnchor?.lat ?? 0,
-      lon: mapCenterAnchor?.lon ?? 0,
-      zoom: mapCenterAnchor?.zoom ?? 0
-    });
-  });
 
   map.onMoveEnd(({ lat, lon, zoom }) => {
     mapCenterAnchor = {
@@ -181,15 +179,15 @@ export function createApp(root) {
       name: 'this map area'
     };
 
-    if (appState.followMode) {
-      return;
-    }
-
-    mapContext.showExploring({
+    followMode.updateMapCenter({
       lat,
       lon,
       zoom
     });
+
+    if (followMode.isFollowing()) {
+      return;
+    }
 
     searchAreaButton.hidden = true;
 
@@ -211,33 +209,9 @@ export function createApp(root) {
     await nearbyFeature.search(mapCenterAnchor);
   });
   const appState = {
-    userPosition: null,
-    followMode: true
+    userPosition: null
   };
 
-  const followButton =
-    root.querySelector('#followBtn');
-
-  const updateFollowButton = () => {
-    followButton.classList.toggle(
-      'on',
-      appState.followMode
-    );
-
-    followButton.setAttribute(
-      'aria-label',
-      appState.followMode
-        ? 'Stop following my location'
-        : 'Start following my location'
-    );
-
-    followButton.title =
-      appState.followMode
-        ? 'Stop following'
-        : 'Start following';
-  };
-
-  updateFollowButton();
 
   let nearbyFeature = null;
 
@@ -275,19 +249,7 @@ export function createApp(root) {
       };
 
       map.updateUserLocation(position, firstFix);
-
-      if (appState.followMode) {
-        map.focus(
-          appState.userPosition.lat,
-          appState.userPosition.lon,
-          16
-        );
-
-        mapContext.showFollowing({
-          heading: position.heading,
-          speed: position.speed
-        });
-      }
+      followMode.updatePosition(position);
 
       status(
         '📍 You are here',
@@ -325,52 +287,6 @@ export function createApp(root) {
     else status('Nearby unavailable', 'Select a stop or enable GPS first.');
   });
 
-  followButton.addEventListener('click', () => {
-    if (appState.followMode) {
-      appState.followMode = false;
-      updateFollowButton();
-
-      if (mapCenterAnchor) {
-        mapContext.showExploring(mapCenterAnchor);
-      } else {
-        mapContext.showIdle();
-      }
-
-      status(
-        'Follow mode paused',
-        'GPS remains active, but the map will not auto-center.'
-      );
-
-      return;
-    }
-
-    if (!appState.userPosition) {
-      status(
-        'No GPS position',
-        'Enable GPS and wait for a location fix first.'
-      );
-      return;
-    }
-
-    appState.followMode = true;
-    updateFollowButton();
-
-    map.focus(
-      appState.userPosition.lat,
-      appState.userPosition.lon,
-      16
-    );
-
-    mapContext.showFollowing({
-      heading: appState.userPosition.heading,
-      speed: appState.userPosition.speed
-    });
-
-    status(
-      'Follow mode enabled',
-      'The map will follow your live GPS position.'
-    );
-  });
 
   root.querySelector('#gpsBtn').addEventListener('click', event => {
     if (gps.enabled) {
@@ -385,36 +301,6 @@ export function createApp(root) {
     }
   });
 
-  root.querySelector('#recenterBtn').addEventListener('click', event => {
-    if (!appState.userPosition) {
-      status(
-        'No GPS position',
-        'Enable GPS and wait for a location fix.'
-      );
-      return;
-    }
-
-    appState.followMode = true;
-    updateFollowButton();
-    event.currentTarget.classList.add('following');
-    event.currentTarget.textContent = '◎';
-
-    map.focus(
-      appState.userPosition.lat,
-      appState.userPosition.lon,
-      16
-    );
-
-    mapContext.showFollowing({
-      heading: appState.userPosition?.heading ?? null,
-      speed: appState.userPosition?.speed ?? null
-    });
-
-    status(
-      'Follow mode enabled',
-      'The map will follow your GPS position.'
-    );
-  });
 
 
 
