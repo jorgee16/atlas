@@ -27,11 +27,41 @@ export class MapController {
     this.adapter.updateUserLocation(position, firstFix);
   }
 
+  setRegion(region, options = {}) {
+    return this.adapter.setRegion(
+      region,
+      options
+    );
+  }
+
   addNearby(place, popupHtml) {
     this.adapter.addNearby(place, popupHtml);
   }
 
   invalidateSize() {
     this.adapter.invalidateSize();
+  }
+
+  onMoveEnd(callback) {
+    this.adapter.onMoveEnd(callback);
+  }
+
+  onUserMoveStart(callback) {
+    this.adapter.onUserMoveStart(callback);
+  }
+
+  onMapClick(callback) {
+    this.adapter.onMapClick(callback);
+  }
+
+  showSelectionPin(lat, lon) {
+    this.adapter.showSelectionPin(
+      lat,
+      lon
+    );
+  }
+
+  clearSelectionPin() {
+    this.adapter.clearSelectionPin();
   }
 }

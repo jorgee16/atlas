@@ -30,7 +30,14 @@ export class GpsController {
   }
 
   handlePosition(position) {
-    const {latitude, longitude, accuracy} = position.coords;
+    const {
+      latitude,
+      longitude,
+      accuracy,
+      heading,
+      speed
+    } = position.coords;
+
     if (![latitude, longitude, accuracy].every(Number.isFinite)) return;
     if (accuracy > 150) {
       this.onStatus('📍 Waiting for a precise fix', `Current accuracy is about ${Math.round(accuracy)} m.`);
@@ -38,7 +45,19 @@ export class GpsController {
     }
     if (accuracy > this.bestAccuracy + 100 && this.bestAccuracy < 50) return;
     this.bestAccuracy = accuracy;
-    this.onUpdate({latitude, longitude, accuracy});
+    this.onUpdate({
+      latitude,
+      longitude,
+      accuracy,
+      heading:
+        Number.isFinite(heading)
+          ? heading
+          : null,
+      speed:
+        Number.isFinite(speed)
+          ? speed
+          : null
+    });
   }
 
   handleError(error) {

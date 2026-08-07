@@ -1,49 +1,79 @@
+import {
+  RegionCatalog,
+  positionInRegion
+} from '../regions/region-catalog.js';
+
+import {
+  RegionInstallStore
+} from '../regions/region-install-store.js';
+
 export class RegionRepository {
   constructor({
-    indexUrl = `${import.meta.env.BASE_URL}regions/index.json`,
-    fetchFn = globalThis.fetch.bind(globalThis)
+    catalog = new RegionCatalog(),
+    installStore = new RegionInstallStore()
   } = {}) {
-    this.indexUrl = indexUrl;
-    this.fetchFn = fetchFn;
-    this.regions = null;
+    this.catalog = catalog;
+    this.installStore = installStore;
   }
 
   async list() {
-    if (this.regions) {
-      return this.regions;
-    }
-
-    const response = await this.fetchFn(this.indexUrl, {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Unable to load region catalogue: HTTP ${response.status}`
+    const installedIds =
+      new Set(
+        this.installStore
+          .load()
+          .map(region => region.id)
       );
-    }
 
-    const document = await response.json();
-    this.regions = document.regions ?? [];
+    const catalogueRegions =
+      await this.catalog.list();
 
-    return this.regions;
+    return catalogueRegions
+      .filter(region =>
+        region.bundled === true ||
+        installedIds.has(region.id)
+      )
+      .map(region =>
+        this.#normalizeCatalogueRegion(region)
+      );
   }
 
   async findByPosition(position) {
     this.#validatePosition(position);
 
-    const regions = await this.list();
+    const regions =
+      await this.list();
 
-    return regions.find(region => {
-      const [left, bottom, right, top] = region.bounds;
+    return (
+      regions.find(region =>
+        positionInRegion(
+          region,
+          position
+        )
+      ) ?? null
+    );
+  }
 
-      return (
-        position.lon >= left &&
-        position.lon <= right &&
-        position.lat >= bottom &&
-        position.lat <= top
-      );
-    }) ?? null;
+  #normalizeCatalogueRegion(region) {
+    return {
+      id: region.id,
+      name: region.name,
+      country: region.country,
+      bounds: region.bounds,
+      areas: region.areas,
+      bundled: region.bundled === true,
+
+      poiUrl:
+        region.poiUrl ??
+        region.assets?.pois,
+
+      indexUrl:
+        region.indexUrl ??
+        region.assets?.index,
+
+      mapUrl:
+        region.mapUrl ??
+        region.assets?.map
+    };
   }
 
   #validatePosition(position) {

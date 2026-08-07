@@ -1,0 +1,59 @@
+{
+  "regions": [
+    {
+      "id": "london",
+      "name": "London",
+      "country": "United Kingdom",
+      "bundled": true,
+      "bounds": [
+        -0.55,
+        51.25,
+        0.35,
+        51.75
+      ],
+      "sizeBytes": 0,
+      "assets": {
+        "map": "/regions/london/map.pmtiles",
+        "pois": "/regions/london/pois.geojson",
+        "index": "/regions/london/poi-index.json"
+      }
+    },
+    {
+      "id": "portugal",
+      "name": "Portugal",
+      "country": "Portugal",
+      "bundled": true,
+      "bounds": [
+        -31.4,
+        32.5,
+        -6.18,
+        42.2
+      ],
+      "areas": [
+        [
+          -9.7,
+          36.8,
+          -6.0,
+          42.3
+        ],
+        [
+          -17.5,
+          32.4,
+          -16.0,
+          33.3
+        ],
+        [
+          -31.5,
+          36.7,
+          -24.0,
+          40.1
+        ]
+      ],
+      "sizeBytes": 0,
+      "assets": {
+        "pois": "/region-packages/portugal/pois.geojson",
+        "index": "/region-packages/portugal/poi-index.json"
+      }
+    }
+  ]
+}

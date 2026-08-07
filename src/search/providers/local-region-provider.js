@@ -37,6 +37,27 @@ export class LocalRegionProvider {
       radiusMeters
     );
 
+    console.log(
+      '[Nearby debug]',
+      {
+        anchor,
+        region: region.id,
+        features: dataset.features.length,
+        candidates: candidateIndexes.length,
+        radiusMeters
+      }
+    );
+
+    if (candidateIndexes.length) {
+      const firstFeature =
+        dataset.features[candidateIndexes[0]];
+
+      console.log(
+        '[Nearby first candidate]',
+        firstFeature
+      );
+    }
+
     return candidateIndexes
       .map(index => dataset.features[index])
       .map(feature => this.#toPlace(feature, anchor))
@@ -58,10 +79,11 @@ export class LocalRegionProvider {
       region.poiUrl.replace(/pois\.geojson$/, 'poi-index.json')
     );
 
-    const [poiResponse, indexResponse] = await Promise.all([
-      this.fetchFn(poiUrl, { cache: 'no-store' }),
-      this.fetchFn(indexUrl, { cache: 'no-store' })
-    ]);
+    const [poiResponse, indexResponse] =
+      await Promise.all([
+        this.#fetchRegionAsset(poiUrl),
+        this.#fetchRegionAsset(indexUrl)
+      ]);
 
     if (!poiResponse.ok) {
       throw new Error(
@@ -97,6 +119,24 @@ export class LocalRegionProvider {
 
     this.datasets.set(region.id, dataset);
     return dataset;
+  }
+
+  async #fetchRegionAsset(url) {
+    if ('caches' in globalThis) {
+      const cached =
+        await caches.match(url);
+
+      if (cached) {
+        return cached;
+      }
+    }
+
+    return this.fetchFn(
+      url,
+      {
+        cache: 'no-store'
+      }
+    );
   }
 
   #candidateIndexes(index, anchor, radiusMeters) {
