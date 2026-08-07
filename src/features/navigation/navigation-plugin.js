@@ -16,7 +16,7 @@ export class NavigationPlugin {
           context.panelController,
         listElement:
           context.root.querySelector(
-            '#list'
+            '#navigationContent'
           ),
         status: context.status
       });

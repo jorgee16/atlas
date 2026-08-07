@@ -25,7 +25,7 @@ export class TripPlugin {
       panelController:
         context.panelController,
       listElement:
-        context.root.querySelector('#list'),
+        context.root.querySelector('#tripContent'),
       daySelectElement:
         context.root.querySelector('#daySelect'),
       status: context.status,

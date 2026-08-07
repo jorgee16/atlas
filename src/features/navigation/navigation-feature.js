@@ -7,6 +7,7 @@ import {
   bearingDegrees,
   cardinalDirection
 } from './navigation-geometry.js';
+import { escapeHtml } from '../../utils.js';
 
 export class NavigationFeature {
   constructor({
@@ -87,7 +88,11 @@ export class NavigationFeature {
 
     this.session.stop();
     this.listElement.replaceChildren();
-    this.panelController.hide();
+
+    this.panelController.showMode(
+      'bookmarks',
+      { snap: 'half' }
+    );
 
     this.status(
       'Navigation stopped',
@@ -139,7 +144,7 @@ export class NavigationFeature {
       </div>
 
       <div class="navigation-summary">
-        <strong>${destinationName}</strong>
+        <strong>${escapeHtml(destinationName)}</strong>
 
         <span>
           ${this.#formatDistance(distance)}

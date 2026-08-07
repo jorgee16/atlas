@@ -134,13 +134,18 @@ export class BookmarksFeature {
 
       card.className = 'nearby-card';
 
-      card.innerHTML = `
-        <strong>${bookmark.name}</strong>
-        <small>
-          ${bookmark.lat.toFixed(5)},
-          ${bookmark.lon.toFixed(5)}
-        </small>
-      `;
+      const name =
+        document.createElement('strong');
+
+      name.textContent = bookmark.name;
+
+      const coordinates =
+        document.createElement('small');
+
+      coordinates.textContent =
+        `${bookmark.lat.toFixed(5)}, ${bookmark.lon.toFixed(5)}`;
+
+      card.append(name, coordinates);
 
       const focusButton =
         document.createElement('button');
@@ -156,6 +161,11 @@ export class BookmarksFeature {
             bookmark.lon,
             16
           );
+
+            this.map.showSelectionPin(
+              bookmark.lat,
+              bookmark.lon
+            );
         }
       );
 

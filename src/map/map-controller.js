@@ -27,6 +27,13 @@ export class MapController {
     this.adapter.updateUserLocation(position, firstFix);
   }
 
+  setRegion(region, options = {}) {
+    return this.adapter.setRegion(
+      region,
+      options
+    );
+  }
+
   addNearby(place, popupHtml) {
     this.adapter.addNearby(place, popupHtml);
   }

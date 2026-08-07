@@ -144,7 +144,7 @@ export class NearbyFeature {
         <a
           target="_blank"
           rel="noopener"
-          href="${googleWalkingDirections(place.name)}"
+          href="${googleWalkingDirections(place)}"
         >
           Open Google Maps →
         </a>

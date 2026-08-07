@@ -53,6 +53,10 @@ import {
   GpsController
 } from '../gps.js';
 
+import {
+  RegionManager
+} from '../regions/region-manager.js';
+
 export class AppBootstrap {
   constructor(root) {
     if (!root) {
@@ -89,10 +93,7 @@ export class AppBootstrap {
     panelController.expand();
   };
   const mapAdapter = new LeafletMapAdapter({
-    elementId: 'map',
-    offlineMapUrl:
-      `${import.meta.env.BASE_URL}regions/london/map.pmtiles`,
-    preferOffline: false
+    elementId: 'map'
   });
 
   const map = new MapController({
@@ -228,12 +229,82 @@ export class AppBootstrap {
   const nearbyFeature =
     appContext.get('nearbyFeature');
 
+  const tripFeature =
+    appContext.get('tripFeature');
+
     const bookmarksFeature =
       appContext.get('bookmarksFeature');
 
+    const panelToggleButton =
+      root.querySelector('#panelToggleBtn');
+
+    const syncPanelToggle = () => {
+      if (!panelToggleButton) {
+        return;
+      }
+
+      const hasMode =
+        panelController.hasActiveMode();
+
+      const visible =
+        panelController.isVisible();
+
+      panelToggleButton.disabled =
+        !hasMode;
+
+      panelToggleButton.classList.toggle(
+        'on',
+        hasMode && visible
+      );
+
+      panelToggleButton.setAttribute(
+        'aria-pressed',
+        String(hasMode && visible)
+      );
+
+      panelToggleButton.setAttribute(
+        'aria-label',
+        visible
+          ? 'Hide panel'
+          : 'Show panel'
+      );
+
+      panelToggleButton.title =
+        visible
+          ? 'Hide panel'
+          : 'Show panel';
+    };
+
+    panelToggleButton?.addEventListener(
+      'click',
+      () => {
+        panelController.togglePanel({
+          snap: 'half'
+        });
+      }
+    );
+
+    bottomSheet.addEventListener(
+      'panelvisibilitychange',
+      syncPanelToggle
+    );
+
+
+
     panelController.registerMode('explore', {
       enter: () => {
+        if (backToTripButton) {
+          backToTripButton.hidden =
+            !tripFeature.isLoaded();
+        }
+
         nearbyFeature.render();
+      },
+
+      leave: () => {
+        if (backToTripButton) {
+          backToTripButton.hidden = true;
+        }
       }
     });
 
@@ -249,6 +320,19 @@ export class AppBootstrap {
       }
     });
 
+    panelController.registerMode('regions', {
+      enter: () => {
+        renderRegions().catch(error => {
+          console.error(error);
+
+          status(
+            'Regions unavailable',
+            error.message
+          );
+        });
+      }
+    });
+
     panelController.registerMode('navigation', {
       enter: () => {
         appContext
@@ -260,8 +344,17 @@ export class AppBootstrap {
     let bookmarkPickMode = false;
     let pendingBookmarkLocation = null;
 
-  const tripFeature =
-    appContext.get('tripFeature');
+    const backToTripButton =
+      root.querySelector('#backToTripBtn');
+
+    backToTripButton?.addEventListener(
+      'click',
+      () => {
+        tripFeature.show({
+          snap: 'half'
+        });
+      }
+    );
 
     const tripLoader = new TripLoader();
 
@@ -283,11 +376,123 @@ export class AppBootstrap {
     const menuBookmarksButton =
       root.querySelector('#menuBookmarksBtn');
 
+    const menuNavigationButton =
+      root.querySelector('#menuNavigationBtn');
+
+    const menuRegionsButton =
+      root.querySelector('#menuRegionsBtn');
+
+    const regionsContent =
+      root.querySelector('#regionsContent');
+
+    const renderRegions = async () => {
+      const regions =
+        await regionManager.listRegions();
+
+      regionsContent.replaceChildren();
+
+      regions.forEach(region => {
+        const card =
+          document.createElement('div');
+
+        card.className = 'region-card';
+
+        const state =
+          region.bundled
+            ? 'Included'
+            : region.installed
+            ? 'Installed'
+            : 'Available';
+
+        const copy =
+          document.createElement('div');
+
+        copy.className = 'region-card-copy';
+
+        const name =
+          document.createElement('strong');
+
+        name.textContent = region.name;
+
+        const details =
+          document.createElement('small');
+
+        details.textContent =
+          `${region.country} · ${state}`;
+
+        copy.append(name, details);
+        card.appendChild(copy);
+
+        const button =
+          document.createElement('button');
+
+        button.type = 'button';
+
+        if (region.bundled) {
+          button.textContent = 'Included';
+          button.disabled = true;
+        } else if (region.installed) {
+          button.textContent = 'Installed';
+          button.disabled = true;
+        } else {
+          button.textContent = 'Download';
+
+          button.addEventListener(
+            'click',
+            async () => {
+              button.disabled = true;
+              button.textContent =
+                'Downloading…';
+
+              try {
+                await regionManager
+                  .downloadRegion(region);
+
+                status(
+                  `${region.name} installed`,
+                  'Offline data is ready.'
+                );
+
+                await renderRegions();
+              } catch (error) {
+                console.error(error);
+
+                button.disabled = false;
+                button.textContent =
+                  'Retry';
+
+                status(
+                  'Download failed',
+                  error.message
+                );
+              }
+            }
+          );
+        }
+
+        card.appendChild(button);
+        regionsContent.appendChild(card);
+      });
+    };
+
     const menuSettingsButton =
       root.querySelector('#menuSettingsBtn');
 
     const menuAboutButton =
       root.querySelector('#menuAboutBtn');
+
+  const regionManager =
+    new RegionManager({
+      status,
+      onDownloadRequired: region => {
+        status(
+          'Offline region available',
+          `${region.name} can be downloaded.`
+        );
+      }
+    });
+
+  let activeRegionId = null;
 
   const gps = new GpsController({
     onStatus: status,
@@ -301,8 +506,39 @@ export class AppBootstrap {
         speed: position.speed
       };
 
+
+      regionManager
+        .ensureForPosition(
+          appState.userPosition
+        )
+        .then(async region => {
+          const nextRegionId =
+            region?.id ?? null;
+
+          if (nextRegionId === activeRegionId) {
+            return;
+          }
+
+          activeRegionId = nextRegionId;
+
+          await map.setRegion(region, {
+            preferOffline: false
+          });
+        })
+        .catch(error => {
+          console.error(
+            'Region detection failed:',
+            error
+          );
+        });
+
+
       map.updateUserLocation(position, firstFix);
       followMode.updatePosition(position);
+
+      appContext
+        .get('navigationFeature')
+        .updatePosition(appState.userPosition);
 
       status(
         '📍 You are here',
@@ -366,6 +602,14 @@ loadTripButton?.addEventListener(
     saveBookmarkButton?.addEventListener(
       'click',
       () => {
+        panelBeforeBookmarkPick =
+          panelController.getActivePanel();
+
+        panelWasVisibleBeforeBookmarkPick =
+          panelController.isVisible();
+
+        showBookmarksList();
+
         bookmarkPickMode = true;
 
         status(
@@ -381,14 +625,62 @@ loadTripButton?.addEventListener(
         bookmarksFeature.show();
       }
     );
-    const bookmarkConfirmBar =
-    root.querySelector('#bookmarkConfirmBar');
+
 
   const confirmBookmarkButton =
     root.querySelector('#confirmBookmarkBtn');
 
   const cancelBookmarkButton =
     root.querySelector('#cancelBookmarkBtn');
+
+  const bookmarkEditor =
+    root.querySelector('#bookmarkEditor');
+
+  const bookmarksContent =
+    root.querySelector('#bookmarksContent');
+
+  const bookmarkNameInput =
+    root.querySelector('#bookmarkNameInput');
+
+  const bookmarkCoordinates =
+    root.querySelector('#bookmarkCoordinates');
+
+  let panelBeforeBookmarkPick = null;
+  let panelWasVisibleBeforeBookmarkPick = false;
+
+  const showBookmarkEditor = () => {
+    bookmarkEditor.hidden = false;
+    bookmarksContent.hidden = true;
+  };
+
+  const showBookmarksList = () => {
+    bookmarkEditor.hidden = true;
+    bookmarksContent.hidden = false;
+  };
+
+  const restorePanelAfterBookmark = () => {
+    showBookmarksList();
+
+    if (
+      panelBeforeBookmarkPick &&
+      panelBeforeBookmarkPick !== 'bookmarks'
+    ) {
+      panelController.showMode(
+        panelBeforeBookmarkPick,
+        { snap: 'half' }
+      );
+    } else if (
+      panelBeforeBookmarkPick === 'bookmarks'
+    ) {
+      bookmarksFeature.show();
+    } else if (!panelWasVisibleBeforeBookmarkPick) {
+      panelController.hidePanel();
+    }
+
+    panelBeforeBookmarkPick = null;
+    panelWasVisibleBeforeBookmarkPick = false;
+  };
+
 
   map.onMapClick(({ lat, lon }) => {
     if (!bookmarkPickMode) {
@@ -401,11 +693,20 @@ loadTripButton?.addEventListener(
     };
 
     map.showSelectionPin(lat, lon);
-    bookmarkConfirmBar.hidden = false;
+
+    bookmarkCoordinates.textContent =
+      `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+
+    panelController.showMode(
+      'bookmarks',
+      { snap: 'fit' }
+    );
+
+    showBookmarkEditor();
 
     status(
       'Bookmark location selected',
-      'Save it, cancel, or tap another point.'
+      'Save it or tap another point.'
     );
   });
 
@@ -416,20 +717,31 @@ loadTripButton?.addEventListener(
         return;
       }
 
+      const typedName =
+        bookmarkNameInput.value.trim();
+
       const bookmarkNumber =
         bookmarksFeature.bookmarks.length + 1;
 
+      const name =
+        typedName ||
+        `Bookmark ${bookmarkNumber}`;
+
       bookmarksFeature.add({
-        name: `Bookmark ${bookmarkNumber}`,
+        name,
         lat: pendingBookmarkLocation.lat,
         lon: pendingBookmarkLocation.lon
       });
 
       pendingBookmarkLocation = null;
       bookmarkPickMode = false;
-      bookmarkConfirmBar.hidden = true;
+
+      bookmarkNameInput.value = '';
+      bookmarkCoordinates.textContent = '—';
 
       map.clearSelectionPin();
+
+      restorePanelAfterBookmark();
     }
   );
 
@@ -438,9 +750,13 @@ loadTripButton?.addEventListener(
     () => {
       pendingBookmarkLocation = null;
       bookmarkPickMode = false;
-      bookmarkConfirmBar.hidden = true;
+
+      bookmarkNameInput.value = '';
+      bookmarkCoordinates.textContent = '—';
 
       map.clearSelectionPin();
+
+      restorePanelAfterBookmark();
 
       status(
         'Bookmark cancelled',
@@ -448,6 +764,7 @@ loadTripButton?.addEventListener(
       );
     }
   );
+
     const closeOverflowMenu = () => {
       if (overflowMenu) {
         overflowMenu.hidden = true;
@@ -478,7 +795,44 @@ loadTripButton?.addEventListener(
       'click',
       () => {
         closeOverflowMenu();
+        showBookmarksList();
         bookmarksFeature.show();
+      }
+    );
+
+    menuNavigationButton?.addEventListener(
+      'click',
+      () => {
+        closeOverflowMenu();
+
+        const navigationFeature =
+          appContext.get('navigationFeature');
+
+        if (!navigationFeature.isActive()) {
+          status(
+            'No active navigation',
+            'Open Bookmarks and select Navigate.'
+          );
+
+          return;
+        }
+
+        panelController.showMode(
+          'navigation',
+          { snap: 'half' }
+        );
+      }
+    );
+
+    menuRegionsButton?.addEventListener(
+      'click',
+      () => {
+        closeOverflowMenu();
+
+        panelController.showMode(
+          'regions',
+          { snap: 'half' }
+        );
       }
     );
 
@@ -569,7 +923,8 @@ loadTripButton?.addEventListener(
     tripFeature,
     nearbyFeature,
     statusController,
-    gps
+    gps,
+    regionManager
   };
   }
 

@@ -1,6 +1,6 @@
 # Offline Maps
 
-## Phase 4.2 — Map package generation
+## Offline map packages
 
 Roam region packages can include a vector map archive:
 
@@ -12,6 +12,11 @@ Roam region packages can include a vector map archive:
 
 `map.pmtiles` is generated from OpenStreetMap data with Tilemaker.
 
-Phase 4.2 generates and validates the archive but does not yet change
-the application map renderer. Integration with the map adapter is a
-separate step.
+The active region is connected to the Leaflet adapter. Online OpenStreetMap is
+the default layer. When the current catalogue entry defines `assets.map` and
+the archive exists, Roam adds `Offline <region name>` to the layer selector.
+
+Portugal currently provides offline POIs and a spatial index, but no PMTiles
+archive. London keeps its optional PMTiles path. POI packages can be generated
+with the C++ `roam-packager`; PMTiles generation remains in the map-tile
+pipeline.

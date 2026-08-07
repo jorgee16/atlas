@@ -5,9 +5,10 @@ import {
   createPmtilesVectorLayer,
   pmtilesArchiveExists
 } from './layers/pmtiles-vector-layer.js';
+import { escapeHtml } from '../utils.js';
 
-const DEFAULT_CENTER = [51.5074, -0.1278];
-const DEFAULT_ZOOM = 13;
+const DEFAULT_CENTER = [39.5, -8.0];
+const DEFAULT_ZOOM = 7;
 const MIN_HEADING_SPEED_METERS_PER_SECOND = 0.8;
 
 function createUserLocationIcon({
@@ -105,6 +106,8 @@ export class LeafletMapAdapter {
       .addTo(this.map);
 
     this.offlineLayer = null;
+    this.offlineRegionId = null;
+    this.offlineRequestVersion = 0;
 
     this.layerControl = L.control.layers(
       {
@@ -122,11 +125,89 @@ export class LeafletMapAdapter {
     this.userAccuracy = null;
 
     if (offlineMapUrl) {
-      void this.#registerOfflineLayer({
-        url: offlineMapUrl,
-        preferOffline
-      });
+      void this.setRegion(
+        {
+          id: 'initial-offline-map',
+          name: 'Region',
+          mapUrl: offlineMapUrl
+        },
+        { preferOffline }
+      );
     }
+  }
+
+  async setRegion(
+    region,
+    {
+      preferOffline = false
+    } = {}
+  ) {
+    const regionId = region?.id ?? null;
+    const mapUrl =
+      region?.mapUrl ??
+      region?.assets?.map ??
+      null;
+
+    if (
+      regionId &&
+      regionId === this.offlineRegionId &&
+      this.offlineLayer
+    ) {
+      return true;
+    }
+
+    const requestVersion =
+      ++this.offlineRequestVersion;
+
+    this.#clearOfflineLayer();
+
+    if (!mapUrl) {
+      return false;
+    }
+
+    const resolvedUrl =
+      this.#resolveAssetUrl(mapUrl);
+
+    const exists =
+      await pmtilesArchiveExists(
+        resolvedUrl
+      );
+
+    if (
+      requestVersion !==
+      this.offlineRequestVersion
+    ) {
+      return false;
+    }
+
+    if (!exists) {
+      console.info(
+        `${region.name} has no available offline map; using online OpenStreetMap.`
+      );
+      return false;
+    }
+
+    this.offlineLayer =
+      createPmtilesVectorLayer({
+        url: resolvedUrl
+      });
+
+    this.offlineRegionId = regionId;
+
+    this.layerControl.addBaseLayer(
+      this.offlineLayer,
+      `📦 Offline ${region.name}`
+    );
+
+    if (preferOffline) {
+      this.map.removeLayer(
+        this.onlineLayer
+      );
+
+      this.offlineLayer.addTo(this.map);
+    }
+
+    return true;
   }
 
   clearItinerary() {
@@ -148,7 +229,7 @@ export class LeafletMapAdapter {
       const marker = L.marker([place.lat, place.lon])
         .addTo(this.map)
         .bindPopup(
-          `<b>${place.name}</b><br>${place.note ?? ''}`
+          `<b>${escapeHtml(place.name)}</b><br>${escapeHtml(place.note ?? '')}`
         );
 
       marker.on('click', () => {
@@ -369,32 +450,37 @@ export class LeafletMapAdapter {
     });
   }
 
-  async #registerOfflineLayer({
-    url,
-    preferOffline
-  }) {
-    const exists = await pmtilesArchiveExists(url);
-
-    if (!exists) {
-      console.info(
-        'Offline map was not found; using online OpenStreetMap.'
-      );
+  #clearOfflineLayer() {
+    if (!this.offlineLayer) {
+      this.offlineRegionId = null;
       return;
     }
 
-    this.offlineLayer = createPmtilesVectorLayer({
-      url
-    });
+    if (this.map.hasLayer(this.offlineLayer)) {
+      this.map.removeLayer(this.offlineLayer);
+    }
 
-    this.layerControl.addBaseLayer(
-      this.offlineLayer,
-      '📦 Offline London'
+    this.layerControl.removeLayer(
+      this.offlineLayer
     );
 
-    if (preferOffline) {
-      this.map.removeLayer(this.onlineLayer);
-      this.offlineLayer.addTo(this.map);
+    if (!this.map.hasLayer(this.onlineLayer)) {
+      this.onlineLayer.addTo(this.map);
     }
+
+    this.offlineLayer = null;
+    this.offlineRegionId = null;
+  }
+
+  #resolveAssetUrl(url) {
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const relativeUrl =
+      String(url).replace(/^\//, '');
+
+    return `${import.meta.env.BASE_URL}${relativeUrl}`;
   }
 
   #removeLayers(layers) {

@@ -90,7 +90,29 @@ export function renderAppShell(root) {
                 <span>Bookmarks</span>
               </button>
 
+
               <button
+                id="menuNavigationBtn"
+                type="button"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m12 3 7 18-7-4-7 4Z"></path>
+                </svg>
+                <span>Navigation</span>
+              </button>
+
+                            <button
+                id="menuRegionsBtn"
+                type="button"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 6h16v12H4z"></path>
+                  <path d="m4 8 5-3 6 3 5-3"></path>
+                </svg>
+                <span>Offline regions</span>
+              </button>
+
+<button
                 id="menuSettingsBtn"
                 type="button"
               >
@@ -132,21 +154,32 @@ export function renderAppShell(root) {
         </header>
 
         
-          <div
-            id="bookmarkConfirmBar"
-            class="bookmark-confirm-bar"
-            hidden
-          >
-            <button id="confirmBookmarkBtn" type="button">
-              Save
-            </button>
-
-            <button id="cancelBookmarkBtn" type="button">
-              Cancel
-            </button>
-          </div>
+          
 
           <div class="map-actions">
+            <button
+              id="panelToggleBtn"
+              class="panel-toggle"
+              type="button"
+              aria-label="Show panel"
+              aria-pressed="false"
+              title="Show panel"
+              disabled
+            >
+              <span class="panel-toggle-label">
+                Panel
+              </span>
+
+              <span
+                class="panel-toggle-track"
+                aria-hidden="true"
+              >
+                <span
+                  class="panel-toggle-knob"
+                ></span>
+              </span>
+            </button>
+
           <button
             id="searchAreaBtn"
             class="search-area-btn"
@@ -175,27 +208,186 @@ export function renderAppShell(root) {
         <div class="attribution-note">© OpenStreetMap contributors</div>
       </main>
 
-      <aside class="sidebar bottom-sheet" id="bottomSheet">
-        <button id="sheetToggle" class="sheet-handle" type="button" aria-label="Expand or collapse panel">
+      <aside
+        class="sidebar bottom-sheet"
+        id="bottomSheet"
+        hidden
+      >
+        <button
+          id="sheetToggle"
+          class="sheet-handle"
+          type="button"
+          aria-label="Expand or collapse panel"
+        >
           <span></span>
         </button>
 
-        <div class="sidebar-head">
-          <div class="brand desktop-brand"><h1>🌍 Roam</h1><p>Interactive travel exploration</p></div>
-          <div class="toolbar">
-            <select id="daySelect" aria-label="Select itinerary day"></select>
-            <button id="nearBtn" type="button">Nearby</button>
-          </div>
-          <div class="chips" aria-label="Nearby place filters">
-            <button class="chip on" data-cat="all" type="button">All</button>
-            <button class="chip" data-cat="cafe" type="button">☕ Cafés</button>
-            <button class="chip" data-cat="restaurant" type="button">🍴 Food</button>
-            <button class="chip" data-cat="pub" type="button">🍺 Pubs</button>
-            <button class="chip" data-cat="attraction" type="button">🏛️ Attractions</button>
-          </div>
-        </div>
+        <div class="panel-host">
+          <section
+            id="explorePanel"
+            class="panel-view"
+            data-panel-view="explore"
+            hidden
+          >
+            <header class="panel-view-header">
+              <div>
+                <small>Discover</small>
+                <h2>Explore nearby</h2>
+              </div>
+            
+                <button
+                  id="backToTripBtn"
+                  type="button"
+                  hidden
+                >
+                  Back to trip
+                </button>
+</header>
 
-        <div class="list" id="list"></div>
+            <div
+              class="chips"
+              aria-label="Nearby place filters"
+            >
+              <button class="chip on" data-cat="all" type="button">All</button>
+              <button class="chip" data-cat="cafe" type="button">Cafés</button>
+              <button class="chip" data-cat="restaurant" type="button">Food</button>
+              <button class="chip" data-cat="pub" type="button">Pubs</button>
+              <button class="chip" data-cat="attraction" type="button">Attractions</button>
+            </div>
+
+            <div
+              id="exploreContent"
+              class="panel-content"
+            ></div>
+          </section>
+
+          <section
+            id="tripPanel"
+            class="panel-view"
+            data-panel-view="trip"
+            hidden
+          >
+            <header class="panel-view-header">
+              <div>
+                <small>Itinerary</small>
+                <h2>Your trip</h2>
+              </div>
+
+              <button id="nearBtn" type="button">
+                Nearby
+              </button>
+            </header>
+
+            <div class="trip-day-control">
+              <label for="daySelect">Day</label>
+
+              <select
+                id="daySelect"
+                aria-label="Select itinerary day"
+              ></select>
+            </div>
+
+            <div
+              id="tripContent"
+              class="panel-content"
+            ></div>
+          </section>
+
+          <section
+            id="bookmarksPanel"
+            class="panel-view"
+            data-panel-view="bookmarks"
+            hidden
+          >
+                        <div
+              id="bookmarkEditor"
+              class="bookmark-editor"
+              hidden
+            >
+              <header class="panel-view-header bookmark-editor-header">
+                <div>
+                  <small>Bookmarks</small>
+                  <h2>Save bookmark</h2>
+                </div>
+              </header>
+
+              <div class="bookmark-editor-body">
+                <label class="bookmark-field">
+                  <span>Name <small>(optional)</small></span>
+
+                  <input
+                    id="bookmarkNameInput"
+                    type="text"
+                    placeholder="e.g. Great view, Coffee shop"
+                    autocomplete="off"
+                  >
+                </label>
+
+                <div class="bookmark-location-summary">
+                  <span>Location selected on map</span>
+
+                  <small id="bookmarkCoordinates">
+                    —
+                  </small>
+                </div>
+
+                <div class="bookmark-editor-actions">
+                  <button
+                    id="cancelBookmarkBtn"
+                    class="bookmark-cancel-btn"
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    id="confirmBookmarkBtn"
+                    class="bookmark-save-btn"
+                    type="button"
+                  >
+                    Save bookmark
+                  </button>
+                </div>
+              </div>
+            </div>
+
+<div
+              id="bookmarksContent"
+              class="panel-content"
+            ></div>
+          </section>
+
+                    <section
+            id="regionsPanel"
+            class="panel-view"
+            data-panel-view="regions"
+            hidden
+          >
+            <header class="panel-view-header">
+              <div>
+                <small>Offline maps</small>
+                <h2>Regions</h2>
+              </div>
+            </header>
+
+            <div
+              id="regionsContent"
+              class="panel-content"
+            ></div>
+          </section>
+
+<section
+            id="navigationPanel"
+            class="panel-view"
+            data-panel-view="navigation"
+            hidden
+          >
+            <div
+              id="navigationContent"
+              class="panel-content"
+            ></div>
+          </section>
+        </div>
       </aside>
     </div>`;
 }

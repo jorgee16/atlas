@@ -1,5 +1,9 @@
 # Roam Region Builder
 
+> Legacy map-pipeline tooling. Use the C++ `packager/roam-packager` for all
+> new POI extraction and spatial-index generation. This Node.js pipeline is
+> retained for PMTiles compatibility and reproducing older packages.
+
 The public interface is a portable Node.js CLI.
 
 The first extraction adapter uses `osmium-tool`, because it is fast,
@@ -24,7 +28,8 @@ Output:
 ```text
 public/regions/london/
 ├── metadata.json
-└── pois.geojson
+├── pois.geojson
+└── poi-index.json
 ```
 
 Generated geographic data is derived from OpenStreetMap and must retain

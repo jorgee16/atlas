@@ -8,8 +8,18 @@ export class PanelController {
 
     this.sheet = sheet;
     this.draggableSheet = null;
+
     this.activePanel = null;
     this.modes = new Map();
+
+    this.views = new Map(
+      [...this.sheet.querySelectorAll(
+        '[data-panel-view]'
+      )].map(view => [
+        view.dataset.panelView,
+        view
+      ])
+    );
   }
 
   attachDraggableSheet(draggableSheet) {
@@ -41,6 +51,14 @@ export class PanelController {
       );
     }
 
+    const view = this.views.get(name);
+
+    if (!view) {
+      throw new Error(
+        `PanelController has no view registered for "${name}".`
+      );
+    }
+
     if (
       this.activePanel &&
       this.activePanel !== name
@@ -50,17 +68,79 @@ export class PanelController {
         ?.leave?.();
     }
 
+    this.views.forEach(
+      (panelView, panelName) => {
+        const active =
+          panelName === name;
+
+        panelView.hidden = !active;
+
+        panelView.classList.toggle(
+          'active',
+          active
+        );
+      }
+    );
+
     this.activePanel = name;
-    this.sheet.hidden = false;
     this.sheet.dataset.panel = name;
 
     this.modes.get(name)?.enter?.();
 
-    this.#applySnap(snap);
+    this.showPanel({ snap });
   }
 
   show(name, options = {}) {
     this.showMode(name, options);
+  }
+
+  showPanel({
+    snap = 'half'
+  } = {}) {
+    if (!this.activePanel) {
+      return false;
+    }
+
+    const view =
+      this.views.get(this.activePanel);
+
+    if (!view) {
+      return false;
+    }
+
+    view.hidden = false;
+    view.classList.add('active');
+
+    this.sheet.hidden = false;
+
+    this.#applySnap(snap);
+    this.#emitVisibility();
+
+    return true;
+  }
+
+  hidePanel() {
+    if (!this.activePanel) {
+      return false;
+    }
+
+    this.sheet.hidden = true;
+
+    this.#emitVisibility();
+
+    return true;
+  }
+
+  togglePanel({
+    snap = 'half'
+  } = {}) {
+    if (this.isVisible()) {
+      this.hidePanel();
+      return false;
+    }
+
+    this.showPanel({ snap });
+    return true;
   }
 
   hide() {
@@ -70,9 +150,16 @@ export class PanelController {
         ?.leave?.();
     }
 
+    this.views.forEach(view => {
+      view.hidden = true;
+      view.classList.remove('active');
+    });
+
     this.activePanel = null;
     this.sheet.dataset.panel = '';
     this.sheet.hidden = true;
+
+    this.#emitVisibility();
   }
 
   expand() {
@@ -89,6 +176,10 @@ export class PanelController {
 
   isVisible() {
     return !this.sheet.hidden;
+  }
+
+  hasActiveMode() {
+    return Boolean(this.activePanel);
   }
 
   getActivePanel() {
@@ -109,9 +200,33 @@ export class PanelController {
         this.draggableSheet.collapse();
         break;
 
+      case 'compact':
+        this.draggableSheet.compact();
+        break;
+
+      case 'fit':
+        requestAnimationFrame(() => {
+          this.draggableSheet.fit();
+        });
+        break;
+
       default:
         this.draggableSheet.half();
         break;
     }
+  }
+
+  #emitVisibility() {
+    this.sheet.dispatchEvent(
+      new CustomEvent(
+        'panelvisibilitychange',
+        {
+          detail: {
+            visible: this.isVisible(),
+            mode: this.activePanel
+          }
+        }
+      )
+    );
   }
 }

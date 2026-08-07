@@ -16,3 +16,10 @@ public/regions/*/poi-index.json
 
 # Temporary patch archives
 roam-*.zip
+
+# Native packager build outputs
+packager/build/
+packager/build-cmake/
+
+# Backup files
+*.bak

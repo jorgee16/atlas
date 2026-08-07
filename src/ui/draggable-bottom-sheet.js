@@ -1,6 +1,7 @@
 const SNAP_POINTS = {
   expanded: 0.12,
   half: 0.50,
+  compact: 0.70,
   collapsed: 0.84
 };
 
@@ -77,6 +78,61 @@ export class DraggableBottomSheet {
     this.snapTo('half');
   }
 
+  compact() {
+    this.snapTo('compact');
+  }
+
+  fit() {
+    const activeView =
+      this.sheet.querySelector(
+        '.panel-view.active'
+      );
+
+    if (!activeView) {
+      this.half();
+      return;
+    }
+
+    const visibleChildren =
+      [...activeView.children]
+        .filter(element => !element.hidden);
+
+    const contentHeight =
+      visibleChildren.reduce(
+        (height, element) =>
+          height + element.offsetHeight,
+        0
+      );
+
+    const handleHeight =
+      this.handle.offsetHeight || 34;
+
+    const padding = 20;
+
+    const visibleHeight =
+      Math.min(
+        contentHeight +
+          handleHeight +
+          padding,
+        window.innerHeight * 0.46
+      );
+
+    this.currentSnap = 'fit';
+
+    this.currentY =
+      Math.round(
+        window.innerHeight -
+        visibleHeight
+      );
+
+    this.sheet.style.transform =
+      `translateY(${this.currentY}px)`;
+
+    this.sheet.dataset.snap = 'fit';
+
+    this.onSettled('fit');
+  }
+
   collapse() {
     this.snapTo('collapsed');
   }
@@ -129,25 +185,45 @@ export class DraggableBottomSheet {
   }
 
   resolveSnapPoint() {
+    const entries =
+      Object.entries(SNAP_POINTS)
+        .sort((a, b) => a[1] - b[1]);
+
     if (this.velocityY > 0.45) {
-      return this.currentSnap === 'expanded'
-        ? 'half'
-        : 'collapsed';
+      const next =
+        entries.find(
+          ([, ratio]) =>
+            window.innerHeight * ratio >
+            this.currentY + 20
+        );
+
+      return next?.[0] ?? 'collapsed';
     }
 
     if (this.velocityY < -0.45) {
-      return this.currentSnap === 'collapsed'
-        ? 'half'
-        : 'expanded';
+      const previous =
+        [...entries]
+          .reverse()
+          .find(
+            ([, ratio]) =>
+              window.innerHeight * ratio <
+              this.currentY - 20
+          );
+
+      return previous?.[0] ?? 'expanded';
     }
 
-    return Object.entries(SNAP_POINTS)
+    return entries
       .map(([name, ratio]) => ({
         name,
         distance: Math.abs(
-          window.innerHeight * ratio - this.currentY
+          window.innerHeight * ratio -
+          this.currentY
         )
       }))
-      .sort((a, b) => a.distance - b.distance)[0].name;
+      .sort(
+        (a, b) =>
+          a.distance - b.distance
+      )[0].name;
   }
 }

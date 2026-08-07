@@ -14,7 +14,7 @@ export class NearbyPlugin {
       panelController:
         context.panelController,
       listElement:
-        context.root.querySelector('#list'),
+        context.root.querySelector('#exploreContent'),
       chipElements:
         context.root.querySelectorAll('.chip'),
       status: context.status

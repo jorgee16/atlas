@@ -19,6 +19,12 @@ export function iconFor(type) {
   return {anchor:'📍',hotel:'🏨',food:'🍴',shop:'🛍️',event:'🎭',walk:'🚶',airport:'✈️',cafe:'☕',restaurant:'🍴',pub:'🍺',attraction:'🏛️'}[type] ?? '📍';
 }
 
-export function googleWalkingDirections(name) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${name} London`)}&travelmode=walking`;
+export function googleWalkingDirections(destination) {
+  const value =
+    Number.isFinite(destination?.lat) &&
+    Number.isFinite(destination?.lon)
+      ? `${destination.lat},${destination.lon}`
+      : destination?.name ?? destination;
+
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(String(value))}&travelmode=walking`;
 }

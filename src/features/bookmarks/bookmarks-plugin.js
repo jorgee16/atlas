@@ -18,7 +18,7 @@ export class BookmarksPlugin {
         panelController:
           context.panelController,
         listElement:
-          context.root.querySelector('#list'),
+          context.root.querySelector('#bookmarksContent'),
         status: context.status,
         onNavigate: this.onNavigate
       });

@@ -30,7 +30,7 @@ export function nearbyCardHtml(place) {
     <a
       target="_blank"
       rel="noopener"
-      href="${googleWalkingDirections(place.name)}"
+      href="${googleWalkingDirections(place)}"
     >
       Directions in Google Maps →
     </a>
