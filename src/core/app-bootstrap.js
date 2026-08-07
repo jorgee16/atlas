@@ -231,6 +231,32 @@ export class AppBootstrap {
     const bookmarksFeature =
       appContext.get('bookmarksFeature');
 
+    panelController.registerMode('explore', {
+      enter: () => {
+        nearbyFeature.render();
+      }
+    });
+
+    panelController.registerMode('trip', {
+      enter: () => {
+        tripFeature.renderView();
+      }
+    });
+
+    panelController.registerMode('bookmarks', {
+      enter: () => {
+        bookmarksFeature.render();
+      }
+    });
+
+    panelController.registerMode('navigation', {
+      enter: () => {
+        appContext
+          .get('navigationFeature')
+          .render();
+      }
+    });
+
     let bookmarkPickMode = false;
     let pendingBookmarkLocation = null;
 
@@ -244,6 +270,24 @@ export class AppBootstrap {
 
     const tripFileInput =
       root.querySelector('#tripFileInput');
+
+    const moreButton =
+      root.querySelector('#moreBtn');
+
+    const overflowMenu =
+      root.querySelector('#overflowMenu');
+
+    const menuLoadTripButton =
+      root.querySelector('#menuLoadTripBtn');
+
+    const menuBookmarksButton =
+      root.querySelector('#menuBookmarksBtn');
+
+    const menuSettingsButton =
+      root.querySelector('#menuSettingsBtn');
+
+    const menuAboutButton =
+      root.querySelector('#menuAboutBtn');
 
   const gps = new GpsController({
     onStatus: status,
@@ -404,6 +448,79 @@ loadTripButton?.addEventListener(
       );
     }
   );
+    const closeOverflowMenu = () => {
+      if (overflowMenu) {
+        overflowMenu.hidden = true;
+      }
+    };
+
+    moreButton?.addEventListener(
+      'click',
+      event => {
+        event.stopPropagation();
+
+        if (overflowMenu) {
+          overflowMenu.hidden =
+            !overflowMenu.hidden;
+        }
+      }
+    );
+
+    menuLoadTripButton?.addEventListener(
+      'click',
+      () => {
+        closeOverflowMenu();
+        tripFileInput?.click();
+      }
+    );
+
+    menuBookmarksButton?.addEventListener(
+      'click',
+      () => {
+        closeOverflowMenu();
+        bookmarksFeature.show();
+      }
+    );
+
+    menuSettingsButton?.addEventListener(
+      'click',
+      () => {
+        closeOverflowMenu();
+
+        status(
+          'Settings',
+          'Settings are coming soon.'
+        );
+      }
+    );
+
+    menuAboutButton?.addEventListener(
+      'click',
+      () => {
+        closeOverflowMenu();
+
+        status(
+          'Roam',
+          'Your map, trips and saved places.'
+        );
+      }
+    );
+
+    document.addEventListener(
+      'click',
+      event => {
+        if (
+          overflowMenu &&
+          !overflowMenu.hidden &&
+          !overflowMenu.contains(event.target) &&
+          !moreButton?.contains(event.target)
+        ) {
+          closeOverflowMenu();
+        }
+      }
+    );
+
+
 
   draggableSheet = new DraggableBottomSheet({
     sheet: bottomSheet,

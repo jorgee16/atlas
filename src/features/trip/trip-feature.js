@@ -74,6 +74,36 @@ export class TripFeature {
     });
   }
 
+  renderView() {
+    if (!this.loaded || !this.itinerary) {
+      return false;
+    }
+
+    const day =
+      this.itinerary.selectedDay ??
+      this.daySelectElement.value ??
+      Object.keys(this.itinerary.days)[0];
+
+    this.itinerary.render(day);
+
+    return true;
+  }
+
+  show({
+    snap = 'half'
+  } = {}) {
+    if (!this.loaded) {
+      return false;
+    }
+
+    this.panelController.showMode(
+      'trip',
+      { snap }
+    );
+
+    return true;
+  }
+
   unload() {
     this.loaded = false;
     this.itinerary = null;

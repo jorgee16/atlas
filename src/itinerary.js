@@ -8,6 +8,7 @@ export class ItineraryController {
     this.daySelect = daySelect;
     this.status = status;
     this.selected = null;
+    this.selectedDay = null;
     this.onSelect = null;
     Object.keys(this.days).forEach(day => {
       const option = document.createElement('option');
@@ -21,6 +22,8 @@ export class ItineraryController {
   setSelectHandler(handler) { this.onSelect = handler; }
 
   render(day) {
+    this.selectedDay = String(day);
+    this.daySelect.value = this.selectedDay;
     this.selected = null;
     const places = this.days[day] ?? [];
     this.list.innerHTML = '';

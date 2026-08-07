@@ -57,8 +57,11 @@ export class NearbyFeature {
     }
 
     if (expandPanel) {
-      this.panelController.expand();
-    }
+        this.panelController.showMode(
+          'explore',
+          { snap: 'expanded' }
+        );
+      }
 
     this.map.clearNearby();
 

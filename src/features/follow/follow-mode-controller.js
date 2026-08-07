@@ -96,6 +96,25 @@ export class FollowModeController {
     return this.position;
   }
 
+  recenter() {
+    if (!this.position) {
+      this.status(
+        'No GPS position',
+        'Enable GPS and wait for a location fix first.'
+      );
+
+      return false;
+    }
+
+    this.map.focus(
+      this.position.lat,
+      this.position.lon,
+      16
+    );
+
+    return true;
+  }
+
   #bind() {
     this.followButton?.addEventListener(
       'click',
@@ -123,10 +142,10 @@ export class FollowModeController {
     this.recenterButton?.addEventListener(
       'click',
       () => {
-        if (this.startFollowing()) {
+        if (this.recenter()) {
           this.status(
             '📍 Recentered',
-            'The map will continue following your position.'
+            'Map centered on your current location.'
           );
         }
       }
@@ -134,14 +153,6 @@ export class FollowModeController {
 
     this.map.onUserMoveStart(() => {
       this.stopFollowing();
-
-      this.recenterButton?.classList.remove(
-        'following'
-      );
-
-      if (this.recenterButton) {
-        this.recenterButton.textContent = '🎯';
-      }
     });
   }
 
@@ -151,14 +162,6 @@ export class FollowModeController {
       this.position.lon,
       16
     );
-
-    this.recenterButton?.classList.add(
-      'following'
-    );
-
-    if (this.recenterButton) {
-      this.recenterButton.textContent = '◎';
-    }
   }
 
   #renderButton() {

@@ -100,12 +100,10 @@ export class BookmarksFeature {
   }
 
   show() {
-    this.panelController.show(
+    this.panelController.showMode(
       'bookmarks',
       { snap: 'half' }
     );
-
-    this.render();
   }
 
   render() {

@@ -15,3 +15,99 @@
 .map-header>*{
     pointer-events:auto;
 }
+
+.brand-inline{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    width:184px;
+    padding:8px 12px;
+
+    background:rgba(255,255,255,.94);
+
+    border-radius:20px;
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.12);
+}
+
+.brand-copy{
+    min-width:0;
+}
+
+.brand-copy strong{
+    display:block;
+    font-size:16px;
+    line-height:1.1;
+}
+
+.brand-copy small{
+    display:block;
+    margin-top:4px;
+
+    color:#6f7683;
+    font-size:11px;
+}
+
+.brand-mark{
+    display:grid;
+    place-items:center;
+
+    width:36px;
+    height:36px;
+
+    border-radius:12px;
+
+    background:#edf3ff;
+}
+
+.brand-mark svg{
+    width:22px;
+    height:22px;
+
+    fill:none;
+    stroke:#315efb;
+    stroke-width:2;
+}
+
+.map-header-actions{
+    display:flex;
+    gap:6px;
+}
+
+.map-header .icon-btn{
+    width:44px;
+    height:44px;
+
+    display:grid;
+    place-items:center;
+
+    padding:0;
+
+    border:none;
+    border-radius:16px;
+
+    background:rgba(255,255,255,.94);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.12);
+}
+
+.map-header .icon-btn svg{
+    width:22px;
+    height:22px;
+
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+}
+
+.map-header .icon-btn.on{
+    background:#3b63f6;
+    color:white;
+}
+
+.map-header-actions {
+  position: relative;
+}
