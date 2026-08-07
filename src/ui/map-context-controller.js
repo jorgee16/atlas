@@ -75,7 +75,7 @@ export class MapContextController {
 
       default:
         this.titleElement.textContent = 'Roam';
-        this.subtitleElement.textContent = 'Exploring London';
+        this.subtitleElement.textContent = 'Explore the map';
         break;
     }
   }
@@ -115,7 +115,7 @@ export class MapContextController {
     }
 
     this.subtitleElement.textContent =
-      `${center.lat.toFixed(4)}, ${center.lon.toFixed(4)} · z${center.zoom}`;
+      'Map area';
   }
 
   #formatHeading(heading) {
