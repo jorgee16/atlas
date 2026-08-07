@@ -1,4 +1,5 @@
 import './styles.css';
+import "./ui/components/header/header.css";
 import { createApp } from './app.js';
 
 const root = document.querySelector('#app');

@@ -1,0 +1,17 @@
+.map-header{
+    position:absolute;
+    top:16px;
+    left:16px;
+    right:16px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+
+    z-index:1000;
+    pointer-events:none;
+}
+
+.map-header>*{
+    pointer-events:auto;
+}
