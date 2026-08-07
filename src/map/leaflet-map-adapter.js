@@ -88,6 +88,8 @@ export class LeafletMapAdapter {
     offlineMapUrl = null,
     preferOffline = true
   }) {
+    this.selectionPin = null;
+    this.selectionPinTimer = null;
     if (!elementId) {
       throw new TypeError(
         'LeafletMapAdapter requires a map element id.'
@@ -239,6 +241,70 @@ export class LeafletMapAdapter {
 
   invalidateSize() {
     this.map.invalidateSize();
+  }
+
+  showSelectionPin(lat, lon) {
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon)
+    ) {
+      throw new TypeError(
+        'showSelectionPin requires lat and lon.'
+      );
+    }
+
+    if (this.selectionPin) {
+      this.selectionPin.setLatLng([
+        lat,
+        lon
+      ]);
+
+      return;
+    }
+
+    const icon = L.divIcon({
+      className: '',
+      html:
+        '<div class="bookmark-selection-pin"></div>',
+      iconSize: [34, 38],
+      iconAnchor: [17, 34]
+    });
+
+    this.selectionPin = L.marker(
+      [lat, lon],
+      {
+        icon,
+        interactive: false,
+        keyboard: false
+      }
+    ).addTo(this.map);
+  }
+
+  clearSelectionPin() {
+    if (!this.selectionPin) {
+      return;
+    }
+
+    this.map.removeLayer(
+      this.selectionPin
+    );
+
+    this.selectionPin = null;
+  }
+
+  onMapClick(callback) {
+    if (typeof callback !== 'function') {
+      throw new TypeError(
+        'onMapClick requires a callback.'
+      );
+    }
+
+    this.map.on('click', event => {
+      callback({
+        lat: event.latlng.lat,
+        lon: event.latlng.lng
+      });
+    });
   }
 
   onUserMoveStart(callback) {

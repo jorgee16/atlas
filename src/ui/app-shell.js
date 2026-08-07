@@ -36,6 +36,26 @@ export function renderAppShell(root) {
                 accept="application/json,.json"
                 hidden
               >
+              <button
+                id="saveBookmarkBtn"
+                class="icon-btn"
+                type="button"
+                aria-label="Save this location"
+                title="Save this location"
+              >
+                ⭐
+              </button>
+
+              <button
+                id="showBookmarksBtn"
+                class="icon-btn"
+                type="button"
+                aria-label="Show bookmarks"
+                title="Show bookmarks"
+              >
+                🔖
+              </button>
+
 
             <button
               id="followBtn"
@@ -59,7 +79,22 @@ export function renderAppShell(root) {
           </div>
         </header>
 
-        <div class="map-actions">
+        
+          <div
+            id="bookmarkConfirmBar"
+            class="bookmark-confirm-bar"
+            hidden
+          >
+            <button id="confirmBookmarkBtn" type="button">
+              Save
+            </button>
+
+            <button id="cancelBookmarkBtn" type="button">
+              Cancel
+            </button>
+          </div>
+
+          <div class="map-actions">
           <button
             id="searchAreaBtn"
             class="search-area-btn"

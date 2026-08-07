@@ -8,7 +8,8 @@ export class BookmarksFeature {
     panelController,
     listElement,
     status,
-    store = new BookmarkStore()
+    store = new BookmarkStore(),
+    onNavigate = null
   }) {
     if (!map || !panelController || !listElement) {
       throw new TypeError(
@@ -21,6 +22,7 @@ export class BookmarksFeature {
     this.listElement = listElement;
     this.status = status;
     this.store = store;
+    this.onNavigate = onNavigate;
     this.bookmarks = this.store.load();
   }
 
@@ -159,6 +161,21 @@ export class BookmarksFeature {
         }
       );
 
+      const navigateButton =
+        document.createElement('button');
+
+      navigateButton.type = 'button';
+      navigateButton.textContent = 'Navigate';
+      navigateButton.disabled =
+        typeof this.onNavigate !== 'function';
+
+      navigateButton.addEventListener(
+        'click',
+        () => {
+          this.onNavigate?.(bookmark);
+        }
+      );
+
       const editButton =
         document.createElement('button');
 
@@ -197,6 +214,7 @@ export class BookmarksFeature {
 
       card.append(
         focusButton,
+        navigateButton,
         editButton,
         removeButton
       );

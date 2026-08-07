@@ -3,9 +3,12 @@ import {
 } from './bookmarks-feature.js';
 
 export class BookmarksPlugin {
-  constructor() {
+  constructor({
+    onNavigate = null
+  } = {}) {
     this.id = 'bookmarks';
     this.feature = null;
+    this.onNavigate = onNavigate;
   }
 
   start(context) {
@@ -16,7 +19,8 @@ export class BookmarksPlugin {
           context.panelController,
         listElement:
           context.root.querySelector('#list'),
-        status: context.status
+        status: context.status,
+        onNavigate: this.onNavigate
       });
 
     context.provide(

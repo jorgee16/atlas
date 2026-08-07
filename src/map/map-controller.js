@@ -42,4 +42,19 @@ export class MapController {
   onUserMoveStart(callback) {
     this.adapter.onUserMoveStart(callback);
   }
+
+  onMapClick(callback) {
+    this.adapter.onMapClick(callback);
+  }
+
+  showSelectionPin(lat, lon) {
+    this.adapter.showSelectionPin(
+      lat,
+      lon
+    );
+  }
+
+  clearSelectionPin() {
+    this.adapter.clearSelectionPin();
+  }
 }

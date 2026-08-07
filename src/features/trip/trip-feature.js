@@ -66,6 +66,9 @@ export class TripFeature {
 
     this.loaded = true;
 
+    this.panelController.sheet
+      .classList.add('has-trip');
+
     this.panelController.show('trip', {
       snap
     });
@@ -74,6 +77,9 @@ export class TripFeature {
   unload() {
     this.loaded = false;
     this.itinerary = null;
+
+    this.panelController.sheet
+      .classList.remove('has-trip');
 
     this.listElement.replaceChildren();
     this.daySelectElement.replaceChildren();

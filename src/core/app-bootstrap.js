@@ -28,6 +28,14 @@ import {
 } from '../features/nearby/nearby-plugin.js';
 
 import {
+  BookmarksPlugin
+} from '../features/bookmarks/bookmarks-plugin.js';
+
+import {
+  NavigationPlugin
+} from '../features/navigation/navigation-plugin.js';
+
+import {
   TripPlugin
 } from '../features/trip/trip-plugin.js';
 
@@ -176,6 +184,32 @@ export class AppBootstrap {
     new NearbyPlugin()
   );
 
+    pluginManager.register(
+      new NavigationPlugin()
+    );
+
+    pluginManager.register(
+      new BookmarksPlugin({
+        onNavigate: destination => {
+          if (!appState.userPosition) {
+            status(
+              'Navigation unavailable',
+              'Enable GPS and wait for a location fix.'
+            );
+
+            return;
+          }
+
+          appContext
+            .get('navigationFeature')
+            .start({
+              origin: appState.userPosition,
+              destination
+            });
+        }
+      })
+    );
+
   pluginManager.register(
     new TripPlugin({
         data: null,
@@ -193,6 +227,12 @@ export class AppBootstrap {
 
   const nearbyFeature =
     appContext.get('nearbyFeature');
+
+    const bookmarksFeature =
+      appContext.get('bookmarksFeature');
+
+    let bookmarkPickMode = false;
+    let pendingBookmarkLocation = null;
 
   const tripFeature =
     appContext.get('tripFeature');
@@ -273,8 +313,97 @@ loadTripButton?.addEventListener(
         }
       }
     );
+    const saveBookmarkButton =
+      root.querySelector('#saveBookmarkBtn');
 
+    const showBookmarksButton =
+      root.querySelector('#showBookmarksBtn');
 
+    saveBookmarkButton?.addEventListener(
+      'click',
+      () => {
+        bookmarkPickMode = true;
+
+        status(
+          'Choose bookmark location',
+          'Tap anywhere on the map.'
+        );
+      }
+    );
+
+    showBookmarksButton?.addEventListener(
+      'click',
+      () => {
+        bookmarksFeature.show();
+      }
+    );
+    const bookmarkConfirmBar =
+    root.querySelector('#bookmarkConfirmBar');
+
+  const confirmBookmarkButton =
+    root.querySelector('#confirmBookmarkBtn');
+
+  const cancelBookmarkButton =
+    root.querySelector('#cancelBookmarkBtn');
+
+  map.onMapClick(({ lat, lon }) => {
+    if (!bookmarkPickMode) {
+      return;
+    }
+
+    pendingBookmarkLocation = {
+      lat,
+      lon
+    };
+
+    map.showSelectionPin(lat, lon);
+    bookmarkConfirmBar.hidden = false;
+
+    status(
+      'Bookmark location selected',
+      'Save it, cancel, or tap another point.'
+    );
+  });
+
+  confirmBookmarkButton?.addEventListener(
+    'click',
+    () => {
+      if (!pendingBookmarkLocation) {
+        return;
+      }
+
+      const bookmarkNumber =
+        bookmarksFeature.bookmarks.length + 1;
+
+      bookmarksFeature.add({
+        name: `Bookmark ${bookmarkNumber}`,
+        lat: pendingBookmarkLocation.lat,
+        lon: pendingBookmarkLocation.lon
+      });
+
+      pendingBookmarkLocation = null;
+      bookmarkPickMode = false;
+      bookmarkConfirmBar.hidden = true;
+
+      map.clearSelectionPin();
+    }
+  );
+
+  cancelBookmarkButton?.addEventListener(
+    'click',
+    () => {
+      pendingBookmarkLocation = null;
+      bookmarkPickMode = false;
+      bookmarkConfirmBar.hidden = true;
+
+      map.clearSelectionPin();
+
+      status(
+        'Bookmark cancelled',
+        ''
+      );
+    }
+  );
 
   draggableSheet = new DraggableBottomSheet({
     sheet: bottomSheet,
