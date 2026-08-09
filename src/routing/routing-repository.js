@@ -6,6 +6,11 @@ import {
   RoutingGraph
 } from './routing-graph.js';
 
+import {
+  defaultRegionAssetOrigin,
+  resolveRegionAssetUrl
+} from '../regions/region-asset-url.js';
+
 export class RoutingRepository {
   constructor({
     regionRepository =
@@ -14,13 +19,16 @@ export class RoutingRepository {
       globalThis
     ),
     baseUrl =
-      import.meta.env?.BASE_URL ?? '/'
+      import.meta.env?.BASE_URL ?? '/',
+    origin =
+      defaultRegionAssetOrigin()
   } = {}) {
     this.regionRepository =
       regionRepository;
 
     this.fetchFn = fetchFn;
     this.baseUrl = baseUrl;
+    this.origin = origin;
     this.datasets = new Map();
   }
 
@@ -341,13 +349,12 @@ export class RoutingRepository {
   }
 
   #resolveRegionUrl(url) {
-    if (/^https?:\/\//i.test(url)) {
-      return url;
-    }
-
-    const relativeUrl =
-      String(url).replace(/^\//, '');
-
-    return `${this.baseUrl}${relativeUrl}`;
+    return resolveRegionAssetUrl(
+      url,
+      {
+        baseUrl: this.baseUrl,
+        origin: this.origin
+      }
+    );
   }
 }

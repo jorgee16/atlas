@@ -1,14 +1,6 @@
 import {
-  Capacitor
-} from '@capacitor/core';
-
-import {
   RegionManager
 } from '../../regions/region-manager.js';
-
-import {
-  RegionDownloader
-} from '../../regions/region-downloader.js';
 
 import {
   RegionsFeature
@@ -24,19 +16,11 @@ export class RegionsPlugin {
   }
 
   start(context) {
-    if (!this.manager) {
-      const downloader = new RegionDownloader({
-        origin: Capacitor.isNativePlatform()
-          ? 'https://pub-75539028275a4826aa383fdb89292ed7.r2.dev'
-          : globalThis.location?.origin
-      });
-
-      this.manager = new RegionManager({
-        downloader,
+    this.manager ??=
+      new RegionManager({
         status: context.status,
         map: context.map
       });
-    }
 
     this.feature = new RegionsFeature({
       manager: this.manager,

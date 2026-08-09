@@ -348,6 +348,10 @@ function scoreSearchEntry(entry, normalizedQuery, queryTokens) {
   return score;
 }
 
+import {
+  resolveRegionAssetUrl
+} from '../../regions/region-asset-url.js';
+
 export class LocalRegionProvider {
   constructor({
     regionRepository,
@@ -606,11 +610,7 @@ export class LocalRegionProvider {
   }
 
   #resolveRegionUrl(url) {
-    const relativeUrl = String(url).replace(/^\//, '');
-    const baseUrl =
-      import.meta.env?.BASE_URL ?? '/';
-
-    return `${baseUrl}${relativeUrl}`;
+    return resolveRegionAssetUrl(url);
   }
 
   #toPlace(feature, anchor) {

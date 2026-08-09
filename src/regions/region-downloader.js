@@ -1,3 +1,8 @@
+import {
+  defaultRegionAssetOrigin,
+  resolveRegionAssetUrl
+} from './region-asset-url.js';
+
 const CACHE_PREFIX =
   'roam-region-v2-';
 
@@ -12,8 +17,7 @@ export class RegionDownloader {
     baseUrl =
       import.meta.env?.BASE_URL ?? '/',
     origin =
-      globalThis.location?.origin ??
-      'http://localhost'
+      defaultRegionAssetOrigin()
   } = {}) {
     this.fetchFn =
       fetchFn ??
@@ -289,17 +293,13 @@ export class RegionDownloader {
   }
 
   #resolveUrl(url) {
-    if (/^https?:\/\//i.test(url)) {
-      return url;
-    }
-
-    const relativeUrl =
-      String(url).replace(/^\//, '');
-
-    return new URL(
-      `${this.baseUrl}${relativeUrl}`,
-      this.origin
-    ).href;
+    return resolveRegionAssetUrl(
+      url,
+      {
+        baseUrl: this.baseUrl,
+        origin: this.origin
+      }
+    );
   }
 
   async #removeManagedCaches(
