@@ -7,10 +7,38 @@ const source = await readFile(
   'utf8'
 );
 
-test('service worker matches only its shell cache', () => {
+test('service worker owns only the application shell and excludes region assets', () => {
   assert.match(source, /caches\.open\(CACHE\)/);
-  assert.match(source, /SHELL\.includes\(url\.pathname\)/);
-  assert.doesNotMatch(source, /caches\.match\(event\.request\)/);
+
+  assert.match(
+    source,
+    /url\.pathname\.startsWith\('\/region-packages\/'\)/
+  );
+
+  assert.match(
+    source,
+    /url\.pathname\.startsWith\('\/regions\/'\)/
+  );
+
+  assert.match(
+    source,
+    /url\.pathname\.startsWith\('\/assets\/'\)/
+  );
+
+  assert.match(
+    source,
+    /event\.request\.mode === 'navigate'/
+  );
+
+  assert.match(
+    source,
+    /cache\.match\('\/index\.html'\)/
+  );
+
+  assert.doesNotMatch(
+    source,
+    /caches\.match\(event\.request\)/
+  );
 });
 
 test('application explicitly updates the corrected service worker', async () => {
