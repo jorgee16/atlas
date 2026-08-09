@@ -1,8 +1,9 @@
 # Roam Region Builder
 
 > Legacy map-pipeline tooling. Use the C++ `packager/roam-packager` for all
-> new POI extraction and spatial-index generation. This Node.js pipeline is
-> retained for PMTiles compatibility and reproducing older packages.
+> new POI extraction, spatial-index generation, and offline routing graphs.
+> This Node.js pipeline is retained for PMTiles compatibility and reproducing
+> older packages.
 
 The public interface is a portable Node.js CLI.
 

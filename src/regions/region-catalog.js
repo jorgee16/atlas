@@ -31,9 +31,22 @@ export class RegionCatalog {
       await response.json();
 
     this.regions =
-      document.regions ?? [];
+      (document.regions ?? [])
+        .filter(region => region?.id)
+        .map(region => ({
+          version: 1,
+          ...region
+        }));
 
     return this.regions;
+  }
+
+  async findById(id) {
+    const regions = await this.list();
+
+    return regions.find(
+      region => region.id === id
+    ) ?? null;
   }
 
   async findByPosition({

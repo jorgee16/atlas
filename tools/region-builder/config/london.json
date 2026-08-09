@@ -34,7 +34,8 @@
         "key": "amenity",
         "values": [
           "pub",
-          "bar"
+          "bar",
+          "biergarten"
         ]
       }
     ],
@@ -48,7 +49,8 @@
           "viewpoint",
           "zoo",
           "aquarium",
-          "theme_park"
+          "theme_park",
+          "artwork"
         ]
       },
       {
@@ -56,7 +58,8 @@
         "values": [
           "theatre",
           "cinema",
-          "arts_centre"
+          "arts_centre",
+          "place_of_worship"
         ]
       },
       {
@@ -71,6 +74,101 @@
         "key": "historic",
         "values": [
           "*"
+        ]
+      }
+    ],
+    "stay": [
+      {
+        "key": "tourism",
+        "values": [
+          "hotel",
+          "hostel",
+          "guest_house",
+          "motel",
+          "apartment",
+          "camp_site",
+          "caravan_site"
+        ]
+      }
+    ],
+    "shop": [
+      {
+        "key": "shop",
+        "values": [
+          "*"
+        ]
+      }
+    ],
+    "health": [
+      {
+        "key": "amenity",
+        "values": [
+          "pharmacy",
+          "hospital",
+          "clinic",
+          "doctors",
+          "dentist",
+          "veterinary"
+        ]
+      },
+      {
+        "key": "healthcare",
+        "values": [
+          "*"
+        ]
+      }
+    ],
+    "transport": [
+      {
+        "key": "aeroway",
+        "values": [
+          "aerodrome",
+          "terminal"
+        ]
+      },
+      {
+        "key": "railway",
+        "values": [
+          "station",
+          "halt",
+          "subway_entrance",
+          "tram_stop"
+        ]
+      },
+      {
+        "key": "public_transport",
+        "values": [
+          "station",
+          "platform"
+        ]
+      },
+      {
+        "key": "amenity",
+        "values": [
+          "bus_station",
+          "ferry_terminal",
+          "taxi",
+          "bicycle_rental",
+          "car_rental",
+          "charging_station",
+          "fuel",
+          "parking"
+        ]
+      }
+    ],
+    "service": [
+      {
+        "key": "amenity",
+        "values": [
+          "bank",
+          "atm",
+          "post_office",
+          "police",
+          "toilets",
+          "drinking_water",
+          "marketplace",
+          "library",
+          "community_centre"
         ]
       }
     ]

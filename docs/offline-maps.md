@@ -8,7 +8,15 @@ Roam region packages can include a vector map archive:
     ├── metadata.json
     ├── pois.geojson
     ├── poi-index.json
-    └── map.pmtiles
+    ├── map.pmtiles
+    └── routing/
+        ├── manifest.json
+        ├── mainland/
+        │   └── metadata.json + 4 binary assets
+        ├── madeira/
+        │   └── metadata.json + 4 binary assets
+        └── azores/
+            └── metadata.json + 4 binary assets
 
 `map.pmtiles` is generated from OpenStreetMap data with Tilemaker.
 
@@ -20,3 +28,6 @@ Portugal currently provides offline POIs and a spatial index, but no PMTiles
 archive. London keeps its optional PMTiles path. POI packages can be generated
 with the C++ `roam-packager`; PMTiles generation remains in the map-tile
 pipeline.
+
+The PMTiles basemap and routing graph are independent: PMTiles draws the roads,
+while the binary graph provides topology and travel-time weights for A*.

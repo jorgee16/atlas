@@ -4,7 +4,8 @@
       "id": "london",
       "name": "London",
       "country": "United Kingdom",
-      "bundled": true,
+      "version": 4,
+      "bundled": false,
       "bounds": [
         -0.55,
         51.25,
@@ -18,7 +19,8 @@
       "id": "portugal",
       "name": "Portugal",
       "country": "Portugal",
-      "bundled": true,
+      "version": 4,
+      "bundled": false,
       "bounds": [
         -31.4,
         32.5,

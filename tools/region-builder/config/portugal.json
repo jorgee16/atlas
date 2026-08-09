@@ -1,0 +1,176 @@
+{
+  "id": "portugal",
+  "name": "Portugal",
+  "country": "Portugal",
+  "bbox": [
+    -31.5,
+    32.4,
+    -6.0,
+    42.3
+  ],
+  "output": "public/region-packages/portugal",
+  "categories": {
+    "cafe": [
+      {
+        "key": "amenity",
+        "values": [
+          "cafe",
+          "ice_cream"
+        ]
+      }
+    ],
+    "restaurant": [
+      {
+        "key": "amenity",
+        "values": [
+          "restaurant",
+          "fast_food",
+          "food_court"
+        ]
+      }
+    ],
+    "pub": [
+      {
+        "key": "amenity",
+        "values": [
+          "pub",
+          "bar",
+          "biergarten"
+        ]
+      }
+    ],
+    "attraction": [
+      {
+        "key": "tourism",
+        "values": [
+          "museum",
+          "gallery",
+          "attraction",
+          "viewpoint",
+          "zoo",
+          "aquarium",
+          "theme_park",
+          "artwork"
+        ]
+      },
+      {
+        "key": "amenity",
+        "values": [
+          "theatre",
+          "cinema",
+          "arts_centre",
+          "place_of_worship"
+        ]
+      },
+      {
+        "key": "leisure",
+        "values": [
+          "park",
+          "garden",
+          "nature_reserve"
+        ]
+      },
+      {
+        "key": "historic",
+        "values": [
+          "*"
+        ]
+      }
+    ],
+    "stay": [
+      {
+        "key": "tourism",
+        "values": [
+          "hotel",
+          "hostel",
+          "guest_house",
+          "motel",
+          "apartment",
+          "camp_site",
+          "caravan_site"
+        ]
+      }
+    ],
+    "shop": [
+      {
+        "key": "shop",
+        "values": [
+          "*"
+        ]
+      }
+    ],
+    "health": [
+      {
+        "key": "amenity",
+        "values": [
+          "pharmacy",
+          "hospital",
+          "clinic",
+          "doctors",
+          "dentist",
+          "veterinary"
+        ]
+      },
+      {
+        "key": "healthcare",
+        "values": [
+          "*"
+        ]
+      }
+    ],
+    "transport": [
+      {
+        "key": "aeroway",
+        "values": [
+          "aerodrome",
+          "terminal"
+        ]
+      },
+      {
+        "key": "railway",
+        "values": [
+          "station",
+          "halt",
+          "subway_entrance",
+          "tram_stop"
+        ]
+      },
+      {
+        "key": "public_transport",
+        "values": [
+          "station",
+          "platform"
+        ]
+      },
+      {
+        "key": "amenity",
+        "values": [
+          "bus_station",
+          "ferry_terminal",
+          "taxi",
+          "bicycle_rental",
+          "car_rental",
+          "charging_station",
+          "fuel",
+          "parking"
+        ]
+      }
+    ],
+    "service": [
+      {
+        "key": "amenity",
+        "values": [
+          "bank",
+          "atm",
+          "post_office",
+          "police",
+          "toilets",
+          "drinking_water",
+          "marketplace",
+          "library",
+          "community_centre"
+        ]
+      }
+    ]
+  }
+}

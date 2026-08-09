@@ -15,6 +15,10 @@ export class MapController {
     this.adapter.clearNearby();
   }
 
+  clearRoute() {
+    this.adapter.clearRoute();
+  }
+
   showItinerary(places, onSelect) {
     this.adapter.showItinerary(places, onSelect);
   }
@@ -23,8 +27,23 @@ export class MapController {
     this.adapter.focus(lat, lon, zoom);
   }
 
+  followPosition(position, options = {}) {
+    return this.adapter.followPosition?.(
+      position,
+      options
+    );
+  }
+
+  setBearing(bearing = 0) {
+    return this.adapter.setBearing?.(bearing);
+  }
+
   updateUserLocation(position, firstFix = false) {
     this.adapter.updateUserLocation(position, firstFix);
+  }
+
+  setNavigationTravelMode(mode = null) {
+    return this.adapter.setNavigationTravelMode?.(mode);
   }
 
   setRegion(region, options = {}) {
@@ -36,6 +55,30 @@ export class MapController {
 
   addNearby(place, popupHtml) {
     this.adapter.addNearby(place, popupHtml);
+  }
+
+  showRoute(route, endpoints = {}) {
+    this.adapter.showRoute(
+      route,
+      endpoints
+    );
+  }
+
+  updateRouteProgress(route, progress) {
+    this.adapter.updateRouteProgress?.(
+      route,
+      progress
+    );
+  }
+
+  showManeuvers(
+    maneuvers,
+    activeIndex = 0
+  ) {
+    this.adapter.showManeuvers?.(
+      maneuvers,
+      activeIndex
+    );
   }
 
   invalidateSize() {
@@ -54,14 +97,23 @@ export class MapController {
     this.adapter.onMapClick(callback);
   }
 
-  showSelectionPin(lat, lon) {
+  showSelectionPin(
+    lat,
+    lon,
+    popupContent = null
+  ) {
     this.adapter.showSelectionPin(
       lat,
-      lon
+      lon,
+      popupContent
     );
   }
 
   clearSelectionPin() {
     this.adapter.clearSelectionPin();
+  }
+
+  closeSelectionPopup() {
+    this.adapter.closeSelectionPopup();
   }
 }

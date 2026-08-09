@@ -17,21 +17,28 @@ export class RegionRepository {
   }
 
   async list() {
-    const installedIds =
-      new Set(
-        this.installStore
-          .load()
-          .map(region => region.id)
-      );
+    const installedRegions =
+      this.installStore.load();
 
     const catalogueRegions =
       await this.catalog.list();
 
     return catalogueRegions
-      .filter(region =>
-        region.bundled === true ||
-        installedIds.has(region.id)
-      )
+      .filter(region => {
+        if (region.bundled === true) {
+          return true;
+        }
+
+        const installed =
+          installedRegions.find(
+            record =>
+              record.id === region.id
+          );
+
+        return Boolean(installed) &&
+          String(installed.version ?? '') ===
+            String(region.version ?? 1);
+      })
       .map(region =>
         this.#normalizeCatalogueRegion(region)
       );
@@ -72,7 +79,12 @@ export class RegionRepository {
 
       mapUrl:
         region.mapUrl ??
-        region.assets?.map
+        region.assets?.map,
+
+      routing:
+        region.routing ??
+        region.assets?.routing ??
+        null
     };
   }
 

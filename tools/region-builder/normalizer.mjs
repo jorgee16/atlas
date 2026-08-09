@@ -1,7 +1,21 @@
 import fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import path from 'node:path';
 
 const DEFAULT_CELL_SIZE_DEGREES = 0.005;
+const GEOGRAPHIC_PLACE_TYPES = new Set([
+  'city',
+  'town',
+  'village',
+  'hamlet',
+  'suburb',
+  'quarter',
+  'neighbourhood',
+  'locality',
+  'municipality',
+  'borough',
+  'island'
+]);
 
 function flattenCoordinates(value, output = []) {
   if (!Array.isArray(value)) return output;
@@ -51,6 +65,14 @@ function matchesRule(tags, rule) {
 }
 
 function categoryFor(tags, categories) {
+  if (tags['addr:housenumber'] && tags['addr:street']) {
+    return 'address';
+  }
+
+  if (GEOGRAPHIC_PLACE_TYPES.has(tags.place)) {
+    return 'locality';
+  }
+
   for (const [category, rules] of Object.entries(categories)) {
     if (rules.some(rule => matchesRule(tags, rule))) {
       return category;
@@ -61,15 +83,28 @@ function categoryFor(tags, categories) {
 
 function compactProperties(tags, category) {
   const output = {
-    name: tags.name,
+    name: tags.name ?? (category === 'address'
+      ? `${tags['addr:housenumber']} ${tags['addr:street']}`
+      : undefined),
     type: category,
     amenity:
-      tags.amenity ??
-      tags.tourism ??
-      tags.leisure ??
-      tags.historic ??
-      'place'
+      category === 'address'
+        ? 'address'
+        : tags.amenity ??
+          tags.tourism ??
+          tags.leisure ??
+          tags.historic ??
+          'place'
   };
+
+  if (category === 'locality') {
+    output.place = tags.place;
+    output.search_only = true;
+  }
+
+  if (category === 'address') {
+    output.search_only = true;
+  }
 
   for (const key of [
     'opening_hours',
@@ -80,7 +115,21 @@ function compactProperties(tags, category) {
     'wheelchair',
     'addr:housenumber',
     'addr:street',
-    'addr:city'
+    'addr:city',
+    'addr:postcode',
+    'alt_name',
+    'short_name',
+    'official_name',
+    'ref',
+    'name:pt',
+    'name:en',
+    'loc_name',
+    'old_name',
+    'municipality',
+    'district',
+    'postal_code',
+    'population',
+    'wikidata'
   ]) {
     if (tags[key]) output[key] = tags[key];
   }
@@ -96,25 +145,129 @@ function gridKey(lon, lat, cellSize) {
   return `${gridCell(lon, cellSize)}:${gridCell(lat, cellSize)}`;
 }
 
-function buildSpatialIndex(features, cellSize) {
-  const cells = {};
+function addSpatialIndexFeature(cells, featureIndex, coordinates, cellSize) {
+  const [lon, lat] = coordinates;
+  const key = gridKey(lon, lat, cellSize);
 
-  features.forEach((feature, featureIndex) => {
-    const [lon, lat] = feature.geometry.coordinates;
-    const key = gridKey(lon, lat, cellSize);
+  if (!cells[key]) cells[key] = [];
+  cells[key].push(featureIndex);
+}
 
-    if (!cells[key]) cells[key] = [];
-    cells[key].push(featureIndex);
+async function* readGeoJsonSequence(filePath) {
+  const input = createReadStream(filePath, {
+    encoding: 'utf8',
+    highWaterMark: 1024 * 1024
   });
 
-  return {
-    version: 1,
-    kind: 'uniform-grid',
-    cellSizeDegrees: cellSize,
-    featureCount: features.length,
-    cellCount: Object.keys(cells).length,
-    cells
-  };
+  let buffer = '';
+
+  for await (const chunk of input) {
+    buffer += chunk;
+
+    // RFC 8142 uses ASCII Record Separator (0x1E) between JSON texts.
+    // Do not split on newlines: osmium may format one JSON feature across
+    // multiple physical lines.
+    const records = buffer.split('\x1e');
+    buffer = records.pop() ?? '';
+
+    for (const record of records) {
+      const json = record.trim();
+      if (!json) continue;
+      yield JSON.parse(json);
+    }
+  }
+
+  const tail = buffer.trim();
+  if (tail) {
+    yield JSON.parse(tail);
+  }
+}
+
+async function* readLegacyGeoJson(filePath) {
+  // Kept for small fixtures/backward compatibility. Large production builds
+  // use GeoJSON Sequence so they never create one giant JavaScript string.
+  const source = JSON.parse(await fs.readFile(filePath, 'utf8'));
+  for (const feature of source.features ?? []) {
+    yield feature;
+  }
+}
+
+function inputFeatures(filePath) {
+  return filePath.endsWith('.geojsonseq')
+    ? readGeoJsonSequence(filePath)
+    : readLegacyGeoJson(filePath);
+}
+
+class BufferedFileWriter {
+  constructor(handle, flushBytes = 1024 * 1024) {
+    this.handle = handle;
+    this.flushBytes = flushBytes;
+    this.parts = [];
+    this.bytes = 0;
+  }
+
+  async write(value) {
+    const chunk = String(value);
+    this.parts.push(chunk);
+    this.bytes += Buffer.byteLength(chunk);
+
+    if (this.bytes >= this.flushBytes) {
+      await this.flush();
+    }
+  }
+
+  async flush() {
+    if (!this.parts.length) return;
+    const chunk = this.parts.join('');
+    this.parts = [];
+    this.bytes = 0;
+    await this.handle.write(chunk);
+  }
+
+  async close() {
+    await this.flush();
+    await this.handle.close();
+  }
+}
+
+async function writeSpatialIndex({
+  filePath,
+  cells,
+  cellSizeDegrees,
+  featureCount
+}) {
+  const tempPath = `${filePath}.partial`;
+  const handle = await fs.open(tempPath, 'w');
+  const writer = new BufferedFileWriter(handle);
+
+  try {
+    const entries = Object.entries(cells);
+
+    await writer.write(
+      '{"version":1,"kind":"uniform-grid",' +
+      `"cellSizeDegrees":${JSON.stringify(cellSizeDegrees)},` +
+      `"featureCount":${featureCount},` +
+      `"cellCount":${entries.length},"cells":{`
+    );
+
+    for (let index = 0; index < entries.length; index += 1) {
+      const [key, featureIndexes] = entries[index];
+
+      if (index > 0) await writer.write(',');
+
+      await writer.write(
+        `${JSON.stringify(key)}:${JSON.stringify(featureIndexes)}`
+      );
+    }
+
+    await writer.write('}}');
+    await writer.close();
+    await fs.rename(tempPath, filePath);
+  } catch (error) {
+    await handle.close().catch(() => {});
+    await fs.rm(tempPath, { force: true });
+    throw error;
+  }
 }
 
 export async function normalizeRegion({
@@ -122,58 +275,115 @@ export async function normalizeRegion({
   config,
   outputDir
 }) {
-  const source = JSON.parse(await fs.readFile(rawGeoJson, 'utf8'));
-  const seen = new Set();
-  const features = [];
-
-  for (const feature of source.features ?? []) {
-    const tags = feature.properties ?? {};
-    const category = categoryFor(tags, config.categories);
-    const coordinates = representativePoint(feature.geometry);
-
-    if (!tags.name || !category || !coordinates) continue;
-
-    const id = String(
-      feature.id ?? `${tags.name}:${coordinates[0]}:${coordinates[1]}`
-    );
-
-    if (seen.has(id)) continue;
-    seen.add(id);
-
-    features.push({
-      type: 'Feature',
-      id,
-      geometry: {
-        type: 'Point',
-        coordinates
-      },
-      properties: {
-        ...compactProperties(tags, category),
-        osm_id: id
-      }
-    });
-  }
-
   await fs.mkdir(outputDir, { recursive: true });
 
   const cellSizeDegrees =
     config.spatialIndex?.cellSizeDegrees ??
     DEFAULT_CELL_SIZE_DEGREES;
 
-  const spatialIndex = buildSpatialIndex(
-    features,
-    cellSizeDegrees
+  const seen = new Set();
+  const cells = {};
+  let featureCount = 0;
+
+  const poiPath = path.join(outputDir, 'pois.geojson');
+  const poiTempPath = `${poiPath}.partial`;
+  const poiHandle = await fs.open(poiTempPath, 'w');
+  const poiWriter = new BufferedFileWriter(poiHandle);
+
+  await poiWriter.write(
+    '{"type":"FeatureCollection","metadata":' +
+      JSON.stringify({
+        source: 'OpenStreetMap',
+        license: 'ODbL-1.0',
+        attribution: '© OpenStreetMap contributors'
+      }) +
+      ',"features":['
   );
 
-  const poiDocument = {
-    type: 'FeatureCollection',
-    metadata: {
-      source: 'OpenStreetMap',
-      license: 'ODbL-1.0',
-      attribution: '© OpenStreetMap contributors'
-    },
-    features
-  };
+  let first = true;
+
+  try {
+    for await (const feature of inputFeatures(rawGeoJson)) {
+      const tags = feature.properties ?? {};
+      const category = categoryFor(tags, config.categories);
+      const coordinates = representativePoint(feature.geometry);
+
+      const searchableAddress = category === 'address';
+      if (
+        (!tags.name && !searchableAddress) ||
+        !category ||
+        !coordinates
+      ) {
+        continue;
+      }
+
+      const id = String(
+        feature.id ??
+        `${tags.name ?? `${tags['addr:housenumber']} ${tags['addr:street']}`}:${coordinates[0]}:${coordinates[1]}`
+      );
+
+      if (seen.has(id)) continue;
+      seen.add(id);
+
+      const normalized = {
+        type: 'Feature',
+        id,
+        geometry: {
+          type: 'Point',
+          coordinates
+        },
+        properties: {
+          ...compactProperties(tags, category),
+          osm_id: id
+        }
+      };
+
+      addSpatialIndexFeature(
+        cells,
+        featureCount,
+        coordinates,
+        cellSizeDegrees
+      );
+
+      if (!first) {
+        await poiWriter.write(',');
+      }
+
+      await poiWriter.write(
+        JSON.stringify(normalized)
+      );
+
+      first = false;
+      featureCount += 1;
+
+      if (featureCount % 100_000 === 0) {
+        console.log(
+          `  normalized ${featureCount.toLocaleString()} records...`
+        );
+      }
+    }
+
+    await poiWriter.write(']}');
+    await poiWriter.close();
+    await fs.rename(poiTempPath, poiPath);
+  } catch (error) {
+    await poiHandle.close().catch(() => {});
+    await fs.rm(poiTempPath, { force: true });
+    throw error;
+  }
+
+  const indexPath = path.join(outputDir, 'poi-index.json');
+
+  // Stream the index too. Portugal can contain enough exact-address records
+  // that JSON.stringify(spatialIndex) itself can exceed V8's string limit.
+  await writeSpatialIndex({
+    filePath: indexPath,
+    cells,
+    cellSizeDegrees,
+    featureCount
+  });
+
+  const cellCount = Object.keys(cells).length;
 
   const metadata = {
     id: config.id,
@@ -182,29 +392,17 @@ export async function normalizeRegion({
     bounds: config.bbox,
     poiUrl: `/regions/${config.id}/pois.geojson`,
     indexUrl: `/regions/${config.id}/poi-index.json`,
-    poiCount: features.length,
+    poiCount: featureCount,
     spatialIndex: {
-      kind: spatialIndex.kind,
-      version: spatialIndex.version,
+      kind: 'uniform-grid',
+      version: 1,
       cellSizeDegrees,
-      cellCount: spatialIndex.cellCount
+      cellCount
     },
     generatedAt: new Date().toISOString(),
     attribution: '© OpenStreetMap contributors',
     dataLicense: 'ODbL-1.0'
   };
-
-  await fs.writeFile(
-    path.join(outputDir, 'pois.geojson'),
-    JSON.stringify(poiDocument),
-    'utf8'
-  );
-
-  await fs.writeFile(
-    path.join(outputDir, 'poi-index.json'),
-    JSON.stringify(spatialIndex),
-    'utf8'
-  );
 
   await fs.writeFile(
     path.join(outputDir, 'metadata.json'),

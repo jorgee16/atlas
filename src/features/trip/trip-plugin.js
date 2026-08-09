@@ -28,9 +28,35 @@ export class TripPlugin {
         context.root.querySelector('#tripContent'),
       daySelectElement:
         context.root.querySelector('#daySelect'),
+      scheduleViewElement:
+        context.root.querySelector('#tripScheduleView'),
+      mapViewElement:
+        context.root.querySelector('#tripMapView'),
+      selectedStopElement:
+        context.root.querySelector('#tripSelectedStop'),
+      mapTimelineElement:
+        context.root.querySelector('#tripMapTimeline'),
+      mapStopCountElement:
+        context.root.querySelector('#tripMapStopCount'),
+      modeElements:
+        context.root.querySelectorAll('[data-trip-mode]'),
       status: context.status,
       onPlaceSelected:
-        this.onPlaceSelected
+        this.onPlaceSelected,
+      onNavigate: (place, navigationContext) => {
+        context.root.dispatchEvent(
+          new CustomEvent('tripnavigate', {
+            detail: { place, navigationContext }
+          })
+        );
+      },
+      onNearby: place => {
+        context.root.dispatchEvent(
+          new CustomEvent('tripnearby', {
+            detail: { place }
+          })
+        );
+      }
     });
 
     if (this.data) {

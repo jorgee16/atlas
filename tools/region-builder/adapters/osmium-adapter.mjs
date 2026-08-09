@@ -18,7 +18,12 @@ function run(command, args) {
 }
 
 function filterExpression(categoryRules) {
-  const expressions = [];
+  const expressions = [
+    'n/place=city,town,village,hamlet,suburb,quarter,neighbourhood,locality,municipality,borough,island',
+    // Exact address points are search-only geocoder records. They do not
+    // appear in Nearby but let future region packages resolve house numbers.
+    'nwr/addr:housenumber'
+  ];
 
   for (const rules of Object.values(categoryRules)) {
     for (const rule of rules) {
@@ -67,7 +72,7 @@ export class OsmiumAdapter {
 
     const extractedPbf = path.join(workDir, 'region.osm.pbf');
     const filteredPbf = path.join(workDir, 'pois.osm.pbf');
-    const rawGeoJson = path.join(workDir, 'raw-pois.geojson');
+    const rawGeoJson = path.join(workDir, 'raw-pois.geojsonseq');
 
     await this.extractRegion({
       input,
@@ -88,6 +93,7 @@ export class OsmiumAdapter {
     await run('osmium', [
       'export',
       '--add-unique-id', 'type_id',
+      '--output-format', 'geojsonseq',
       '--overwrite',
       '--output', rawGeoJson,
       filteredPbf

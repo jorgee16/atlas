@@ -9,8 +9,9 @@ The first dataset is **London 2026**, based on the supplied `El Plan - London.pd
 - Vite
 - Vanilla JavaScript (ES modules)
 - Leaflet
-- OpenStreetMap tiles
-- Overpass API for nearby OSM places
+- OpenStreetMap tiles and regional OSM PBF packages
+- Local indexed POI search
+- Offline car routing with compact binary road graphs and A*
 - Browser Geolocation API
 - Google Maps URLs for walking directions
 - PWA manifest + service worker
@@ -66,7 +67,10 @@ roam/
 
 ## Current scope
 
-This is the first modular foundation, not the final architecture. Satellite imagery, routing, recommendation scoring, offline map data, and richer place details are intentionally left as future modules.
+Roam currently supports regional offline POIs, optional PMTiles basemaps, GPS,
+bookmarks, contextual map actions, and offline car routing on generated OSM road
+graphs. Turn restrictions, spoken turn-by-turn instructions, walking/cycling
+profiles, and live traffic remain future routing phases.
 
 ### Data note
 

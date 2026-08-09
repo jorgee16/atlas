@@ -9,3 +9,6 @@ nwr/amenity=theatre,cinema,arts_centre
 # Useful outdoor places
 nwr/leisure=park,garden,nature_reserve
 nwr/natural=beach,peak
+
+# Geographic names used by offline destination search (hidden from Nearby)
+n/place=city,town,village,hamlet,suburb,quarter,neighbourhood,locality,municipality,borough,island

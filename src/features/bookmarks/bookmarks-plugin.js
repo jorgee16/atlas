@@ -15,8 +15,6 @@ export class BookmarksPlugin {
     this.feature =
       new BookmarksFeature({
         map: context.map,
-        panelController:
-          context.panelController,
         listElement:
           context.root.querySelector('#bookmarksContent'),
         status: context.status,

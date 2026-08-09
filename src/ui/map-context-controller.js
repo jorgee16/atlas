@@ -74,14 +74,14 @@ export class MapContextController {
         break;
 
       default:
-        this.titleElement.textContent = 'Roam';
+        this.titleElement.textContent = 'Atlas';
         this.subtitleElement.textContent = 'Explore the map';
         break;
     }
   }
 
   #renderFollowing() {
-    this.titleElement.textContent = 'Following you';
+    this.titleElement.textContent = 'Atlas';
 
     const heading = this.state.heading;
     const speed = this.state.speed;
@@ -105,7 +105,7 @@ export class MapContextController {
   }
 
   #renderExploring() {
-    this.titleElement.textContent = 'Exploring';
+    this.titleElement.textContent = 'Atlas';
 
     const center = this.state.center;
 

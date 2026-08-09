@@ -29,6 +29,8 @@ add_executable(
   roam-packager
   src/main.cpp
   src/poi-extractor.cpp
+  src/road-extractor.cpp
+  src/routing-writer.cpp
   src/spatial-index.cpp
 )
 

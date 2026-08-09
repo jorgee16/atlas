@@ -3,24 +3,80 @@ import {
 } from './navigation-session.js';
 
 import {
-  distanceMeters,
-  bearingDegrees,
-  cardinalDirection
+  distanceMeters
 } from './navigation-geometry.js';
+
+import {
+  OfflineRoutingService
+} from '../../routing/offline-routing-service.js';
+
+import {
+  findRouteProgress
+} from '../../routing/route-progress.js';
+
+import {
+  NavigationGuidance
+} from './navigation-guidance.js';
+
+import {
+  NavigationVoice,
+  spokenInstruction
+} from './navigation-voice.js';
+
+import {
+  maneuverIconSvg
+} from './maneuver-icons.js';
+
+import {
+  queryDestinations
+} from '../../nearby.js';
+
+import {
+  NavigationPlannerView
+} from './navigation-planner-view.js';
+
+import {
+  DestinationHistory
+} from './destination-history.js';
+
 import { escapeHtml } from '../../utils.js';
+
+const OFF_ROUTE_DISTANCE_METERS = 80;
+const GPS_REDUCED_ACCURACY_METERS = 45;
+const OFF_ROUTE_CONFIRMATION_FIXES = 3;
+const OFF_ROUTE_CONFIRMATION_MS = 2_500;
+const ROUTE_CHANGED_NOTICE_MS = 6_000;
+const MINIMUM_REROUTE_INTERVAL_MS = 15_000;
+const ROUTE_PREVIEW_COLLAPSE_MS = 4_500;
+const ARRIVAL_DISTANCE_METERS = 30;
+const ARRIVAL_DESTINATION_RADIUS_METERS = 50;
 
 export class NavigationFeature {
   constructor({
     map,
     panelController,
     listElement,
+    guidanceElement = null,
+    guidance = null,
     status,
-    session = new NavigationSession()
+    session = new NavigationSession(),
+    routingService =
+      new OfflineRoutingService(),
+    now = () => Date.now(),
+    voice = new NavigationVoice(),
+    destinationSearch = queryDestinations,
+    searchAnchorProvider = () => null,
+    destinationHistory = new DestinationHistory(),
+    plannerView = null,
+    onActiveChange = () => {},
+    onArrivalAction = () => {},
+    documentRef = globalThis.document
   }) {
     if (
       !map ||
       !panelController ||
-      !listElement
+      !listElement ||
+      !documentRef
     ) {
       throw new TypeError(
         'NavigationFeature requires map, panelController and listElement.'
@@ -33,52 +89,285 @@ export class NavigationFeature {
     this.listElement = listElement;
     this.status = status;
     this.session = session;
+    this.routingService = routingService;
+    this.now = now;
+    this.document = documentRef;
+    this.voice = voice;
+    this.destinationSearch =
+      destinationSearch;
+    this.searchAnchorProvider =
+      searchAnchorProvider;
+    this.destinationHistory =
+      destinationHistory;
+    this.plannerView = plannerView ??
+      new NavigationPlannerView({
+        documentRef
+      });
+    this.onActiveChange = onActiveChange;
+    this.onArrivalAction = onArrivalAction;
+
+    this.guidance = guidance ??
+      (guidanceElement
+        ? new NavigationGuidance({
+            element: guidanceElement,
+            onStop: () => this.stop(),
+            onToggleVoice:
+              () => this.#toggleVoice(),
+            onUndoRoute:
+              () => this.undoLastReroute(),
+            onArrivalAction:
+              action => this.#handleArrivalAction(action),
+            onTravelMode:
+              mode => this.setTravelMode(mode),
+            voiceState: () => ({
+              enabled:
+                this.voice.isEnabled(),
+              supported:
+                this.voice.isSupported()
+            }),
+            now
+          })
+        : null);
+
+    this.routeState = 'idle';
+    this.routeError = null;
+    this.routeRequest = 0;
+    this.routeAbortController = null;
+    this.lastRouteAt = 0;
+    this.routeProgress = null;
+    this.lastVoiceAnnouncement = null;
+    this.navigationConfidenceState = 'normal';
+    this.offRouteEvidenceCount = 0;
+    this.offRouteEvidenceSince = 0;
+    this.routeChangedUntil = 0;
+    this.previousRoute = null;
+    this.arrivalState = null;
+    this.navigationContext = null;
+
+    this.currentPosition = null;
+    this.trackPosition = true;
+    this.travelMode = this.#loadTravelMode();
+    this.laneGuidanceEnabled = this.#loadBoolPref('atlas.navigation.laneGuidance', true);
+    this.autoRerouteEnabled = this.#loadBoolPref('atlas.navigation.autoReroute', true);
+
+    // The map marker should always reflect the selected planner mode,
+    // even before active navigation starts.
+    this.map.setNavigationTravelMode?.(this.travelMode);
+
+    this.plannerOrigin = null;
+    this.plannerDestination = null;
+    this.plannerNavigationContext = null;
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.plannerRequest = 0;
+    this.plannerSearchTimer = null;
+    this.pickMode = null;
+    this.previewRoute = null;
+    this.previewState = 'idle';
+    this.previewError = null;
+    this.previewRequest = 0;
+    this.previewAbortController = null;
+    this.previewPromise = null;
+    this.previewCollapsed = false;
+    this.previewCollapseTimer = null;
+
+    this.map.onUserMoveStart?.(() => {
+      if (this.previewRoute && !this.session.isActive()) {
+        this.#setPreviewCollapsed(true);
+      }
+    });
   }
 
-  start({
+  async start({
     origin,
-    destination
+    destination,
+    trackPosition = true,
+    context = null
   }) {
+    this.#resetPreview({ clearRoute: false });
+    this.#cancelRouteRequest();
+    this.map.clearRoute?.();
+
     this.session.start({
       origin,
       destination
     });
-
-    this.panelController.show(
-      'navigation',
-      { snap: 'half' }
+    this.map.setNavigationTravelMode?.(this.travelMode);
+    this.onActiveChange(
+      true,
+      { trackPosition }
     );
+
+    this.routeState = 'loading';
+    this.routeError = null;
+    this.routeProgress = null;
+    this.lastVoiceAnnouncement = null;
+    this.trackPosition = trackPosition;
+    this.navigationContext = context;
+    this.arrivalState = null;
+    this.pickMode = null;
 
     this.render();
 
-    this.map.focus(
-      destination.lat,
-      destination.lon,
-      15
+    this.guidance?.showLoading(
+      destination.name ?? 'Destination'
     );
 
-    this.status(
-      'Navigation started',
+    this.status?.(
+      'Calculating offline route',
       destination.name ??
         'Selected destination'
     );
+
+    return this.#calculateRoute({
+      preserveCurrentRoute: false
+    });
   }
 
   updatePosition(position) {
-    if (!this.session.isActive()) {
-      return;
-    }
-
-    this.session.updateOrigin({
+    const normalizedPosition = {
+      name: position.name ?? 'My location',
       lat:
         position.lat ??
         position.latitude,
       lon:
         position.lon ??
-        position.longitude
-    });
+        position.longitude,
+      heading: position.heading,
+      speed: position.speed,
+      accuracy: position.accuracy
+    };
+
+    if (
+      !Number.isFinite(normalizedPosition.lat) ||
+      !Number.isFinite(normalizedPosition.lon)
+    ) {
+      return;
+    }
+
+    const firstPlannerFix =
+      !this.currentPosition;
+
+    this.currentPosition =
+      normalizedPosition;
+
+    if (!this.session.isActive()) {
+      if (
+        firstPlannerFix &&
+        !this.plannerOrigin
+      ) {
+        this.render();
+      }
+
+      return;
+    }
+
+    if (!this.trackPosition) {
+      return;
+    }
+
+    this.session.updateOrigin(
+      normalizedPosition
+    );
+
+    const { route } =
+      this.session.getState();
+
+    if (route?.maneuvers?.length) {
+      this.routeProgress =
+        findRouteProgress(
+          this.session.getState().origin,
+          route,
+          {
+            previousPointIndex:
+              this.routeProgress
+                ?.pointIndex ?? null
+          }
+        );
+
+      this.#renderGuidance();
+      this.#announceGuidance();
+
+      this.map.showManeuvers?.(
+        route.maneuvers,
+        this.routeProgress
+          ?.nextManeuverIndex ?? 0
+      );
+
+      this.map.updateRouteProgress?.(
+        route,
+        this.routeProgress
+      );
+
+      if (this.#shouldArrive(normalizedPosition)) {
+        this.#arrive();
+        return;
+      }
+    }
 
     this.render();
+
+    if (!route || this.routeState === 'loading') {
+      return;
+    }
+
+    const now = this.now();
+    const distanceFromRoute =
+      this.routeProgress?.distanceFromRouteMeters ??
+      this.#distanceFromRoute(
+        this.session.getState().origin,
+        route.points
+      );
+
+    if (
+      Number.isFinite(normalizedPosition.accuracy) &&
+      normalizedPosition.accuracy > GPS_REDUCED_ACCURACY_METERS
+    ) {
+      this.#resetOffRouteEvidence();
+      this.#setNavigationConfidenceState('reduced');
+      return;
+    }
+
+    if (distanceFromRoute <= OFF_ROUTE_DISTANCE_METERS) {
+      this.#resetOffRouteEvidence();
+      if (
+        this.navigationConfidenceState !== 'changed' ||
+        now >= this.routeChangedUntil
+      ) {
+        this.#setNavigationConfidenceState('normal');
+      }
+      return;
+    }
+
+    if (now - this.lastRouteAt < MINIMUM_REROUTE_INTERVAL_MS) {
+      return;
+    }
+
+    if (!this.offRouteEvidenceSince) {
+      this.offRouteEvidenceSince = now;
+      this.offRouteEvidenceCount = 1;
+      this.#setNavigationConfidenceState('checking');
+      return;
+    }
+
+    this.offRouteEvidenceCount += 1;
+    this.#setNavigationConfidenceState('checking');
+
+    if (
+      this.offRouteEvidenceCount < OFF_ROUTE_CONFIRMATION_FIXES ||
+      now - this.offRouteEvidenceSince < OFF_ROUTE_CONFIRMATION_MS
+    ) {
+      return;
+    }
+
+    if (!this.autoRerouteEnabled) { this.#setNavigationConfidenceState('checking'); return; }
+    this.previousRoute = route;
+    this.#resetOffRouteEvidence();
+    void this.#calculateRoute({
+      preserveCurrentRoute: true
+    });
   }
 
   stop() {
@@ -86,50 +375,727 @@ export class NavigationFeature {
       return;
     }
 
+    this.#cancelRouteRequest();
     this.session.stop();
+    this.routeState = 'idle';
+    this.routeError = null;
+    this.lastRouteAt = 0;
+    this.routeProgress = null;
+    this.lastVoiceAnnouncement = null;
+    this.navigationConfidenceState = 'normal';
+    this.#resetOffRouteEvidence();
+    this.routeChangedUntil = 0;
+    this.previousRoute = null;
+    this.arrivalState = null;
+    this.navigationContext = null;
+    this.trackPosition = true;
+
+    this.map.clearRoute?.();
+
+    // Stopping navigation ends the route, not the selected transport mode.
+    // Keep the map marker synchronized with Drive / Walk in the planner.
+    this.map.setNavigationTravelMode?.(this.travelMode);
+
     this.listElement.replaceChildren();
+    this.guidance?.hide();
+    this.voice.stop();
+    this.onActiveChange(false);
 
-    this.panelController.showMode(
-      'bookmarks',
-      { snap: 'half' }
-    );
+    this.render();
 
-    this.status(
+    this.status?.(
       'Navigation stopped',
       ''
     );
+  }
+
+  undoLastReroute() {
+    if (!this.session.isActive() || !this.previousRoute) {
+      return false;
+    }
+
+    const route = this.previousRoute;
+    this.previousRoute = null;
+    this.session.setRoute(route);
+    this.routeState = 'ready';
+    this.routeChangedUntil = 0;
+    this.navigationConfidenceState = 'normal';
+
+    const { origin, destination } = this.session.getState();
+    this.routeProgress = route.maneuvers?.length
+      ? findRouteProgress(origin, route)
+      : null;
+
+    this.map.showRoute?.(route, { origin, destination });
+    this.map.updateRouteProgress?.(route, this.routeProgress);
+    this.map.showManeuvers?.(
+      route.maneuvers ?? [],
+      this.routeProgress?.nextManeuverIndex ?? 0
+    );
+    this.#renderGuidance();
+    this.render();
+    this.status?.('Previous route restored', '');
+    return true;
+  }
+
+  finishArrival() {
+    if (!this.arrivalState) return false;
+    this.stop();
+    this.status?.('Arrival complete', '');
+    return true;
+  }
+
+  #shouldArrive(position) {
+    if (this.arrivalState || !this.routeProgress) return false;
+
+    const destination = this.session.getState().destination;
+    if (!destination) return false;
+
+    const remaining = this.routeProgress.remainingDistanceMeters;
+    const direct = distanceMeters(position, destination);
+
+    return Number.isFinite(remaining) &&
+      remaining <= ARRIVAL_DISTANCE_METERS &&
+      direct <= ARRIVAL_DESTINATION_RADIUS_METERS;
+  }
+
+  #arrive() {
+    if (this.arrivalState || !this.session.isActive()) return;
+
+    const { destination } = this.session.getState();
+    this.arrivalState = { destination, context: this.navigationContext };
+    this.#resetOffRouteEvidence();
+    this.navigationConfidenceState = 'normal';
+    this.voice.stop();
+    this.map.clearManeuvers?.();
+
+    this.guidance?.showArrival({
+      destinationName: destination?.name ?? 'Destination',
+      context: this.navigationContext
+    });
+
+    this.status?.('Arrived', destination?.name ?? 'Destination');
+  }
+
+  #handleArrivalAction(action) {
+    if (!this.arrivalState) return;
+
+    if (action === 'finish') {
+      this.finishArrival();
+      return;
+    }
+
+    const detail = {
+      destination: this.arrivalState.destination,
+      context: this.arrivalState.context
+    };
+
+    if (action === 'trip') {
+      this.finishArrival();
+    }
+
+    this.onArrivalAction(action, detail);
   }
 
   isActive() {
     return this.session.isActive();
   }
 
-  render() {
-    const {
-      origin,
-      destination
-    } = this.session.getState();
+  getVoiceGuidanceState() {
+    return {
+      enabled: this.voice.isEnabled(),
+      supported: this.voice.isSupported()
+    };
+  }
 
-    if (!origin || !destination) {
+  setVoiceGuidanceEnabled(enabled) {
+    const value = this.voice.setEnabled(enabled);
+
+    if (this.session.isActive()) {
+      this.#renderGuidance();
+    }
+
+    this.render();
+    return value;
+  }
+
+  getPlannerState() {
+    return {
+      origin: this.#plannerStart(),
+      travelMode: this.travelMode,
+      originMode:
+        this.plannerOrigin
+          ? 'picked'
+          : 'gps',
+      destination:
+        this.plannerDestination,
+      query: this.plannerQuery,
+      results: [...this.plannerResults],
+      recent: this.destinationHistory.list(),
+      state: this.plannerState,
+      error: this.plannerError,
+      pickMode: this.pickMode,
+      previewRoute: this.previewRoute,
+      previewState: this.previewState,
+      previewError: this.previewError,
+      previewCollapsed: this.previewCollapsed
+    };
+  }
+
+  setTravelMode(mode) {
+    if (mode !== 'drive' && mode !== 'walk') {
+      return false;
+    }
+
+    if (this.travelMode === mode) {
+      // Keep the map presentation synchronized even when the
+      // requested travel mode is already selected.
+      this.map.setNavigationTravelMode?.(mode);
+      return true;
+    }
+
+    this.travelMode = mode;
+    this.#saveTravelMode();
+
+    // Marker presentation follows the selected travel mode
+    // immediately; do not wait for another GPS update or route start.
+    this.map.setNavigationTravelMode?.(mode);
+
+    if (this.session.isActive()) {
+      this.map.setNavigationTravelMode?.(mode);
+      if (this.currentPosition && this.trackPosition) {
+        this.session.updateOrigin(this.currentPosition);
+      }
+
+      void this.#calculateRoute({ preserveCurrentRoute: true });
+      return true;
+    }
+
+    this.#resetPreview({ clearRoute: true });
+    this.render();
+
+    // If a destination is already selected, immediately rebuild
+    // the preview using the newly selected travel profile.
+    if (
+      this.plannerDestination &&
+      this.#plannerStart()
+    ) {
+      void this.previewPlannedRoute();
+    }
+
+    return true;
+  }
+
+  getNavigationPreferences() { return { laneGuidance: this.laneGuidanceEnabled, autoReroute: this.autoRerouteEnabled }; }
+  setLaneGuidanceEnabled(value) { this.laneGuidanceEnabled=value===true; this.#saveBoolPref('atlas.navigation.laneGuidance',this.laneGuidanceEnabled); this.#renderGuidance(); return this.laneGuidanceEnabled; }
+  setAutoRerouteEnabled(value) { this.autoRerouteEnabled=value===true; this.#saveBoolPref('atlas.navigation.autoReroute',this.autoRerouteEnabled); if (!this.autoRerouteEnabled) this.#resetOffRouteEvidence(); return this.autoRerouteEnabled; }
+  #loadBoolPref(key,fallback) { try { const v=globalThis.localStorage?.getItem(key); return v == null ? fallback : v !== 'false'; } catch { return fallback; } }
+  #saveBoolPref(key,value) { try { globalThis.localStorage?.setItem(key,String(value)); } catch {} }
+
+  #loadTravelMode() {
+    try {
+      const saved = globalThis.localStorage?.getItem('atlas.navigation.travelMode');
+      return saved === 'walk' ? 'walk' : 'drive';
+    } catch {
+      return 'drive';
+    }
+  }
+
+  #saveTravelMode() {
+    try {
+      globalThis.localStorage?.setItem(
+        'atlas.navigation.travelMode',
+        this.travelMode
+      );
+    } catch {
+      // Navigation remains usable when storage is unavailable.
+    }
+  }
+
+  useCurrentLocation() {
+    this.plannerOrigin = null;
+    this.plannerResults = [];
+    this.plannerError = null;
+    this.#resetPreview({ clearRoute: true });
+    this.render();
+
+    if (this.plannerDestination && this.#plannerStart()) {
+      void this.previewPlannedRoute();
+    }
+  }
+
+  swapPlannerEndpoints() {
+    const origin = this.#plannerStart();
+
+    if (!origin || !this.plannerDestination) {
+      return false;
+    }
+
+    const previousDestination =
+      this.plannerDestination;
+
+    this.plannerOrigin = {
+      ...previousDestination,
+      name: previousDestination.name ?? 'Picked starting point'
+    };
+
+    this.plannerDestination = {
+      ...origin,
+      name: origin.name ?? 'Destination'
+    };
+    this.plannerNavigationContext = null;
+
+    this.plannerResults = [];
+    this.plannerQuery = '';
+    this.plannerError = null;
+    this.plannerState = 'idle';
+    this.#resetPreview({ clearRoute: true });
+    this.render();
+    void this.previewPlannedRoute();
+    return true;
+  }
+
+  updatePlannerQuery(query) {
+    this.plannerQuery = String(query ?? '');
+    clearTimeout(this.plannerSearchTimer);
+
+    // Every keystroke invalidates any search already running.
+    // An older result must never repaint the planner while the
+    // user is still typing a newer query.
+    this.plannerRequest += 1;
+
+    if (this.plannerQuery.trim().length < 2) {
+      this.plannerResults = [];
+      this.plannerState = 'idle';
+      this.plannerError = null;
+      this.render();
       return;
     }
 
-    const distance =
-      distanceMeters(
-        origin,
-        destination
-      );
+    // Search only after the user has stopped typing for a moment.
+    this.plannerSearchTimer = setTimeout(
+      () => void this.searchPlanner(this.plannerQuery),
+      600
+    );
+  }
 
-    const bearing =
-      bearingDegrees(
-        origin,
-        destination
+  clearPlannerSearch() {
+    clearTimeout(this.plannerSearchTimer);
+    this.plannerRequest += 1;
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.render();
+  }
+
+  clearPlannerDestination() {
+    this.#resetPreview({ clearRoute: true });
+    this.plannerDestination = null;
+    this.plannerNavigationContext = null;
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.map.clearSelectionPin?.();
+    this.render();
+  }
+
+  beginMapPick(kind) {
+    if (
+      kind !== 'origin' &&
+      kind !== 'destination'
+    ) {
+      throw new TypeError(
+        'Navigation map picking requires origin or destination.'
       );
+    }
+
+    if (this.session.isActive()) {
+      return false;
+    }
+
+    this.pickMode = kind;
+    this.map.clearSelectionPin?.();
+    this.panelController.hidePanel?.();
+    this.render();
+
+    this.status?.(
+      kind === 'origin'
+        ? 'Choose a starting point'
+        : 'Choose a destination',
+      'Tap the map to place it.'
+    );
+
+    return true;
+  }
+
+  acceptMapPoint(point) {
+    if (!this.pickMode) {
+      return false;
+    }
+
+    this.#validatePlannerPoint(point);
+
+    const kind = this.pickMode;
+    const selected = {
+      name:
+        kind === 'origin'
+          ? 'Picked starting point'
+          : 'Picked destination',
+      lat: point.lat,
+      lon: point.lon
+    };
+
+    this.#resetPreview({ clearRoute: true });
+
+    if (kind === 'origin') {
+      this.plannerOrigin = selected;
+      this.plannerResults = [];
+    } else {
+      this.plannerDestination = selected;
+      this.plannerNavigationContext = null;
+      this.plannerResults = [];
+      this.plannerState = 'idle';
+    }
+
+    this.pickMode = null;
+    this.plannerError = null;
+
+    this.map.showSelectionPin?.(
+      selected.lat,
+      selected.lon
+    );
+
+    this.map.focus?.(
+      selected.lat,
+      selected.lon,
+      15
+    );
+
+    this.render();
+
+    this.status?.(
+      kind === 'origin'
+        ? 'Starting point selected'
+        : 'Destination selected',
+      selected.name
+    );
+
+    if (this.plannerDestination && this.#plannerStart()) {
+      void this.previewPlannedRoute();
+    }
+
+    return true;
+  }
+
+  setPlannerDestination(destination, { context = null } = {}) {
+    this.#validatePlannerPoint(
+      destination
+    );
+
+    this.#resetPreview({ clearRoute: true });
+
+    this.plannerDestination = {
+      ...destination,
+      name:
+        destination.name ??
+        'Destination'
+    };
+    this.plannerNavigationContext = context;
+
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.render();
+
+    this.map.showSelectionPin?.(
+      destination.lat,
+      destination.lon
+    );
+
+    this.map.focus?.(
+      destination.lat,
+      destination.lon,
+      15
+    );
+
+    if (this.#plannerStart()) {
+      void this.previewPlannedRoute();
+    }
+  }
+
+  async searchPlanner(query) {
+    const rawQuery =
+      String(query ?? '');
+
+    const normalizedQuery =
+      rawQuery
+        .trim()
+        .replace(/\s+/g, ' ');
+
+    this.plannerQuery = rawQuery;
+    this.plannerError = null;
+
+    if (normalizedQuery.length < 2) {
+      this.plannerState = 'idle';
+      this.plannerResults = [];
+      this.plannerError =
+        'Type at least two characters.';
+      this.render();
+      return [];
+    }
+
+    const origin = this.#plannerStart();
+    const searchAnchor =
+      origin ?? this.searchAnchorProvider?.();
+
+    if (!searchAnchor) {
+      this.plannerState = 'idle';
+      this.plannerResults = [];
+      this.plannerError =
+        'Move the map to an area to search, or enable GPS.';
+      this.render();
+      return [];
+    }
+
+    // Destination lookup is independent from route origin. When GPS is off,
+    // use the visible map area only for search ranking/region selection.
+    // Routing still requires #plannerStart() in previewPlannedRoute().
+    // updatePlannerQuery() already reserved this request generation.
+    // Do not rerender the planner just to show a loading state: replacing
+    // the input DOM while it is focused is what made typing feel hostile.
+    const request = this.plannerRequest;
+
+    this.plannerState = 'loading';
+
+    try {
+      const results =
+        await this.destinationSearch(
+          normalizedQuery,
+          searchAnchor,
+          { limit: 12 }
+        );
+
+      if (request !== this.plannerRequest) {
+        return [];
+      }
+
+      this.plannerResults = results;
+      this.plannerState = 'ready';
+
+      if (!results.length) {
+        this.plannerError =
+          'No offline places matched. You can pick the destination on the map.';
+      }
+
+      this.render();
+      return results;
+    } catch (error) {
+      if (request !== this.plannerRequest) {
+        return [];
+      }
+
+      console.error(error);
+
+      this.plannerState = 'error';
+      this.plannerResults = [];
+      this.plannerError =
+        error.message ??
+        'Offline destination search is unavailable.';
+      this.render();
+      return [];
+    }
+  }
+
+  async previewPlannedRoute() {
+    const origin = this.#plannerStart();
+    const destination = this.plannerDestination;
+
+    if (!origin || !destination) {
+      return false;
+    }
+
+    this.#cancelPreviewRequest();
+
+    const request = ++this.previewRequest;
+    const abortController = new AbortController();
+    this.previewAbortController = abortController;
+    this.previewState = 'loading';
+    this.previewError = null;
+    this.previewRoute = null;
+    this.previewCollapsed = false;
+    clearTimeout(this.previewCollapseTimer);
+    this.render();
+
+    const promise = (async () => {
+      try {
+        const route = await this.routingService.route(
+          origin,
+          destination,
+          {
+            signal: abortController.signal,
+            profile: this.travelMode
+          }
+        );
+
+        if (
+          request !== this.previewRequest ||
+          this.session.isActive()
+        ) {
+          return false;
+        }
+
+        this.previewRoute = route;
+        this.previewState = 'ready';
+        this.previewError = null;
+
+        this.map.clearSelectionPin?.();
+        this.map.showRoute?.(route, {
+          origin,
+          destination
+        });
+
+        this.render();
+        this.#schedulePreviewCollapse();
+
+        this.status?.(
+          'Route preview ready',
+          `${this.#formatDistance(route.distanceMeters)} · ${this.#formatDuration(route.durationSeconds)}`
+        );
+
+        return true;
+      } catch (error) {
+        if (
+          error.name === 'AbortError' ||
+          request !== this.previewRequest
+        ) {
+          return false;
+        }
+
+        console.error(error);
+        this.previewRoute = null;
+        this.previewState = 'error';
+        this.previewError =
+          error.message ?? 'No route could be calculated.';
+        this.map.clearRoute?.();
+        this.render();
+        return false;
+      } finally {
+        if (request === this.previewRequest) {
+          this.previewAbortController = null;
+          this.previewPromise = null;
+        }
+      }
+    })();
+
+    this.previewPromise = promise;
+    return promise;
+  }
+
+  expandRoutePreview() {
+    if (!this.previewRoute || this.session.isActive()) {
+      return false;
+    }
+
+    this.#setPreviewCollapsed(false);
+    this.#schedulePreviewCollapse();
+    return true;
+  }
+
+  async startPlannedRoute() {
+    const origin = this.#plannerStart();
+    const destination = this.plannerDestination;
+
+    if (!origin || !destination) {
+      this.plannerError = !origin
+        ? 'Enable GPS or pick a starting point.'
+        : 'Search for or pick a destination.';
+      this.render();
+      return false;
+    }
+
+    if (this.previewState === 'loading' && this.previewPromise) {
+      await this.previewPromise;
+    }
+
+    if (!this.previewRoute) {
+      const ready = await this.previewPlannedRoute();
+      if (!ready || !this.previewRoute) {
+        return false;
+      }
+    }
+
+    const route = this.previewRoute;
+    this.#cancelPreviewRequest();
+    clearTimeout(this.previewCollapseTimer);
+
+    this.session.start({
+      origin,
+      destination,
+      route
+    });
+    this.navigationContext = this.plannerNavigationContext;
+    this.arrivalState = null;
+    this.trackPosition = this.plannerOrigin === null;
+    this.routeState = 'ready';
+    this.routeError = null;
+    this.lastRouteAt = this.now();
+    this.lastVoiceAnnouncement = null;
+    this.routeProgress = route.maneuvers?.length
+      ? findRouteProgress(origin, route)
+      : null;
+
+    this.previewRoute = null;
+    this.previewState = 'idle';
+    this.previewError = null;
+    this.previewCollapsed = false;
+
+    this.destinationHistory.add(destination);
+    this.onActiveChange(true, {
+      trackPosition: this.trackPosition
+    });
+
+    this.map.updateRouteProgress?.(
+      route,
+      this.routeProgress
+    );
+    this.map.showManeuvers?.(
+      route.maneuvers ?? [],
+      this.routeProgress?.nextManeuverIndex ?? 0
+    );
+    this.#renderGuidance();
+    this.#announceGuidance();
+    this.render();
+
+    this.status?.(
+      'Navigation started',
+      `${this.#formatDistance(route.distanceMeters)} · ${this.#formatDuration(route.durationSeconds)}`
+    );
+
+    return true;
+  }
+
+  render() {
+    const {
+      origin,
+      destination,
+      route
+    } = this.session.getState();
+
+    if (
+      !this.session.isActive() ||
+      !origin ||
+      !destination
+    ) {
+      this.#renderPlanner();
+      return;
+    }
 
     this.listElement.replaceChildren();
 
     const container =
-      document.createElement('section');
+      this.document.createElement('section');
 
     container.className =
       'navigation-panel';
@@ -138,29 +1104,154 @@ export class NavigationFeature {
       destination.name ??
       'Destination';
 
-    container.innerHTML = `
-      <div class="section-title">
-        Navigation
-      </div>
+    const summary =
+      this.document.createElement('div');
 
-      <div class="navigation-summary">
+    summary.className =
+      'navigation-summary';
+
+    if (this.routeState === 'loading') {
+      summary.innerHTML = `
         <strong>${escapeHtml(destinationName)}</strong>
-
-        <span>
-          ${this.#formatDistance(distance)}
-          · ${cardinalDirection(bearing)}
-          · ${Math.round(bearing)}°
-        </span>
-
+        <span>Calculating fastest car route…</span>
         <small>
-          Direct distance — road routing
-          will be added next.
+          Snapping both endpoints and running A* on the installed road graph.
         </small>
-      </div>
-    `;
+      `;
+    } else if (
+      this.routeState === 'error'
+    ) {
+      summary.innerHTML = `
+        <strong>${escapeHtml(destinationName)}</strong>
+        <span>Offline route unavailable</span>
+        <small>${escapeHtml(
+          this.routeError ??
+          'No route could be calculated.'
+        )}</small>
+      `;
+    } else if (route) {
+      summary.innerHTML = `
+        <small class="navigation-summary-status"><span></span> Navigating offline</small>
+        <strong>${escapeHtml(destinationName)}</strong>
+        <div class="navigation-route-stats">
+          <span><strong>${this.#formatDuration(route.durationSeconds)}</strong><small>travel time</small></span>
+          <span><strong>${this.#formatDistance(route.distanceMeters)}</strong><small>distance</small></span>
+          <span><strong>${route.maneuvers?.length ?? 0}</strong><small>directions</small></span>
+        </div>
+      `;
+    }
+
+    const title =
+      this.document.createElement('div');
+
+    title.className = 'section-title';
+    title.textContent = 'Navigation';
+
+    container.append(
+      title,
+      summary
+    );
+
+    if (
+      route?.maneuvers?.length &&
+      this.routeProgress
+    ) {
+      const maneuver =
+        this.routeProgress.nextManeuver;
+
+      const maneuverCard =
+        this.document.createElement('div');
+
+      maneuverCard.className =
+        'navigation-current-maneuver';
+
+      maneuverCard.innerHTML = `
+        <div class="navigation-maneuver-tile">
+          ${maneuverIconSvg(maneuver)}
+        </div>
+        <div>
+          <small>${this.#formatDistance(
+            this.routeProgress
+              .distanceToManeuverMeters
+          )}</small>
+          <strong>${escapeHtml(
+            maneuver.instruction
+          )}</strong>
+        </div>
+      `;
+
+      container.appendChild(maneuverCard);
+
+      const voiceButton =
+        this.document.createElement('button');
+
+      voiceButton.type = 'button';
+      voiceButton.className =
+        `navigation-panel-voice${
+          this.voice.isEnabled()
+            ? ' on'
+            : ''
+        }`;
+
+      voiceButton.textContent =
+        this.voice.isSupported()
+          ? this.voice.isEnabled()
+            ? '🔊 Voice guidance on'
+            : '🔇 Voice guidance off'
+          : 'Voice guidance unavailable';
+
+      voiceButton.disabled =
+        !this.voice.isSupported();
+
+      voiceButton.addEventListener(
+        'click',
+        () => this.#toggleVoice()
+      );
+
+      container.appendChild(voiceButton);
+
+      const upcoming =
+        route.maneuvers.slice(
+          this.routeProgress
+            .nextManeuverIndex + 1,
+          this.routeProgress
+            .nextManeuverIndex + 4
+        );
+
+      if (upcoming.length) {
+        const steps =
+          this.document.createElement('div');
+
+        steps.className =
+          'navigation-upcoming-steps';
+
+        steps.innerHTML = upcoming.map(
+          step => `
+            <div>
+              ${maneuverIconSvg(
+                step,
+                {
+                  className:
+                    'maneuver-icon maneuver-icon-small'
+                }
+              )}
+              <span>
+                <strong>${escapeHtml(step.instruction)}</strong>
+                <small>${step.type === 'arrive'
+                  ? 'Destination'
+                  : `${this.#formatDistance(step.distanceToNextMeters ?? 0)} to following step`
+                }</small>
+              </span>
+            </div>
+          `
+        ).join('');
+
+        container.appendChild(steps);
+      }
+    }
 
     const stopButton =
-      document.createElement('button');
+      this.document.createElement('button');
 
     stopButton.type = 'button';
     stopButton.className =
@@ -178,6 +1269,554 @@ export class NavigationFeature {
     this.listElement.appendChild(container);
   }
 
+  #renderPlanner() {
+    const state = this.getPlannerState();
+    const activeElement =
+      this.document.activeElement;
+
+    const restoreSearchFocus =
+      activeElement?.id ===
+        'navigationDestinationInput';
+
+    const selectionStart =
+      restoreSearchFocus
+        ? activeElement.selectionStart
+        : null;
+
+    const selectionEnd =
+      restoreSearchFocus
+        ? activeElement.selectionEnd
+        : null;
+
+    const view = this.plannerView.render({
+      ...state,
+      onUseGps:
+        () => this.useCurrentLocation(),
+      onTravelMode:
+        mode => this.setTravelMode(mode),
+      onPick:
+        kind => this.beginMapPick(kind),
+      onSwap:
+        () => this.swapPlannerEndpoints(),
+      onQuery:
+        query => this.updatePlannerQuery(query),
+      onClear:
+        () => this.clearPlannerSearch(),
+      onSearch:
+        query => {
+          void this.searchPlanner(query);
+        },
+      onSelect:
+        index => {
+          const destination =
+            this.plannerResults[index];
+
+          if (destination) {
+            this.setPlannerDestination(
+              destination
+            );
+          }
+        },
+      onSelectRecent:
+        index => {
+          const destination =
+            state.recent[index];
+
+          if (destination) {
+            this.setPlannerDestination(destination);
+          }
+        },
+      onChangeDestination:
+        () => this.clearPlannerDestination(),
+      onExpandPreview:
+        () => this.expandRoutePreview(),
+      onStart:
+        () => {
+          void this.startPlannedRoute();
+        }
+    });
+
+    this.listElement.replaceChildren(view);
+
+    if (restoreSearchFocus) {
+      const input = view.querySelector?.(
+        '#navigationDestinationInput'
+      );
+
+      input?.focus?.({
+        preventScroll: true
+      });
+
+      if (
+        input?.setSelectionRange &&
+        Number.isInteger(selectionStart) &&
+        Number.isInteger(selectionEnd)
+      ) {
+        input.setSelectionRange(
+          selectionStart,
+          selectionEnd
+        );
+      }
+    }
+  }
+  #plannerStart() {
+    return this.plannerOrigin ??
+      this.currentPosition;
+  }
+
+  #validatePlannerPoint(point) {
+    if (
+      !Number.isFinite(point?.lat) ||
+      !Number.isFinite(point?.lon)
+    ) {
+      throw new TypeError(
+        'Navigation point requires lat and lon.'
+      );
+    }
+  }
+
+  #formatCoordinates(point) {
+    return `${point.lat.toFixed(5)}, ${point.lon.toFixed(5)}`;
+  }
+
+  async #calculateRoute({
+    preserveCurrentRoute
+  }) {
+    const {
+      origin,
+      destination
+    } = this.session.getState();
+
+    if (!origin || !destination) {
+      return false;
+    }
+
+    this.#cancelRouteRequest();
+
+    const request =
+      ++this.routeRequest;
+
+    const abortController =
+      new AbortController();
+
+    this.routeAbortController =
+      abortController;
+
+    this.routeState = 'loading';
+    this.routeError = null;
+    this.render();
+
+    if (preserveCurrentRoute) {
+      this.navigationConfidenceState = 'checking';
+      this.#renderGuidance();
+      this.status?.(
+        'Checking route',
+        'Deviation confirmed. Calculating an updated offline route.'
+      );
+    } else {
+      this.guidance?.showLoading(
+        destination.name ?? 'Destination'
+      );
+    }
+
+    try {
+      const route =
+        await this.routingService.route(
+          origin,
+          destination,
+          {
+            signal:
+              abortController.signal,
+            profile: this.travelMode
+          }
+        );
+
+      if (
+        request !== this.routeRequest ||
+        !this.session.isActive()
+      ) {
+        return false;
+      }
+
+      this.session.setRoute(route);
+      this.routeState = 'ready';
+      this.routeError = null;
+      this.lastRouteAt = this.now();
+      this.lastVoiceAnnouncement = null;
+
+      if (preserveCurrentRoute) {
+        this.navigationConfidenceState = 'changed';
+        this.routeChangedUntil = this.now() + ROUTE_CHANGED_NOTICE_MS;
+      } else {
+        this.navigationConfidenceState = 'normal';
+        this.previousRoute = null;
+      }
+
+      this.routeProgress =
+        route.maneuvers?.length
+          ? findRouteProgress(
+              origin,
+              route
+            )
+          : null;
+
+      this.map.showRoute?.(
+        route,
+        {
+          origin,
+          destination
+        }
+      );
+
+      this.map.updateRouteProgress?.(
+        route,
+        this.routeProgress
+      );
+
+      this.#renderGuidance();
+      this.#announceGuidance();
+
+      this.map.showManeuvers?.(
+        route.maneuvers ?? [],
+        this.routeProgress
+          ?.nextManeuverIndex ?? 0
+      );
+
+      this.render();
+
+      this.status?.(
+        preserveCurrentRoute
+          ? 'Route changed'
+          : 'Offline route ready',
+        `${this.#formatDistance(
+          route.distanceMeters
+        )} · ${this.#formatDuration(
+          route.durationSeconds
+        )}`
+      );
+
+      return true;
+    } catch (error) {
+      if (
+        error.name === 'AbortError' ||
+        request !== this.routeRequest
+      ) {
+        return false;
+      }
+
+      console.error(error);
+
+      if (
+        preserveCurrentRoute &&
+        this.session.getState().route
+      ) {
+        this.routeState = 'ready';
+
+        this.#renderGuidance();
+
+        this.status?.(
+          'Route update unavailable',
+          error.message ??
+            'The previous route remains active.'
+        );
+      } else {
+        this.routeState = 'error';
+        this.routeError =
+          error.message ??
+          'No route could be calculated.';
+
+        this.map.clearRoute?.();
+
+        this.guidance?.showError(
+          this.routeError
+        );
+
+        this.status?.(
+          'Offline route unavailable',
+          this.routeError
+        );
+      }
+
+      this.render();
+      return false;
+    } finally {
+      if (request === this.routeRequest) {
+        this.routeAbortController = null;
+      }
+    }
+  }
+
+  #setPreviewCollapsed(collapsed) {
+    if (
+      !this.previewRoute ||
+      this.session.isActive() ||
+      this.previewCollapsed === collapsed
+    ) {
+      return;
+    }
+
+    this.previewCollapsed = collapsed;
+    this.render();
+  }
+
+  #schedulePreviewCollapse() {
+    clearTimeout(this.previewCollapseTimer);
+
+    if (!this.previewRoute || this.previewCollapsed) {
+      return;
+    }
+
+    this.previewCollapseTimer = setTimeout(
+      () => this.#setPreviewCollapsed(true),
+      ROUTE_PREVIEW_COLLAPSE_MS
+    );
+  }
+
+  #cancelPreviewRequest() {
+    this.previewAbortController?.abort();
+    this.previewAbortController = null;
+    this.previewPromise = null;
+  }
+
+  #resetPreview({ clearRoute = false } = {}) {
+    this.#cancelPreviewRequest();
+    clearTimeout(this.previewCollapseTimer);
+    this.previewRoute = null;
+    this.previewState = 'idle';
+    this.previewError = null;
+    this.previewCollapsed = false;
+
+    if (clearRoute && !this.session.isActive()) {
+      this.map.clearRoute?.();
+    }
+  }
+
+  #cancelRouteRequest() {
+    this.routeAbortController?.abort();
+    this.routeAbortController = null;
+  }
+
+  #renderGuidance() {
+    const {
+      route,
+      destination
+    } = this.session.getState();
+
+    if (
+      !this.guidance ||
+      !route ||
+      !this.routeProgress
+    ) {
+      return;
+    }
+
+    if (
+      this.navigationConfidenceState === 'changed' &&
+      this.now() >= this.routeChangedUntil
+    ) {
+      this.navigationConfidenceState = 'normal';
+      this.previousRoute = null;
+    }
+
+    this.guidance.showRoute({
+      route,
+      progress: this.routeProgress,
+      destinationName:
+        destination?.name ??
+        'Destination',
+      navigationState: this.navigationConfidenceState,
+      canUndoRoute:
+        this.navigationConfidenceState === 'changed' &&
+        Boolean(this.previousRoute),
+      travelMode: this.travelMode,
+      laneGuidanceEnabled: this.laneGuidanceEnabled
+    });
+  }
+
+  #setNavigationConfidenceState(state) {
+    if (this.navigationConfidenceState === state) {
+      return;
+    }
+
+    this.navigationConfidenceState = state;
+    this.#renderGuidance();
+
+    if (state === 'reduced') {
+      this.status?.(
+        'GPS accuracy reduced',
+        'Staying on the current route while the signal settles.'
+      );
+    } else if (state === 'checking') {
+      this.status?.(
+        'Checking route',
+        'Possible deviation detected.'
+      );
+    }
+  }
+
+  #resetOffRouteEvidence() {
+    this.offRouteEvidenceCount = 0;
+    this.offRouteEvidenceSince = 0;
+  }
+
+  #toggleVoice() {
+    if (!this.voice.isSupported()) {
+      this.status?.(
+        'Voice guidance unavailable',
+        'Install an offline Android text-to-speech voice to use spoken directions.'
+      );
+      return;
+    }
+
+    const enabled = this.voice.toggle();
+
+    this.lastVoiceAnnouncement = null;
+    this.#renderGuidance();
+    this.render();
+
+    if (enabled) {
+      this.#announceGuidance();
+    }
+
+    this.status?.(
+      enabled
+        ? 'Voice guidance on'
+        : 'Voice guidance off',
+      enabled
+        ? 'Directions will use an installed device voice.'
+        : ''
+    );
+  }
+
+  #announceGuidance() {
+    if (
+      !this.voice.isEnabled() ||
+      !this.routeProgress?.nextManeuver
+    ) {
+      return;
+    }
+
+    const distance =
+      this.routeProgress
+        .distanceToManeuverMeters;
+
+    let stage = null;
+
+    if (distance <= 35) {
+      stage = 'now';
+    } else if (distance <= 150) {
+      stage = 'soon';
+    } else if (distance <= 500) {
+      stage = 'prepare';
+    }
+
+    if (!stage) {
+      return;
+    }
+
+    const maneuver =
+      this.routeProgress.nextManeuver;
+
+    const key = `${maneuver.id}:${stage}`;
+
+    if (key === this.lastVoiceAnnouncement) {
+      return;
+    }
+
+    this.lastVoiceAnnouncement = key;
+
+    this.voice.speak(
+      spokenInstruction(
+        maneuver,
+        distance
+      )
+    );
+  }
+
+  #distanceFromRoute(position, points) {
+    if (!points?.length) {
+      return Infinity;
+    }
+
+    if (points.length === 1) {
+      return distanceMeters(
+        position,
+        points[0]
+      );
+    }
+
+    const metersPerLatitudeDegree =
+      111_320;
+
+    const metersPerLongitudeDegree =
+      metersPerLatitudeDegree *
+      Math.max(
+        Math.cos(
+          position.lat * Math.PI / 180
+        ),
+        0.01
+      );
+
+    let nearestSquared = Infinity;
+
+    for (
+      let index = 1;
+      index < points.length;
+      index += 1
+    ) {
+      const start = points[index - 1];
+      const end = points[index];
+
+      const startX =
+        (start.lon - position.lon) *
+        metersPerLongitudeDegree;
+
+      const startY =
+        (start.lat - position.lat) *
+        metersPerLatitudeDegree;
+
+      const segmentX =
+        (end.lon - start.lon) *
+        metersPerLongitudeDegree;
+
+      const segmentY =
+        (end.lat - start.lat) *
+        metersPerLatitudeDegree;
+
+      const segmentSquared =
+        segmentX * segmentX +
+        segmentY * segmentY;
+
+      const projection =
+        segmentSquared > 0
+          ? Math.max(
+              0,
+              Math.min(
+                1,
+                -(
+                  startX * segmentX +
+                  startY * segmentY
+                ) / segmentSquared
+              )
+            )
+          : 0;
+
+      const nearestX =
+        startX + projection * segmentX;
+
+      const nearestY =
+        startY + projection * segmentY;
+
+      nearestSquared = Math.min(
+        nearestSquared,
+        nearestX * nearestX +
+          nearestY * nearestY
+      );
+    }
+
+    return Math.sqrt(nearestSquared);
+  }
+
   #formatDistance(distance) {
     if (distance < 1000) {
       return `${Math.round(distance)} m`;
@@ -186,5 +1825,26 @@ export class NavigationFeature {
     return `${(
       distance / 1000
     ).toFixed(1)} km`;
+  }
+
+  #formatDuration(durationSeconds) {
+    const totalMinutes = Math.max(
+      1,
+      Math.round(durationSeconds / 60)
+    );
+
+    if (totalMinutes < 60) {
+      return `${totalMinutes} min`;
+    }
+
+    const hours = Math.floor(
+      totalMinutes / 60
+    );
+
+    const minutes = totalMinutes % 60;
+
+    return minutes
+      ? `${hours} h ${minutes} min`
+      : `${hours} h`;
   }
 }

@@ -32,6 +32,7 @@ export class DraggableBottomSheet {
     this.velocityY = 0;
     this.lastY = 0;
     this.lastTime = 0;
+    this.viewportHeight = window.innerHeight;
 
     this.handle.addEventListener(
       'pointerdown',
@@ -40,7 +41,7 @@ export class DraggableBottomSheet {
 
     window.addEventListener(
       'resize',
-      () => this.snapTo(this.currentSnap, false)
+      () => this.onViewportResize()
     );
 
     this.snapTo(initialSnap, false);
@@ -54,7 +55,7 @@ export class DraggableBottomSheet {
     }
 
     this.currentSnap = name;
-    this.currentY = Math.round(window.innerHeight * ratio);
+    this.currentY = Math.round(this.viewportHeight * ratio);
 
     this.sheet.classList.toggle('is-dragging', !animate);
     this.sheet.style.transform =
@@ -83,6 +84,10 @@ export class DraggableBottomSheet {
   }
 
   fit() {
+    if (this.isTextEditing()) {
+      return;
+    }
+
     const activeView =
       this.sheet.querySelector(
         '.panel-view.active'
@@ -114,14 +119,14 @@ export class DraggableBottomSheet {
         contentHeight +
           handleHeight +
           padding,
-        window.innerHeight * 0.46
+        this.viewportHeight * 0.46
       );
 
     this.currentSnap = 'fit';
 
     this.currentY =
       Math.round(
-        window.innerHeight -
+        this.viewportHeight -
         visibleHeight
       );
 
@@ -154,8 +159,8 @@ export class DraggableBottomSheet {
 
       this.currentY = clamp(
         this.startTranslateY + delta,
-        window.innerHeight * SNAP_POINTS.expanded,
-        window.innerHeight * SNAP_POINTS.collapsed
+        this.viewportHeight * SNAP_POINTS.expanded,
+        this.viewportHeight * SNAP_POINTS.collapsed
       );
 
       const elapsed = Math.max(now - this.lastTime, 1);
@@ -193,7 +198,7 @@ export class DraggableBottomSheet {
       const next =
         entries.find(
           ([, ratio]) =>
-            window.innerHeight * ratio >
+            this.viewportHeight * ratio >
             this.currentY + 20
         );
 
@@ -206,7 +211,7 @@ export class DraggableBottomSheet {
           .reverse()
           .find(
             ([, ratio]) =>
-              window.innerHeight * ratio <
+              this.viewportHeight * ratio <
               this.currentY - 20
           );
 
@@ -217,7 +222,7 @@ export class DraggableBottomSheet {
       .map(([name, ratio]) => ({
         name,
         distance: Math.abs(
-          window.innerHeight * ratio -
+          this.viewportHeight * ratio -
           this.currentY
         )
       }))
@@ -225,5 +230,40 @@ export class DraggableBottomSheet {
         (a, b) =>
           a.distance - b.distance
       )[0].name;
+  }
+
+  isTextEditing() {
+    const activeElement =
+      this.sheet.ownerDocument?.activeElement ??
+      document.activeElement;
+
+    if (!activeElement || !this.sheet.contains(activeElement)) {
+      return false;
+    }
+
+    return (
+      activeElement.matches?.(
+        'input, textarea, [contenteditable="true"]'
+      ) ?? false
+    );
+  }
+
+  onViewportResize() {
+    // Android changes the viewport height when its keyboard opens. Moving the
+    // sheet at that moment makes a live search re-render feel like a drag and
+    // can dismiss the focused input. Keep the current geometry until editing
+    // ends; the next real resize or snap refreshes the stored height.
+    if (this.isTextEditing()) {
+      return;
+    }
+
+    this.viewportHeight = window.innerHeight;
+
+    if (this.currentSnap === 'fit') {
+      this.fit();
+      return;
+    }
+
+    this.snapTo(this.currentSnap, false);
   }
 }

@@ -65,6 +65,20 @@ test(
       }),
       null
     );
+
+    const portugal =
+      document.regions.find(
+        region => region.id === 'portugal'
+      );
+
+    assert.equal(portugal.bundled, false);
+    assert.ok(portugal.version >= 4);
+
+    assert.deepEqual(
+      portugal.assets.routing.partitions
+        .map(partition => partition.id),
+      ['mainland', 'madeira', 'azores']
+    );
   }
 );
 
@@ -78,7 +92,11 @@ test(
         list: async () => document.regions
       },
       installStore: {
-        load: () => []
+        load: () =>
+          document.regions.map(region => ({
+            id: region.id,
+            version: region.version
+          }))
       }
     });
 
@@ -86,6 +104,73 @@ test(
       (await repository.list())
         .map(region => region.id),
       ['london', 'portugal']
+    );
+  }
+);
+
+test(
+  'outdated or missing downloads stay outside the searchable repository',
+  async () => {
+    const document = await loadCatalogue();
+
+    const repository = new RegionRepository({
+      catalog: {
+        list: async () => document.regions
+      },
+      installStore: {
+        load: () => [
+          {
+            id: 'portugal',
+            version: 2
+          }
+        ]
+      }
+    });
+
+    assert.deepEqual(
+      await repository.list(),
+      []
+    );
+  }
+);
+
+test(
+  'London exposes its non-partitioned routing graph',
+  async () => {
+    const document = await loadCatalogue();
+
+    const london =
+      document.regions.find(
+        region => region.id === 'london'
+      );
+
+    assert.ok(london);
+
+    assert.deepEqual(
+      london.assets.routing,
+      {
+        metadata:
+          '/regions/london/routing/metadata.json',
+        nodes:
+          '/regions/london/routing/nodes.bin',
+        edges:
+          '/regions/london/routing/edges.bin',
+        geometry:
+          '/regions/london/routing/geometry.bin',
+        roads:
+          '/regions/london/routing/roads.bin',
+        strings:
+          '/regions/london/routing/strings.bin',
+        restrictions:
+          '/regions/london/routing/restrictions.bin',
+        spatialIndex:
+          '/regions/london/routing/spatial-index.bin'
+      }
+    );
+
+    assert.equal(
+      'partitions' in london.assets.routing,
+      false
     );
   }
 );

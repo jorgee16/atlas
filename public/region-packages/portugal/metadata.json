@@ -1,5 +1,23 @@
 {
   "id": "portugal",
-  "poiCount": 47448,
-  "version": 1
+  "name": "Portugal",
+  "country": "Portugal",
+  "bounds": [
+    -31.5,
+    32.4,
+    -6,
+    42.3
+  ],
+  "poiUrl": "/regions/portugal/pois.geojson",
+  "indexUrl": "/regions/portugal/poi-index.json",
+  "poiCount": 920010,
+  "spatialIndex": {
+    "kind": "uniform-grid",
+    "version": 1,
+    "cellSizeDegrees": 0.005,
+    "cellCount": 57848
+  },
+  "generatedAt": "2026-08-09T06:48:07.512Z",
+  "attribution": "© OpenStreetMap contributors",
+  "dataLicense": "ODbL-1.0"
 }

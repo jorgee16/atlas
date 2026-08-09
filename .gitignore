@@ -23,3 +23,16 @@ packager/build-cmake/
 
 # Backup files
 *.bak
+
+# Atlas generated/downloaded map data
+packager/data/
+public/region-packages/*/routing/
+public/region-packages/*/routing-v2-backup/
+public/regions/*/routing/
+
+# Local patch artifacts
+atlas-*.patch
+ATLAS-*-README.md
+
+# Generated regional POI datasets
+public/region-packages/*/pois.geojson

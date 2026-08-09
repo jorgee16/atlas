@@ -4,25 +4,121 @@
       "id": "london",
       "name": "London",
       "country": "United Kingdom",
-      "bundled": true,
+      "version": 6,
+      "updatedAt": "2026-08-09",
+      "bundled": false,
       "bounds": [
         -0.55,
         51.25,
         0.35,
         51.75
       ],
-      "sizeBytes": 0,
       "assets": {
         "map": "/regions/london/map.pmtiles",
         "pois": "/regions/london/pois.geojson",
-        "index": "/regions/london/poi-index.json"
+        "index": "/regions/london/poi-index.json",
+        "routing": {
+          "metadata": "/regions/london/routing/metadata.json",
+          "nodes": "/regions/london/routing/nodes.bin",
+          "edges": "/regions/london/routing/edges.bin",
+          "geometry": "/regions/london/routing/geometry.bin",
+          "roads": "/regions/london/routing/roads.bin",
+          "strings": "/regions/london/routing/strings.bin",
+          "restrictions": "/regions/london/routing/restrictions.bin",
+          "spatialIndex": "/regions/london/routing/spatial-index.bin"
+        }
+      },
+      "sizeBytes": 512664705,
+      "package": {
+        "schemaVersion": 1,
+        "files": [
+          {
+            "url": "/regions/london/map.pmtiles",
+            "label": "map.pmtiles",
+            "group": "map",
+            "sizeBytes": 59687994,
+            "sha256": "51133acdfed56cd99da94211c43c26fc0494f53e445ce017b575ff7f3d03527c"
+          },
+          {
+            "url": "/regions/london/pois.geojson",
+            "label": "pois.geojson",
+            "group": "places",
+            "sizeBytes": 362005523,
+            "sha256": "a1ad51687e6489090934c9ae6acb8e141cce7a690422299ed659ef7fcfe1fb4f"
+          },
+          {
+            "url": "/regions/london/poi-index.json",
+            "label": "poi-index.json",
+            "group": "places",
+            "sizeBytes": 8097155,
+            "sha256": "3d746b910cc31127635ce996bb0bcc34aa9d9390ac9363777ddba8ce6e37b832"
+          },
+          {
+            "url": "/regions/london/routing/metadata.json",
+            "label": "metadata.json",
+            "group": "navigation",
+            "sizeBytes": 1189,
+            "sha256": "26c963ced47e0a582abf9a7474f2b6988dc97f5dffc1f49a4d3f66dbe2cffa81"
+          },
+          {
+            "url": "/regions/london/routing/nodes.bin",
+            "label": "nodes.bin",
+            "group": "navigation",
+            "sizeBytes": 9212020,
+            "sha256": "24923ab86cd81761fe010860f478eef5ca0bada7af71cc4f038e2aadc070ab0b"
+          },
+          {
+            "url": "/regions/london/routing/edges.bin",
+            "label": "edges.bin",
+            "group": "navigation",
+            "sizeBytes": 41231472,
+            "sha256": "5d6b89d4fd75e9c2ad690a95e1f5cecf6076aa98ea5574f7f8b82aa9ae5424d8"
+          },
+          {
+            "url": "/regions/london/routing/geometry.bin",
+            "label": "geometry.bin",
+            "group": "navigation",
+            "sizeBytes": 10140304,
+            "sha256": "3edf6dde79b2f0fac6441c4d875c5125f705ee171c3666a315e5c0e81417ca06"
+          },
+          {
+            "url": "/regions/london/routing/roads.bin",
+            "label": "roads.bin",
+            "group": "navigation",
+            "sizeBytes": 18363868,
+            "sha256": "93bbed6c354a27595d5a0ca1ce3f0eb6465cd33974f26c42ab2e197535f39adb"
+          },
+          {
+            "url": "/regions/london/routing/strings.bin",
+            "label": "strings.bin",
+            "group": "navigation",
+            "sizeBytes": 644648,
+            "sha256": "d203c9e492e616182115ce646ce7c228d35b5d8a88e7e6350209a845a3626112"
+          },
+          {
+            "url": "/regions/london/routing/restrictions.bin",
+            "label": "restrictions.bin",
+            "group": "navigation",
+            "sizeBytes": 67536,
+            "sha256": "a0c15f8bcd141804c9b5aed04762e92062bfe72b79a6b412cedd8c91e30159d1"
+          },
+          {
+            "url": "/regions/london/routing/spatial-index.bin",
+            "label": "spatial-index.bin",
+            "group": "navigation",
+            "sizeBytes": 3212996,
+            "sha256": "a0cb9536bdae45ba6daee8cbee3137448058b55a3236e3d715ed0e3aa414eaba"
+          }
+        ]
       }
     },
     {
       "id": "portugal",
       "name": "Portugal",
       "country": "Portugal",
-      "bundled": true,
+      "version": 6,
+      "updatedAt": "2026-08-09",
+      "bundled": false,
       "bounds": [
         -31.4,
         32.5,
@@ -33,26 +129,276 @@
         [
           -9.7,
           36.8,
-          -6.0,
+          -6,
           42.3
         ],
         [
           -17.5,
           32.4,
-          -16.0,
+          -16,
           33.3
         ],
         [
           -31.5,
           36.7,
-          -24.0,
+          -24,
           40.1
         ]
       ],
-      "sizeBytes": 0,
       "assets": {
         "pois": "/region-packages/portugal/pois.geojson",
-        "index": "/region-packages/portugal/poi-index.json"
+        "index": "/region-packages/portugal/poi-index.json",
+        "routing": {
+          "manifest": "/region-packages/portugal/routing/manifest.json",
+          "partitions": [
+            {
+              "id": "mainland",
+              "bounds": [
+                -9.7,
+                36.8,
+                -6,
+                42.3
+              ],
+              "metadata": "/region-packages/portugal/routing/mainland/metadata.json",
+              "nodes": "/region-packages/portugal/routing/mainland/nodes.bin",
+              "edges": "/region-packages/portugal/routing/mainland/edges.bin",
+              "geometry": "/region-packages/portugal/routing/mainland/geometry.bin",
+              "roads": "/region-packages/portugal/routing/mainland/roads.bin",
+              "strings": "/region-packages/portugal/routing/mainland/strings.bin",
+              "restrictions": "/region-packages/portugal/routing/mainland/restrictions.bin",
+              "spatialIndex": "/region-packages/portugal/routing/mainland/spatial-index.bin"
+            },
+            {
+              "id": "madeira",
+              "bounds": [
+                -17.5,
+                32.4,
+                -16,
+                33.3
+              ],
+              "metadata": "/region-packages/portugal/routing/madeira/metadata.json",
+              "nodes": "/region-packages/portugal/routing/madeira/nodes.bin",
+              "edges": "/region-packages/portugal/routing/madeira/edges.bin",
+              "geometry": "/region-packages/portugal/routing/madeira/geometry.bin",
+              "roads": "/region-packages/portugal/routing/madeira/roads.bin",
+              "strings": "/region-packages/portugal/routing/madeira/strings.bin",
+              "restrictions": "/region-packages/portugal/routing/madeira/restrictions.bin",
+              "spatialIndex": "/region-packages/portugal/routing/madeira/spatial-index.bin"
+            },
+            {
+              "id": "azores",
+              "bounds": [
+                -31.5,
+                36.7,
+                -24,
+                40.1
+              ],
+              "metadata": "/region-packages/portugal/routing/azores/metadata.json",
+              "nodes": "/region-packages/portugal/routing/azores/nodes.bin",
+              "edges": "/region-packages/portugal/routing/azores/edges.bin",
+              "geometry": "/region-packages/portugal/routing/azores/geometry.bin",
+              "roads": "/region-packages/portugal/routing/azores/roads.bin",
+              "strings": "/region-packages/portugal/routing/azores/strings.bin",
+              "restrictions": "/region-packages/portugal/routing/azores/restrictions.bin",
+              "spatialIndex": "/region-packages/portugal/routing/azores/spatial-index.bin"
+            }
+          ]
+        }
+      },
+      "sizeBytes": 662074402,
+      "package": {
+        "schemaVersion": 1,
+        "files": [
+          {
+            "url": "/region-packages/portugal/pois.geojson",
+            "label": "pois.geojson",
+            "group": "places",
+            "sizeBytes": 289689607,
+            "sha256": "4d450e8e9745a29fe5e4647f8ad64d24b04da104aa0f2a66f73107b2bc2eb323"
+          },
+          {
+            "url": "/region-packages/portugal/poi-index.json",
+            "label": "poi-index.json",
+            "group": "places",
+            "sizeBytes": 7196789,
+            "sha256": "d3f618ec05cb2400f0c9440ca72ea5d84705b56158c4affd7f89abf9c39f07ab"
+          },
+          {
+            "url": "/region-packages/portugal/routing/manifest.json",
+            "label": "manifest.json",
+            "group": "navigation",
+            "sizeBytes": 1589,
+            "sha256": "3d5a869d8305f16cd9fc23ae3a11b435137cb22a52f8da905023dd6fe8e9d970"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/metadata.json",
+            "label": "metadata.json",
+            "group": "navigation",
+            "sizeBytes": 1207,
+            "sha256": "e1dd653a4bfaacdb911279f68fa86f7929f9528da32c5bb42eae8237603c6509"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/nodes.bin",
+            "label": "nodes.bin",
+            "group": "navigation",
+            "sizeBytes": 36313336,
+            "sha256": "ef3df68e56e76f135393cd80555a127cc771a527dd521c310f4fa1eeab20467a"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/edges.bin",
+            "label": "edges.bin",
+            "group": "navigation",
+            "sizeBytes": 158516804,
+            "sha256": "80b1bcf4b4906c510e9183e8e9dcc9c766faf51087390f2825afd30808e93ea8"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/geometry.bin",
+            "label": "geometry.bin",
+            "group": "navigation",
+            "sizeBytes": 81061504,
+            "sha256": "15368cce8b4fac1de2164ffc7937a68fd8188559556b86de44f5d3d0ce26fd65"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/roads.bin",
+            "label": "roads.bin",
+            "group": "navigation",
+            "sizeBytes": 52477720,
+            "sha256": "b162b954f4dfe1d0579829b9dac866a0f287e26ed5cffb4905a599157497ac7f"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/strings.bin",
+            "label": "strings.bin",
+            "group": "navigation",
+            "sizeBytes": 2705788,
+            "sha256": "690fed8e155c587ab858bc2f8eff8779606d872d1a16291001c0cf037cffdda4"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/restrictions.bin",
+            "label": "restrictions.bin",
+            "group": "navigation",
+            "sizeBytes": 364352,
+            "sha256": "0bcbca851d01faeae3ce49b7ad87688b5d25257b4a145c6f17871ed024fb1e4a"
+          },
+          {
+            "url": "/region-packages/portugal/routing/mainland/spatial-index.bin",
+            "label": "spatial-index.bin",
+            "group": "navigation",
+            "sizeBytes": 17095664,
+            "sha256": "607904e1364496d748e7c899a17207f043841018d23b9b51fb0b7276a4c2396c"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/metadata.json",
+            "label": "metadata.json",
+            "group": "navigation",
+            "sizeBytes": 1193,
+            "sha256": "b0d85932e04cc453291c7548c9766d93675a4087650631a7ce1b4812c2b1e645"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/nodes.bin",
+            "label": "nodes.bin",
+            "group": "navigation",
+            "sizeBytes": 856828,
+            "sha256": "b8bdd6464ebcf46d18865abf6ed040d0bdbdb5a701e54303c7b9be7b3a118a79"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/edges.bin",
+            "label": "edges.bin",
+            "group": "navigation",
+            "sizeBytes": 3780388,
+            "sha256": "30bb3c37bca60753ca988b9977595c1a0ec330cb8f8817dd76df2a47e86b117a"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/geometry.bin",
+            "label": "geometry.bin",
+            "group": "navigation",
+            "sizeBytes": 1763160,
+            "sha256": "9df9c9b580d28e83b8422505f9b17b2c1be95ceec1da8f3117c324557c3d9841"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/roads.bin",
+            "label": "roads.bin",
+            "group": "navigation",
+            "sizeBytes": 1743208,
+            "sha256": "eac2bbccd7b1768b9f3d9f0817d6d85bb6eb6efd50e352f8754a2cd7b9f6c9f3"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/strings.bin",
+            "label": "strings.bin",
+            "group": "navigation",
+            "sizeBytes": 119842,
+            "sha256": "cb5685ed82b06791c9bb46c6b90491416a3cc711dbe43bc8861883e912f8caf2"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/restrictions.bin",
+            "label": "restrictions.bin",
+            "group": "navigation",
+            "sizeBytes": 19664,
+            "sha256": "21ff2a36cc40194646e2120fb556f08dc82a1c0de7f3a546f500caa05147a1d8"
+          },
+          {
+            "url": "/region-packages/portugal/routing/madeira/spatial-index.bin",
+            "label": "spatial-index.bin",
+            "group": "navigation",
+            "sizeBytes": 331660,
+            "sha256": "8e145ed0820ad600685ace33ceb2c6b3a07e79051c91a71f3b419a687a17097b"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/metadata.json",
+            "label": "metadata.json",
+            "group": "navigation",
+            "sizeBytes": 1191,
+            "sha256": "68dbc850c804787bad12a17f12de5b20c9268237aee8c9ac7fe973ba45c81059"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/nodes.bin",
+            "label": "nodes.bin",
+            "group": "navigation",
+            "sizeBytes": 855124,
+            "sha256": "9c0661ef01a5dc217c2360bd68b207023ba310dc3738c39c77beeb05097a30b2"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/edges.bin",
+            "label": "edges.bin",
+            "group": "navigation",
+            "sizeBytes": 3556680,
+            "sha256": "b8d8e792104fbb4ea00bd15721cfe5b1e73899b26ec19431fe8d067225e9a50e"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/geometry.bin",
+            "label": "geometry.bin",
+            "group": "navigation",
+            "sizeBytes": 1845408,
+            "sha256": "7a9bc8ffed0922e03fb411a220ee2dd2e160f2d4f0d87dd56fa90e4a70a3838c"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/roads.bin",
+            "label": "roads.bin",
+            "group": "navigation",
+            "sizeBytes": 1251916,
+            "sha256": "d7fa6514b8963ab96bc9e16c8b9f8a99f101388624a2814d876dc4736c1b7af1"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/strings.bin",
+            "label": "strings.bin",
+            "group": "navigation",
+            "sizeBytes": 92624,
+            "sha256": "cdcf6c532f55ab598d6e2e564b7eaaa023d8c9b663ada80a87720b8526504bb0"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/restrictions.bin",
+            "label": "restrictions.bin",
+            "group": "navigation",
+            "sizeBytes": 7088,
+            "sha256": "73c87a49d4f6f3c83704d7aa212f545b45d7e70aac44d4df52f61ab4522913dc"
+          },
+          {
+            "url": "/region-packages/portugal/routing/azores/spatial-index.bin",
+            "label": "spatial-index.bin",
+            "group": "navigation",
+            "sizeBytes": 424068,
+            "sha256": "bf88d9f9cd38c6808f0595f9f8391541e42907e79de9e0274f767485fa27927e"
+          }
+        ]
       }
     }
   ]

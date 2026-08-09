@@ -62,6 +62,20 @@
       const tourism = tags.tourism;
       const leisure = tags.leisure;
 
+      if ([
+        'city',
+        'town',
+        'village',
+        'hamlet',
+        'suburb',
+        'quarter',
+        'neighbourhood',
+        'locality',
+        'municipality',
+        'borough',
+        'island'
+      ].includes(tags.place)) return 'locality';
+
       if (amenity === 'cafe' || amenity === 'ice_cream') return 'cafe';
 
       if (
@@ -99,6 +113,11 @@
           'place'
       };
 
+      if (type === 'locality') {
+        output.place = properties.place;
+        output.search_only = true;
+      }
+
       const optionalKeys = [
         'opening_hours',
         'website',
@@ -108,7 +127,21 @@
         'wheelchair',
         'addr:housenumber',
         'addr:street',
-        'addr:city'
+        'addr:city',
+        'addr:postcode',
+        'alt_name',
+        'short_name',
+        'official_name',
+        'ref',
+        'name:pt',
+        'name:en',
+        'loc_name',
+        'old_name',
+        'municipality',
+        'district',
+        'postal_code',
+        'population',
+        'wikidata'
       ];
 
       for (const key of optionalKeys) {

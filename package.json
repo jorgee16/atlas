@@ -8,9 +8,12 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test"
+    "test": "node --test",
+    "regions:manifest": "node tools/region-builder/package-manifest.mjs",
+    "regions:rebuild-rich": "node tools/region-builder/rebuild-rich-regions.mjs"
   },
   "dependencies": {
+    "@tomickigrzegorz/leaflet-rotate": "0.2.3",
     "leaflet": "^1.9.4",
     "pmtiles": "^4.4.1",
     "protomaps-leaflet": "^5.1.0"

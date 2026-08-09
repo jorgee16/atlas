@@ -16,9 +16,41 @@ export class NavigationPlugin {
           context.panelController,
         listElement:
           context.root.querySelector(
+            '#navigationWorkspaceContent'
+          ) ?? context.root.querySelector(
             '#navigationContent'
           ),
-        status: context.status
+        guidanceElement:
+          context.root.querySelector(
+            '#navigationGuidance'
+          ),
+        status: context.status,
+        onArrivalAction: (action, detail) => {
+          context.root.dispatchEvent(
+            new CustomEvent('navigationarrivalaction', {
+              detail: { action, ...detail }
+            })
+          );
+        },
+        onActiveChange: (
+          active,
+          options
+        ) => {
+          if (context.has('followMode')) {
+            context
+              .get('followMode')
+              .setNavigationActive(
+                active,
+                options
+              );
+          }
+
+          context.root.dispatchEvent(
+            new CustomEvent('navigationactivechange', {
+              detail: { active, options }
+            })
+          );
+        }
       });
 
     context.provide(

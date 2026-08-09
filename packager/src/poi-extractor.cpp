@@ -14,8 +14,25 @@ std::string classify(
   std::string_view amenity,
   std::string_view tourism,
   std::string_view leisure,
-  std::string_view historic
+  std::string_view historic,
+  std::string_view place
 ) {
+  if (
+    place == "city" ||
+    place == "town" ||
+    place == "village" ||
+    place == "hamlet" ||
+    place == "suburb" ||
+    place == "quarter" ||
+    place == "neighbourhood" ||
+    place == "locality" ||
+    place == "municipality" ||
+    place == "borough" ||
+    place == "island"
+  ) {
+    return "locality";
+  }
+
   if (
     amenity == "cafe" ||
     amenity == "coffee_shop" ||
@@ -90,6 +107,9 @@ public:
     const char* historicRaw =
       node.tags()["historic"];
 
+    const char* placeRaw =
+      node.tags()["place"];
+
     const std::string_view amenity =
       amenityRaw
         ? amenityRaw
@@ -110,12 +130,18 @@ public:
         ? historicRaw
         : "";
 
+    const std::string_view place =
+      placeRaw
+        ? placeRaw
+        : "";
+
     const auto type =
       classify(
         amenity,
         tourism,
         leisure,
-        historic
+        historic,
+        place
       );
 
     if (type.empty()) {
@@ -139,6 +165,25 @@ public:
             : std::string(historic);
 
     poi.type = type;
+    poi.place = std::string(place);
+    poi.searchOnly = type == "locality";
+
+    const auto copyTag = [&node](
+      const char* key
+    ) {
+      const char* value = node.tags()[key];
+      return value ? std::string(value) : std::string{};
+    };
+
+    poi.altName = copyTag("alt_name");
+    poi.shortName = copyTag("short_name");
+    poi.officialName = copyTag("official_name");
+    poi.localName = copyTag("loc_name");
+    poi.portugueseName = copyTag("name:pt");
+    poi.englishName = copyTag("name:en");
+    poi.municipality = copyTag("municipality");
+    poi.district = copyTag("district");
+    poi.postcode = copyTag("postal_code");
 
     output_.push_back(
       std::move(poi)
