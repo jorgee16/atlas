@@ -50,6 +50,10 @@ import {
 import {
   TripLoader
 } from '../features/trip/trip-loader.js';
+
+import {
+  TripCatalog
+} from '../features/trip/trip-catalog.js';
 import {
   TripStore
 } from '../features/trip/trip-store.js';
@@ -780,14 +784,19 @@ export class AppBootstrap {
     );
 
     const tripLoader = new TripLoader();
+    const tripCatalog = new TripCatalog();
     const tripStore = new TripStore();
+
     let tripLibraryState = tripStore.load();
     let tripLibraryOpen = false;
+    let availableCloudTrips = [];
+    let cloudTripsLoaded = false;
 
     const tripTitle = root.querySelector('#tripTitle');
     const tripLibraryButton = root.querySelector('#tripLibraryBtn');
     const tripLibraryView = root.querySelector('#tripLibraryView');
     const tripLibraryList = root.querySelector('#tripLibraryList');
+    const tripCloudList = root.querySelector('#tripCloudList');
     const tripImportButton = root.querySelector('#tripImportBtn');
 
     const firstTripDay = data =>
@@ -849,6 +858,80 @@ export class AppBootstrap {
       }
     };
 
+    const renderCloudTrips = () => {
+      if (!tripCloudList) return;
+
+      tripCloudList.replaceChildren();
+
+      if (!cloudTripsLoaded) {
+        const loading = document.createElement('div');
+        loading.className = 'trip-library-empty';
+        loading.textContent = 'Loading available trips…';
+        tripCloudList.append(loading);
+        return;
+      }
+
+      if (!availableCloudTrips.length) {
+        const empty = document.createElement('div');
+        empty.className = 'trip-library-empty';
+        empty.textContent = 'No online trips available.';
+        tripCloudList.append(empty);
+        return;
+      }
+
+      for (const trip of availableCloudTrips) {
+        const alreadySaved =
+          tripLibraryState.trips.some(record =>
+            record.data?.trip?.id === trip.id
+          );
+
+        const row = document.createElement('article');
+        row.className = 'trip-library-item';
+
+        const copy = document.createElement('div');
+        copy.className = 'trip-library-open';
+
+        const name = document.createElement('strong');
+        name.textContent = trip.name;
+
+        const source = document.createElement('span');
+        source.textContent =
+          alreadySaved
+            ? 'Saved on this device'
+            : 'Available online';
+
+        copy.append(name, source);
+
+        const action = document.createElement('button');
+        action.type = 'button';
+        action.className = 'trip-library-remove';
+
+        if (alreadySaved) {
+          action.textContent = 'Saved';
+          action.disabled = true;
+        } else {
+          action.textContent = 'Download';
+          action.dataset.tripDownload = trip.id;
+        }
+
+        row.append(copy, action);
+        tripCloudList.append(row);
+      }
+    };
+
+    const loadCloudTrips = async () => {
+      try {
+        availableCloudTrips =
+          await tripCatalog.list();
+      } catch (error) {
+        console.error(error);
+        availableCloudTrips = [];
+      } finally {
+        cloudTripsLoaded = true;
+        renderCloudTrips();
+      }
+    };
+
     const setTripLibraryOpen = open => {
       tripLibraryOpen = open === true;
       tripWorkspace?.classList.toggle(
@@ -862,7 +945,14 @@ export class AppBootstrap {
         'aria-expanded',
         String(tripLibraryOpen)
       );
-      if (tripLibraryOpen) renderTripLibrary();
+      if (tripLibraryOpen) {
+        renderTripLibrary();
+        renderCloudTrips();
+
+        if (!cloudTripsLoaded) {
+          void loadCloudTrips();
+        }
+      }
     };
 
     const activateTripRecord = (record, { reveal = true } = {}) => {
@@ -1056,6 +1146,60 @@ loadTripButton?.addEventListener(
       setTripLibraryOpen(true);
       status('Trip removed', removed?.name ?? '');
     });
+
+    tripCloudList?.addEventListener(
+      'click',
+      async event => {
+        const button =
+          event.target.closest?.('[data-trip-download]');
+
+        if (!button) return;
+
+        const trip =
+          availableCloudTrips.find(
+            item =>
+              item.id === button.dataset.tripDownload
+          );
+
+        if (!trip) return;
+
+        button.disabled = true;
+        button.textContent = 'Downloading…';
+
+        try {
+          const tripData =
+            await tripLoader.loadFromUrl(trip.url);
+
+          const record = tripStore.upsert(
+            tripData,
+            {
+              sourceName: `${trip.id}.json`
+            }
+          );
+
+          tripLibraryState = tripStore.load();
+
+          renderTripLibrary();
+          renderCloudTrips();
+          activateTripRecord(record);
+
+          status(
+            'Trip downloaded',
+            trip.name
+          );
+        } catch (error) {
+          console.error(error);
+
+          button.disabled = false;
+          button.textContent = 'Download';
+
+          status(
+            'Could not download trip',
+            error.message
+          );
+        }
+      }
+    );
 
     restoreStoredTrip();
 

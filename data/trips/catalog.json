@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "trips": [
+    {
+      "id": "london-2026",
+      "name": "London 2026",
+      "url": "/trips/london-2026.json"
+    }
+  ]
+}

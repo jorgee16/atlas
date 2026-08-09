@@ -5818,3 +5818,36 @@ html[data-atlas-theme="dark"] .app-tab.on { color: #8ea8ff; background: rgba(49,
     border-radius: 22px;
   }
 }
+
+/* ---------- Cloud trip catalogue ---------- */
+
+.trip-cloud-section {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.trip-cloud-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.trip-cloud-heading small {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trip-cloud-heading strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.trip-cloud-list .trip-library-remove:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

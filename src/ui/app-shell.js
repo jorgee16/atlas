@@ -203,6 +203,18 @@ export function renderAppShell(root) {
                 <button id="tripImportBtn" class="primary" type="button">+ Load trip</button>
               </div>
               <div id="tripLibraryList" class="trip-library-list"></div>
+
+              <div class="trip-cloud-section">
+                <div class="trip-cloud-heading">
+                  <small>Available online</small>
+                  <strong>Discover trips</strong>
+                </div>
+
+                <div
+                  id="tripCloudList"
+                  class="trip-library-list trip-cloud-list"
+                ></div>
+              </div>
             </div>
 
             <div id="tripScheduleView" class="trip-schedule-view">
