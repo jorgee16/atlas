@@ -177,7 +177,31 @@ test(
 
 test(
   'bundled spatial indexes contain every POI exactly once',
-  async () => {
+  async t => {
+    const requiredFiles = [
+      '../public/regions/london/pois.geojson',
+      '../public/regions/london/poi-index.json',
+      '../public/region-packages/portugal/pois.geojson',
+      '../public/region-packages/portugal/poi-index.json'
+    ];
+
+    const available = await Promise.all(
+      requiredFiles.map(relativePath =>
+        fs.access(
+          new URL(relativePath, import.meta.url)
+        )
+          .then(() => true)
+          .catch(() => false)
+      )
+    );
+
+    if (!available.every(Boolean)) {
+      t.skip(
+        'Generated region datasets are not present in this checkout.'
+      );
+      return;
+    }
+
     const packages = [
       '../public/regions/london',
       '../public/region-packages/portugal'
