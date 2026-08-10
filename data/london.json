@@ -1,45 +1,184 @@
 {
   "trip": {
-    "id": "london-2026",
-    "name": "London 2026",
+    "id": "london-2026-real-thumbnails",
+    "name": "London 2026 · Real Thumbnails",
     "source": "El Plan - London.pdf",
     "days": {
       "12": [
-        {"name":"Big Ben","lat":51.500729,"lon":-0.124625,"type":"anchor","note":"Lunch / arrival"},
-        {"name":"ABC Hyde Park","lat":51.5113,"lon":-0.1870,"type":"hotel","note":"Hotel location is approximate; verify exact address."}
+        {
+          "name": "Big Ben",
+          "lat": 51.500729,
+          "lon": -0.124625,
+          "type": "anchor",
+          "note": "Lunch / arrival",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Big%20Ben%20London%20closeup.jpg?width=240"
+        },
+        {
+          "name": "ABC Hyde Park",
+          "lat": 51.5113,
+          "lon": -0.187,
+          "type": "hotel",
+          "note": "Hotel location is approximate; verify exact address."
+        }
       ],
       "13": [
-        {"name":"Westminster Abbey","lat":51.499292,"lon":-0.127309,"type":"anchor","note":"Morning — €36 with Portuguese audio guide"},
-        {"name":"Buckingham Palace","lat":51.501364,"lon":-0.141890,"type":"anchor","note":"Afternoon"},
-        {"name":"Chinatown","lat":51.5118,"lon":-0.1312,"type":"food","note":"Dinner"}
+        {
+          "name": "Westminster Abbey",
+          "lat": 51.499292,
+          "lon": -0.127309,
+          "type": "anchor",
+          "note": "Morning — €36 with Portuguese audio guide",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Westminster%20abbey%20exterior.jpg?width=240"
+        },
+        {
+          "name": "Buckingham Palace",
+          "lat": 51.501364,
+          "lon": -0.14189,
+          "type": "anchor",
+          "note": "Afternoon",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/BuckinghamPalace.jpg?width=240"
+        },
+        {
+          "name": "Chinatown",
+          "lat": 51.5118,
+          "lon": -0.1312,
+          "type": "food",
+          "note": "Dinner"
+        }
       ],
       "14": [
-        {"name":"Natural History Museum","lat":51.4967,"lon":-0.1764,"type":"anchor","note":"10:00 — €20"},
-        {"name":"Piccadilly Circus","lat":51.5101,"lon":-0.1340,"type":"anchor","note":"Afternoon"},
-        {"name":"Fortnum & Mason","lat":51.5086,"lon":-0.1394,"type":"shop","note":"Afternoon"},
-        {"name":"Oliver! Musical","lat":51.5117,"lon":-0.1160,"type":"event","note":"19:30"}
+        {
+          "name": "Natural History Museum",
+          "lat": 51.4967,
+          "lon": -0.1764,
+          "type": "anchor",
+          "note": "10:00 — €20",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Natural%20History%20Museum%20London.JPG?width=240"
+        },
+        {
+          "name": "Piccadilly Circus",
+          "lat": 51.5101,
+          "lon": -0.134,
+          "type": "anchor",
+          "note": "Afternoon"
+        },
+        {
+          "name": "Fortnum & Mason",
+          "lat": 51.5086,
+          "lon": -0.1394,
+          "type": "shop",
+          "note": "Afternoon"
+        },
+        {
+          "name": "Oliver! Musical",
+          "lat": 51.5117,
+          "lon": -0.116,
+          "type": "event",
+          "note": "19:30"
+        }
       ],
       "15": [
-        {"name":"Tower of London","lat":51.5081,"lon":-0.0759,"type":"anchor","note":"Morning — €43"},
-        {"name":"Tower Bridge","lat":51.5055,"lon":-0.0754,"type":"anchor","note":"Morning"},
-        {"name":"Borough Market","lat":51.5055,"lon":-0.0910,"type":"food","note":"Lunch"},
-        {"name":"Bankside","lat":51.5070,"lon":-0.1000,"type":"walk","note":"Afternoon — riverside walk"}
+        {
+          "name": "Tower of London",
+          "lat": 51.5081,
+          "lon": -0.0759,
+          "type": "anchor",
+          "note": "Morning — €43"
+        },
+        {
+          "name": "Tower Bridge",
+          "lat": 51.5055,
+          "lon": -0.0754,
+          "type": "anchor",
+          "note": "Morning",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Tower%20Bridge%20in%20London.JPG?width=240"
+        },
+        {
+          "name": "Borough Market",
+          "lat": 51.5055,
+          "lon": -0.091,
+          "type": "food",
+          "note": "Lunch"
+        },
+        {
+          "name": "Bankside",
+          "lat": 51.507,
+          "lon": -0.1,
+          "type": "walk",
+          "note": "Afternoon — riverside walk"
+        }
       ],
       "16": [
-        {"name":"Oxford Street","lat":51.5154,"lon":-0.1410,"type":"anchor","note":"Morning"},
-        {"name":"Primark Oxford Street","lat":51.5167,"lon":-0.1406,"type":"shop","note":"Morning"},
-        {"name":"British Museum","lat":51.5194,"lon":-0.1269,"type":"anchor","note":"13:00–17:00 — free"},
-        {"name":"Flat Iron Soho","lat":51.5134,"lon":-0.1319,"type":"food","note":"19:00 reservation"}
+        {
+          "name": "Oxford Street",
+          "lat": 51.5154,
+          "lon": -0.141,
+          "type": "anchor",
+          "note": "Morning"
+        },
+        {
+          "name": "Primark Oxford Street",
+          "lat": 51.5167,
+          "lon": -0.1406,
+          "type": "shop",
+          "note": "Morning"
+        },
+        {
+          "name": "British Museum",
+          "lat": 51.5194,
+          "lon": -0.1269,
+          "type": "anchor",
+          "note": "13:00–17:00 — free",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/British%20Museum%20London.JPG?width=240"
+        },
+        {
+          "name": "Flat Iron Soho",
+          "lat": 51.5134,
+          "lon": -0.1319,
+          "type": "food",
+          "note": "19:00 reservation"
+        }
       ],
       "17": [],
       "18": [
-        {"name":"Sky Garden","lat":51.5114,"lon":-0.0836,"type":"anchor","note":"Morning"},
-        {"name":"Notting Hill / Portobello Road","lat":51.5161,"lon":-0.2050,"type":"anchor","note":"Market"}
+        {
+          "name": "Sky Garden",
+          "lat": 51.5114,
+          "lon": -0.0836,
+          "type": "anchor",
+          "note": "Morning"
+        },
+        {
+          "name": "Notting Hill / Portobello Road",
+          "lat": 51.5161,
+          "lon": -0.205,
+          "type": "anchor",
+          "note": "Market"
+        }
       ],
       "19": [
-        {"name":"Kensington Gardens","lat":51.5085,"lon":-0.1799,"type":"anchor","note":"Morning"},
-        {"name":"Hyde Park","lat":51.5073,"lon":-0.1657,"type":"anchor","note":"Morning"},
-        {"name":"Airport","lat":51.4700,"lon":-0.4543,"type":"airport","note":"Be at airport by 15:30; flight 18:45"}
+        {
+          "name": "Kensington Gardens",
+          "lat": 51.5085,
+          "lon": -0.1799,
+          "type": "anchor",
+          "note": "Morning"
+        },
+        {
+          "name": "Hyde Park",
+          "lat": 51.5073,
+          "lon": -0.1657,
+          "type": "anchor",
+          "note": "Morning",
+          "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hyde-Park.jpg?width=240"
+        },
+        {
+          "name": "Airport",
+          "lat": 51.47,
+          "lon": -0.4543,
+          "type": "airport",
+          "note": "Be at airport by 15:30; flight 18:45"
+        }
       ]
     }
   }
