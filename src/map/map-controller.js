@@ -27,6 +27,14 @@ export class MapController {
     this.adapter.focus(lat, lon, zoom);
   }
 
+  focusWithOffset(lat, lon, options = {}) {
+    this.adapter.focusWithOffset(
+      lat,
+      lon,
+      options
+    );
+  }
+
   followPosition(position, options = {}) {
     return this.adapter.followPosition?.(
       position,

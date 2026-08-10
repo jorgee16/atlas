@@ -312,6 +312,26 @@ export class LeafletMapAdapter {
     this.map.setView([lat, lon], zoom);
   }
 
+  focusWithOffset(
+    lat,
+    lon,
+    {
+      zoom = 16,
+      offsetY = 150
+    } = {}
+  ) {
+    this.map.setView([lat, lon], zoom, {
+      animate: false
+    });
+
+    this.map.panBy(
+      [0, offsetY],
+      {
+        animate: false
+      }
+    );
+  }
+
   followPosition(
     position,
     {

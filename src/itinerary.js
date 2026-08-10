@@ -111,14 +111,20 @@ export class ItineraryController {
     }
     this.selected = place;
 
-    // Map and map-timeline selections are already being made in the
-    // visible map context. Re-centering places the selected marker
-    // underneath the Trip workspace overlay.
-    if (
-      meta.source !== 'map' &&
-      meta.source !== 'map-timeline'
-    ) {
-      this.map.focus(place.lat, place.lon);
+    if (meta.source === 'map') {
+      this.map.focus(
+        place.lat,
+        place.lon
+      );
+    } else {
+      this.map.focusWithOffset(
+        place.lat,
+        place.lon,
+        {
+          zoom: 16,
+          offsetY: 150
+        }
+      );
     }
 
     if (marker) marker.openPopup();
