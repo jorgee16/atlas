@@ -312,25 +312,73 @@ export class LeafletMapAdapter {
     this.map.setView([lat, lon], zoom);
   }
 
-  focusWithOffset(
-    lat,
-    lon,
+  focusItineraryPlace(
+    place,
     {
-      zoom = 16,
-      offsetY = 150
+      zoom = 16
     } = {}
   ) {
-    this.map.setView([lat, lon], zoom, {
-      animate: false
-    });
+    if (
+      !Number.isFinite(place?.lat) ||
+      !Number.isFinite(place?.lon)
+    ) {
+      return false;
+    }
 
-    this.map.panBy(
-      [0, offsetY],
+    const container =
+      this.map.getContainer();
+
+    const height =
+      container?.clientHeight ||
+      this.map.getSize().y;
+
+    // Put the selected point around the upper third of the map.
+    // This leaves the lower area free for the Trip workspace.
+    const verticalOffset =
+      Math.max(
+        120,
+        Math.round(height * 0.28)
+      );
+
+    this.map.setView(
+      [place.lat, place.lon],
+      zoom,
       {
         animate: false
       }
     );
+
+    this.map.panBy(
+      [0, verticalOffset],
+      {
+        animate: false
+      }
+    );
+
+    let selectedMarker = null;
+
+    for (const marker of this.itineraryMarkers) {
+      marker.setZIndexOffset?.(0);
+
+      const latLng = marker.getLatLng?.();
+
+      if (
+        latLng &&
+        Math.abs(latLng.lat - place.lat) < 0.000001 &&
+        Math.abs(latLng.lng - place.lon) < 0.000001
+      ) {
+        selectedMarker = marker;
+      }
+    }
+
+    if (selectedMarker) {
+      selectedMarker.setZIndexOffset?.(1000);
+      selectedMarker.openPopup?.();
+    }
+
+    return true;
   }
+
 
   followPosition(
     position,

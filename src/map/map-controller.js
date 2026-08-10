@@ -27,13 +27,13 @@ export class MapController {
     this.adapter.focus(lat, lon, zoom);
   }
 
-  focusWithOffset(lat, lon, options = {}) {
-    this.adapter.focusWithOffset(
-      lat,
-      lon,
+  focusItineraryPlace(place, options = {}) {
+    return this.adapter.focusItineraryPlace(
+      place,
       options
     );
   }
+
 
   followPosition(position, options = {}) {
     return this.adapter.followPosition?.(

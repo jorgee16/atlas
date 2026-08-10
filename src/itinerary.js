@@ -111,23 +111,13 @@ export class ItineraryController {
     }
     this.selected = place;
 
-    if (meta.source === 'map') {
-      this.map.focus(
-        place.lat,
-        place.lon
-      );
-    } else {
-      this.map.focusWithOffset(
-        place.lat,
-        place.lon,
-        {
-          zoom: 16,
-          offsetY: 150
-        }
-      );
-    }
+    this.map.focusItineraryPlace(
+      place,
+      {
+        zoom: 16
+      }
+    );
 
-    if (marker) marker.openPopup();
     this.status(place.name, 'Ready to discover nearby cafés, restaurants, pubs and attractions.');
     this.onSelect?.(place, meta);
   }
