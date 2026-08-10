@@ -5932,3 +5932,463 @@ html[data-atlas-theme="dark"] .app-tab.on { color: #8ea8ff; background: rgba(49,
   color: #315efb !important;
   box-shadow: none !important;
 }
+
+/* ---------- Compact selected-point card ---------- */
+
+.map-selection-leaflet-popup-v2 .leaflet-popup-content {
+  width: 210px !important;
+  margin: 10px !important;
+}
+
+.map-selection-leaflet-popup-v2 .leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+}
+
+.map-selection-leaflet-popup-v2 .leaflet-popup-close-button {
+  width: 26px !important;
+  height: 26px !important;
+  padding: 3px !important;
+  font-size: 18px !important;
+}
+
+.map-selection-popup {
+  gap: 2px !important;
+  padding: 0 20px 0 0 !important;
+}
+
+.map-selection-popup > strong {
+  font-size: 14px !important;
+  line-height: 18px !important;
+}
+
+.map-selection-popup > small {
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.map-selection-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+  margin-top: 8px !important;
+}
+
+.map-selection-action {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  align-items: center !important;
+  gap: 3px !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 50px !important;
+  padding: 5px 2px !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 12px !important;
+  text-align: center !important;
+}
+
+.map-selection-action::before {
+  display: grid !important;
+  width: 26px !important;
+  height: 26px !important;
+  margin: 0 !important;
+  place-items: center !important;
+
+  background: #f1f4f9 !important;
+  border-radius: 50% !important;
+
+  font-size: 14px !important;
+}
+
+.map-selection-action--navigate {
+  color: #315efb !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.map-selection-action--navigate::before {
+  color: #315efb !important;
+  background: #edf2ff !important;
+}
+
+.map-selection-action--bookmark,
+.map-selection-action--nearby {
+  color: #263047 !important;
+}
+
+
+/* ============================================================
+   Atlas dark theme
+   ============================================================ */
+
+html[data-atlas-theme="dark"] {
+  --bg: #0f141d;
+  --surface: rgba(23, 30, 42, 0.96);
+  --surface-solid: #171e2a;
+  --surface-muted: #202837;
+
+  --text: #f4f7fb;
+  --text-muted: #aab5c5;
+
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.18);
+
+  --accent-soft: #202c57;
+  --accent-dark: #7391ff;
+
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 12px 34px rgba(0, 0, 0, 0.30);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.38);
+
+  color: var(--text);
+  background: var(--bg);
+}
+
+
+/* ---------- General app text ---------- */
+
+html[data-atlas-theme="dark"] body,
+html[data-atlas-theme="dark"] .app {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] strong,
+html[data-atlas-theme="dark"] b,
+html[data-atlas-theme="dark"] label,
+html[data-atlas-theme="dark"] h1,
+html[data-atlas-theme="dark"] h2,
+html[data-atlas-theme="dark"] h3 {
+  color: inherit;
+}
+
+
+/* ---------- Header ---------- */
+
+html[data-atlas-theme="dark"] .brand-inline {
+  color: var(--text);
+  background: rgba(23, 30, 42, 0.96);
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"] .brand-copy strong,
+html[data-atlas-theme="dark"] .brand-inline strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .brand-copy small,
+html[data-atlas-theme="dark"] .brand-inline small {
+  color: var(--text-muted);
+}
+
+html[data-atlas-theme="dark"] .brand-mark {
+  background: #202837;
+  border-color: var(--line);
+}
+
+
+/* ---------- Chips / categories ---------- */
+
+html[data-atlas-theme="dark"] .chip {
+  color: var(--text-muted);
+  background: var(--surface-solid);
+  border-color: var(--line-strong);
+}
+
+html[data-atlas-theme="dark"] .chip:hover {
+  color: #8ea5ff;
+  background: #202837;
+}
+
+html[data-atlas-theme="dark"] .chip.on {
+  color: #ffffff;
+  background: #315efb;
+  border-color: #315efb;
+}
+
+
+/* ---------- Section headings ---------- */
+
+html[data-atlas-theme="dark"] .section-title {
+  color: var(--text-muted);
+}
+
+html[data-atlas-theme="dark"] .section-title span {
+  color: var(--text-muted);
+  background: #202837;
+}
+
+
+/* ---------- Generic cards ---------- */
+
+html[data-atlas-theme="dark"] .place {
+  color: var(--text);
+  background: var(--surface-solid);
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"] .place b,
+html[data-atlas-theme="dark"] .place strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .place small {
+  color: var(--text-muted);
+}
+
+html[data-atlas-theme="dark"] .place.active {
+  color: var(--text);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(49, 94, 251, 0.18),
+      transparent 65%
+    ),
+    #1b2331;
+  border-color: #6685ff;
+  box-shadow:
+    0 0 0 1px rgba(102, 133, 255, 0.4) inset,
+    0 10px 26px rgba(0, 0, 0, 0.25);
+}
+
+
+/* ---------- Nearby ---------- */
+
+html[data-atlas-theme="dark"] .nearby-card {
+  color: var(--text);
+  background: var(--surface-muted);
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"] .nearby-card:hover {
+  color: var(--text);
+  background: #263041;
+  border-color: var(--line-strong);
+}
+
+html[data-atlas-theme="dark"] .nearby-card b,
+html[data-atlas-theme="dark"] .nearby-card strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .nearby-card small {
+  color: var(--text-muted);
+}
+
+
+/* ---------- Trip workspace ---------- */
+
+html[data-atlas-theme="dark"] .trip-workspace-card {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .trip-workspace-header strong,
+html[data-atlas-theme="dark"] .trip-workspace-header span,
+html[data-atlas-theme="dark"] .trip-day-control label,
+html[data-atlas-theme="dark"] .trip-map-itinerary-head span,
+html[data-atlas-theme="dark"] .trip-selected-stop strong,
+html[data-atlas-theme="dark"] .trip-map-stop strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .trip-workspace-header small,
+html[data-atlas-theme="dark"] .trip-map-itinerary-head small,
+html[data-atlas-theme="dark"] .trip-selected-stop small,
+html[data-atlas-theme="dark"] .trip-selected-stop span,
+html[data-atlas-theme="dark"] .trip-stop-meta,
+html[data-atlas-theme="dark"] .trip-stop-note {
+  color: var(--text-muted);
+}
+
+html[data-atlas-theme="dark"] .trip-map-stop {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .trip-library-item {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .trip-library-item strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .trip-library-item span,
+html[data-atlas-theme="dark"] .trip-library-empty,
+html[data-atlas-theme="dark"] .trip-cloud-heading small {
+  color: var(--text-muted);
+}
+
+html[data-atlas-theme="dark"] .trip-cloud-heading strong {
+  color: var(--text);
+}
+
+
+/* ---------- Navigation ---------- */
+
+html[data-atlas-theme="dark"] .navigation-workspace,
+html[data-atlas-theme="dark"] .navigation-workspace-content,
+html[data-atlas-theme="dark"] .navigation-guidance {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .navigation-workspace strong,
+html[data-atlas-theme="dark"] .navigation-guidance strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .navigation-workspace small,
+html[data-atlas-theme="dark"] .navigation-guidance small {
+  color: var(--text-muted);
+}
+
+
+/* ---------- App tabs ---------- */
+
+html[data-atlas-theme="dark"] .app-tabs {
+  background: rgba(23, 30, 42, 0.97);
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"] .app-tab {
+  color: #9aa7bb;
+}
+
+html[data-atlas-theme="dark"] .app-tab.on {
+  color: #8da5ff;
+  background: #202b49;
+}
+
+
+/* ---------- Overflow menu ---------- */
+
+html[data-atlas-theme="dark"] .overflow-menu {
+  color: var(--text);
+  background: rgba(23, 30, 42, 0.99);
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"] .overflow-menu button {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .overflow-menu button:hover,
+html[data-atlas-theme="dark"] .overflow-menu button:focus-visible {
+  background: #252e3d;
+}
+
+
+/* ---------- Settings / Regions / Bookmarks ---------- */
+
+html[data-atlas-theme="dark"] .settings-overlay-card,
+html[data-atlas-theme="dark"] .regions-overlay-card,
+html[data-atlas-theme="dark"] .bookmarks-overlay-card {
+  color: var(--text);
+  background: var(--surface-solid);
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"] .settings-overlay strong,
+html[data-atlas-theme="dark"] .settings-overlay h2,
+html[data-atlas-theme="dark"] .regions-overlay strong,
+html[data-atlas-theme="dark"] .regions-overlay h2,
+html[data-atlas-theme="dark"] .bookmarks-overlay strong,
+html[data-atlas-theme="dark"] .bookmarks-overlay h2 {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .settings-overlay small,
+html[data-atlas-theme="dark"] .regions-overlay small,
+html[data-atlas-theme="dark"] .bookmarks-overlay small {
+  color: var(--text-muted);
+}
+
+
+/* ---------- Selects / inputs ---------- */
+
+html[data-atlas-theme="dark"] select,
+html[data-atlas-theme="dark"] input,
+html[data-atlas-theme="dark"] textarea {
+  color: var(--text);
+  background: var(--surface-muted);
+  border-color: var(--line-strong);
+}
+
+html[data-atlas-theme="dark"] input::placeholder,
+html[data-atlas-theme="dark"] textarea::placeholder {
+  color: #8d99ab;
+}
+
+
+/* ---------- Selected map point popup ---------- */
+
+html[data-atlas-theme="dark"]
+.map-selection-leaflet-popup-v2
+.leaflet-popup-content-wrapper {
+  color: var(--text);
+  background: #171e2a;
+  border-color: var(--line);
+}
+
+html[data-atlas-theme="dark"]
+.map-selection-leaflet-popup-v2
+.leaflet-popup-tip {
+  background: #171e2a;
+}
+
+html[data-atlas-theme="dark"]
+.map-selection-leaflet-popup-v2
+.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+}
+
+html[data-atlas-theme="dark"] .map-selection-popup {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .map-selection-popup > strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .map-selection-popup > small {
+  color: var(--text-muted);
+}
+
+html[data-atlas-theme="dark"] .map-selection-action {
+  color: var(--text) !important;
+  background: transparent !important;
+}
+
+html[data-atlas-theme="dark"] .map-selection-action::before {
+  color: #dbe3f0;
+  background: #293344 !important;
+}
+
+html[data-atlas-theme="dark"] .map-selection-action--navigate {
+  color: #8ea5ff !important;
+}
+
+html[data-atlas-theme="dark"] .map-selection-action--navigate::before {
+  color: #8ea5ff !important;
+  background: #26345f !important;
+}
+
+
+/* ---------- Leaflet standard popups ---------- */
+
+html[data-atlas-theme="dark"] .leaflet-popup-content-wrapper {
+  color: var(--text);
+  background: #171e2a;
+}
+
+html[data-atlas-theme="dark"] .leaflet-popup-tip {
+  background: #171e2a;
+}
+
