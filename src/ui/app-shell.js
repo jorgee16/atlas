@@ -13,10 +13,11 @@ export function renderAppShell(root) {
         <header class="map-header">
           <div class="brand-inline">
             <span class="brand-mark" aria-hidden="true">
-              <svg class="atlas-mark" viewBox="0 0 24 24">
-                <path d="M12 3 4.5 20h3.8l1.3-3.4h4.8l1.3 3.4h3.8L12 3Z"></path>
-                <path d="M10.8 13.5h2.4L12 10.2l-1.2 3.3Z"></path>
-              </svg>
+              <img
+                class="atlas-brand-icon"
+                src="/assets/branding/atlas-icon.png"
+                alt=""
+              >
             </span>
 
             <div class="brand-copy">

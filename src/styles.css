@@ -5851,3 +5851,12 @@ html[data-atlas-theme="dark"] .app-tab.on { color: #8ea8ff; background: rgba(49,
   opacity: 0.55;
   cursor: default;
 }
+
+/* Atlas application icon in map header */
+.brand-mark .atlas-brand-icon {
+  display: block;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 8px;
+}

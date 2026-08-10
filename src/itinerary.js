@@ -91,6 +91,11 @@ export class ItineraryController {
   restoreSelection(place) {
     if (!place) return;
     this.selected = place;
+
+    this.map.showSelectionPin(
+      place.lat,
+      place.lon
+    );
     const places = this.days[this.selectedDay] ?? [];
     const index = places.findIndex(candidate => candidate === place || (
       candidate?.name === place.name && candidate?.lat === place.lat && candidate?.lon === place.lon
@@ -117,6 +122,16 @@ export class ItineraryController {
         zoom: 16
       }
     );
+
+    // Selections coming from the itinerary UI do not carry a Leaflet
+    // marker reference. Keep the selected destination explicitly pinned
+    // using Atlas's existing blue selection pin.
+    if (!marker) {
+      this.map.showSelectionPin(
+        place.lat,
+        place.lon
+      );
+    }
 
     this.status(place.name, 'Ready to discover nearby cafés, restaurants, pubs and attractions.');
     this.onSelect?.(place, meta);
