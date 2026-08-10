@@ -129,7 +129,8 @@ export class ItineraryController {
     if (!marker) {
       this.map.showSelectionPin(
         place.lat,
-        place.lon
+        place.lon,
+        `<b>${escapeHtml(place.name)}</b>${place.note ? `<br>${escapeHtml(place.note)}` : ''}`
       );
     }
 

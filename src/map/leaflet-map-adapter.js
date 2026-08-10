@@ -358,7 +358,10 @@ export class LeafletMapAdapter {
     let selectedMarker = null;
 
     for (const marker of this.itineraryMarkers) {
-      marker.setZIndexOffset?.(0);
+      // Restore every itinerary marker first. The currently selected stop
+      // is represented by Atlas's blue selection pin instead.
+      marker.setOpacity?.(1);
+      marker.closePopup?.();
 
       const latLng = marker.getLatLng?.();
 
@@ -372,8 +375,9 @@ export class LeafletMapAdapter {
     }
 
     if (selectedMarker) {
-      selectedMarker.setZIndexOffset?.(1000);
-      selectedMarker.openPopup?.();
+      // Avoid rendering the normal itinerary marker underneath the
+      // dedicated blue selection pin.
+      selectedMarker.setOpacity?.(0);
     }
 
     return true;
