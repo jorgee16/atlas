@@ -110,7 +110,17 @@ export class ItineraryController {
       if (index >= 0) this.list.querySelector?.(`[data-stop-index="${index}"]`)?.classList.add('active');
     }
     this.selected = place;
-    this.map.focus(place.lat, place.lon);
+
+    // Map and map-timeline selections are already being made in the
+    // visible map context. Re-centering places the selected marker
+    // underneath the Trip workspace overlay.
+    if (
+      meta.source !== 'map' &&
+      meta.source !== 'map-timeline'
+    ) {
+      this.map.focus(place.lat, place.lon);
+    }
+
     if (marker) marker.openPopup();
     this.status(place.name, 'Ready to discover nearby cafés, restaurants, pubs and attractions.');
     this.onSelect?.(place, meta);
