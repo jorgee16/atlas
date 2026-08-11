@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { TfLJourneyProvider } from '../src/transit/providers/tfl-journey-provider.js';
 import { TransitJourneyBridge, geometryPoints } from '../src/transit/transit-journey-bridge.js';
 
-test('TfL provider calls atlas_transit and bridge creates an Atlas navigation sequence', async () => {
+test('TfL provider calls TfL Journey API directly and bridge creates an Atlas navigation sequence', async () => {
   let requestedUrl = '';
   const provider = new TfLJourneyProvider({
     baseUrl: 'http://localhost:5000',
@@ -11,16 +11,77 @@ test('TfL provider calls atlas_transit and bridge creates an Atlas navigation se
       requestedUrl = String(url);
       return {
         ok: true,
-        json: async () => [{
-          duration_minutes: 24,
-          start_time: '2026-08-11T10:00:00',
-          arrival_time: '2026-08-11T10:24:00',
-          legs: [
-            { mode: 'walking', from_name: 'Origin', to_name: 'Stop A', duration_minutes: 5, geometry: 'LINESTRING (-0.10 51.50, -0.11 51.51)' },
-            { mode: 'tube', line: 'Piccadilly', from_name: 'Stop A', to_name: 'South Kensington', duration_minutes: 14, direction: 'Heathrow', intermediate_stops: ['Stop B'], geometry: 'LINESTRING (-0.11 51.51, -0.17 51.49)' },
-            { mode: 'walking', from_name: 'South Kensington', to_name: 'Natural History Museum', duration_minutes: 5, geometry: 'LINESTRING (-0.17 51.49, -0.1764 51.4967)' }
+        json: async () => ({
+          journeys: [
+            {
+              duration: 24,
+              startDateTime: '2026-08-11T10:00:00',
+              arrivalDateTime: '2026-08-11T10:24:00',
+              legs: [
+                {
+                  mode: { id: 'walking' },
+                  routeOptions: [],
+                  departurePoint: {
+                    commonName: 'Origin'
+                  },
+                  arrivalPoint: {
+                    commonName: 'Stop A'
+                  },
+                  duration: 5,
+                  path: {
+                    lineString:
+                      'LINESTRING (-0.10 51.50, -0.11 51.51)',
+                    stopPoints: []
+                  },
+                  disruptions: []
+                },
+                {
+                  mode: { id: 'tube' },
+                  routeOptions: [
+                    {
+                      name: 'Piccadilly',
+                      directions: ['Heathrow']
+                    }
+                  ],
+                  departurePoint: {
+                    commonName: 'Stop A',
+                    naptanId: '940GZZLUSTA'
+                  },
+                  arrivalPoint: {
+                    commonName: 'South Kensington',
+                    naptanId: '940GZZLUSKS'
+                  },
+                  duration: 14,
+                  path: {
+                    lineString:
+                      'LINESTRING (-0.11 51.51, -0.17 51.49)',
+                    stopPoints: [
+                      { name: 'Stop B' }
+                    ]
+                  },
+                  disruptions: []
+                },
+                {
+                  mode: { id: 'walking' },
+                  routeOptions: [],
+                  departurePoint: {
+                    commonName: 'South Kensington'
+                  },
+                  arrivalPoint: {
+                    commonName: 'Natural History Museum'
+                  },
+                  duration: 5,
+                  path: {
+                    lineString:
+                      'LINESTRING (-0.17 51.49, -0.1764 51.4967)',
+                    stopPoints: []
+                  },
+                  disruptions: []
+                }
+              ]
+            }
           ]
-        }]
+        })
       };
     }
   });
@@ -31,8 +92,8 @@ test('TfL provider calls atlas_transit and bridge creates an Atlas navigation se
     { name: 'Natural History Museum', lat: 51.4967, lon: -0.1764 }
   );
 
-  assert.match(requestedUrl, /\/api\/v2\/journeys\?/);
-  assert.match(requestedUrl, /from=51.5%2C-0.1/);
+  assert.match(requestedUrl, /\/Journey\/JourneyResults\//);
+  assert.match(requestedUrl, /\/Journey\/JourneyResults\/51\.5%2C-0\.1\/to\/51\.4967%2C-0\.1764/);
   assert.equal(plans[0].sequence.length, 3);
   assert.equal(plans[0].sequence[0].navigation, 'atlas-offline');
   assert.equal(plans[0].sequence[1].navigation, 'provider-guidance');
