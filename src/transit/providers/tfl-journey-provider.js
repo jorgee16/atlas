@@ -11,16 +11,33 @@ const TFL_BASE_URL =
   'https://api.tfl.gov.uk';
 
 function normalizeMode(value) {
-  const aliases = {
-    bus: 'public-bus',
-    'national-rail': 'train'
-  };
+  const allowed = new Set([
+    'bus',
+    'tube',
+    'dlr',
+    'overground',
+    'tram'
+  ]);
 
   return String(value ?? '')
     .split(',')
     .map(mode => mode.trim())
     .filter(Boolean)
-    .map(mode => aliases[mode] ?? mode)
+    .map(mode => {
+      if (mode === 'public-bus') return 'bus';
+
+      // TfL Journey does not accept these as Journey mode values.
+      if (
+        mode === 'national-rail' ||
+        mode === 'train' ||
+        mode === 'elizabeth-line'
+      ) {
+        return null;
+      }
+
+      return mode;
+    })
+    .filter(mode => mode && allowed.has(mode))
     .join(',');
 }
 
@@ -98,8 +115,6 @@ export class TfLJourneyProvider extends JourneyProvider {
             'tube',
             'dlr',
             'overground',
-            'elizabeth-line',
-            'national-rail',
             'tram'
           ].join(',')
         ),
