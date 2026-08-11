@@ -28,6 +28,10 @@ export class NavigationPlannerView {
     previewState = 'idle',
     previewError = null,
     previewCollapsed = false,
+    transitJourneys = [],
+    selectedTransitJourneyIndex = 0,
+    expandedTransitJourneyIndex = null,
+    transitJourneySession = null,
     onUseGps,
     onTravelMode,
     onPick,
@@ -37,7 +41,9 @@ export class NavigationPlannerView {
     onSelect,
     onSelectRecent,
     onChangeDestination,
+    onPreviewMap,
     onExpandPreview,
+    onSelectTransitJourney,
     onStart
   }) {
     const container =
@@ -93,7 +99,7 @@ export class NavigationPlannerView {
               class="navigation-start-button navigation-start-button--slim"
               type="button"
               data-navigation-start
-            >Start</button>
+            >${travelMode === 'transit' ? 'Start journey' : 'Start'}</button>
           </div>
         `;
 
@@ -138,8 +144,6 @@ export class NavigationPlannerView {
             Route preview
           </div>
 
-          ${this.#travelModeMarkup(travelMode)}
-
           <div class="navigation-confirm-main">
             <span class="navigation-destination-pin" aria-hidden="true"></span>
             <span class="navigation-confirm-copy">
@@ -151,10 +155,41 @@ export class NavigationPlannerView {
 
           ${routeDetails}
 
+          <div class="navigation-mode-choice">
+            <small class="navigation-mode-choice-label">How do you want to go?</small>
+            ${this.#travelModeMarkup(travelMode)}
+          </div>
+
+          ${travelMode === 'transit' && previewState === 'ready'
+            ? this.#transitOptionsMarkup(
+                transitJourneys,
+                selectedTransitJourneyIndex,
+                expandedTransitJourneyIndex
+              )
+            : ''}
+
           ${error ? `
             <div class="navigation-planner-feedback" role="status">
               ${escapeHtml(error)}
             </div>
+          ` : ''}
+
+          ${travelMode === 'transit' && routeReady ? `
+            <button
+              class="navigation-preview-map-button"
+              type="button"
+              data-navigation-preview-map
+            >
+              <span
+                class="navigation-preview-map-icon"
+                aria-hidden="true"
+              >⌑</span>
+
+              <span class="navigation-preview-map-copy">
+                <strong>Preview on map</strong>
+                <small>See selected route</small>
+              </span>
+            </button>
           ` : ''}
 
           <div class="navigation-confirm-actions">
@@ -169,8 +204,8 @@ export class NavigationPlannerView {
               data-navigation-start
               ${!routeReady ? 'disabled' : ''}
             >
-              <span>${previewState === 'loading' ? 'Routing…' : 'Start'}</span>
-              <small>${routeReady ? 'Begin guidance' : 'Offline route'}</small>
+              <span>${previewState === 'loading' ? 'Routing…' : travelMode === 'transit' ? 'Start journey' : 'Start'}</span>
+              <small>${routeReady ? travelMode === 'transit' ? 'Begin selected journey' : 'Begin guidance' : travelMode === 'transit' ? 'Finding TfL journeys' : 'Offline route'}</small>
             </button>
           </div>
         </div>
@@ -181,11 +216,18 @@ export class NavigationPlannerView {
         ?.addEventListener('click', onChangeDestination);
 
       container
+        .querySelector?.('[data-navigation-preview-map]')
+        ?.addEventListener('click', onPreviewMap);
+
+      container
         .querySelector?.('[data-navigation-start]')
         ?.addEventListener('click', onStart);
 
       for (const button of container.querySelectorAll?.('[data-navigation-mode]') ?? []) {
         button.addEventListener('click', () => onTravelMode?.(button.dataset.navigationMode));
+      }
+      for (const button of container.querySelectorAll?.('[data-transit-option]') ?? []) {
+        button.addEventListener('click', () => onSelectTransitJourney?.(Number(button.dataset.transitOption)));
       }
 
       return container;
@@ -220,8 +262,6 @@ export class NavigationPlannerView {
             <strong>Where do you want to go?</strong>
           </span>
         </div>
-
-        ${this.#travelModeMarkup(travelMode)}
 
         <button
           class="navigation-origin-summary"
@@ -417,6 +457,334 @@ export class NavigationPlannerView {
       <div class="navigation-travel-mode" role="group" aria-label="Travel mode">
         <button type="button" data-navigation-mode="drive" class="${mode === 'drive' ? 'on' : ''}" aria-pressed="${mode === 'drive'}"><span aria-hidden="true">▸</span>Drive</button>
         <button type="button" data-navigation-mode="walk" class="${mode === 'walk' ? 'on' : ''}" aria-pressed="${mode === 'walk'}"><span aria-hidden="true">●</span>Walk</button>
+        <button type="button" data-navigation-mode="transit" class="${mode === 'transit' ? 'on' : ''}" aria-pressed="${mode === 'transit'}"><span aria-hidden="true">◇</span>Transit</button>
+      </div>
+    `;
+  }
+
+  #transitOptionsMarkup(
+    journeys,
+    selectedIndex,
+    expandedIndex = null
+  ) {
+    if (!journeys?.length) return '';
+
+    const time = value => {
+      if (!value) return '';
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return '';
+      }
+
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    const modeKey = mode =>
+      String(mode ?? 'transit')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+
+    const visualKey = step => {
+      const line =
+        String(step?.line ?? '')
+          .trim()
+          .toLowerCase();
+
+      const normalizedMode =
+        modeKey(step?.mode);
+
+      if (line.includes('jubilee')) return 'jubilee';
+      if (line.includes('piccadilly')) return 'piccadilly';
+      if (line.includes('district')) return 'district';
+      if (line.includes('central')) return 'central';
+      if (line.includes('circle')) return 'circle';
+      if (line.includes('victoria')) return 'victoria';
+      if (line.includes('northern')) return 'northern';
+      if (line.includes('metropolitan')) return 'metropolitan';
+      if (line.includes('bakerloo')) return 'bakerloo';
+
+      if (
+        line.includes('hammersmith') ||
+        line.includes('city')
+      ) {
+        return 'hammersmith-city';
+      }
+
+      if (
+        line.includes('waterloo') &&
+        line.includes('city')
+      ) {
+        return 'waterloo-city';
+      }
+
+      if (normalizedMode === 'bus' || normalizedMode === 'public-bus') {
+        return 'bus';
+      }
+
+      if (normalizedMode === 'dlr') return 'dlr';
+      if (normalizedMode === 'overground') return 'overground';
+      if (normalizedMode === 'elizabeth-line') return 'elizabeth-line';
+      if (normalizedMode === 'national-rail') return 'national-rail';
+      if (normalizedMode === 'tram') return 'tram';
+      if (normalizedMode === 'tube') return 'tube';
+
+      return normalizedMode || 'transit';
+    };
+
+    const modeLabel = mode => {
+      const normalized = modeKey(mode);
+
+      if (normalized === 'tube') return 'Tube';
+
+      if (
+        normalized === 'bus' ||
+        normalized === 'public-bus'
+      ) {
+        return 'Bus';
+      }
+
+      if (normalized === 'overground') {
+        return 'Overground';
+      }
+
+      if (normalized === 'elizabeth-line') {
+        return 'Elizabeth';
+      }
+
+      if (normalized === 'dlr') {
+        return 'DLR';
+      }
+
+      if (normalized === 'national-rail') {
+        return 'Rail';
+      }
+
+      if (normalized === 'tram') {
+        return 'Tram';
+      }
+
+      return mode
+        ? String(mode)
+        : 'Transit';
+    };
+
+    return `
+      <div
+        class="navigation-transit-options navigation-transit-options--abc"
+        aria-label="Transit journey options"
+      >
+        ${journeys.slice(0, 5).map((journey, index) => {
+          const selected =
+            index === selectedIndex;
+
+          const expanded =
+            index === expandedIndex;
+
+          const sequence =
+            journey.sequence ?? [];
+
+          const transitSteps =
+            sequence.filter(
+              step => step.kind === 'transit'
+            );
+
+          const transportModes =
+            [...new Set(
+              transitSteps
+                .map(step => modeLabel(step.mode))
+                .filter(Boolean)
+            )];
+
+          const changes =
+            Math.max(0, transitSteps.length - 1);
+
+          const walkingMinutes =
+            sequence
+              .filter(step => step.kind === 'walk')
+              .reduce(
+                (total, step) =>
+                  total +
+                  Number(step.durationMinutes ?? 0),
+                0
+              );
+
+          const transportSummary =
+            transportModes.join(' + ') || 'Transit';
+
+          const chips = transitSteps.map(step => {
+            const mode = visualKey(step);
+            const label =
+              step.line || modeLabel(step.mode);
+
+            return `
+              <span
+                class="
+                  navigation-transit-line-chip
+                  navigation-transit-line-chip--${mode}
+                "
+              >
+                ${escapeHtml(label)}
+              </span>
+            `;
+          }).join('');
+
+          const miniTimeline = `
+            <span class="navigation-transit-mini-route">
+              ${sequence.map((step, stepIndex) => {
+                const mode =
+                  step.kind === 'walk'
+                    ? 'walk'
+                    : visualKey(step);
+
+                return `
+                  <span
+                    class="
+                      navigation-transit-mini-node
+                      navigation-transit-mini-node--${mode}
+                    "
+                  ></span>
+
+                  ${stepIndex < sequence.length - 1
+                    ? `
+                      <span
+                        class="
+                          navigation-transit-mini-segment
+                          navigation-transit-mini-segment--${mode}
+                        "
+                      ></span>
+                    `
+                    : ''}
+                `;
+              }).join('')}
+            </span>
+          `;
+
+          const detail = expanded
+            ? `
+              <div class="navigation-transit-timeline">
+                ${sequence.map((step, stepIndex) => {
+                  const walking =
+                    step.kind === 'walk';
+
+                  const mode =
+                    walking
+                      ? 'walk'
+                      : visualKey(step);
+
+                  const label =
+                    walking
+                      ? 'Walk'
+                      : step.line ||
+                        modeLabel(step.mode);
+
+                  const instruction =
+                    step.instruction ||
+                    `${step.fromName ?? ''} → ${step.toName ?? ''}`;
+
+                  return `
+                    <div class="navigation-transit-leg">
+                      <span
+                        class="
+                          navigation-transit-leg-rail
+                          navigation-transit-leg-rail--${mode}
+                        "
+                        aria-hidden="true"
+                      >
+                        <i></i>
+
+                        ${stepIndex < sequence.length - 1
+                          ? '<b></b>'
+                          : ''}
+                      </span>
+
+                      <span class="navigation-transit-leg-copy">
+                        <small>
+                          ${escapeHtml(label)}
+                          ${Number.isFinite(step.durationMinutes)
+                            ? ` · ${step.durationMinutes} min`
+                            : ''}
+                        </small>
+
+                        <strong>
+                          ${escapeHtml(instruction)}
+                        </strong>
+
+                        ${!walking && step.direction
+                          ? `<span>Towards ${escapeHtml(step.direction)}</span>`
+                          : ''}
+                      </span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `
+            : '';
+
+          return `
+            <button
+              type="button"
+              class="
+                navigation-transit-option
+                navigation-transit-option--abc
+                ${selected ? 'on' : ''}
+                ${expanded ? 'is-expanded' : ''}
+              "
+              data-transit-option="${index}"
+              aria-pressed="${selected}"
+              aria-expanded="${expanded}"
+            >
+              <span class="navigation-transit-option-main">
+                <span class="navigation-transit-times">
+                  <strong>
+                    ${time(journey.startTime)}
+                    <i aria-hidden="true">→</i>
+                    ${time(journey.arrivalTime)}
+                  </strong>
+
+                  <small>
+                    ${walkingMinutes
+                      ? `${walkingMinutes} min walk`
+                      : 'No walking'}
+                    <i aria-hidden="true">·</i>
+                    ${changes === 0
+                      ? 'Direct'
+                      : `${changes} change${changes === 1 ? '' : 's'}`}
+                  </small>
+                </span>
+
+                <span class="navigation-transit-duration">
+                  <strong>
+                    ${journey.durationMinutes} min
+                  </strong>
+
+                  <i
+                    class="navigation-transit-chevron"
+                    aria-hidden="true"
+                  >⌄</i>
+                </span>
+              </span>
+
+              <span class="navigation-transit-mode-row">
+                <strong class="navigation-transit-mode-summary">
+                  ${escapeHtml(transportSummary)}
+                </strong>
+
+                <span class="navigation-transit-lines">
+                  ${chips}
+                </span>
+              </span>
+
+              ${expanded ? '' : miniTimeline}
+
+              ${detail}
+            </button>
+          `;
+        }).join('')}
       </div>
     `;
   }

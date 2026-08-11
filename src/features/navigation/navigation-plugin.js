@@ -3,8 +3,9 @@ import {
 } from './navigation-feature.js';
 
 export class NavigationPlugin {
-  constructor() {
+  constructor({ transitBridge = null } = {}) {
     this.id = 'navigation';
+    this.transitBridge = transitBridge;
     this.feature = null;
   }
 
@@ -25,6 +26,7 @@ export class NavigationPlugin {
             '#navigationGuidance'
           ),
         status: context.status,
+        transitBridge: this.transitBridge,
         onArrivalAction: (action, detail) => {
           context.root.dispatchEvent(
             new CustomEvent('navigationarrivalaction', {

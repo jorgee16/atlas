@@ -102,6 +102,40 @@ async function build(args) {
       workDir
     });
 
+    if (config.id === 'portugal') {
+      const ensureScript =
+        path.resolve(
+          projectRoot,
+          'tools/region-builder/ensure-portugal-postcodes.mjs'
+        );
+
+      await new Promise((resolve, reject) => {
+        import('node:child_process')
+          .then(({ spawn }) => {
+            const child = spawn(
+              process.execPath,
+              [ensureScript],
+              {
+                cwd: projectRoot,
+                stdio: 'inherit'
+              }
+            );
+
+            child.once('error', reject);
+
+            child.once('exit', code => {
+              if (code === 0) resolve();
+              else reject(
+                new Error(
+                  `Portugal postcode preparation failed with code ${code}`
+                )
+              );
+            });
+          })
+          .catch(reject);
+      });
+    }
+
     console.log(`[3/3] Normalizing local database...`);
     const metadata = await normalizeRegion({
       rawGeoJson,

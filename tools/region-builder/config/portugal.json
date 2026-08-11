@@ -172,5 +172,8 @@
         ]
       }
     ]
+  },
+  "searchEnrichment": {
+    "geojson": "data/postcodes/portugal-postcodes.geojson"
   }
 }

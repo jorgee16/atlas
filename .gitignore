@@ -36,3 +36,17 @@ ATLAS-*-README.md
 
 # Generated regional POI datasets
 public/region-packages/*/pois.geojson
+
+# GISCO raw postcode source downloads
+data/postcodes/PCODE_PT_2024_4326.geojson
+data/postcodes/PCODE_PT_2024_4326.csv
+
+# Portugal postcode enrichment datasets
+data/postcodes/PCODE_PT_2024_4326.geojson
+data/postcodes/PCODE_PT_2024_4326.csv
+data/postcodes/portugal-postcodes.geojson
+
+# Portugal postcode enrichment datasets
+data/postcodes/PCODE_PT_2024_4326.geojson
+data/postcodes/PCODE_PT_2024_4326.csv
+data/postcodes/portugal-postcodes.geojson

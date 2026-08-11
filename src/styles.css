@@ -5447,7 +5447,7 @@ body.navigation-active:has(.navigation-guidance-expanded)
 /* ---------- Atlas travel mode v37 ---------- */
 .navigation-travel-mode {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
   background: #f1f4f8;
@@ -6392,3 +6392,1918 @@ html[data-atlas-theme="dark"] .leaflet-popup-tip {
   background: #171e2a;
 }
 
+
+/* Atlas London transit bridge V2 */
+.navigation-transit-options{display:grid;gap:8px;margin:12px 0}.navigation-transit-option{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;width:100%;padding:11px 12px;color:inherit;background:rgba(20,29,44,.86);border:1px solid rgba(126,147,181,.24);border-radius:13px;text-align:left}.navigation-transit-option.on{border-color:rgba(104,136,255,.85);box-shadow:0 0 0 2px rgba(104,136,255,.13) inset}.navigation-transit-option>span{display:grid;gap:2px;min-width:0}.navigation-transit-option>span:last-child{text-align:right}.navigation-transit-option strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.navigation-transit-option small{color:var(--muted,#8996aa);font-size:10px}
+
+/* Atlas London transit bridge V3: explicit journey execution */
+.transit-execution{display:grid;gap:10px}.transit-execution-card{display:grid;gap:10px;padding:14px;color:var(--text,#e8edf6);background:rgba(17,25,39,.94);border:1px solid rgba(126,147,181,.24);border-radius:18px}.transit-execution-progress{display:flex;justify-content:space-between;gap:12px}.transit-execution-progress small,.transit-execution-progress span{color:var(--muted,#8996aa);font-size:10px;font-weight:800}.transit-execution-title{font-size:18px}.transit-execution-endpoints{font-size:11px}.transit-execution-state{display:grid;gap:3px;padding:11px 12px;background:rgba(49,94,251,.10);border-radius:13px}.transit-execution-state small{color:#8ea7ff;font-size:9px;font-weight:900;text-transform:uppercase}.transit-execution-state span{color:var(--muted,#a2adbd);font-size:10px}.transit-execution-action,.transit-execution-card--complete button{min-height:44px;border:0;border-radius:13px;background:#315efb;color:#fff;font-weight:900}.transit-execution-card--complete{justify-items:start}.transit-execution-card--complete button{width:100%}
+
+
+
+
+/* Atlas London transit bridge V3.2: endpoint-first mode selector */
+.navigation-mode-choice {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 7px;
+  width: 100%;
+  margin: 4px 0 2px;
+}
+.navigation-mode-choice-label {
+  color: var(--text-muted, #8996aa);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.navigation-mode-choice .navigation-travel-mode {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  margin: 0;
+}
+.navigation-mode-choice .navigation-travel-mode button {
+  min-width: 0;
+}
+
+
+/* Atlas London transit bridge V3.3: immediate travel-mode switching */
+.navigation-mode-choice [data-navigation-mode] {
+  pointer-events: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.navigation-mode-choice [data-navigation-mode]:active {
+  transform: scale(.98);
+}
+
+/* Transit execution overlay must remain interactive above the Leaflet map. */
+.transit-execution,
+.transit-execution-card {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.transit-execution-cancel {
+  position: relative;
+  z-index: 21;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 10px;
+  background: rgba(255,255,255,.12);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+/* Smart TfL journey preview */
+.navigation-transit-option {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+}
+
+.navigation-transit-option-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+}
+
+.navigation-transit-option-head > span {
+  display: grid;
+  gap: 2px;
+}
+
+.navigation-transit-option-head > strong {
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.navigation-transit-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.navigation-transit-lines > span {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(104,136,255,.14);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.navigation-transit-timeline {
+  display: grid;
+  gap: 0;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(126,147,181,.18);
+}
+
+.navigation-transit-leg {
+  display: grid;
+  grid-template-columns: 12px minmax(0,1fr);
+  gap: 9px;
+  padding: 5px 0;
+  text-align: left;
+}
+
+.navigation-transit-leg-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #6688ff;
+}
+
+.navigation-transit-leg-dot.is-walk {
+  background: #9aa6b8;
+}
+
+.navigation-transit-leg-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.navigation-transit-leg-copy small,
+.navigation-transit-leg-copy span {
+  color: var(--muted,#8996aa);
+  font-size: 10px;
+}
+
+.navigation-transit-leg-copy strong {
+  white-space: normal;
+  font-size: 11px;
+}
+
+.navigation-transit-transport-summary {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text, #e8edf6);
+}
+
+
+/* Visible drag affordance for Atlas bottom sheet */
+.bottom-sheet-grabber {
+  display: block;
+  width: 42px;
+  height: 5px;
+  margin: 7px auto 8px;
+  border-radius: 999px;
+  background: rgba(150, 163, 184, .55);
+  pointer-events: none;
+}
+
+html[data-atlas-theme="dark"] .bottom-sheet-grabber {
+  background: rgba(190, 200, 216, .48);
+}
+
+#sheetToggle {
+  cursor: grab;
+  touch-action: none;
+}
+
+#bottomSheet.is-dragging #sheetToggle {
+  cursor: grabbing;
+}
+
+#bottomSheet.is-dragging .bottom-sheet-grabber {
+  transform: scaleX(1.12);
+  opacity: .85;
+}
+
+/* =========================================================
+   Bottom sheet: fixed drag header + independently scrollable body
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .bottom-sheet {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sheet-handle {
+    position: relative;
+    z-index: 5;
+    flex: 0 0 34px;
+    width: 100%;
+    height: 34px;
+    min-height: 34px;
+    touch-action: none;
+    cursor: grab;
+    background: inherit;
+  }
+
+  .bottom-sheet.is-dragging .sheet-handle {
+    cursor: grabbing;
+  }
+
+  /* We already inserted our own grabber. Hide the old anonymous bar. */
+  .sheet-handle > span:not(.bottom-sheet-grabber) {
+    display: none;
+  }
+
+  .bottom-sheet-grabber {
+    display: block;
+    width: 44px;
+    height: 5px;
+    margin: 10px auto 0;
+    border-radius: 999px;
+    background: rgba(150, 163, 184, .62);
+    pointer-events: none;
+  }
+
+  html[data-atlas-theme="dark"] .bottom-sheet-grabber {
+    background: rgba(194, 204, 219, .54);
+  }
+
+  /*
+   * Critical part:
+   * the sheet itself moves; panel-host scrolls.
+   */
+  .bottom-sheet > .panel-host {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .bottom-sheet > .panel-host > .panel-view {
+    min-height: 100%;
+  }
+
+  /* Keep the grabber visible while the content underneath scrolls. */
+  .sheet-handle {
+    box-shadow: 0 1px 0 rgba(126, 147, 181, .10);
+  }
+}
+
+.navigation-preview-map-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px solid rgba(104,136,255,.35);
+  border-radius: 13px;
+  background: rgba(104,136,255,.10);
+  color: var(--text, #e8edf6);
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   Atlas Transit A+B+C option design
+   A = compact
+   B = fast line/mode chips
+   C = expandable vertical timeline
+   ========================================================= */
+
+.navigation-transit-options--abc {
+  display: grid;
+  gap: 9px;
+  margin: 12px 0;
+}
+
+.navigation-transit-option--abc {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 100%;
+  min-height: 82px;
+  padding: 12px 14px;
+  overflow: hidden;
+
+  color: inherit;
+  background: rgba(18, 27, 42, .90);
+
+  border:
+    1px solid rgba(126, 147, 181, .20);
+
+  border-radius: 16px;
+
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.navigation-transit-option--abc.on {
+  border-color: rgba(85, 124, 255, .92);
+
+  box-shadow:
+    0 0 0 1px rgba(85, 124, 255, .20) inset;
+}
+
+.navigation-transit-option--abc.is-expanded {
+  padding-bottom: 14px;
+}
+
+.navigation-transit-option-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.navigation-transit-times {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.navigation-transit-times > strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  font-size: 16px;
+  line-height: 1.15;
+}
+
+.navigation-transit-times > strong > i {
+  color: var(--muted, #8996aa);
+  font-style: normal;
+  font-size: 12px;
+}
+
+.navigation-transit-times > small {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  color: var(--muted, #8996aa);
+  font-size: 10px;
+}
+
+.navigation-transit-times > small > i {
+  font-style: normal;
+  opacity: .7;
+}
+
+.navigation-transit-duration {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.navigation-transit-duration > strong {
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.navigation-transit-chevron {
+  display: inline-block;
+  color: var(--muted, #8996aa);
+  font-style: normal;
+  font-size: 15px;
+
+  transition:
+    transform 180ms ease;
+}
+
+.navigation-transit-option--abc.is-expanded
+.navigation-transit-chevron {
+  transform: rotate(180deg);
+}
+
+.navigation-transit-mode-row {
+  display: grid;
+  gap: 6px;
+}
+
+.navigation-transit-mode-summary {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.navigation-transit-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.navigation-transit-line-chip {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 22px;
+  padding: 3px 8px;
+
+  color: #fff;
+  background: rgba(74, 101, 163, .48);
+
+  border-radius: 7px;
+
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.navigation-transit-line-chip--0 {
+  background: rgba(204, 61, 58, .82);
+}
+
+.navigation-transit-line-chip--1 {
+  background: rgba(22, 153, 167, .82);
+}
+
+.navigation-transit-line-chip--2 {
+  background: rgba(36, 132, 79, .82);
+}
+
+.navigation-transit-line-chip--3 {
+  background: rgba(187, 126, 29, .88);
+}
+
+
+/* C-style expanded timeline */
+
+.navigation-transit-timeline {
+  display: grid;
+  gap: 0;
+
+  margin-top: 4px;
+  padding-top: 10px;
+
+  border-top:
+    1px solid rgba(126, 147, 181, .16);
+}
+
+.navigation-transit-leg {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 9px;
+
+  min-height: 48px;
+
+  text-align: left;
+}
+
+.navigation-transit-leg-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.navigation-transit-leg-rail > i {
+  position: relative;
+  z-index: 2;
+
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+
+  border-radius: 50%;
+  background: #6688ff;
+}
+
+.navigation-transit-leg-rail.is-walk > i {
+  background: #a0abbc;
+}
+
+.navigation-transit-leg-rail > b {
+  position: absolute;
+  z-index: 1;
+
+  top: 14px;
+  bottom: -6px;
+  left: 50%;
+
+  width: 2px;
+
+  background:
+    rgba(104, 136, 255, .42);
+
+  transform:
+    translateX(-50%);
+}
+
+.navigation-transit-leg-rail.is-walk > b {
+  background:
+    rgba(160, 171, 188, .30);
+}
+
+.navigation-transit-leg-copy {
+  display: grid;
+  gap: 2px;
+
+  padding-bottom: 10px;
+  min-width: 0;
+}
+
+.navigation-transit-leg-copy small {
+  color: var(--muted, #8996aa);
+  font-size: 10px;
+}
+
+.navigation-transit-leg-copy strong {
+  white-space: normal;
+  overflow: visible;
+
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.navigation-transit-leg-copy span {
+  color: var(--muted, #8996aa);
+  font-size: 10px;
+}
+
+
+/* Slightly tighter on narrow phones */
+
+@media (max-width: 430px) {
+  .navigation-transit-option--abc {
+    min-height: 76px;
+    padding: 11px 12px;
+  }
+
+  .navigation-transit-times > strong {
+    font-size: 15px;
+  }
+
+  .navigation-transit-duration > strong {
+    font-size: 14px;
+  }
+
+  .navigation-transit-line-chip {
+    padding-inline: 7px;
+  }
+}
+
+
+/* =========================================================
+   FINAL A+B+C TRANSIT CARD OVERRIDES
+   Strongly scoped to beat legacy transit option CSS.
+   ========================================================= */
+
+.navigation-transit-options.navigation-transit-options--abc {
+  display: grid !important;
+  gap: 9px !important;
+  margin: 12px 0 !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-option.navigation-transit-option--abc {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+
+  width: 100% !important;
+  min-height: 0 !important;
+
+  padding: 12px 14px !important;
+
+  color: var(--text, #e8edf6) !important;
+  background: rgba(18, 27, 42, .94) !important;
+
+  border: 1px solid rgba(126, 147, 181, .22) !important;
+  border-radius: 16px !important;
+
+  box-shadow: none !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-option--abc.on {
+  border-color: #557cff !important;
+
+  box-shadow:
+    0 0 0 1px rgba(85, 124, 255, .28) inset !important;
+}
+
+
+/* ---------------------------------------------------------
+   TOP ROW
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-option-main {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-times {
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-times > strong {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+
+  color: #f3f6fb !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+
+  white-space: nowrap !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-times > strong > i {
+  color: #8e9aad !important;
+  font-size: 12px !important;
+  font-style: normal !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-times > small {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+
+  color: #9ba6b7 !important;
+  font-size: 10px !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-times > small > i {
+  font-style: normal !important;
+}
+
+
+/* ---------------------------------------------------------
+   DURATION + CHEVRON
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-duration {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+
+  text-align: right !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-duration > strong {
+  color: #f3f6fb !important;
+
+  font-size: 15px !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-chevron {
+  display: inline-block !important;
+
+  color: #91a0b5 !important;
+
+  font-size: 14px !important;
+  font-style: normal !important;
+
+  transition: transform 180ms ease !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-option--abc.is-expanded
+.navigation-transit-chevron {
+  transform: rotate(180deg) !important;
+}
+
+
+/* ---------------------------------------------------------
+   TRANSPORT SUMMARY
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-mode-row {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+
+  gap: 8px !important;
+
+  width: 100% !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-mode-summary {
+  flex: 0 0 auto !important;
+
+  color: #f2f5fa !important;
+
+  font-size: 11px !important;
+  font-weight: 900 !important;
+
+  text-align: left !important;
+}
+
+
+/* ---------------------------------------------------------
+   RECTANGULAR COLOURED LINE CHIPS
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-lines {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+
+  gap: 5px !important;
+
+  width: auto !important;
+  margin: 0 !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-lines
+.navigation-transit-line-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: auto !important;
+  min-width: 30px !important;
+  min-height: 22px !important;
+
+  margin: 0 !important;
+  padding: 3px 8px !important;
+
+  color: #fff !important;
+
+  border: 0 !important;
+  border-radius: 6px !important;
+
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+
+  text-align: center !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* Red */
+.navigation-transit-options--abc
+.navigation-transit-line-chip--0 {
+  background: #c93b37 !important;
+}
+
+/* Cyan */
+.navigation-transit-options--abc
+.navigation-transit-line-chip--1 {
+  background: #159aa8 !important;
+}
+
+/* Green */
+.navigation-transit-options--abc
+.navigation-transit-line-chip--2 {
+  background: #27884f !important;
+}
+
+/* Amber */
+.navigation-transit-options--abc
+.navigation-transit-line-chip--3 {
+  background: #c58421 !important;
+}
+
+
+/* ---------------------------------------------------------
+   EXPANDED C-STYLE TIMELINE
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-timeline {
+  display: grid !important;
+  gap: 0 !important;
+
+  width: 100% !important;
+
+  margin-top: 4px !important;
+  padding-top: 10px !important;
+
+  border-top:
+    1px solid rgba(126, 147, 181, .18) !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg {
+  display: grid !important;
+
+  grid-template-columns:
+    18px minmax(0, 1fr) !important;
+
+  gap: 9px !important;
+
+  min-height: 48px !important;
+  width: 100% !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail {
+  position: relative !important;
+
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail > i {
+  position: relative !important;
+  z-index: 2 !important;
+
+  width: 9px !important;
+  height: 9px !important;
+
+  margin-top: 5px !important;
+
+  border-radius: 50% !important;
+
+  background: #6688ff !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.is-walk > i {
+  background: #9ca8ba !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail > b {
+  position: absolute !important;
+
+  top: 14px !important;
+  bottom: -6px !important;
+  left: 50% !important;
+
+  width: 2px !important;
+
+  background:
+    rgba(104, 136, 255, .42) !important;
+
+  transform: translateX(-50%) !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.is-walk > b {
+  background:
+    rgba(156, 168, 186, .30) !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-copy {
+  display: grid !important;
+  gap: 2px !important;
+
+  min-width: 0 !important;
+  padding-bottom: 10px !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-copy small {
+  color: #929fb2 !important;
+
+  font-size: 10px !important;
+
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-copy strong {
+  color: #edf1f7 !important;
+
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+
+  white-space: normal !important;
+  text-align: left !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-copy span {
+  color: #929fb2 !important;
+
+  font-size: 10px !important;
+
+  text-align: left !important;
+}
+
+
+/* Mobile density */
+@media (max-width: 430px) {
+  .navigation-transit-options--abc
+  .navigation-transit-option--abc {
+    padding: 11px 12px !important;
+  }
+
+  .navigation-transit-options--abc
+  .navigation-transit-times > strong {
+    font-size: 15px !important;
+  }
+
+  .navigation-transit-options--abc
+  .navigation-transit-duration > strong {
+    font-size: 14px !important;
+  }
+}
+
+
+/* =========================================================
+   Atlas Transit — TfL mode-based colours
+   ========================================================= */
+
+/* Generic fallback */
+.navigation-transit-options--abc
+.navigation-transit-line-chip {
+  background: #42526d !important;
+  color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   BUS — TfL red
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--bus,
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--public-bus {
+  background: #dc241f !important;
+  color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   LONDON UNDERGROUND — TfL blue
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--tube {
+  background: #0019a8 !important;
+  color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   DLR — turquoise
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--dlr {
+  background: #00afad !important;
+  color: #062326 !important;
+}
+
+
+/* ---------------------------------------------------------
+   LONDON OVERGROUND — orange
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--overground {
+  background: #ee7c0e !important;
+  color: #111111 !important;
+}
+
+
+/* ---------------------------------------------------------
+   ELIZABETH LINE — purple
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--elizabeth-line {
+  background: #6950a1 !important;
+  color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   NATIONAL RAIL — dark rail blue
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--national-rail {
+  background: #003b70 !important;
+  color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   TRAM — green
+   --------------------------------------------------------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip--tram {
+  background: #84b817 !important;
+  color: #111111 !important;
+}
+
+
+/* =========================================================
+   FINAL TfL journey visual language
+   ========================================================= */
+
+
+/* ---------- compact mini route ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-mini-route {
+  display: flex !important;
+  align-items: center !important;
+
+  width: 100% !important;
+  height: 16px !important;
+
+  margin-top: 2px !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-mini-node {
+  position: relative !important;
+  z-index: 2 !important;
+
+  flex: 0 0 8px !important;
+
+  width: 8px !important;
+  height: 8px !important;
+
+  border-radius: 50% !important;
+
+  background: #9ba7b8 !important;
+
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.16) !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-mini-segment {
+  position: relative !important;
+  z-index: 1 !important;
+
+  flex: 1 1 auto !important;
+
+  height: 3px !important;
+
+  margin: 0 -1px !important;
+
+  background: #9ba7b8 !important;
+}
+
+
+/* Walk */
+.navigation-transit-mini-segment--walk {
+  background: #9ba7b8 !important;
+}
+
+/* Bus */
+.navigation-transit-mini-segment--bus,
+.navigation-transit-mini-segment--public-bus {
+  background: #dc241f !important;
+}
+
+/* Tube */
+.navigation-transit-mini-segment--tube {
+  background: #0019a8 !important;
+}
+
+/* DLR */
+.navigation-transit-mini-segment--dlr {
+  background: #00afad !important;
+}
+
+/* Overground */
+.navigation-transit-mini-segment--overground {
+  background: #ee7c0e !important;
+}
+
+/* Elizabeth line */
+.navigation-transit-mini-segment--elizabeth-line {
+  background: #6950a1 !important;
+}
+
+/* National Rail */
+.navigation-transit-mini-segment--national-rail {
+  background: #003b70 !important;
+}
+
+/* Tram */
+.navigation-transit-mini-segment--tram {
+  background: #84b817 !important;
+}
+
+
+/* ---------- expanded vertical timeline ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail {
+  position: relative !important;
+
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail > i {
+  position: relative !important;
+  z-index: 2 !important;
+
+  width: 11px !important;
+  height: 11px !important;
+
+  margin-top: 4px !important;
+
+  border-radius: 50% !important;
+
+  background: #9ba7b8 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.10) !important;
+}
+
+.navigation-transit-options--abc
+.navigation-transit-leg-rail > b {
+  position: absolute !important;
+
+  z-index: 1 !important;
+
+  top: 15px !important;
+  bottom: -8px !important;
+  left: 50% !important;
+
+  width: 3px !important;
+
+  transform:
+    translateX(-50%) !important;
+
+  background: #9ba7b8 !important;
+}
+
+
+/* Walk */
+.navigation-transit-leg-rail--walk > i,
+.navigation-transit-leg-rail--walk > b {
+  background: #9ba7b8 !important;
+}
+
+
+/* Bus */
+.navigation-transit-leg-rail--bus > i,
+.navigation-transit-leg-rail--bus > b,
+
+.navigation-transit-leg-rail--public-bus > i,
+.navigation-transit-leg-rail--public-bus > b {
+  background: #dc241f !important;
+}
+
+
+/* Tube */
+.navigation-transit-leg-rail--tube > i,
+.navigation-transit-leg-rail--tube > b {
+  background: #0019a8 !important;
+}
+
+
+/* DLR */
+.navigation-transit-leg-rail--dlr > i,
+.navigation-transit-leg-rail--dlr > b {
+  background: #00afad !important;
+}
+
+
+/* Overground */
+.navigation-transit-leg-rail--overground > i,
+.navigation-transit-leg-rail--overground > b {
+  background: #ee7c0e !important;
+}
+
+
+/* Elizabeth */
+.navigation-transit-leg-rail--elizabeth-line > i,
+.navigation-transit-leg-rail--elizabeth-line > b {
+  background: #6950a1 !important;
+}
+
+
+/* National Rail */
+.navigation-transit-leg-rail--national-rail > i,
+.navigation-transit-leg-rail--national-rail > b {
+  background: #003b70 !important;
+}
+
+
+/* Tram */
+.navigation-transit-leg-rail--tram > i,
+.navigation-transit-leg-rail--tram > b {
+  background: #84b817 !important;
+}
+
+
+/* ---------- Preview on map ---------- */
+
+.navigation-preview-map-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 12px !important;
+
+  width: 100% !important;
+  min-height: 58px !important;
+
+  margin-top: 10px !important;
+  padding: 8px 16px !important;
+
+  color: #eef2ff !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(40, 57, 90, .72),
+      rgba(27, 40, 65, .72)
+    ) !important;
+
+  border:
+    1px solid rgba(93, 119, 255, .55) !important;
+
+  border-radius: 14px !important;
+
+  font-weight: 800 !important;
+}
+
+.navigation-preview-map-icon {
+  display: grid !important;
+  place-items: center !important;
+
+  width: 30px !important;
+  height: 30px !important;
+
+  color: #6f8cff !important;
+
+  font-size: 26px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+}
+
+.navigation-preview-map-copy {
+  display: grid !important;
+  gap: 2px !important;
+
+  text-align: left !important;
+}
+
+.navigation-preview-map-copy strong {
+  color: #f4f6fb !important;
+
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.navigation-preview-map-copy small {
+  color: #9ca8ba !important;
+
+  font-size: 9px !important;
+  font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   TfL Underground line colours
+   ========================================================= */
+
+/* Jubilee */
+.navigation-transit-line-chip--jubilee,
+.navigation-transit-mini-segment--jubilee,
+.navigation-transit-leg-rail--jubilee > i,
+.navigation-transit-leg-rail--jubilee > b {
+  background: #7c878e !important;
+}
+
+/* Piccadilly */
+.navigation-transit-line-chip--piccadilly,
+.navigation-transit-mini-segment--piccadilly,
+.navigation-transit-leg-rail--piccadilly > i,
+.navigation-transit-leg-rail--piccadilly > b {
+  background: #003688 !important;
+}
+
+/* District */
+.navigation-transit-line-chip--district,
+.navigation-transit-mini-segment--district,
+.navigation-transit-leg-rail--district > i,
+.navigation-transit-leg-rail--district > b {
+  background: #00782a !important;
+}
+
+/* Central */
+.navigation-transit-line-chip--central,
+.navigation-transit-mini-segment--central,
+.navigation-transit-leg-rail--central > i,
+.navigation-transit-leg-rail--central > b {
+  background: #e32017 !important;
+}
+
+/* Circle */
+.navigation-transit-line-chip--circle,
+.navigation-transit-mini-segment--circle,
+.navigation-transit-leg-rail--circle > i,
+.navigation-transit-leg-rail--circle > b {
+  background: #ffd300 !important;
+  color: #111 !important;
+}
+
+/* Victoria */
+.navigation-transit-line-chip--victoria,
+.navigation-transit-mini-segment--victoria,
+.navigation-transit-leg-rail--victoria > i,
+.navigation-transit-leg-rail--victoria > b {
+  background: #0098d4 !important;
+}
+
+/* Northern */
+.navigation-transit-line-chip--northern,
+.navigation-transit-mini-segment--northern,
+.navigation-transit-leg-rail--northern > i,
+.navigation-transit-leg-rail--northern > b {
+  background: #000000 !important;
+}
+
+/* Metropolitan */
+.navigation-transit-line-chip--metropolitan,
+.navigation-transit-mini-segment--metropolitan,
+.navigation-transit-leg-rail--metropolitan > i,
+.navigation-transit-leg-rail--metropolitan > b {
+  background: #9b0056 !important;
+}
+
+/* Bakerloo */
+.navigation-transit-line-chip--bakerloo,
+.navigation-transit-mini-segment--bakerloo,
+.navigation-transit-leg-rail--bakerloo > i,
+.navigation-transit-leg-rail--bakerloo > b {
+  background: #894e24 !important;
+}
+
+/* Hammersmith & City */
+.navigation-transit-line-chip--hammersmith-city,
+.navigation-transit-mini-segment--hammersmith-city,
+.navigation-transit-leg-rail--hammersmith-city > i,
+.navigation-transit-leg-rail--hammersmith-city > b {
+  background: #f3a9bb !important;
+  color: #111 !important;
+}
+
+/* Waterloo & City */
+.navigation-transit-line-chip--waterloo-city,
+.navigation-transit-mini-segment--waterloo-city,
+.navigation-transit-leg-rail--waterloo-city > i,
+.navigation-transit-leg-rail--waterloo-city > b {
+  background: #95cdba !important;
+  color: #111 !important;
+}
+
+
+/* =========================================================
+   Non-Underground TfL modes
+   ========================================================= */
+
+/* Bus */
+.navigation-transit-line-chip--bus,
+.navigation-transit-mini-segment--bus,
+.navigation-transit-leg-rail--bus > i,
+.navigation-transit-leg-rail--bus > b {
+  background: #dc241f !important;
+}
+
+/* DLR */
+.navigation-transit-line-chip--dlr,
+.navigation-transit-mini-segment--dlr,
+.navigation-transit-leg-rail--dlr > i,
+.navigation-transit-leg-rail--dlr > b {
+  background: #00afad !important;
+}
+
+/* Overground */
+.navigation-transit-line-chip--overground,
+.navigation-transit-mini-segment--overground,
+.navigation-transit-leg-rail--overground > i,
+.navigation-transit-leg-rail--overground > b {
+  background: #ee7c0e !important;
+}
+
+/* Elizabeth line */
+.navigation-transit-line-chip--elizabeth-line,
+.navigation-transit-mini-segment--elizabeth-line,
+.navigation-transit-leg-rail--elizabeth-line > i,
+.navigation-transit-leg-rail--elizabeth-line > b {
+  background: #6950a1 !important;
+}
+
+/* National Rail */
+.navigation-transit-line-chip--national-rail,
+.navigation-transit-mini-segment--national-rail,
+.navigation-transit-leg-rail--national-rail > i,
+.navigation-transit-leg-rail--national-rail > b {
+  background: #003b70 !important;
+}
+
+/* Tram */
+.navigation-transit-line-chip--tram,
+.navigation-transit-mini-segment--tram,
+.navigation-transit-leg-rail--tram > i,
+.navigation-transit-leg-rail--tram > b {
+  background: #84b817 !important;
+  color: #111 !important;
+}
+
+/* =========================================================
+   FINAL FIX — TfL line colours must beat generic ABC styles
+   ========================================================= */
+
+/* ---------- BUS ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--bus,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--bus,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--bus > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--bus > b {
+  background: #dc241f !important;
+  color: #fff !important;
+}
+
+
+/* ---------- JUBILEE ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--jubilee,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--jubilee,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--jubilee > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--jubilee > b {
+  background: #7c878e !important;
+  color: #fff !important;
+}
+
+
+/* ---------- PICCADILLY ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--piccadilly,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--piccadilly,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--piccadilly > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--piccadilly > b {
+  background: #003688 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- DISTRICT ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--district,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--district,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--district > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--district > b {
+  background: #00782a !important;
+  color: #fff !important;
+}
+
+
+/* ---------- CENTRAL ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--central,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--central,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--central > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--central > b {
+  background: #e32017 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- CIRCLE ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--circle,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--circle,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--circle > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--circle > b {
+  background: #ffd300 !important;
+  color: #111 !important;
+}
+
+
+/* ---------- VICTORIA ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--victoria,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--victoria,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--victoria > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--victoria > b {
+  background: #0098d4 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- NORTHERN ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--northern,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--northern,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--northern > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--northern > b {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- BAKERLOO ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--bakerloo,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--bakerloo,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--bakerloo > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--bakerloo > b {
+  background: #894e24 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- METROPOLITAN ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--metropolitan,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--metropolitan,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--metropolitan > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--metropolitan > b {
+  background: #9b0056 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- HAMMERSMITH & CITY ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--hammersmith-city,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--hammersmith-city,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--hammersmith-city > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--hammersmith-city > b {
+  background: #f3a9bb !important;
+  color: #111 !important;
+}
+
+
+/* ---------- WATERLOO & CITY ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--waterloo-city,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--waterloo-city,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--waterloo-city > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--waterloo-city > b {
+  background: #95cdba !important;
+  color: #111 !important;
+}
+
+
+/* ---------- DLR ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--dlr,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--dlr,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--dlr > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--dlr > b {
+  background: #00afad !important;
+  color: #111 !important;
+}
+
+
+/* ---------- OVERGROUND ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--overground,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--overground,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--overground > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--overground > b {
+  background: #ee7c0e !important;
+  color: #111 !important;
+}
+
+
+/* ---------- ELIZABETH LINE ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--elizabeth-line,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--elizabeth-line,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--elizabeth-line > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--elizabeth-line > b {
+  background: #6950a1 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- NATIONAL RAIL ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--national-rail,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--national-rail,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--national-rail > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--national-rail > b {
+  background: #003b70 !important;
+  color: #fff !important;
+}
+
+
+/* ---------- TRAM ---------- */
+
+.navigation-transit-options--abc
+.navigation-transit-line-chip.navigation-transit-line-chip--tram,
+.navigation-transit-options--abc
+.navigation-transit-mini-segment.navigation-transit-mini-segment--tram,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--tram > i,
+.navigation-transit-options--abc
+.navigation-transit-leg-rail.navigation-transit-leg-rail--tram > b {
+  background: #84b817 !important;
+  color: #111 !important;
+}
+
+
+
+/* =========================================================
+   Atlas Transit V3.4
+   Compact active-journey strip
+   ========================================================= */
+
+.transit-execution {
+  display: block;
+  width: 100%;
+}
+
+.transit-execution-card--compact {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+
+  background: rgba(17,25,39,.94);
+  border: 1px solid rgba(126,147,181,.24);
+  border-radius: 18px;
+}
+
+.transit-execution-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+
+  min-height: 72px;
+  padding: 8px;
+}
+
+.transit-execution-summary {
+  display: grid;
+  grid-template-columns:
+    34px
+    minmax(0,1fr)
+    20px;
+
+  align-items: center;
+  gap: 9px;
+
+  flex: 1 1 auto;
+  min-width: 0;
+
+  padding: 4px;
+
+  color: inherit;
+  background: transparent;
+  border: 0;
+
+  text-align: left;
+  cursor: pointer;
+
+  touch-action: manipulation;
+}
+
+.transit-execution-mode-icon {
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 11px;
+
+  color: #fff;
+  background: #315efb;
+
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.transit-execution-mode-icon.is-walk {
+  background: rgba(126,147,181,.24);
+  color: #dce5f2;
+}
+
+.transit-execution-summary-copy {
+  display: grid;
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.transit-execution-summary-copy small {
+  overflow: hidden;
+
+  color: var(--muted,#8996aa);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transit-execution-summary-copy strong {
+  overflow: hidden;
+
+  color: var(--text,#e8edf6);
+
+  font-size: 14px;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transit-execution-chevron {
+  color: var(--muted,#8996aa);
+
+  font-size: 22px;
+  line-height: 1;
+
+  text-align: center;
+}
+
+.transit-execution-action--inline {
+  align-self: center;
+
+  width: auto;
+  min-width: 88px;
+  min-height: 46px;
+
+  padding: 0 14px;
+
+  border-radius: 13px;
+
+  white-space: nowrap;
+}
+
+.transit-execution-details {
+  display: grid;
+  gap: 9px;
+
+  padding:
+    0
+    12px
+    12px;
+
+  border-top:
+    1px solid
+    rgba(126,147,181,.16);
+}
+
+.transit-execution-details
+.transit-execution-endpoints {
+  padding-top: 10px;
+
+  color: var(--muted,#8996aa);
+
+  font-size: 11px;
+}
+
+.transit-execution-details
+.transit-execution-state {
+  margin: 0;
+}
+
+.transit-execution-card--compact
+.transit-execution-cancel {
+  min-height: 40px;
+}
+
+
+/* Phones: keep the active journey especially compact. */
+
+@media (max-width: 760px) {
+
+  .transit-execution-strip {
+    min-height: 68px;
+    padding: 7px 8px;
+  }
+
+  .transit-execution-summary {
+    grid-template-columns:
+      32px
+      minmax(0,1fr)
+      18px;
+
+    gap: 8px;
+  }
+
+  .transit-execution-mode-icon {
+    width: 32px;
+    height: 32px;
+
+    border-radius: 10px;
+  }
+
+  .transit-execution-summary-copy strong {
+    font-size: 13px;
+  }
+
+  .transit-execution-action--inline {
+    min-width: 78px;
+    min-height: 42px;
+
+    padding-inline: 11px;
+
+    font-size: 12px;
+  }
+
+}

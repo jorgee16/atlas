@@ -223,6 +223,41 @@ function words(value) {
   return normalizeSearchText(value).split(/\s+/).filter(Boolean);
 }
 
+function normalizePostcode(value) {
+  return String(value ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+}
+
+function looksLikeUkPostcode(value) {
+  const compact = normalizePostcode(value);
+
+  return /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(compact) ||
+    /^[A-Z]{1,2}\d[A-Z\d]?$/.test(compact);
+}
+
+function looksLikePortuguesePostcode(value) {
+  return /^\d{4}(?:-?\d{0,3})?$/.test(
+    String(value ?? '').trim()
+  );
+}
+
+function parsedAddressQuery(value) {
+  const normalized = normalizeSearchText(value);
+
+  const match =
+    normalized.match(/^([0-9]+[a-z]?(?:[-/][0-9]+[a-z]?)?)\s+(.+)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    houseNumber: match[1],
+    street: match[2]
+  };
+}
+
 function editDistanceAtMostOne(left, right) {
   if (Math.abs(left.length - right.length) > 1) return false;
   if (left === right) return true;
@@ -270,6 +305,16 @@ function tokenScore(token, fieldWords) {
 
 function searchEntry(feature, featureIndex) {
   const properties = feature?.properties ?? {};
+
+  const houseNumber =
+    normalizeSearchText(properties['addr:housenumber']);
+
+  const street =
+    normalizeSearchText(properties['addr:street']);
+
+  const postcode =
+    normalizePostcode(properties['addr:postcode']);
+
   const address = [
     properties['addr:housenumber'],
     properties['addr:street'],
@@ -317,33 +362,131 @@ function searchEntry(feature, featureIndex) {
     words: words(value)
   })).filter(field => field.text);
 
-  return { index: featureIndex, fields };
+  return {
+    index: featureIndex,
+    fields,
+    houseNumber,
+    street,
+    postcode
+  };
 }
 
-function scoreSearchEntry(entry, normalizedQuery, queryTokens) {
+function scoreSearchEntry(
+  entry,
+  normalizedQuery,
+  queryTokens
+) {
+  const postcodeQuery =
+    (
+      looksLikeUkPostcode(normalizedQuery) ||
+      looksLikePortuguesePostcode(normalizedQuery)
+    )
+      ? normalizePostcode(normalizedQuery)
+      : null;
+
+  const exactPostcode =
+    postcodeQuery &&
+    entry.postcode === postcodeQuery;
+
+  const prefixPostcode =
+    postcodeQuery &&
+    entry.postcode &&
+    entry.postcode.startsWith(postcodeQuery);
+
+  const addressQuery =
+    parsedAddressQuery(normalizedQuery);
+
+  let exactAddress = false;
+  let prefixAddress = false;
+  let partialAddress = false;
+
+  if (addressQuery) {
+    const queryHouse =
+      normalizeSearchText(
+        addressQuery.houseNumber
+      );
+
+    const queryStreet =
+      normalizeSearchText(
+        addressQuery.street
+      );
+
+    exactAddress =
+      entry.houseNumber === queryHouse &&
+      entry.street === queryStreet;
+
+    prefixAddress =
+      entry.houseNumber === queryHouse &&
+      entry.street.startsWith(queryStreet);
+
+    partialAddress =
+      entry.houseNumber === queryHouse &&
+      entry.street.includes(queryStreet);
+  }
+
   let score = 0;
 
   for (const token of queryTokens) {
     let tokenBest = Infinity;
 
     for (const field of entry.fields) {
-      const match = tokenScore(token, field.words);
-      if (!Number.isFinite(match)) continue;
+      const match =
+        tokenScore(token, field.words);
+
+      if (!Number.isFinite(match)) {
+        continue;
+      }
 
       tokenBest = Math.min(
         tokenBest,
-        match * 10 + SEARCH_FIELD_WEIGHTS[field.kind]
+        match * 10 +
+          SEARCH_FIELD_WEIGHTS[field.kind]
       );
     }
 
-    if (!Number.isFinite(tokenBest)) return null;
+    if (!Number.isFinite(tokenBest)) {
+      if (
+        exactPostcode ||
+        prefixPostcode ||
+        exactAddress ||
+        prefixAddress ||
+        partialAddress
+      ) {
+        continue;
+      }
+
+      return null;
+    }
+
     score += tokenBest;
   }
 
-  const name = entry.fields.find(field => field.kind === 'name')?.text ?? '';
-  if (name === normalizedQuery) score -= 40;
-  else if (name.startsWith(normalizedQuery)) score -= 20;
-  else if (name.includes(normalizedQuery)) score -= 8;
+  const name =
+    entry.fields.find(
+      field => field.kind === 'name'
+    )?.text ?? '';
+
+  if (name === normalizedQuery) {
+    score -= 40;
+  } else if (name.startsWith(normalizedQuery)) {
+    score -= 20;
+  } else if (name.includes(normalizedQuery)) {
+    score -= 8;
+  }
+
+  if (exactPostcode) {
+    score -= 120;
+  } else if (prefixPostcode) {
+    score -= 70;
+  }
+
+  if (exactAddress) {
+    score -= 140;
+  } else if (prefixAddress) {
+    score -= 110;
+  } else if (partialAddress) {
+    score -= 80;
+  }
 
   return score;
 }
@@ -444,15 +587,176 @@ export class LocalRegionProvider {
     }
 
     const dataset = await this.#loadRegion(region);
+
+    const compactPostcode =
+      normalizePostcode(normalizedQuery)
+        .toLowerCase();
+
+    const isPostcodeQuery =
+      looksLikeUkPostcode(normalizedQuery) ||
+      looksLikePortuguesePostcode(normalizedQuery);
+
     const queryTokens =
-      normalizedQuery.split(/\s+/);
+      isPostcodeQuery && compactPostcode
+        ? [compactPostcode]
+        : normalizedQuery.split(/\s+/);
 
-    dataset.searchEntries ??=
-      dataset.features
-        .map(searchEntry)
-        .filter(entry => entry.fields.length);
+    let candidateIndexes = null;
 
-    const matches = dataset.searchEntries
+    if (dataset.searchIndex?.tokens) {
+      const tokens =
+        [...queryTokens];
+
+      if (
+        isPostcodeQuery &&
+        compactPostcode
+      ) {
+        tokens.push(compactPostcode);
+      }
+
+      let postingLists =
+        [...new Set(tokens)]
+          .map(token =>
+            dataset.searchIndex.tokens[token] ?? null
+          )
+          .filter(Boolean)
+          .sort(
+            (left, right) =>
+              left.length - right.length
+          );
+
+      /*
+       * Avoid constructing enormous Sets for generic words such as
+       * "london", "road" or "street" when another query token already
+       * gives us a selective candidate list.
+       *
+       * Final scoreSearchEntry() still checks the complete query, so
+       * skipping a huge posting here changes candidate generation only,
+       * not matching semantics.
+       */
+      if (postingLists.length > 1) {
+        const smallest = postingLists[0].length;
+
+        const usefulLimit =
+          Math.max(
+            100_000,
+            smallest * 100
+          );
+
+        postingLists = [
+          postingLists[0],
+          ...postingLists
+            .slice(1)
+            .filter(list =>
+              list.length <= usefulLimit
+            )
+        ];
+      }
+
+      if (postingLists.length) {
+        /*
+         * Start with the smallest posting and keep IDs
+         * appearing in every available query posting.
+         */
+        const candidates =
+          new Set(postingLists[0]);
+
+        for (
+          let listIndex = 1;
+          listIndex < postingLists.length;
+          listIndex += 1
+        ) {
+          const current =
+            new Set(postingLists[listIndex]);
+
+          for (const id of candidates) {
+            if (!current.has(id)) {
+              candidates.delete(id);
+            }
+          }
+
+          if (!candidates.size) {
+            break;
+          }
+        }
+
+        /*
+         * If strict intersection became empty, use the
+         * union instead. The existing scorer will reject
+         * irrelevant records.
+         */
+        if (!candidates.size) {
+          for (const list of postingLists) {
+            for (const id of list) {
+              candidates.add(id);
+            }
+          }
+        }
+
+        candidateIndexes =
+          [...candidates];
+      } else {
+        candidateIndexes = [];
+      }
+    }
+
+    /*
+     * Older packages without search-index.json retain
+     * the legacy search path.
+     */
+    const entries =
+      candidateIndexes === null
+        ? (
+            dataset.searchEntries ??=
+              dataset.features
+                .map(searchEntry)
+                .filter(
+                  entry =>
+                    entry.fields.length
+                )
+          )
+        : candidateIndexes
+            .map(index => {
+              let entry =
+                dataset.searchEntryCache.get(index);
+
+              if (!entry) {
+                entry = searchEntry(
+                  dataset.features[index],
+                  index
+                );
+
+                /*
+                 * Keep memory bounded. 25k normalized entries is enough to
+                 * make incremental typing fast without rebuilding a second
+                 * million-record index in RAM.
+                 */
+                if (
+                  dataset.searchEntryCache.size >= 25_000
+                ) {
+                  const oldest =
+                    dataset.searchEntryCache
+                      .keys()
+                      .next()
+                      .value;
+
+                  dataset.searchEntryCache.delete(oldest);
+                }
+
+                dataset.searchEntryCache.set(
+                  index,
+                  entry
+                );
+              }
+
+              return entry;
+            })
+            .filter(
+              entry =>
+                entry.fields.length
+            );
+
+    const matches = entries
       .map(entry => {
         const matchScore = scoreSearchEntry(
           entry,
@@ -503,11 +807,27 @@ export class LocalRegionProvider {
       region.poiUrl.replace(/pois\.geojson$/, 'poi-index.json')
     );
 
-    const [poiResponse, indexResponse] =
-      await Promise.all([
-        this.#fetchRegionAsset(poiUrl),
-        this.#fetchRegionAsset(indexUrl)
-      ]);
+    const searchUrl =
+      region.searchUrl ??
+      region.assets?.search ??
+      poiUrl.replace(
+        /pois\.geojson$/,
+        'search-index.json'
+      );
+
+    const [
+      poiResponse,
+      indexResponse,
+      searchResponse
+    ] = await Promise.all([
+      this.#fetchRegionAsset(poiUrl),
+      this.#fetchRegionAsset(indexUrl),
+
+      // Search index is optional so older installed
+      // region packages remain compatible.
+      this.#fetchRegionAsset(searchUrl)
+        .catch(() => null)
+    ]);
 
     if (!poiResponse.ok) {
       throw new Error(
@@ -521,15 +841,33 @@ export class LocalRegionProvider {
       );
     }
 
-    const [poiDocument, index] = await Promise.all([
+    const [
+      poiDocument,
+      index,
+      searchIndex
+    ] = await Promise.all([
       poiResponse.json(),
-      indexResponse.json()
+      indexResponse.json(),
+
+      searchResponse?.ok
+        ? searchResponse.json()
+        : Promise.resolve(null)
     ]);
 
     const dataset = {
       features: poiDocument.features ?? [],
       index,
-      searchEntries: null
+      searchIndex:
+        searchIndex?.kind === 'atlas-text-index'
+          ? searchIndex
+          : null,
+
+      // Legacy full-index fallback for older region packages.
+      searchEntries: null,
+
+      // V1 text-index searches repeatedly touch the same candidates while
+      // the user types. Cache their normalized search representation.
+      searchEntryCache: new Map()
     };
 
     if (

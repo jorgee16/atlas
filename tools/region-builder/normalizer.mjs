@@ -270,6 +270,169 @@ async function writeSpatialIndex({
   }
 }
 
+
+function normalizeSearchToken(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function compactPostcode(value) {
+  return String(value ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .toLowerCase();
+}
+
+function searchTokensForProperties(properties) {
+  const values = [
+    properties.name,
+    properties.alt_name,
+    properties.short_name,
+    properties.official_name,
+    properties.loc_name,
+    properties.old_name,
+    properties['name:en'],
+    properties.ref,
+    properties['addr:housenumber'],
+    properties['addr:street'],
+    properties['addr:postcode'],
+    properties['addr:city'],
+    properties.municipality,
+    properties.district,
+    properties.place,
+    properties.amenity,
+    properties.tourism,
+    properties.shop,
+    properties.railway,
+    properties.aeroway
+  ];
+
+  const tokens = new Set();
+
+  for (const value of values) {
+    const normalized =
+      normalizeSearchToken(value);
+
+    for (const token of normalized.split(/\s+/)) {
+      if (token.length >= 2) {
+        tokens.add(token);
+      }
+    }
+  }
+
+  const postcode =
+    compactPostcode(properties['addr:postcode']);
+
+  if (postcode.length >= 3) {
+    tokens.add(postcode);
+  }
+
+  return tokens;
+}
+
+async function writeSearchIndex({
+  filePath,
+  postings,
+  featureCount
+}) {
+  const tempPath =
+    `${filePath}.partial`;
+
+  const handle =
+    await fs.open(tempPath, 'w');
+
+  const writer =
+    new BufferedFileWriter(handle);
+
+  try {
+    const entries =
+      [...postings.entries()]
+        .sort(([left], [right]) =>
+          left.localeCompare(right)
+        );
+
+    await writer.write(
+      '{"version":1,"kind":"atlas-text-index",' +
+      `"featureCount":${featureCount},` +
+      `"tokenCount":${entries.length},"tokens":{`
+    );
+
+    for (
+      let index = 0;
+      index < entries.length;
+      index += 1
+    ) {
+      const [token, featureIndexes] =
+        entries[index];
+
+      if (index > 0) {
+        await writer.write(',');
+      }
+
+      await writer.write(
+        `${JSON.stringify(token)}:${JSON.stringify(featureIndexes)}`
+      );
+    }
+
+    await writer.write('}}');
+    await writer.close();
+
+    await fs.rename(
+      tempPath,
+      filePath
+    );
+  } catch (error) {
+    await handle.close().catch(() => {});
+    await fs.rm(
+      tempPath,
+      { force: true }
+    );
+
+    throw error;
+  }
+}
+
+
+async function extraSearchFeatures(config) {
+  const configuredPath =
+    config.searchEnrichment?.geojson;
+
+  if (!configuredPath) {
+    return [];
+  }
+
+  const filePath = path.resolve(
+    configuredPath
+  );
+
+  try {
+    const document = JSON.parse(
+      await fs.readFile(
+        filePath,
+        'utf8'
+      )
+    );
+
+    return Array.isArray(document.features)
+      ? document.features
+      : [];
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.warn(
+        `  Search enrichment not found: ${configuredPath}; continuing without it.`
+      );
+
+      return [];
+    }
+
+    throw error;
+  }
+}
+
 export async function normalizeRegion({
   rawGeoJson,
   config,
@@ -283,6 +446,11 @@ export async function normalizeRegion({
 
   const seen = new Set();
   const cells = {};
+
+  // Token -> feature indexes.
+  // Generated once during packaging instead of on the phone.
+  const searchPostings = new Map();
+
   let featureCount = 0;
 
   const poiPath = path.join(outputDir, 'pois.geojson');
@@ -345,6 +513,24 @@ export async function normalizeRegion({
         cellSizeDegrees
       );
 
+      for (
+        const token of
+        searchTokensForProperties(normalized.properties)
+      ) {
+        let posting =
+          searchPostings.get(token);
+
+        if (!posting) {
+          posting = [];
+          searchPostings.set(
+            token,
+            posting
+          );
+        }
+
+        posting.push(featureCount);
+      }
+
       if (!first) {
         await poiWriter.write(',');
       }
@@ -361,6 +547,101 @@ export async function normalizeRegion({
           `  normalized ${featureCount.toLocaleString()} records...`
         );
       }
+    }
+
+    /*
+     * Portugal search enrichment.
+     *
+     * GISCO postcode points are search-only destinations. They participate
+     * in destination lookup and spatial indexing but remain hidden from
+     * Nearby because properties.search_only === true.
+     */
+    const extraFeatures =
+      await extraSearchFeatures(config);
+
+    if (extraFeatures.length) {
+      console.log(
+        `  merging ${extraFeatures.length.toLocaleString()} Portugal postcode records...`
+      );
+    }
+
+    for (const feature of extraFeatures) {
+      const coordinates =
+        feature?.geometry?.coordinates;
+
+      if (
+        feature?.geometry?.type !== 'Point' ||
+        !Array.isArray(coordinates) ||
+        coordinates.length < 2 ||
+        !Number.isFinite(coordinates[0]) ||
+        !Number.isFinite(coordinates[1])
+      ) {
+        continue;
+      }
+
+      const id =
+        String(
+          feature.id ??
+          `extra:${featureCount}`
+        );
+
+      if (seen.has(id)) {
+        continue;
+      }
+
+      seen.add(id);
+
+      const normalized = {
+        type: 'Feature',
+        id,
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            coordinates[0],
+            coordinates[1]
+          ]
+        },
+        properties: {
+          ...(feature.properties ?? {}),
+          search_only: true
+        }
+      };
+
+      addSpatialIndexFeature(
+        cells,
+        featureCount,
+        coordinates,
+        cellSizeDegrees
+      );
+
+      for (
+        const token of
+        searchTokensForProperties(normalized.properties)
+      ) {
+        let posting =
+          searchPostings.get(token);
+
+        if (!posting) {
+          posting = [];
+          searchPostings.set(
+            token,
+            posting
+          );
+        }
+
+        posting.push(featureCount);
+      }
+
+      if (!first) {
+        await poiWriter.write(',');
+      }
+
+      await poiWriter.write(
+        JSON.stringify(normalized)
+      );
+
+      first = false;
+      featureCount += 1;
     }
 
     await poiWriter.write(']}');
@@ -383,6 +664,22 @@ export async function normalizeRegion({
     featureCount
   });
 
+  const searchIndexPath =
+    path.join(
+      outputDir,
+      'search-index.json'
+    );
+
+  console.log(
+    `  writing ${searchPostings.size.toLocaleString()} search tokens...`
+  );
+
+  await writeSearchIndex({
+    filePath: searchIndexPath,
+    postings: searchPostings,
+    featureCount
+  });
+
   const cellCount = Object.keys(cells).length;
 
   const metadata = {
@@ -392,6 +689,7 @@ export async function normalizeRegion({
     bounds: config.bbox,
     poiUrl: `/regions/${config.id}/pois.geojson`,
     indexUrl: `/regions/${config.id}/poi-index.json`,
+    searchUrl: `/regions/${config.id}/search-index.json`,
     poiCount: featureCount,
     spatialIndex: {
       kind: 'uniform-grid',

@@ -26,7 +26,8 @@
           "strings": "/regions/london/routing/strings.bin",
           "restrictions": "/regions/london/routing/restrictions.bin",
           "spatialIndex": "/regions/london/routing/spatial-index.bin"
-        }
+        },
+        "search": "/regions/london/search-index.json"
       },
       "sizeBytes": 512664705,
       "package": {
@@ -116,8 +117,8 @@
       "id": "portugal",
       "name": "Portugal",
       "country": "Portugal",
-      "version": 6,
-      "updatedAt": "2026-08-09",
+      "version": 7,
+      "updatedAt": "2026-08-11",
       "bundled": false,
       "bounds": [
         -31.4,
@@ -203,9 +204,10 @@
               "spatialIndex": "/region-packages/portugal/routing/azores/spatial-index.bin"
             }
           ]
-        }
+        },
+        "search": "/region-packages/portugal/search-index.json"
       },
-      "sizeBytes": 662074402,
+      "sizeBytes": 791957192,
       "package": {
         "schemaVersion": 1,
         "files": [
@@ -213,15 +215,15 @@
             "url": "/region-packages/portugal/pois.geojson",
             "label": "pois.geojson",
             "group": "places",
-            "sizeBytes": 289689607,
-            "sha256": "4d450e8e9745a29fe5e4647f8ad64d24b04da104aa0f2a66f73107b2bc2eb323"
+            "sizeBytes": 350153368,
+            "sha256": "a01b266240862865d0ad0f60f50481ca3787cbaaa406011dfe92af027002f529"
           },
           {
             "url": "/region-packages/portugal/poi-index.json",
             "label": "poi-index.json",
             "group": "places",
-            "sizeBytes": 7196789,
-            "sha256": "d3f618ec05cb2400f0c9440ca72ea5d84705b56158c4affd7f89abf9c39f07ab"
+            "sizeBytes": 8973614,
+            "sha256": "b091cccfcf66ff0d0007d560d339cf4913bca32d8108400d135317af782bb478"
           },
           {
             "url": "/region-packages/portugal/routing/manifest.json",
@@ -397,6 +399,13 @@
             "group": "navigation",
             "sizeBytes": 424068,
             "sha256": "bf88d9f9cd38c6808f0595f9f8391541e42907e79de9e0274f767485fa27927e"
+          },
+          {
+            "url": "/region-packages/portugal/search-index.json",
+            "label": "search-index.json",
+            "group": "data",
+            "sizeBytes": 67642204,
+            "sha256": "9b8465c656413193d9dad99e4224ea7efb32e3fbb237ac69ffdf703f0ca1a3c3"
           }
         ]
       }

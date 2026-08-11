@@ -10,14 +10,15 @@
   ],
   "poiUrl": "/regions/portugal/pois.geojson",
   "indexUrl": "/regions/portugal/poi-index.json",
-  "poiCount": 920010,
+  "searchUrl": "/regions/portugal/search-index.json",
+  "poiCount": 1118403,
   "spatialIndex": {
     "kind": "uniform-grid",
     "version": 1,
     "cellSizeDegrees": 0.005,
-    "cellCount": 57848
+    "cellCount": 75826
   },
-  "generatedAt": "2026-08-09T06:48:07.512Z",
+  "generatedAt": "2026-08-11T21:40:35.481Z",
   "attribution": "© OpenStreetMap contributors",
   "dataLicense": "ODbL-1.0"
 }

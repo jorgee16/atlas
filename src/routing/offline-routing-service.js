@@ -97,7 +97,11 @@ export class OfflineRoutingService {
       );
     }
 
+    // The stored component id is graph-global, not profile-specific.
+    // Keep the fast connectivity rejection for Drive, but let the
+    // walk-aware A* determine pedestrian connectivity itself.
     if (
+      profile === 'drive' &&
       originSnap.point.component !==
       destinationSnap.point.component
     ) {

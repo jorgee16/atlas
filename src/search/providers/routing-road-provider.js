@@ -7,6 +7,27 @@ const STREET_WORDS = new Set([
   'crescent', 'gardens', 'square', 'court', 'parade', 'highway'
 ]);
 
+const PORTUGUESE_STREET_PREFIXES = new Set([
+  'rua',
+  'avenida',
+  'av',
+  'travessa',
+  'estrada',
+  'caminho',
+  'alameda',
+  'largo',
+  'praca',
+  'rotunda',
+  'calcada',
+  'beco'
+]);
+
+function looksLikePortuguesePostcodeToken(value) {
+  return /^\d{4}-?\d{3}$/.test(
+    String(value ?? '').trim()
+  );
+}
+
 const AIRPORT_WORDS = /\b(airport|terminal|heathrow|gatwick|stansted|luton)\b/i;
 
 function normalize(value) {
@@ -50,23 +71,60 @@ function roadQuery(query, region) {
     ...tokens(region?.country)
   ]);
 
-  let queryTokens = tokens(query)
+  const rawTokens = tokens(query)
     .filter(token => !regionTokens.has(token));
 
-  // House numbers are useful when the POI geocoder contains exact addresses,
-  // but the routing graph only knows roads. Drop them for the road fallback so
-  // "10 Downing Street" can still resolve to Downing Street rather than fail.
-  queryTokens = queryTokens.filter(token => !/^\d+[a-z]?$/.test(token));
+  const houseNumber =
+    rawTokens.length &&
+    /^\d+[a-z]?$/.test(rawTokens[0])
+      ? rawTokens[0]
+      : null;
 
-  const streetIndex = queryTokens.findIndex(token => STREET_WORDS.has(token));
-  if (streetIndex >= 0) {
-    const start = Math.max(0, streetIndex - 4);
-    queryTokens = queryTokens.slice(start, streetIndex + 1);
+  let queryTokens = rawTokens
+    .filter((token, index) =>
+      !(index === 0 && houseNumber) &&
+      !looksLikePortuguesePostcodeToken(token)
+    );
+
+  /*
+   * English street types are normally suffixes:
+   *   Downing Street
+   *
+   * Portuguese street types are normally prefixes:
+   *   Rua Professor Albuquerque de Matos
+   *
+   * Do not apply the English suffix truncation rule to Portuguese names.
+   */
+  const portuguesePrefix =
+    PORTUGUESE_STREET_PREFIXES.has(
+      queryTokens[0]
+    );
+
+  if (!portuguesePrefix) {
+    const streetIndex =
+      queryTokens.findIndex(
+        token => STREET_WORDS.has(token)
+      );
+
+    if (streetIndex >= 0) {
+      const start =
+        Math.max(
+          0,
+          streetIndex - 4
+        );
+
+      queryTokens =
+        queryTokens.slice(
+          start,
+          streetIndex + 1
+        );
+    }
   }
 
   return {
     text: queryTokens.join(' '),
-    tokens: queryTokens
+    tokens: queryTokens,
+    houseNumber
   };
 }
 
@@ -185,17 +243,30 @@ export class RoutingRoadProvider {
           id: `road:${region.id}:${match.entry.key}`,
           lat: point.lat,
           lon: point.lon,
-          name: airportAlias ?? match.entry.name,
+          name:
+            airportAlias ??
+            (
+              parsedQuery.houseNumber
+                ? `${parsedQuery.houseNumber} ${match.entry.name}`
+                : match.entry.name
+            ),
           amenity: resultKind === 'airport-access'
             ? 'airport'
             : 'street',
           type: resultKind,
           place: '',
-          address: '',
+          address:
+            resultKind === 'airport-access'
+              ? ''
+              : parsedQuery.houseNumber
+                ? `${parsedQuery.houseNumber} ${match.entry.name}`
+                : match.entry.name,
           city: region.name,
           subtitle: resultKind === 'airport-access'
             ? 'Airport access · offline road data'
-            : 'Street · address number approximated from road data',
+            : parsedQuery.houseNumber
+              ? 'Approximate address · matched to street'
+              : 'Street · offline road data',
           distance: point.distance,
           regionId: region.id,
           matchScore: match.score

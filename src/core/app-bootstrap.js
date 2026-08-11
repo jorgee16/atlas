@@ -63,6 +63,15 @@ import {
 } from '../features/follow/follow-mode-controller.js';
 
 
+import {
+  TransitJourneyBridge
+} from '../transit/transit-journey-bridge.js';
+
+import {
+  TfLJourneyProvider
+} from '../transit/providers/tfl-journey-provider.js';
+
+
 import { MapController, LeafletMapAdapter } from '../map.js';
 import {
   GpsController
@@ -278,8 +287,13 @@ export class AppBootstrap {
     new RegionsPlugin()
   );
 
+    const transitJourneyBridge = new TransitJourneyBridge({
+      provider: new TfLJourneyProvider()
+    });
+    appContext.provide('transitJourneyBridge', transitJourneyBridge);
+
     pluginManager.register(
-      new NavigationPlugin()
+      new NavigationPlugin({ transitBridge: transitJourneyBridge })
     );
 
     pluginManager.register(
@@ -1030,8 +1044,7 @@ export class AppBootstrap {
           region?.id ?? null;
 
         await map.setRegion(region, {
-          preferOffline:
-            event.type !== 'removed'
+          preferOffline: false
         });
       })
       .catch(error => {

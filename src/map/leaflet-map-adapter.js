@@ -120,7 +120,7 @@ export class LeafletMapAdapter {
     center = DEFAULT_CENTER,
     zoom = DEFAULT_ZOOM,
     offlineMapUrl = null,
-    preferOffline = true
+    preferOffline = false
   }) {
     this.selectionPin = null;
     this.selectionPinTimer = null;
@@ -565,6 +565,198 @@ export class LeafletMapAdapter {
     const latLngs = points.map(
       point => [point.lat, point.lon]
     );
+
+    /*
+     * Transit previews preserve the TfL leg structure instead of
+     * flattening the complete journey into one Atlas-blue line.
+     *
+     * Drive/Walk continue through the normal route renderer below.
+     */
+    if (
+      route?.kind === 'transit' &&
+      Array.isArray(route?.transitJourney?.sequence)
+    ) {
+      const sequence =
+        route.transitJourney.sequence;
+
+      const transitColour = step => {
+        if (step?.kind === 'walk') {
+          return '#8f99a8';
+        }
+
+        const line =
+          String(step?.line ?? '')
+            .trim()
+            .toLowerCase();
+
+        const mode =
+          String(step?.mode ?? '')
+            .trim()
+            .toLowerCase();
+
+        // London Underground line colours.
+        if (line.includes('jubilee')) return '#7c878e';
+        if (line.includes('piccadilly')) return '#003688';
+        if (line.includes('district')) return '#00782a';
+        if (line.includes('central')) return '#e32017';
+        if (line.includes('circle')) return '#ffd300';
+        if (line.includes('victoria')) return '#0098d4';
+        if (line.includes('northern')) return '#000000';
+        if (line.includes('metropolitan')) return '#9b0056';
+        if (line.includes('bakerloo')) return '#894e24';
+
+        if (
+          line.includes('waterloo') &&
+          line.includes('city')
+        ) {
+          return '#95cdba';
+        }
+
+        if (
+          line.includes('hammersmith') ||
+          line.includes('h&c')
+        ) {
+          return '#f3a9bb';
+        }
+
+        // Other TfL modes.
+        if (
+          mode === 'bus' ||
+          mode === 'public-bus'
+        ) {
+          return '#dc241f';
+        }
+
+        if (mode === 'dlr') {
+          return '#00afad';
+        }
+
+        if (mode === 'overground') {
+          return '#ee7c0e';
+        }
+
+        if (mode === 'elizabeth-line') {
+          return '#6950a1';
+        }
+
+        if (mode === 'national-rail') {
+          return '#003b70';
+        }
+
+        if (mode === 'tram') {
+          return '#84b817';
+        }
+
+        if (mode === 'tube') {
+          return '#0019a8';
+        }
+
+        return '#315efb';
+      };
+
+      let journeyBounds = null;
+
+      for (const step of sequence) {
+        const stepPoints =
+          (step?.points ?? [])
+            .filter(point =>
+              Number.isFinite(point?.lat) &&
+              Number.isFinite(point?.lon)
+            );
+
+        if (stepPoints.length < 2) {
+          continue;
+        }
+
+        const stepLatLngs =
+          stepPoints.map(
+            point => [point.lat, point.lon]
+          );
+
+        // White casing keeps every transport colour readable
+        // against both light and dark map tiles.
+        const stepCasing = L.polyline(
+          stepLatLngs,
+          {
+            color: '#ffffff',
+            weight: 9,
+            opacity: 0.90,
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false
+          }
+        ).addTo(this.map);
+
+        const stepLine = L.polyline(
+          stepLatLngs,
+          {
+            color: transitColour(step),
+            weight:
+              step.kind === 'walk'
+                ? 4
+                : 5,
+            opacity:
+              step.kind === 'walk'
+                ? 0.82
+                : 0.97,
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+            dashArray:
+              step.kind === 'walk'
+                ? '5 7'
+                : null
+          }
+        ).addTo(this.map);
+
+        this.routeLayers.push(
+          stepCasing,
+          stepLine
+        );
+
+        const bounds =
+          stepLine.getBounds();
+
+        if (bounds.isValid()) {
+          if (!journeyBounds) {
+            journeyBounds = bounds;
+          } else {
+            journeyBounds.extend(bounds);
+          }
+        }
+      }
+
+      // Transit preview does not use normal drive/walk progress layers.
+      this.routeCasing = null;
+      this.traveledRouteLine = null;
+      this.remainingRouteLine = null;
+
+      this.#addRouteConnector(
+        origin,
+        sequence[0]?.points?.[0] ?? null
+      );
+
+      const lastStep =
+        sequence.at(-1);
+
+      this.#addRouteConnector(
+        lastStep?.points?.at?.(-1) ?? null,
+        destination
+      );
+
+      if (journeyBounds?.isValid?.()) {
+        this.map.fitBounds(
+          journeyBounds,
+          {
+            paddingTopLeft: [28, 112],
+            paddingBottomRight: [28, 196],
+            maxZoom: 16
+          }
+        );
+      }
+
+      return;
+    }
 
     const casing = L.polyline(
       latLngs,
