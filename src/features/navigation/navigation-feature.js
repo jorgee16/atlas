@@ -1958,6 +1958,10 @@ export class NavigationFeature {
       return false;
     }
 
+    if (this.travelMode === 'transit') {
+      return false;
+    }
+
     this.#cancelRouteRequest();
 
     const request =

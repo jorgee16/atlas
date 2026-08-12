@@ -6240,7 +6240,7 @@ html[data-atlas-theme="dark"] .navigation-guidance {
 }
 
 html[data-atlas-theme="dark"] .navigation-workspace strong,
-html[data-atlas-theme="dark"] .navigation-guidance strong {
+html[data-atlas-theme="dark"] .navigation-guidance strong:not(.navigation-maneuver-distance) {
   color: var(--text);
 }
 
@@ -8503,4 +8503,29 @@ html[data-atlas-theme="dark"] .leaflet-tile-pane {
 
 html[data-atlas-theme="dark"] .leaflet-tile {
   transition: filter 180ms ease;
+}
+
+/* Dark theme: maneuver banner remains a light surface */
+html[data-atlas-theme="dark"] .navigation-guidance-banner {
+  color: #18202f;
+}
+
+html[data-atlas-theme="dark"] .navigation-guidance-banner .navigation-maneuver-distance {
+  color: #315efb;
+}
+
+html[data-atlas-theme="dark"] .navigation-guidance-banner .navigation-maneuver-instruction {
+  color: #18202f;
+}
+
+html[data-atlas-theme="dark"] .navigation-guidance-banner .navigation-maneuver-copy small {
+  color: #687487;
+}
+
+html[data-atlas-theme="dark"] .navigation-current-maneuver > div:last-child > small {
+  color: #315efb;
+}
+
+html[data-atlas-theme="dark"] .navigation-current-maneuver > div:last-child > strong {
+  color: #18202f;
 }

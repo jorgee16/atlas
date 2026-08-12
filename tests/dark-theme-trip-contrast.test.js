@@ -101,3 +101,18 @@ test(
     );
   }
 );
+
+test(
+  'dark theme keeps maneuver distance readable on the light guidance card',
+  () => {
+    assert.match(
+      css,
+      /html\[data-atlas-theme="dark"\]\s+\.navigation-guidance-banner \.navigation-maneuver-distance\s*\{[^}]*color:\s*#315efb/i
+    );
+
+    assert.match(
+      css,
+      /html\[data-atlas-theme="dark"\]\s+\.navigation-guidance-banner \.navigation-maneuver-instruction\s*\{[^}]*color:\s*#18202f/i
+    );
+  }
+);
