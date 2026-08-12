@@ -59,13 +59,10 @@ export class GpsController {
       const permissions =
         await Geolocation.requestPermissions();
 
-      if (
-        permissions.location !== 'granted' &&
-        permissions.coarseLocation !== 'granted'
-      ) {
+      if (permissions.location !== 'granted') {
         this.onStatus(
-          'GPS unavailable',
-          'Location permission was denied.'
+          'Precise GPS required',
+          'Enable precise location for navigation.'
         );
 
         return;
@@ -142,24 +139,15 @@ export class GpsController {
 
     if (accuracy > 150) {
       this.onStatus(
-        '📍 Waiting for a precise fix',
+        '📍 Low GPS accuracy',
         `Current accuracy is about ${Math.round(
           accuracy
         )} m.`
       );
-
-      return;
     }
 
-    if (
-      accuracy >
-        this.bestAccuracy + 100 &&
-      this.bestAccuracy < 50
-    ) {
-      return;
-    }
-
-    this.bestAccuracy = accuracy;
+    this.bestAccuracy =
+      Math.min(this.bestAccuracy, accuracy);
 
     this.onUpdate({
       latitude,

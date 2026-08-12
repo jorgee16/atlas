@@ -19,11 +19,71 @@ const DEFAULT_CENTER = [39.5, -8.0];
 const DEFAULT_ZOOM = 7;
 const MIN_HEADING_SPEED_METERS_PER_SECOND = 0.8;
 const DRIVING_ZOOM = 17;
+const DRIVE_MAX_POSITION_PREDICTION_SECONDS = 1.2;
+const WALK_MAX_POSITION_PREDICTION_SECONDS = 0.55;
+const WALK_MIN_PREDICTION_SPEED_METERS_PER_SECOND = 0.45;
+const EARTH_RADIUS_METERS = 6378137;
 
 function normalizeBearing(value) {
   return (
     (Number(value) % 360) + 360
   ) % 360;
+}
+
+function smoothingFactor(rate, deltaSeconds) {
+  return 1 - Math.exp(-rate * deltaSeconds);
+}
+
+function predictPosition(
+  position,
+  speed,
+  heading,
+  seconds
+) {
+  if (
+    !position ||
+    !Number.isFinite(speed) ||
+    speed < MIN_HEADING_SPEED_METERS_PER_SECOND ||
+    !Number.isFinite(heading) ||
+    seconds <= 0
+  ) {
+    return position;
+  }
+
+  const distance =
+    speed * seconds;
+
+  const headingRadians =
+    heading * Math.PI / 180;
+
+  const latRadians =
+    position.lat * Math.PI / 180;
+
+  const north =
+    Math.cos(headingRadians) * distance;
+
+  const east =
+    Math.sin(headingRadians) * distance;
+
+  const latitudeDelta =
+    north /
+    EARTH_RADIUS_METERS *
+    180 /
+    Math.PI;
+
+  const longitudeDelta =
+    east /
+    (
+      EARTH_RADIUS_METERS *
+      Math.cos(latRadians)
+    ) *
+    180 /
+    Math.PI;
+
+  return {
+    lat: position.lat + latitudeDelta,
+    lon: position.lon + longitudeDelta
+  };
 }
 
 function createUserLocationIcon({
@@ -169,6 +229,23 @@ export class LeafletMapAdapter {
     this.userMarker = null;
     this.userAccuracy = null;
     this.navigationTravelMode = null;
+
+    // Raw GPS coordinates remain untouched for navigation.
+    // These values are only used for smooth map rendering.
+    this.renderedUserPosition = null;
+    this.targetUserPosition = null;
+    this.userPositionAnimationFrame = null;
+    this.userPositionAnimationTimestamp = null;
+
+    this.latestUserSpeed = null;
+    this.latestUserHeading = null;
+    this.latestUserFixTimestamp = null;
+
+    // Camera follows the same continuously rendered position
+    // as the vehicle marker instead of raw GPS fixes.
+    this.followHeadingUp = false;
+    this.followZoom = DRIVING_ZOOM;
+    this.lastFollowRequestTimestamp = null;
 
     if (offlineMapUrl) {
       void this.setRegion(
@@ -431,36 +508,49 @@ export class LeafletMapAdapter {
         ? position.heading
         : this.routeBearing;
 
-    const bearing = headingUp &&
+    const bearing =
+      headingUp &&
       Number.isFinite(heading)
         ? normalizeBearing(heading)
         : 0;
 
-    if (headingUp && Number.isFinite(heading)) {
-      this.map.setHeading?.(heading, {
-        ease: 0.24,
-        deadzone: 0.75
-      });
+    if (
+      headingUp &&
+      Number.isFinite(heading)
+    ) {
+      this.map.setHeading?.(
+        heading,
+        {
+          ease: 0.16,
+          deadzone: 0.4
+        }
+      );
     } else {
       this.setBearing(0);
     }
 
-    this.map.setView(
-      [position.lat, position.lon],
-      headingUp ? zoom : 16,
-      { animate: false }
-    );
+    this.followHeadingUp =
+      headingUp;
 
-    if (headingUp) {
-      const height =
-        this.map.getSize().y;
+    this.followZoom =
+      headingUp
+        ? zoom
+        : 16;
 
-      this.map.panBy(
-        [
-          0,
-          -Math.min(140, height * 0.18)
-        ],
-        { animate: false }
+    this.lastFollowRequestTimestamp =
+      performance.now();
+
+    // Zoom may change when entering navigation,
+    // but position is NOT recentered here.
+    if (
+      this.map.getZoom() !==
+      this.followZoom
+    ) {
+      this.map.setZoom(
+        this.followZoom,
+        {
+          animate: true
+        }
       );
     }
 
@@ -505,44 +595,337 @@ export class LeafletMapAdapter {
       speed
     };
 
+    this.targetUserPosition = {
+      lat: latitude,
+      lon: longitude
+    };
+
+    this.latestUserSpeed =
+      Number.isFinite(speed)
+        ? speed
+        : null;
+
+    this.latestUserHeading =
+      Number.isFinite(heading)
+        ? normalizeBearing(heading)
+        : null;
+
+    this.latestUserFixTimestamp =
+      performance.now();
+
     const renderedHeading =
       Number.isFinite(heading)
         ? heading + this.#mapBearing()
         : heading;
 
-    const icon = this.navigationTravelMode === 'drive'
-      ? createDriveLocationIcon({ heading: renderedHeading })
-      : createUserLocationIcon({
-          heading: renderedHeading,
-          showHeading
-        });
+    const icon =
+      this.navigationTravelMode === 'drive'
+        ? createDriveLocationIcon({
+            heading: renderedHeading
+          })
+        : createUserLocationIcon({
+            heading: renderedHeading,
+            showHeading
+          });
 
     if (!this.userMarker) {
-      this.userMarker = L.marker(latLng, {
-        icon,
-        zIndexOffset: 1000
-      })
+      this.renderedUserPosition = {
+        lat: latitude,
+        lon: longitude
+      };
+
+      this.userMarker = L.marker(
+        latLng,
+        {
+          icon,
+          zIndexOffset: 1000
+        }
+      )
         .addTo(this.map)
         .bindPopup('<b>📍 You are here</b>');
     } else {
-      this.userMarker.setLatLng(latLng);
+      // Heading/icon can react immediately while position
+      // continues smoothly toward the latest GPS fix.
       this.userMarker.setIcon(icon);
     }
 
     if (!this.userAccuracy) {
-      this.userAccuracy = L.circle(latLng, {
-        radius: accuracy,
-        weight: 1,
-        fillOpacity: 0.08
-      }).addTo(this.map);
+      this.userAccuracy = L.circle(
+        latLng,
+        {
+          radius: accuracy,
+          weight: 1,
+          fillOpacity: 0.08
+        }
+      ).addTo(this.map);
     } else {
-      this.userAccuracy.setLatLng(latLng);
       this.userAccuracy.setRadius(accuracy);
     }
 
     if (firstFix) {
-      this.focus(latitude, longitude, 16);
+      this.renderedUserPosition = {
+        lat: latitude,
+        lon: longitude
+      };
+
+      this.userMarker.setLatLng(latLng);
+      this.userAccuracy.setLatLng(latLng);
+
+      this.focus(
+        latitude,
+        longitude,
+        16
+      );
+    } else {
+      this.#startUserPositionAnimation();
     }
+  }
+
+  #startUserPositionAnimation() {
+    if (
+      this.userPositionAnimationFrame !== null
+    ) {
+      return;
+    }
+
+    this.userPositionAnimationTimestamp = null;
+
+    this.userPositionAnimationFrame =
+      requestAnimationFrame(
+        timestamp =>
+          this.#animateUserPosition(timestamp)
+      );
+  }
+
+  #animateUserPosition(timestamp) {
+    if (
+      !this.renderedUserPosition ||
+      !this.targetUserPosition ||
+      !this.userMarker
+    ) {
+      this.userPositionAnimationFrame = null;
+      this.userPositionAnimationTimestamp = null;
+      return;
+    }
+
+    if (
+      this.userPositionAnimationTimestamp === null
+    ) {
+      this.userPositionAnimationTimestamp =
+        timestamp;
+    }
+
+    const deltaSeconds =
+      Math.min(
+        (
+          timestamp -
+          this.userPositionAnimationTimestamp
+        ) / 1000,
+        0.1
+      );
+
+    this.userPositionAnimationTimestamp =
+      timestamp;
+
+    const maxPredictionSeconds =
+      this.navigationTravelMode === 'drive'
+        ? DRIVE_MAX_POSITION_PREDICTION_SECONDS
+        : this.navigationTravelMode === 'walk'
+          ? WALK_MAX_POSITION_PREDICTION_SECONDS
+          : 0;
+
+    const minimumPredictionSpeed =
+      this.navigationTravelMode === 'drive'
+        ? MIN_HEADING_SPEED_METERS_PER_SECOND
+        : WALK_MIN_PREDICTION_SPEED_METERS_PER_SECOND;
+
+    const predictionEnabled =
+      maxPredictionSeconds > 0 &&
+      Number.isFinite(this.latestUserSpeed) &&
+      this.latestUserSpeed >=
+        minimumPredictionSpeed &&
+      Number.isFinite(this.latestUserHeading);
+
+    const predictionSeconds =
+      predictionEnabled &&
+      this.latestUserFixTimestamp !== null
+        ? Math.min(
+            maxPredictionSeconds,
+            Math.max(
+              0,
+              (
+                performance.now() -
+                this.latestUserFixTimestamp
+              ) / 1000
+            )
+          )
+        : 0;
+
+    const predictedTarget =
+      predictionEnabled
+        ? predictPosition(
+            this.targetUserPosition,
+            this.latestUserSpeed,
+            this.latestUserHeading,
+            predictionSeconds
+          )
+        : this.targetUserPosition;
+
+    // Softer than the previous value of ~4-5.
+    // Prediction keeps the target moving, so we no longer
+    // need to race toward every GPS fix.
+    const smoothingRate =
+      this.navigationTravelMode === 'drive'
+        ? 2.8
+        : 3.2;
+
+    const amount =
+      smoothingFactor(
+        smoothingRate,
+        deltaSeconds
+      );
+
+    this.renderedUserPosition.lat +=
+      (
+        predictedTarget.lat -
+        this.renderedUserPosition.lat
+      ) * amount;
+
+    this.renderedUserPosition.lon +=
+      (
+        predictedTarget.lon -
+        this.renderedUserPosition.lon
+      ) * amount;
+
+    const renderedLatLng = [
+      this.renderedUserPosition.lat,
+      this.renderedUserPosition.lon
+    ];
+
+    this.userMarker.setLatLng(
+      renderedLatLng
+    );
+
+    this.userAccuracy?.setLatLng(
+      renderedLatLng
+    );
+
+    this.#followRenderedUserPosition();
+
+    const latDifference =
+      Math.abs(
+        predictedTarget.lat -
+        this.renderedUserPosition.lat
+      );
+
+    const lonDifference =
+      Math.abs(
+        predictedTarget.lon -
+        this.renderedUserPosition.lon
+      );
+
+    const stillPredicting =
+      predictionEnabled &&
+      predictionSeconds <
+        maxPredictionSeconds;
+
+
+    if (
+      !stillPredicting &&
+      latDifference < 0.0000001 &&
+      lonDifference < 0.0000001
+    ) {
+      this.renderedUserPosition = {
+        ...predictedTarget
+      };
+
+      this.userMarker.setLatLng([
+        this.renderedUserPosition.lat,
+        this.renderedUserPosition.lon
+      ]);
+
+      this.userAccuracy?.setLatLng([
+        this.renderedUserPosition.lat,
+        this.renderedUserPosition.lon
+      ]);
+
+      this.userPositionAnimationFrame = null;
+      this.userPositionAnimationTimestamp = null;
+      return;
+    }
+
+    this.userPositionAnimationFrame =
+      requestAnimationFrame(
+        nextTimestamp =>
+          this.#animateUserPosition(
+            nextTimestamp
+          )
+      );
+  }
+
+  #followRenderedUserPosition() {
+    if (
+      !this.renderedUserPosition ||
+      this.lastFollowRequestTimestamp === null
+    ) {
+      return;
+    }
+
+    // followPosition() is called continuously while Navigation
+    // follow mode is active. If it stops being called, don't
+    // keep dragging the map back to the vehicle indefinitely.
+    const followAge =
+      performance.now() -
+      this.lastFollowRequestTimestamp;
+
+    if (followAge > 1800) {
+      return;
+    }
+
+    const zoom =
+      this.followZoom;
+
+    let targetCenter =
+      L.latLng(
+        this.renderedUserPosition.lat,
+        this.renderedUserPosition.lon
+      );
+
+    if (this.followHeadingUp) {
+      const height =
+        this.map.getSize().y;
+
+      const verticalOffset =
+        Math.min(
+          140,
+          height * 0.18
+        );
+
+      const projected =
+        this.map.project(
+          targetCenter,
+          zoom
+        );
+
+      targetCenter =
+        this.map.unproject(
+          projected.subtract([
+            0,
+            verticalOffset
+          ]),
+          zoom
+        );
+    }
+
+    // Tiny frame-by-frame pans are already smooth.
+    // Do NOT start a new Leaflet animation every frame.
+    this.map.panTo(
+      targetCenter,
+      {
+        animate: false,
+        noMoveStart: true
+      }
+    );
   }
 
   setNavigationTravelMode(mode = null) {
