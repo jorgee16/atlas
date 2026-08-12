@@ -8307,3 +8307,200 @@ html[data-atlas-theme="dark"] .bottom-sheet-grabber {
   }
 
 }
+
+/* =========================================================
+   ATLAS DARK MAP
+   ---------------------------------------------------------
+   Darkens only the raster map tiles.
+
+   IMPORTANT:
+   Do not filter .leaflet-map-pane because that would also
+   invert routes, GPS markers, itinerary pins and overlays.
+   ========================================================= */
+
+
+
+/* =========================================================
+   DARK MODE — LIGHT SURFACE CONTRAST
+   ---------------------------------------------------------
+   Some Atlas controls intentionally remain white/light even
+   in dark mode. Text inside those surfaces must therefore
+   use dark foreground colours.
+   ========================================================= */
+
+@media (prefers-color-scheme: dark) {
+
+  /*
+   * Trip itinerary chips / horizontal stops.
+   */
+  .trip-itinerary-item,
+  .trip-stop-chip,
+  .trip-stop-card {
+    color: #172033;
+  }
+
+  .trip-itinerary-item strong,
+  .trip-itinerary-item b,
+  .trip-itinerary-item span,
+  .trip-stop-chip strong,
+  .trip-stop-chip b,
+  .trip-stop-chip span,
+  .trip-stop-card strong,
+  .trip-stop-card b {
+    color: inherit;
+  }
+
+  /*
+   * Generic light buttons/surfaces used inside Trip.
+   * Keep secondary copy darker but less prominent.
+   */
+  .trip-itinerary-item small,
+  .trip-stop-chip small,
+  .trip-stop-card small {
+    color: #667085;
+  }
+}
+
+/* Dark theme: preserve readable text on light Trip surfaces */
+html[data-atlas-theme="dark"] .trip-mode-switch,
+html[data-atlas-theme="dark"] .trip-mode-switch button.on,
+html[data-atlas-theme="dark"] .trip-selected-stop,
+html[data-atlas-theme="dark"] .trip-workspace-content .place {
+  color: #18202f;
+}
+
+html[data-atlas-theme="dark"] .trip-workspace-header strong,
+html[data-atlas-theme="dark"] .trip-selected-stop-copy strong {
+  color: #202a3d;
+}
+
+html[data-atlas-theme="dark"] .trip-workspace-header small,
+html[data-atlas-theme="dark"] .trip-selected-stop > small,
+html[data-atlas-theme="dark"] .trip-selected-stop-copy small,
+html[data-atlas-theme="dark"] .trip-selected-stop-copy span {
+  color: #687487;
+}
+
+html[data-atlas-theme="dark"] .trip-mode-switch button {
+  color: #697487;
+}
+
+html[data-atlas-theme="dark"] .trip-mode-switch button.on {
+  color: #315efb;
+}
+
+html[data-atlas-theme="dark"] .trip-selected-stop-actions button {
+  color: #2a354a;
+}
+
+html[data-atlas-theme="dark"] .trip-selected-stop-actions button.primary {
+  color: #ffffff;
+}
+
+/* Dark theme: Trip day selector container */
+html[data-atlas-theme="dark"] .trip-schedule-view .trip-day-control {
+  background: transparent;
+}
+
+html[data-atlas-theme="dark"] .trip-schedule-view .trip-day-control select {
+  color: var(--text);
+  background: var(--surface-muted);
+  border-color: var(--line);
+}
+
+/* Dark theme: readable text on light Trip map-view surfaces */
+html[data-atlas-theme="dark"] .trip-map-view .place,
+html[data-atlas-theme="dark"] .trip-map-view .trip-itinerary-stop,
+html[data-atlas-theme="dark"] .trip-map-view .trip-itinerary-card {
+  color: #18202f;
+}
+
+html[data-atlas-theme="dark"] .trip-map-view .place strong,
+html[data-atlas-theme="dark"] .trip-map-view .trip-itinerary-stop strong,
+html[data-atlas-theme="dark"] .trip-map-view .trip-itinerary-card strong {
+  color: #202a3d;
+}
+
+html[data-atlas-theme="dark"] .trip-map-view .place small,
+html[data-atlas-theme="dark"] .trip-map-view .trip-itinerary-stop small,
+html[data-atlas-theme="dark"] .trip-map-view .trip-itinerary-card small {
+  color: #687487;
+}
+
+/* Light helper/status strip inside dark Trip workspace */
+html[data-atlas-theme="dark"] .trip-map-view .trip-empty-state,
+html[data-atlas-theme="dark"] .trip-map-view .trip-map-hint,
+html[data-atlas-theme="dark"] .trip-workspace .trip-empty-state,
+html[data-atlas-theme="dark"] .trip-workspace .trip-map-hint {
+  color: #687487;
+  background: #f5f7fb;
+}
+
+/* =========================================================
+   Dark theme — Trip contrast corrections
+   Dark containers use light text.
+   Light embedded surfaces use dark text.
+   ========================================================= */
+
+/* Trip header lives directly on the dark workspace. */
+html[data-atlas-theme="dark"] .trip-workspace-header strong {
+  color: var(--text);
+}
+
+html[data-atlas-theme="dark"] .trip-workspace-header small {
+  color: var(--text-muted);
+}
+
+/* Map-view itinerary chips remain light surfaces. */
+html[data-atlas-theme="dark"] .trip-map-stop {
+  color: #18202f;
+}
+
+html[data-atlas-theme="dark"] .trip-map-stop strong,
+html[data-atlas-theme="dark"] .trip-map-stop b,
+html[data-atlas-theme="dark"] .trip-map-stop span {
+  color: #202a3d;
+}
+
+html[data-atlas-theme="dark"] .trip-map-stop small {
+  color: #687487;
+}
+
+/* Selected-stop helper/empty state remains a light surface. */
+html[data-atlas-theme="dark"] .trip-selected-stop {
+  color: #18202f;
+  background: #f5f7fb;
+}
+
+html[data-atlas-theme="dark"] .trip-selected-stop > small {
+  color: #687487;
+}
+
+/* When a stop is selected, its copy also lives on that light surface. */
+html[data-atlas-theme="dark"] .trip-selected-stop-copy strong {
+  color: #202a3d;
+}
+
+html[data-atlas-theme="dark"] .trip-selected-stop-copy small,
+html[data-atlas-theme="dark"] .trip-selected-stop-copy span {
+  color: #687487;
+}
+
+/* =========================================================
+   Atlas dark map
+   Darken ONLY raster OSM tiles.
+   Routes, markers, pins and Leaflet overlays are untouched.
+   ========================================================= */
+
+html[data-atlas-theme="dark"] .leaflet-tile-pane {
+  filter:
+    brightness(0.68)
+    invert(1)
+    contrast(1.25)
+    hue-rotate(180deg)
+    saturate(0.65);
+}
+
+html[data-atlas-theme="dark"] .leaflet-tile {
+  transition: filter 180ms ease;
+}
