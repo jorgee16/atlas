@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>Atlas GPS Replay</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      font-family: system-ui, sans-serif;
+      background: #111827;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      position: fixed;
+      z-index: 9999;
+      top: 12px;
+      left: 12px;
+
+      display: grid;
+      gap: 8px;
+
+      width: min(320px, calc(100% - 24px));
+      padding: 12px;
+
+      color: #fff;
+      background: rgba(15, 23, 42, 0.92);
+      border-radius: 14px;
+    }
+
+    .controls button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 9px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      gap: 3px;
+      font-size: 12px;
+    }
+
+    .stats strong {
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div class="controls">
+    <strong>Atlas GPS replay</strong>
+
+    <button id="start">
+      Start replay
+    </button>
+
+    <button id="stop">
+      Stop
+    </button>
+
+    <div
+      id="stats"
+      class="stats"
+    ></div>
+  </div>
+
+  <script
+    type="module"
+    src="./replay.js"
+  ></script>
+</body>
+</html>

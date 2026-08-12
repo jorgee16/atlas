@@ -8529,3 +8529,48 @@ html[data-atlas-theme="dark"] .navigation-current-maneuver > div:last-child > sm
 html[data-atlas-theme="dark"] .navigation-current-maneuver > div:last-child > strong {
   color: #18202f;
 }
+
+/* Temporary GPS/render diagnostics */
+.atlas-gps-diagnostics {
+  position: absolute;
+  z-index: 1500;
+  top: 88px;
+  left: 10px;
+
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+
+  width: fit-content;
+  padding: 7px 9px;
+
+  color: #18202f;
+  background: rgba(255, 255, 255, 0.90);
+  border: 1px solid rgba(24, 32, 47, 0.12);
+  border-radius: 9px;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+
+  font-size: 10px;
+  line-height: 1.2;
+
+  pointer-events: none;
+}
+
+.atlas-gps-diagnostics strong {
+  grid-column: 1 / -1;
+  margin-bottom: 2px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.atlas-gps-diagnostics span {
+  opacity: 0.9;
+}
+
+html[data-atlas-theme="dark"] .atlas-gps-diagnostics {
+  color: #eef2f8;
+  background: rgba(18, 24, 34, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
+}

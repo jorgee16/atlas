@@ -1094,6 +1094,14 @@ export class AppBootstrap {
         });
 
 
+      globalThis.__atlasGpsFixCount =
+        (globalThis.__atlasGpsFixCount ?? 0) + 1;
+
+      status(
+        `GPS fix #${globalThis.__atlasGpsFixCount}`,
+        `${position.latitude.toFixed(5)}, ${position.longitude.toFixed(5)} · ${Math.round(position.accuracy)} m`
+      );
+
       map.updateUserLocation(position, firstFix);
       appContext
         .get('navigationFeature')
@@ -1565,13 +1573,20 @@ loadTripButton?.addEventListener(
 
 
 
-  root.querySelector('#gpsBtn').addEventListener('click', event => {
+  root.querySelector('#gpsBtn').addEventListener('click', async event => {
     if (gps.enabled) {
-      gps.stop();
+      await gps.stop();
+      map.adapter?.resetGpsDiagnostics?.();
+
       event.currentTarget.classList.remove('on');
-      status('GPS disabled','Your location is no longer being tracked.');
+
+      status(
+        'GPS disabled',
+        'Your location is no longer being tracked.'
+      );
     } else {
-      gps.start();
+      await gps.start();
+
       event.currentTarget.classList.add('on');
     }
   });

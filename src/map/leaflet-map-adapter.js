@@ -34,6 +34,20 @@ function smoothingFactor(rate, deltaSeconds) {
   return 1 - Math.exp(-rate * deltaSeconds);
 }
 
+function gpsAccuracyConfidence(accuracy) {
+  if (!Number.isFinite(accuracy)) {
+    return 0.35;
+  }
+
+  return Math.max(
+    0.12,
+    Math.min(
+      1,
+      30 / Math.max(accuracy, 10)
+    )
+  );
+}
+
 function predictPosition(
   position,
   speed,
@@ -43,7 +57,7 @@ function predictPosition(
   if (
     !position ||
     !Number.isFinite(speed) ||
-    speed < MIN_HEADING_SPEED_METERS_PER_SECOND ||
+    speed <= 0 ||
     !Number.isFinite(heading) ||
     seconds <= 0
   ) {
@@ -236,6 +250,37 @@ export class LeafletMapAdapter {
     this.targetUserPosition = null;
     this.userPositionAnimationFrame = null;
     this.userPositionAnimationTimestamp = null;
+
+    this.gpsDiagnosticsElement = null;
+    this.gpsDiagnosticsFrameCount = 0;
+    this.gpsDiagnosticsLastFrameTimestamp = null;
+    this.gpsDiagnosticsFps = 0;
+    this.gpsDiagnosticsFixCount = 0;
+    this.gpsDiagnosticsFixWindowStart = null;
+    this.gpsDiagnosticsHz = 0;
+    this.gpsDiagnosticsPredictionSeconds = 0;
+
+    this.gpsDiagnosticsElement =
+      document.createElement('div');
+
+    this.gpsDiagnosticsElement.className =
+      'atlas-gps-diagnostics';
+
+    this.gpsDiagnosticsElement.innerHTML = `
+      <strong>GPS diagnostics</strong>
+      <span>Render 0 Hz</span>
+      <span>GPS 0.0 Hz</span>
+      <span>Accuracy —</span>
+      <span>Speed —</span>
+      <span>Heading —</span>
+      <span>Prediction 0.00 s</span>
+    `;
+
+    this.map
+      .getContainer()
+      .appendChild(
+        this.gpsDiagnosticsElement
+      );
 
     this.latestUserSpeed = null;
     this.latestUserHeading = null;
@@ -595,6 +640,32 @@ export class LeafletMapAdapter {
       speed
     };
 
+    const diagnosticsNow =
+      performance.now();
+
+    if (
+      this.gpsDiagnosticsFixWindowStart === null
+    ) {
+      this.gpsDiagnosticsFixWindowStart =
+        diagnosticsNow;
+    }
+
+    this.gpsDiagnosticsFixCount += 1;
+
+    const diagnosticsFixElapsed =
+      diagnosticsNow -
+      this.gpsDiagnosticsFixWindowStart;
+
+    if (diagnosticsFixElapsed >= 1000) {
+      this.gpsDiagnosticsHz =
+        this.gpsDiagnosticsFixCount /
+        (diagnosticsFixElapsed / 1000);
+
+      this.gpsDiagnosticsFixCount = 0;
+      this.gpsDiagnosticsFixWindowStart =
+        diagnosticsNow;
+    }
+
     this.targetUserPosition = {
       lat: latitude,
       lon: longitude
@@ -612,6 +683,8 @@ export class LeafletMapAdapter {
 
     this.latestUserFixTimestamp =
       performance.now();
+
+    this.#renderGpsDiagnostics();
 
     const renderedHeading =
       Number.isFinite(heading)
@@ -699,6 +772,31 @@ export class LeafletMapAdapter {
 
   #animateUserPosition(timestamp) {
     if (
+      this.gpsDiagnosticsLastFrameTimestamp === null
+    ) {
+      this.gpsDiagnosticsLastFrameTimestamp =
+        timestamp;
+    }
+
+    this.gpsDiagnosticsFrameCount += 1;
+
+    const diagnosticsFrameElapsed =
+      timestamp -
+      this.gpsDiagnosticsLastFrameTimestamp;
+
+    if (diagnosticsFrameElapsed >= 1000) {
+      this.gpsDiagnosticsFps =
+        this.gpsDiagnosticsFrameCount /
+        (diagnosticsFrameElapsed / 1000);
+
+      this.gpsDiagnosticsFrameCount = 0;
+      this.gpsDiagnosticsLastFrameTimestamp =
+        timestamp;
+
+      this.#renderGpsDiagnostics();
+    }
+
+    if (
       !this.renderedUserPosition ||
       !this.targetUserPosition ||
       !this.userMarker
@@ -761,6 +859,9 @@ export class LeafletMapAdapter {
           )
         : 0;
 
+    this.gpsDiagnosticsPredictionSeconds =
+      predictionSeconds;
+
     const predictedTarget =
       predictionEnabled
         ? predictPosition(
@@ -774,10 +875,19 @@ export class LeafletMapAdapter {
     // Softer than the previous value of ~4-5.
     // Prediction keeps the target moving, so we no longer
     // need to race toward every GPS fix.
-    const smoothingRate =
+    const baseSmoothingRate =
       this.navigationTravelMode === 'drive'
         ? 2.8
         : 3.2;
+
+    const accuracyConfidence =
+      gpsAccuracyConfidence(
+        this.lastUserPosition?.accuracy
+      );
+
+    const smoothingRate =
+      baseSmoothingRate *
+      accuracyConfidence;
 
     const amount =
       smoothingFactor(
@@ -1575,6 +1685,64 @@ export class LeafletMapAdapter {
     )
       ? this.map.getBearing()
       : 0;
+  }
+
+  resetGpsDiagnostics() {
+    this.gpsDiagnosticsFixCount = 0;
+    this.gpsDiagnosticsFixWindowStart = null;
+    this.gpsDiagnosticsHz = 0;
+    this.gpsDiagnosticsPredictionSeconds = 0;
+
+    this.lastUserPosition = null;
+    this.latestUserSpeed = null;
+    this.latestUserHeading = null;
+
+    if (!this.gpsDiagnosticsElement) {
+      return;
+    }
+
+    this.gpsDiagnosticsElement.innerHTML = `
+      <strong>GPS diagnostics</strong>
+      <span>Render ${this.gpsDiagnosticsFps.toFixed(0)} Hz</span>
+      <span>GPS —</span>
+      <span>Accuracy —</span>
+      <span>Speed —</span>
+      <span>Heading —</span>
+      <span>Prediction —</span>
+    `;
+  }
+
+  #renderGpsDiagnostics() {
+    const accuracy =
+      this.lastUserPosition?.accuracy;
+
+    const speed =
+      this.latestUserSpeed;
+
+    const heading =
+      this.latestUserHeading;
+
+    this.gpsDiagnosticsElement.innerHTML = `
+      <strong>GPS diagnostics</strong>
+      <span>Render ${this.gpsDiagnosticsFps.toFixed(0)} Hz</span>
+      <span>GPS ${this.gpsDiagnosticsHz.toFixed(1)} Hz</span>
+      <span>Accuracy ${
+        Number.isFinite(accuracy)
+          ? `${Math.round(accuracy)} m`
+          : '—'
+      }</span>
+      <span>Speed ${
+        Number.isFinite(speed)
+          ? `${speed.toFixed(1)} m/s`
+          : '—'
+      }</span>
+      <span>Heading ${
+        Number.isFinite(heading)
+          ? `${Math.round(heading)}°`
+          : '—'
+      }</span>
+      <span>Prediction ${this.gpsDiagnosticsPredictionSeconds.toFixed(2)} s</span>
+    `;
   }
 
   #refreshUserLocationIcon() {

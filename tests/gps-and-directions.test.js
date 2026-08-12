@@ -7,17 +7,19 @@ import {
 } from '../src/utils.js';
 
 test(
-  'GPS updates retain browser heading and speed',
+  'GPS validates movement before exposing navigation speed',
   () => {
-    let update = null;
+    const updates = [];
 
     const gps = new GpsController({
       onUpdate: value => {
-        update = value;
+        updates.push(value);
       },
       onStatus: () => {}
     });
 
+    // A single GPS fix cannot prove movement.
+    // Raw provider speed must therefore not enable prediction.
     gps.handlePosition({
       coords: {
         latitude: 40.2,
@@ -28,13 +30,37 @@ test(
       }
     });
 
-    assert.deepEqual(update, {
+    assert.deepEqual(updates[0], {
       latitude: 40.2,
       longitude: -8.4,
       accuracy: 8,
       heading: 135,
-      speed: 2.5
+      speed: 0
     });
+
+    // Simulate three seconds passing, followed by about
+    // 11 metres of real displacement.
+    gps.courseAnchor.timestamp -= 3000;
+
+    gps.handlePosition({
+      coords: {
+        latitude: 40.20010,
+        longitude: -8.4,
+        accuracy: 8,
+        heading: 135,
+        speed: 2.5
+      }
+    });
+
+    assert.equal(
+      updates[1].speed > 0,
+      true
+    );
+
+    assert.equal(
+      Number.isFinite(updates[1].heading),
+      true
+    );
   }
 );
 

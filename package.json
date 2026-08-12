@@ -10,7 +10,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test",
     "regions:manifest": "node tools/region-builder/package-manifest.mjs",
-    "regions:rebuild-rich": "node tools/region-builder/rebuild-rich-regions.mjs"
+    "regions:rebuild-rich": "node tools/region-builder/rebuild-rich-regions.mjs",
+    "gps-replay": "vite tools/gps-replay --host 0.0.0.0"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
