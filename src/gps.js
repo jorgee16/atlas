@@ -72,8 +72,10 @@ export class GpsController {
         await Geolocation.watchPosition(
           {
             enableHighAccuracy: true,
-            timeout: 30000,
-            maximumAge: 0
+            timeout: 10000,
+            maximumAge: 0,
+            minimumUpdateInterval: 1000,
+            interval: 1000
           },
           (position, error) => {
             if (error) {
