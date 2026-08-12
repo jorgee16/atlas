@@ -283,7 +283,37 @@ export class LeafletMapAdapter {
     const bounds = [];
 
     places.forEach((place, index) => {
-      const marker = L.marker([place.lat, place.lon])
+      const icon = L.divIcon({
+        className: '',
+        html: `
+          <div style="
+            width:34px;
+            height:34px;
+            display:grid;
+            place-items:center;
+            background:#2563eb;
+            color:#fff;
+            border:3px solid #fff;
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            box-shadow:0 3px 10px rgba(0,0,0,.32);
+            font:700 14px/1 system-ui,sans-serif;
+          ">
+            <span style="transform:rotate(45deg);">${index + 1}</span>
+          </div>
+        `,
+        iconSize: [34, 34],
+        iconAnchor: [17, 34],
+        popupAnchor: [0, -36]
+      });
+
+      const marker = L.marker(
+        [place.lat, place.lon],
+        {
+          icon,
+          zIndexOffset: 200
+        }
+      )
         .addTo(this.map)
         .bindPopup(
           `<b>${escapeHtml(place.name)}</b><br>${escapeHtml(place.note ?? '')}`
