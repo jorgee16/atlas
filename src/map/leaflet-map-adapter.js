@@ -268,12 +268,12 @@ export class LeafletMapAdapter {
 
     this.gpsDiagnosticsElement.innerHTML = `
       <strong>GPS diagnostics</strong>
-      <span>Render 0 Hz</span>
+      <span>FPS 0</span>
       <span>GPS 0.0 Hz</span>
-      <span>Accuracy —</span>
+      <span>Acc —</span>
       <span>Speed —</span>
-      <span>Heading —</span>
-      <span>Prediction 0.00 s</span>
+      <span>Head —</span>
+      <span>Pred 0.00 s</span>
     `;
 
     this.map
@@ -1703,12 +1703,12 @@ export class LeafletMapAdapter {
 
     this.gpsDiagnosticsElement.innerHTML = `
       <strong>GPS diagnostics</strong>
-      <span>Render ${this.gpsDiagnosticsFps.toFixed(0)} Hz</span>
+      <span>FPS ${this.gpsDiagnosticsFps.toFixed(0)}</span>
       <span>GPS —</span>
-      <span>Accuracy —</span>
+      <span>Acc —</span>
       <span>Speed —</span>
-      <span>Heading —</span>
-      <span>Prediction —</span>
+      <span>Head —</span>
+      <span>Pred —</span>
     `;
   }
 
@@ -1724,9 +1724,9 @@ export class LeafletMapAdapter {
 
     this.gpsDiagnosticsElement.innerHTML = `
       <strong>GPS diagnostics</strong>
-      <span>Render ${this.gpsDiagnosticsFps.toFixed(0)} Hz</span>
+      <span>FPS ${this.gpsDiagnosticsFps.toFixed(0)}</span>
       <span>GPS ${this.gpsDiagnosticsHz.toFixed(1)} Hz</span>
-      <span>Accuracy ${
+      <span>Acc ${
         Number.isFinite(accuracy)
           ? `${Math.round(accuracy)} m`
           : '—'
@@ -1736,12 +1736,12 @@ export class LeafletMapAdapter {
           ? `${speed.toFixed(1)} m/s`
           : '—'
       }</span>
-      <span>Heading ${
+      <span>Head ${
         Number.isFinite(heading)
           ? `${Math.round(heading)}°`
           : '—'
       }</span>
-      <span>Prediction ${this.gpsDiagnosticsPredictionSeconds.toFixed(2)} s</span>
+      <span>Pred ${this.gpsDiagnosticsPredictionSeconds.toFixed(2)} s</span>
     `;
   }
 

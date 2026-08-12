@@ -183,6 +183,7 @@ export class NavigationFeature {
     this.expandedTransitJourneyIndex = null;
     this.transitJourneySession = null;
     this.transitJourneyExecution = null;
+    this.transitJourneyStarting = false;
     this.transitJourneyExecutionView = new TransitJourneyExecutionView({ documentRef });
     this.transitWalkRequest = 0;
 
@@ -695,12 +696,35 @@ export class NavigationFeature {
     );
 
     if (this.session.isActive()) {
-      if (this.currentPosition && this.trackPosition) {
-        this.session.updateOrigin(this.currentPosition);
-      }
+      if (mode === 'transit') {
+        this.#cancelRouteRequest();
 
-      void this.#calculateRoute({ preserveCurrentRoute: true });
-      return true;
+        this.session.stop();
+        this.routeState = 'idle';
+        this.routeError = null;
+        this.routeProgress = null;
+        this.arrivalState = null;
+        this.navigationContext = null;
+
+        this.guidance?.hide();
+        this.voice.stop();
+
+        this.map.clearRoute?.();
+        this.map.clearManeuvers?.();
+        this.map.setNavigationTravelMode?.(null);
+
+        this.onActiveChange(false);
+      } else {
+        if (this.currentPosition && this.trackPosition) {
+          this.session.updateOrigin(this.currentPosition);
+        }
+
+        void this.#calculateRoute({
+          preserveCurrentRoute: true
+        });
+
+        return true;
+      }
     }
 
     // Cancel any Drive/Walk/TfL preview and its collapse timer before
@@ -1059,12 +1083,32 @@ export class NavigationFeature {
 
 
   async startTransitJourney(journey = this.getSelectedTransitJourney()) {
-    if (!journey) return false;
-    this.transitJourneyExecution = new TransitJourneyExecution(journey, { now: this.now });
-    this.map.clearSelectionPin?.();
-    this.status?.('Journey started', `${journey.sequence.length} legs`);
-    await this.#activateTransitExecutionLeg();
-    return true;
+    if (!journey || this.transitJourneyStarting) {
+      return false;
+    }
+
+    this.transitJourneyStarting = true;
+
+    try {
+      this.transitJourneyExecution =
+        new TransitJourneyExecution(
+          journey,
+          { now: this.now }
+        );
+
+      this.map.clearSelectionPin?.();
+
+      this.status?.(
+        'Journey started',
+        `${journey.sequence.length} legs`
+      );
+
+      await this.#activateTransitExecutionLeg();
+
+      return true;
+    } finally {
+      this.transitJourneyStarting = false;
+    }
   }
 
   async transitionTransitJourney(action) {
@@ -1169,8 +1213,37 @@ export class NavigationFeature {
     const state = execution.getState();
 
     if (state.completed) {
+      this.transitWalkRequest += 1;
+
+      this.#cancelRouteRequest();
+
+      if (this.session.isActive()) {
+        this.session.stop();
+      }
+
+      this.routeState = 'idle';
+      this.routeError = null;
+      this.routeProgress = null;
+      this.arrivalState = null;
+      this.navigationContext = null;
+      this.lastVoiceAnnouncement = null;
+
+      this.#resetTransitArrivalEvidence();
+
+      this.guidance?.hide();
+      this.voice.stop();
+
       this.map.clearRoute?.();
-      this.status?.('Destination reached', 'All journey legs are complete.');
+      this.map.clearManeuvers?.();
+      this.map.setNavigationTravelMode?.(null);
+
+      this.onActiveChange(false);
+
+      this.status?.(
+        'Destination reached',
+        'All journey legs are complete.'
+      );
+
       this.render();
       return;
     }
@@ -1179,6 +1252,37 @@ export class NavigationFeature {
     const points = (leg.points ?? []).filter(point =>
       Number.isFinite(point?.lat) && Number.isFinite(point?.lon)
     );
+
+    if (leg.kind === 'walk' && points.length < 2) {
+      this.transitWalkRequest += 1;
+      this.#resetTransitArrivalEvidence();
+
+      if (this.session.isActive()) {
+        this.#cancelRouteRequest();
+        this.session.stop();
+      }
+
+      this.routeState = 'idle';
+      this.routeError = null;
+      this.routeProgress = null;
+      this.arrivalState = null;
+      this.navigationContext = null;
+
+      this.guidance?.hide();
+      this.voice.stop();
+
+      this.map.clearRoute?.();
+      this.map.clearManeuvers?.();
+      this.map.setNavigationTravelMode?.(null);
+
+      this.status?.(
+        'Walking leg',
+        leg.toName ?? 'Continue to the next stop'
+      );
+
+      this.render();
+      return;
+    }
 
     if (leg.kind === 'walk' && points.length >= 2) {
       const request = ++this.transitWalkRequest;
@@ -1268,36 +1372,65 @@ export class NavigationFeature {
         'Walking leg',
         leg.toName ?? 'Follow Atlas Navigation'
       );
-    } else if (points.length >= 2) {
+    } else {
       this.transitWalkRequest += 1;
       this.#resetTransitArrivalEvidence();
 
+      // A transit vehicle leg must never inherit an Atlas walking
+      // NavigationSession from the previous leg.
       if (this.session.isActive()) {
         this.#cancelRouteRequest();
         this.session.stop();
-        this.routeState = 'idle';
-        this.routeProgress = null;
-        this.arrivalState = null;
-        this.guidance?.hide();
-        this.voice.stop();
-        this.map.clearManeuvers?.();
       }
 
+      this.routeState = 'idle';
+      this.routeError = null;
+      this.routeProgress = null;
+      this.arrivalState = null;
+      this.navigationContext = null;
+
+      this.guidance?.hide();
+      this.voice.stop();
+      this.map.clearManeuvers?.();
       this.map.setNavigationTravelMode?.(null);
 
-      this.map.showRoute?.({
-        points,
-        distanceMeters: leg.distanceMeters ?? 0,
-        durationSeconds: Math.max(60, (leg.durationMinutes ?? 1) * 60),
-        maneuvers: [],
-        kind: 'transit-leg'
-      }, {
-        origin: { ...points[0], name: leg.fromName ?? 'Board here' },
-        destination: { ...points.at(-1), name: leg.toName ?? 'Get off here' }
-      });
+      if (points.length >= 2) {
+        this.map.showRoute?.({
+          points,
+          distanceMeters:
+            leg.distanceMeters ?? 0,
+          durationSeconds:
+            Math.max(
+              60,
+              (leg.durationMinutes ?? 1) * 60
+            ),
+          maneuvers: [],
+          kind: 'transit-leg'
+        }, {
+          origin: {
+            ...points[0],
+            name:
+              leg.fromName ?? 'Board here'
+          },
+          destination: {
+            ...points.at(-1),
+            name:
+              leg.toName ?? 'Get off here'
+          }
+        });
+      } else {
+        this.map.clearRoute?.();
+      }
+
       this.status?.(
-        state.phase === 'riding' ? 'Riding' : 'Ready to board',
-        [leg.line, leg.direction].filter(Boolean).join(' · ') || leg.mode || 'Transit'
+        state.phase === 'riding'
+          ? 'Riding'
+          : 'Ready to board',
+        [leg.line, leg.direction]
+          .filter(Boolean)
+          .join(' · ') ||
+          leg.mode ||
+          'Transit'
       );
     }
 
@@ -1454,28 +1587,89 @@ export class NavigationFeature {
     const promise = (async () => {
       try {
         let route;
+        let transitJourneys = null;
+        let transitSession = null;
 
-        if (this.travelMode === 'transit') {
-          if (!this.transitBridge) throw new Error('Transit planning is unavailable.');
-          const journeys = await this.transitBridge.plan(origin, destination, { signal: abortController.signal });
-          if (!journeys.length) throw new Error('No transit journeys were returned.');
-          this.transitJourneyOptions = journeys;
-          this.selectedTransitJourneyIndex = 0;
-          this.expandedTransitJourneyIndex = null;
-          this.transitJourneySession = { journey: journeys[0], origin: { ...origin }, destination: { ...destination }, selectedAt: this.now() };
-          route = this.#transitPreviewRoute(journeys[0]);
+        const requestedTravelMode =
+          this.travelMode;
+
+        if (requestedTravelMode === 'transit') {
+          if (!this.transitBridge) {
+            throw new Error(
+              'Transit planning is unavailable.'
+            );
+          }
+
+          const journeys =
+            await this.transitBridge.plan(
+              origin,
+              destination,
+              {
+                signal:
+                  abortController.signal
+              }
+            );
+
+          if (!journeys.length) {
+            throw new Error(
+              'No transit journeys were returned.'
+            );
+          }
+
+          route =
+            this.#transitPreviewRoute(
+              journeys[0]
+            );
+
+          transitJourneys = journeys;
+
+          transitSession = {
+            journey: journeys[0],
+            origin: { ...origin },
+            destination: { ...destination },
+            selectedAt: this.now()
+          };
         } else {
-          this.transitJourneyOptions = [];
-          this.selectedTransitJourneyIndex = 0;
-          this.transitJourneySession = null;
-          route = await this.routingService.route(origin, destination, { signal: abortController.signal, profile: this.travelMode });
+          route =
+            await this.routingService.route(
+              origin,
+              destination,
+              {
+                signal:
+                  abortController.signal,
+                profile:
+                  requestedTravelMode
+              }
+            );
         }
 
         if (
           request !== this.previewRequest ||
-          this.session.isActive()
+          this.session.isActive() ||
+          this.travelMode !== requestedTravelMode
         ) {
           return false;
+        }
+
+        if (requestedTravelMode === 'transit') {
+          this.transitJourneyOptions =
+            transitJourneys;
+
+          this.selectedTransitJourneyIndex =
+            0;
+
+          this.expandedTransitJourneyIndex =
+            null;
+
+          this.transitJourneySession =
+            transitSession;
+        } else {
+          this.transitJourneyOptions = [];
+          this.selectedTransitJourneyIndex =
+            0;
+          this.expandedTransitJourneyIndex =
+            null;
+          this.transitJourneySession = null;
         }
 
         this.previewRoute = route;
@@ -1563,15 +1757,95 @@ export class NavigationFeature {
     }
 
     if (this.travelMode === 'transit') {
-      if (this.previewState === 'loading' && this.previewPromise) await this.previewPromise;
-      if (!this.previewRoute) {
-        const ready = await this.previewPlannedRoute();
-        if (!ready || !this.previewRoute) return false;
+      if (
+        this.previewState === 'loading' &&
+        this.previewPromise
+      ) {
+        await this.previewPromise;
       }
-      const selected = this.transitJourneyOptions[this.selectedTransitJourneyIndex];
-      if (!selected) return false;
-      this.transitJourneySession = { journey: selected, origin: { ...origin }, destination: { ...destination }, selectedAt: this.now() };
-      return this.startTransitJourney(selected);
+
+      // The planner may have changed while an asynchronous
+      // TfL preview was resolving.
+      if (this.travelMode !== 'transit') {
+        return false;
+      }
+
+      if (!this.previewRoute) {
+        const ready =
+          await this.previewPlannedRoute();
+
+        if (!ready || !this.previewRoute) {
+          return false;
+        }
+      }
+
+      // previewPlannedRoute() may itself have awaited network work.
+      // Validate the planner identity again before starting.
+      if (this.travelMode !== 'transit') {
+        return false;
+      }
+
+      const currentOrigin =
+        this.#plannerStart();
+
+      const currentDestination =
+        this.plannerDestination;
+
+      const transitSession =
+        this.transitJourneySession;
+
+      if (
+        !currentOrigin ||
+        !currentDestination ||
+        !transitSession
+      ) {
+        return false;
+      }
+
+      const samePoint = (a, b) =>
+        Number.isFinite(a?.lat) &&
+        Number.isFinite(a?.lon) &&
+        Number.isFinite(b?.lat) &&
+        Number.isFinite(b?.lon) &&
+        a.lat === b.lat &&
+        a.lon === b.lon;
+
+      // A picked origin must still be the exact origin that was
+      // previewed. A GPS origin is allowed to move naturally.
+      if (
+        this.plannerOrigin &&
+        !samePoint(
+          currentOrigin,
+          transitSession.origin
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        !samePoint(
+          currentDestination,
+          transitSession.destination
+        )
+      ) {
+        return false;
+      }
+
+      const selected =
+        this.transitJourneyOptions[
+          this.selectedTransitJourneyIndex
+        ];
+
+      if (
+        !selected ||
+        transitSession.journey !== selected
+      ) {
+        return false;
+      }
+
+      return this.startTransitJourney(
+        selected
+      );
     }
 
     if (this.previewState === 'loading' && this.previewPromise) {
@@ -2153,10 +2427,19 @@ export class NavigationFeature {
     this.#cancelPreviewRequest();
     this.previewRequest += 1;
     clearTimeout(this.previewCollapseTimer);
+
     this.previewRoute = null;
     this.previewState = 'idle';
     this.previewError = null;
     this.previewCollapsed = false;
+
+    // A preview belongs to one exact From/To/mode combination.
+    // Once that identity changes, no TfL option from the previous
+    // preview may remain selectable or startable.
+    this.transitJourneyOptions = [];
+    this.selectedTransitJourneyIndex = 0;
+    this.expandedTransitJourneyIndex = null;
+    this.transitJourneySession = null;
 
     if (clearRoute && !this.session.isActive()) {
       this.map.clearRoute?.();

@@ -1573,23 +1573,50 @@ loadTripButton?.addEventListener(
 
 
 
-  root.querySelector('#gpsBtn').addEventListener('click', async event => {
-    if (gps.enabled) {
-      await gps.stop();
-      map.adapter?.resetGpsDiagnostics?.();
+  const gpsButton =
+    root.querySelector('#gpsBtn');
 
-      event.currentTarget.classList.remove('on');
+  const syncGpsButtonState = () => {
+    const enabled = gps.enabled;
 
-      status(
-        'GPS disabled',
-        'Your location is no longer being tracked.'
-      );
-    } else {
-      await gps.start();
+    gpsButton?.classList.toggle(
+      'on',
+      enabled
+    );
 
-      event.currentTarget.classList.add('on');
+    gpsButton?.setAttribute(
+      'aria-pressed',
+      String(enabled)
+    );
+
+    gpsButton?.setAttribute(
+      'title',
+      enabled
+        ? 'Disable GPS'
+        : 'Enable GPS'
+    );
+  };
+
+  gpsButton?.addEventListener(
+    'click',
+    async () => {
+      if (gps.enabled) {
+        await gps.stop();
+        map.adapter?.resetGpsDiagnostics?.();
+
+        status(
+          'GPS disabled',
+          'Your location is no longer being tracked.'
+        );
+      } else {
+        await gps.start();
+      }
+
+      syncGpsButtonState();
     }
-  });
+  );
+
+  syncGpsButtonState();
 
 
 
