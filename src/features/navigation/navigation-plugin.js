@@ -3,9 +3,13 @@ import {
 } from './navigation-feature.js';
 
 export class NavigationPlugin {
-  constructor({ transitBridge = null } = {}) {
+  constructor({
+    transitBridge = null,
+    onBookmarkDestination = () => {}
+  } = {}) {
     this.id = 'navigation';
     this.transitBridge = transitBridge;
+    this.onBookmarkDestination = onBookmarkDestination;
     this.feature = null;
   }
 
@@ -27,6 +31,8 @@ export class NavigationPlugin {
           ),
         status: context.status,
         transitBridge: this.transitBridge,
+        onBookmarkDestination:
+          this.onBookmarkDestination,
         onArrivalAction: (action, detail) => {
           context.root.dispatchEvent(
             new CustomEvent('navigationarrivalaction', {

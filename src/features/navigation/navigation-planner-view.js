@@ -41,10 +41,12 @@ export class NavigationPlannerView {
     onSelect,
     onSelectRecent,
     onChangeDestination,
+    onBookmarkDestination,
     onPreviewMap,
     onExpandPreview,
     onSelectTransitJourney,
-    onStart
+    onStart,
+    onRetryPreview
   }) {
     const container =
       this.document.createElement('section');
@@ -114,28 +116,67 @@ export class NavigationPlannerView {
         return container;
       }
 
-      const routeDetails = previewState === 'loading'
-        ? `
-          <div class="navigation-preview-status navigation-preview-status--loading" role="status">
-            <span class="navigation-guidance-spinner" aria-hidden="true"></span>
-            <span><strong>Calculating route</strong><small>Using downloaded road data</small></span>
-          </div>
-        `
-        : routeReady
+      const routeDetails =
+        previewState === 'loading'
           ? `
-            <div class="navigation-preview-metrics">
-              <span><strong>${this.#formatDuration(previewRoute.durationSeconds)}</strong><small>ETA</small></span>
-              <span><strong>${this.#formatDistance(previewRoute.distanceMeters)}</strong><small>distance</small></span>
+            <div class="navigation-preview-status navigation-preview-status--loading" role="status">
+              <span class="navigation-guidance-spinner" aria-hidden="true"></span>
+              <span>
+                <strong>${
+                  travelMode === 'transit'
+                    ? 'Finding transit options'
+                    : 'Calculating route'
+                }</strong>
+                <small>${
+                  travelMode === 'transit'
+                    ? 'Checking TfL services'
+                    : 'Using downloaded road data'
+                }</small>
+              </span>
             </div>
           `
-          : previewState === 'error'
+          : routeReady
             ? `
-              <div class="navigation-preview-status navigation-preview-status--error" role="status">
-                <span aria-hidden="true">!</span>
-                <span><strong>Route unavailable</strong><small>${escapeHtml(previewError ?? 'No offline route could be calculated.')}</small></span>
+              <div class="navigation-preview-metrics">
+                <span>
+                  <strong>${this.#formatDuration(previewRoute.durationSeconds)}</strong>
+                  <small>ETA</small>
+                </span>
+                <span>
+                  <strong>${this.#formatDistance(previewRoute.distanceMeters)}</strong>
+                  <small>distance</small>
+                </span>
               </div>
             `
-            : '';
+            : previewState === 'error'
+              ? `
+                <div class="navigation-preview-status navigation-preview-status--error" role="status">
+                  <span aria-hidden="true">!</span>
+                  <span>
+                    <strong>${
+                      travelMode === 'transit'
+                        ? 'Transit unavailable'
+                        : 'Route unavailable'
+                    }</strong>
+                    <small>${escapeHtml(
+                      previewError ??
+                      (
+                        travelMode === 'transit'
+                          ? 'No transit journey could be calculated.'
+                          : 'No offline route could be calculated.'
+                      )
+                    )}</small>
+                    <button
+                      type="button"
+                      class="navigation-preview-retry"
+                      data-navigation-retry-preview
+                    >
+                      Retry
+                    </button>
+                  </span>
+                </div>
+              `
+              : '';
 
       container.innerHTML = `
         <div class="navigation-confirm-card navigation-confirm-card--preview">
@@ -146,11 +187,21 @@ export class NavigationPlannerView {
 
           <div class="navigation-confirm-main">
             <span class="navigation-destination-pin" aria-hidden="true"></span>
+
             <span class="navigation-confirm-copy">
               <small>Destination</small>
               <strong>${escapeHtml(destination.name ?? 'Destination')}</strong>
               <span>${escapeHtml(this.#placeDetails(destination, false))}</span>
             </span>
+
+            <button
+              class="navigation-destination-bookmark"
+              type="button"
+              data-navigation-bookmark
+            >
+              <span aria-hidden="true">☆</span>
+              Bookmark
+            </button>
           </div>
 
           ${routeDetails}
@@ -212,6 +263,13 @@ export class NavigationPlannerView {
       `;
 
       container
+        .querySelector?.('[data-navigation-bookmark]')
+        ?.addEventListener(
+          'click',
+          onBookmarkDestination
+        );
+
+      container
         .querySelector?.('[data-navigation-change]')
         ?.addEventListener('click', onChangeDestination);
 
@@ -222,6 +280,14 @@ export class NavigationPlannerView {
       container
         .querySelector?.('[data-navigation-start]')
         ?.addEventListener('click', onStart);
+
+
+      container
+        .querySelector?.('[data-navigation-retry-preview]')
+        ?.addEventListener(
+          'click',
+          onRetryPreview
+        );
 
       for (const button of container.querySelectorAll?.('[data-navigation-mode]') ?? []) {
         button.addEventListener('click', () => onTravelMode?.(button.dataset.navigationMode));

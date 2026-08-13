@@ -85,7 +85,41 @@ export class NearbyFeature {
           );
         }
       }
+
+      const bookmarkButton =
+        event.target.closest('[data-nearby-bookmark]');
+
+      if (bookmarkButton) {
+        const place = this.placeById(
+          bookmarkButton.dataset.nearbyBookmark
+        );
+
+        if (place) {
+          this.listElement.dispatchEvent(
+            new CustomEvent('nearbybookmark', {
+              bubbles: true,
+              detail: { place }
+            })
+          );
+        }
+      }
     });
+  }
+
+  syncFullResultsUiState() {
+    const root =
+      this.listElement.ownerDocument
+        ?.documentElement;
+
+    root?.classList.toggle(
+      'atlas-nearby-open',
+      this.resultsVisible
+    );
+
+    root?.classList.toggle(
+      'atlas-nearby-full',
+      this.fullResults && this.resultsVisible
+    );
   }
 
   async search(anchor) {
@@ -98,6 +132,7 @@ export class NearbyFeature {
     this.map.clearNearby();
     this.fullResults = false;
     this.resultsVisible = true;
+    this.syncFullResultsUiState();
 
     this.status(
       'Searching nearby…',
@@ -128,6 +163,7 @@ export class NearbyFeature {
   dismissResults() {
     this.resultsVisible = false;
     this.fullResults = false;
+    this.syncFullResultsUiState();
     this.listElement.replaceChildren();
   }
 
@@ -140,11 +176,13 @@ export class NearbyFeature {
     this.results = [];
     this.fullResults = false;
     this.resultsVisible = false;
+    this.syncFullResultsUiState();
     this.map.clearNearby();
     this.listElement.replaceChildren();
   }
 
   render() {
+    this.syncFullResultsUiState();
     this.listElement.replaceChildren();
     this.map.clearNearby();
 

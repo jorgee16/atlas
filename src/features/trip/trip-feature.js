@@ -26,7 +26,8 @@ export class TripFeature {
     status,
     onPlaceSelected = () => {},
     onNavigate = () => {},
-    onNearby = () => {}
+    onNearby = () => {},
+    onStateChange = () => {}
   }) {
     if (!map) {
       throw new TypeError(
@@ -60,6 +61,7 @@ export class TripFeature {
     this.onPlaceSelected = onPlaceSelected;
     this.onNavigate = onNavigate;
     this.onNearby = onNearby;
+    this.onStateChange = onStateChange;
 
     this.itinerary = null;
     this.tripData = null;
@@ -94,7 +96,9 @@ export class TripFeature {
   }
 
   load(data, {
-    initialDay = '12'
+    initialDay = '12',
+    initialStopIndex = null,
+    initialMode = 'schedule'
   } = {}) {
     if (!data) {
       this.unload();
@@ -114,7 +118,14 @@ export class TripFeature {
 
     this.itinerary.setRenderHandler(() => {
       this.#renderMapTimeline();
-      if (!this.selected) this.#renderSelectedStop(null);
+
+      if (!this.selected) {
+        this.#renderSelectedStop(null);
+      }
+
+      if (this.loaded) {
+        this.#emitStateChange();
+      }
     });
 
     this.itinerary.setSelectHandler((place, meta = {}) => {
@@ -124,12 +135,46 @@ export class TripFeature {
         this.setMode('map');
       }
       this.onPlaceSelected(place);
+
+      if (this.loaded) {
+        this.#emitStateChange();
+      }
     });
 
-    this.itinerary.render(initialDay);
+    const availableDays =
+      Object.keys(this.itinerary.days);
+
+    const restoredDay =
+      availableDays.includes(String(initialDay))
+        ? String(initialDay)
+        : availableDays[0];
+
+    this.itinerary.render(restoredDay);
     this.#renderMapTimeline();
+
+    if (
+      Number.isInteger(initialStopIndex) &&
+      initialStopIndex >= 0
+    ) {
+      const place =
+        this.itinerary.days[restoredDay]?.[
+          initialStopIndex
+        ];
+
+      if (place) {
+        this.itinerary.restoreSelection(place);
+        this.#renderSelectedStop(place);
+        this.#renderMapTimeline(place);
+      }
+    }
+
     this.loaded = true;
-    this.mode = 'schedule';
+
+    this.mode =
+      initialMode === 'map'
+        ? 'map'
+        : 'schedule';
+
     this.#syncMode();
   }
 
@@ -181,6 +226,11 @@ export class TripFeature {
 
     this.mode = mode;
     this.#syncMode();
+
+    if (this.loaded) {
+      this.#emitStateChange();
+    }
+
     return true;
   }
 
@@ -257,6 +307,48 @@ export class TripFeature {
 
   get selected() {
     return this.itinerary?.selected ?? null;
+  }
+
+  #emitStateChange() {
+    if (!this.itinerary) {
+      return;
+    }
+
+    const day =
+      String(
+        this.itinerary.selectedDay ??
+        this.daySelectElement.value ??
+        ''
+      );
+
+    const places =
+      this.itinerary.days[day] ?? [];
+
+    const selected = this.selected;
+
+    let stopIndex = null;
+
+    if (selected) {
+      const index =
+        places.findIndex(place =>
+          place === selected ||
+          (
+            place?.name === selected.name &&
+            place?.lat === selected.lat &&
+            place?.lon === selected.lon
+          )
+        );
+
+      if (index >= 0) {
+        stopIndex = index;
+      }
+    }
+
+    this.onStateChange({
+      day,
+      stopIndex,
+      mode: this.mode
+    });
   }
 
   #bindModeSwitch() {

@@ -293,7 +293,11 @@ export class AppBootstrap {
     appContext.provide('transitJourneyBridge', transitJourneyBridge);
 
     pluginManager.register(
-      new NavigationPlugin({ transitBridge: transitJourneyBridge })
+      new NavigationPlugin({
+        transitBridge: transitJourneyBridge,
+        onBookmarkDestination: destination =>
+          beginBookmarkFromSelectedPoint(destination)
+      })
     );
 
     pluginManager.register(
@@ -703,6 +707,13 @@ export class AppBootstrap {
       void nearbyFeature.search(point);
     });
 
+    root.addEventListener('nearbybookmark', event => {
+      const place = event.detail?.place;
+      if (!place) return;
+
+      beginBookmarkFromSelectedPoint(place);
+    });
+
     root.addEventListener('nearbynavigate', event => {
       const place = event.detail?.place;
       if (!place) return;
@@ -802,6 +813,23 @@ export class AppBootstrap {
     const tripStore = new TripStore();
 
     let tripLibraryState = tripStore.load();
+
+    tripFeature.onStateChange = viewState => {
+      const activeId =
+        tripLibraryState.activeId;
+
+      if (!activeId) {
+        return;
+      }
+
+      tripStore.setViewState(
+        activeId,
+        viewState
+      );
+
+      tripLibraryState =
+        tripStore.load();
+    };
     let tripLibraryOpen = false;
     let availableCloudTrips = [];
     let cloudTripsLoaded = false;
@@ -975,7 +1003,17 @@ export class AppBootstrap {
       tripStore.setActive(record.id);
       tripLibraryState = tripStore.load();
       tripFeature.load(record.data, {
-        initialDay: firstTripDay(record.data)
+        initialDay:
+          record.viewState?.day ??
+          firstTripDay(record.data),
+
+        initialStopIndex:
+          record.viewState?.stopIndex ??
+          null,
+
+        initialMode:
+          record.viewState?.mode ??
+          'schedule'
       });
       syncTripTitle();
       setTripLibraryOpen(false);
@@ -1348,11 +1386,13 @@ loadTripButton?.addEventListener(
 
   function openBookmarkEditorAt({
     lat,
-    lon
+    lon,
+    name = null
   }) {
     pendingBookmarkLocation = {
       lat,
-      lon
+      lon,
+      name
     };
 
     bookmarkPickMode = true;
@@ -1363,6 +1403,14 @@ loadTripButton?.addEventListener(
       `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 
     showBookmarksOverlay({ editor: true });
+
+    if (bookmarkNameInput) {
+      bookmarkNameInput.value =
+        name &&
+        name !== 'Selected point'
+          ? name
+          : '';
+    }
 
     status(
       'Bookmark location selected',

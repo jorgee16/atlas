@@ -347,6 +347,35 @@ export class NavigationGuidance {
     `;
   }
 
+  showApproaching({
+    destinationName,
+    remainingDistanceMeters
+  }) {
+    const distance =
+      Math.max(
+        0,
+        Math.round(remainingDistanceMeters ?? 0)
+      );
+
+    this.element.hidden = false;
+    this.element.dataset.state = 'approaching';
+    delete this.element.dataset.navigationState;
+
+    this.element.innerHTML = `
+      <div class="navigation-guidance-banner navigation-guidance-approaching">
+        <span class="navigation-destination-pin" aria-hidden="true"></span>
+
+        <div class="navigation-guidance-approaching-copy">
+          <small>Arriving at</small>
+          <strong>${escapeHtml(destinationName ?? 'Destination')}</strong>
+          <span>${distance} m remaining</span>
+        </div>
+
+        ${this.#voiceButton()}
+      </div>
+    `;
+  }
+
   showArrival({
     destinationName,
     context = null

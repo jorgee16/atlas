@@ -2,6 +2,10 @@ import {
   BookmarkStore
 } from './bookmark-store.js';
 
+import {
+  googleWalkingDirections
+} from '../../utils.js';
+
 export class BookmarksFeature {
   constructor({
     map,
@@ -116,7 +120,8 @@ export class BookmarksFeature {
 
       const showButton = document.createElement('button');
       showButton.type = 'button';
-      showButton.textContent = 'Show';
+      showButton.textContent = 'Show on map';
+      showButton.className = 'bookmark-library-show';
       showButton.addEventListener('click', () => {
         if (typeof this.onFocus === 'function') {
           this.onFocus(bookmark);
@@ -133,9 +138,25 @@ export class BookmarksFeature {
       navigateButton.disabled = typeof this.onNavigate !== 'function';
       navigateButton.addEventListener('click', () => this.onNavigate?.(bookmark));
 
+      const googleMapsLink =
+        document.createElement('a');
+
+      googleMapsLink.className =
+        'bookmark-library-google';
+
+      googleMapsLink.textContent =
+        'Google Maps';
+
+      googleMapsLink.href =
+        googleWalkingDirections(bookmark);
+
+      googleMapsLink.target = '_blank';
+      googleMapsLink.rel = 'noopener noreferrer';
+
       const editButton = document.createElement('button');
       editButton.type = 'button';
       editButton.textContent = 'Rename';
+      editButton.className = 'bookmark-library-manage';
       editButton.addEventListener('click', () => {
         const nextName = window.prompt('Bookmark name', bookmark.name);
         if (nextName !== null) this.rename(bookmark.id, nextName);
@@ -144,10 +165,17 @@ export class BookmarksFeature {
       const removeButton = document.createElement('button');
       removeButton.type = 'button';
       removeButton.textContent = 'Remove';
-      removeButton.className = 'danger-link';
+      removeButton.className =
+        'danger-link bookmark-library-manage';
       removeButton.addEventListener('click', () => this.remove(bookmark.id));
 
-      actions.append(showButton, navigateButton, editButton, removeButton);
+      actions.append(
+        showButton,
+        navigateButton,
+        googleMapsLink,
+        editButton,
+        removeButton
+      );
       card.append(copy, actions);
       this.listElement.appendChild(card);
     });

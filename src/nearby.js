@@ -239,6 +239,8 @@ export function nearbyCardHtml(place) {
             data-nearby-show="${escapeHtml(placeId)}">Show</button>
           <button type="button" class="nearby-action nearby-action--primary"
             data-nearby-navigate="${escapeHtml(placeId)}">Navigate</button>
+          <button type="button" class="nearby-action nearby-action--quiet"
+            data-nearby-bookmark="${escapeHtml(placeId)}">Bookmark</button>
           <a
             class="nearby-action nearby-action--quiet nearby-action--maps"
             target="_blank"

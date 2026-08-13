@@ -48,6 +48,7 @@ const OFF_ROUTE_CONFIRMATION_MS = 2_500;
 const ROUTE_CHANGED_NOTICE_MS = 6_000;
 const MINIMUM_REROUTE_INTERVAL_MS = 15_000;
 const ROUTE_PREVIEW_COLLAPSE_MS = 4_500;
+const APPROACHING_DESTINATION_METERS = 100;
 const ARRIVAL_DISTANCE_METERS = 30;
 const ARRIVAL_DESTINATION_RADIUS_METERS = 50;
 
@@ -74,6 +75,7 @@ export class NavigationFeature {
     plannerView = null,
     onActiveChange = () => {},
     onArrivalAction = () => {},
+    onBookmarkDestination = () => {},
     documentRef = globalThis.document
   }) {
     if (
@@ -110,6 +112,8 @@ export class NavigationFeature {
       });
     this.onActiveChange = onActiveChange;
     this.onArrivalAction = onArrivalAction;
+    this.onBookmarkDestination =
+      onBookmarkDestination;
 
     this.guidance = guidance ??
       (guidanceElement
@@ -305,6 +309,12 @@ export class NavigationFeature {
     const { route } =
       this.session.getState();
 
+    // Arrival keeps the session context alive until Finish,
+    // but no further guidance or rerouting may replace the arrival UI.
+    if (this.arrivalState) {
+      return;
+    }
+
     if (route?.maneuvers?.length) {
       this.routeProgress =
         findRouteProgress(
@@ -316,20 +326,6 @@ export class NavigationFeature {
                 ?.pointIndex ?? null
           }
         );
-
-      this.#renderGuidance();
-      this.#announceGuidance();
-
-      this.map.showManeuvers?.(
-        route.maneuvers,
-        this.routeProgress
-          ?.nextManeuverIndex ?? 0
-      );
-
-      this.map.updateRouteProgress?.(
-        route,
-        this.routeProgress
-      );
 
       if (this.#shouldArrive(normalizedPosition)) {
         if (this.#isTransitWalkingLeg()) {
@@ -344,6 +340,20 @@ export class NavigationFeature {
       } else if (this.#isTransitWalkingLeg()) {
         this.#resetTransitArrivalEvidence();
       }
+
+      this.#renderGuidance();
+      this.#announceGuidance();
+
+      this.map.showManeuvers?.(
+        route.maneuvers,
+        this.routeProgress
+          ?.nextManeuverIndex ?? 0
+      );
+
+      this.map.updateRouteProgress?.(
+        route,
+        this.routeProgress
+      );
     }
 
     this.render();
@@ -594,6 +604,15 @@ export class NavigationFeature {
     this.#resetOffRouteEvidence();
     this.navigationConfidenceState = 'normal';
     this.voice.stop();
+
+    if (this.voice.isEnabled()) {
+      this.voice.speak(
+        `You have arrived at ${
+          destination?.name ?? 'your destination'
+        }.`
+      );
+    }
+
     this.map.clearManeuvers?.();
 
     this.guidance?.showArrival({
@@ -1700,10 +1719,64 @@ export class NavigationFeature {
         }
 
         console.error(error);
+
         this.previewRoute = null;
         this.previewState = 'error';
-        this.previewError =
-          error.message ?? 'No route could be calculated.';
+
+        if (this.travelMode === 'transit') {
+          this.transitJourneyOptions = [];
+          this.selectedTransitJourneyIndex = 0;
+          this.expandedTransitJourneyIndex = null;
+          this.transitJourneySession = null;
+
+          const message =
+            String(error?.message ?? '');
+
+          if (
+            message.includes(
+              'No transit journeys were returned'
+            )
+          ) {
+            this.previewError =
+              'No transit journey found for this route.';
+          } else if (
+            message.includes(
+              'TfL journey request failed'
+            ) ||
+            message.includes(
+              'Failed to fetch'
+            ) ||
+            message.includes(
+              'NetworkError'
+            )
+          ) {
+            this.previewError =
+              'TfL transit service is temporarily unavailable.';
+          } else if (
+            message.includes(
+              'TfL returned invalid JSON'
+            )
+          ) {
+            this.previewError =
+              'TfL returned an invalid response.';
+          } else if (
+            message.includes(
+              'TfL geometry unsupported'
+            )
+          ) {
+            this.previewError =
+              'Transit route details could not be processed.';
+          } else {
+            this.previewError =
+              message ||
+              'Transit planning is unavailable.';
+          }
+        } else {
+          this.previewError =
+            error.message ??
+            'No route could be calculated.';
+        }
+
         this.map.clearRoute?.();
         this.render();
         return false;
@@ -2165,6 +2238,15 @@ export class NavigationFeature {
         },
       onChangeDestination:
         () => this.clearPlannerDestination(),
+      onBookmarkDestination:
+        () => {
+          const destination =
+            this.plannerDestination;
+
+          if (destination) {
+            this.onBookmarkDestination(destination);
+          }
+        },
       onPreviewMap:
         () => this.previewRouteOnMap(),
       onExpandPreview:
@@ -2174,6 +2256,10 @@ export class NavigationFeature {
       onStart:
         () => {
           void this.startPlannedRoute();
+        },
+      onRetryPreview:
+        () => {
+          void this.previewPlannedRoute();
         }
     });
 
@@ -2471,6 +2557,21 @@ export class NavigationFeature {
     ) {
       this.navigationConfidenceState = 'normal';
       this.previousRoute = null;
+    }
+
+    const approachingDestination =
+      this.routeProgress.remainingDistanceMeters <=
+        APPROACHING_DESTINATION_METERS &&
+      this.routeProgress.nextManeuver?.type === 'arrive';
+
+    if (approachingDestination) {
+      this.guidance.showApproaching({
+        destinationName:
+          destination?.name ?? 'Destination',
+        remainingDistanceMeters:
+          this.routeProgress.remainingDistanceMeters
+      });
+      return;
     }
 
     this.guidance.showRoute({

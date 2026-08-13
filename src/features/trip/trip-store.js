@@ -106,6 +106,9 @@ export class TripStore {
     );
 
     if (existingIndex >= 0) {
+      record.viewState =
+        state.trips[existingIndex].viewState ?? null;
+
       state.trips[existingIndex] = record;
       // Drop any stale duplicate records created by older filename-based
       // identity rules for the same canonical trip.
@@ -127,6 +130,43 @@ export class TripStore {
     state.activeId = id;
     this.save(state);
     return state.trips.find(trip => trip.id === id) ?? null;
+  }
+
+  setViewState(id, viewState) {
+    const state = this.load();
+
+    const record =
+      state.trips.find(trip => trip.id === id);
+
+    if (!record) {
+      return null;
+    }
+
+    const day =
+      viewState?.day != null
+        ? String(viewState.day)
+        : null;
+
+    const stopIndex =
+      Number.isInteger(viewState?.stopIndex) &&
+      viewState.stopIndex >= 0
+        ? viewState.stopIndex
+        : null;
+
+    const mode =
+      viewState?.mode === 'map'
+        ? 'map'
+        : 'schedule';
+
+    record.viewState = {
+      day,
+      stopIndex,
+      mode
+    };
+
+    this.save(state);
+
+    return record.viewState;
   }
 
   remove(id) {
