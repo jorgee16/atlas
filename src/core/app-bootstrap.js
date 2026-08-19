@@ -288,7 +288,11 @@ export class AppBootstrap {
   );
 
     const transitJourneyBridge = new TransitJourneyBridge({
-      provider: new TfLJourneyProvider()
+      provider: new TfLJourneyProvider({
+        appKey:
+          import.meta.env.VITE_TFL_APP_KEY ??
+          ''
+      })
     });
     appContext.provide('transitJourneyBridge', transitJourneyBridge);
 
@@ -1056,8 +1060,45 @@ export class AppBootstrap {
     const menuSettingsButton =
       root.querySelector('#menuSettingsBtn');
 
+    const menuGpsDiagnosticsButton =
+      root.querySelector('#menuGpsDiagnosticsBtn');
+
     const menuAboutButton =
       root.querySelector('#menuAboutBtn');
+
+    const GPS_DIAGNOSTICS_STORAGE_KEY =
+      'atlas.gpsDiagnosticsVisible';
+
+    let gpsDiagnosticsVisible =
+      globalThis.localStorage?.getItem(
+        GPS_DIAGNOSTICS_STORAGE_KEY
+      ) === 'true';
+
+    const renderGpsDiagnosticsToggle = () => {
+      map.setGpsDiagnosticsVisible?.(
+        gpsDiagnosticsVisible
+      );
+
+      menuGpsDiagnosticsButton?.setAttribute(
+        'aria-pressed',
+        String(gpsDiagnosticsVisible)
+      );
+
+      const label =
+        menuGpsDiagnosticsButton
+          ?.querySelector('span');
+
+      if (label) {
+        label.textContent =
+          `GPS diagnostics · ${
+            gpsDiagnosticsVisible
+              ? 'On'
+              : 'Off'
+          }`;
+      }
+    };
+
+    renderGpsDiagnosticsToggle();
 
   let activeRegionId = null;
 
@@ -1134,11 +1175,6 @@ export class AppBootstrap {
 
       globalThis.__atlasGpsFixCount =
         (globalThis.__atlasGpsFixCount ?? 0) + 1;
-
-      status(
-        `GPS fix #${globalThis.__atlasGpsFixCount}`,
-        `${position.latitude.toFixed(5)}, ${position.longitude.toFixed(5)} · ${Math.round(position.accuracy)} m`
-      );
 
       map.updateUserLocation(position, firstFix);
       appContext
@@ -1549,6 +1585,21 @@ loadTripButton?.addEventListener(
       () => {
         closeOverflowMenu();
         showSettingsOverlay();
+      }
+    );
+
+    menuGpsDiagnosticsButton?.addEventListener(
+      'click',
+      () => {
+        gpsDiagnosticsVisible =
+          !gpsDiagnosticsVisible;
+
+        globalThis.localStorage?.setItem(
+          GPS_DIAGNOSTICS_STORAGE_KEY,
+          String(gpsDiagnosticsVisible)
+        );
+
+        renderGpsDiagnosticsToggle();
       }
     );
 

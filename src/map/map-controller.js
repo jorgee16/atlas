@@ -54,6 +54,16 @@ export class MapController {
     return this.adapter.setNavigationTravelMode?.(mode);
   }
 
+  setGpsDiagnosticsVisible(visible) {
+    return this.adapter.setGpsDiagnosticsVisible?.(
+      visible
+    );
+  }
+
+  isGpsDiagnosticsVisible() {
+    return this.adapter.isGpsDiagnosticsVisible?.() ?? false;
+  }
+
   setRegion(region, options = {}) {
     return this.adapter.setRegion(
       region,

@@ -130,6 +130,21 @@ export function renderAppShell(root) {
               </button>
 
               <button
+                id="menuGpsDiagnosticsBtn"
+                type="button"
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 18V6"></path>
+                  <path d="M8 18v-5"></path>
+                  <path d="M12 18V9"></path>
+                  <path d="M16 18v-8"></path>
+                  <path d="M20 18V4"></path>
+                </svg>
+                <span>GPS diagnostics · Off</span>
+              </button>
+
+              <button
                 id="menuAboutBtn"
                 type="button"
               >

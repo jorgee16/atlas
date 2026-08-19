@@ -46,8 +46,11 @@ test(
       element.className,
       'navigation-planner navigation-planner--compact'
     );
-    assert.match(element.innerHTML, /Where do you want to go\?/);
+    assert.doesNotMatch(element.innerHTML, /Where do you want to go\?/);
+    assert.match(element.innerHTML, /Offline navigation/);
+    assert.match(element.innerHTML, /navigation-endpoint-stack/);
     assert.match(element.innerHTML, />From</);
+    assert.match(element.innerHTML, />To</);
     assert.match(element.innerHTML, />My location</);
     assert.match(
       element.innerHTML,

@@ -301,7 +301,7 @@ export class NavigationPlannerView {
 
     const visibleResults = results.slice(0, 5);
     const visibleRecent = !query && !visibleResults.length
-      ? recent.slice(0, 3)
+      ? recent.slice(0, 2)
       : [];
 
     const resultMarkup = visibleResults.map(
@@ -320,74 +320,31 @@ export class NavigationPlannerView {
       )
     ).join('');
 
-    const searchActive = Boolean(
-      query ||
-      visibleResults.length ||
-      state === 'loading' ||
-      error
-    );
-
     container.innerHTML = `
-      <div class="navigation-search-card navigation-search-card--destination ${searchActive ? 'is-searching' : ''}">
-        <div class="navigation-search-title-row navigation-search-title-row--minimal">
-          <small><i aria-hidden="true"></i> Offline navigation</small>
+      <div class="navigation-search-card">
+        <div class="navigation-search-title-row">
+          <span>
+            <small><i aria-hidden="true"></i> Offline navigation</small>
+            <strong>Where do you want to go?</strong>
+          </span>
         </div>
 
-        <div class="navigation-endpoint-stack">
-          <button
-            class="navigation-origin-summary navigation-endpoint-row navigation-endpoint-row--origin"
-            type="button"
-            data-navigation-origin-toggle
-            aria-expanded="false"
-          >
-            <span class="navigation-endpoint-marker navigation-endpoint-marker--origin" aria-hidden="true"></span>
-            <span class="navigation-endpoint-copy">
-              <small>From</small>
-              <strong>${escapeHtml(originName)}</strong>
-              <span>${escapeHtml(originDetails)}</span>
-            </span>
-            <span class="navigation-origin-chevron" aria-hidden="true">⌄</span>
-          </button>
+        <button
+          class="navigation-origin-summary"
+          type="button"
+          data-navigation-origin-toggle
+          aria-expanded="false"
+        >
+          <span class="navigation-origin-dot" aria-hidden="true"></span>
+          <span>
+            <small>From</small>
+            <strong>${escapeHtml(originName)}</strong>
+          </span>
+          <small>${escapeHtml(originDetails)}</small>
+          <span class="navigation-origin-chevron" aria-hidden="true">⌄</span>
+        </button>
 
-          <span class="navigation-endpoint-connector" aria-hidden="true"></span>
-
-          <form class="navigation-destination-search navigation-endpoint-row navigation-endpoint-row--destination" data-navigation-search>
-            <span class="navigation-endpoint-marker navigation-endpoint-marker--destination" aria-hidden="true"></span>
-            <label class="navigation-endpoint-copy" for="navigationDestinationInput">
-              <small>To</small>
-              <input
-                id="navigationDestinationInput"
-                name="destination"
-                type="search"
-                inputmode="search"
-                autocomplete="off"
-                enterkeyhint="search"
-                aria-label="Destination"
-                placeholder="Search a place, airport or address"
-                value="${escapeHtml(query)}"
-              >
-            </label>
-            <span class="navigation-endpoint-actions">
-              ${query ? `
-                <button
-                  class="navigation-search-clear"
-                  type="button"
-                  data-navigation-clear
-                  aria-label="Clear destination search"
-                >×</button>
-              ` : ''}
-              <button
-                class="navigation-map-pick-button"
-                type="button"
-                data-navigation-pick="destination"
-                aria-label="Choose destination on map"
-                title="Choose on map"
-              >⌖</button>
-            </span>
-          </form>
-        </div>
-
-        <div class="navigation-origin-editor navigation-origin-editor--inline" data-navigation-origin-editor hidden>
+        <div class="navigation-origin-editor" data-navigation-origin-editor hidden>
           <button
             type="button"
             data-navigation-use-gps
@@ -396,8 +353,40 @@ export class NavigationPlannerView {
           <button
             type="button"
             data-navigation-pick="origin"
-          >Choose start on map</button>
+          >Choose on map</button>
         </div>
+
+        <form class="navigation-destination-search" data-navigation-search>
+          <div>
+            <span class="navigation-search-icon" aria-hidden="true">⌕</span>
+            <input
+              id="navigationDestinationInput"
+              name="destination"
+              type="search"
+              inputmode="search"
+              autocomplete="off"
+              enterkeyhint="search"
+              aria-label="Destination"
+              placeholder="Search a place, airport or address"
+              value="${escapeHtml(query)}"
+            >
+            ${query ? `
+              <button
+                class="navigation-search-clear"
+                type="button"
+                data-navigation-clear
+                aria-label="Clear destination search"
+              >×</button>
+            ` : ''}
+            <button
+              class="navigation-map-pick-button"
+              type="button"
+              data-navigation-pick="destination"
+              aria-label="Choose destination on map"
+              title="Choose on map"
+            >⌖</button>
+          </div>
+        </form>
 
         ${state === 'loading' ? `
           <div class="navigation-planner-feedback navigation-planner-feedback--loading">
@@ -413,24 +402,24 @@ export class NavigationPlannerView {
         ` : ''}
 
         ${resultMarkup ? `
-          <div class="navigation-search-section navigation-search-section--compact navigation-search-section--flat">
+          <div class="navigation-search-section navigation-search-section--compact">
             <div class="navigation-search-heading">
-              <strong>Results</strong>
-              <span>${results.length} found</span>
+              <strong>Best matches</strong>
+              <span>${results.length} result${results.length === 1 ? '' : 's'}</span>
             </div>
-            <div class="navigation-search-results navigation-search-results--flat" aria-label="Destination results">
+            <div class="navigation-search-results" aria-label="Destination results">
               ${resultMarkup}
             </div>
           </div>
         ` : ''}
 
         ${recentMarkup ? `
-          <div class="navigation-search-section navigation-search-section--recent navigation-search-section--flat">
+          <div class="navigation-search-section navigation-search-section--recent">
             <div class="navigation-search-heading">
               <strong>Recent</strong>
-              <span>${recent.length > 3 ? '3 shown' : 'On this device'}</span>
+              <span>${recent.length > 2 ? '2 shown' : 'On this device'}</span>
             </div>
-            <div class="navigation-search-results navigation-search-results--flat" aria-label="Recent destinations">
+            <div class="navigation-search-results" aria-label="Recent destinations">
               ${recentMarkup}
             </div>
           </div>
@@ -828,19 +817,6 @@ export class NavigationPlannerView {
 
                       <span class="navigation-transit-leg-copy">
                         <small>
-                          ${!walking && (
-                            step.mode === 'tube' ||
-                            step.mode === 'underground'
-                          )
-                            ? `
-                              <span
-                                class="navigation-transit-roundel"
-                                aria-label="London Underground"
-                              >
-                                <span></span>
-                              </span>
-                            `
-                            : ''}
                           ${escapeHtml(label)}
                           ${Number.isFinite(step.durationMinutes)
                             ? ` · ${step.durationMinutes} min`
@@ -912,12 +888,9 @@ export class NavigationPlannerView {
                         ${!walking && Number.isFinite(step.stopCount)
                           ? `
                             <div class="navigation-transit-stop-rail">
-                              <div class="navigation-transit-stop-rail-heading">
-                                <span>
-                                  ${step.stopCount}
-                                  stop${step.stopCount === 1 ? '' : 's'}
-                                </span>
-                              </div>
+                              <span class="navigation-transit-stop-rail-count">
+                                ${step.stopCount} stop${step.stopCount === 1 ? '' : 's'}
+                              </span>
 
                               ${
                                 Array.isArray(step.intermediateStops) &&
@@ -925,36 +898,14 @@ export class NavigationPlannerView {
                                   ? `
                                     <div class="navigation-transit-stop-rail-list">
                                       ${step.intermediateStops
-                                        .map((stop, stopIndex, stops) => {
-                                          const isLast =
-                                            stopIndex ===
-                                            stops.length - 1;
-
-                                          return `
-                                            <div
-                                              class="
-                                                navigation-transit-stop-rail-item
-                                                ${isLast ? 'is-destination' : ''}
-                                              "
-                                            >
-                                              <span
-                                                class="navigation-transit-stop-rail-track"
-                                                aria-hidden="true"
-                                              ></span>
-
-                                              <span
-                                                class="navigation-transit-stop-rail-dot"
-                                                aria-hidden="true"
-                                              ></span>
-
-                                              <span
-                                                class="navigation-transit-stop-rail-name"
-                                              >
-                                                ${escapeHtml(String(stop))}
-                                              </span>
-                                            </div>
-                                          `;
-                                        })
+                                        .map(stop => `
+                                          <span class="navigation-transit-stop-rail-item">
+                                            <span class="navigation-transit-stop-rail-dot" aria-hidden="true"></span>
+                                            <span class="navigation-transit-stop-rail-name">
+                                              ${escapeHtml(String(stop))}
+                                            </span>
+                                          </span>
+                                        `)
                                         .join('')}
                                     </div>
                                   `

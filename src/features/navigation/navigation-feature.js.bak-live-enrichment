@@ -1571,77 +1571,12 @@ export class NavigationFeature {
 
     this.render();
 
-    /*
-     * Do not make route planning wait for platform/live-arrival data.
-     * The journey is already usable at this point.
-     *
-     * Enrich only the journey the user actually expanded, then repaint
-     * the card when TfL operational data arrives.
-     */
-    void this.#enrichTransitJourneyOption(
-      index,
-      journey
-    );
-
     this.status?.(
       'Transit option selected',
       `${journey.durationMinutes} min · ${journey.sequence.length} legs`
     );
 
     return true;
-  }
-
-  async #enrichTransitJourneyOption(
-    index,
-    journey
-  ) {
-    if (
-      typeof this.transitBridge
-        ?.enrichOperationalDetails !==
-        'function'
-    ) {
-      return;
-    }
-
-    let enriched;
-
-    try {
-      enriched =
-        await this.transitBridge
-          .enrichOperationalDetails(
-            journey
-          );
-    } catch {
-      return;
-    }
-
-    /*
-     * The user may have selected another option while the network
-     * request was in flight. Never repaint stale information.
-     */
-    if (
-      this.selectedTransitJourneyIndex !==
-        index ||
-      this.expandedTransitJourneyIndex !==
-        index
-    ) {
-      return;
-    }
-
-    this.transitJourneyOptions[index] =
-      enriched;
-
-    if (
-      this.transitJourneySession?.journey ===
-      journey
-    ) {
-      this.transitJourneySession = {
-        ...this.transitJourneySession,
-        journey: enriched
-      };
-    }
-
-    this.render();
   }
 
   getSelectedTransitJourney() {
@@ -3032,11 +2967,6 @@ export class NavigationFeature {
       return;
     }
 
-    const activeGuidanceTravelMode =
-      this.navigationContext?.type === 'transit-walk-leg'
-        ? 'walk'
-        : this.travelMode;
-
     this.guidance.showRoute({
       route,
       progress: this.routeProgress,
@@ -3047,7 +2977,7 @@ export class NavigationFeature {
       canUndoRoute:
         this.navigationConfidenceState === 'changed' &&
         Boolean(this.previousRoute),
-      travelMode: activeGuidanceTravelMode,
+      travelMode: this.travelMode,
       laneGuidanceEnabled: this.laneGuidanceEnabled
     });
   }

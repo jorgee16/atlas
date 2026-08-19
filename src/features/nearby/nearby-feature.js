@@ -50,12 +50,16 @@ export class NearbyFeature {
     this.listElement.addEventListener('click', event => {
       if (event.target.closest('[data-nearby-see-all]')) {
         this.fullResults = true;
+        this.syncFullResultsUiState();
         this.render();
+        return;
       }
 
       if (event.target.closest('[data-nearby-close-all]')) {
         this.fullResults = false;
+        this.syncFullResultsUiState();
         this.render();
+        return;
       }
 
       if (event.target.closest('[data-nearby-dismiss]')) {

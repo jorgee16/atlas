@@ -36,16 +36,6 @@ function normalizeMode(value) {
     .join(',');
 }
 
-function cleanStopName(value) {
-  return String(value ?? '')
-    .replace(/\s*\(([^)]+)\)\s*Underground Station$/i, '')
-    .replace(/\s*Underground Station$/i, '')
-    .replace(/\s*DLR Station$/i, '')
-    .replace(/\s*Rail Station$/i, '')
-    .replace(/\s*Station$/i, '')
-    .trim();
-}
-
 function disruption(item) {
   if (!item || typeof item !== 'object') {
     return null;
@@ -206,199 +196,6 @@ export class TfLJourneyProvider extends JourneyProvider {
     );
   }
 
-  async arrivals(
-    stopId,
-    {
-      line = null,
-      signal = null
-    } = {}
-  ) {
-    const id =
-      String(stopId ?? '').trim();
-
-    if (!id) {
-      return [];
-    }
-
-    const params = {};
-
-    if (this.appKey) {
-      params.app_key = this.appKey;
-    }
-
-    const normalizeLine =
-      value =>
-        String(value ?? '')
-          .toLowerCase()
-          .replace(/\s+line$/i, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-
-    const wantedLine =
-      normalizeLine(line);
-
-    const matchesLine =
-      prediction => {
-        if (!wantedLine) {
-          return true;
-        }
-
-        const ids = [
-          prediction?.lineId,
-          prediction?.lineName
-        ]
-          .map(normalizeLine)
-          .filter(Boolean);
-
-        return ids.some(
-          value =>
-            value === wantedLine ||
-            value.includes(wantedLine) ||
-            wantedLine.includes(value)
-        );
-      };
-
-    const fetchArrivals =
-      async candidateStopId => {
-        const endpoint =
-          `${this.baseUrl}/StopPoint/` +
-          `${encodeURIComponent(candidateStopId)}` +
-          `/Arrivals`;
-
-        const payload =
-          await this.#request(
-            endpoint,
-            params,
-            signal
-          );
-
-        const rows =
-          Array.isArray(payload)
-            ? payload
-            : [];
-
-        return rows
-          .filter(matchesLine)
-          .map(prediction => ({
-            ...prediction,
-
-            /*
-             * Preserve where Atlas actually found the prediction.
-             *
-             * This is important at interchanges such as Paddington,
-             * where the Journey API departure ID and the live-arrival
-             * StopPoint ID can differ.
-             */
-            atlasArrivalStopId:
-              candidateStopId
-          }));
-      };
-
-    /*
-     * Normal case:
-     * the Journey departure StopPoint also owns the live predictions.
-     */
-    let direct = [];
-
-    try {
-      direct =
-        await fetchArrivals(id);
-    } catch {
-      /*
-       * Do not fail journey expansion merely because live operational
-       * information is temporarily unavailable.
-       */
-    }
-
-    if (
-      direct.length ||
-      !wantedLine
-    ) {
-      return direct;
-    }
-
-    /*
-     * Some TfL interchanges expose one station identity to Journey
-     * Planner but publish predictions for a line under a sibling
-     * NaptanMetroStation.
-     *
-     * Discover those siblings from TfL rather than hardcoding IDs.
-     */
-    let stopPoint;
-
-    try {
-      const endpoint =
-        `${this.baseUrl}/StopPoint/` +
-        `${encodeURIComponent(id)}`;
-
-      stopPoint =
-        await this.#request(
-          endpoint,
-          params,
-          signal
-        );
-    } catch {
-      return direct;
-    }
-
-    const children =
-      Array.isArray(stopPoint?.children)
-        ? stopPoint.children
-        : [];
-
-    const siblingIds =
-      [
-        ...new Set(
-          children
-            .filter(child =>
-              String(
-                child?.stopType ?? ''
-              ).toLowerCase() ===
-                'naptanmetrostation'
-            )
-            .map(child =>
-              String(
-                child?.naptanId ??
-                child?.id ??
-                ''
-              ).trim()
-            )
-            .filter(
-              siblingId =>
-                siblingId &&
-                siblingId !== id
-            )
-        )
-      ];
-
-    if (!siblingIds.length) {
-      return direct;
-    }
-
-    /*
-     * Query siblings concurrently. A broken sibling must not prevent
-     * another valid station identity from supplying the prediction.
-     */
-    const settled =
-      await Promise.allSettled(
-        siblingIds.map(
-          siblingId =>
-            fetchArrivals(
-              siblingId
-            )
-        )
-      );
-
-    const siblingMatches =
-      settled.flatMap(result =>
-        result.status === 'fulfilled'
-          ? result.value
-          : []
-      );
-
-    return siblingMatches;
-  }
-
   async #request(
     endpoint,
     params,
@@ -554,7 +351,7 @@ export class TfLJourneyProvider extends JourneyProvider {
     const intermediateStops =
       stopPoints
         .map(stop =>
-          cleanStopName(
+          String(
             stop?.name ??
             stop?.commonName ??
             ''
@@ -572,44 +369,6 @@ export class TfLJourneyProvider extends JourneyProvider {
       )
         .map(disruption)
         .filter(Boolean);
-
-    const detailedText =
-      String(
-        instruction?.detailed ?? ''
-      );
-
-    const boundMatch =
-      detailedText.match(
-        /\b(north|south|east|west)bound\b/i
-      );
-
-    const platformMatch =
-      detailedText.match(
-        /\bplatform\s+([A-Z]?\d+[A-Z]?|[A-Z])\b/i
-      );
-
-    const boundDirection =
-      boundMatch
-        ? `${boundMatch[1][0].toUpperCase()}${boundMatch[1].slice(1).toLowerCase()}bound`
-        : null;
-
-    const towardsName =
-      directions.length
-        ? cleanStopName(
-            String(directions[0])
-          )
-        : null;
-
-    const departurePlatform =
-      departure?.platformName
-        ? /^platform\b/i.test(
-            String(departure.platformName)
-          )
-          ? String(departure.platformName)
-          : `Platform ${departure.platformName}`
-        : platformMatch
-          ? `Platform ${platformMatch[1]}`
-          : null;
 
     return {
       id:
@@ -658,10 +417,9 @@ export class TfLJourneyProvider extends JourneyProvider {
         null,
 
       direction:
-        towardsName,
-
-      boundDirection:
-        boundDirection,
+        directions.length
+          ? String(directions[0])
+          : null,
 
       distanceMeters:
         leg?.distance == null
@@ -674,7 +432,8 @@ export class TfLJourneyProvider extends JourneyProvider {
         null,
 
       departurePlatform:
-        departurePlatform,
+        departure?.platformName ??
+        null,
 
       departureIndicator:
         departure?.indicator ??

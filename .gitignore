@@ -50,3 +50,4 @@ data/postcodes/portugal-postcodes.geojson
 data/postcodes/PCODE_PT_2024_4326.geojson
 data/postcodes/PCODE_PT_2024_4326.csv
 data/postcodes/portugal-postcodes.geojson
+.env.local

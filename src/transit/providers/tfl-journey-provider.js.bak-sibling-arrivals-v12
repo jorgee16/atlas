@@ -220,183 +220,53 @@ export class TfLJourneyProvider extends JourneyProvider {
       return [];
     }
 
+    const endpoint =
+      `${this.baseUrl}/StopPoint/` +
+      `${encodeURIComponent(id)}/Arrivals`;
+
     const params = {};
 
     if (this.appKey) {
       params.app_key = this.appKey;
     }
 
-    const normalizeLine =
-      value =>
-        String(value ?? '')
-          .toLowerCase()
-          .replace(/\s+line$/i, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
+    const payload =
+      await this.#request(
+        endpoint,
+        params,
+        signal
+      );
 
-    const wantedLine =
-      normalizeLine(line);
-
-    const matchesLine =
-      prediction => {
-        if (!wantedLine) {
-          return true;
-        }
-
-        const ids = [
-          prediction?.lineId,
-          prediction?.lineName
-        ]
-          .map(normalizeLine)
-          .filter(Boolean);
-
-        return ids.some(
-          value =>
-            value === wantedLine ||
-            value.includes(wantedLine) ||
-            wantedLine.includes(value)
-        );
-      };
-
-    const fetchArrivals =
-      async candidateStopId => {
-        const endpoint =
-          `${this.baseUrl}/StopPoint/` +
-          `${encodeURIComponent(candidateStopId)}` +
-          `/Arrivals`;
-
-        const payload =
-          await this.#request(
-            endpoint,
-            params,
-            signal
-          );
-
-        const rows =
-          Array.isArray(payload)
-            ? payload
-            : [];
-
-        return rows
-          .filter(matchesLine)
-          .map(prediction => ({
-            ...prediction,
-
-            /*
-             * Preserve where Atlas actually found the prediction.
-             *
-             * This is important at interchanges such as Paddington,
-             * where the Journey API departure ID and the live-arrival
-             * StopPoint ID can differ.
-             */
-            atlasArrivalStopId:
-              candidateStopId
-          }));
-      };
-
-    /*
-     * Normal case:
-     * the Journey departure StopPoint also owns the live predictions.
-     */
-    let direct = [];
-
-    try {
-      direct =
-        await fetchArrivals(id);
-    } catch {
-      /*
-       * Do not fail journey expansion merely because live operational
-       * information is temporarily unavailable.
-       */
-    }
-
-    if (
-      direct.length ||
-      !wantedLine
-    ) {
-      return direct;
-    }
-
-    /*
-     * Some TfL interchanges expose one station identity to Journey
-     * Planner but publish predictions for a line under a sibling
-     * NaptanMetroStation.
-     *
-     * Discover those siblings from TfL rather than hardcoding IDs.
-     */
-    let stopPoint;
-
-    try {
-      const endpoint =
-        `${this.baseUrl}/StopPoint/` +
-        `${encodeURIComponent(id)}`;
-
-      stopPoint =
-        await this.#request(
-          endpoint,
-          params,
-          signal
-        );
-    } catch {
-      return direct;
-    }
-
-    const children =
-      Array.isArray(stopPoint?.children)
-        ? stopPoint.children
+    const rows =
+      Array.isArray(payload)
+        ? payload
         : [];
 
-    const siblingIds =
-      [
-        ...new Set(
-          children
-            .filter(child =>
-              String(
-                child?.stopType ?? ''
-              ).toLowerCase() ===
-                'naptanmetrostation'
-            )
-            .map(child =>
-              String(
-                child?.naptanId ??
-                child?.id ??
-                ''
-              ).trim()
-            )
-            .filter(
-              siblingId =>
-                siblingId &&
-                siblingId !== id
-            )
+    const wantedLine =
+      String(line ?? '')
+        .trim()
+        .toLowerCase();
+
+    return rows.filter(row => {
+      if (!wantedLine) {
+        return true;
+      }
+
+      const lineName =
+        String(
+          row?.lineName ??
+          row?.lineId ??
+          ''
         )
-      ];
+          .trim()
+          .toLowerCase();
 
-    if (!siblingIds.length) {
-      return direct;
-    }
-
-    /*
-     * Query siblings concurrently. A broken sibling must not prevent
-     * another valid station identity from supplying the prediction.
-     */
-    const settled =
-      await Promise.allSettled(
-        siblingIds.map(
-          siblingId =>
-            fetchArrivals(
-              siblingId
-            )
-        )
+      return (
+        lineName === wantedLine ||
+        lineName.includes(wantedLine) ||
+        wantedLine.includes(lineName)
       );
-
-    const siblingMatches =
-      settled.flatMap(result =>
-        result.status === 'fulfilled'
-          ? result.value
-          : []
-      );
-
-    return siblingMatches;
+    });
   }
 
   async #request(

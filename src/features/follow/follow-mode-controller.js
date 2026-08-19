@@ -259,7 +259,7 @@ export class FollowModeController {
   setHeadingUpEnabled(value) { this.headingUpEnabled = value === true; this.#save('atlas.navigation.headingUp', String(this.headingUpEnabled)); if (this.enabled && this.position) this.#focusPosition(); else if (!this.headingUpEnabled) this.map.setBearing?.(0); this.#renderCompass(0); return this.headingUpEnabled; }
   getFollowZoom() { return this.followZoom; }
   setFollowZoom(value) { if (!['near','normal','far'].includes(value)) return false; this.followZoom=value; this.#save('atlas.map.followZoom', value); if (this.enabled && this.position) this.#focusPosition(); return true; }
-  #zoomLevel() { return { near:18, normal:17, far:16 }[this.followZoom] ?? 17; }
+  #zoomLevel() { return { near:19, normal:18, far:17 }[this.followZoom] ?? 18; }
   #loadZoom() { try { const v=globalThis.localStorage?.getItem('atlas.map.followZoom'); return ['near','normal','far'].includes(v) ? v : 'normal'; } catch { return 'normal'; } }
   #loadBool(key,fallback) { try { const v=globalThis.localStorage?.getItem(key); return v == null ? fallback : v !== 'false'; } catch { return fallback; } }
   #save(key,value) { try { globalThis.localStorage?.setItem(key,value); } catch {} }

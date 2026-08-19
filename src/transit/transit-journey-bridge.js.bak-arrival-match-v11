@@ -209,25 +209,6 @@ export class TransitJourneyBridge {
                 step.departureTime ?? ''
               );
 
-            const normalizeText =
-              value =>
-                String(value ?? '')
-                  .toLowerCase()
-                  .replace(/underground station/g, '')
-                  .replace(/station/g, '')
-                  .replace(/[^a-z0-9]+/g, ' ')
-                  .trim();
-
-            const expectedTowards =
-              normalizeText(
-                step.direction
-              );
-
-            const expectedDestination =
-              normalizeText(
-                step.toName
-              );
-
             const candidates =
               predictions
                 .map(prediction => {
@@ -249,63 +230,13 @@ export class TransitJourneyBridge {
                           Infinity
                         ) * 1000;
 
-                  const predictionDestination =
-                    normalizeText(
-                      prediction?.destinationName ??
-                      prediction?.towards
-                    );
-
-                  const destinationMatch =
-                    Boolean(
-                      predictionDestination &&
-                      expectedTowards &&
-                      (
-                        predictionDestination.includes(
-                          expectedTowards
-                        ) ||
-                        expectedTowards.includes(
-                          predictionDestination
-                        )
-                      )
-                    );
-
-                  const legDestinationMatch =
-                    Boolean(
-                      predictionDestination &&
-                      expectedDestination &&
-                      (
-                        predictionDestination.includes(
-                          expectedDestination
-                        ) ||
-                        expectedDestination.includes(
-                          predictionDestination
-                        )
-                      )
-                    );
-
-                  /*
-                   * Destination compatibility is more important than
-                   * a small timing difference. This prevents matching
-                   * a Bakerloo train terminating at Waterloo when the
-                   * planned leg is towards Elephant & Castle.
-                   */
-                  const destinationPenalty =
-                    destinationMatch
-                      ? 0
-                      : legDestinationMatch
-                        ? 0
-                        : 60 * 60 * 1000;
-
                   return {
                     prediction,
-                    delta,
-                    destinationPenalty
+                    delta
                   };
                 })
                 .sort(
                   (a, b) =>
-                    a.destinationPenalty -
-                      b.destinationPenalty ||
                     a.delta - b.delta
                 );
 
@@ -380,22 +311,17 @@ export class TransitJourneyBridge {
                 step.departurePlatform ??
                 null,
 
-              boundDirection:
-                operationalDirection ??
-                step.boundDirection ??
-                null,
-
               /*
-               * Keep the planned terminus/towards value separate from
-               * the cardinal operational direction.
+               * Only replace direction when TfL gives us an actual
+               * cardinal operational direction.
                */
               direction:
+                operationalDirection ??
                 step.direction ??
                 null,
 
               operationalDestination:
                 destination ||
-                step.direction ||
                 null,
 
               expectedDepartureTime:

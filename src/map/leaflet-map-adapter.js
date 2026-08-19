@@ -14,11 +14,14 @@ import {
   routeBearingFromProgress,
   splitRouteAtProgress
 } from '../features/navigation/navigation-route-visuals.js';
+import {
+  adaptiveNavigationZoom
+} from './navigation-camera.js';
 
 const DEFAULT_CENTER = [39.5, -8.0];
 const DEFAULT_ZOOM = 7;
 const MIN_HEADING_SPEED_METERS_PER_SECOND = 0.8;
-const DRIVING_ZOOM = 17;
+const DRIVING_ZOOM = 18;
 const DRIVE_MAX_POSITION_PREDICTION_SECONDS = 1.2;
 const WALK_MAX_POSITION_PREDICTION_SECONDS = 0.55;
 const WALK_MIN_PREDICTION_SPEED_METERS_PER_SECOND = 0.45;
@@ -206,7 +209,9 @@ export class LeafletMapAdapter {
 
     this.map = L.map(elementId, {
       zoomControl: true,
-      maxZoom: 18,
+      maxZoom: 19,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25,
       rotate: true,
       rotateControl: false,
       dragRotate: false,
@@ -239,6 +244,9 @@ export class LeafletMapAdapter {
     this.traveledRouteLine = null;
     this.remainingRouteLine = null;
     this.routeBearing = null;
+    this.navigationRouteProgress = null;
+    this.navigationCameraZoom = null;
+    this.navigationCameraTimestamp = null;
     this.maneuverLayers = [];
     this.userMarker = null;
     this.userAccuracy = null;
@@ -252,6 +260,7 @@ export class LeafletMapAdapter {
     this.userPositionAnimationTimestamp = null;
 
     this.gpsDiagnosticsElement = null;
+    this.gpsDiagnosticsVisible = false;
     this.gpsDiagnosticsFrameCount = 0;
     this.gpsDiagnosticsLastFrameTimestamp = null;
     this.gpsDiagnosticsFps = 0;
@@ -265,6 +274,8 @@ export class LeafletMapAdapter {
 
     this.gpsDiagnosticsElement.className =
       'atlas-gps-diagnostics';
+
+    this.gpsDiagnosticsElement.hidden = true;
 
     this.gpsDiagnosticsElement.innerHTML = `
       <strong>GPS diagnostics</strong>
@@ -396,6 +407,9 @@ export class LeafletMapAdapter {
     this.traveledRouteLine = null;
     this.remainingRouteLine = null;
     this.routeBearing = null;
+    this.navigationRouteProgress = null;
+    this.navigationCameraZoom = null;
+    this.navigationCameraTimestamp = null;
     this.maneuverLayers = [];
   }
 
@@ -577,19 +591,59 @@ export class LeafletMapAdapter {
     this.followHeadingUp =
       headingUp;
 
+    const now = performance.now();
+
+    const requestedZoom =
+      this.navigationTravelMode
+        ? adaptiveNavigationZoom({
+            travelMode: this.navigationTravelMode,
+            speed: position?.speed,
+            preferredZoom: zoom,
+            progress: this.navigationRouteProgress
+          })
+        : headingUp
+          ? zoom
+          : 16;
+
+    if (this.navigationCameraZoom === null) {
+      this.navigationCameraZoom = requestedZoom;
+    } else {
+      const elapsedSeconds =
+        this.navigationCameraTimestamp === null
+          ? 0.2
+          : Math.min(
+              0.5,
+              Math.max(
+                0.016,
+                (now - this.navigationCameraTimestamp) / 1000
+              )
+            );
+
+      const zoomEase =
+        smoothingFactor(2.6, elapsedSeconds);
+
+      this.navigationCameraZoom +=
+        (requestedZoom - this.navigationCameraZoom) *
+        zoomEase;
+    }
+
+    this.navigationCameraTimestamp = now;
+
     this.followZoom =
-      headingUp
-        ? zoom
-        : 16;
+      Math.round(
+        this.navigationCameraZoom * 4
+      ) / 4;
 
-    this.lastFollowRequestTimestamp =
-      performance.now();
+    this.lastFollowRequestTimestamp = now;
 
-    // Zoom may change when entering navigation,
-    // but position is NOT recentered here.
+    // Only commit quarter-zoom steps after the smoothed camera target
+    // has moved far enough. This prevents GPS speed noise from making
+    // the map continuously hunt in and out.
     if (
-      this.map.getZoom() !==
-      this.followZoom
+      Math.abs(
+        this.map.getZoom() -
+        this.followZoom
+      ) >= 0.24
     ) {
       this.map.setZoom(
         this.followZoom,
@@ -1043,7 +1097,17 @@ export class LeafletMapAdapter {
       throw new TypeError('Navigation travel mode must be drive, walk, or null.');
     }
 
+    if (this.navigationTravelMode !== mode) {
+      this.navigationCameraZoom = null;
+      this.navigationCameraTimestamp = null;
+    }
+
     this.navigationTravelMode = mode;
+
+    if (mode === null) {
+      this.navigationRouteProgress = null;
+    }
+
     this.#refreshUserLocationIcon();
   }
 
@@ -1349,6 +1413,9 @@ export class LeafletMapAdapter {
   }
 
   updateRouteProgress(route, progress) {
+    this.navigationRouteProgress =
+      progress ?? null;
+
     if (
       !this.traveledRouteLine ||
       !this.remainingRouteLine
@@ -1687,6 +1754,22 @@ export class LeafletMapAdapter {
       : 0;
   }
 
+  setGpsDiagnosticsVisible(visible) {
+    this.gpsDiagnosticsVisible =
+      Boolean(visible);
+
+    if (!this.gpsDiagnosticsElement) {
+      return;
+    }
+
+    this.gpsDiagnosticsElement.hidden =
+      !this.gpsDiagnosticsVisible;
+  }
+
+  isGpsDiagnosticsVisible() {
+    return this.gpsDiagnosticsVisible;
+  }
+
   resetGpsDiagnostics() {
     this.gpsDiagnosticsFixCount = 0;
     this.gpsDiagnosticsFixWindowStart = null;
@@ -1713,6 +1796,17 @@ export class LeafletMapAdapter {
   }
 
   #renderGpsDiagnostics() {
+    if (!this.gpsDiagnosticsElement) {
+      return;
+    }
+
+    this.gpsDiagnosticsElement.hidden =
+      !this.gpsDiagnosticsVisible;
+
+    if (!this.gpsDiagnosticsVisible) {
+      return;
+    }
+
     const accuracy =
       this.lastUserPosition?.accuracy;
 
