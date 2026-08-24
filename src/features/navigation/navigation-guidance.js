@@ -19,6 +19,14 @@ function formatDistance(distanceMeters) {
   return `${(distanceMeters / 1_000).toFixed(digits)} km`;
 }
 
+function formatManeuverDistance(distanceMeters) {
+  if (Number.isFinite(distanceMeters) && distanceMeters <= 20) {
+    return 'Now';
+  }
+
+  return formatDistance(distanceMeters);
+}
+
 function formatDuration(durationSeconds) {
   const minutes = Math.max(1, Math.round(durationSeconds / 60));
   if (minutes < 60) return `${minutes} min`;
@@ -267,7 +275,7 @@ export class NavigationGuidance {
 
           <div class="navigation-maneuver-copy">
             <strong class="navigation-maneuver-distance">
-              ${formatDistance(progress.distanceToManeuverMeters)}
+              ${formatManeuverDistance(progress.distanceToManeuverMeters)}
             </strong>
             <span class="navigation-maneuver-instruction">
               ${escapeHtml(maneuver.instruction)}
@@ -292,14 +300,11 @@ export class NavigationGuidance {
       </div>
 
       <div class="navigation-journey-summary">
-        <div>
-          <strong>${formatEta(progress.remainingDurationSeconds, this.now())}</strong>
-          <span>arrival</span>
-        </div>
-        <div>
+        <div class="navigation-eta-summary">
           <strong>${formatDuration(progress.remainingDurationSeconds)}</strong>
-          <span>remaining</span>
+          <span>ETA · ${formatEta(progress.remainingDurationSeconds, this.now())}</span>
         </div>
+
         <div class="navigation-route-mode-summary">
           <button
             type="button"
@@ -316,7 +321,7 @@ export class NavigationGuidance {
 
           <div class="navigation-route-mode-copy">
             <strong>${formatDistance(progress.remainingDistanceMeters)}</strong>
-            <span>${escapeHtml(destinationName ?? 'destination')}</span>
+            <span>remaining</span>
           </div>
 
           <div
@@ -339,6 +344,7 @@ export class NavigationGuidance {
             >🚶 <span>Walk</span></button>
           </div>
         </div>
+
         ${this.#voiceButton()}
         <div class="navigation-route-progress" aria-label="Route progress">
           <span style="width: ${completed.toFixed(1)}%"></span>

@@ -59,6 +59,50 @@ std::string tagValue(
   return value ? value : "";
 }
 
+
+bool isTruthyTagValue(std::string_view value) {
+  return (
+    value == "yes" ||
+    value == "true" ||
+    value == "1" ||
+    value == "designated"
+  );
+}
+
+bool isTolledForCars(const osmium::TagList& tags) {
+  for (const char* key : {
+    "toll:motorcar",
+    "toll:motor_vehicle",
+    "toll:vehicle",
+    "toll"
+  }) {
+    if (const char* raw = tags[key]) {
+      const std::string_view value {raw};
+      if (isTruthyTagValue(value)) {
+        return true;
+      }
+      if (value == "no" || value == "false" || value == "0") {
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
+bool isElectronicToll(const osmium::TagList& tags) {
+  for (const char* key : {
+    "toll:electronic",
+    "payment:electronic_toll_collection"
+  }) {
+    if (const char* raw = tags[key]) {
+      if (isTruthyTagValue(std::string_view {raw})) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 std::optional<std::string_view>
 restrictionValue(
   const osmium::TagList& tags
@@ -1016,7 +1060,9 @@ public:
       tagValue(way.tags(), "destination:lanes"),
       junction == "roundabout" ||
         junction == "circular",
-      highway.ends_with("_link")
+      highway.ends_with("_link"),
+      isTolledForCars(way.tags()),
+      isElectronicToll(way.tags())
     });
 
     roadIndexes_.insert_or_assign(

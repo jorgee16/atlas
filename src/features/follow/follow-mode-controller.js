@@ -152,15 +152,29 @@ export class FollowModeController {
       return;
     }
 
-    if (
-      this.navigationTracksPosition &&
-      this.enabled &&
-      this.position
-    ) {
-      this.#focusPosition();
-    } else {
-      this.#renderCompass(0);
+    if (this.navigationTracksPosition) {
+      // Starting road navigation always enters Follow mode. This is an
+      // intentional navigation-state transition, not a user preference:
+      // the map should immediately recenter on the latest GPS fix and keep
+      // following subsequent fixes without requiring a second tap.
+      this.enabled = true;
+      this.#renderButton();
+
+      if (this.position) {
+        this.#focusPosition();
+        this.mapContext.showFollowing({
+          heading: this.position.heading,
+          speed: this.position.speed
+        });
+      } else {
+        // Keep Follow armed. The next GPS update will focus the camera.
+        this.#renderCompass(0);
+      }
+
+      return;
     }
+
+    this.#renderCompass(0);
   }
 
   #bind() {

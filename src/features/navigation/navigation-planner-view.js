@@ -28,6 +28,8 @@ export class NavigationPlannerView {
     previewState = 'idle',
     previewError = null,
     previewCollapsed = false,
+    driveRoutes = [],
+    selectedDriveRouteIndex = 0,
     transitJourneys = [],
     selectedTransitJourneyIndex = 0,
     expandedTransitJourneyIndex = null,
@@ -44,6 +46,7 @@ export class NavigationPlannerView {
     onBookmarkDestination,
     onPreviewMap,
     onExpandPreview,
+    onSelectDriveRoute,
     onSelectTransitJourney,
     onStart,
     onRetryPreview
@@ -116,6 +119,15 @@ export class NavigationPlannerView {
         return container;
       }
 
+      const selectedDriveOption =
+        travelMode === 'drive' && driveRoutes.length > 1
+          ? driveRoutes[selectedDriveRouteIndex] ?? driveRoutes[0] ?? null
+          : null;
+
+      const selectedDriveTolls = Number(
+        selectedDriveOption?.route?.tolls?.totalEuros ?? 0
+      );
+
       const routeDetails =
         previewState === 'loading'
           ? `
@@ -123,31 +135,76 @@ export class NavigationPlannerView {
               <span class="navigation-guidance-spinner" aria-hidden="true"></span>
               <span>
                 <strong>${
-                  travelMode === 'transit'
-                    ? 'Finding transit options'
-                    : 'Calculating route'
+                  travelMode === 'drive'
+                    ? 'Calculating drive options'
+                    : travelMode === 'transit'
+                      ? 'Finding transit options'
+                      : 'Calculating walking route'
                 }</strong>
                 <small>${
-                  travelMode === 'transit'
-                    ? 'Checking TfL services'
-                    : 'Using downloaded road data'
+                  travelMode === 'drive'
+                    ? 'Fastest · Balanced · No tolls · Offline road data'
+                    : travelMode === 'transit'
+                      ? 'Checking TfL services'
+                      : 'Using downloaded road data'
                 }</small>
               </span>
             </div>
           `
           : routeReady
-            ? `
-              <div class="navigation-preview-metrics">
-                <span>
-                  <strong>${this.#formatDuration(previewRoute.durationSeconds)}</strong>
-                  <small>ETA</small>
-                </span>
-                <span>
-                  <strong>${this.#formatDistance(previewRoute.distanceMeters)}</strong>
-                  <small>distance</small>
-                </span>
-              </div>
-            `
+            ? selectedDriveOption
+              ? ''
+              : travelMode === 'drive'
+                ? (() => {
+                    const roadHint = (
+                      previewRoute?.roadRefs ?? []
+                    )
+                      .slice(0, 4)
+                      .join(' · ');
+
+                    const tollEuros = Number(
+                      previewRoute?.tolls?.totalEuros ?? 0
+                    );
+
+                    return `
+                      <div class="navigation-single-drive-route">
+                        <div class="navigation-single-drive-main">
+                          <span>
+                            <strong>${this.#formatDuration(previewRoute.durationSeconds)}</strong>
+                            <small>${this.#formatDistance(previewRoute.distanceMeters)}</small>
+                          </span>
+
+                          <span class="navigation-single-drive-toll ${tollEuros <= 0 ? 'is-free' : ''}">
+                            ${tollEuros > 0
+                              ? `Est. €${tollEuros.toFixed(2)}`
+                              : 'No tolls'}
+                          </span>
+                        </div>
+
+                        ${roadHint
+                          ? `
+                            <div class="navigation-single-drive-roads">
+                              <small>Via</small>
+                              <strong>${escapeHtml(roadHint)}</strong>
+                            </div>
+                          `
+                          : ''}
+
+                      </div>
+                    `;
+                  })()
+                : `
+                  <div class="navigation-preview-metrics">
+                    <span>
+                      <strong>${this.#formatDuration(previewRoute.durationSeconds)}</strong>
+                      <small>ETA</small>
+                    </span>
+                    <span>
+                      <strong>${this.#formatDistance(previewRoute.distanceMeters)}</strong>
+                      <small>distance</small>
+                    </span>
+                  </div>
+                `
             : previewState === 'error'
               ? `
                 <div class="navigation-preview-status navigation-preview-status--error" role="status">
@@ -211,6 +268,13 @@ export class NavigationPlannerView {
             ${this.#travelModeMarkup(travelMode)}
           </div>
 
+          ${travelMode === 'drive' && previewState === 'ready'
+            ? this.#driveOptionsMarkup(
+                driveRoutes,
+                selectedDriveRouteIndex
+              )
+            : ''}
+
           ${travelMode === 'transit' && previewState === 'ready'
             ? this.#transitOptionsMarkup(
                 transitJourneys,
@@ -225,7 +289,7 @@ export class NavigationPlannerView {
             </div>
           ` : ''}
 
-          ${travelMode === 'transit' && routeReady ? `
+          ${routeReady && travelMode === 'transit' ? `
             <button
               class="navigation-preview-map-button"
               type="button"
@@ -291,6 +355,9 @@ export class NavigationPlannerView {
 
       for (const button of container.querySelectorAll?.('[data-navigation-mode]') ?? []) {
         button.addEventListener('click', () => onTravelMode?.(button.dataset.navigationMode));
+      }
+      for (const button of container.querySelectorAll?.('[data-drive-option]') ?? []) {
+        button.addEventListener('click', () => onSelectDriveRoute?.(Number(button.dataset.driveOption)));
       }
       for (const button of container.querySelectorAll?.('[data-transit-option]') ?? []) {
         button.addEventListener('click', () => onSelectTransitJourney?.(Number(button.dataset.transitOption)));
@@ -536,6 +603,97 @@ export class NavigationPlannerView {
         <button type="button" data-navigation-mode="walk" class="${mode === 'walk' ? 'on' : ''}" aria-pressed="${mode === 'walk'}"><span aria-hidden="true">●</span>Walk</button>
         <button type="button" data-navigation-mode="transit" class="${mode === 'transit' ? 'on' : ''}" aria-pressed="${mode === 'transit'}"><span aria-hidden="true">◇</span>Transit</button>
       </div>
+    `;
+  }
+
+  #driveOptionsMarkup(options, selectedIndex) {
+    if (!options?.length || options.length < 2) {
+      return '';
+    }
+
+    const fastest = options.find(option => option.kind === 'fastest')?.route ?? null;
+    const selectedOption = options[selectedIndex] ?? options[0];
+
+    return `
+      <section class="navigation-drive-options" aria-label="Driving route options">
+        <header class="navigation-drive-options-heading">
+          <span>
+            <strong>Route options</strong>
+            <small>Tap a route to compare it on the map</small>
+          </span>
+          <small>${escapeHtml(selectedOption?.label ?? 'Route')} selected</small>
+        </header>
+
+        <div class="navigation-drive-options-list">
+          ${options.map((option, index) => {
+            const route = option.route;
+            const tollEuros = Number(route?.tolls?.totalEuros ?? 0);
+            const selected = index === selectedIndex;
+            const extraMinutes = fastest && route !== fastest
+              ? Math.max(0, Math.round((route.durationSeconds - fastest.durationSeconds) / 60))
+              : 0;
+            const savedEuros = fastest && route !== fastest
+              ? Math.max(0, Number(fastest.tolls?.totalEuros ?? 0) - tollEuros)
+              : 0;
+
+            const tradeoff = savedEuros >= 0.5
+              ? `Save €${savedEuros.toFixed(2)}${extraMinutes ? ` · +${extraMinutes} min` : ''}`
+              : extraMinutes
+                ? `+${extraMinutes} min`
+                : '';
+
+            const roadHint = (route?.roadRefs ?? [])
+              .slice(0, 4)
+              .join(' · ');
+
+            return `
+              <button
+                type="button"
+                class="navigation-drive-option ${selected ? 'is-selected' : ''}"
+                data-drive-option="${index}"
+                data-drive-kind="${escapeHtml(option.kind ?? '')}"
+                aria-pressed="${selected}"
+              >
+                <span class="navigation-drive-option-selector" aria-hidden="true"><i></i></span>
+
+                <span class="navigation-drive-option-content">
+                  <span class="navigation-drive-option-head">
+                    <span class="navigation-drive-option-title">
+                      <strong>${escapeHtml(option.label)}</strong>
+                      ${option.recommended ? '<small class="navigation-drive-recommended">Recommended</small>' : ''}
+                    </span>
+                    <b class="navigation-drive-option-duration">${this.#formatDuration(route.durationSeconds)}</b>
+                  </span>
+
+                  <span class="navigation-drive-option-route-row">
+                    ${roadHint
+                      ? `<small class="navigation-drive-roads"><span>Via</span> ${escapeHtml(roadHint)}</small>`
+                      : '<small class="navigation-drive-roads"><span>Local roads</span></small>'}
+                    <strong class="navigation-drive-option-price">${tollEuros > 0 ? `Est. €${tollEuros.toFixed(2)}` : '€0'}</strong>
+                  </span>
+
+                  <span class="navigation-drive-option-foot">
+                    <small>${this.#formatDistance(route.distanceMeters)}</small>
+                    ${tradeoff ? `<small class="navigation-drive-tradeoff">${escapeHtml(tradeoff)}</small>` : '<small></small>'}
+                  </span>
+                </span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        <footer class="navigation-drive-options-footer">
+          <small class="navigation-drive-toll-note">ⓘ Estimated tolls · 2026 tariffs</small>
+          <button
+            class="navigation-drive-preview-link"
+            type="button"
+            data-navigation-preview-map
+          >
+            <span aria-hidden="true">⌑</span>
+            Full map
+          </button>
+        </footer>
+      </section>
     `;
   }
 

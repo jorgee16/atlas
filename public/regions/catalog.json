@@ -117,8 +117,8 @@
       "id": "portugal",
       "name": "Portugal",
       "country": "Portugal",
-      "version": 7,
-      "updatedAt": "2026-08-11",
+      "version": 8,
+      "updatedAt": "2026-08-22",
       "bundled": false,
       "bounds": [
         -31.4,
@@ -230,175 +230,175 @@
             "label": "manifest.json",
             "group": "navigation",
             "sizeBytes": 1589,
-            "sha256": "3d5a869d8305f16cd9fc23ae3a11b435137cb22a52f8da905023dd6fe8e9d970"
+            "sha256": "5d2f541e668881d5c847ff062252e7ed3d6187b8443e99b1b474d9a7d6db06fd"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/metadata.json",
             "label": "metadata.json",
             "group": "navigation",
             "sizeBytes": 1207,
-            "sha256": "e1dd653a4bfaacdb911279f68fa86f7929f9528da32c5bb42eae8237603c6509"
+            "sha256": "eaa9e525c43f9d19f825ed98ec815065a6a532cd174fb563ee94dfbd97b8704a"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/nodes.bin",
             "label": "nodes.bin",
             "group": "navigation",
             "sizeBytes": 36313336,
-            "sha256": "ef3df68e56e76f135393cd80555a127cc771a527dd521c310f4fa1eeab20467a"
+            "sha256": "a7daf7279381128c4f9304a5d27982850f80db0218dfb7978070182ee0f2a294"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/edges.bin",
             "label": "edges.bin",
             "group": "navigation",
             "sizeBytes": 158516804,
-            "sha256": "80b1bcf4b4906c510e9183e8e9dcc9c766faf51087390f2825afd30808e93ea8"
+            "sha256": "237d893d8358c539a8ad28b656e928137acd07f674d86b6734b1b4158051ea9a"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/geometry.bin",
             "label": "geometry.bin",
             "group": "navigation",
             "sizeBytes": 81061504,
-            "sha256": "15368cce8b4fac1de2164ffc7937a68fd8188559556b86de44f5d3d0ce26fd65"
+            "sha256": "12bc479f95b0add7a32dcc9067b6c7b18caa08ed4c89105993c8666cbf85354f"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/roads.bin",
             "label": "roads.bin",
             "group": "navigation",
             "sizeBytes": 52477720,
-            "sha256": "b162b954f4dfe1d0579829b9dac866a0f287e26ed5cffb4905a599157497ac7f"
+            "sha256": "7d9014e15f2ccdbfeefb3586c57c6990567aac23f1d7127de6eba5862427ccbf"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/strings.bin",
             "label": "strings.bin",
             "group": "navigation",
             "sizeBytes": 2705788,
-            "sha256": "690fed8e155c587ab858bc2f8eff8779606d872d1a16291001c0cf037cffdda4"
+            "sha256": "e8e664f709a48d98d56cb816a098ac6b9e7ece9d0d0a597d3c91415bce0e757b"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/restrictions.bin",
             "label": "restrictions.bin",
             "group": "navigation",
             "sizeBytes": 364352,
-            "sha256": "0bcbca851d01faeae3ce49b7ad87688b5d25257b4a145c6f17871ed024fb1e4a"
+            "sha256": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1"
           },
           {
             "url": "/region-packages/portugal/routing/mainland/spatial-index.bin",
             "label": "spatial-index.bin",
             "group": "navigation",
             "sizeBytes": 17095664,
-            "sha256": "607904e1364496d748e7c899a17207f043841018d23b9b51fb0b7276a4c2396c"
+            "sha256": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/metadata.json",
             "label": "metadata.json",
             "group": "navigation",
             "sizeBytes": 1193,
-            "sha256": "b0d85932e04cc453291c7548c9766d93675a4087650631a7ce1b4812c2b1e645"
+            "sha256": "12c5cf3721e858c3dfb23f20bbd41691cd8b30e332938bdc3ba49d334e118859"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/nodes.bin",
             "label": "nodes.bin",
             "group": "navigation",
             "sizeBytes": 856828,
-            "sha256": "b8bdd6464ebcf46d18865abf6ed040d0bdbdb5a701e54303c7b9be7b3a118a79"
+            "sha256": "f627989d442b4455c5d2f8bd794b6067dee2400a83b9af654ea51b6617d6be17"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/edges.bin",
             "label": "edges.bin",
             "group": "navigation",
             "sizeBytes": 3780388,
-            "sha256": "30bb3c37bca60753ca988b9977595c1a0ec330cb8f8817dd76df2a47e86b117a"
+            "sha256": "9668cbe9149fc8a96679967dbd4f1fa3bc20a090e4d35bb33dd060a8c2b1dc0b"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/geometry.bin",
             "label": "geometry.bin",
             "group": "navigation",
             "sizeBytes": 1763160,
-            "sha256": "9df9c9b580d28e83b8422505f9b17b2c1be95ceec1da8f3117c324557c3d9841"
+            "sha256": "7f433895139a3fee67a7c107d93258c53ac10faf2ba2a298c1c53d2de4b763e4"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/roads.bin",
             "label": "roads.bin",
             "group": "navigation",
             "sizeBytes": 1743208,
-            "sha256": "eac2bbccd7b1768b9f3d9f0817d6d85bb6eb6efd50e352f8754a2cd7b9f6c9f3"
+            "sha256": "13ff120b9aadcfde6fbb67dd22088de0329aa9961a2a34f9f109e8dae19436b6"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/strings.bin",
             "label": "strings.bin",
             "group": "navigation",
             "sizeBytes": 119842,
-            "sha256": "cb5685ed82b06791c9bb46c6b90491416a3cc711dbe43bc8861883e912f8caf2"
+            "sha256": "83eb42c15cdf8aae2ef8af72bb8c7bd47181c888fa79a0b291d67ece6c4b5a09"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/restrictions.bin",
             "label": "restrictions.bin",
             "group": "navigation",
             "sizeBytes": 19664,
-            "sha256": "21ff2a36cc40194646e2120fb556f08dc82a1c0de7f3a546f500caa05147a1d8"
+            "sha256": "db65292e2663a8900ac26b24be0397b8f62e49a43a18425213159da3f521090b"
           },
           {
             "url": "/region-packages/portugal/routing/madeira/spatial-index.bin",
             "label": "spatial-index.bin",
             "group": "navigation",
             "sizeBytes": 331660,
-            "sha256": "8e145ed0820ad600685ace33ceb2c6b3a07e79051c91a71f3b419a687a17097b"
+            "sha256": "dce426c30bfad87d5cbf607a377371a723b2e55b289eb9ff56db65e68b59fa91"
           },
           {
             "url": "/region-packages/portugal/routing/azores/metadata.json",
             "label": "metadata.json",
             "group": "navigation",
             "sizeBytes": 1191,
-            "sha256": "68dbc850c804787bad12a17f12de5b20c9268237aee8c9ac7fe973ba45c81059"
+            "sha256": "27843bda75c7738c31af05ad493b43ee4df966c3e64bcc845bab5572116434ef"
           },
           {
             "url": "/region-packages/portugal/routing/azores/nodes.bin",
             "label": "nodes.bin",
             "group": "navigation",
             "sizeBytes": 855124,
-            "sha256": "9c0661ef01a5dc217c2360bd68b207023ba310dc3738c39c77beeb05097a30b2"
+            "sha256": "89c99ffac8bd083687e0aae77016ac1f4de287ec44fc5689cb83a4759dcf6acb"
           },
           {
             "url": "/region-packages/portugal/routing/azores/edges.bin",
             "label": "edges.bin",
             "group": "navigation",
             "sizeBytes": 3556680,
-            "sha256": "b8d8e792104fbb4ea00bd15721cfe5b1e73899b26ec19431fe8d067225e9a50e"
+            "sha256": "72123d5dfdddcaed63c9f60f70545f2bdcffab1b0e18b957d13fcec1ad1670fd"
           },
           {
             "url": "/region-packages/portugal/routing/azores/geometry.bin",
             "label": "geometry.bin",
             "group": "navigation",
             "sizeBytes": 1845408,
-            "sha256": "7a9bc8ffed0922e03fb411a220ee2dd2e160f2d4f0d87dd56fa90e4a70a3838c"
+            "sha256": "391bb8c51a873dac0213cb74528ef09941c8f3ecc1ffde57b6e26e1509d2b2e0"
           },
           {
             "url": "/region-packages/portugal/routing/azores/roads.bin",
             "label": "roads.bin",
             "group": "navigation",
             "sizeBytes": 1251916,
-            "sha256": "d7fa6514b8963ab96bc9e16c8b9f8a99f101388624a2814d876dc4736c1b7af1"
+            "sha256": "f98f82acf34b03af38e9341d440c5300d20bafc49aa4199176519651efea0cc1"
           },
           {
             "url": "/region-packages/portugal/routing/azores/strings.bin",
             "label": "strings.bin",
             "group": "navigation",
             "sizeBytes": 92624,
-            "sha256": "cdcf6c532f55ab598d6e2e564b7eaaa023d8c9b663ada80a87720b8526504bb0"
+            "sha256": "4422a0b603b657ad67853b75401a57b9df92715716ec244c27d8e4096337c783"
           },
           {
             "url": "/region-packages/portugal/routing/azores/restrictions.bin",
             "label": "restrictions.bin",
             "group": "navigation",
             "sizeBytes": 7088,
-            "sha256": "73c87a49d4f6f3c83704d7aa212f545b45d7e70aac44d4df52f61ab4522913dc"
+            "sha256": "e3bac5e9bd76349e8aa66c6fe8ab52e698911e1e0e23d6ff90ad66d7d9907cf6"
           },
           {
             "url": "/region-packages/portugal/routing/azores/spatial-index.bin",
             "label": "spatial-index.bin",
             "group": "navigation",
             "sizeBytes": 424068,
-            "sha256": "bf88d9f9cd38c6808f0595f9f8391541e42907e79de9e0274f767485fa27927e"
+            "sha256": "e7281db36173e010ce363884b465ca3d88e10a8fd60f44a3f97dcc5abb4af050"
           },
           {
             "url": "/region-packages/portugal/search-index.json",

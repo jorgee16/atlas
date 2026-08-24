@@ -157,13 +157,19 @@ test(
       true
     );
 
-    const summary =
-      listElement.children[0]
-        .children[1];
+    assert.equal(
+      listElement.children.length,
+      0
+    );
 
-    assert.match(summary.innerHTML, /2\.4 km/);
-    assert.match(summary.innerHTML, /4 min/);
-    assert.match(summary.innerHTML, /Navigating offline/);
+    assert.equal(
+      calls.some(
+        ([name]) =>
+          name === 'showGuidance' ||
+          name === 'showRoute'
+      ),
+      true
+    );
   }
 );
 

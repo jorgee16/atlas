@@ -2,6 +2,10 @@ import {
   MinPriorityQueue
 } from './min-priority-queue.js';
 
+import {
+  estimateEdgeTollEuros
+} from './portugal-toll-estimator.js';
+
 const EARTH_RADIUS_METERS = 6_371_000;
 const MAX_PROFILE_SPEED_METERS_PER_SECOND =
   140 / 3.6;
@@ -99,7 +103,10 @@ export class AStarRouter {
       yieldEvery = 8_000,
       maximumExpandedNodes = 2_000_000,
       yieldControl = nextFrame,
-      profile = 'drive'
+      profile = 'drive',
+      avoidTolls = false,
+      tollPenaltyMinutesPerEuro = 0,
+      vehicleClass = 1
     } = {}
   ) {
     if (profile !== 'drive' && profile !== 'walk') {
@@ -190,7 +197,8 @@ export class AStarRouter {
           goal,
           goalState: current.node,
           generation,
-          expandedNodes
+          expandedNodes,
+          profile
         });
       }
 
@@ -235,6 +243,14 @@ export class AStarRouter {
           continue;
         }
 
+        if (
+          profile === 'drive' &&
+          avoidTolls &&
+          this.graph.edgeIsToll?.(edgeIndex)
+        ) {
+          continue;
+        }
+
         const target =
           this.graph.edgeTarget(edgeIndex);
 
@@ -262,7 +278,7 @@ export class AStarRouter {
             currentNode
           );
 
-        const edgeCost =
+        const baseEdgeCost =
           profile === 'walk'
             ? Math.max(
                 1,
@@ -273,6 +289,24 @@ export class AStarRouter {
                 )
               )
             : this.graph.edgeDurationCentiseconds(edgeIndex);
+
+        const tollPenalty =
+          profile === 'drive' &&
+          tollPenaltyMinutesPerEuro > 0
+            ? Math.round(
+                estimateEdgeTollEuros(
+                  this.graph,
+                  edgeIndex,
+                  vehicleClass
+                ) *
+                tollPenaltyMinutesPerEuro *
+                60 *
+                100
+              )
+            : 0;
+
+        const edgeCost =
+          baseEdgeCost + tollPenalty;
 
         const nextCost =
           currentCost + edgeCost;
@@ -516,7 +550,8 @@ export class AStarRouter {
     goal,
     goalState,
     generation,
-    expandedNodes
+    expandedNodes,
+    profile
   }) {
     const reversedNodes = [];
     const reversedEdges = [];
@@ -578,6 +613,24 @@ export class AStarRouter {
       reversedEdges
     );
 
+    const durationCentiseconds =
+      reversedEdges.reduce(
+        (total, edgeIndex) =>
+          total + (
+            profile === 'walk'
+              ? Math.max(
+                  1,
+                  Math.round(
+                    (this.graph.edgeDistanceDecimeters(edgeIndex) / 10) /
+                      WALK_SPEED_METERS_PER_SECOND *
+                      100
+                  )
+                )
+              : this.graph.edgeDurationCentiseconds(edgeIndex)
+          ),
+        0
+      );
+
     return {
       nodeIndexes: reversedNodes,
       edgeIndexes: reversedEdges,
@@ -586,7 +639,7 @@ export class AStarRouter {
       distanceMeters:
         distanceDecimeters / 10,
       durationSeconds:
-        this.#stateCost(goalState) / 100,
+        durationCentiseconds / 100,
       expandedNodes
     };
   }

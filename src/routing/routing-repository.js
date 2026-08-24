@@ -222,7 +222,7 @@ export class RoutingRepository {
         : [];
 
     const validProfiles =
-      metadata.version === 5 &&
+      metadata.version === 6 &&
       profiles.includes('drive') &&
       profiles.includes('walk');
 

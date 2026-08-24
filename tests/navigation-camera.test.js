@@ -90,7 +90,7 @@ test(
 );
 
 test(
-  'navigation compass changes orientation without changing Follow state',
+  'navigation start automatically recenters and enables Follow mode',
   () => {
     const calls = [];
     const compassButton = new FakeButton();
@@ -128,18 +128,22 @@ test(
 
     controller.setNavigationActive(true);
 
-    assert.equal(controller.isFollowing(), false);
+    assert.equal(controller.isFollowing(), true);
     assert.equal(compassButton.hidden, false);
     assert.equal(
       compassButton.styleValues.get(
         '--map-bearing'
       ),
-      '0deg'
+      '92deg'
+    );
+    assert.deepEqual(
+      calls.find(([name]) => name === 'follow'),
+      ['follow', { zoom: 18, headingUp: true }]
     );
 
     compassButton.click();
 
-    assert.equal(controller.isFollowing(), false);
+    assert.equal(controller.isFollowing(), true);
     assert.equal(
       compassButton.attributes.get(
         'aria-pressed'

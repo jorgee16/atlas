@@ -9,7 +9,7 @@ const ROAD_HEADER_BYTES = 16;
 const STRING_HEADER_BYTES = 12;
 const RESTRICTION_HEADER_BYTES = 16;
 const GRID_HEADER_BYTES = 24;
-const FORMAT_VERSION = 5;
+const FORMAT_VERSION = 6;
 
 function createView(buffer, label) {
   if (!(buffer instanceof ArrayBuffer)) {
@@ -697,8 +697,24 @@ export class RoutingGraph {
         directionalTurnLanes || turnLanes,
       destinationLanes: stringAt(28),
       roundabout: Boolean(flags & 1),
-      link: Boolean(flags & 2)
+      link: Boolean(flags & 2),
+      ...(flags & 4 ? { toll: true } : {}),
+      ...(flags & 8 ? { electronicToll: true } : {})
     };
+  }
+
+  edgeIsToll(edgeIndex) {
+    const road = this.edgeRoad(edgeIndex);
+    const offset =
+      ROAD_HEADER_BYTES +
+      road * this.roadRecordBytes;
+
+    const flags = this.roadView.getUint32(
+      offset + 32,
+      true
+    );
+
+    return Boolean(flags & 4);
   }
 
   hasTurnRestrictions(nodeIndex) {

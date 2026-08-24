@@ -1060,10 +1060,9 @@ export class LeafletMapAdapter {
         this.map.getSize().y;
 
       const verticalOffset =
-        Math.min(
-          140,
-          height * 0.18
-        );
+        this.navigationTravelMode === 'walk'
+          ? Math.min(150, height * 0.20)
+          : Math.min(180, height * 0.24);
 
       const projected =
         this.map.project(

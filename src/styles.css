@@ -10096,3 +10096,1684 @@ html[data-atlas-theme="dark"]
     opacity: 1;
   }
 }
+
+/* ---------- Drive route alternatives / Portugal toll-aware routing ---------- */
+.navigation-drive-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.navigation-drive-option {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid rgba(49, 94, 251, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: inherit;
+  text-align: left;
+}
+
+.navigation-drive-option.is-selected {
+  border-color: rgba(49, 94, 251, 0.72);
+  box-shadow: 0 0 0 2px rgba(49, 94, 251, 0.10);
+}
+
+.navigation-drive-option-main,
+.navigation-drive-option-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.navigation-drive-option-main > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.navigation-drive-option-main strong,
+.navigation-drive-option-main b {
+  font-size: 13px;
+}
+
+.navigation-drive-recommended {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #315efb;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.navigation-drive-option-meta {
+  margin-top: 5px;
+  color: #687489;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.navigation-drive-tradeoff {
+  display: block;
+  margin-top: 5px;
+  color: #315efb;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.navigation-drive-toll-note {
+  padding: 0 3px;
+  color: #7a8496;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #1f2939;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option.is-selected {
+  border-color: #6485ff;
+  box-shadow: 0 0 0 2px rgba(100, 133, 255, 0.14);
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option-meta,
+html[data-atlas-theme="dark"] .navigation-drive-toll-note {
+  color: #8f99aa;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-tradeoff {
+  color: #8ea8ff;
+}
+
+.navigation-drive-roads {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #9aa6ba;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-roads {
+  color: #a8b2c4;
+}
+
+/* ---------- Drive route alternatives: compact comparison polish v4 ---------- */
+.navigation-drive-selected-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label eta"
+    "meta meta";
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 7px 10px;
+  border: 1px solid rgba(49, 94, 251, 0.10);
+  border-radius: 11px;
+  background: rgba(49, 94, 251, 0.055);
+}
+
+.navigation-drive-selected-summary > small {
+  grid-area: label;
+  overflow: hidden;
+  color: #637089;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .055em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.navigation-drive-selected-summary > strong {
+  grid-area: eta;
+  color: #202a3d;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.navigation-drive-selected-summary > span {
+  grid-area: meta;
+  color: #7b879b;
+  font-size: 10px;
+  font-weight: 720;
+}
+
+.navigation-drive-options {
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.navigation-drive-option {
+  padding: 9px 11px;
+  border-radius: 13px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.navigation-drive-option:active {
+  transform: scale(.995);
+}
+
+.navigation-drive-option.is-selected {
+  border-color: rgba(79, 116, 255, .78);
+  background: rgba(49, 94, 251, .075);
+  box-shadow: inset 3px 0 0 #4f74ff;
+}
+
+.navigation-drive-option-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.navigation-drive-option-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.navigation-drive-option-title strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-drive-recommended {
+  padding: 2px 5px;
+  background: rgba(49, 94, 251, .15);
+  color: #315efb;
+  font-size: 8px;
+  letter-spacing: .025em;
+}
+
+.navigation-drive-option-price {
+  flex: 0 0 auto;
+  color: #536179;
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.navigation-drive-option-values {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.navigation-drive-option-values b {
+  color: #202a3d;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.navigation-drive-option-values small {
+  color: #7e899c;
+  font-size: 10px;
+  font-weight: 740;
+}
+
+.navigation-drive-roads {
+  margin-top: 3px;
+  color: #7f8ba0;
+  font-size: 10px;
+  font-weight: 720;
+}
+
+.navigation-drive-roads > span {
+  color: #9aa4b5;
+  font-weight: 650;
+}
+
+.navigation-drive-tradeoff {
+  margin-top: 3px;
+  color: #315efb;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.navigation-drive-options-footer {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 1px 2px 0;
+}
+
+.navigation-drive-toll-note {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-drive-preview-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #315efb;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.navigation-drive-preview-link > span {
+  font-size: 14px;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-selected-summary {
+  border-color: rgba(100, 133, 255, .16);
+  background: rgba(49, 94, 251, .10);
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-selected-summary > small,
+html[data-atlas-theme="dark"] .navigation-drive-selected-summary > span,
+html[data-atlas-theme="dark"] .navigation-drive-option-price,
+html[data-atlas-theme="dark"] .navigation-drive-option-values small,
+html[data-atlas-theme="dark"] .navigation-drive-roads {
+  color: #9ba7ba;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-selected-summary > strong,
+html[data-atlas-theme="dark"] .navigation-drive-option-values b,
+html[data-atlas-theme="dark"] .navigation-drive-option-title strong {
+  color: #f3f6fb;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option.is-selected {
+  border-color: rgba(100, 133, 255, .82);
+  background: rgba(49, 94, 251, .12);
+  box-shadow: inset 3px 0 0 #6485ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-recommended,
+html[data-atlas-theme="dark"] .navigation-drive-tradeoff,
+html[data-atlas-theme="dark"] .navigation-drive-preview-link {
+  color: #8ea8ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-recommended {
+  background: rgba(100, 133, 255, .16);
+}
+
+/* ---------- Drive route alternatives: route-picker polish v5 ---------- */
+.navigation-drive-selected-summary { display: none; }
+
+.navigation-drive-options {
+  display: grid;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.navigation-drive-options-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 3px;
+}
+
+.navigation-drive-options-heading > span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.navigation-drive-options-heading strong {
+  color: #283247;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.navigation-drive-options-heading small {
+  overflow: hidden;
+  color: #8792a5;
+  font-size: 9px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-drive-options-heading > small {
+  flex: 0 0 auto;
+  color: #315efb;
+  font-weight: 850;
+}
+
+.navigation-drive-options-list {
+  display: grid;
+  gap: 6px;
+}
+
+.navigation-drive-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 9px;
+  width: 100%;
+  min-height: 76px;
+  padding: 10px 11px 9px;
+  overflow: hidden;
+  border: 1px solid rgba(72, 86, 112, .13);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .72);
+  color: inherit;
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.navigation-drive-option:active { transform: scale(.995); }
+
+.navigation-drive-option.is-selected {
+  border-color: rgba(79, 116, 255, .76);
+  background: rgba(49, 94, 251, .065);
+  box-shadow: inset 3px 0 0 #4f74ff;
+}
+
+.navigation-drive-option-selector {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  place-items: center;
+  border: 1.5px solid #9ba6b8;
+  border-radius: 50%;
+}
+
+.navigation-drive-option-selector i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.navigation-drive-option.is-selected .navigation-drive-option-selector {
+  border-color: #4f74ff;
+}
+
+.navigation-drive-option.is-selected .navigation-drive-option-selector i {
+  background: #4f74ff;
+}
+
+.navigation-drive-option-content {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.navigation-drive-option-head,
+.navigation-drive-option-route-row,
+.navigation-drive-option-foot {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.navigation-drive-option-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.navigation-drive-option-title strong {
+  overflow: hidden;
+  color: #202a3d;
+  font-size: 13px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-drive-option-duration {
+  flex: 0 0 auto;
+  color: #202a3d;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.navigation-drive-recommended {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(49, 94, 251, .13);
+  color: #315efb;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+}
+
+.navigation-drive-option-route-row { align-items: center; }
+
+.navigation-drive-roads {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #6f7b91;
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-drive-roads > span {
+  color: #9aa5b7;
+  font-weight: 650;
+}
+
+.navigation-drive-option-price {
+  flex: 0 0 auto;
+  color: #59667d;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.navigation-drive-option-foot {
+  color: #8a95a7;
+  font-size: 9px;
+  font-weight: 740;
+}
+
+.navigation-drive-option-foot > small { min-width: 0; }
+
+.navigation-drive-tradeoff {
+  margin: 0;
+  color: #315efb;
+  font-size: 9px;
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.navigation-drive-options-footer {
+  display: flex;
+  min-height: 27px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+.navigation-drive-toll-note {
+  min-width: 0;
+  overflow: hidden;
+  color: #8a95a7;
+  font-size: 8.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-drive-preview-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 26px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 7px;
+  border: 1px solid rgba(49, 94, 251, .16);
+  border-radius: 8px;
+  background: rgba(49, 94, 251, .06);
+  color: #315efb;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.navigation-drive-preview-link > span { font-size: 12px; }
+
+html[data-atlas-theme="dark"] .navigation-drive-options-heading strong,
+html[data-atlas-theme="dark"] .navigation-drive-option-title strong,
+html[data-atlas-theme="dark"] .navigation-drive-option-duration {
+  color: #f3f6fb;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-options-heading small,
+html[data-atlas-theme="dark"] .navigation-drive-roads,
+html[data-atlas-theme="dark"] .navigation-drive-option-foot,
+html[data-atlas-theme="dark"] .navigation-drive-toll-note {
+  color: #95a2b5;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option {
+  border-color: rgba(255, 255, 255, .075);
+  background: rgba(31, 41, 57, .88);
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option.is-selected {
+  border-color: rgba(100, 133, 255, .76);
+  background: rgba(49, 94, 251, .11);
+  box-shadow: inset 3px 0 0 #6485ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option-selector {
+  border-color: #718097;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option.is-selected .navigation-drive-option-selector {
+  border-color: #8ca5ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option.is-selected .navigation-drive-option-selector i {
+  background: #8ca5ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-option-price {
+  color: #b3bfd0;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-recommended {
+  background: rgba(100, 133, 255, .16);
+  color: #9bb0ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-tradeoff,
+html[data-atlas-theme="dark"] .navigation-drive-options-heading > small,
+html[data-atlas-theme="dark"] .navigation-drive-preview-link {
+  color: #8ea8ff;
+}
+
+html[data-atlas-theme="dark"] .navigation-drive-preview-link {
+  border-color: rgba(100, 133, 255, .18);
+  background: rgba(100, 133, 255, .075);
+}
+
+
+/* ---------- Route preview loading polish v6 ---------- */
+
+.navigation-preview-status--loading {
+  position: relative;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+
+  min-height: 68px;
+  overflow: hidden;
+
+  padding: 11px 13px;
+
+  border:
+    1px solid
+    rgba(49, 94, 251, 0.16);
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(242, 246, 255, 0.97)
+    );
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.82),
+    0 8px 22px
+      rgba(23, 35, 61, 0.08);
+}
+
+.navigation-preview-status--loading::after {
+  content: "";
+
+  position: absolute;
+  right: -22px;
+  bottom: -30px;
+
+  width: 92px;
+  height: 92px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(49, 94, 251, 0.055);
+
+  pointer-events: none;
+}
+
+.navigation-preview-status--loading
+.navigation-guidance-spinner {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
+  border:
+    3px solid
+    rgba(49, 94, 251, 0.14);
+
+  border-top-color: #315efb;
+
+  border-right-color:
+    rgba(49, 94, 251, 0.48);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 5px
+    rgba(49, 94, 251, 0.055);
+
+  animation-duration: 720ms;
+}
+
+.navigation-preview-status--loading
+> span:last-child {
+  position: relative;
+  z-index: 1;
+
+  display: grid;
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.navigation-preview-status--loading strong {
+  color: #202b42;
+
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.navigation-preview-status--loading small {
+  overflow: hidden;
+
+  color: #758198;
+
+  font-size: 10px;
+  font-weight: 720;
+  line-height: 1.25;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-preview-status--loading {
+  border-color:
+    rgba(112, 142, 255, 0.20);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(31, 41, 57, 0.98),
+      rgba(24, 32, 47, 0.98)
+    );
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.035),
+    0 8px 24px
+      rgba(0, 0, 0, 0.16);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-preview-status--loading::after {
+  background:
+    rgba(91, 124, 255, 0.075);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-preview-status--loading strong {
+  color: #f3f6fb;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-preview-status--loading small {
+  color: #9aa6ba;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-preview-status--loading
+.navigation-guidance-spinner {
+  border-color:
+    rgba(112, 142, 255, 0.18);
+
+  border-top-color: #7290ff;
+
+  border-right-color:
+    rgba(114, 144, 255, 0.58);
+
+  box-shadow:
+    0 0 0 5px
+    rgba(91, 124, 255, 0.07);
+}
+
+/* Keep Routing… dark while calculation is running. */
+html[data-atlas-theme="dark"]
+.panel-content
+.navigation-start-button:disabled {
+  color: #8793a8;
+
+  background:
+    rgba(42, 53, 73, 0.96);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.05);
+
+  box-shadow: none;
+}
+
+/* ---------- Single drive route summary ---------- */
+
+.navigation-single-drive-route {
+  display: grid;
+  gap: 9px;
+
+  padding: 12px 14px;
+
+  border:
+    1px solid
+    rgba(49, 94, 251, 0.15);
+
+  border-radius: 16px;
+
+  background:
+    rgba(246, 248, 253, 0.96);
+}
+
+.navigation-single-drive-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.navigation-single-drive-main > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.navigation-single-drive-main strong {
+  color: #202b42;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+
+.navigation-single-drive-main small {
+  color: #7b879b;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.navigation-single-drive-toll {
+  flex: 0 0 auto;
+
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(49, 94, 251, 0.09);
+
+  color: #315efb;
+
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.navigation-single-drive-toll.is-free {
+  background:
+    rgba(31, 169, 113, 0.10);
+
+  color: #18895d;
+}
+
+.navigation-single-drive-roads {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+
+  min-width: 0;
+}
+
+.navigation-single-drive-roads small {
+  flex: 0 0 auto;
+
+  color: #8a95a8;
+
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.navigation-single-drive-roads strong {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #566176;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation-single-drive-free {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #18895d;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.navigation-single-drive-free > span:first-child {
+  display: grid;
+  place-items: center;
+
+  width: 17px;
+  height: 17px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(31, 169, 113, 0.12);
+
+  font-size: 10px;
+}
+
+/* Dark theme */
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-route {
+  border-color:
+    rgba(112, 142, 255, 0.16);
+
+  background:
+    rgba(31, 41, 57, 0.90);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-main strong {
+  color: #f3f6fb;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-main small {
+  color: #929daf;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-roads small {
+  color: #798599;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-roads strong {
+  color: #b4bdcb;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-toll {
+  background:
+    rgba(91, 124, 255, 0.13);
+
+  color: #8ea8ff;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-toll.is-free {
+  background:
+    rgba(48, 190, 132, 0.11);
+
+  color: #63d7a6;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-single-drive-free {
+  color: #63d7a6;
+}
+
+
+
+/* ---------- Active navigation polish v39 ---------- */
+
+/* Active guidance owns the navigation screen; keep global chrome quiet. */
+.app.navigation-active .brand-inline,
+.app.navigation-active #gpsBtn {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app.navigation-active #followBtn {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.app.navigation-active .map-header {
+  pointer-events: none;
+}
+
+.app.navigation-active .map-header-actions,
+.app.navigation-active #moreBtn,
+.app.navigation-active .overflow-menu {
+  pointer-events: auto;
+}
+
+.app.navigation-active .map-header-actions {
+  margin-left: auto;
+}
+
+/* Start feedback is temporary; keep the toast above the persistent HUD. */
+.app.navigation-active .status-toast {
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  max-width: min(280px, calc(100vw - 24px));
+}
+
+/* Persistent HUD: ETA / remaining distance / voice. */
+.navigation-journey-summary {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) auto;
+  align-items: stretch;
+  min-height: 62px;
+  padding: 0;
+  border-radius: 20px;
+}
+
+.navigation-journey-summary > div:not(.navigation-route-progress) {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  padding: 9px 12px 11px;
+}
+
+.navigation-journey-summary .navigation-eta-summary {
+  text-align: left;
+}
+
+.navigation-journey-summary .navigation-eta-summary strong {
+  color: #ffffff;
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+
+.navigation-journey-summary .navigation-eta-summary span {
+  margin-top: 2px;
+  color: #9facc0;
+  font-size: 8px;
+}
+
+.navigation-journey-summary .navigation-route-mode-summary {
+  justify-content: center;
+  padding-inline: 9px !important;
+  text-align: left;
+}
+
+.navigation-journey-summary .navigation-route-mode-copy strong {
+  color: #ffffff;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.navigation-journey-summary .navigation-route-mode-copy span {
+  color: #9facc0;
+}
+
+.navigation-journey-summary .navigation-voice-button {
+  min-width: 82px;
+  min-height: 62px;
+  padding: 7px 10px;
+}
+
+.navigation-journey-summary .navigation-voice-button > span {
+  font-size: 17px;
+}
+
+.navigation-journey-summary .navigation-voice-button > strong {
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+/* Keep the stop control easy to hit while visually quieter. */
+.navigation-guidance-stop {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: #667187;
+  background: rgba(235, 239, 246, 0.92);
+}
+
+.navigation-guidance-compact .navigation-guidance-stop {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+/* Single-route summary: the toll chip is sufficient; avoid duplicate copy. */
+.navigation-single-drive-free {
+  display: none !important;
+}
+
+@media (max-width: 520px) {
+  .navigation-journey-summary {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
+  }
+
+  .navigation-journey-summary > div:nth-child(2) {
+    display: flex;
+  }
+
+  .navigation-journey-summary > div:not(.navigation-route-progress) {
+    padding-inline: 9px;
+  }
+
+  .navigation-journey-summary .navigation-eta-summary strong,
+  .navigation-journey-summary .navigation-route-mode-copy strong {
+    font-size: 16px;
+  }
+
+  .navigation-journey-summary .navigation-voice-button {
+    min-width: 74px;
+  }
+}
+
+
+/* ---------- Active navigation composition v40 ---------- */
+
+/* Turn the top-right controls into one compact navigation cluster. */
+.app.navigation-active .map-header {
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  align-items: flex-start;
+}
+
+.app.navigation-active .map-header-actions {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 17px;
+  background: rgba(28, 37, 54, 0.92);
+  box-shadow: 0 10px 26px rgba(16, 24, 39, 0.22);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+.app.navigation-active .map-header-actions .icon-btn {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 13px;
+  color: #d7deeb;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.app.navigation-active .map-header-actions .icon-btn:hover {
+  transform: none;
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: none;
+}
+
+.app.navigation-active #followBtn.on {
+  color: #ffffff;
+  background: #315efb;
+  box-shadow: 0 6px 16px rgba(49, 94, 251, 0.26);
+}
+
+/* Keep Layers as the second tier of the same control group. */
+.app.navigation-active .leaflet-control-layers {
+  margin-top: 66px !important;
+  margin-right: 10px !important;
+  border-radius: 13px !important;
+  box-shadow: 0 8px 20px rgba(16, 24, 39, 0.16) !important;
+  transform: scale(0.94);
+  transform-origin: top right;
+}
+
+/* Guidance belongs to the top navigation chrome rather than floating mid-map. */
+.app.navigation-active .navigation-guidance-banner {
+  top: 68px;
+  left: 10px;
+  width: min(344px, calc(100% - 82px));
+  border-radius: 18px;
+  transform: none;
+  box-shadow: 0 12px 28px rgba(23, 35, 61, 0.18);
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-guidance-primary {
+  min-height: 78px;
+  padding: 9px 10px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-tile {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+}
+
+.app.navigation-active .navigation-guidance-banner .maneuver-icon {
+  width: 35px;
+  height: 35px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-distance {
+  font-size: 19px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-instruction {
+  font-size: 14px;
+  line-height: 1.22;
+}
+
+/* Smaller glyph, unchanged stop hit target. */
+.app.navigation-active .navigation-guidance-stop {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+.app.navigation-active .navigation-guidance-stop svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Zoom sits closer to the left edge and below the guidance card. */
+.app.navigation-active .leaflet-control-zoom {
+  margin-top: 158px !important;
+  margin-left: 8px !important;
+  border-radius: 12px !important;
+  transform: scale(0.92);
+  transform-origin: top left;
+}
+
+/* Compass/recenter form a small recovery stack immediately above the HUD. */
+.app.navigation-active .map-actions {
+  right: 9px;
+  bottom: calc(94px + env(safe-area-inset-bottom));
+  gap: 5px;
+}
+
+.app.navigation-active .map-actions #compassBtn,
+.app.navigation-active .map-actions #recenterBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  font-size: 17px;
+  box-shadow: 0 8px 20px rgba(16, 24, 39, 0.17);
+}
+
+.app.navigation-active .navigation-compass-arrow {
+  width: 27px;
+  height: 27px;
+}
+
+.app.navigation-active .navigation-compass-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Give the persistent HUD breathing room from the physical screen edge. */
+.app.navigation-active .navigation-journey-summary {
+  right: 10px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 10px;
+  max-width: 500px;
+}
+
+.app.navigation-active .status-toast {
+  bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 520px) {
+  .app.navigation-active .navigation-guidance-banner {
+    top: 66px;
+    left: 9px;
+    width: min(330px, calc(100% - 78px));
+  }
+
+  .app.navigation-active .leaflet-control-layers {
+    margin-top: 64px !important;
+    margin-right: 9px !important;
+  }
+
+  .app.navigation-active .leaflet-control-zoom {
+    margin-top: 152px !important;
+    margin-left: 7px !important;
+  }
+
+  .app.navigation-active .map-actions {
+    right: 8px;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .app.navigation-active .navigation-journey-summary {
+    right: 8px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    left: 8px;
+  }
+}
+
+/* ---------- Active navigation final composition v41 ---------- */
+
+/* Keep the three primary controls visually grouped without a heavy toolbar slab. */
+.app.navigation-active .map-header-actions {
+  gap: 5px;
+  padding: 3px;
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(20, 28, 43, 0.38);
+  box-shadow: 0 6px 18px rgba(16, 24, 39, 0.12);
+}
+
+.app.navigation-active .map-header-actions .icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(27, 36, 53, 0.94);
+}
+
+.app.navigation-active #followBtn.on {
+  background: #315efb;
+}
+
+/* Layers is a second tier of the same top-right control group, with a clear gap. */
+.app.navigation-active .leaflet-control-layers {
+  margin-top: 76px !important;
+  margin-right: 10px !important;
+  transform: scale(0.90);
+}
+
+/* Anchor guidance to the navigation chrome instead of the visual centre of the map. */
+.app.navigation-active .navigation-guidance-banner {
+  top: 58px !important;
+  left: 12px !important;
+  width: min(310px, calc(100% - 86px)) !important;
+  transform: none !important;
+  border-radius: 17px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-guidance-primary {
+  min-height: 74px;
+  padding: 8px 9px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-tile {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-distance {
+  font-size: 18px;
+}
+
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-instruction {
+  font-size: 13.5px;
+}
+
+/* Keep the stop target large but make the X itself quieter. */
+.app.navigation-active .navigation-guidance-stop svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.7;
+}
+
+/* Pull zoom away from the physical edge/user marker and slightly higher. */
+.app.navigation-active .leaflet-control-zoom {
+  margin-top: 140px !important;
+  margin-left: 14px !important;
+  transform: scale(0.88);
+}
+
+/* Recovery controls sit cleanly above the persistent HUD. */
+.app.navigation-active .map-actions {
+  right: 10px;
+  bottom: calc(108px + env(safe-area-inset-bottom));
+  gap: 5px;
+}
+
+.app.navigation-active .map-actions #compassBtn,
+.app.navigation-active .map-actions #recenterBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+/* Give the bottom HUD a little air from the device edge. */
+.app.navigation-active .navigation-journey-summary {
+  right: 10px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 10px;
+}
+
+/* Navigation-start feedback is already timed to disappear; make the transient surface lighter. */
+.app.navigation-active .status-toast {
+  left: 14px;
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  max-width: min(220px, calc(100vw - 28px));
+  padding: 9px 12px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.18);
+}
+
+.app.navigation-active .status-toast b {
+  font-size: 12px;
+}
+
+.app.navigation-active .status-toast span {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+@media (max-width: 520px) {
+  .app.navigation-active .map-header {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+  }
+
+  .app.navigation-active .leaflet-control-layers {
+    margin-top: 74px !important;
+    margin-right: 8px !important;
+  }
+
+  .app.navigation-active .navigation-guidance-banner {
+    top: 56px !important;
+    left: 10px !important;
+    width: min(306px, calc(100% - 82px)) !important;
+  }
+
+  .app.navigation-active .leaflet-control-zoom {
+    margin-top: 136px !important;
+    margin-left: 13px !important;
+  }
+
+  .app.navigation-active .map-actions {
+    right: 8px;
+    bottom: calc(106px + env(safe-area-inset-bottom));
+  }
+
+  .app.navigation-active .navigation-journey-summary {
+    right: 8px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    left: 8px;
+  }
+
+  .app.navigation-active .status-toast {
+    left: 12px;
+    bottom: calc(108px + env(safe-area-inset-bottom));
+  }
+}
+
+
+/* ---------- Active navigation start/follow + collision cleanup v42 ---------- */
+/* Keep the maneuver surface below the top control row instead of letting the
+   two floating surfaces overlap on phone-sized screens. */
+.app.navigation-active .navigation-guidance-banner {
+  top: 78px !important;
+  width: min(300px, calc(100% - 88px)) !important;
+}
+
+@media (max-width: 520px) {
+  .app.navigation-active .navigation-guidance-banner {
+    top: 76px !important;
+    width: min(296px, calc(100% - 86px)) !important;
+  }
+}
+
+/* ---------- Active navigation portrait + landscape v43 ---------- */
+/* Landscape is a deliberate navigation composition, not a squashed portrait UI. */
+@media (orientation: landscape) and (max-height: 600px) {
+  /*
+   * A phone in landscape is wider than the desktop breakpoint, but it is
+   * still the mobile app. Force the map-first mobile shell so the desktop
+   * 380px sidebar grid cannot collapse the map into the left side.
+   */
+  .app {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .app > .map-wrap {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .app.navigation-active .map-header {
+    top: max(6px, calc(var(--safe-top) + 4px));
+    right: max(8px, calc(var(--safe-right) + 6px));
+    left: auto;
+    width: auto;
+  }
+
+  .app.navigation-active .map-header-actions {
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .app.navigation-active .map-header-actions .icon-btn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-radius: 11px;
+  }
+
+  .app.navigation-active .navigation-guidance-banner {
+    top: max(7px, calc(var(--safe-top) + 5px)) !important;
+    left: max(10px, calc(var(--safe-left) + 8px)) !important;
+    width: min(330px, calc(100vw - 190px)) !important;
+    max-height: calc(100dvh - 78px);
+    border-radius: 16px;
+  }
+
+  .app.navigation-active .navigation-guidance-banner .navigation-guidance-primary {
+    grid-template-columns: 48px minmax(0, 1fr) 38px;
+    gap: 8px;
+    min-height: 64px;
+    padding: 7px 8px;
+  }
+
+  .app.navigation-active .navigation-guidance-banner .navigation-maneuver-tile {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+
+  .app.navigation-active .navigation-guidance-banner .maneuver-icon {
+    width: 31px;
+    height: 31px;
+  }
+
+  .app.navigation-active .navigation-guidance-banner .navigation-maneuver-distance {
+    font-size: 17px;
+  }
+
+  .app.navigation-active .navigation-guidance-banner .navigation-maneuver-instruction {
+    font-size: 12.5px;
+    line-height: 1.15;
+  }
+
+  .app.navigation-active .navigation-guidance-stop {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+  }
+
+  /* Layers remains visually attached to the top-right control group. */
+  .app.navigation-active .leaflet-control-layers {
+    margin-top: 54px !important;
+    margin-right: max(8px, calc(var(--safe-right) + 6px)) !important;
+    transform: scale(0.84);
+  }
+
+  /* Keep zoom available without stealing the short landscape height. */
+  .app.navigation-active .leaflet-control-zoom {
+    margin-top: 82px !important;
+    margin-left: max(10px, calc(var(--safe-left) + 8px)) !important;
+    transform: scale(0.82);
+  }
+
+  /* Recovery controls live above the compact journey HUD. */
+  .app.navigation-active .map-actions {
+    right: max(8px, calc(var(--safe-right) + 6px));
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    gap: 4px;
+  }
+
+  .app.navigation-active .map-actions #compassBtn,
+  .app.navigation-active .map-actions #recenterBtn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-radius: 12px;
+  }
+
+  /* In landscape the HUD becomes a low, centred instrument strip. */
+  .app.navigation-active .navigation-journey-summary {
+    right: auto;
+    bottom: max(8px, calc(env(safe-area-inset-bottom) + 6px));
+    left: 50%;
+    width: min(470px, calc(100vw - var(--safe-left) - var(--safe-right) - 96px));
+    min-height: 54px;
+    transform: translateX(-50%);
+    border-radius: 17px;
+  }
+
+  .app.navigation-active .navigation-journey-summary > div:not(.navigation-route-progress) {
+    padding: 7px 10px 9px;
+  }
+
+  .app.navigation-active .navigation-journey-summary .navigation-eta-summary strong,
+  .app.navigation-active .navigation-journey-summary .navigation-route-mode-copy strong {
+    font-size: 16px;
+  }
+
+  .app.navigation-active .navigation-journey-summary .navigation-voice-button {
+    min-width: 72px;
+    min-height: 54px;
+    padding: 5px 8px;
+  }
+
+  .app.navigation-active .status-toast {
+    left: max(10px, calc(var(--safe-left) + 8px));
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    max-width: 190px;
+  }
+}
+
+/* Very short phones need an even leaner guidance surface in landscape. */
+@media (orientation: landscape) and (max-height: 430px) {
+  .app.navigation-active .navigation-guidance-banner {
+    width: min(300px, calc(100vw - 184px)) !important;
+  }
+
+  .app.navigation-active .navigation-following-turn,
+  .app.navigation-active .navigation-lanes {
+    display: none;
+  }
+
+  .app.navigation-active .leaflet-control-zoom {
+    margin-top: 72px !important;
+  }
+}
+
+/* ---------- Landscape navigation finishing pass v44 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* The legacy active-navigation rule moves the entire Leaflet top-left
+     corner down. Reset that corner in landscape and position zoom explicitly
+     below the maneuver surface so it cannot be clipped by the short viewport. */
+  .app.navigation-active .leaflet-top.leaflet-left {
+    top: 178px !important;
+  }
+
+  .app.navigation-active .leaflet-control-zoom {
+    margin-top: 0 !important;
+    margin-left: max(10px, calc(var(--safe-left) + 8px)) !important;
+    transform: scale(0.78);
+    transform-origin: top left;
+  }
+
+  /* Float the journey HUD clear of the browser/device edge. */
+  .app.navigation-active .navigation-journey-summary {
+    bottom: max(18px, calc(env(safe-area-inset-bottom) + 16px));
+  }
+
+  /* Keep the recovery stack visually tied to the HUD with a clean gap. */
+  .app.navigation-active .map-actions {
+    bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+
+  /* Attribution stays visible, but no longer sits underneath the HUD. */
+  .app.navigation-active .leaflet-control-attribution {
+    margin-right: max(8px, calc(var(--safe-right) + 6px)) !important;
+    margin-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    max-width: min(360px, calc(100vw - 180px));
+    border-radius: 7px;
+    opacity: 0.86;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .app.navigation-active .leaflet-top.leaflet-left {
+    top: 152px !important;
+  }
+
+  .app.navigation-active .leaflet-control-zoom {
+    transform: scale(0.72);
+  }
+
+  .app.navigation-active .navigation-journey-summary {
+    bottom: max(14px, calc(env(safe-area-inset-bottom) + 12px));
+  }
+
+  .app.navigation-active .map-actions {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .app.navigation-active .leaflet-control-attribution {
+    margin-bottom: calc(74px + env(safe-area-inset-bottom)) !important;
+  }
+}

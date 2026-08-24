@@ -1,4 +1,4 @@
-const FORMAT_VERSION = 5;
+const FORMAT_VERSION = 6;
 
 function writeMagic(view, offset, magic) {
   [...magic].forEach((character, index) => {
@@ -228,7 +228,9 @@ function createRoadAssets(roads) {
     destinationLanes: intern(road.destinationLanes),
     flags:
       (road.roundabout ? 1 : 0) |
-      (road.link ? 2 : 0)
+      (road.link ? 2 : 0) |
+      (road.toll ? 4 : 0) |
+      (road.electronicToll ? 8 : 0)
   }));
 
   const roadBuffer = new ArrayBuffer(

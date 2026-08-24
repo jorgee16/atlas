@@ -197,6 +197,36 @@ export class AppBootstrap {
 
   window.addEventListener('resize', positionSearchAreaButton);
 
+  // Leaflet needs a size refresh after the viewport changes orientation.
+  // If navigation is following GPS, immediately restore the navigation camera
+  // after the new portrait/landscape dimensions have settled.
+  let orientationRefreshTimer = null;
+  const refreshMapAfterOrientationChange = () => {
+    if (orientationRefreshTimer !== null) {
+      window.clearTimeout(orientationRefreshTimer);
+    }
+
+    orientationRefreshTimer = window.setTimeout(() => {
+      orientationRefreshTimer = null;
+      map.invalidateSize();
+      positionSearchAreaButton();
+
+      if (followMode.isFollowing()) {
+        followMode.recenter();
+      }
+    }, 180);
+  };
+
+  window.addEventListener(
+    'orientationchange',
+    refreshMapAfterOrientationChange
+  );
+
+  globalThis.screen?.orientation?.addEventListener?.(
+    'change',
+    refreshMapAfterOrientationChange
+  );
+
 
   map.onMoveEnd(({ lat, lon, zoom }) => {
     mapCenterAnchor = {
@@ -648,8 +678,12 @@ export class AppBootstrap {
 
     root.addEventListener('navigationactivechange', event => {
       const active = event.detail?.active === true;
+      root.querySelector('.app')?.classList.toggle(
+        'navigation-active',
+        active
+      );
       appTabs.hidden = active;
-      if (fullMapButton) fullMapButton.hidden = active;
+      if (fullMapButton) fullMapButton.hidden = false;
       exploreWorkspace.hidden = true;
       tripWorkspace.hidden = true;
       navigationWorkspace.hidden = true;

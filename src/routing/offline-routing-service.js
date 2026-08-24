@@ -14,6 +14,18 @@ import {
   routeCumulativeDistances
 } from './route-progress.js';
 
+import {
+  estimateRouteTolls
+} from './portugal-toll-estimator.js';
+
+import {
+  DRIVE_TOLL_PENALTIES_MINUTES_PER_EURO,
+  selectBalancedDriveRoute
+} from './drive-route-options.js';
+import {
+  summarizeRouteRoadRefs
+} from './route-road-summary.js';
+
 export class OfflineRoutingService {
   constructor({
     repository = new RoutingRepository(),
@@ -36,7 +48,10 @@ export class OfflineRoutingService {
     destination,
     {
       signal = null,
-      profile = 'drive'
+      profile = 'drive',
+      avoidTolls = false,
+      tollPenaltyMinutesPerEuro = 0,
+      vehicleClass = 1
     } = {}
   ) {
     if (profile !== 'drive' && profile !== 'walk') {
@@ -127,7 +142,13 @@ export class OfflineRoutingService {
     const route = await router.route(
       originSnap.node,
       destinationSnap.node,
-      { signal, profile }
+      {
+        signal,
+        profile,
+        avoidTolls,
+        tollPenaltyMinutesPerEuro,
+        vehicleClass
+      }
     );
 
     if (!route) {
@@ -157,8 +178,175 @@ export class OfflineRoutingService {
         dataset.partitionId ?? null,
       profile,
       originSnap,
-      destinationSnap
+      destinationSnap,
+      roadRefs:
+        profile === 'drive'
+          ? summarizeRouteRoadRefs(
+              dataset.graph,
+              route
+            )
+          : [],
+      tolls:
+        profile === 'drive'
+          ? estimateRouteTolls(
+              dataset.graph,
+              route,
+              { vehicleClass }
+            )
+          : {
+              vehicleClass,
+              estimated: false,
+              totalEuros: 0,
+              tolledDistanceMeters: 0,
+              roads: []
+            }
     };
+  }
+
+  async driveOptions(
+    origin,
+    destination,
+    {
+      signal = null,
+      vehicleClass = 1
+    } = {}
+  ) {
+    const policies =
+      DRIVE_TOLL_PENALTIES_MINUTES_PER_EURO.map(
+        penalty => ({
+          kind: penalty === 0
+            ? 'fastest'
+            : 'candidate',
+          penalty
+        })
+      );
+
+    const candidates = [];
+
+    for (const policy of policies) {
+      const candidate = await this.route(
+        origin,
+        destination,
+        {
+          signal,
+          profile: 'drive',
+          tollPenaltyMinutesPerEuro:
+            policy.penalty,
+          vehicleClass
+        }
+      );
+
+      candidate.routePolicy = policy.kind;
+      candidates.push(candidate);
+    }
+
+    try {
+      const noTolls = await this.route(
+        origin,
+        destination,
+        {
+          signal,
+          profile: 'drive',
+          avoidTolls: true,
+          vehicleClass
+        }
+      );
+
+      noTolls.routePolicy = 'no-tolls';
+      candidates.push(noTolls);
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        throw error;
+      }
+      // Some islands/areas can genuinely have no toll-free connection.
+    }
+
+    const unique = [];
+    const signatures = new Set();
+
+    for (const candidate of candidates) {
+      const signature =
+        candidate.edgeIndexes.join(',');
+
+      if (signatures.has(signature)) {
+        continue;
+      }
+
+      signatures.add(signature);
+      unique.push(candidate);
+    }
+
+    unique.sort(
+      (a, b) =>
+        a.durationSeconds - b.durationSeconds ||
+        a.tolls.totalEuros - b.tolls.totalEuros
+    );
+
+    const frontier = unique.filter(
+      candidate =>
+        !unique.some(other =>
+          other !== candidate &&
+          other.durationSeconds <=
+            candidate.durationSeconds &&
+          other.tolls.totalEuros <=
+            candidate.tolls.totalEuros &&
+          (
+            other.durationSeconds <
+              candidate.durationSeconds ||
+            other.tolls.totalEuros <
+              candidate.tolls.totalEuros
+          )
+        )
+    );
+
+    const fastest = frontier.reduce(
+      (best, route) =>
+        !best || route.durationSeconds < best.durationSeconds
+          ? route
+          : best,
+      null
+    );
+
+    const noTolls = frontier
+      .filter(route => route.tolls.totalEuros === 0)
+      .reduce(
+        (best, route) =>
+          !best || route.durationSeconds < best.durationSeconds
+            ? route
+            : best,
+        null
+      );
+
+    const balanced = selectBalancedDriveRoute(
+      frontier,
+      fastest,
+      noTolls
+    );
+
+    const output = [];
+    const add = (kind, route, recommended = false) => {
+      if (!route || output.some(item => item.route === route)) {
+        return;
+      }
+
+      output.push({
+        kind,
+        label:
+          kind === 'fastest'
+            ? 'Fastest'
+            : kind === 'balanced'
+              ? 'Balanced'
+              : 'No tolls',
+        recommended,
+        route
+      });
+    };
+
+    add('fastest', fastest);
+    add('balanced', balanced, balanced !== fastest);
+    add('no-tolls', noTolls);
+
+    return output;
   }
 
   #requirePoint(point, label) {

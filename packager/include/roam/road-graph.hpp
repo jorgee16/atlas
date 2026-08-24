@@ -47,6 +47,8 @@ struct RoadMetadata {
   std::string destinationLanes;
   bool roundabout = false;
   bool link = false;
+  bool toll = false;
+  bool electronicToll = false;
 };
 
 struct RoadEdge {

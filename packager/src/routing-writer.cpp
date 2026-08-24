@@ -22,7 +22,7 @@ namespace roam {
 
 namespace {
 
-constexpr std::uint32_t routingFormatVersion = 5;
+constexpr std::uint32_t routingFormatVersion = 6;
 constexpr std::uint32_t nodeRecordBytes = 12;
 constexpr std::uint32_t edgeRecordBytes = 20;
 constexpr std::uint32_t geometryArcRecordBytes = 8;
@@ -678,6 +678,14 @@ EncodedRoadAssets encodeRoads(
 
     if (road.link) {
       flags |= 1U << 1U;
+    }
+
+    if (road.toll) {
+      flags |= 1U << 2U;
+    }
+
+    if (road.electronicToll) {
+      flags |= 1U << 3U;
     }
 
     encoded.roads.push_back({

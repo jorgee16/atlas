@@ -182,6 +182,8 @@ export class NavigationFeature {
     this.previewAbortController = null;
     this.previewPromise = null;
     this.previewCollapsed = false;
+    this.driveRouteOptions = [];
+    this.selectedDriveRouteIndex = 0;
     this.transitJourneyOptions = [];
     this.selectedTransitJourneyIndex = 0;
     this.expandedTransitJourneyIndex = null;
@@ -685,6 +687,9 @@ export class NavigationFeature {
       previewState: this.previewState,
       previewError: this.previewError,
       previewCollapsed: this.previewCollapsed,
+      driveRoutes: [...this.driveRouteOptions],
+      selectedDriveRouteIndex:
+        this.selectedDriveRouteIndex,
       transitJourneys: [...this.transitJourneyOptions],
       selectedTransitJourneyIndex:
         this.selectedTransitJourneyIndex,
@@ -1508,6 +1513,35 @@ export class NavigationFeature {
     };
   }
 
+  selectDriveRoute(index) {
+    if (this.travelMode !== 'drive') {
+      return false;
+    }
+
+    const option = this.driveRouteOptions[index];
+    const origin = this.#plannerStart();
+    const destination = this.plannerDestination;
+
+    if (!option?.route || !origin || !destination) {
+      return false;
+    }
+
+    this.selectedDriveRouteIndex = index;
+    this.previewRoute = option.route;
+    this.previewState = 'ready';
+    this.previewError = null;
+    this.previewCollapsed = false;
+
+    this.map.showRoute?.(option.route, {
+      origin,
+      destination
+    });
+
+    this.render();
+    this.#schedulePreviewCollapse();
+    return true;
+  }
+
   selectTransitJourney(index) {
     if (this.travelMode !== 'transit') {
       return false;
@@ -1671,6 +1705,7 @@ export class NavigationFeature {
     const promise = (async () => {
       try {
         let route;
+        let driveRoutes = null;
         let transitJourneys = null;
         let transitSession = null;
 
@@ -2106,6 +2141,61 @@ export class NavigationFeature {
             destination: { ...destination },
             selectedAt: this.now()
           };
+        } else if (requestedTravelMode === 'drive') {
+          if (typeof this.routingService.driveOptions === 'function') {
+            driveRoutes =
+              await this.routingService.driveOptions(
+                origin,
+                destination,
+                {
+                  signal:
+                    abortController.signal,
+                  vehicleClass: 1
+                }
+              );
+          } else {
+            // Compatibility path for routing providers/tests that implement
+            // the original single-route service contract. The production
+            // OfflineRoutingService exposes driveOptions().
+            const fallbackRoute =
+              await this.routingService.route(
+                origin,
+                destination,
+                {
+                  signal:
+                    abortController.signal,
+                  profile: 'drive'
+                }
+              );
+
+            driveRoutes = [{
+              kind: 'fastest',
+              label: 'Fastest',
+              recommended: true,
+              route: fallbackRoute
+            }];
+          }
+
+          if (!driveRoutes.length) {
+            throw new Error(
+              'No legal car route connects these endpoints.'
+            );
+          }
+
+          const recommendedIndex =
+            driveRoutes.findIndex(
+              option => option.recommended
+            );
+
+          this.selectedDriveRouteIndex =
+            recommendedIndex >= 0
+              ? recommendedIndex
+              : 0;
+
+          route =
+            driveRoutes[
+              this.selectedDriveRouteIndex
+            ].route;
         } else {
           route =
             await this.routingService.route(
@@ -2126,6 +2216,14 @@ export class NavigationFeature {
           this.travelMode !== requestedTravelMode
         ) {
           return false;
+        }
+
+        if (requestedTravelMode === 'drive') {
+          this.driveRouteOptions =
+            driveRoutes ?? [];
+        } else {
+          this.driveRouteOptions = [];
+          this.selectedDriveRouteIndex = 0;
         }
 
         if (requestedTravelMode === 'transit') {
@@ -2447,8 +2545,7 @@ export class NavigationFeature {
 
     const {
       origin,
-      destination,
-      route
+      destination
     } = this.session.getState();
 
     if (
@@ -2460,181 +2557,18 @@ export class NavigationFeature {
       return;
     }
 
+    /*
+     * Active road navigation is rendered by the dedicated
+     * guidance surface. The planner workspace must stay empty
+     * while the navigation session is active, otherwise the
+     * legacy navigation panel duplicates guidance and obscures
+     * the map.
+     *
+     * Transit execution is handled above before reaching here.
+     * When navigation stops, session.isActive() becomes false
+     * and the planner is rendered again normally.
+     */
     this.listElement.replaceChildren();
-
-    const container =
-      this.document.createElement('section');
-
-    container.className =
-      'navigation-panel';
-
-    const destinationName =
-      destination.name ??
-      'Destination';
-
-    const summary =
-      this.document.createElement('div');
-
-    summary.className =
-      'navigation-summary';
-
-    if (this.routeState === 'loading') {
-      summary.innerHTML = `
-        <strong>${escapeHtml(destinationName)}</strong>
-        <span>Calculating fastest car route…</span>
-        <small>
-          Snapping both endpoints and running A* on the installed road graph.
-        </small>
-      `;
-    } else if (
-      this.routeState === 'error'
-    ) {
-      summary.innerHTML = `
-        <strong>${escapeHtml(destinationName)}</strong>
-        <span>Offline route unavailable</span>
-        <small>${escapeHtml(
-          this.routeError ??
-          'No route could be calculated.'
-        )}</small>
-      `;
-    } else if (route) {
-      summary.innerHTML = `
-        <small class="navigation-summary-status"><span></span> Navigating offline</small>
-        <strong>${escapeHtml(destinationName)}</strong>
-        <div class="navigation-route-stats">
-          <span><strong>${this.#formatDuration(route.durationSeconds)}</strong><small>travel time</small></span>
-          <span><strong>${this.#formatDistance(route.distanceMeters)}</strong><small>distance</small></span>
-          <span><strong>${route.maneuvers?.length ?? 0}</strong><small>directions</small></span>
-        </div>
-      `;
-    }
-
-    const title =
-      this.document.createElement('div');
-
-    title.className = 'section-title';
-    title.textContent = 'Navigation';
-
-    container.append(
-      title,
-      summary
-    );
-
-    if (
-      route?.maneuvers?.length &&
-      this.routeProgress
-    ) {
-      const maneuver =
-        this.routeProgress.nextManeuver;
-
-      const maneuverCard =
-        this.document.createElement('div');
-
-      maneuverCard.className =
-        'navigation-current-maneuver';
-
-      maneuverCard.innerHTML = `
-        <div class="navigation-maneuver-tile">
-          ${maneuverIconSvg(maneuver)}
-        </div>
-        <div>
-          <small>${this.#formatDistance(
-            this.routeProgress
-              .distanceToManeuverMeters
-          )}</small>
-          <strong>${escapeHtml(
-            maneuver.instruction
-          )}</strong>
-        </div>
-      `;
-
-      container.appendChild(maneuverCard);
-
-      const voiceButton =
-        this.document.createElement('button');
-
-      voiceButton.type = 'button';
-      voiceButton.className =
-        `navigation-panel-voice${
-          this.voice.isEnabled()
-            ? ' on'
-            : ''
-        }`;
-
-      voiceButton.textContent =
-        this.voice.isSupported()
-          ? this.voice.isEnabled()
-            ? '🔊 Voice guidance on'
-            : '🔇 Voice guidance off'
-          : 'Voice guidance unavailable';
-
-      voiceButton.disabled =
-        !this.voice.isSupported();
-
-      voiceButton.addEventListener(
-        'click',
-        () => this.#toggleVoice()
-      );
-
-      container.appendChild(voiceButton);
-
-      const upcoming =
-        route.maneuvers.slice(
-          this.routeProgress
-            .nextManeuverIndex + 1,
-          this.routeProgress
-            .nextManeuverIndex + 4
-        );
-
-      if (upcoming.length) {
-        const steps =
-          this.document.createElement('div');
-
-        steps.className =
-          'navigation-upcoming-steps';
-
-        steps.innerHTML = upcoming.map(
-          step => `
-            <div>
-              ${maneuverIconSvg(
-                step,
-                {
-                  className:
-                    'maneuver-icon maneuver-icon-small'
-                }
-              )}
-              <span>
-                <strong>${escapeHtml(step.instruction)}</strong>
-                <small>${step.type === 'arrive'
-                  ? 'Destination'
-                  : `${this.#formatDistance(step.distanceToNextMeters ?? 0)} to following step`
-                }</small>
-              </span>
-            </div>
-          `
-        ).join('');
-
-        container.appendChild(steps);
-      }
-    }
-
-    const stopButton =
-      this.document.createElement('button');
-
-    stopButton.type = 'button';
-    stopButton.className =
-      'navigation-stop-button';
-
-    stopButton.textContent =
-      'Stop navigation';
-
-    stopButton.addEventListener(
-      'click',
-      () => this.stop()
-    );
-
-    container.appendChild(stopButton);
-    this.listElement.appendChild(container);
   }
 
   #renderPlanner() {
@@ -2709,6 +2643,8 @@ export class NavigationFeature {
         () => this.previewRouteOnMap(),
       onExpandPreview:
         () => this.expandRoutePreview(),
+      onSelectDriveRoute:
+        index => this.selectDriveRoute(index),
       onSelectTransitJourney:
         index => this.selectTransitJourney(index),
       onStart:
@@ -2976,6 +2912,9 @@ export class NavigationFeature {
     this.previewState = 'idle';
     this.previewError = null;
     this.previewCollapsed = false;
+
+    this.driveRouteOptions = [];
+    this.selectedDriveRouteIndex = 0;
 
     // A preview belongs to one exact From/To/mode combination.
     // Once that identity changes, no TfL option from the previous
