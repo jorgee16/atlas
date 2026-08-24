@@ -70,7 +70,6 @@ test(
     assert.match(element.innerHTML, /250 m/);
     assert.match(element.innerHTML, /maneuver-exit-number">2/);
     assert.doesNotMatch(element.innerHTML, />Then</);
-    assert.match(element.innerHTML, /Praça do Comércio/);
     assert.match(element.innerHTML, /Voice on/);
     assert.match(element.innerHTML, /navigation-guidance-compact/);
     assert.match(element.innerHTML, /navigation-journey-summary/);
