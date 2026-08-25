@@ -11,6 +11,59 @@ class FakeElement {
     this.children = [];
     this.listeners = new Map();
     this.className = '';
+
+    this.classList = {
+      add: (...names) => {
+        const classes = new Set(
+          this.className.split(/\s+/).filter(Boolean)
+        );
+
+        for (const name of names) {
+          classes.add(name);
+        }
+
+        this.className = [...classes].join(' ');
+      },
+
+      remove: (...names) => {
+        const removed = new Set(names);
+
+        this.className = this.className
+          .split(/\s+/)
+          .filter(
+            name =>
+              name &&
+              !removed.has(name)
+          )
+          .join(' ');
+      },
+
+      contains: name =>
+        this.className
+          .split(/\s+/)
+          .filter(Boolean)
+          .includes(name),
+
+      toggle: (name, force) => {
+        const present = this.className
+          .split(/\s+/)
+          .filter(Boolean)
+          .includes(name);
+
+        const shouldAdd =
+          force === undefined
+            ? !present
+            : Boolean(force);
+
+        if (shouldAdd) {
+          this.classList.add(name);
+        } else {
+          this.classList.remove(name);
+        }
+
+        return shouldAdd;
+      }
+    };
     this.textContent = '';
     this.innerHTML = '';
     this.type = '';

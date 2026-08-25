@@ -81,6 +81,8 @@ export class NavigationPlannerView {
       : 'Location unavailable';
 
     if (destination) {
+      container.classList.add('navigation-planner--preview');
+
       const routeReady =
         previewState === 'ready' && previewRoute;
 
@@ -242,29 +244,31 @@ export class NavigationPlannerView {
             Route preview
           </div>
 
-          <div class="navigation-confirm-main">
-            <span class="navigation-destination-pin" aria-hidden="true"></span>
+          <div class="navigation-preview-topbar">
+            <div class="navigation-confirm-main">
+              <span class="navigation-destination-pin" aria-hidden="true"></span>
 
-            <span class="navigation-confirm-copy">
-              <small>Destination</small>
-              <strong>${escapeHtml(destination.name ?? 'Destination')}</strong>
-              <span>${escapeHtml(this.#placeDetails(destination, false))}</span>
-            </span>
+              <span class="navigation-confirm-copy">
+                <strong>${escapeHtml(destination.name ?? 'Destination')}</strong>
+                <span>${escapeHtml(this.#placeDetails(destination, false))}</span>
+              </span>
 
-            <button
-              class="navigation-destination-bookmark"
-              type="button"
-              data-navigation-bookmark
-            >
-              <span aria-hidden="true">☆</span>
-              Bookmark
-            </button>
+              <button
+                class="navigation-destination-bookmark"
+                type="button"
+                data-navigation-bookmark
+              >
+                <span aria-hidden="true">☆</span>
+                Bookmark
+              </button>
+            </div>
           </div>
 
-          ${routeDetails}
+          <div class="navigation-preview-controls">
+            ${routeDetails}
 
-          <div class="navigation-mode-choice">
-            <small class="navigation-mode-choice-label">How do you want to go?</small>
+            <div class="navigation-mode-choice">
+            <small class="navigation-mode-choice-label">Travel mode</small>
             ${this.#travelModeMarkup(travelMode)}
           </div>
 
@@ -307,21 +311,22 @@ export class NavigationPlannerView {
             </button>
           ` : ''}
 
-          <div class="navigation-confirm-actions">
-            <button
-              class="navigation-secondary-action"
-              type="button"
-              data-navigation-change
-            >Change</button>
-            <button
-              class="navigation-start-button"
-              type="button"
-              data-navigation-start
-              ${!routeReady ? 'disabled' : ''}
-            >
-              <span>${previewState === 'loading' ? 'Routing…' : travelMode === 'transit' ? 'Start journey' : 'Start'}</span>
-              <small>${routeReady ? travelMode === 'transit' ? 'Begin selected journey' : 'Begin guidance' : travelMode === 'transit' ? 'Finding TfL journeys' : 'Offline route'}</small>
-            </button>
+            <div class="navigation-confirm-actions">
+              <button
+                class="navigation-secondary-action"
+                type="button"
+                data-navigation-change
+              >Change</button>
+              <button
+                class="navigation-start-button"
+                type="button"
+                data-navigation-start
+                ${!routeReady ? 'disabled' : ''}
+              >
+                <span>${previewState === 'loading' ? 'Routing…' : travelMode === 'transit' ? 'Start journey' : 'Start'}</span>
+                <small>${routeReady ? travelMode === 'transit' ? 'Begin selected journey' : 'Begin guidance' : travelMode === 'transit' ? 'Finding TfL journeys' : 'Offline route'}</small>
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -365,6 +370,8 @@ export class NavigationPlannerView {
 
       return container;
     }
+
+    container.classList.add('navigation-planner--search');
 
     const visibleResults = results.slice(0, 5);
     const visibleRecent = !query && !visibleResults.length

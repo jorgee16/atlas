@@ -82,6 +82,13 @@ export class MapController {
     );
   }
 
+  fitRoute(route, options = {}) {
+    return this.adapter.fitRoute?.(
+      route,
+      options
+    );
+  }
+
   updateRouteProgress(route, progress) {
     this.adapter.updateRouteProgress?.(
       route,

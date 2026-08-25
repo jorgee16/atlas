@@ -1400,15 +1400,53 @@ export class LeafletMapAdapter {
       destination
     );
 
-    const bounds = routeLine.getBounds();
+    this.fitRoute(route);
+  }
 
-    if (bounds.isValid()) {
-      this.map.fitBounds(bounds, {
-        paddingTopLeft: [28, 112],
-        paddingBottomRight: [28, 196],
-        maxZoom: 16
-      });
+  fitRoute(
+    route,
+    {
+      maxZoom = 16
+    } = {}
+  ) {
+    const points = route?.points ?? [];
+
+    if (
+      points.length < 2 ||
+      points.some(point =>
+        !Number.isFinite(point?.lat) ||
+        !Number.isFinite(point?.lon)
+      )
+    ) {
+      return false;
     }
+
+    const bounds = L.latLngBounds(
+      points.map(point => [point.lat, point.lon])
+    );
+
+    if (!bounds.isValid()) {
+      return false;
+    }
+
+    const container = this.map.getContainer?.();
+    const landscape =
+      Number(container?.clientWidth ?? 0) >
+      Number(container?.clientHeight ?? 0);
+
+    this.map.fitBounds(bounds, {
+      paddingTopLeft:
+        landscape
+          ? [32, 28]
+          : [28, 112],
+      paddingBottomRight:
+        landscape
+          ? [32, 126]
+          : [28, 196],
+      maxZoom
+    });
+
+    return true;
   }
 
   updateRouteProgress(route, progress) {

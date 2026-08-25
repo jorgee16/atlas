@@ -11,6 +11,30 @@ export function renderAppShell(root) {
         <div id="map" class="map"></div>
 
         <header class="map-header">
+          <form
+            id="landscapeExploreSearch"
+            class="landscape-explore-search"
+            role="search"
+            autocomplete="off"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6"></circle>
+              <path d="m16 16 4 4"></path>
+            </svg>
+            <input
+              id="landscapeExploreSearchInput"
+              type="search"
+              placeholder="Search a place, airport or address"
+              aria-label="Search the map"
+              spellcheck="false"
+            >
+            <div
+              id="landscapeExploreSearchResults"
+              class="landscape-explore-search-results"
+              hidden
+            ></div>
+          </form>
+
           <div class="brand-inline">
             <span class="brand-mark" aria-hidden="true">
               <img
@@ -213,17 +237,17 @@ export function renderAppShell(root) {
             <div id="tripLibraryView" class="trip-library-view" hidden>
               <div class="trip-library-toolbar">
                 <div>
-                  <small>Saved on this device</small>
-                  <strong>Your trips</strong>
+                  <strong>Saved trips</strong>
+                  <small>On this device</small>
                 </div>
-                <button id="tripImportBtn" class="primary" type="button">+ Load trip</button>
+                <button id="tripImportBtn" class="primary" type="button">+ Add</button>
               </div>
               <div id="tripLibraryList" class="trip-library-list"></div>
 
               <div class="trip-cloud-section">
                 <div class="trip-cloud-heading">
+                  <strong>Discover</strong>
                   <small>Available online</small>
-                  <strong>Discover trips</strong>
                 </div>
 
                 <div

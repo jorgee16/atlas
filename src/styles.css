@@ -11777,3 +11777,3018 @@ html[data-atlas-theme="dark"]
     margin-bottom: calc(74px + env(safe-area-inset-bottom)) !important;
   }
 }
+
+
+/* ---------- Atlas navigation preview hierarchy v14 ---------- */
+.navigation-confirm-card--preview {
+  gap: 8px;
+  padding: 12px;
+}
+
+.navigation-confirm-card--preview .navigation-confirm-kicker {
+  margin-bottom: 1px;
+  font-size: 8px;
+  letter-spacing: 0.075em;
+}
+
+.navigation-confirm-card--preview .navigation-confirm-main {
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 9px;
+  min-height: 48px;
+}
+
+.navigation-confirm-card--preview .navigation-confirm-copy {
+  gap: 2px;
+}
+
+.navigation-confirm-card--preview .navigation-confirm-copy > strong {
+  font-size: 18px;
+  line-height: 1.08;
+}
+
+.navigation-confirm-card--preview .navigation-confirm-copy > span {
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.navigation-confirm-card--preview .navigation-destination-bookmark {
+  min-height: 32px;
+  padding-inline: 7px;
+  font-size: 11px;
+}
+
+.navigation-confirm-card--preview .navigation-mode-choice {
+  gap: 6px;
+  margin-top: 0;
+}
+
+.navigation-confirm-card--preview .navigation-mode-choice-label {
+  color: #8b95a8;
+  font-size: 9px;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+@media (max-width: 520px) {
+  .navigation-confirm-card--preview .navigation-confirm-main {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+  }
+
+  .navigation-confirm-card--preview .navigation-confirm-copy > strong {
+    font-size: 17px;
+  }
+}
+
+/* ---------- Atlas loaded route preview polish v15b ---------- */
+.navigation-confirm-card--preview .navigation-single-drive-route {
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-main {
+  align-items: center;
+  gap: 10px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-main > span:first-child {
+  gap: 7px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-main strong {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-main small {
+  font-size: 11px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-toll {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-roads {
+  gap: 6px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-roads small {
+  font-size: 9px;
+}
+
+.navigation-confirm-card--preview .navigation-single-drive-roads strong {
+  font-size: 11px;
+}
+
+.navigation-confirm-card--preview .navigation-confirm-actions {
+  margin-top: 2px;
+}
+
+@media (max-width: 520px) {
+  .navigation-confirm-card--preview .navigation-single-drive-route {
+    padding: 9px 11px;
+  }
+}
+
+
+/* ---------- Trip hierarchy polish v16 ---------- */
+.trip-library-view {
+  padding: 0 14px 14px;
+}
+
+.trip-library-toolbar {
+  margin-bottom: 8px;
+  padding: 8px 2px 10px;
+  background: transparent;
+  border-radius: 0;
+}
+
+.trip-library-toolbar > div {
+  gap: 1px;
+}
+
+.trip-library-toolbar strong {
+  color: var(--text, #202a3d);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.trip-library-toolbar small {
+  color: var(--text-muted, #7a8496);
+  font-size: 9px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.trip-library-toolbar button {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 11px;
+  font-size: 11px;
+}
+
+.trip-library-empty {
+  gap: 4px;
+  padding: 16px 14px;
+  border-color: rgba(150, 162, 183, 0.42);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.trip-library-empty strong {
+  font-size: 13px;
+}
+
+.trip-library-empty span {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.trip-cloud-section {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top-color: rgba(137, 150, 173, 0.18);
+}
+
+.trip-cloud-heading {
+  gap: 1px;
+  margin-bottom: 7px;
+}
+
+.trip-cloud-heading strong {
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.trip-cloud-heading small {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.trip-cloud-list {
+  opacity: 0.88;
+}
+
+@media (max-width: 520px) {
+  .trip-library-view {
+    padding-inline: 12px;
+  }
+
+  .trip-library-toolbar {
+    padding-top: 5px;
+  }
+}
+
+/* ---------- Non-active landscape workspaces v17 ---------- */
+/* Phone landscape needs task-specific compositions instead of the portrait
+   bottom-sheet geometry stretched across a short viewport. */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Keep the shared chrome compact. Active navigation has its own rules. */
+  .app:not(.navigation-active) .map-header {
+    top: max(8px, calc(var(--safe-top) + 6px));
+    right: max(10px, calc(var(--safe-right) + 8px));
+    left: max(10px, calc(var(--safe-left) + 8px));
+  }
+
+  .app:not(.navigation-active) .brand-inline {
+    min-height: 42px;
+    padding: 5px 9px;
+    border-radius: 15px;
+  }
+
+  .app:not(.navigation-active) .brand-mark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app:not(.navigation-active) .map-header-actions {
+    gap: 4px;
+  }
+
+  .app:not(.navigation-active) .map-header-actions .icon-btn {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    border-radius: 12px;
+  }
+
+  /* A short centred tab dock frees the sides for mode-specific workspaces. */
+  .app:not(.navigation-active) .app-tabs {
+    right: auto;
+    bottom: max(8px, calc(env(safe-area-inset-bottom) + 6px));
+    left: 50%;
+    width: min(330px, calc(100vw - 280px));
+    min-width: 270px;
+    padding: 4px;
+    border-radius: 17px;
+    transform: translateX(-50%);
+  }
+
+  .app:not(.navigation-active) .app-tab {
+    min-height: 44px;
+    padding: 3px 5px;
+    border-radius: 12px;
+  }
+
+  .app:not(.navigation-active) .app-tab span {
+    font-size: 16px;
+  }
+
+  .app:not(.navigation-active) .app-tab strong {
+    font-size: 9px;
+  }
+
+  /* GPS feedback becomes a small map badge instead of another bottom panel. */
+  .app:not(.navigation-active) .status-toast {
+    left: max(12px, calc(var(--safe-left) + 10px));
+    bottom: max(10px, calc(env(safe-area-inset-bottom) + 8px));
+    max-width: 210px;
+    padding: 9px 12px;
+    border-radius: 15px;
+  }
+
+  .app:not(.navigation-active) .status-toast b {
+    font-size: 12px;
+  }
+
+  .app:not(.navigation-active) .status-toast span {
+    margin-top: 2px;
+    font-size: 10px;
+  }
+
+  /* EXPLORE: map-first. Filters stay as a low horizontal instrument rail. */
+  .explore-workspace:not([hidden]) {
+    right: max(88px, calc(var(--safe-right) + 86px));
+    bottom: max(10px, calc(env(safe-area-inset-bottom) + 8px));
+    left: max(230px, calc(var(--safe-left) + 228px));
+    gap: 6px;
+  }
+
+  .explore-workspace .explore-category-bar {
+    gap: 4px;
+    max-width: 100%;
+    padding: 4px;
+    border-radius: 15px;
+  }
+
+  .explore-workspace .explore-category-bar .chip {
+    min-height: 32px;
+    padding-inline: 10px;
+    font-size: 10px;
+  }
+
+  .explore-workspace .explore-peek .nearby {
+    width: min(390px, 46vw);
+    max-height: 42vh;
+    overflow-y: auto;
+  }
+
+  /* TRIP: a left workspace, leaving the route/map visible on the right. */
+  .trip-workspace:not([hidden]) {
+    top: max(72px, calc(var(--safe-top) + 70px));
+    right: auto;
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 10px));
+    left: max(12px, calc(var(--safe-left) + 10px));
+    width: min(390px, 43vw);
+    justify-content: flex-start;
+  }
+
+  .trip-workspace:not([hidden]) .trip-workspace-card {
+    width: 100%;
+    max-height: 100%;
+    border-radius: 19px;
+  }
+
+  .trip-workspace:not([hidden]) .trip-workspace-header {
+    padding: 9px 10px 8px 12px;
+  }
+
+  .trip-workspace:not([hidden]) .trip-workspace-header strong {
+    font-size: 15px;
+  }
+
+  .trip-workspace:not([hidden]) .trip-schedule-view {
+    max-height: calc(100dvh - 148px);
+  }
+
+  /* NAVIGATION PLANNER/PREVIEW: a right-side route workspace. */
+  .navigation-workspace:not([hidden]) {
+    top: max(72px, calc(var(--safe-top) + 70px));
+    right: max(12px, calc(var(--safe-right) + 10px));
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 10px));
+    left: auto;
+    width: min(430px, 46vw);
+    max-height: calc(100dvh - 86px);
+    overflow: visible;
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-workspace-content,
+  .navigation-workspace:not([hidden]) .navigation-planner {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-search-card,
+  .navigation-workspace:not([hidden]) .navigation-confirm-card {
+    max-height: calc(100dvh - 96px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 18px;
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-search-card,
+  .navigation-workspace:not([hidden]) .navigation-confirm-card--preview {
+    padding: 10px;
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-search-results {
+    max-height: 150px;
+  }
+
+  /* Route planning already owns the right side; don't layer this CTA over it. */
+  body:has(.navigation-workspace:not([hidden])) #searchAreaBtn,
+  body:has(.trip-workspace:not([hidden])) #searchAreaBtn {
+    display: none !important;
+  }
+
+  /* Keep the map recovery controls clear of the compact tab dock. */
+  body:has(.app-tabs:not([hidden])) .map-actions {
+    right: max(12px, calc(var(--safe-right) + 10px));
+    bottom: max(10px, calc(env(safe-area-inset-bottom) + 8px));
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .trip-workspace:not([hidden]) {
+    top: max(62px, calc(var(--safe-top) + 60px));
+    width: min(360px, 41vw);
+  }
+
+  .navigation-workspace:not([hidden]) {
+    top: max(62px, calc(var(--safe-top) + 60px));
+    width: min(400px, 44vw);
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-endpoint-row {
+    min-height: 52px;
+    padding-block: 7px;
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-search-card,
+  .navigation-workspace:not([hidden]) .navigation-confirm-card--preview {
+    padding: 9px;
+  }
+}
+
+/* ---------- Explore responsive shell (canonical) ---------- */
+/*
+ * Explore owns one responsive geometry system. Keep search, filters,
+ * Leaflet controls and the bottom dock tied to these variables instead of
+ * adding independent fixed offsets in later polish passes.
+ */
+.landscape-explore-search {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 800px) {
+  body:has(#exploreWorkspace:not([hidden])) {
+    --explore-search-top: 66px;
+    --explore-search-height: 44px;
+    --explore-search-gap: 22px;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .landscape-explore-search {
+    position: absolute;
+    top: var(--explore-search-top);
+    left: 0;
+    z-index: 1080;
+    display: flex;
+    width: 150px;
+    height: var(--explore-search-height);
+    align-items: center;
+    gap: 8px;
+    padding: 0 13px;
+    overflow: visible;
+    color: #eef3ff;
+    background: rgba(23, 32, 49, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    box-shadow: 0 9px 24px rgba(8, 14, 25, 0.20);
+    pointer-events: auto;
+    transition:
+      width 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 180ms ease;
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .landscape-explore-search:focus-within {
+    width: min(340px, calc(100vw - 24px));
+    box-shadow: 0 14px 34px rgba(8, 14, 25, 0.28);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    fill: none;
+    stroke: #9aabd0;
+    stroke-width: 2;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    color: #eef3ff;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 740;
+    text-overflow: ellipsis;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input::placeholder {
+    color: #bac5d7;
+    opacity: 1;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results {
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 0;
+    z-index: 1090;
+    display: grid;
+    width: min(340px, calc(100vw - 24px));
+    max-height: min(290px, 42vh);
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    background: rgba(20, 29, 45, 0.98);
+    box-shadow: 0 14px 34px rgba(8, 14, 25, 0.30);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results[hidden] {
+    display: none;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button {
+    display: grid;
+    gap: 2px;
+    min-height: 46px;
+    padding: 8px 10px;
+    color: #eef3ff;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    text-align: left;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button:active {
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results strong {
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 820;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results small,
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-empty {
+    color: #98a5ba;
+    font-size: 9px;
+    font-weight: 680;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-empty {
+    padding: 10px;
+  }
+
+  /* The zoom rail derives from search geometry, so search sizing cannot cover it. */
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+    margin-top: calc(
+      var(--explore-search-top) +
+      var(--explore-search-height) +
+      var(--explore-search-gap)
+    ) !important;
+    margin-left: 12px !important;
+    position: relative;
+    z-index: 720;
+  }
+
+  /* One dark-glass filter language in portrait. */
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar {
+    gap: 5px;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(20, 29, 45, 0.94);
+    box-shadow: 0 10px 26px rgba(8, 14, 25, 0.24);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip {
+    min-height: 34px;
+    padding-inline: 11px;
+    color: #b8c2d3;
+    background: rgba(255, 255, 255, 0.035);
+    border: 0;
+    box-shadow: none;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip:hover {
+    color: #eef3ff;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip.on {
+    color: #ffffff;
+    background: #315efb;
+    box-shadow: 0 7px 16px rgba(49, 94, 251, 0.24);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#exploreWorkspace:not([hidden])) {
+    --explore-search-top: max(9px, calc(var(--safe-top) + 7px));
+    --explore-search-height: 48px;
+    --explore-search-width: min(350px, 40vw);
+    --explore-filter-gap: 8px;
+    --explore-filter-left: max(92px, calc(var(--safe-left) + 88px));
+    --explore-zoom-gap: 59px;
+    --explore-layer-gap: 9px;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .brand-inline {
+    display: none;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .map-header {
+    top: var(--explore-search-top);
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .landscape-explore-search {
+    position: relative;
+    display: flex;
+    width: var(--explore-search-width);
+    min-width: 260px;
+    height: var(--explore-search-height);
+    align-items: center;
+    gap: 10px;
+    padding: 0 15px;
+    overflow: visible;
+    color: #eef3ff;
+    background: rgba(23, 32, 49, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 9px 24px rgba(8, 14, 25, 0.22);
+    pointer-events: auto;
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+    fill: none;
+    stroke: #8fa3c8;
+    stroke-width: 2;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    color: #eef3ff;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 720;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input::placeholder {
+    color: #bac5d7;
+    opacity: 1;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input::-webkit-search-cancel-button {
+    filter: invert(1);
+    opacity: 0.55;
+  }
+
+  .landscape-explore-search-results {
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 0;
+    z-index: 1080;
+    display: grid;
+    width: 100%;
+    max-height: min(220px, 50vh);
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    background: rgba(20, 29, 45, 0.97);
+    box-shadow: 0 14px 34px rgba(8, 14, 25, 0.30);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  .landscape-explore-search-results[hidden] {
+    display: none;
+  }
+
+  .landscape-explore-search-results button {
+    display: grid;
+    gap: 1px;
+    min-height: 42px;
+    padding: 7px 9px;
+    color: #eef3ff;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .landscape-explore-search-results button:hover,
+  .landscape-explore-search-results button:focus-visible {
+    background: rgba(255, 255, 255, 0.07);
+    outline: none;
+  }
+
+  .landscape-explore-search-results strong {
+    overflow: hidden;
+    font-size: 10px;
+    font-weight: 820;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .landscape-explore-search-results small,
+  .landscape-explore-search-empty {
+    color: #98a5ba;
+    font-size: 8px;
+    font-weight: 680;
+  }
+
+  .landscape-explore-search-empty {
+    padding: 10px;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .map-header-actions {
+    margin-left: auto;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 15px;
+    background: rgba(23, 32, 49, 0.54);
+    box-shadow: 0 8px 22px rgba(8, 14, 25, 0.15);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .map-header-actions .icon-btn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-radius: 11px;
+    box-shadow: none;
+  }
+
+  /* Filters derive their vertical position from the search bar. */
+  .explore-workspace:not([hidden]) {
+    top: calc(
+      var(--explore-search-top) +
+      var(--explore-search-height) +
+      var(--explore-filter-gap)
+    );
+    right: auto;
+    bottom: auto;
+    left: var(--explore-filter-left);
+    width: min(455px, 52vw);
+    gap: 7px;
+    align-content: start;
+  }
+
+  .explore-workspace:not([hidden]) .explore-category-bar {
+    width: max-content;
+    max-width: 100%;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    background: rgba(23, 32, 49, 0.90);
+    box-shadow: 0 8px 22px rgba(8, 14, 25, 0.18);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+  }
+
+  .explore-workspace:not([hidden]) .explore-category-bar .chip {
+    min-height: 28px;
+    padding-inline: 9px;
+    color: #c8d0df;
+    border: 0;
+    border-radius: 11px;
+    background: transparent;
+    box-shadow: none;
+    font-size: 9px;
+    font-weight: 780;
+  }
+
+  .explore-workspace:not([hidden]) .explore-category-bar .chip.on {
+    color: #fff;
+    background: #315efb;
+  }
+
+  .explore-workspace:not([hidden]) .explore-peek:not(:empty) {
+    width: min(360px, 43vw);
+  }
+
+  .explore-workspace:not([hidden]) .explore-peek .nearby {
+    width: 100%;
+    max-height: min(190px, 42vh);
+    padding: 9px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    background: rgba(23, 32, 49, 0.94);
+    box-shadow: 0 12px 28px rgba(8, 14, 25, 0.22);
+  }
+
+  .explore-workspace:not([hidden]) .nearby-peek-header strong,
+  .explore-workspace:not([hidden]) .nearby-card strong {
+    color: #f3f6fc;
+  }
+
+  .explore-workspace:not([hidden]) .nearby-peek-header small,
+  .explore-workspace:not([hidden]) .nearby-card small {
+    color: #9eaabc;
+  }
+
+  body:has(#exploreWorkspace:not([hidden])) #searchAreaBtn {
+    display: none !important;
+  }
+
+  /* Zoom and Layers now derive from the same search geometry. */
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+    margin-top: calc(
+      var(--explore-search-top) +
+      var(--explore-search-height) +
+      var(--explore-zoom-gap)
+    ) !important;
+    margin-left: max(12px, calc(var(--safe-left) + 10px)) !important;
+    position: relative;
+    z-index: 720;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers {
+    display: block !important;
+    margin-top: calc(
+      var(--explore-search-top) +
+      var(--explore-search-height) +
+      var(--explore-layer-gap)
+    ) !important;
+    margin-right: max(12px, calc(var(--safe-right) + 10px)) !important;
+    position: relative;
+    z-index: 720;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .app-tabs {
+    width: min(280px, calc(100vw - 360px));
+    min-width: 250px;
+    bottom: max(5px, calc(env(safe-area-inset-bottom) + 3px));
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .status-toast {
+    max-width: 180px;
+    padding: 8px 11px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#exploreWorkspace:not([hidden])) {
+    --explore-search-height: 42px;
+    --explore-search-width: min(320px, 37vw);
+    --explore-filter-gap: 7px;
+    --explore-filter-left: max(86px, calc(var(--safe-left) + 82px));
+    --explore-zoom-gap: 57px;
+    --explore-layer-gap: 8px;
+  }
+
+  .explore-workspace:not([hidden]) {
+    width: min(440px, 52vw);
+  }
+
+  .explore-workspace:not([hidden]) .explore-category-bar .chip {
+    min-height: 27px;
+    padding-inline: 8px;
+    font-size: 8px;
+  }
+}
+
+/* ---------- Navigation planner landscape shell v25 ---------- */
+/* Landscape planning is map-first: search lives at the top, route choices at
+   the bottom. Portrait keeps the established compact card layout. */
+.navigation-preview-topbar,
+.navigation-preview-controls {
+  display: contents;
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden])) {
+    --planner-top: max(9px, calc(var(--safe-top) + 7px));
+    --planner-search-width: min(390px, 43vw);
+    --planner-control-width: min(760px, calc(100vw - 230px));
+    --planner-dock-bottom: max(58px, calc(env(safe-area-inset-bottom) + 54px));
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active) .brand-inline {
+    display: none;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active) .map-header {
+    top: var(--planner-top);
+    left: auto;
+    right: max(10px, calc(var(--safe-right) + 8px));
+    width: auto;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active) .map-header-actions {
+    margin-left: 0;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 15px;
+    background: rgba(23, 32, 49, 0.58);
+    box-shadow: 0 8px 22px rgba(8, 14, 25, 0.16);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active) .map-header-actions .icon-btn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-radius: 11px;
+    box-shadow: none;
+  }
+
+  /* The workspace becomes a transparent positioning layer. */
+  .navigation-workspace:not([hidden]) {
+    inset: 0;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .navigation-workspace:not([hidden]) .navigation-workspace-content,
+  .navigation-workspace:not([hidden]) .navigation-planner {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  /* Destination search: Waze-style compact top-left instrument. */
+  .navigation-planner--search .navigation-search-card {
+    position: absolute;
+    top: var(--planner-top);
+    left: max(12px, calc(var(--safe-left) + 10px));
+    width: var(--planner-search-width);
+    max-height: calc(100dvh - 78px);
+    gap: 6px;
+    padding: 7px;
+    overflow-y: auto;
+    color: #eef3ff;
+    background: rgba(23, 32, 49, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 17px;
+    box-shadow: 0 11px 28px rgba(8, 14, 25, 0.25);
+    pointer-events: auto;
+    backdrop-filter: blur(17px) saturate(140%);
+    -webkit-backdrop-filter: blur(17px) saturate(140%);
+  }
+
+  .navigation-planner--search .navigation-search-title-row {
+    display: none;
+  }
+
+  .navigation-planner--search .navigation-endpoint-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .navigation-planner--search .navigation-endpoint-connector {
+    display: none;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--destination {
+    order: 1;
+    min-height: 46px;
+    color: #eef3ff;
+    background: rgba(8, 15, 27, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 13px;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--origin {
+    order: 2;
+    min-height: 32px;
+    padding-block: 4px;
+    color: #c5cede;
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--origin small,
+  .navigation-planner--search .navigation-endpoint-row--origin span:last-child {
+    display: none;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--origin strong {
+    color: #c5cede;
+    font-size: 10px;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--destination small {
+    display: none;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--destination input {
+    height: 36px;
+    color: #f5f7fb;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 720;
+  }
+
+  .navigation-planner--search .navigation-endpoint-row--destination input::placeholder {
+    color: #aeb9cb;
+    opacity: 1;
+  }
+
+  .navigation-planner--search .navigation-search-results,
+  .navigation-planner--search .navigation-search-section {
+    max-height: min(190px, 45vh);
+  }
+
+  .navigation-planner--search .navigation-search-heading strong,
+  .navigation-planner--search .navigation-search-result strong {
+    color: #f1f4fa;
+  }
+
+  .navigation-planner--search .navigation-search-heading span,
+  .navigation-planner--search .navigation-search-result small {
+    color: #95a3b8;
+  }
+
+  .navigation-planner--search .navigation-search-result {
+    color: #eef3ff;
+    background: transparent;
+  }
+
+  .navigation-planner--search .navigation-search-result + .navigation-search-result {
+    border-top-color: rgba(255, 255, 255, 0.07);
+  }
+
+  /* Preview: destination becomes a top-left search-like bar. */
+  .navigation-planner--preview .navigation-confirm-card--preview {
+    display: contents;
+  }
+
+  .navigation-planner--preview .navigation-confirm-kicker {
+    display: none;
+  }
+
+  .navigation-planner--preview .navigation-preview-topbar {
+    position: absolute;
+    top: var(--planner-top);
+    left: max(12px, calc(var(--safe-left) + 10px));
+    display: block;
+    width: var(--planner-search-width);
+    pointer-events: auto;
+  }
+
+  .navigation-planner--preview .navigation-confirm-main {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    min-height: 48px;
+    gap: 8px;
+    padding: 7px 9px;
+    color: #eef3ff;
+    background: rgba(23, 32, 49, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(8, 14, 25, 0.23);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .navigation-planner--preview .navigation-destination-pin {
+    width: 13px;
+    height: 13px;
+    border-width: 4px;
+    border-color: #66d1b3;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .navigation-planner--preview .navigation-confirm-copy > strong {
+    color: #f5f7fb;
+    font-size: 12px;
+  }
+
+  .navigation-planner--preview .navigation-confirm-copy > span {
+    color: #98a6bb;
+    font-size: 9px;
+  }
+
+  .navigation-planner--preview .navigation-destination-bookmark {
+    min-width: 34px;
+    padding-inline: 7px;
+    color: #aab6ca;
+    background: rgba(255,255,255,.05);
+    border-radius: 10px;
+    font-size: 0;
+  }
+
+  .navigation-planner--preview .navigation-destination-bookmark > span {
+    font-size: 17px;
+  }
+
+  /* Route/mode/start collapse into one low-profile bottom instrument dock. */
+  .navigation-planner--preview .navigation-preview-controls {
+    position: absolute;
+    right: auto;
+    bottom: var(--planner-dock-bottom);
+    left: 50%;
+    display: grid;
+    grid-template-columns: minmax(150px, 1.15fr) minmax(180px, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    width: var(--planner-control-width);
+    max-height: min(158px, 43vh);
+    padding: 7px;
+    overflow: visible;
+    color: #eef3ff;
+    background: rgba(23, 32, 49, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 17px;
+    box-shadow: 0 12px 30px rgba(8, 14, 25, 0.27);
+    pointer-events: auto;
+    transform: translateX(-50%);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  .navigation-planner--preview .navigation-single-drive-route,
+  .navigation-planner--preview .navigation-preview-status,
+  .navigation-planner--preview .navigation-preview-metrics {
+    margin: 0;
+    padding: 7px 9px;
+    color: #eef3ff;
+    background: rgba(255,255,255,.035);
+    border: 0;
+    border-radius: 12px;
+  }
+
+  .navigation-planner--preview .navigation-single-drive-main strong,
+  .navigation-planner--preview .navigation-preview-metrics strong {
+    color: #f6f8fc;
+    font-size: 15px;
+  }
+
+  .navigation-planner--preview .navigation-single-drive-main small,
+  .navigation-planner--preview .navigation-single-drive-roads,
+  .navigation-planner--preview .navigation-preview-status small {
+    color: #9ca8ba;
+  }
+
+  .navigation-planner--preview .navigation-mode-choice {
+    margin: 0;
+  }
+
+  .navigation-planner--preview .navigation-mode-choice-label {
+    display: none;
+  }
+
+  .navigation-planner--preview .navigation-mode-selector {
+    min-height: 42px;
+    padding: 4px;
+    background: rgba(8, 15, 27, 0.32);
+    border-radius: 12px;
+  }
+
+  .navigation-planner--preview .navigation-mode-selector button {
+    min-height: 34px;
+    padding-inline: 10px;
+    border-radius: 9px;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions {
+    grid-template-columns: auto minmax(92px, 1fr);
+    gap: 5px;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions .navigation-secondary-action {
+    min-width: 64px;
+    min-height: 42px;
+    color: #aeb9cc;
+    background: rgba(255,255,255,.055);
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions .navigation-start-button {
+    min-width: 100px;
+    min-height: 42px;
+    padding-inline: 13px;
+    border-radius: 11px;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions .navigation-start-button small {
+    display: none;
+  }
+
+  /* Multiple drive choices become horizontally scannable route cards. */
+  .navigation-planner--preview .navigation-drive-options {
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .navigation-planner--preview .navigation-drive-options-heading,
+  .navigation-planner--preview .navigation-drive-options-footer {
+    display: none;
+  }
+
+  .navigation-planner--preview .navigation-drive-options-list {
+    display: flex;
+    gap: 6px;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .navigation-planner--preview .navigation-drive-options-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navigation-planner--preview .navigation-drive-option {
+    flex: 0 0 150px;
+    min-height: 62px;
+    padding: 7px 8px;
+    color: #eef3ff;
+    background: rgba(255,255,255,.035);
+    border-color: rgba(255,255,255,.075);
+    border-radius: 11px;
+  }
+
+  .navigation-planner--preview .navigation-drive-option.is-selected {
+    border-color: #57d0a7;
+    background: rgba(51, 190, 145, 0.08);
+    box-shadow: inset 2px 0 0 #57d0a7;
+  }
+
+  .navigation-planner--preview .navigation-drive-option-title strong,
+  .navigation-planner--preview .navigation-drive-option-duration {
+    color: #f3f6fb;
+    font-size: 11px;
+  }
+
+  .navigation-planner--preview .navigation-drive-option-route-row,
+  .navigation-planner--preview .navigation-drive-option-foot {
+    font-size: 8px;
+  }
+
+  .navigation-planner--preview .navigation-drive-roads,
+  .navigation-planner--preview .navigation-drive-option-price,
+  .navigation-planner--preview .navigation-drive-option-foot small {
+    color: #9da9bb;
+  }
+
+  .navigation-planner--preview .navigation-planner-feedback,
+  .navigation-planner--preview .navigation-preview-map-button,
+  .navigation-planner--preview .transit-options {
+    grid-column: 1 / -1;
+  }
+
+  body:has(#navigationWorkspace:not([hidden])) #searchAreaBtn {
+    display: none !important;
+  }
+
+  /* Keep Leaflet controls away from the new top/dock surfaces. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+    margin-top: 72px !important;
+    margin-left: max(12px, calc(var(--safe-left) + 10px)) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers {
+    display: block !important;
+    margin-top: 58px !important;
+    margin-right: max(12px, calc(var(--safe-right) + 10px)) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden])) {
+    --planner-search-width: min(350px, 40vw);
+    --planner-control-width: min(680px, calc(100vw - 220px));
+    --planner-dock-bottom: max(52px, calc(env(safe-area-inset-bottom) + 49px));
+  }
+
+  .navigation-planner--preview .navigation-preview-controls {
+    max-height: min(138px, 41vh);
+    padding: 6px;
+  }
+
+  .navigation-planner--preview .navigation-drive-option {
+    flex-basis: 136px;
+  }
+}
+
+/* ---------- Navigation landscape planner stabilization v26 ---------- */
+/* Keep search intentionally roomy, but route preview compact and map-first. */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Searching is the one planner state allowed to occupy more map. */
+  .navigation-planner--search .navigation-search-card.is-searching {
+    width: min(470px, 54vw);
+    max-height: calc(100dvh - 18px);
+  }
+
+  .navigation-planner--search .navigation-search-card.is-searching
+    .navigation-search-results {
+    max-height: min(285px, 58vh);
+    overflow-y: auto;
+  }
+
+  .navigation-planner--search .navigation-search-card.is-searching
+    .navigation-search-section {
+    max-height: none;
+  }
+
+  /* Expanded preview: a compact instrument dock, never a large sheet. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-controls {
+    right: auto !important;
+    bottom: var(--planner-dock-bottom) !important;
+    left: 50% !important;
+    width: min(720px, calc(100vw - 330px)) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: min(150px, 42vh) !important;
+    padding: 7px !important;
+    overflow: hidden !important;
+    color: #eef3ff !important;
+    background: rgba(23, 32, 49, 0.96) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 17px !important;
+    box-shadow: 0 12px 30px rgba(8, 14, 25, 0.27) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  /* Before a route exists, only mode + actions are needed. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:disabled) {
+    grid-template-columns: minmax(280px, 1fr) auto !important;
+    width: min(610px, calc(100vw - 360px)) !important;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:disabled)
+    .navigation-mode-choice {
+    grid-column: 1;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:disabled)
+    .navigation-confirm-actions {
+    grid-column: 2;
+    width: auto;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions {
+    align-items: stretch;
+    min-width: 190px;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions button {
+    height: 42px;
+    min-height: 42px !important;
+  }
+
+  /* Collapsed/preview-on-map state: Waze-style dark summary strip. */
+  .navigation-planner--preview .navigation-preview-bar {
+    position: absolute;
+    right: auto;
+    bottom: var(--planner-dock-bottom);
+    left: 50%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 94px;
+    align-items: stretch;
+    gap: 6px;
+    width: min(560px, calc(100vw - 420px));
+    min-width: 420px;
+    padding: 6px;
+    color: #eef3ff;
+    background: rgba(23, 32, 49, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(8, 14, 25, 0.27);
+    pointer-events: auto;
+    transform: translateX(-50%);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  .navigation-planner--preview .navigation-preview-summary {
+    min-height: 44px;
+    padding: 4px 7px;
+    color: #eef3ff;
+    background: transparent;
+  }
+
+  .navigation-planner--preview .navigation-preview-summary strong {
+    color: #f5f7fb;
+    font-size: 12px;
+  }
+
+  .navigation-planner--preview .navigation-preview-summary small,
+  .navigation-planner--preview .navigation-preview-chevron {
+    color: #9ca8ba;
+  }
+
+  .navigation-planner--preview .navigation-preview-bar
+    .navigation-destination-pin {
+    border-color: #66d1b3;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .navigation-planner--preview .navigation-start-button--slim {
+    display: grid;
+    min-height: 44px;
+    place-items: center;
+    padding: 0 12px;
+    color: #fff;
+    background: linear-gradient(135deg, #3d6dff, #264ed8);
+    border: 0;
+    border-radius: 11px;
+    box-shadow: none;
+    font-size: 12px;
+    font-weight: 850;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .navigation-planner--search .navigation-search-card.is-searching {
+    width: min(440px, 52vw);
+  }
+
+  .navigation-planner--search .navigation-search-card.is-searching
+    .navigation-search-results {
+    max-height: min(245px, 55vh);
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-controls {
+    width: min(660px, calc(100vw - 300px)) !important;
+    max-height: min(132px, 40vh) !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-bar {
+    width: min(530px, calc(100vw - 370px));
+    min-width: 390px;
+  }
+}
+
+/* ---------- Navigation landscape route-ready dock v27 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Once a route is ready, keep summary, travel mode and actions on one row. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)) {
+    bottom: max(72px, calc(env(safe-area-inset-bottom) + 68px)) !important;
+    grid-template-columns:
+      minmax(220px, 1.25fr)
+      minmax(250px, 1fr)
+      auto !important;
+    align-items: center !important;
+    gap: 7px !important;
+    width: min(760px, calc(100vw - 300px)) !important;
+    max-height: 78px !important;
+    overflow: visible !important;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-single-drive-route,
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-preview-status,
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-preview-metrics {
+    grid-column: auto !important;
+    min-width: 0;
+    min-height: 52px;
+    max-height: 62px;
+    align-content: center;
+    gap: 4px;
+    padding: 6px 9px !important;
+    overflow: hidden;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-single-drive-main {
+    gap: 8px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-single-drive-main strong {
+    font-size: 14px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-single-drive-main small,
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-single-drive-roads strong {
+    font-size: 9px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-single-drive-toll {
+    padding: 4px 7px;
+    font-size: 9px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-mode-choice {
+    grid-column: auto !important;
+    width: auto !important;
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-mode-selector {
+    min-height: 46px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-confirm-actions {
+    grid-column: auto !important;
+    grid-template-columns: 66px 104px !important;
+    min-width: 0 !important;
+    width: auto !important;
+    gap: 6px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-confirm-actions button {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 46px;
+    min-height: 46px !important;
+    padding-inline: 10px;
+  }
+
+  /* Multi-route choices are the exception: keep them as a short row above. */
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-drive-options {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)) {
+    bottom: max(68px, calc(env(safe-area-inset-bottom) + 64px)) !important;
+    grid-template-columns:
+      minmax(190px, 1.15fr)
+      minmax(225px, 1fr)
+      auto !important;
+    width: min(710px, calc(100vw - 270px)) !important;
+    max-height: 72px !important;
+  }
+}
+
+/* ---------- Navigation landscape route finishing pass v28b ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)) {
+    width: min(720px, calc(100vw - 320px)) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    width: min(570px, calc(100vw - 420px)) !important;
+    min-height: 56px;
+    padding: 6px !important;
+    grid-template-columns: minmax(0, 1fr) 112px !important;
+    gap: 7px;
+    color: #f7f9fc !important;
+    background: rgba(24, 33, 50, 0.96) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 12px 30px rgba(9, 14, 24, 0.30) !important;
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar
+    .navigation-preview-summary {
+    min-height: 44px;
+    padding: 3px 8px !important;
+    color: #f7f9fc !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar
+    .navigation-preview-summary strong {
+    color: #f7f9fc !important;
+    font-size: 12px;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar
+    .navigation-preview-summary small {
+    color: #aeb8c9 !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar
+    .navigation-preview-chevron {
+    color: #9aa7bb !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar
+    .navigation-start-button--slim {
+    min-height: 44px !important;
+    height: 44px;
+    border-radius: 13px !important;
+    padding-inline: 16px !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    width: min(540px, calc(100vw - 390px)) !important;
+    min-height: 52px;
+    grid-template-columns: minmax(0, 1fr) 104px !important;
+  }
+}
+
+/* ---------- Navigation landscape route dock alignment v29 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Keep the ready-route instrument clear of the persistent tab dock. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)) {
+    bottom: max(92px, calc(env(safe-area-inset-bottom) + 88px)) !important;
+    width: min(940px, calc(100vw - 250px)) !important;
+    grid-template-columns:
+      minmax(250px, 1.15fr)
+      minmax(300px, 1fr)
+      216px !important;
+    box-sizing: border-box;
+    overflow: hidden !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-confirm-actions {
+    justify-self: end;
+    width: 216px !important;
+    min-width: 216px !important;
+    grid-template-columns: 88px 120px !important;
+    gap: 8px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-confirm-actions button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box;
+    padding-inline: 8px !important;
+  }
+
+  /* The collapsed route card is a second instrument, not part of the tab bar. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    transform: translateY(-32px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)) {
+    bottom: max(84px, calc(env(safe-area-inset-bottom) + 80px)) !important;
+    width: min(900px, calc(100vw - 230px)) !important;
+    grid-template-columns:
+      minmax(225px, 1.1fr)
+      minmax(270px, 1fr)
+      204px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled))
+    .navigation-confirm-actions {
+    width: 204px !important;
+    min-width: 204px !important;
+    grid-template-columns: 82px 114px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    transform: translateY(-26px);
+  }
+}
+
+/* ---------- Navigation landscape route layout correction v30 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Single ready route: use a real horizontal flex instrument so actions can never overflow. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: min(900px, calc(100vw - 300px)) !important;
+    max-width: calc(100vw - 300px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-route,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-status,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-metrics {
+    flex: 1 1 245px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-mode-choice {
+    flex: 1 1 315px !important;
+    width: auto !important;
+    min-width: 250px !important;
+    max-width: none !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions {
+    display: grid !important;
+    flex: 0 0 208px !important;
+    grid-template-columns: 82px 118px !important;
+    gap: 8px !important;
+    width: 208px !important;
+    min-width: 208px !important;
+    max-width: 208px !important;
+    justify-self: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions > button {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* Collapsed preview is centred above the persistent Explore / Trip / Navigation dock. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    bottom: max(112px, calc(env(safe-area-inset-bottom) + 108px)) !important;
+    left: 50% !important;
+    width: min(540px, calc(100vw - 430px)) !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    width: min(860px, calc(100vw - 270px)) !important;
+    max-width: calc(100vw - 270px) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    bottom: max(104px, calc(env(safe-area-inset-bottom) + 100px)) !important;
+    width: min(510px, calc(100vw - 390px)) !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* ---------- Navigation landscape route spacing correction v31 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Preserve the route summary as a readable instrument; let the mode segment flex instead. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    width: min(980px, calc(100vw - 220px)) !important;
+    max-width: calc(100vw - 220px) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-route,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-status,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-metrics {
+    flex: 0 0 310px !important;
+    width: 310px !important;
+    min-width: 310px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-main {
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-main strong,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-main small,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-roads {
+    white-space: nowrap !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-toll {
+    flex: 0 0 auto !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-mode-choice {
+    flex: 1 1 300px !important;
+    min-width: 285px !important;
+  }
+
+  /* Keep the collapsed card close to, but clearly separate from, the tab dock. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    transform: translate(-50%, 38px) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    width: min(940px, calc(100vw - 190px)) !important;
+    max-width: calc(100vw - 190px) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-route,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-status,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-metrics {
+    flex-basis: 295px !important;
+    width: 295px !important;
+    min-width: 295px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace
+    .navigation-preview-bar {
+    transform: translate(-50%, 34px) !important;
+  }
+}
+
+/* ---------- Navigation landscape balanced ready-route dock v32-direct ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    width: min(940px, calc(100vw - 220px)) !important;
+    max-width: calc(100vw - 220px) !important;
+    padding-inline: 10px !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-route,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-status,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-metrics {
+    flex: 0 0 250px !important;
+    width: 250px !important;
+    min-width: 250px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-mode-choice {
+    flex: 1 1 300px !important;
+    min-width: 270px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions {
+    flex: 0 0 232px !important;
+    width: 232px !important;
+    min-width: 232px !important;
+    max-width: 232px !important;
+    grid-template-columns: 88px 136px !important;
+    gap: 8px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions > button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    width: min(900px, calc(100vw - 180px)) !important;
+    max-width: calc(100vw - 180px) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-route,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-status,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-metrics {
+    flex-basis: 235px !important;
+    width: 235px !important;
+    min-width: 235px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-mode-choice {
+    min-width: 250px !important;
+  }
+}
+
+/* ---------- Navigation landscape ready-route dock hard bounds v34 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  /*
+   * Keep the three logical pieces inside one bounded instrument:
+   * route summary | travel mode | Change + Start.
+   * Earlier overrides combined fixed minimums that could exceed the dock's
+   * usable width, so the action group was being clipped by overflow:hidden.
+   */
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    display: grid !important;
+    grid-template-columns:
+      minmax(210px, 230px)
+      minmax(250px, 1fr)
+      200px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: min(820px, calc(100vw - 260px)) !important;
+    max-width: calc(100vw - 260px) !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-single-drive-route,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-status,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-preview-metrics {
+    grid-column: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 230px !important;
+    flex: none !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-mode-choice {
+    grid-column: 2 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions {
+    grid-column: 3 !important;
+    display: grid !important;
+    grid-template-columns: 76px 116px !important;
+    gap: 8px !important;
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions > button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding-inline: 8px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options)) {
+    grid-template-columns:
+      minmax(195px, 215px)
+      minmax(225px, 1fr)
+      190px !important;
+    width: min(780px, calc(100vw - 220px)) !important;
+    max-width: calc(100vw - 220px) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions {
+    grid-template-columns: 72px 110px !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    max-width: 190px !important;
+  }
+}
+
+
+/* ---------- Navigation landscape action + preview visibility v35 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions {
+    align-items: stretch !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions > button {
+    min-height: 52px !important;
+    height: 52px !important;
+    align-self: center !important;
+    border-radius: 14px !important;
+    font-size: 12px !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions
+    .navigation-change-button {
+    color: #d9e0ec !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions
+    .navigation-start-button {
+    color: #ffffff !important;
+    background: #315efb !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 10px 22px rgba(49, 94, 251, 0.25) !important;
+  }
+}
+
+/* ---------- Navigation landscape Change action polish v36 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions {
+    align-items: center !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions
+    .navigation-secondary-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 10px !important;
+    color: #c4cede !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    font-size: 11px !important;
+    font-weight: 820 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)):not(:has(.navigation-drive-options))
+    .navigation-confirm-actions
+    .navigation-start-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    height: 52px !important;
+    min-height: 52px !important;
+  }
+}
+
+/* ---------- Trip landscape workspace v37 ---------- */
+/*
+ * Trip uses a compact left-side workspace in landscape. It should feel like
+ * a drawer over the map, not a portrait bottom sheet stretched sideways.
+ */
+@media (orientation: landscape) and (max-height: 560px) {
+  body:has(#tripWorkspace:not([hidden])) {
+    --trip-landscape-top: max(14px, calc(var(--safe-top) + 12px));
+    --trip-landscape-bottom: max(78px, calc(env(safe-area-inset-bottom) + 76px));
+    --trip-landscape-left: max(14px, calc(var(--safe-left) + 12px));
+    --trip-landscape-width: min(360px, 38vw);
+  }
+
+  body:has(#tripWorkspace:not([hidden])) .brand-inline {
+    display: none;
+  }
+
+  #tripWorkspace.trip-workspace:not([hidden]) {
+    position: absolute;
+    top: var(--trip-landscape-top);
+    right: auto;
+    bottom: var(--trip-landscape-bottom);
+    left: var(--trip-landscape-left);
+    z-index: 920;
+    width: var(--trip-landscape-width);
+    min-width: 320px;
+    max-width: 380px;
+    height: auto;
+    max-height: calc(100dvh - var(--trip-landscape-top) - var(--trip-landscape-bottom));
+    display: block;
+    pointer-events: none;
+  }
+
+  #tripWorkspace .trip-workspace-card {
+    width: 100%;
+    height: auto;
+    max-height: inherit;
+    overflow: hidden;
+    pointer-events: auto;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    background: rgba(22, 31, 48, 0.96);
+    box-shadow: 0 16px 38px rgba(7, 12, 22, 0.28);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  #tripWorkspace .trip-workspace-header {
+    min-height: 58px;
+    padding: 9px 10px 8px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  #tripWorkspace .trip-workspace-header small {
+    color: #7f8ca3;
+    font-size: 8px;
+  }
+
+  #tripWorkspace .trip-workspace-header strong {
+    color: #f5f7fb;
+    font-size: 17px;
+    line-height: 1.1;
+  }
+
+  #tripWorkspace .trip-header-actions {
+    gap: 5px;
+  }
+
+  #tripWorkspace .trip-library-btn {
+    min-height: 36px;
+    padding: 0 11px;
+    color: #aeb9cb;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 11px;
+  }
+
+  #tripWorkspace .trip-library-btn[aria-expanded="true"] {
+    color: #dbe5ff;
+    background: rgba(49, 94, 251, 0.18);
+    border-color: rgba(102, 132, 255, 0.28);
+  }
+
+  #tripWorkspace .trip-mode-switch {
+    padding: 2px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  #tripWorkspace .trip-mode-switch button {
+    min-height: 31px;
+    color: #8f9bb0;
+  }
+
+  #tripWorkspace .trip-mode-switch button.on {
+    color: #dfe7ff;
+    background: rgba(49, 94, 251, 0.18);
+    box-shadow: none;
+  }
+
+  #tripWorkspace .trip-library-view,
+  #tripWorkspace .trip-schedule-view,
+  #tripWorkspace .trip-map-view {
+    max-height: calc(100dvh - var(--trip-landscape-top) - var(--trip-landscape-bottom) - 58px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  #tripWorkspace .trip-library-view {
+    padding: 10px 12px 12px;
+  }
+
+  #tripWorkspace .trip-library-toolbar {
+    margin: 0 0 8px;
+    padding: 4px 2px 8px;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0;
+  }
+
+  #tripWorkspace .trip-library-toolbar strong,
+  #tripWorkspace .trip-cloud-heading strong {
+    color: #f2f5fa;
+  }
+
+  #tripWorkspace .trip-library-toolbar small,
+  #tripWorkspace .trip-cloud-heading small {
+    color: #8290a7;
+  }
+
+  #tripWorkspace .trip-library-toolbar button {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 11px;
+    font-size: 11px;
+  }
+
+  #tripWorkspace .trip-library-empty {
+    gap: 3px;
+    padding: 14px 12px;
+    color: #8996aa;
+    background: rgba(255, 255, 255, 0.025);
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 13px;
+  }
+
+  #tripWorkspace .trip-library-empty strong {
+    color: #dfe5ef;
+    font-size: 13px;
+  }
+
+  #tripWorkspace .trip-library-empty span {
+    font-size: 10px;
+  }
+
+  #tripWorkspace .trip-cloud-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  #tripWorkspace .trip-cloud-heading {
+    margin-bottom: 7px;
+  }
+
+  #tripWorkspace .trip-library-list {
+    gap: 6px;
+  }
+
+  #tripWorkspace .trip-library-item {
+    padding: 4px;
+    color: #edf2fa;
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+  }
+
+  #tripWorkspace .trip-library-item.active {
+    background: rgba(49, 94, 251, 0.12);
+    border-color: rgba(88, 121, 255, 0.22);
+  }
+
+  #tripWorkspace .trip-library-open {
+    min-height: 42px;
+    padding: 5px 7px;
+    color: #edf2fa;
+  }
+
+  #tripWorkspace .trip-library-open strong {
+    font-size: 12px;
+  }
+
+  #tripWorkspace .trip-library-open span {
+    color: #8996aa;
+    font-size: 9px;
+  }
+
+  #tripWorkspace .trip-library-remove {
+    min-height: 34px;
+    color: #a6b1c3;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  #tripWorkspace .trip-schedule-view .trip-day-control {
+    padding: 8px 12px 7px;
+    background: rgba(22, 31, 48, 0.98);
+  }
+
+  #tripWorkspace .trip-workspace-content {
+    padding-bottom: 12px;
+  }
+
+  #tripWorkspace .trip-workspace-content .trip-timeline-stop:hover {
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  #tripWorkspace .trip-workspace-content .trip-timeline-stop.active {
+    background: rgba(49, 94, 251, 0.13);
+  }
+
+  #tripWorkspace .trip-stop-main b,
+  #tripWorkspace .trip-selected-stop-copy strong {
+    color: #edf2fa;
+  }
+
+  #tripWorkspace .trip-stop-note,
+  #tripWorkspace .trip-selected-stop > small,
+  #tripWorkspace .trip-selected-stop-copy span {
+    color: #8d9aae !important;
+  }
+
+  #tripWorkspace .trip-selected-stop {
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  body:has(#tripWorkspace:not([hidden])) #searchAreaBtn {
+    display: none !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#tripWorkspace:not([hidden])) {
+    --trip-landscape-top: max(10px, calc(var(--safe-top) + 8px));
+    --trip-landscape-bottom: max(72px, calc(env(safe-area-inset-bottom) + 70px));
+    --trip-landscape-width: min(340px, 37vw);
+  }
+
+  #tripWorkspace.trip-workspace:not([hidden]) {
+    min-width: 300px;
+  }
+
+  #tripWorkspace .trip-workspace-header {
+    min-height: 52px;
+    padding-block: 7px;
+  }
+
+  #tripWorkspace .trip-library-view,
+  #tripWorkspace .trip-schedule-view,
+  #tripWorkspace .trip-map-view {
+    max-height: calc(100dvh - var(--trip-landscape-top) - var(--trip-landscape-bottom) - 52px);
+  }
+}
+
+/* ---------- Trip landscape placement correction v38 ---------- */
+@media (orientation: landscape) and (max-height: 560px) {
+  body:has(#tripWorkspace:not([hidden])) {
+    --trip-landscape-top: max(70px, calc(var(--safe-top) + 62px));
+    --trip-landscape-bottom: max(78px, calc(env(safe-area-inset-bottom) + 76px));
+    --trip-landscape-left: max(86px, calc(var(--safe-left) + 82px));
+    --trip-landscape-width: min(360px, 34vw);
+  }
+
+  body:has(#tripWorkspace:not([hidden])) .map-header {
+    justify-content: flex-end;
+  }
+
+  body:has(#tripWorkspace:not([hidden])) .map-header-actions {
+    margin-left: auto;
+  }
+
+  #tripWorkspace.trip-workspace:not([hidden]) {
+    top: var(--trip-landscape-top);
+    right: auto;
+    bottom: var(--trip-landscape-bottom);
+    left: var(--trip-landscape-left);
+    width: var(--trip-landscape-width);
+    min-width: 320px;
+    max-width: 360px;
+    height: auto;
+    max-height: calc(100dvh - var(--trip-landscape-top) - var(--trip-landscape-bottom));
+  }
+
+  #tripWorkspace .trip-workspace-card {
+    height: 100%;
+    max-height: inherit;
+  }
+
+  #tripWorkspace .trip-library-view,
+  #tripWorkspace .trip-schedule-view,
+  #tripWorkspace .trip-map-view {
+    max-height: calc(100dvh - var(--trip-landscape-top) - var(--trip-landscape-bottom) - 58px);
+    overflow-y: auto;
+  }
+
+  body:has(#tripWorkspace:not([hidden])) .leaflet-top.leaflet-left {
+    top: 70px;
+    left: max(12px, var(--safe-left));
+  }
+
+  /* Keep Layers below the top-right action cluster in Trip landscape. */
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers {
+    display: block !important;
+    margin-top: 86px !important;
+    margin-right: max(12px, calc(var(--safe-right) + 10px)) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#tripWorkspace:not([hidden])) {
+    --trip-landscape-top: max(62px, calc(var(--safe-top) + 56px));
+    --trip-landscape-bottom: max(72px, calc(env(safe-area-inset-bottom) + 70px));
+    --trip-landscape-left: max(78px, calc(var(--safe-left) + 74px));
+    --trip-landscape-width: min(340px, 33vw);
+  }
+
+  #tripWorkspace.trip-workspace:not([hidden]) {
+    min-width: 300px;
+    max-width: 340px;
+  }
+
+  #tripWorkspace .trip-library-view,
+  #tripWorkspace .trip-schedule-view,
+  #tripWorkspace .trip-map-view {
+    max-height: calc(100dvh - var(--trip-landscape-top) - var(--trip-landscape-bottom) - 52px);
+  }
+}
+
+
+/* ---------- Canonical landscape map controls ---------- */
+@media (orientation: landscape) and (max-height: 560px) {
+  /*
+   * One control dock for Explore, Trip and Navigation.
+   * Workspace-specific CSS must not reposition this.
+   */
+  .map-header-actions {
+    position: fixed !important;
+    top: 12px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+
+    margin: 0 !important;
+    padding: 4px !important;
+
+    background: rgba(17, 25, 39, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+    backdrop-filter: blur(16px) !important;
+
+    transform: none !important;
+    z-index: 1200 !important;
+  }
+
+  .map-header-actions .icon-btn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+
+    margin: 0 !important;
+    border-radius: 14px !important;
+  }
+
+  /*
+   * Layers belongs to the same right-hand stack.
+   * 12 top + 56 dock height + 8 gap = ~76px.
+   */
+  .leaflet-top.leaflet-right {
+    top: 76px !important;
+    right: 12px !important;
+    left: auto !important;
+    margin: 0 !important;
+    z-index: 1150 !important;
+  }
+
+  .leaflet-top.leaflet-right .leaflet-control,
+  .leaflet-top.leaflet-right .leaflet-control-layers {
+    margin: 0 !important;
+  }
+
+  /*
+   * Cancel the old Trip-specific 86px margin.
+   */
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right
+    .leaflet-control-layers {
+    margin: 0 !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .map-header-actions {
+    top: 10px !important;
+    right: 10px !important;
+  }
+
+  .map-header-actions .icon-btn {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+  }
+
+  .leaflet-top.leaflet-right {
+    top: 72px !important;
+    right: 10px !important;
+  }
+}
+
+/* ---------- Canonical landscape Layers alignment ---------- */
+@media (orientation: landscape) and (max-height: 560px) {
+  /* 12px top + ~56px action dock + 8px gap */
+  .leaflet-top.leaflet-right {
+    top: 76px !important;
+    right: 12px !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers,
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers,
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-control-layers-toggle,
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-control-layers-toggle,
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-control-layers-toggle {
+    margin: 0 !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .leaflet-top.leaflet-right {
+    top: 72px !important;
+    right: 10px !important;
+  }
+}
+
+
+/* ---------- Canonical landscape zoom placement ---------- */
+@media (orientation: landscape) and (max-height: 560px) {
+
+  /* EXPLORE */
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 118px !important;
+    left: 16px !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left
+    .leaflet-control-zoom {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    transform: none !important;
+  }
+
+
+  /* TRIP */
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 118px !important;
+    left: 16px !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left
+    .leaflet-control-zoom {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    transform: none !important;
+  }
+
+
+  /*
+   * NAVIGATION PLANNER
+   *
+   * Same vertical anchor, but shifted to the right of the
+   * upper-left search/results panel so the zoom rail remains visible.
+   */
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 118px !important;
+    left: calc(var(--planner-search-width, 360px) + 34px) !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left
+    .leaflet-control-zoom {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    transform: none !important;
+  }
+
+
+  /* Same physical button dimensions in all three modes. */
+  body:has(#exploreWorkspace:not([hidden])) .leaflet-control-zoom a,
+  body:has(#tripWorkspace:not([hidden])) .leaflet-control-zoom a,
+  body:has(#navigationWorkspace:not([hidden])) .leaflet-control-zoom a {
+    width: 46px !important;
+    height: 46px !important;
+    line-height: 46px !important;
+  }
+}
+
+
+/* Short landscape phones */
+@media (orientation: landscape) and (max-height: 430px) {
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left,
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 108px !important;
+    left: 14px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 108px !important;
+    left: calc(var(--planner-search-width, 350px) + 28px) !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden])) .leaflet-control-zoom a,
+  body:has(#tripWorkspace:not([hidden])) .leaflet-control-zoom a,
+  body:has(#navigationWorkspace:not([hidden])) .leaflet-control-zoom a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+  }
+}
+
+/* ---------- Navigation landscape zoom exception ---------- */
+@media (orientation: landscape) and (max-height: 560px) {
+
+  /*
+   * While the navigation search/planner occupies the upper-left,
+   * don't throw the Leaflet zoom rail into the middle of the map.
+   */
+  body:has(
+    #navigationWorkspace:not([hidden])
+    .navigation-planner:not(.navigation-planner--preview)
+  )
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+
+  /*
+   * Once a route preview exists, return zoom to the normal
+   * left-side map rail.
+   */
+  body:has(
+    #navigationWorkspace:not([hidden])
+    .navigation-planner--preview
+  )
+  .leaflet-top.leaflet-left {
+    top: 118px !important;
+    left: 16px !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(
+    #navigationWorkspace:not([hidden])
+    .navigation-planner--preview
+  )
+  .leaflet-control-zoom {
+    display: block !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(
+    #navigationWorkspace:not([hidden])
+    .navigation-planner--preview
+  )
+  .leaflet-top.leaflet-left {
+    top: 108px !important;
+    left: 14px !important;
+  }
+}
+
+/* ---------- Canonical portrait map chrome ---------- */
+@media (orientation: portrait) and (max-width: 800px) {
+
+  /*
+   * HEADER
+   * Atlas + the four map buttons always share ONE row.
+   */
+  .map-header {
+    left: max(10px, calc(var(--safe-left) + 8px)) !important;
+    right: max(10px, calc(var(--safe-right) + 8px)) !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  .brand-inline {
+    flex: 0 1 174px !important;
+    width: 174px !important;
+    max-width: 174px !important;
+    min-width: 0 !important;
+  }
+
+  .map-header-actions {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    margin: 0 !important;
+    gap: 5px !important;
+  }
+
+  .map-header-actions .icon-btn {
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+
+  /*
+   * LAYERS
+   * One identical right-side position for Explore / Trip / Navigation.
+   */
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right,
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right,
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right {
+    top: 82px !important;
+    right: max(14px, calc(var(--safe-right) + 10px)) !important;
+    left: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers,
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers,
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-right .leaflet-control-layers {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+  }
+
+
+  /*
+   * ZOOM — Trip + Navigation
+   * No secondary search bar occupies the left rail.
+   */
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left,
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 92px !important;
+    left: max(12px, calc(var(--safe-left) + 10px)) !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(#tripWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left .leaflet-control-zoom,
+  body:has(#navigationWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+    display: block !important;
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    transform: none !important;
+  }
+
+
+  /*
+   * ZOOM — Explore
+   * Explore has the compact search bar beneath Atlas, therefore its
+   * zoom rail intentionally starts one level lower.
+   */
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left {
+    top: 142px !important;
+    left: max(12px, calc(var(--safe-left) + 10px)) !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+    display: block !important;
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    transform: none !important;
+  }
+
+  body:has(#exploreWorkspace:not([hidden])) .leaflet-control-zoom a,
+  body:has(#tripWorkspace:not([hidden])) .leaflet-control-zoom a,
+  body:has(#navigationWorkspace:not([hidden])) .leaflet-control-zoom a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+  }
+}
+
+
+/*
+ * Active turn-by-turn navigation owns its own layout.
+ * Do not let planner/workspace portrait positioning override it.
+ */
+@media (orientation: portrait) and (max-width: 800px) {
+  .app.navigation-active .leaflet-control-zoom {
+    display: block !important;
+  }
+}

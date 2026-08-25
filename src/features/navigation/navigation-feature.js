@@ -176,6 +176,7 @@ export class NavigationFeature {
     this.plannerSearchTimer = null;
     this.pickMode = null;
     this.previewRoute = null;
+    this.previewOrigin = null;
     this.previewState = 'idle';
     this.previewError = null;
     this.previewRequest = 0;
@@ -476,7 +477,7 @@ export class NavigationFeature {
 
     const { origin, destination } = this.session.getState();
     this.routeProgress = route.maneuvers?.length
-      ? findRouteProgress(origin, route)
+      ? findRouteProgress(startOrigin, route)
       : null;
 
     this.map.showRoute?.(route, { origin, destination });
@@ -1698,6 +1699,7 @@ export class NavigationFeature {
     this.previewState = 'loading';
     this.previewError = null;
     this.previewRoute = null;
+    this.previewOrigin = null;
     this.previewCollapsed = false;
     clearTimeout(this.previewCollapseTimer);
     this.render();
@@ -2248,6 +2250,10 @@ export class NavigationFeature {
         }
 
         this.previewRoute = route;
+        this.previewOrigin = {
+          lat: origin.lat,
+          lon: origin.lon
+        };
         this.previewState = 'ready';
         this.previewError = null;
 
@@ -2258,6 +2264,7 @@ export class NavigationFeature {
         });
 
         this.render();
+        this.#refitPreviewRoute();
         this.#schedulePreviewCollapse();
 
         this.status?.(
@@ -2488,12 +2495,67 @@ export class NavigationFeature {
       }
     }
 
+    /*
+     * "My location" is live. The GPS fix may have changed while the
+     * preview was being calculated (especially immediately after app
+     * startup). Never start navigation from a stale preview origin.
+     */
+    if (this.plannerOrigin === null) {
+      const latestOrigin = this.#plannerStart();
+      const previewOrigin = this.previewOrigin;
+
+      const movedMeters = (
+        latestOrigin &&
+        previewOrigin &&
+        Number.isFinite(latestOrigin.lat) &&
+        Number.isFinite(latestOrigin.lon) &&
+        Number.isFinite(previewOrigin.lat) &&
+        Number.isFinite(previewOrigin.lon)
+      )
+        ? (() => {
+            const toRadians = value => value * Math.PI / 180;
+            const earthRadiusMeters = 6371000;
+            const dLat = toRadians(
+              latestOrigin.lat - previewOrigin.lat
+            );
+            const dLon = toRadians(
+              latestOrigin.lon - previewOrigin.lon
+            );
+            const lat1 = toRadians(previewOrigin.lat);
+            const lat2 = toRadians(latestOrigin.lat);
+
+            const a =
+              Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1) *
+              Math.cos(lat2) *
+              Math.sin(dLon / 2) ** 2;
+
+            return earthRadiusMeters * 2 *
+              Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          })()
+        : Infinity;
+
+      if (movedMeters > 25) {
+        const ready = await this.previewPlannedRoute();
+
+        if (!ready || !this.previewRoute) {
+          return false;
+        }
+      }
+    }
+
+    const startOrigin = this.#plannerStart();
     const route = this.previewRoute;
+
+    if (!startOrigin || !route) {
+      return false;
+    }
+
     this.#cancelPreviewRequest();
     clearTimeout(this.previewCollapseTimer);
 
     this.session.start({
-      origin,
+      origin: startOrigin,
       destination,
       route
     });
@@ -2509,6 +2571,7 @@ export class NavigationFeature {
       : null;
 
     this.previewRoute = null;
+    this.previewOrigin = null;
     this.previewState = 'idle';
     this.previewError = null;
     this.previewCollapsed = false;
@@ -2882,6 +2945,31 @@ export class NavigationFeature {
 
     this.previewCollapsed = collapsed;
     this.render();
+    this.#refitPreviewRoute();
+  }
+
+  #refitPreviewRoute() {
+    if (
+      !this.previewRoute ||
+      this.session.isActive()
+    ) {
+      return;
+    }
+
+    const refit = () =>
+      this.map.fitRoute?.(
+        this.previewRoute
+      );
+
+    if (
+      typeof globalThis.requestAnimationFrame ===
+      'function'
+    ) {
+      globalThis.requestAnimationFrame(refit);
+      return;
+    }
+
+    setTimeout(refit, 0);
   }
 
   #schedulePreviewCollapse() {

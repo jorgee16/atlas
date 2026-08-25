@@ -497,6 +497,157 @@ export class AppBootstrap {
       selectAppTab(tab, { reveal });
     });
 
+    const landscapeExploreSearch =
+      root.querySelector('#landscapeExploreSearch');
+    const landscapeExploreSearchInput =
+      root.querySelector('#landscapeExploreSearchInput');
+    const landscapeExploreSearchResults =
+      root.querySelector('#landscapeExploreSearchResults');
+
+    let landscapeExploreSearchTimer = null;
+    let landscapeExploreSearchRequest = 0;
+    let landscapeExploreResults = [];
+
+    const clearLandscapeExploreResults = () => {
+      landscapeExploreResults = [];
+      landscapeExploreSearchResults?.replaceChildren();
+      if (landscapeExploreSearchResults) {
+        landscapeExploreSearchResults.hidden = true;
+      }
+    };
+
+    const selectLandscapeExploreResult = result => {
+      if (!result) return;
+
+      clearLandscapeExploreResults();
+      if (landscapeExploreSearchInput) {
+        landscapeExploreSearchInput.value = result.name ?? '';
+        landscapeExploreSearchInput.blur();
+      }
+
+      map.focus?.(result.lat, result.lon, 16);
+      mapSelectionFeature.select({
+        lat: result.lat,
+        lon: result.lon,
+        name: result.name ?? 'Selected place'
+      });
+    };
+
+    const runLandscapeExploreSearch = async () => {
+      const query = String(
+        landscapeExploreSearchInput?.value ?? ''
+      ).trim();
+
+      if (query.length < 2) {
+        clearLandscapeExploreResults();
+        return;
+      }
+
+      const anchor =
+        mapCenterAnchor ?? appState.userPosition ?? null;
+
+      if (!anchor) {
+        clearLandscapeExploreResults();
+        status(
+          'Search unavailable',
+          'Move the map or enable GPS first.'
+        );
+        return;
+      }
+
+      const request = ++landscapeExploreSearchRequest;
+
+      try {
+        const results = await navigationFeature.destinationSearch(
+          query,
+          anchor,
+          { limit: 6 }
+        );
+
+        if (request !== landscapeExploreSearchRequest) return;
+
+        landscapeExploreResults = results;
+        landscapeExploreSearchResults?.replaceChildren();
+
+        if (!results.length) {
+          if (landscapeExploreSearchResults) {
+            const empty = document.createElement('div');
+            empty.className = 'landscape-explore-search-empty';
+            empty.textContent = 'No offline places found';
+            landscapeExploreSearchResults.appendChild(empty);
+            landscapeExploreSearchResults.hidden = false;
+          }
+          return;
+        }
+
+        for (const [index, result] of results.entries()) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.dataset.exploreSearchResult = String(index);
+
+          const name = document.createElement('strong');
+          name.textContent = result.name ?? 'Place';
+
+          const detail = document.createElement('small');
+          detail.textContent =
+            result.category ?? result.type ?? 'Offline place';
+
+          button.append(name, detail);
+          landscapeExploreSearchResults?.appendChild(button);
+        }
+
+        if (landscapeExploreSearchResults) {
+          landscapeExploreSearchResults.hidden = false;
+        }
+      } catch (error) {
+        if (request !== landscapeExploreSearchRequest) return;
+        console.error(error);
+        clearLandscapeExploreResults();
+        status(
+          'Search unavailable',
+          error.message ?? 'Offline place search failed.'
+        );
+      }
+    };
+
+    landscapeExploreSearchInput?.addEventListener('input', () => {
+      if (landscapeExploreSearchTimer !== null) {
+        window.clearTimeout(landscapeExploreSearchTimer);
+      }
+
+      landscapeExploreSearchTimer = window.setTimeout(() => {
+        landscapeExploreSearchTimer = null;
+        void runLandscapeExploreSearch();
+      }, 180);
+    });
+
+    landscapeExploreSearch?.addEventListener('submit', event => {
+      event.preventDefault();
+      if (landscapeExploreResults.length === 1) {
+        selectLandscapeExploreResult(landscapeExploreResults[0]);
+        return;
+      }
+      void runLandscapeExploreSearch();
+    });
+
+    landscapeExploreSearchResults?.addEventListener('click', event => {
+      const button = event.target.closest?.('[data-explore-search-result]');
+      if (!button) return;
+      const result = landscapeExploreResults[
+        Number(button.dataset.exploreSearchResult)
+      ];
+      selectLandscapeExploreResult(result);
+    });
+
+    document.addEventListener('pointerdown', event => {
+      if (
+        landscapeExploreSearch &&
+        !landscapeExploreSearch.contains(event.target)
+      ) {
+        clearLandscapeExploreResults();
+      }
+    });
+
     fullMapButton?.addEventListener('click', () => {
       const visible = workspaceChromeVisible[activeAppTab] === true;
       setWorkspaceChrome(activeAppTab, !visible);
