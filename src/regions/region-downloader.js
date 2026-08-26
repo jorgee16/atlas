@@ -9,6 +9,9 @@ const CACHE_PREFIX =
 const LEGACY_CACHE_NAME =
   'roam-regions-v1';
 
+const LARGE_CACHE_BLOB_THRESHOLD_BYTES =
+  64 * 1024 * 1024;
+
 export class RegionDownloader {
   constructor({
     fetchFn = null,
@@ -136,15 +139,31 @@ export class RegionDownloader {
 
         let cacheResponse;
         let verification = null;
+        let verificationReadyBeforeCache = false;
 
-        if (file.sha256) {
+        const onChunk = chunkBytes => {
+          downloadedBytes += chunkBytes;
+          emit(file);
+        };
+
+        if (shouldUseBlobCacheEntry(file, responseSize)) {
+          const prepared =
+            await blobBackedCacheResponse(
+              response,
+              onChunk,
+              file.sha256
+            );
+
+          cacheResponse = prepared.response;
+          verification = prepared.digest;
+          verificationReadyBeforeCache = Boolean(
+            verification
+          );
+        } else if (file.sha256) {
           const streamed =
             verifiedProgressResponse(
               response,
-              chunkBytes => {
-                downloadedBytes += chunkBytes;
-                emit(file);
-              }
+              onChunk
             );
 
           cacheResponse = streamed.response;
@@ -154,20 +173,31 @@ export class RegionDownloader {
           cacheResponse =
             progressResponse(
               response,
-              chunkBytes => {
-                downloadedBytes += chunkBytes;
-                emit(file);
-              }
+              onChunk
             );
         }
 
         try {
+          if (verificationReadyBeforeCache) {
+            const digest = await verification;
+
+            throwIfAborted(signal);
+
+            if (digest !== file.sha256) {
+              throw new Error(
+                `${region.name} integrity check failed for ${file.label}.`
+              );
+            }
+
+            verifiedFiles += 1;
+          }
+
           await cache.put(
             file.url,
             cacheResponse
           );
 
-          if (verification) {
+          if (verification && !verificationReadyBeforeCache) {
             const digest = await verification;
 
             throwIfAborted(signal);
@@ -442,6 +472,57 @@ function uniqueFiles(files) {
       files.map(file => [file.url, file])
     ).values()
   ];
+}
+
+function shouldUseBlobCacheEntry(file, responseSize) {
+  const size =
+    file.sizeBytes ??
+    (Number.isFinite(responseSize)
+      ? responseSize
+      : 0);
+
+  return size >= LARGE_CACHE_BLOB_THRESHOLD_BYTES;
+}
+
+async function blobBackedCacheResponse(
+  response,
+  onChunk,
+  expectedSha256
+) {
+  const tracked =
+    progressResponse(response, onChunk);
+  const blob = await tracked.blob();
+
+  return {
+    response: cloneResponse(
+      response,
+      blob
+    ),
+    digest: expectedSha256
+      ? hashBlob(blob)
+      : null
+  };
+}
+
+async function hashBlob(blob) {
+  if (!blob?.stream) {
+    throw new Error(
+      'This browser cannot stream verified region blobs.'
+    );
+  }
+
+  const hasher = new IncrementalSha256();
+  const reader = blob.stream().getReader();
+
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      return hasher.hex();
+    }
+
+    hasher.update(value);
+  }
 }
 
 function progressResponse(response, onChunk) {
