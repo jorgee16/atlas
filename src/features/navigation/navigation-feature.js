@@ -41,12 +41,13 @@ import {
 
 import { escapeHtml } from '../../utils.js';
 
-const OFF_ROUTE_DISTANCE_METERS = 80;
-const GPS_REDUCED_ACCURACY_METERS = 45;
-const OFF_ROUTE_CONFIRMATION_FIXES = 3;
-const OFF_ROUTE_CONFIRMATION_MS = 2_500;
+const OFF_ROUTE_DISTANCE_METERS = 50;
+const GPS_REDUCED_ACCURACY_METERS = 80;
+const OFF_ROUTE_ACCURACY_MULTIPLIER = 1.5;
+const OFF_ROUTE_CONFIRMATION_FIXES = 2;
+const OFF_ROUTE_CONFIRMATION_MS = 1_500;
 const ROUTE_CHANGED_NOTICE_MS = 6_000;
-const MINIMUM_REROUTE_INTERVAL_MS = 15_000;
+const MINIMUM_REROUTE_INTERVAL_MS = 10_000;
 const ROUTE_PREVIEW_COLLAPSE_MS = 4_500;
 const APPROACHING_DESTINATION_METERS = 100;
 const ARRIVAL_DISTANCE_METERS = 30;
@@ -394,7 +395,17 @@ export class NavigationFeature {
       return;
     }
 
-    if (distanceFromRoute <= OFF_ROUTE_DISTANCE_METERS) {
+    // Treat the route as a corridor rather than a razor-thin line. GPS
+    // accuracy widens that corridor, so mediocre fixes do not make Atlas
+    // chatter between the current route and repeated reroutes.
+    const offRouteThresholdMeters = Math.max(
+      OFF_ROUTE_DISTANCE_METERS,
+      Number.isFinite(normalizedPosition.accuracy)
+        ? normalizedPosition.accuracy * OFF_ROUTE_ACCURACY_MULTIPLIER
+        : 0
+    );
+
+    if (distanceFromRoute <= offRouteThresholdMeters) {
       this.#resetOffRouteEvidence();
       if (
         this.navigationConfidenceState !== 'changed' ||

@@ -85,6 +85,8 @@ import {
   AppearancePreference
 } from '../settings/appearance-preference.js';
 
+import { ScreenWakeLock } from '../platform/screen-wake-lock.js';
+
 export class AppBootstrap {
   constructor(root) {
     if (!root) {
@@ -117,6 +119,19 @@ export class AppBootstrap {
   const status = (title, subtitle = '') => {
     statusController.show(title, subtitle);
   };
+
+  const screenWakeLock = new ScreenWakeLock();
+  const onNavigationActiveChange = event => {
+    void screenWakeLock.setActive(
+      event.detail?.active === true
+    );
+  };
+  root.addEventListener(
+    'navigationactivechange',
+    onNavigationActiveChange
+  );
+  this.screenWakeLock = screenWakeLock;
+  this.onNavigationActiveChange = onNavigationActiveChange;
 
   let draggableSheet = null;
 
@@ -1993,7 +2008,17 @@ loadTripButton?.addEventListener(
     await this.pluginManager?.stop();
     this.appContext?.clear();
 
+    if (this.onNavigationActiveChange) {
+      this.root?.removeEventListener?.(
+        'navigationactivechange',
+        this.onNavigationActiveChange
+      );
+    }
+    await this.screenWakeLock?.destroy();
+
     this.pluginManager = null;
     this.appContext = null;
+    this.screenWakeLock = null;
+    this.onNavigationActiveChange = null;
   }
 }
