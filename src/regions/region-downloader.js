@@ -390,7 +390,9 @@ function groupForPath(path) {
 
   if (
     root === 'pois' ||
-    root === 'index'
+    root === 'index' ||
+    root === 'search' ||
+    root === 'searchRecords'
   ) {
     return 'places';
   }

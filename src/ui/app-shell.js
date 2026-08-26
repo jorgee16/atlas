@@ -356,6 +356,22 @@ export function renderAppShell(root) {
           >
             🎯
           </button>
+
+          <button
+            id="routePlannerBtn"
+            class="map-action route-planner-action"
+            type="button"
+            aria-label="Plan a route with custom start and destination"
+            title="Route planner"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="6" cy="6" r="2"></circle>
+              <path d="M8 6h5a4 4 0 0 1 4 4v1"></path>
+              <path d="m14 9 3 3 3-3"></path>
+              <path d="M17 12v3a3 3 0 0 1-3 3H9"></path>
+              <path d="m10 15-3 3 3 3"></path>
+            </svg>
+          </button>
         </div>
 
         <div class="status-toast" id="status" aria-live="polite">

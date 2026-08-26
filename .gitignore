@@ -51,3 +51,9 @@ data/postcodes/PCODE_PT_2024_4326.geojson
 data/postcodes/PCODE_PT_2024_4326.csv
 data/postcodes/portugal-postcodes.geojson
 .env.local
+
+# Generated region search/address binaries are published to R2, not Git
+public/**/search-index.bin
+public/**/search-records.bin
+public/**/address-index.bin
+public/**/address-records.bin

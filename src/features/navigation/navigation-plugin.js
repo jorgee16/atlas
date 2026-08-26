@@ -4,10 +4,12 @@ import {
 
 export class NavigationPlugin {
   constructor({
+    transitProviderRegistry = null,
     transitBridge = null,
     onBookmarkDestination = () => {}
   } = {}) {
     this.id = 'navigation';
+    this.transitProviderRegistry = transitProviderRegistry;
     this.transitBridge = transitBridge;
     this.onBookmarkDestination = onBookmarkDestination;
     this.feature = null;
@@ -30,6 +32,7 @@ export class NavigationPlugin {
             '#navigationGuidance'
           ),
         status: context.status,
+        transitProviderRegistry: this.transitProviderRegistry,
         transitBridge: this.transitBridge,
         onBookmarkDestination:
           this.onBookmarkDestination,

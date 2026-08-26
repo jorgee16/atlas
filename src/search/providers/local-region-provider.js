@@ -1,5 +1,367 @@
 import { distanceMeters } from '../../utils.js';
 
+const BINARY_SEARCH_RECORD_FIELDS = [
+  'name',
+  'type',
+  'amenity',
+  'place',
+  'addr:housenumber',
+  'addr:street',
+  'addr:postcode',
+  'addr:city',
+  'alt_name',
+  'short_name',
+  'official_name',
+  'loc_name',
+  'old_name',
+  'name:pt',
+  'name:en',
+  'ref',
+  'municipality',
+  'district',
+  'tourism',
+  'shop',
+  'railway',
+  'aeroway',
+  'boundary',
+  'search_only'
+];
+
+function readVarUint(view, state) {
+  let value = 0;
+  let shift = 0;
+
+  while (state.offset < view.byteLength) {
+    const byte = view.getUint8(state.offset++);
+    value |= (byte & 0x7f) << shift;
+    if ((byte & 0x80) === 0) return value >>> 0;
+    shift += 7;
+    if (shift > 28) throw new Error('Invalid search varint.');
+  }
+
+  throw new Error('Unexpected end of search varint.');
+}
+
+export function parseBinarySearchIndex(arrayBuffer) {
+  const view = new DataView(arrayBuffer);
+  if (view.byteLength < 16) return null;
+
+  const magic = String.fromCharCode(...new Uint8Array(arrayBuffer, 0, 4));
+  if (magic !== 'ATSI') return null;
+
+  const version = view.getUint16(4, true);
+  const featureCount = view.getUint32(8, true);
+  const tokenCount = view.getUint32(12, true);
+
+  if (version === 2) {
+    if (view.byteLength < 32) return null;
+
+    const entriesOffset = view.getUint32(16, true);
+    const tokensOffset = view.getUint32(20, true);
+    const postingsOffset = view.getUint32(24, true);
+    const entryBytes = tokenCount * 16;
+
+    if (
+      entriesOffset < 32 ||
+      entriesOffset + entryBytes > view.byteLength ||
+      tokensOffset < entriesOffset + entryBytes ||
+      postingsOffset < tokensOffset ||
+      postingsOffset > view.byteLength
+    ) {
+      throw new Error('Invalid Atlas binary search-index header.');
+    }
+
+    return {
+      version: 2,
+      kind: 'atlas-text-index-binary-lazy',
+      featureCount,
+      tokenCount,
+      buffer: arrayBuffer,
+      view,
+      entriesOffset,
+      tokensOffset,
+      postingsOffset,
+      decoder: new TextDecoder(),
+      postingCache: new Map()
+    };
+  }
+
+  if (version !== 1) return null;
+
+  /*
+   * Version 1 is retained for already-installed Phase 3 packages. It has
+   * no token directory, so it must be decoded eagerly. Newly-built regions
+   * use version 2 and never take this path.
+   */
+  const decoder = new TextDecoder();
+  const tokens = Object.create(null);
+  const state = { offset: 16 };
+
+  for (let tokenIndex = 0; tokenIndex < tokenCount; tokenIndex += 1) {
+    if (state.offset + 2 > view.byteLength) throw new Error('Truncated search index.');
+    const tokenBytes = view.getUint16(state.offset, true);
+    state.offset += 2;
+    if (state.offset + tokenBytes + 4 > view.byteLength) throw new Error('Truncated search token.');
+
+    const token = decoder.decode(new Uint8Array(arrayBuffer, state.offset, tokenBytes));
+    state.offset += tokenBytes;
+    const postingCount = view.getUint32(state.offset, true);
+    state.offset += 4;
+    const postings = new Uint32Array(postingCount);
+    let previous = 0;
+
+    for (let index = 0; index < postingCount; index += 1) {
+      previous += readVarUint(view, state);
+      postings[index] = previous;
+    }
+
+    tokens[token] = postings;
+  }
+
+  return {
+    version: 1,
+    kind: 'atlas-text-index-binary',
+    featureCount,
+    tokenCount,
+    tokens
+  };
+}
+
+function binarySearchIndexEntry(searchIndex, token) {
+  if (!searchIndex || searchIndex.version !== 2) return null;
+
+  let low = 0;
+  let high = searchIndex.tokenCount - 1;
+
+  while (low <= high) {
+    const middle = (low + high) >>> 1;
+    const entryOffset = searchIndex.entriesOffset + middle * 16;
+    const tokenOffset = searchIndex.view.getUint32(entryOffset, true);
+    const tokenBytes = searchIndex.view.getUint16(entryOffset + 4, true);
+    const current = searchIndex.decoder.decode(
+      new Uint8Array(
+        searchIndex.buffer,
+        searchIndex.tokensOffset + tokenOffset,
+        tokenBytes
+      )
+    );
+    const comparison = current.localeCompare(token);
+
+    if (comparison === 0) {
+      return { middle, entryOffset };
+    }
+
+    if (comparison < 0) low = middle + 1;
+    else high = middle - 1;
+  }
+
+  return null;
+}
+
+export function binarySearchIndexTokenCount(searchIndex, token) {
+  if (!searchIndex) return null;
+  if (searchIndex.version !== 2) {
+    const postings = searchIndex?.tokens?.[token];
+    return postings ? postings.length : null;
+  }
+
+  const entry = binarySearchIndexEntry(searchIndex, token);
+  return entry
+    ? searchIndex.view.getUint32(entry.entryOffset + 12, true)
+    : null;
+}
+
+export function binarySearchIndexToken(searchIndex, token) {
+  if (!searchIndex || searchIndex.version !== 2) {
+    return searchIndex?.tokens?.[token] ?? null;
+  }
+
+  const entry = binarySearchIndexEntry(searchIndex, token);
+  if (!entry) return null;
+
+  const { middle, entryOffset } = entry;
+
+  const cached = searchIndex.postingCache.get(middle);
+  if (cached) return cached;
+
+  const postingOffset = searchIndex.view.getUint32(entryOffset + 8, true);
+  const postingCount = searchIndex.view.getUint32(entryOffset + 12, true);
+  const postings = new Uint32Array(postingCount);
+  const state = {
+    offset: searchIndex.postingsOffset + postingOffset
+  };
+  let previous = 0;
+
+  for (let index = 0; index < postingCount; index += 1) {
+    previous += readVarUint(searchIndex.view, state);
+    postings[index] = previous;
+  }
+
+  if (searchIndex.postingCache.size >= 64) {
+    const oldest = searchIndex.postingCache.keys().next().value;
+    searchIndex.postingCache.delete(oldest);
+  }
+  searchIndex.postingCache.set(middle, postings);
+  return postings;
+}
+
+export function intersectSortedPostings(left, right) {
+  const output = [];
+  let leftIndex = 0;
+  let rightIndex = 0;
+
+  while (leftIndex < left.length && rightIndex < right.length) {
+    const leftValue = left[leftIndex];
+    const rightValue = right[rightIndex];
+
+    if (leftValue === rightValue) {
+      output.push(leftValue);
+      leftIndex += 1;
+      rightIndex += 1;
+    } else if (leftValue < rightValue) {
+      leftIndex += 1;
+    } else {
+      rightIndex += 1;
+    }
+  }
+
+  return output;
+}
+
+export function unionSortedPostings(lists) {
+  if (!lists.length) return [];
+  if (lists.length === 1) return Array.from(lists[0]);
+
+  let merged = Array.from(lists[0]);
+
+  for (let listIndex = 1; listIndex < lists.length; listIndex += 1) {
+    const right = lists[listIndex];
+    const output = [];
+    let leftIndex = 0;
+    let rightIndex = 0;
+
+    while (leftIndex < merged.length || rightIndex < right.length) {
+      const leftValue = leftIndex < merged.length ? merged[leftIndex] : Infinity;
+      const rightValue = rightIndex < right.length ? right[rightIndex] : Infinity;
+
+      if (leftValue === rightValue) {
+        output.push(leftValue);
+        leftIndex += 1;
+        rightIndex += 1;
+      } else if (leftValue < rightValue) {
+        output.push(leftValue);
+        leftIndex += 1;
+      } else {
+        output.push(rightValue);
+        rightIndex += 1;
+      }
+    }
+
+    merged = output;
+  }
+
+  return merged;
+}
+
+function yieldToSearchUi() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+export function parseBinarySearchRecords(arrayBuffer) {
+  const view = new DataView(arrayBuffer);
+  if (view.byteLength < 32) return null;
+
+  const magic = String.fromCharCode(...new Uint8Array(arrayBuffer, 0, 4));
+  if (magic !== 'ATSR' || view.getUint16(4, true) !== 1) return null;
+
+  const fieldCount = view.getUint16(6, true);
+  const recordCount = view.getUint32(8, true);
+  const stringCount = view.getUint32(12, true);
+  const recordOffsetsOffset = view.getUint32(16, true);
+  const recordsOffset = view.getUint32(20, true);
+  const stringOffsetsOffset = view.getUint32(24, true);
+  const stringsOffset = view.getUint32(28, true);
+
+  if (
+    fieldCount !== BINARY_SEARCH_RECORD_FIELDS.length ||
+    recordOffsetsOffset + (recordCount + 1) * 4 > view.byteLength ||
+    stringOffsetsOffset + (stringCount + 1) * 4 > view.byteLength ||
+    stringsOffset > view.byteLength
+  ) {
+    throw new Error('Invalid Atlas binary search-records header.');
+  }
+
+  return {
+    version: 1,
+    kind: 'atlas-search-records-binary',
+    buffer: arrayBuffer,
+    view,
+    recordCount,
+    stringCount,
+    recordOffsetsOffset,
+    recordsOffset,
+    stringOffsetsOffset,
+    stringsOffset,
+    decoder: new TextDecoder(),
+    stringCache: new Map()
+  };
+}
+
+function binarySearchString(records, id) {
+  if (!id) return null;
+  const cached = records.stringCache.get(id);
+  if (cached !== undefined) return cached;
+
+  const index = id - 1;
+  if (index < 0 || index >= records.stringCount) return null;
+  const start = records.view.getUint32(records.stringOffsetsOffset + index * 4, true);
+  const end = records.view.getUint32(records.stringOffsetsOffset + (index + 1) * 4, true);
+  const value = records.decoder.decode(
+    new Uint8Array(records.buffer, records.stringsOffset + start, end - start)
+  );
+
+  if (records.stringCache.size >= 50_000) {
+    const oldest = records.stringCache.keys().next().value;
+    records.stringCache.delete(oldest);
+  }
+  records.stringCache.set(id, value);
+  return value;
+}
+
+export function binarySearchFeature(records, index) {
+  if (index < 0 || index >= records.recordCount) return null;
+
+  const relative = records.view.getUint32(records.recordOffsetsOffset + index * 4, true);
+  const endRelative = records.view.getUint32(records.recordOffsetsOffset + (index + 1) * 4, true);
+  let offset = records.recordsOffset + relative;
+  const end = records.recordsOffset + endRelative;
+
+  if (offset + 16 > end) return null;
+  const idRef = records.view.getUint32(offset, true); offset += 4;
+  const lon = records.view.getInt32(offset, true) / 1_000_000; offset += 4;
+  const lat = records.view.getInt32(offset, true) / 1_000_000; offset += 4;
+  const presentMask = records.view.getUint32(offset, true); offset += 4;
+  const properties = {};
+
+  for (let fieldIndex = 0; fieldIndex < BINARY_SEARCH_RECORD_FIELDS.length; fieldIndex += 1) {
+    if ((presentMask & ((1 << fieldIndex) >>> 0)) === 0) continue;
+    if (offset + 4 > end) return null;
+    const stringRef = records.view.getUint32(offset, true); offset += 4;
+    const value = binarySearchString(records, stringRef);
+    if (value !== null) {
+      const key = BINARY_SEARCH_RECORD_FIELDS[fieldIndex];
+      properties[key] = key === 'search_only' ? value === 'true' : value;
+    }
+  }
+
+  return {
+    type: 'Feature',
+    id: binarySearchString(records, idRef) ?? `search:${index}`,
+    geometry: { type: 'Point', coordinates: [lon, lat] },
+    properties
+  };
+}
+
 const METERS_PER_LATITUDE_DEGREE = 111_320;
 
 function normalizeSearchText(value) {
@@ -509,6 +871,9 @@ export class LocalRegionProvider {
     this.regionRepository = regionRepository;
     this.fetchFn = fetchFn;
     this.datasets = new Map();
+    this.datasetPromises = new Map();
+    this.poiFeaturePromises = new Map();
+    this.spatialIndexPromises = new Map();
   }
 
   async search(anchor, radiusMeters = 900) {
@@ -523,7 +888,9 @@ export class LocalRegionProvider {
       );
     }
 
-    const dataset = await this.#loadRegion(region);
+    const dataset = await this.#loadRegion(region, {
+      includeSpatialIndex: true
+    });
     const candidateIndexes = this.#candidateIndexes(
       dataset.index,
       anchor,
@@ -586,7 +953,9 @@ export class LocalRegionProvider {
       );
     }
 
-    const dataset = await this.#loadRegion(region);
+    const dataset = await this.#loadRegion(region, {
+      includeSpatialIndex: false
+    });
 
     const compactPostcode =
       normalizePostcode(normalizedQuery)
@@ -603,7 +972,7 @@ export class LocalRegionProvider {
 
     let candidateIndexes = null;
 
-    if (dataset.searchIndex?.tokens) {
+    if (dataset.searchIndex) {
       const tokens =
         [...queryTokens];
 
@@ -614,87 +983,62 @@ export class LocalRegionProvider {
         tokens.push(compactPostcode);
       }
 
-      let postingLists =
+      const tokenEntries =
         [...new Set(tokens)]
-          .map(token =>
-            dataset.searchIndex.tokens[token] ?? null
-          )
-          .filter(Boolean)
-          .sort(
-            (left, right) =>
-              left.length - right.length
-          );
+          .map(token => ({
+            token,
+            count: binarySearchIndexTokenCount(dataset.searchIndex, token)
+          }))
+          .filter(entry => Number.isFinite(entry.count))
+          .sort((left, right) => left.count - right.count);
 
       /*
-       * Avoid constructing enormous Sets for generic words such as
-       * "london", "road" or "street" when another query token already
-       * gives us a selective candidate list.
-       *
-       * Final scoreSearchEntry() still checks the complete query, so
-       * skipping a huge posting here changes candidate generation only,
-       * not matching semantics.
+       * Inspect posting counts before decoding them. This avoids expanding
+       * huge lists for generic terms on the browser UI thread when a much
+       * more selective query token is already available.
        */
-      if (postingLists.length > 1) {
-        const smallest = postingLists[0].length;
-
-        const usefulLimit =
-          Math.max(
-            100_000,
-            smallest * 100
-          );
-
-        postingLists = [
-          postingLists[0],
-          ...postingLists
+      let postingLists = [];
+      if (tokenEntries.length) {
+        const smallest = tokenEntries[0].count;
+        const usefulLimit = Math.max(100_000, smallest * 100);
+        const usefulEntries = [
+          tokenEntries[0],
+          ...tokenEntries
             .slice(1)
-            .filter(list =>
-              list.length <= usefulLimit
-            )
-        ];
+            .filter(entry => entry.count <= usefulLimit)
+        ].slice(0, 4);
+
+        postingLists = usefulEntries
+          .map(entry => binarySearchIndexToken(dataset.searchIndex, entry.token))
+          .filter(Boolean);
       }
 
       if (postingLists.length) {
         /*
-         * Start with the smallest posting and keep IDs
-         * appearing in every available query posting.
+         * Posting lists are already sorted. Merge them directly instead of
+         * allocating one or more very large Sets on the browser UI thread.
          */
-        const candidates =
-          new Set(postingLists[0]);
+        let candidates = Array.from(postingLists[0]);
 
         for (
           let listIndex = 1;
           listIndex < postingLists.length;
           listIndex += 1
         ) {
-          const current =
-            new Set(postingLists[listIndex]);
+          candidates = intersectSortedPostings(
+            candidates,
+            postingLists[listIndex]
+          );
 
-          for (const id of candidates) {
-            if (!current.has(id)) {
-              candidates.delete(id);
-            }
-          }
-
-          if (!candidates.size) {
-            break;
-          }
+          if (!candidates.length) break;
         }
 
         /*
-         * If strict intersection became empty, use the
-         * union instead. The existing scorer will reject
-         * irrelevant records.
+         * Never broaden an empty multi-token intersection into the union of
+         * all terms. Generic words can make that union enormous and stall the
+         * UI while still producing weak partial matches.
          */
-        if (!candidates.size) {
-          for (const list of postingLists) {
-            for (const id of list) {
-              candidates.add(id);
-            }
-          }
-        }
-
-        candidateIndexes =
-          [...candidates];
+        candidateIndexes = candidates;
       } else {
         candidateIndexes = [];
       }
@@ -704,89 +1048,84 @@ export class LocalRegionProvider {
      * Older packages without search-index.json retain
      * the legacy search path.
      */
-    const entries =
-      candidateIndexes === null
-        ? (
-            dataset.searchEntries ??=
-              dataset.features
-                .map(searchEntry)
-                .filter(
-                  entry =>
-                    entry.fields.length
-                )
-          )
-        : candidateIndexes
-            .map(index => {
-              let entry =
-                dataset.searchEntryCache.get(index);
+    let entries;
 
-              if (!entry) {
-                entry = searchEntry(
-                  dataset.features[index],
-                  index
-                );
+    if (candidateIndexes === null) {
+      entries = (
+        dataset.searchEntries ??=
+          dataset.features
+            .map(searchEntry)
+            .filter(entry => entry.fields.length)
+      );
+    } else {
+      entries = [];
 
-                /*
-                 * Keep memory bounded. 25k normalized entries is enough to
-                 * make incremental typing fast without rebuilding a second
-                 * million-record index in RAM.
-                 */
-                if (
-                  dataset.searchEntryCache.size >= 25_000
-                ) {
-                  const oldest =
-                    dataset.searchEntryCache
-                      .keys()
-                      .next()
-                      .value;
+      for (let position = 0; position < candidateIndexes.length; position += 1) {
+        const index = candidateIndexes[position];
+        let entry = dataset.searchEntryCache.get(index);
 
-                  dataset.searchEntryCache.delete(oldest);
-                }
+        if (!entry) {
+          entry = searchEntry(
+            this.#searchFeatureAt(dataset, index),
+            index
+          );
 
-                dataset.searchEntryCache.set(
-                  index,
-                  entry
-                );
-              }
+          if (dataset.searchEntryCache.size >= 25_000) {
+            const oldest = dataset.searchEntryCache.keys().next().value;
+            dataset.searchEntryCache.delete(oldest);
+          }
 
-              return entry;
-            })
-            .filter(
-              entry =>
-                entry.fields.length
-            );
+          dataset.searchEntryCache.set(index, entry);
+        }
 
-    const matches = entries
-      .map(entry => {
-        const matchScore = scoreSearchEntry(
-          entry,
-          normalizedQuery,
-          queryTokens
-        );
+        if (entry.fields.length) entries.push(entry);
 
-        if (matchScore === null) return null;
+        /*
+         * Very broad tokens can match tens of thousands of POIs. Yield every
+         * few hundred records so typing, animation and request cancellation
+         * can continue instead of presenting as an application freeze.
+         */
+        if ((position + 1) % 512 === 0) {
+          await yieldToSearchUi();
+        }
+      }
+    }
 
+    const matches = [];
+
+    for (let position = 0; position < entries.length; position += 1) {
+      const entry = entries[position];
+      const matchScore = scoreSearchEntry(
+        entry,
+        normalizedQuery,
+        queryTokens
+      );
+
+      if (matchScore !== null) {
         const place = this.#toPlace(
-          dataset.features[entry.index],
+          this.#searchFeatureAt(dataset, entry.index),
           anchor
         );
 
-        if (!place) {
-          return null;
+        if (place) {
+          matches.push({
+            ...place,
+            regionId: region.id,
+            matchScore
+          });
         }
+      }
 
-        return {
-          ...place,
-          regionId: region.id,
-          matchScore
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) =>
-        a.matchScore - b.matchScore ||
-        a.distance - b.distance ||
-        String(a.name).localeCompare(String(b.name))
-      );
+      if ((position + 1) % 512 === 0) {
+        await yieldToSearchUi();
+      }
+    }
+
+    matches.sort((a, b) =>
+      a.matchScore - b.matchScore ||
+      a.distance - b.distance ||
+      String(a.name).localeCompare(String(b.name))
+    );
 
     const deduplicated = deduplicateSearchMatches(matches, limit);
 
@@ -796,92 +1135,216 @@ export class LocalRegionProvider {
       .map(({ matchScore, ...place }) => place);
   }
 
-  async #loadRegion(region) {
-    if (this.datasets.has(region.id)) {
-      return this.datasets.get(region.id);
+  async #loadRegion(region, { includeSpatialIndex = true } = {}) {
+    let dataset = this.datasets.get(region.id);
+
+    if (!dataset) {
+      let datasetPromise = this.datasetPromises.get(region.id);
+
+      if (!datasetPromise) {
+        datasetPromise = this.#loadSearchDataset(region);
+        this.datasetPromises.set(region.id, datasetPromise);
+      }
+
+      try {
+        dataset = await datasetPromise;
+        this.datasets.set(region.id, dataset);
+      } finally {
+        this.datasetPromises.delete(region.id);
+      }
     }
 
+    if (includeSpatialIndex) {
+      await this.#ensurePoiFeatures(region, dataset);
+
+      if (!dataset.index) {
+        await this.#ensureSpatialIndex(region, dataset);
+      }
+    }
+
+    return dataset;
+  }
+
+  async #loadSearchDataset(region) {
     const poiUrl = this.#resolveRegionUrl(region.poiUrl);
-    const indexUrl = this.#resolveRegionUrl(
-      region.indexUrl ??
-      region.poiUrl.replace(/pois\.geojson$/, 'poi-index.json')
+    const configuredSearch = region.searchUrl ?? region.assets?.search;
+    const configuredRecords = region.searchRecordsUrl ?? region.assets?.searchRecords;
+
+    const binarySearchUrl = this.#resolveRegionUrl(
+      configuredSearch?.endsWith('.bin')
+        ? configuredSearch
+        : poiUrl.replace(/pois\.geojson$/, 'search-index.bin')
+    );
+    const binaryRecordsUrl = this.#resolveRegionUrl(
+      configuredRecords?.endsWith('.bin')
+        ? configuredRecords
+        : poiUrl.replace(/pois\.geojson$/, 'search-records.bin')
     );
 
-    const searchUrl =
-      region.searchUrl ??
-      region.assets?.search ??
-      poiUrl.replace(
-        /pois\.geojson$/,
-        'search-index.json'
-      );
-
-    const [
-      poiResponse,
-      indexResponse,
-      searchResponse
-    ] = await Promise.all([
-      this.#fetchRegionAsset(poiUrl),
-      this.#fetchRegionAsset(indexUrl),
-
-      // Search index is optional so older installed
-      // region packages remain compatible.
-      this.#fetchRegionAsset(searchUrl)
-        .catch(() => null)
+    const [binaryIndexResponse, binaryRecordsResponse] = await Promise.all([
+      this.#fetchRegionAsset(binarySearchUrl).catch(() => null),
+      this.#fetchRegionAsset(binaryRecordsUrl).catch(() => null)
     ]);
 
+    if (binaryIndexResponse?.ok && binaryRecordsResponse?.ok) {
+      try {
+        const [indexBuffer, recordsBuffer] = await Promise.all([
+          binaryIndexResponse.arrayBuffer(),
+          binaryRecordsResponse.arrayBuffer()
+        ]);
+        const searchIndex = parseBinarySearchIndex(indexBuffer);
+        const binarySearchRecords = parseBinarySearchRecords(recordsBuffer);
+
+        if (searchIndex && binarySearchRecords) {
+          return {
+            features: null,
+            index: null,
+            searchIndex,
+            binarySearchRecords,
+            searchRecords: null,
+            searchRecordFields: null,
+            searchEntries: null,
+            searchEntryCache: new Map()
+          };
+        }
+      } catch (error) {
+        console.warn(`Unable to read binary search assets for ${region.name}; falling back to JSON.`, error);
+      }
+    }
+
+    const searchUrl = this.#resolveRegionUrl(
+      configuredSearch && !configuredSearch.endsWith('.bin')
+        ? configuredSearch
+        : poiUrl.replace(/pois\.geojson$/, 'search-index.json')
+    );
+    const searchRecordsUrl = this.#resolveRegionUrl(
+      configuredRecords && !configuredRecords.endsWith('.bin')
+        ? configuredRecords
+        : poiUrl.replace(/pois\.geojson$/, 'search-records.json')
+    );
+
+    const [searchResponse, recordsResponse] = await Promise.all([
+      this.#fetchRegionAsset(searchUrl).catch(() => null),
+      this.#fetchRegionAsset(searchRecordsUrl).catch(() => null)
+    ]);
+
+    const [searchIndex, recordsDocument] = await Promise.all([
+      searchResponse?.ok ? searchResponse.json() : Promise.resolve(null),
+      recordsResponse?.ok ? recordsResponse.json() : Promise.resolve(null)
+    ]);
+
+    const validSearchIndex = searchIndex?.kind === 'atlas-text-index' ? searchIndex : null;
+    const searchRecords = recordsDocument?.kind === 'atlas-search-records' && Array.isArray(recordsDocument.records)
+      ? recordsDocument.records
+      : null;
+    const searchRecordFields = recordsDocument?.version >= 2 && Array.isArray(recordsDocument.fields)
+      ? recordsDocument.fields
+      : null;
+
+    if (validSearchIndex && searchRecords) {
+      return {
+        features: null,
+        index: null,
+        searchIndex: validSearchIndex,
+        binarySearchRecords: null,
+        searchRecords,
+        searchRecordFields,
+        searchEntries: null,
+        searchEntryCache: new Map()
+      };
+    }
+
+    const poiResponse = await this.#fetchRegionAsset(poiUrl);
     if (!poiResponse.ok) {
-      throw new Error(
-        `Unable to load ${region.name} POIs: HTTP ${poiResponse.status}`
-      );
+      throw new Error(`Unable to load ${region.name} POIs: HTTP ${poiResponse.status}`);
     }
+    const poiDocument = await poiResponse.json();
 
-    if (!indexResponse.ok) {
-      throw new Error(
-        `Unable to load ${region.name} spatial index: HTTP ${indexResponse.status}`
-      );
-    }
-
-    const [
-      poiDocument,
-      index,
-      searchIndex
-    ] = await Promise.all([
-      poiResponse.json(),
-      indexResponse.json(),
-
-      searchResponse?.ok
-        ? searchResponse.json()
-        : Promise.resolve(null)
-    ]);
-
-    const dataset = {
+    return {
       features: poiDocument.features ?? [],
-      index,
-      searchIndex:
-        searchIndex?.kind === 'atlas-text-index'
-          ? searchIndex
-          : null,
-
-      // Legacy full-index fallback for older region packages.
+      index: null,
+      searchIndex: validSearchIndex,
+      binarySearchRecords: null,
+      searchRecords: null,
+      searchRecordFields: null,
       searchEntries: null,
-
-      // V1 text-index searches repeatedly touch the same candidates while
-      // the user types. Cache their normalized search representation.
       searchEntryCache: new Map()
     };
+  }
 
-    if (
-      index.kind !== 'uniform-grid' ||
-      !Number.isFinite(index.cellSizeDegrees) ||
-      !index.cells
-    ) {
-      throw new Error(
-        `${region.name} has an unsupported spatial index.`
-      );
+  async #ensurePoiFeatures(region, dataset) {
+    if (dataset.features) return;
+
+    let poiPromise = this.poiFeaturePromises.get(region.id);
+
+    if (!poiPromise) {
+      poiPromise = (async () => {
+        const poiUrl = this.#resolveRegionUrl(region.poiUrl);
+        const poiResponse = await this.#fetchRegionAsset(poiUrl);
+
+        if (!poiResponse.ok) {
+          throw new Error(
+            `Unable to load ${region.name} POIs: HTTP ${poiResponse.status}`
+          );
+        }
+
+        const poiDocument = await poiResponse.json();
+        dataset.features = poiDocument.features ?? [];
+      })();
+
+      this.poiFeaturePromises.set(region.id, poiPromise);
     }
 
-    this.datasets.set(region.id, dataset);
-    return dataset;
+    try {
+      await poiPromise;
+    } finally {
+      this.poiFeaturePromises.delete(region.id);
+    }
+  }
+
+  async #ensureSpatialIndex(region, dataset) {
+    if (dataset.index) return;
+
+    let indexPromise = this.spatialIndexPromises.get(region.id);
+
+    if (!indexPromise) {
+      indexPromise = (async () => {
+        const poiUrl = this.#resolveRegionUrl(region.poiUrl);
+        const indexUrl = this.#resolveRegionUrl(
+          region.indexUrl ??
+          region.poiUrl.replace(/pois\.geojson$/, 'poi-index.json')
+        );
+        const indexResponse = await this.#fetchRegionAsset(indexUrl);
+
+        if (!indexResponse.ok) {
+          throw new Error(
+            `Unable to load ${region.name} spatial index: HTTP ${indexResponse.status}`
+          );
+        }
+
+        const index = await indexResponse.json();
+
+        if (
+          index.kind !== 'uniform-grid' ||
+          !Number.isFinite(index.cellSizeDegrees) ||
+          !index.cells
+        ) {
+          throw new Error(
+            `${region.name} has an unsupported spatial index.`
+          );
+        }
+
+        dataset.index = index;
+      })();
+
+      this.spatialIndexPromises.set(region.id, indexPromise);
+    }
+
+    try {
+      await indexPromise;
+    } finally {
+      this.spatialIndexPromises.delete(region.id);
+    }
   }
 
   async #fetchRegionAsset(url) {
@@ -945,6 +1408,52 @@ export class LocalRegionProvider {
     }
 
     return [...candidates];
+  }
+
+  #searchFeatureAt(dataset, index) {
+    if (dataset.binarySearchRecords) {
+      return binarySearchFeature(dataset.binarySearchRecords, index);
+    }
+
+    if (dataset.searchRecords) {
+      const record = dataset.searchRecords[index];
+
+      if (!Array.isArray(record) || record.length < 3) {
+        return null;
+      }
+
+      const [id, lon, lat] = record;
+      let properties = {};
+
+      if (dataset.searchRecordFields) {
+        for (
+          let fieldIndex = 0;
+          fieldIndex < dataset.searchRecordFields.length;
+          fieldIndex += 1
+        ) {
+          const value = record[fieldIndex + 3];
+
+          if (value !== undefined && value !== null && value !== '') {
+            properties[dataset.searchRecordFields[fieldIndex]] = value;
+          }
+        }
+      } else {
+        // Version 1 compatibility: [id, lon, lat, properties].
+        properties = record[3] ?? {};
+      }
+
+      return {
+        type: 'Feature',
+        id,
+        geometry: {
+          type: 'Point',
+          coordinates: [lon, lat]
+        },
+        properties
+      };
+    }
+
+    return dataset.features?.[index] ?? null;
   }
 
   #resolveRegionUrl(url) {

@@ -44,9 +44,25 @@ for (const id of ['london', 'portugal']) {
   const region = catalog.regions?.find(candidate => candidate.id === id);
   if (!region) throw new Error(`Region missing from catalogue: ${id}`);
 
-  // Rich-POI packages are schema-compatible but their bytes changed. Bump one
-  // published version so RegionManager offers an update atomically.
-  region.version = Math.max(Number(region.version) || 0, 6);
+  const poiUrl = region.assets?.pois;
+
+  if (typeof poiUrl !== 'string') {
+    throw new Error(`${region.name} catalogue entry is missing assets.pois.`);
+  }
+
+  region.assets.search = poiUrl.replace(
+    /pois\.geojson(?:\?.*)?$/,
+    'search-index.bin'
+  );
+  region.assets.searchRecords = poiUrl.replace(
+    /pois\.geojson(?:\?.*)?$/,
+    'search-records.bin'
+  );
+
+  // Search package bytes changed, so publish a genuinely newer package
+  // version. RegionManager then offers an atomic update containing the
+  // compact destination-search assets.
+  region.version = Math.max(Number(region.version) || 0, 6) + 1;
   region.updatedAt = updatedAt;
   delete region.package;
   delete region.sizeBytes;

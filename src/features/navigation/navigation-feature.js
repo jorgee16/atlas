@@ -71,6 +71,7 @@ export class NavigationFeature {
     destinationSearch = queryDestinations,
     searchAnchorProvider = () => null,
     destinationHistory = new DestinationHistory(),
+    transitProviderRegistry = null,
     transitBridge = null,
     plannerView = null,
     onActiveChange = () => {},
@@ -105,7 +106,14 @@ export class NavigationFeature {
       searchAnchorProvider;
     this.destinationHistory =
       destinationHistory;
-    this.transitBridge = transitBridge;
+    this.transitProviderRegistry = transitProviderRegistry ?? (transitBridge ? {
+      resolve: async () => ({
+        available: true,
+        region: null,
+        provider: { id: 'legacy', label: 'Public transport', bridge: transitBridge },
+        reason: null
+      })
+    } : null);
     this.plannerView = plannerView ??
       new NavigationPlannerView({
         documentRef
@@ -169,6 +177,8 @@ export class NavigationFeature {
     this.plannerDestination = null;
     this.plannerNavigationContext = null;
     this.plannerQuery = '';
+    this.plannerSearchTarget = 'destination';
+    this.advancedPlannerOpen = false;
     this.plannerResults = [];
     this.plannerState = 'idle';
     this.plannerError = null;
@@ -193,6 +203,8 @@ export class NavigationFeature {
     this.transitJourneyStarting = false;
     this.transitJourneyExecutionView = new TransitJourneyExecutionView({ documentRef });
     this.transitWalkRequest = 0;
+    this.transitAvailability = { status: 'unknown', region: null, providerId: null, message: null };
+    this.transitAvailabilityRequest = 0;
 
     // Transit walking-leg arrival confidence.
     // Do not advance from one noisy GPS fix.
@@ -679,6 +691,8 @@ export class NavigationFeature {
       destination:
         this.plannerDestination,
       query: this.plannerQuery,
+      searchTarget: this.plannerSearchTarget,
+      advancedPlannerOpen: this.advancedPlannerOpen,
       results: [...this.plannerResults],
       recent: this.destinationHistory.list(),
       state: this.plannerState,
@@ -697,7 +711,8 @@ export class NavigationFeature {
       expandedTransitJourneyIndex:
         this.expandedTransitJourneyIndex,
       transitJourneySession:
-        this.transitJourneySession
+        this.transitJourneySession,
+      transitAvailability: { ...this.transitAvailability }
     };
   }
 
@@ -752,7 +767,7 @@ export class NavigationFeature {
       }
     }
 
-    // Cancel any Drive/Walk/TfL preview and its collapse timer before
+    // Cancel any Drive/Walk/transit preview and its collapse timer before
     // repainting the newly selected mode.
     this.#resetPreview({ clearRoute: true });
     this.render();
@@ -762,7 +777,18 @@ export class NavigationFeature {
       this.plannerDestination &&
       this.#plannerStart()
     ) {
-      void this.previewPlannedRoute();
+      if (
+        mode === 'transit' &&
+        this.transitAvailability.status === 'unavailable'
+      ) {
+        this.previewState = 'error';
+        this.previewError =
+          this.transitAvailability.message ??
+          'Public transport routing isn’t available in this region yet.';
+        this.render();
+      } else {
+        void this.previewPlannedRoute();
+      }
     }
 
     return true;
@@ -798,7 +824,13 @@ export class NavigationFeature {
 
   useCurrentLocation() {
     this.plannerOrigin = null;
+    this.plannerSearchTarget = 'destination';
+    if (this.plannerDestination) {
+      this.advancedPlannerOpen = false;
+    }
+    this.plannerQuery = '';
     this.plannerResults = [];
+    this.plannerState = 'idle';
     this.plannerError = null;
     this.#resetPreview({ clearRoute: true });
     this.render();
@@ -833,10 +865,99 @@ export class NavigationFeature {
     this.plannerQuery = '';
     this.plannerError = null;
     this.plannerState = 'idle';
+    this.advancedPlannerOpen = false;
+    this.plannerSearchTarget = 'destination';
     this.#resetPreview({ clearRoute: true });
     this.render();
     void this.previewPlannedRoute();
     return true;
+  }
+
+  openAdvancedPlanner({ focus = 'destination' } = {}) {
+    if (this.session.isActive()) {
+      return false;
+    }
+
+    this.advancedPlannerOpen = true;
+    this.plannerSearchTarget =
+      focus === 'origin' ? 'origin' : 'destination';
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.render();
+
+    const focusInput = () => {
+      const input = this.document?.querySelector?.(
+        '[data-navigation-query-input]'
+      );
+      input?.focus?.();
+      input?.select?.();
+    };
+
+    if (typeof globalThis.requestAnimationFrame === 'function') {
+      globalThis.requestAnimationFrame(focusInput);
+    } else {
+      queueMicrotask(focusInput);
+    }
+
+    return true;
+  }
+
+  closeAdvancedPlanner() {
+    if (this.session.isActive() || !this.advancedPlannerOpen) {
+      return false;
+    }
+
+    this.advancedPlannerOpen = false;
+    this.plannerSearchTarget = 'destination';
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.render();
+    return true;
+  }
+
+  activatePlannerEndpoint(kind) {
+    if (kind !== 'origin' && kind !== 'destination') {
+      return false;
+    }
+
+    this.advancedPlannerOpen = true;
+    this.plannerSearchTarget = kind;
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.render();
+    return true;
+  }
+
+  setPlannerOrigin(origin) {
+    this.#validatePlannerPoint(origin);
+
+    this.plannerOrigin = {
+      ...origin,
+      name: origin.name ?? 'Starting point'
+    };
+    this.plannerQuery = '';
+    this.plannerResults = [];
+    this.plannerState = 'idle';
+    this.plannerError = null;
+    this.#resetPreview({ clearRoute: true });
+
+    if (this.plannerDestination) {
+      this.advancedPlannerOpen = false;
+      this.plannerSearchTarget = 'destination';
+      this.render();
+      void this.#refreshTransitAvailability();
+      void this.previewPlannedRoute();
+      return;
+    }
+
+    this.plannerSearchTarget = 'destination';
+    this.render();
   }
 
   updatePlannerQuery(query) {
@@ -859,7 +980,7 @@ export class NavigationFeature {
     // Search only after the user has stopped typing for a moment.
     this.plannerSearchTimer = setTimeout(
       () => void this.searchPlanner(this.plannerQuery),
-      600
+      275
     );
   }
 
@@ -873,7 +994,30 @@ export class NavigationFeature {
     this.render();
   }
 
+  openDestinationSearch() {
+    this.advancedPlannerOpen = false;
+    this.plannerSearchTarget = 'destination';
+    this.clearPlannerDestination();
+
+    const focusSearch = () => {
+      const input = this.document?.querySelector?.(
+        '[data-navigation-query-input]'
+      );
+
+      input?.focus?.();
+      input?.select?.();
+    };
+
+    if (typeof globalThis.requestAnimationFrame === 'function') {
+      globalThis.requestAnimationFrame(focusSearch);
+    } else {
+      queueMicrotask(focusSearch);
+    }
+  }
+
   clearPlannerDestination() {
+    this.advancedPlannerOpen = false;
+    this.plannerSearchTarget = 'destination';
 
     // Atlas V3.1 planner default: each fresh From/To plan starts on Drive.
 
@@ -952,6 +1096,11 @@ export class NavigationFeature {
     this.pickMode = null;
     this.plannerError = null;
 
+    if (this.plannerDestination && this.#plannerStart()) {
+      this.advancedPlannerOpen = false;
+      this.plannerSearchTarget = 'destination';
+    }
+
     this.map.showSelectionPin?.(
       selected.lat,
       selected.lon
@@ -986,6 +1135,9 @@ export class NavigationFeature {
 
     this.#resetPreview({ clearRoute: true });
 
+    this.advancedPlannerOpen = false;
+    this.plannerSearchTarget = 'destination';
+
     this.plannerDestination = {
       ...destination,
       name:
@@ -1006,6 +1158,7 @@ export class NavigationFeature {
     this.plannerState = 'idle';
     this.plannerError = null;
     this.render();
+    void this.#refreshTransitAvailability();
 
     this.map.showSelectionPin?.(
       destination.lat,
@@ -1165,7 +1318,7 @@ export class NavigationFeature {
     // Invalidate any walking-leg route still resolving asynchronously.
     this.transitWalkRequest += 1;
 
-    // Forget TfL execution/selection state.
+    // Forget transit execution/selection state.
     this.transitJourneySession = null;
     this.transitJourneyOptions = [];
     this.selectedTransitJourneyIndex = 0;
@@ -1683,6 +1836,69 @@ export class NavigationFeature {
     return this.transitJourneySession?.journey ?? null;
   }
 
+  async #resolveTransitProvider(origin, destination) {
+    const request = ++this.transitAvailabilityRequest;
+
+    if (!this.transitProviderRegistry) {
+      const unavailable = {
+        available: false,
+        region: null,
+        provider: null,
+        reason: 'Public transport routing isn’t available in this region yet.'
+      };
+
+      this.transitAvailability = {
+        status: 'unavailable',
+        region: null,
+        providerId: null,
+        message: unavailable.reason
+      };
+
+      return unavailable;
+    }
+
+    const resolution = await this.transitProviderRegistry.resolve(
+      origin,
+      destination
+    );
+
+    if (request === this.transitAvailabilityRequest) {
+      this.transitAvailability = resolution.available
+        ? {
+            status: 'available',
+            region: resolution.region?.id ?? null,
+            providerId: resolution.provider?.id ?? null,
+            message: null
+          }
+        : {
+            status: 'unavailable',
+            region: resolution.region?.id ?? null,
+            providerId: null,
+            message: resolution.reason
+          };
+    }
+
+    return resolution;
+  }
+
+  async #refreshTransitAvailability() {
+    const origin = this.#plannerStart();
+    const destination = this.plannerDestination;
+
+    if (!origin || !destination) {
+      this.transitAvailability = {
+        status: 'unknown',
+        region: null,
+        providerId: null,
+        message: null
+      };
+      return;
+    }
+
+    await this.#resolveTransitProvider(origin, destination);
+    this.render();
+  }
+
   async previewPlannedRoute() {
     const origin = this.#plannerStart();
     const destination = this.plannerDestination;
@@ -1715,14 +1931,15 @@ export class NavigationFeature {
           this.travelMode;
 
         if (requestedTravelMode === 'transit') {
-          if (!this.transitBridge) {
-            throw new Error(
-              'Transit planning is unavailable.'
-            );
+          const transitResolution =
+            await this.#resolveTransitProvider(origin, destination);
+
+          if (!transitResolution.available) {
+            throw new Error(transitResolution.reason);
           }
 
           const journeys =
-            await this.transitBridge.plan(
+            await transitResolution.provider.bridge.plan(
               origin,
               destination,
               {
@@ -1732,7 +1949,7 @@ export class NavigationFeature {
             );
 
           console.log(
-            '[Atlas Transit] TfL journeys:',
+            '[Atlas Transit] provider journeys:',
             journeys.map((journey, index) => ({
               index,
               durationMinutes:
@@ -2314,14 +2531,14 @@ export class NavigationFeature {
             )
           ) {
             this.previewError =
-              'TfL transit service is temporarily unavailable.';
+              'Public transport service is temporarily unavailable.';
           } else if (
             message.includes(
               'TfL returned invalid JSON'
             )
           ) {
             this.previewError =
-              'TfL returned an invalid response.';
+              'The public transport provider returned an invalid response.';
           } else if (
             message.includes(
               'TfL geometry unsupported'
@@ -2640,8 +2857,9 @@ export class NavigationFeature {
       this.document.activeElement;
 
     const restoreSearchFocus =
-      activeElement?.id ===
-        'navigationDestinationInput';
+      activeElement?.matches?.(
+        '[data-navigation-query-input]'
+      ) === true;
 
     const selectionStart =
       restoreSearchFocus
@@ -2663,6 +2881,10 @@ export class NavigationFeature {
         kind => this.beginMapPick(kind),
       onSwap:
         () => this.swapPlannerEndpoints(),
+      onOpenAdvancedPlanner:
+        () => this.openAdvancedPlanner({ focus: 'destination' }),
+      onCloseAdvancedPlanner:
+        () => this.closeAdvancedPlanner(),
       onQuery:
         query => this.updatePlannerQuery(query),
       onClear:
@@ -2673,15 +2895,21 @@ export class NavigationFeature {
         },
       onSelect:
         index => {
-          const destination =
+          const place =
             this.plannerResults[index];
 
-          if (destination) {
-            this.setPlannerDestination(
-              destination
-            );
+          if (!place) {
+            return;
+          }
+
+          if (this.plannerSearchTarget === 'origin') {
+            this.setPlannerOrigin(place);
+          } else {
+            this.setPlannerDestination(place);
           }
         },
+      onActivateEndpoint:
+        kind => this.activatePlannerEndpoint(kind),
       onSelectRecent:
         index => {
           const destination =
@@ -2692,7 +2920,7 @@ export class NavigationFeature {
           }
         },
       onChangeDestination:
-        () => this.clearPlannerDestination(),
+        () => this.openDestinationSearch(),
       onBookmarkDestination:
         () => {
           const destination =
@@ -2724,7 +2952,7 @@ export class NavigationFeature {
 
     if (restoreSearchFocus) {
       const input = view.querySelector?.(
-        '#navigationDestinationInput'
+        '[data-navigation-query-input]'
       );
 
       input?.focus?.({
@@ -3005,7 +3233,7 @@ export class NavigationFeature {
     this.selectedDriveRouteIndex = 0;
 
     // A preview belongs to one exact From/To/mode combination.
-    // Once that identity changes, no TfL option from the previous
+    // Once that identity changes, no transit option from the previous
     // preview may remain selectable or startable.
     this.transitJourneyOptions = [];
     this.selectedTransitJourneyIndex = 0;

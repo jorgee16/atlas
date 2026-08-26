@@ -362,3 +362,233 @@ test(
     );
   }
 );
+
+test(
+  'text destination search defers the spatial POI index until Nearby needs it',
+  async () => {
+    const requested = [];
+    const features = [
+      {
+        id: 'cafe',
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-9.14, 38.71]
+        },
+        properties: {
+          name: 'Cafe Central',
+          amenity: 'cafe',
+          type: 'cafe'
+        }
+      }
+    ];
+
+    const provider = new LocalRegionProvider({
+      regionRepository: {
+        findByPosition: async () => ({
+          id: 'portugal',
+          name: 'Portugal',
+          poiUrl: '/pois.geojson',
+          indexUrl: '/poi-index.json'
+        })
+      },
+      fetchFn: async url => {
+        requested.push(url);
+
+        if (url.includes('poi-index')) {
+          return response({
+            kind: 'uniform-grid',
+            cellSizeDegrees: 1,
+            cells: { '-10:38': [0] }
+          });
+        }
+
+        if (url.includes('search-index')) {
+          return response({
+            kind: 'atlas-text-index',
+            tokens: { cafe: [0], central: [0] }
+          });
+        }
+
+        return response({ features });
+      }
+    });
+
+    const anchor = { lat: 38.71, lon: -9.14 };
+
+    const results = await provider.searchByName('cafe', anchor);
+    assert.equal(results[0].id, 'cafe');
+    assert.equal(
+      requested.some(url => url.includes('poi-index')),
+      false
+    );
+
+    await provider.search(anchor, 1000);
+    assert.equal(
+      requested.filter(url => url.includes('poi-index')).length,
+      1
+    );
+  }
+);
+
+test(
+  'compact destination records avoid loading full POI GeoJSON until Nearby',
+  async () => {
+    const requested = [];
+    const compactProperties = {
+      name: 'Cafe Central',
+      amenity: 'cafe',
+      type: 'cafe',
+      'addr:city': 'Lisboa'
+    };
+    const features = [
+      {
+        id: 'cafe',
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-9.14, 38.71]
+        },
+        properties: compactProperties
+      }
+    ];
+
+    const provider = new LocalRegionProvider({
+      regionRepository: {
+        findByPosition: async () => ({
+          id: 'portugal',
+          name: 'Portugal',
+          poiUrl: '/pois.geojson',
+          indexUrl: '/poi-index.json',
+          searchUrl: '/search-index.json',
+          searchRecordsUrl: '/search-records.json'
+        })
+      },
+      fetchFn: async url => {
+        requested.push(url);
+
+        if (url.includes('search-index')) {
+          return response({
+            kind: 'atlas-text-index',
+            tokens: { cafe: [0], central: [0] }
+          });
+        }
+
+        if (url.includes('search-records')) {
+          return response({
+            kind: 'atlas-search-records',
+            records: [[
+              'cafe',
+              -9.14,
+              38.71,
+              compactProperties
+            ]]
+          });
+        }
+
+        if (url.includes('poi-index')) {
+          return response({
+            kind: 'uniform-grid',
+            cellSizeDegrees: 1,
+            cells: { '-10:38': [0] }
+          });
+        }
+
+        return response({ features });
+      }
+    });
+
+    const anchor = { lat: 38.71, lon: -9.14 };
+    const results = await provider.searchByName('cafe', anchor);
+
+    assert.equal(results[0].id, 'cafe');
+    assert.equal(results[0].city, 'Lisboa');
+    assert.equal(
+      requested.some(url => url.includes('pois.geojson')),
+      false
+    );
+
+    const nearby = await provider.search(anchor, 1000);
+    assert.equal(nearby[0].id, 'cafe');
+    assert.equal(
+      requested.filter(url => url.includes('pois.geojson')).length,
+      1
+    );
+  }
+);
+
+test(
+  'version 2 positional destination records decode without POI GeoJSON',
+  async () => {
+    const requested = [];
+    const fields = [
+      'name',
+      'type',
+      'amenity',
+      'place',
+      'addr:housenumber',
+      'addr:street',
+      'addr:postcode',
+      'addr:city'
+    ];
+
+    const provider = new LocalRegionProvider({
+      regionRepository: {
+        findByPosition: async () => ({
+          id: 'portugal',
+          name: 'Portugal',
+          poiUrl: '/pois.geojson',
+          searchUrl: '/search-index.json',
+          searchRecordsUrl: '/search-records.json'
+        })
+      },
+      fetchFn: async url => {
+        requested.push(url);
+
+        if (url.includes('search-index')) {
+          return response({
+            kind: 'atlas-text-index',
+            tokens: { cafe: [0], central: [0], lisboa: [0] }
+          });
+        }
+
+        if (url.includes('search-records')) {
+          return response({
+            version: 2,
+            kind: 'atlas-search-records',
+            fields,
+            records: [[
+              'cafe',
+              -9.14,
+              38.71,
+              'Cafe Central',
+              'cafe',
+              'cafe',
+              null,
+              null,
+              null,
+              null,
+              'Lisboa'
+            ]]
+          });
+        }
+
+        throw new Error(`Unexpected fetch: ${url}`);
+      }
+    });
+
+    const results = await provider.searchByName(
+      'cafe central',
+      { lat: 38.71, lon: -9.14 }
+    );
+
+    assert.equal(results.length, 1);
+    assert.equal(results[0].name, 'Cafe Central');
+    assert.equal(results[0].city, 'Lisboa');
+    assert.equal(results[0].type, 'cafe');
+    assert.equal(
+      requested.some(url => url.includes('pois.geojson')),
+      false
+    );
+  }
+);

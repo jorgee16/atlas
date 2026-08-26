@@ -71,6 +71,10 @@ import {
   TfLJourneyProvider
 } from '../transit/providers/tfl-journey-provider.js';
 
+import {
+  TransitProviderRegistry
+} from '../transit/transit-provider-registry.js';
+
 
 import { MapController, LeafletMapAdapter } from '../map.js';
 import {
@@ -196,6 +200,44 @@ export class AppBootstrap {
   });
 
   window.addEventListener('resize', positionSearchAreaButton);
+
+  // Android soft keyboards shrink the visual viewport without always changing
+  // the layout viewport. Expose that usable rectangle to CSS so landscape
+  // navigation search can stay above the keyboard and keep results visible.
+  const updateVisualViewport = () => {
+    const viewport = window.visualViewport;
+    const visualHeight = viewport?.height ?? window.innerHeight;
+    const visualTop = viewport?.offsetTop ?? 0;
+    const visualBottomInset = Math.max(
+      0,
+      window.innerHeight - visualTop - visualHeight
+    );
+    const keyboardLikelyOpen =
+      window.matchMedia?.('(orientation: landscape)')?.matches &&
+      visualBottomInset > 120;
+
+    document.documentElement.style.setProperty(
+      '--atlas-visual-height',
+      `${Math.round(visualHeight)}px`
+    );
+    document.documentElement.style.setProperty(
+      '--atlas-visual-top',
+      `${Math.round(visualTop)}px`
+    );
+    document.documentElement.style.setProperty(
+      '--atlas-visual-bottom-inset',
+      `${Math.round(visualBottomInset)}px`
+    );
+    document.documentElement.classList.toggle(
+      'atlas-keyboard-open',
+      Boolean(keyboardLikelyOpen)
+    );
+  };
+
+  updateVisualViewport();
+  window.visualViewport?.addEventListener('resize', updateVisualViewport);
+  window.visualViewport?.addEventListener('scroll', updateVisualViewport);
+  window.addEventListener('resize', updateVisualViewport);
 
   // Leaflet needs a size refresh after the viewport changes orientation.
   // If navigation is following GPS, immediately restore the navigation camera
@@ -324,11 +366,24 @@ export class AppBootstrap {
           ''
       })
     });
+
+    const transitProviderRegistry = new TransitProviderRegistry({
+      catalogProvider: () => appContext.get('regionManager').catalog,
+      providers: {
+        london: {
+          id: 'tfl',
+          label: 'Public transport',
+          bridge: transitJourneyBridge
+        }
+      }
+    });
+
     appContext.provide('transitJourneyBridge', transitJourneyBridge);
+    appContext.provide('transitProviderRegistry', transitProviderRegistry);
 
     pluginManager.register(
       new NavigationPlugin({
-        transitBridge: transitJourneyBridge,
+        transitProviderRegistry,
         onBookmarkDestination: destination =>
           beginBookmarkFromSelectedPoint(destination)
       })
@@ -397,6 +452,7 @@ export class AppBootstrap {
     const tripWorkspace = root.querySelector('#tripWorkspace');
     const navigationWorkspace = root.querySelector('#navigationWorkspace');
     const fullMapButton = root.querySelector('#fullMapBtn');
+    const routePlannerButton = root.querySelector('#routePlannerBtn');
     const regionsOverlay = root.querySelector('#regionsOverlay');
     const closeRegionsButton = root.querySelector('#closeRegionsBtn');
     const settingsOverlay = root.querySelector('#settingsOverlay');
@@ -486,6 +542,23 @@ export class AppBootstrap {
 
       nearbyFeature.render();
     };
+
+    routePlannerButton?.addEventListener('click', () => {
+      if (navigationFeature.isActive()) {
+        status(
+          'Navigation active',
+          'Stop guidance before planning a different route.'
+        );
+        return;
+      }
+
+      selectAppTab('navigation', { reveal: true });
+      navigationFeature.openAdvancedPlanner({
+        focus: navigationFeature.getPlannerState().destination
+          ? 'origin'
+          : 'destination'
+      });
+    });
 
     appTabs?.addEventListener('click', event => {
       const button = event.target.closest?.('[data-app-tab]');

@@ -5449,15 +5449,12 @@ body.navigation-active:has(.navigation-guidance-expanded)
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   min-height: 34px;
   padding: 5px 10px;
   color: #68758a;
   background: transparent;
   border: 0;
   border-radius: 10px;
-  font-size: 11px;
-  font-weight: 800;
   cursor: pointer;
 }
 .navigation-travel-mode button.on {
@@ -5465,7 +5462,15 @@ body.navigation-active:has(.navigation-guidance-expanded)
   background: #fff;
   box-shadow: 0 3px 10px rgba(24, 35, 58, 0.10);
 }
-.navigation-travel-mode button span { font-size: 14px; line-height: 1; }
+.navigation-travel-mode button svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 /* ---------- Active navigation travel-mode switcher ---------- */
 .navigation-mode-summary {
@@ -14790,5 +14795,1390 @@ html[data-atlas-theme="dark"]
 @media (orientation: portrait) and (max-width: 800px) {
   .app.navigation-active .leaflet-control-zoom {
     display: block !important;
+  }
+}
+
+/* ---------- Navigation planner landscape clearance + route dock v26 ---------- */
+/* Keep the route-preview instrument dock structurally separate from the
+   Explore / Trip / Navigation tab dock on short landscape phones. */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden])) {
+    /* The tab dock is ~52px tall plus its bottom inset. Leave a deliberate
+       visual gap instead of letting the route dock sit directly on it. */
+    --planner-dock-bottom: max(
+      80px,
+      calc(env(safe-area-inset-bottom) + 76px)
+    );
+  }
+
+  .navigation-planner--preview .navigation-preview-controls {
+    /* Drive alternatives create a second row. Let the dock grow to its real
+       content height instead of clipping that row against the 158px cap. */
+    max-height: none;
+  }
+
+  .navigation-planner--preview .navigation-drive-options-list {
+    padding-bottom: 2px;
+  }
+
+  .navigation-planner--preview .navigation-drive-option {
+    min-height: 58px;
+  }
+
+  /* Loading is a single-row state. Keep it compact so the map remains the
+     dominant surface while still preserving the clearance above the tabs. */
+  .navigation-planner--preview .navigation-preview-status--loading {
+    min-height: 56px;
+    padding: 8px 10px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-status--loading
+    .navigation-guidance-spinner {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden])) {
+    --planner-dock-bottom: max(
+      74px,
+      calc(env(safe-area-inset-bottom) + 70px)
+    );
+  }
+
+  .navigation-planner--preview .navigation-preview-controls {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .navigation-planner--preview .navigation-drive-option {
+    flex-basis: 142px;
+    min-height: 54px;
+    padding: 6px 7px;
+  }
+}
+
+/* ---------- Navigation landscape loaded-route expansion v27 ---------- */
+/* The v26 stabilization rule deliberately keeps the calculating state
+   compact, but its !important 150px/hidden cap also clips loaded drive
+   alternatives. Once Start is enabled, let the dock size to its route row. */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-start-button:not(:disabled)) {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+/* ---------- Navigation landscape drive-card polish v28 ---------- */
+/* Loaded drive previews use the available landscape width deliberately:
+   controls/actions on the first row, three comparison cards on the second.
+   Route-card text gets explicit grid tracks so badge, ETA and metadata never
+   compete for the same pixels. */
+@media (orientation: landscape) and (max-height: 600px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options):has(.navigation-start-button:not(:disabled)) {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start !important;
+    width: min(760px, calc(100vw - 300px)) !important;
+    gap: 7px 10px !important;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-mode-choice {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-confirm-actions {
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    min-width: 210px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-options {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-options-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    width: 100%;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    flex: none;
+    width: auto;
+    min-width: 0;
+    min-height: 84px;
+    padding: 8px 9px;
+    gap: 8px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-content {
+    min-width: 0;
+    gap: 3px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 3px 8px;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-title {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    justify-items: start;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-title strong {
+    width: 100%;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-duration {
+    align-self: start;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-recommended {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    min-height: 14px;
+    padding: 1px 5px;
+    font-size: 6.5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-route-row,
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-roads {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 8.5px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-price,
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-foot,
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option-foot small {
+    font-size: 8px;
+    line-height: 1.15;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-tradeoff {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 7.5px;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options):has(.navigation-start-button:not(:disabled)) {
+    width: min(730px, calc(100vw - 270px)) !important;
+  }
+
+  .navigation-planner--preview
+    .navigation-preview-controls:has(.navigation-drive-options)
+    .navigation-drive-option {
+    min-height: 78px;
+    padding: 7px 8px;
+  }
+}
+
+/* ---------- Regional transit availability ---------- */
+.navigation-mode-choice [data-navigation-mode="transit"].is-unavailable {
+  opacity: 0.42;
+}
+
+.navigation-transit-availability {
+  display: block;
+  margin-top: 0.35rem;
+  max-width: 34rem;
+  color: var(--atlas-text-muted, #6b7280);
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+
+/* ======================================================
+ * Navigation route-planner entry + advanced endpoints
+ * ====================================================== */
+.route-planner-action {
+  display: grid;
+  place-items: center;
+  color: #f8fbff;
+  background: #0f6f83;
+  border-color: rgba(255, 255, 255, .16);
+  box-shadow: 0 12px 28px rgba(15, 111, 131, .26);
+}
+
+.route-planner-action svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-planner-action:active {
+  transform: scale(.96);
+}
+
+.navigation-endpoint-stack--simple
+.navigation-endpoint-row--destination {
+  border-bottom: 0;
+}
+
+.navigation-search-card.is-advanced {
+  width: min(470px, 100%);
+}
+
+.navigation-endpoint-stack--advanced {
+  overflow: visible;
+}
+
+.navigation-endpoint-stack--advanced
+.navigation-endpoint-row--origin {
+  border-bottom: 1px solid rgba(32, 40, 58, .08);
+}
+
+.navigation-endpoint-edit {
+  color: #8792a6;
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.navigation-endpoint-swap {
+  position: absolute;
+  z-index: 5;
+  right: 10px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  color: #315efb;
+  background: #fff;
+  border: 1px solid rgba(49, 94, 251, .18);
+  border-radius: 11px;
+  box-shadow: 0 5px 14px rgba(25, 34, 52, .10);
+  transform: translateY(-50%);
+}
+
+.navigation-endpoint-swap svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.navigation-endpoint-swap:disabled {
+  opacity: .36;
+}
+
+.navigation-endpoint-stack--advanced
+.navigation-endpoint-row {
+  padding-right: 53px;
+}
+
+.navigation-endpoint-stack--advanced
+.navigation-endpoint-actions {
+  margin-right: -42px;
+}
+
+.navigation-advanced-origin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.navigation-advanced-origin-actions button {
+  min-height: 40px;
+  padding: 0 12px;
+  color: #526078;
+  background: rgba(49, 94, 251, .07);
+  border: 1px solid rgba(49, 94, 251, .12);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.navigation-advanced-origin-actions button:disabled {
+  opacity: .45;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-endpoint-swap {
+  color: #9db3ff;
+  background: #202a3a;
+  border-color: rgba(142, 168, 255, .22);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-advanced-origin-actions button {
+  color: #b8c5db;
+  background: rgba(90, 121, 255, .09);
+  border-color: rgba(142, 168, 255, .16);
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .navigation-search-card.is-advanced {
+    width: min(620px, calc(100vw - 150px));
+  }
+
+  .navigation-search-card.is-advanced.is-searching {
+    max-height: min(74dvh, 420px);
+  }
+}
+
+.app.navigation-active #routePlannerBtn { display: none; }
+
+/* ---------- Advanced From / To planner polish v27 ---------- */
+.navigation-search-card.is-advanced {
+  gap: 12px;
+  padding: 14px;
+}
+
+.navigation-search-card.is-advanced .navigation-search-title-row--minimal {
+  padding: 0 2px;
+}
+
+.navigation-endpoint-stack--advanced {
+  position: relative;
+  display: grid;
+  overflow: visible;
+  padding: 4px;
+  border: 1px solid rgba(109, 129, 166, .18);
+  border-radius: 19px;
+  background: rgba(18, 29, 48, .32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-row {
+  min-height: 66px;
+  padding: 10px 48px 10px 12px;
+  border: 0;
+  border-radius: 15px;
+  background: transparent;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-row--origin {
+  border-bottom: 0;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-row--destination {
+  border-top: 1px solid rgba(151, 167, 196, .12);
+  border-radius: 0 0 15px 15px;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-copy {
+  gap: 3px;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-copy > small {
+  color: #8f9ab0;
+  font-size: 9px;
+  letter-spacing: .09em;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-copy > strong,
+.navigation-endpoint-stack--advanced .navigation-endpoint-copy > input {
+  font-size: 15px;
+  font-weight: 820;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-copy > span {
+  color: #95a1b7;
+  font-size: 10px;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-marker {
+  width: 12px;
+  height: 12px;
+  border-width: 3px;
+  box-shadow: 0 0 0 3px rgba(93, 126, 255, .12);
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-marker--destination {
+  border-radius: 4px;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-connector {
+  left: 20px;
+  top: 33px;
+  bottom: 33px;
+  opacity: .62;
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-swap {
+  right: 9px;
+  width: 36px;
+  min-height: 36px;
+  border-radius: 12px;
+  color: #9fb2ff;
+  background: #1d2940;
+  border-color: rgba(132, 157, 255, .18);
+  box-shadow: 0 7px 16px rgba(5, 12, 25, .22);
+}
+
+.navigation-endpoint-stack--advanced .navigation-endpoint-swap:disabled {
+  color: #657089;
+  background: #182235;
+  opacity: .52;
+}
+
+.navigation-advanced-origin-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+.navigation-advanced-origin-actions button {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 10px;
+  letter-spacing: .01em;
+}
+
+.navigation-advanced-origin-actions button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Keep the map planner shortcut reachable while Navigation search is open.
+ * The workspace leaves a narrow control rail on the right instead of covering
+ * the recenter / route-planner stack. */
+@media (orientation: portrait) and (max-width: 800px) {
+  body:has(#navigationWorkspace:not([hidden]) .navigation-planner--search)
+    .navigation-workspace {
+    right: max(72px, calc(var(--safe-right) + 68px));
+  }
+
+  body:has(#navigationWorkspace:not([hidden]) .navigation-planner--search)
+    .map-actions {
+    z-index: 1035;
+    right: max(10px, calc(var(--safe-right) + 8px));
+  }
+
+  body:has(
+    #navigationWorkspace:not([hidden])
+    .navigation-search-card.is-advanced
+  ) #routePlannerBtn {
+    display: none;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 390px) {
+  body:has(#navigationWorkspace:not([hidden]) .navigation-planner--search)
+    .navigation-workspace {
+    right: max(62px, calc(var(--safe-right) + 58px));
+  }
+}
+
+/* ======================================================
+ * Navigation destination-first search panel v28
+ * Approved "Where to?" concept: one primary search field,
+ * compact shortcuts, recent destinations, advanced From/To on demand.
+ * ====================================================== */
+.navigation-search-card--destination:not(.is-advanced) {
+  width: min(440px, 100%);
+  gap: 11px;
+  padding: 11px 13px 14px;
+  border-radius: 24px;
+}
+
+.navigation-search-grabber {
+  justify-self: center;
+  width: 34px;
+  height: 4px;
+  margin: 0 0 2px;
+  border-radius: 999px;
+  background: rgba(99, 112, 134, .34);
+}
+
+.navigation-destination-first {
+  display: grid;
+  gap: 10px;
+}
+
+.navigation-where-to-search {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 54px;
+  padding: 5px 6px 5px 15px;
+  color: #263247;
+  background: #f5f7fb;
+  border: 1px solid rgba(75, 94, 126, .11);
+  border-radius: 17px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .82),
+    0 5px 16px rgba(24, 37, 60, .05);
+}
+
+.navigation-where-to-icon {
+  display: grid;
+  place-items: center;
+  color: #53627a;
+}
+
+.navigation-where-to-icon svg,
+.navigation-where-to-map svg,
+.navigation-search-quick-action svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.navigation-where-to-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.navigation-where-to-search input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0;
+  color: #20283a;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 760;
+  letter-spacing: -.01em;
+}
+
+.navigation-where-to-search input::placeholder {
+  color: #8f98a8;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.navigation-workspace .navigation-where-to-clear,
+.navigation-workspace .navigation-where-to-map {
+  display: grid;
+  width: 38px;
+  min-height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+}
+
+.navigation-workspace .navigation-where-to-clear {
+  color: #737e90;
+  background: transparent;
+  font-size: 20px;
+}
+
+.navigation-workspace .navigation-where-to-map {
+  color: #315efb;
+  background: rgba(49, 94, 251, .10);
+}
+
+.navigation-where-to-map svg {
+  width: 19px;
+  height: 19px;
+}
+
+.navigation-search-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.navigation-workspace .navigation-search-quick-action {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 9px;
+  overflow: hidden;
+  color: #536078;
+  background: rgba(49, 94, 251, .055);
+  border: 1px solid rgba(49, 94, 251, .10);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 9.5px;
+  font-weight: 790;
+  white-space: nowrap;
+}
+
+.navigation-search-quick-action svg {
+  width: 17px;
+  height: 17px;
+  justify-self: end;
+}
+
+.navigation-search-quick-action > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navigation-search-quick-action.is-current-location,
+.navigation-search-quick-action[aria-pressed="true"] {
+  color: #315efb;
+  background: rgba(49, 94, 251, .09);
+}
+
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-section--recent {
+  margin-top: 1px;
+}
+
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-heading {
+  min-height: 22px;
+  padding-inline: 2px;
+}
+
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-heading strong {
+  font-size: 12px;
+  letter-spacing: -.01em;
+}
+
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-heading span {
+  color: #8792a4;
+  font-size: 9px;
+}
+
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-results--flat .navigation-search-result {
+  min-height: 54px;
+  padding: 7px 3px;
+}
+
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-result-icon--recent {
+  display: grid;
+  place-items: center;
+  color: #7f8aa0;
+  background: #f0f3f8;
+  border-radius: 50%;
+}
+
+/* Dark Atlas treatment mirrors the approved mockup. */
+html[data-atlas-theme="dark"]
+.navigation-search-card--destination:not(.is-advanced) {
+  background: rgba(17, 24, 36, .965);
+  border-color: rgba(255, 255, 255, .075);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .34);
+}
+
+html[data-atlas-theme="dark"] .navigation-search-grabber {
+  background: rgba(183, 195, 215, .23);
+}
+
+html[data-atlas-theme="dark"] .navigation-where-to-search {
+  color: #f1f5fb;
+  background: #202a3a;
+  border-color: rgba(255, 255, 255, .075);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+html[data-atlas-theme="dark"] .navigation-where-to-icon {
+  color: #a7b2c4;
+}
+
+html[data-atlas-theme="dark"] .navigation-where-to-search input {
+  color: #f4f7fc;
+}
+
+html[data-atlas-theme="dark"] .navigation-where-to-search input::placeholder {
+  color: #a6b0c1;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-workspace .navigation-where-to-map {
+  color: #8ea8ff;
+  background: rgba(81, 111, 255, .14);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-workspace .navigation-where-to-clear {
+  color: #9aa5b7;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-workspace .navigation-search-quick-action {
+  color: #b8c3d4;
+  background: rgba(115, 137, 178, .075);
+  border-color: rgba(255, 255, 255, .07);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-workspace .navigation-search-quick-action.is-current-location,
+html[data-atlas-theme="dark"]
+.navigation-workspace .navigation-search-quick-action[aria-pressed="true"] {
+  color: #9db3ff;
+  background: rgba(88, 118, 255, .12);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-heading strong {
+  color: #f2f5fa;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-heading span {
+  color: #8490a4;
+}
+
+html[data-atlas-theme="dark"]
+.navigation-search-card--destination:not(.is-advanced)
+.navigation-search-result-icon--recent {
+  color: #9da9bb;
+  background: #202a3a;
+}
+
+@media (max-width: 380px) {
+  .navigation-workspace .navigation-search-quick-action {
+    grid-template-columns: 16px minmax(0, 1fr);
+    gap: 4px;
+    padding-inline: 6px;
+    font-size: 8.5px;
+  }
+
+  .navigation-search-quick-action svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* Keep the approved compact top-left landscape treatment. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .navigation-planner--search
+  .navigation-search-card--destination:not(.is-advanced) {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .navigation-planner--search .navigation-search-grabber {
+    display: none;
+  }
+
+  .navigation-planner--search .navigation-destination-first {
+    gap: 6px;
+  }
+
+  .navigation-planner--search .navigation-where-to-search {
+    min-height: 46px;
+    border-radius: 13px;
+  }
+
+  .navigation-planner--search .navigation-where-to-search input {
+    height: 34px;
+    font-size: 12px;
+  }
+
+  .navigation-planner--search .navigation-search-quick-actions {
+    gap: 5px;
+  }
+
+  .navigation-planner--search .navigation-search-quick-action {
+    min-height: 32px;
+    padding-inline: 6px;
+    font-size: 8px;
+  }
+}
+
+
+/* ---------- Advanced route back navigation v29 ---------- */
+.navigation-search-title-row--advanced {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 !important;
+}
+
+.navigation-search-title-row--advanced > small {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.navigation-workspace .navigation-advanced-back {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  color: #59677d;
+  background: rgba(49, 94, 251, .06);
+  border: 1px solid rgba(49, 94, 251, .10);
+  border-radius: 11px;
+}
+
+.navigation-advanced-back svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.navigation-advanced-back:active {
+  transform: scale(.96);
+}
+
+html[data-atlas-theme="dark"]
+.navigation-workspace .navigation-advanced-back {
+  color: #b7c4da;
+  background: rgba(115, 137, 178, .075);
+  border-color: rgba(255, 255, 255, .07);
+}
+
+/* ======================================================
+ * Navigation landscape keyboard + planner ergonomics v30
+ * Keep search usable above Android's IME and keep map-pick map-first.
+ * ====================================================== */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Advanced route is a compact horizontal instrument in landscape. */
+  .navigation-planner--search
+  .navigation-search-card--destination.is-advanced {
+    width: min(760px, calc(100vw - 360px));
+    min-width: min(620px, calc(100vw - 300px));
+    max-height: min(220px, calc(100dvh - 70px));
+    gap: 6px;
+    padding: 7px;
+    overflow-y: auto;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-title-row--advanced {
+    min-height: 30px;
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-advanced-back {
+    width: 30px;
+    min-height: 30px;
+    border-radius: 9px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    align-items: stretch;
+    gap: 6px;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row {
+    min-height: 48px;
+    padding: 5px 8px;
+    background: rgba(8, 15, 27, .30);
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 12px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row--origin {
+    grid-column: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row--destination {
+    grid-column: 3;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-connector {
+    display: none;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-swap {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    width: 34px;
+    min-height: 34px;
+    margin: 0;
+    border-radius: 10px;
+    transform: none;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-copy > small {
+    font-size: 8px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-copy > strong,
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-copy > input {
+    font-size: 12px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-copy > span {
+    display: none;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-advanced-origin-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+    margin: 0;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-advanced-origin-actions button {
+    width: auto;
+    min-height: 30px;
+    padding: 4px 10px;
+    border-radius: 9px;
+    font-size: 9px;
+  }
+
+  /* The bottom-left status toast already explains map picking. Do not cover
+     the map with a second, large prompt in short landscape viewports. */
+  .navigation-planner .navigation-map-pick-prompt {
+    display: none;
+  }
+
+  /* Keyboard-open search becomes a lightweight results surface immediately
+     above Android's IME. visualViewport values come from app-bootstrap.js. */
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-card {
+    position: fixed !important;
+    z-index: 1200;
+    top: auto !important;
+    right: 8px !important;
+    bottom: calc(var(--atlas-visual-bottom-inset, 0px) + 6px) !important;
+    left: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: max(84px, calc(var(--atlas-visual-height, 100dvh) - 12px)) !important;
+    gap: 4px !important;
+    padding: 5px 7px !important;
+    overflow: hidden !important;
+    border-radius: 13px !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination:not(.is-advanced)
+  .navigation-search-grabber,
+  html.atlas-keyboard-open
+  .navigation-search-card--destination:not(.is-advanced)
+  .navigation-search-quick-actions,
+  html.atlas-keyboard-open
+  .navigation-search-card--destination
+  .navigation-search-section--recent,
+  html.atlas-keyboard-open
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-title-row--advanced,
+  html.atlas-keyboard-open
+  .navigation-search-card--destination.is-advanced
+  .navigation-advanced-origin-actions {
+    display: none !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination:not(.is-advanced)
+  .navigation-destination-first {
+    gap: 0 !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination:not(.is-advanced)
+  .navigation-where-to-search {
+    min-height: 40px !important;
+    border-radius: 11px !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination:not(.is-advanced)
+  .navigation-where-to-search input {
+    height: 30px !important;
+    font-size: 13px !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced {
+    display: block;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced
+  .navigation-endpoint-row:not(:has(input)) {
+    display: none;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row:has(input) {
+    display: grid;
+    width: 100%;
+    min-height: 40px;
+    padding: 3px 7px;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-swap {
+    display: none !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-planner-feedback {
+    min-height: 26px;
+    margin: 0;
+    padding: 3px 7px;
+    font-size: 9px;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-section {
+    min-height: 0;
+    max-height: none !important;
+    overflow: hidden;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-heading {
+    min-height: 18px;
+    padding: 1px 3px;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-results,
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-results--flat {
+    max-height: max(44px, calc(var(--atlas-visual-height, 100dvh) - 58px)) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-result {
+    min-height: 38px !important;
+    padding: 4px 3px !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-result-icon {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-result strong {
+    font-size: 11px !important;
+  }
+
+  html.atlas-keyboard-open
+  .navigation-planner--search .navigation-search-result small {
+    font-size: 8.5px !important;
+  }
+
+  /* While the keyboard is open, prioritize search feedback over map chrome. */
+  html.atlas-keyboard-open
+  body:has(#navigationWorkspace:not([hidden]))
+  .app:not(.navigation-active) .map-header,
+  html.atlas-keyboard-open
+  body:has(#navigationWorkspace:not([hidden]))
+  #searchAreaBtn,
+  html.atlas-keyboard-open
+  body:has(#navigationWorkspace:not([hidden]))
+  .map-zoom-control,
+  html.atlas-keyboard-open
+  body:has(#navigationWorkspace:not([hidden]))
+  .map-layer-control {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* ---------- Advanced route landscape grid correction v31 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  .navigation-planner--search
+  .navigation-search-card--destination.is-advanced {
+    width: min(860px, calc(100vw - 330px));
+    min-width: min(700px, calc(100vw - 280px));
+    max-height: min(188px, calc(100dvh - 72px));
+    padding: 8px 10px;
+    gap: 7px;
+    overflow: hidden;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-title-row--advanced {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+    width: 100%;
+    min-height: 30px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-title-row--advanced > small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 9px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr);
+    grid-template-rows: 54px;
+    align-items: stretch;
+    gap: 7px;
+    width: 100%;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row {
+    grid-row: 1 !important;
+    order: 0 !important;
+    width: auto;
+    min-width: 0;
+    min-height: 54px;
+    padding: 6px 9px;
+    border: 1px solid rgba(255, 255, 255, .075);
+    border-radius: 12px;
+    background: rgba(8, 15, 27, .30);
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row--origin {
+    grid-column: 1 !important;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row--destination {
+    grid-column: 3 !important;
+    border-top: 1px solid rgba(255, 255, 255, .075);
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-swap {
+    position: static !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center;
+    justify-self: center;
+    width: 36px;
+    min-height: 36px;
+    margin: 0;
+    transform: none !important;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-copy {
+    min-width: 0;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-copy > input,
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-copy > strong {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-advanced-origin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(94px, 126px));
+    justify-content: start;
+    gap: 7px;
+    width: calc((100% - 45px) / 2);
+    padding: 0;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-advanced-origin-actions button {
+    width: 100%;
+    min-height: 31px;
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+}
+
+/* ---------- Advanced route landscape containment + scroll v32 ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  .navigation-planner--search
+  .navigation-search-card--destination.is-advanced {
+    box-sizing: border-box;
+    width: min(860px, calc(100vw - 430px));
+    min-width: 0;
+    max-width: calc(100vw - 430px);
+    max-height: min(250px, calc(100dvh - 78px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced,
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-row,
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-copy {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Portrait advanced styling pulls the inline endpoint actions outward with
+     a negative margin. In the horizontal landscape grid that makes the map
+     target escape the To cell, so keep actions inside their own endpoint. */
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-endpoint-actions {
+    flex: 0 0 auto;
+    margin-right: 0;
+    max-width: 72px;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-map-pick-button,
+  .navigation-search-card--destination.is-advanced
+  .navigation-endpoint-stack--advanced .navigation-search-clear {
+    flex: 0 0 auto;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-section {
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-results,
+  .navigation-search-card--destination.is-advanced
+  .navigation-search-results--flat {
+    max-height: none;
+    overflow: visible;
   }
 }

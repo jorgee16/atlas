@@ -25,6 +25,7 @@ import {
 import {
   summarizeRouteRoadRefs
 } from './route-road-summary.js';
+import { calibrateDriveEta } from './drive-eta.js';
 
 export class OfflineRoutingService {
   constructor({
@@ -159,20 +160,25 @@ export class OfflineRoutingService {
       );
     }
 
-    route.cumulativeDistances =
+    const calibratedRoute =
+      profile === 'drive'
+        ? calibrateDriveEta(route)
+        : route;
+
+    calibratedRoute.cumulativeDistances =
       routeCumulativeDistances(
-        route.points
+        calibratedRoute.points
       );
 
-    route.maneuvers =
+    calibratedRoute.maneuvers =
       this.maneuverGenerator.generate({
         graph: dataset.graph,
-        route,
+        route: calibratedRoute,
         destination
       });
 
     return {
-      ...route,
+      ...calibratedRoute,
       regionId: dataset.region.id,
       partitionId:
         dataset.partitionId ?? null,

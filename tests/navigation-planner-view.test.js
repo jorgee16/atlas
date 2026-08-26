@@ -66,7 +66,7 @@ class FakeElement {
 }
 
 test(
-  'navigation starts as a compact map-first destination search with collapsed origin controls',
+  'navigation starts destination-first and keeps custom origin controls out of the default flow',
   () => {
     const view = new NavigationPlannerView({
       documentRef: {
@@ -100,19 +100,14 @@ test(
       'navigation-planner navigation-planner--compact navigation-planner--search'
     );
     assert.doesNotMatch(element.innerHTML, /Where do you want to go\?/);
-    assert.match(element.innerHTML, /Offline navigation/);
-    assert.match(element.innerHTML, /navigation-endpoint-stack/);
-    assert.match(element.innerHTML, />From</);
-    assert.match(element.innerHTML, />To</);
-    assert.match(element.innerHTML, />My location</);
-    assert.match(
-      element.innerHTML,
-      /Search a place, airport or address/
-    );
-    assert.match(
-      element.innerHTML,
-      /data-navigation-origin-editor hidden/
-    );
+    assert.match(element.innerHTML, /navigation-search-grabber/);
+    assert.match(element.innerHTML, /navigation-where-to-search/);
+    assert.doesNotMatch(element.innerHTML, />From</);
+    assert.doesNotMatch(element.innerHTML, />To</);
+    assert.match(element.innerHTML, /Where to\?/);
+    assert.match(element.innerHTML, /Use my location/);
+    assert.match(element.innerHTML, /Pick on map/);
+    assert.match(element.innerHTML, /Advanced route/);
     assert.match(
       element.innerHTML,
       /data-navigation-pick="destination"/
@@ -125,6 +120,51 @@ test(
       element.innerHTML,
       /data-navigation-swap/
     );
+  }
+);
+
+
+test(
+  'advanced route planner exposes searchable From and To endpoints with swap and GPS recovery',
+  () => {
+    const view = new NavigationPlannerView({
+      documentRef: { createElement: () => new FakeElement() }
+    });
+
+    const element = view.render({
+      origin: { name: 'My location', lat: 37.1, lon: -8.2 },
+      originMode: 'gps',
+      destination: { name: 'Coimbra', lat: 40.21, lon: -8.43 },
+      advancedPlannerOpen: true,
+      searchTarget: 'origin',
+      query: '',
+      results: [],
+      state: 'idle',
+      error: null,
+      pickMode: null,
+      onUseGps() {},
+      onPick() {},
+      onSwap() {},
+      onCloseAdvancedPlanner() {},
+      onActivateEndpoint() {},
+      onSearch() {},
+      onSelect() {}
+    });
+
+    assert.match(element.innerHTML, /Route planner/);
+    assert.match(element.innerHTML, /data-navigation-close-advanced/);
+    assert.match(element.innerHTML, /Back to simple navigation search/);
+    assert.match(element.innerHTML, />From</);
+    assert.match(element.innerHTML, />To</);
+    assert.match(element.innerHTML, /Search starting point/);
+    assert.match(element.innerHTML, />Coimbra</);
+    assert.match(element.innerHTML, /data-navigation-swap/);
+    assert.match(element.innerHTML, /Use my location/);
+    assert.doesNotMatch(
+      element.innerHTML,
+      /data-navigation-use-gps[^>]*disabled/
+    );
+    assert.match(element.innerHTML, /data-navigation-pick="origin"/);
   }
 );
 
@@ -164,3 +204,38 @@ test(
     assert.doesNotMatch(element.innerHTML, /navigation-confirm-card--preview/);
   }
 );
+
+test('drive preview hides regional transit-unavailable notice until Transit is selected', () => {
+  const view = new NavigationPlannerView({
+    documentRef: { createElement: () => new FakeElement() }
+  });
+
+  const base = {
+    origin: { name: 'My location', lat: 37.75, lon: -25.6 },
+    originMode: 'gps',
+    destination: { name: '9700-213', lat: 37.76, lon: -25.58 },
+    query: '',
+    results: [],
+    state: 'idle',
+    error: null,
+    pickMode: null,
+    previewState: 'ready',
+    previewCollapsed: false,
+    previewRoute: { durationSeconds: 240, distanceMeters: 3_100 },
+    driveRoutes: [],
+    transitAvailability: {
+      status: 'unavailable',
+      message: 'Public transport routing isn’t available in this region yet.'
+    },
+    onChangeDestination() {},
+    onStart() {}
+  };
+
+  const drive = view.render({ ...base, travelMode: 'drive' });
+  assert.doesNotMatch(drive.innerHTML, /Public transport routing isn’t available/);
+  assert.match(drive.innerHTML, /data-navigation-change/);
+  assert.match(drive.innerHTML, />Search<\/button>/);
+
+  const transit = view.render({ ...base, travelMode: 'transit' });
+  assert.match(transit.innerHTML, /Public transport routing isn’t available/);
+});

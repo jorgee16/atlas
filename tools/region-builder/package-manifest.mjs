@@ -10,6 +10,7 @@ import {
 
 import {
   readFile,
+  rm,
   stat,
   writeFile
 } from 'node:fs/promises';
@@ -60,6 +61,8 @@ const region = catalogue.regions?.find(
 if (!region) {
   fail(`Unknown region: ${regionId}`);
 }
+
+await prepareBinarySearchAssets(region);
 
 const assets = collectAssets(
   region.assets ?? {}
@@ -116,6 +119,58 @@ await writeFile(
 console.log(
   `${region.name}: ${files.length} files, ${formatBytes(region.sizeBytes)}, SHA-256 manifest written to public/regions/catalog.json`
 );
+
+
+async function prepareBinarySearchAssets(region) {
+  const poiUrl = region.assets?.pois;
+
+  if (typeof poiUrl !== 'string') {
+    return;
+  }
+
+  const binarySearchUrl = poiUrl.replace(
+    /pois\.geojson(?:\?.*)?$/,
+    'search-index.bin'
+  );
+  const binarySearchRecordsUrl = poiUrl.replace(
+    /pois\.geojson(?:\?.*)?$/,
+    'search-records.bin'
+  );
+  const addressSearchUrl = poiUrl.replace(
+    /pois\.geojson(?:\?.*)?$/,
+    'address-index.bin'
+  );
+  const addressRecordsUrl = poiUrl.replace(
+    /pois\.geojson(?:\?.*)?$/,
+    'address-records.bin'
+  );
+
+  if (binarySearchUrl === poiUrl) {
+    return;
+  }
+
+  region.assets.search = binarySearchUrl;
+  region.assets.searchRecords = binarySearchRecordsUrl;
+  region.assets.addressSearch = addressSearchUrl;
+  region.assets.addressRecords = addressRecordsUrl;
+
+  const legacyUrls = [
+    poiUrl.replace(
+      /pois\.geojson(?:\?.*)?$/,
+      'search-index.json'
+    ),
+    poiUrl.replace(
+      /pois\.geojson(?:\?.*)?$/,
+      'search-records.json'
+    )
+  ];
+
+  await Promise.all(
+    legacyUrls.map(url =>
+      rm(localAssetPath(url), { force: true })
+    )
+  );
+}
 
 function collectAssets(root) {
   const found = [];
@@ -211,7 +266,11 @@ function groupForPath(keys) {
 
   if (
     keys[0] === 'pois' ||
-    keys[0] === 'index'
+    keys[0] === 'index' ||
+    keys[0] === 'search' ||
+    keys[0] === 'searchRecords' ||
+    keys[0] === 'addressSearch' ||
+    keys[0] === 'addressRecords'
   ) {
     return 'places';
   }

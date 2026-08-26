@@ -19,6 +19,20 @@ test(
     const outputDir = path.join(directory, 'output');
 
     try {
+      await fs.mkdir(outputDir, { recursive: true });
+      await Promise.all([
+        fs.writeFile(
+          path.join(outputDir, 'search-index.json'),
+          '{\"legacy\":true}',
+          'utf8'
+        ),
+        fs.writeFile(
+          path.join(outputDir, 'search-records.json'),
+          '{\"legacy\":true}',
+          'utf8'
+        )
+      ]);
+
       await fs.writeFile(
         rawGeoJson,
         JSON.stringify({
@@ -61,6 +75,15 @@ test(
       );
 
       assert.equal(document.features.length, 1);
+      await assert.rejects(
+        fs.access(path.join(outputDir, 'search-index.json')),
+        { code: 'ENOENT' }
+      );
+      await assert.rejects(
+        fs.access(path.join(outputDir, 'search-records.json')),
+        { code: 'ENOENT' }
+      );
+
       assert.deepEqual(
         document.features[0].properties,
         {
@@ -84,7 +107,7 @@ test(
 );
 
 test(
-  'region builder packages exact OSM addresses as search-only geocoder entries',
+  'region builder keeps exact OSM addresses out of POIs and writes dedicated address binaries',
   async () => {
     const directory = await fs.mkdtemp(
       path.join(os.tmpdir(), 'atlas-address-geocoder-')
@@ -132,20 +155,110 @@ test(
         await fs.readFile(path.join(outputDir, 'pois.geojson'), 'utf8')
       );
 
-      assert.equal(document.features.length, 1);
-      assert.deepEqual(
-        document.features[0].properties,
-        {
-          name: '10 Downing Street',
-          type: 'address',
-          amenity: 'address',
-          search_only: true,
-          'addr:housenumber': '10',
-          'addr:street': 'Downing Street',
-          'addr:city': 'London',
-          'addr:postcode': 'SW1A 2AA',
-          osm_id: 'n10'
+      assert.equal(document.features.length, 0);
+      const addressIndex = await fs.stat(path.join(outputDir, 'address-index.bin'));
+      const addressRecords = await fs.stat(path.join(outputDir, 'address-records.bin'));
+      assert.ok(addressIndex.size > 0);
+      assert.ok(addressRecords.size > 0);
+    } finally {
+      await fs.rm(directory, { recursive: true, force: true });
+    }
+  }
+);
+
+test(
+  'binary destination search assets resolve results without loading POI GeoJSON',
+  async () => {
+    const { LocalRegionProvider } = await import(
+      '../src/search/providers/local-region-provider.js'
+    );
+    const directory = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'atlas-binary-search-')
+    );
+    const rawGeoJson = path.join(directory, 'raw.geojson');
+    const outputDir = path.join(directory, 'output');
+    const requested = [];
+
+    try {
+      await fs.writeFile(
+        rawGeoJson,
+        JSON.stringify({
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            id: 'cafe-1',
+            geometry: {
+              type: 'Point',
+              coordinates: [-9.14, 38.71]
+            },
+            properties: {
+              name: 'Cafe Central',
+              amenity: 'cafe',
+              'addr:city': 'Lisboa'
+            }
+          }]
+        }),
+        'utf8'
+      );
+
+      const metadata = await normalizeRegion({
+        rawGeoJson,
+        outputDir,
+        config: {
+          id: 'portugal',
+          name: 'Portugal',
+          country: 'Portugal',
+          bbox: [-9.6, 36.8, -6.1, 42.2],
+          categories: {
+            cafe: [{ key: 'amenity', values: ['cafe'] }]
+          }
         }
+      });
+
+      const provider = new LocalRegionProvider({
+        regionRepository: {
+          findByPosition: async () => ({
+            ...metadata,
+            poiUrl: '/pois.geojson',
+            searchUrl: '/search-index.bin',
+            searchRecordsUrl: '/search-records.bin'
+          })
+        },
+        fetchFn: async url => {
+          requested.push(url);
+          const filePath = path.join(outputDir, path.basename(url));
+          try {
+            const bytes = await fs.readFile(filePath);
+            return {
+              ok: true,
+              status: 200,
+              arrayBuffer: async () => bytes.buffer.slice(
+                bytes.byteOffset,
+                bytes.byteOffset + bytes.byteLength
+              ),
+              json: async () => JSON.parse(bytes.toString('utf8'))
+            };
+          } catch {
+            return { ok: false, status: 404 };
+          }
+        }
+      });
+
+      const results = await provider.searchByName(
+        'cafe central',
+        { lat: 38.71, lon: -9.14 }
+      );
+
+      assert.equal(results.length, 1);
+      assert.equal(results[0].name, 'Cafe Central');
+      assert.equal(results[0].city, 'Lisboa');
+      assert.equal(
+        requested.some(url => url.includes('pois.geojson')),
+        false
+      );
+      assert.equal(
+        requested.some(url => url.includes('search-index.json')),
+        false
       );
     } finally {
       await fs.rm(directory, { recursive: true, force: true });

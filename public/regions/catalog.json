@@ -27,9 +27,12 @@
           "restrictions": "/regions/london/routing/restrictions.bin",
           "spatialIndex": "/regions/london/routing/spatial-index.bin"
         },
-        "search": "/regions/london/search-index.json"
+        "search": "/regions/london/search-index.bin",
+        "searchRecords": "/regions/london/search-records.bin",
+        "addressSearch": "/regions/london/address-index.bin",
+        "addressRecords": "/regions/london/address-records.bin"
       },
-      "sizeBytes": 512664705,
+      "sizeBytes": 292565305,
       "package": {
         "schemaVersion": 1,
         "files": [
@@ -44,15 +47,15 @@
             "url": "/regions/london/pois.geojson",
             "label": "pois.geojson",
             "group": "places",
-            "sizeBytes": 362005523,
-            "sha256": "a1ad51687e6489090934c9ae6acb8e141cce7a690422299ed659ef7fcfe1fb4f"
+            "sizeBytes": 43816586,
+            "sha256": "095b8b99fe702d01df80a47e385ff96a954b34a5bdccd888e761ca73995739e0"
           },
           {
             "url": "/regions/london/poi-index.json",
             "label": "poi-index.json",
             "group": "places",
-            "sizeBytes": 8097155,
-            "sha256": "3d746b910cc31127635ce996bb0bcc34aa9d9390ac9363777ddba8ce6e37b832"
+            "sizeBytes": 1025601,
+            "sha256": "541005de343126eb95ea623570fd1dd671935d6e6ea283473c189d33da9e5ff2"
           },
           {
             "url": "/regions/london/routing/metadata.json",
@@ -109,6 +112,34 @@
             "group": "navigation",
             "sizeBytes": 3212996,
             "sha256": "a0cb9536bdae45ba6daee8cbee3137448058b55a3236e3d715ed0e3aa414eaba"
+          },
+          {
+            "url": "/regions/london/search-index.bin",
+            "label": "search-index.bin",
+            "group": "places",
+            "sizeBytes": 3115969,
+            "sha256": "ae8d231f3d4d578e520b0079e7aa4bc3f6d243abdea3c7def483094de60cd9f0"
+          },
+          {
+            "url": "/regions/london/search-records.bin",
+            "label": "search-records.bin",
+            "group": "places",
+            "sizeBytes": 10410083,
+            "sha256": "f84444a6fa06e42ba683eb1d37d49423ce9e71e1104aeb8f70433fd359130feb"
+          },
+          {
+            "url": "/regions/london/address-index.bin",
+            "label": "address-index.bin",
+            "group": "places",
+            "sizeBytes": 10080112,
+            "sha256": "556922a1e2b01205fdb87eae7a3423e38e7e86ebe60d058b47509d80b3228f85"
+          },
+          {
+            "url": "/regions/london/address-records.bin",
+            "label": "address-records.bin",
+            "group": "places",
+            "sizeBytes": 81554927,
+            "sha256": "24f2e180b1299df3152c3ac0cb26b585ab12417242cf1ab940ee77b1b489a387"
           }
         ]
       }
@@ -205,9 +236,12 @@
             }
           ]
         },
-        "search": "/region-packages/portugal/search-index.json"
+        "search": "/region-packages/portugal/search-index.bin",
+        "searchRecords": "/region-packages/portugal/search-records.bin",
+        "addressSearch": "/region-packages/portugal/address-index.bin",
+        "addressRecords": "/region-packages/portugal/address-records.bin"
       },
-      "sizeBytes": 791957192,
+      "sizeBytes": 616641646,
       "package": {
         "schemaVersion": 1,
         "files": [
@@ -215,15 +249,15 @@
             "url": "/region-packages/portugal/pois.geojson",
             "label": "pois.geojson",
             "group": "places",
-            "sizeBytes": 350153368,
-            "sha256": "a01b266240862865d0ad0f60f50481ca3787cbaaa406011dfe92af027002f529"
+            "sizeBytes": 132008571,
+            "sha256": "9081e2f79d943eb9f037ed813978642fe82a43180a8314b2666e8de9642c9117"
           },
           {
             "url": "/region-packages/portugal/poi-index.json",
             "label": "poi-index.json",
             "group": "places",
-            "sizeBytes": 8973614,
-            "sha256": "b091cccfcf66ff0d0007d560d339cf4913bca32d8108400d135317af782bb478"
+            "sizeBytes": 4290696,
+            "sha256": "cf54276fa42dd2cd857999425472940f30a3068de2341fd54b23375b9a3a6f67"
           },
           {
             "url": "/region-packages/portugal/routing/manifest.json",
@@ -401,11 +435,32 @@
             "sha256": "e7281db36173e010ce363884b465ca3d88e10a8fd60f44a3f97dcc5abb4af050"
           },
           {
-            "url": "/region-packages/portugal/search-index.json",
-            "label": "search-index.json",
-            "group": "data",
-            "sizeBytes": 67642204,
-            "sha256": "9b8465c656413193d9dad99e4224ea7efb32e3fbb237ac69ffdf703f0ca1a3c3"
+            "url": "/region-packages/portugal/search-index.bin",
+            "label": "search-index.bin",
+            "group": "places",
+            "sizeBytes": 11455262,
+            "sha256": "a46cdc9f6074626eefed4f3519c4561cb8f52830052a0c1e1694606e655bb102"
+          },
+          {
+            "url": "/region-packages/portugal/search-records.bin",
+            "label": "search-records.bin",
+            "group": "places",
+            "sizeBytes": 34657436,
+            "sha256": "e803c90596e9336c919f7a2550dc799eaecf97634a05b243f1d8ebb1f907bf1a"
+          },
+          {
+            "url": "/region-packages/portugal/address-index.bin",
+            "label": "address-index.bin",
+            "group": "places",
+            "sizeBytes": 8438137,
+            "sha256": "e29f55df6a92d47db79dc6378d9870b53148ef93e1b54e11650ecb232882a883"
+          },
+          {
+            "url": "/region-packages/portugal/address-records.bin",
+            "label": "address-records.bin",
+            "group": "places",
+            "sizeBytes": 60603538,
+            "sha256": "2a43cd9851b5781105a4b9e5ee9f885e0d66131922158fbe9cfcd54996fd4a65"
           }
         ]
       }

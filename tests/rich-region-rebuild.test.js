@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 
 test('rich rebuild covers London and Portugal and preserves useful POI classes', async () => {
-  const [london, portugal, packageJson, script] = await Promise.all([
+  const [london, portugal, packageJson, script, manifestScript] = await Promise.all([
     fs.readFile(new URL('../tools/region-builder/config/london.json', import.meta.url), 'utf8').then(JSON.parse),
     fs.readFile(new URL('../tools/region-builder/config/portugal.json', import.meta.url), 'utf8').then(JSON.parse),
     fs.readFile(new URL('../package.json', import.meta.url), 'utf8').then(JSON.parse),
-    fs.readFile(new URL('../tools/region-builder/rebuild-rich-regions.mjs', import.meta.url), 'utf8')
+    fs.readFile(new URL('../tools/region-builder/rebuild-rich-regions.mjs', import.meta.url), 'utf8'),
+    fs.readFile(new URL('../tools/region-builder/package-manifest.mjs', import.meta.url), 'utf8')
   ]);
 
   for (const config of [london, portugal]) {
@@ -36,4 +37,6 @@ test('rich rebuild covers London and Portugal and preserves useful POI classes',
   assert.match(script, /portugal-latest\.osm\.pbf/);
   assert.match(script, /package-manifest\.mjs/);
   assert.match(script, /region\.version = Math\.max/);
+  assert.match(manifestScript, /search-index\.bin/);
+  assert.match(manifestScript, /search-records\.bin/);
 });

@@ -19,6 +19,8 @@ export class NavigationPlannerView {
     travelMode = 'drive',
     destination,
     query,
+    advancedPlannerOpen = false,
+    searchTarget = 'destination',
     results,
     recent = [],
     state,
@@ -34,9 +36,14 @@ export class NavigationPlannerView {
     selectedTransitJourneyIndex = 0,
     expandedTransitJourneyIndex = null,
     transitJourneySession = null,
+    transitAvailability = { status: 'unknown', message: null },
     onUseGps,
     onTravelMode,
     onPick,
+    onSwap,
+    onOpenAdvancedPlanner,
+    onCloseAdvancedPlanner,
+    onActivateEndpoint,
     onQuery,
     onClear,
     onSearch,
@@ -76,11 +83,11 @@ export class NavigationPlannerView {
 
     const originDetails = origin
       ? originMode === 'picked'
-        ? this.#formatCoordinates(origin)
+        ? this.#placeDetails(origin, false) || this.#formatCoordinates(origin)
         : 'Live GPS'
       : 'Location unavailable';
 
-    if (destination) {
+    if (destination && !advancedPlannerOpen) {
       container.classList.add('navigation-planner--preview');
 
       const routeReady =
@@ -147,7 +154,7 @@ export class NavigationPlannerView {
                   travelMode === 'drive'
                     ? 'Fastest · Balanced · No tolls · Offline road data'
                     : travelMode === 'transit'
-                      ? 'Checking TfL services'
+                      ? 'Checking public transport services'
                       : 'Using downloaded road data'
                 }</small>
               </span>
@@ -269,7 +276,10 @@ export class NavigationPlannerView {
 
             <div class="navigation-mode-choice">
             <small class="navigation-mode-choice-label">Travel mode</small>
-            ${this.#travelModeMarkup(travelMode)}
+            ${this.#travelModeMarkup(travelMode, transitAvailability)}
+            ${travelMode === 'transit' && transitAvailability?.status === 'unavailable' ? `
+              <small class="navigation-transit-availability" role="status">${escapeHtml(transitAvailability.message ?? 'Public transport routing isn’t available in this region yet.')}</small>
+            ` : ''}
           </div>
 
           ${travelMode === 'drive' && previewState === 'ready'
@@ -316,7 +326,8 @@ export class NavigationPlannerView {
                 class="navigation-secondary-action"
                 type="button"
                 data-navigation-change
-              >Change</button>
+              aria-label="Search for another destination"
+              >Search</button>
               <button
                 class="navigation-start-button"
                 type="button"
@@ -324,7 +335,7 @@ export class NavigationPlannerView {
                 ${!routeReady ? 'disabled' : ''}
               >
                 <span>${previewState === 'loading' ? 'Routing…' : travelMode === 'transit' ? 'Start journey' : 'Start'}</span>
-                <small>${routeReady ? travelMode === 'transit' ? 'Begin selected journey' : 'Begin guidance' : travelMode === 'transit' ? 'Finding TfL journeys' : 'Offline route'}</small>
+                <small>${routeReady ? travelMode === 'transit' ? 'Begin selected journey' : 'Begin guidance' : travelMode === 'transit' ? 'Finding public transport options' : 'Offline route'}</small>
               </button>
             </div>
           </div>
@@ -372,11 +383,15 @@ export class NavigationPlannerView {
     }
 
     container.classList.add('navigation-planner--search');
+    if (advancedPlannerOpen) {
+      container.classList.add('navigation-planner--advanced');
+    }
 
     const visibleResults = results.slice(0, 5);
-    const visibleRecent = !query && !visibleResults.length
-      ? recent.slice(0, 3)
-      : [];
+    const visibleRecent =
+      searchTarget === 'destination' && !query && !visibleResults.length
+        ? recent.slice(0, 3)
+        : [];
 
     const resultMarkup = visibleResults.map(
       (place, index) => this.#resultMarkup(
@@ -401,77 +416,250 @@ export class NavigationPlannerView {
       error
     );
 
-    container.innerHTML = `
-      <div class="navigation-search-card navigation-search-card--destination ${searchActive ? 'is-searching' : ''}">
-        <div class="navigation-search-title-row navigation-search-title-row--minimal">
-          <small><i aria-hidden="true"></i> Offline navigation</small>
-        </div>
-
-        <div class="navigation-endpoint-stack">
-          <button
-            class="navigation-origin-summary navigation-endpoint-row navigation-endpoint-row--origin"
-            type="button"
-            data-navigation-origin-toggle
-            aria-expanded="false"
+    const searchInput = (kind, {
+      markerClass,
+      placeholder,
+      value = query
+    }) => `
+      <form
+        class="navigation-destination-search navigation-endpoint-row navigation-endpoint-row--${kind}"
+        data-navigation-search
+      >
+        <span class="navigation-endpoint-marker ${markerClass}" aria-hidden="true"></span>
+        <label class="navigation-endpoint-copy" for="navigationEndpointInput">
+          <small>${kind === 'origin' ? 'From' : 'To'}</small>
+          <input
+            id="navigationEndpointInput"
+            data-navigation-query-input
+            name="query"
+            type="search"
+            inputmode="search"
+            autocomplete="off"
+            enterkeyhint="search"
+            aria-label="${kind === 'origin' ? 'Starting point' : 'Destination'}"
+            placeholder="${escapeHtml(placeholder)}"
+            value="${escapeHtml(value)}"
           >
-            <span class="navigation-endpoint-marker navigation-endpoint-marker--origin" aria-hidden="true"></span>
-            <span class="navigation-endpoint-copy">
-              <small>From</small>
-              <strong>${escapeHtml(originName)}</strong>
-              <span>${escapeHtml(originDetails)}</span>
-            </span>
-            <span class="navigation-origin-chevron" aria-hidden="true">⌄</span>
-          </button>
-
-          <span class="navigation-endpoint-connector" aria-hidden="true"></span>
-
-          <form class="navigation-destination-search navigation-endpoint-row navigation-endpoint-row--destination" data-navigation-search>
-            <span class="navigation-endpoint-marker navigation-endpoint-marker--destination" aria-hidden="true"></span>
-            <label class="navigation-endpoint-copy" for="navigationDestinationInput">
-              <small>To</small>
-              <input
-                id="navigationDestinationInput"
-                name="destination"
-                type="search"
-                inputmode="search"
-                autocomplete="off"
-                enterkeyhint="search"
-                aria-label="Destination"
-                placeholder="Search a place, airport or address"
-                value="${escapeHtml(query)}"
-              >
-            </label>
-            <span class="navigation-endpoint-actions">
-              ${query ? `
-                <button
-                  class="navigation-search-clear"
-                  type="button"
-                  data-navigation-clear
-                  aria-label="Clear destination search"
-                >×</button>
-              ` : ''}
-              <button
-                class="navigation-map-pick-button"
-                type="button"
-                data-navigation-pick="destination"
-                aria-label="Choose destination on map"
-                title="Choose on map"
-              >⌖</button>
-            </span>
-          </form>
-        </div>
-
-        <div class="navigation-origin-editor navigation-origin-editor--inline" data-navigation-origin-editor hidden>
+        </label>
+        <span class="navigation-endpoint-actions">
+          ${query ? `
+            <button
+              class="navigation-search-clear"
+              type="button"
+              data-navigation-clear
+              aria-label="Clear search"
+            >×</button>
+          ` : ''}
           <button
+            class="navigation-map-pick-button"
             type="button"
-            data-navigation-use-gps
-            ${originMode === 'gps' ? 'disabled' : ''}
-          >Use my location</button>
+            data-navigation-pick="${kind}"
+            aria-label="Choose ${kind === 'origin' ? 'starting point' : 'destination'} on map"
+            title="Choose on map"
+          >⌖</button>
+        </span>
+      </form>
+    `;
+
+    const endpointSummary = (kind, point, details) => `
+      <button
+        class="navigation-endpoint-row navigation-endpoint-row--${kind}"
+        type="button"
+        data-navigation-activate-endpoint="${kind}"
+      >
+        <span class="navigation-endpoint-marker navigation-endpoint-marker--${kind}" aria-hidden="true"></span>
+        <span class="navigation-endpoint-copy">
+          <small>${kind === 'origin' ? 'From' : 'To'}</small>
+          <strong>${escapeHtml(point?.name ?? (kind === 'origin' ? 'My location' : 'Choose destination'))}</strong>
+          ${details ? `<span>${escapeHtml(details)}</span>` : ''}
+        </span>
+        <span class="navigation-endpoint-edit" aria-hidden="true">›</span>
+      </button>
+    `;
+
+    const defaultDestinationSearch = `
+      <form
+        class="navigation-where-to-search"
+        data-navigation-search
+      >
+        <span class="navigation-where-to-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+        </span>
+        <input
+          data-navigation-query-input
+          name="query"
+          type="search"
+          inputmode="search"
+          autocomplete="off"
+          enterkeyhint="search"
+          aria-label="Destination"
+          placeholder="Where to?"
+          value="${escapeHtml(query)}"
+        >
+        ${query ? `
           <button
+            class="navigation-search-clear navigation-where-to-clear"
             type="button"
-            data-navigation-pick="origin"
-          >Choose start on map</button>
-        </div>
+            data-navigation-clear
+            aria-label="Clear search"
+          >×</button>
+        ` : ''}
+        <button
+          class="navigation-where-to-map"
+          type="button"
+          data-navigation-pick="destination"
+          aria-label="Pick destination on map"
+          title="Pick on map"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <circle cx="12" cy="12" r="7"></circle>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+          </svg>
+        </button>
+      </form>
+    `;
+
+    const quickActions = `
+      <div class="navigation-search-quick-actions" aria-label="Navigation shortcuts">
+        <button
+          class="navigation-search-quick-action is-current-location"
+          type="button"
+          data-navigation-use-gps
+          title="Use my location as the starting point"
+          ${originMode === 'gps' ? 'aria-pressed="true"' : ''}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m12 3 7 17-7-4-7 4Z"></path>
+          </svg>
+          <span>Use my location</span>
+        </button>
+        <button
+          class="navigation-search-quick-action"
+          type="button"
+          data-navigation-pick="destination"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"></path>
+            <circle cx="12" cy="10" r="2"></circle>
+          </svg>
+          <span>Pick on map</span>
+        </button>
+        <button
+          class="navigation-search-quick-action"
+          type="button"
+          data-navigation-open-advanced
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="6" cy="6" r="2"></circle>
+            <path d="M8 6h5a4 4 0 0 1 4 4v1"></path>
+            <path d="m14 9 3 3 3-3"></path>
+            <path d="M17 12v3a3 3 0 0 1-3 3H9"></path>
+            <path d="m10 15-3 3 3 3"></path>
+          </svg>
+          <span>Advanced route</span>
+        </button>
+      </div>
+    `;
+
+    const advancedEndpoints = `
+      <div class="navigation-endpoint-stack navigation-endpoint-stack--advanced">
+        ${searchTarget === 'origin'
+          ? searchInput('origin', {
+              markerClass: 'navigation-endpoint-marker--origin',
+              placeholder: 'Search starting point'
+            })
+          : endpointSummary('origin', origin, originDetails)}
+
+        <span class="navigation-endpoint-connector" aria-hidden="true"></span>
+
+        ${searchTarget === 'destination'
+          ? searchInput('destination', {
+              markerClass: 'navigation-endpoint-marker--destination',
+              placeholder: destination?.name ?? 'Search destination'
+            })
+          : endpointSummary(
+              'destination',
+              destination,
+              destination ? this.#placeDetails(destination, false) : ''
+            )}
+
+        <button
+          class="navigation-endpoint-swap"
+          type="button"
+          data-navigation-swap
+          aria-label="Swap starting point and destination"
+          title="Swap"
+          ${!origin || !destination ? 'disabled' : ''}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m8 4-3 3 3 3"></path>
+            <path d="M5 7h11a3 3 0 0 1 3 3"></path>
+            <path d="m16 20 3-3-3-3"></path>
+            <path d="M19 17H8a3 3 0 0 1-3-3"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="navigation-advanced-origin-actions">
+        <button
+          type="button"
+          data-navigation-use-gps
+          aria-label="Use my location"
+          title="Use my location"
+          ${originMode === 'gps' && searchTarget !== 'origin' ? 'disabled' : ''}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path>
+          </svg>
+          <span>Use GPS</span>
+        </button>
+        <button
+          type="button"
+          data-navigation-pick="origin"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"></path>
+            <circle cx="12" cy="10" r="2"></circle>
+          </svg>
+          <span>Pick on map</span>
+        </button>
+      </div>
+    `;
+
+    container.innerHTML = `
+      <div class="navigation-search-card navigation-search-card--destination ${advancedPlannerOpen ? 'is-advanced' : ''} ${searchActive ? 'is-searching' : ''}">
+        ${advancedPlannerOpen ? `
+          <div class="navigation-search-title-row navigation-search-title-row--minimal navigation-search-title-row--advanced">
+            <button
+              class="navigation-advanced-back"
+              type="button"
+              data-navigation-close-advanced
+              aria-label="Back to simple navigation search"
+              title="Back"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m15 18-6-6 6-6"></path>
+              </svg>
+            </button>
+            <small><i aria-hidden="true"></i> Route planner</small>
+          </div>
+        ` : `
+          <span class="navigation-search-grabber" aria-hidden="true"></span>
+        `}
+
+        ${advancedPlannerOpen
+          ? advancedEndpoints
+          : `
+            <div class="navigation-destination-first">
+              ${defaultDestinationSearch}
+              ${quickActions}
+            </div>
+          `}
 
         ${state === 'loading' ? `
           <div class="navigation-planner-feedback navigation-planner-feedback--loading">
@@ -489,10 +677,10 @@ export class NavigationPlannerView {
         ${resultMarkup ? `
           <div class="navigation-search-section navigation-search-section--compact navigation-search-section--flat">
             <div class="navigation-search-heading">
-              <strong>Results</strong>
+              <strong>${searchTarget === 'origin' ? 'Starting points' : 'Results'}</strong>
               <span>${results.length} found</span>
             </div>
-            <div class="navigation-search-results navigation-search-results--flat" aria-label="Destination results">
+            <div class="navigation-search-results navigation-search-results--flat" aria-label="Search results">
               ${resultMarkup}
             </div>
           </div>
@@ -512,25 +700,31 @@ export class NavigationPlannerView {
       </div>
     `;
 
-    const originToggle = container.querySelector?.(
-      '[data-navigation-origin-toggle]'
-    );
-    const originEditor = container.querySelector?.(
-      '[data-navigation-origin-editor]'
-    );
-
-    originToggle?.addEventListener('click', () => {
-      const expanded = originEditor?.hidden === false;
-      if (originEditor) originEditor.hidden = expanded;
-      originToggle.setAttribute(
-        'aria-expanded',
-        String(!expanded)
+    for (
+      const button of
+      container.querySelectorAll?.('[data-navigation-activate-endpoint]') ?? []
+    ) {
+      button.addEventListener(
+        'click',
+        () => onActivateEndpoint?.(button.dataset.navigationActivateEndpoint)
       );
-    });
+    }
+
+    container
+      .querySelector?.('[data-navigation-swap]')
+      ?.addEventListener('click', onSwap);
 
     container
       .querySelector?.('[data-navigation-use-gps]')
       ?.addEventListener('click', onUseGps);
+
+    container
+      .querySelector?.('[data-navigation-open-advanced]')
+      ?.addEventListener('click', onOpenAdvancedPlanner);
+
+    container
+      .querySelector?.('[data-navigation-close-advanced]')
+      ?.addEventListener('click', onCloseAdvancedPlanner);
 
     for (
       const button of
@@ -543,7 +737,7 @@ export class NavigationPlannerView {
     }
 
     container
-      .querySelector?.('#navigationDestinationInput')
+      .querySelector?.('[data-navigation-query-input]')
       ?.addEventListener(
         'input',
         event => onQuery?.(event.currentTarget.value)
@@ -560,7 +754,7 @@ export class NavigationPlannerView {
         event => {
           event.preventDefault();
           onSearch(
-            event.currentTarget.elements.destination.value
+            event.currentTarget.elements.query.value
           );
         }
       );
@@ -603,12 +797,44 @@ export class NavigationPlannerView {
     return container;
   }
 
-  #travelModeMarkup(mode) {
+  #travelModeMarkup(mode, transitAvailability = { status: 'unknown' }) {
+    const icon = travelMode => {
+      if (travelMode === 'drive') {
+        return `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 16v-4.2L7.1 7h9.8l2.1 4.8V16"></path>
+            <path d="M4 12h16"></path>
+            <path d="M7.2 7 8.5 4.8h7L16.8 7"></path>
+            <circle cx="7" cy="16.5" r="1.6"></circle>
+            <circle cx="17" cy="16.5" r="1.6"></circle>
+          </svg>`;
+      }
+
+      if (travelMode === 'walk') {
+        return `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="13" cy="4.5" r="2"></circle>
+            <path d="m11.5 8-2.3 4 3 2.2 1.8 5"></path>
+            <path d="m11.5 8 3.1 2 2.4 3"></path>
+            <path d="m9.2 12-3.2 6"></path>
+          </svg>`;
+      }
+
+      return `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="6" y="3.5" width="12" height="14" rx="3"></rect>
+          <path d="M8.5 8h7M8.5 12h7"></path>
+          <circle cx="9" cy="15" r="1"></circle>
+          <circle cx="15" cy="15" r="1"></circle>
+          <path d="m9 17.5-2 3M15 17.5l2 3"></path>
+        </svg>`;
+    };
+
     return `
       <div class="navigation-travel-mode" role="group" aria-label="Travel mode">
-        <button type="button" data-navigation-mode="drive" class="${mode === 'drive' ? 'on' : ''}" aria-pressed="${mode === 'drive'}"><span aria-hidden="true">▸</span>Drive</button>
-        <button type="button" data-navigation-mode="walk" class="${mode === 'walk' ? 'on' : ''}" aria-pressed="${mode === 'walk'}"><span aria-hidden="true">●</span>Walk</button>
-        <button type="button" data-navigation-mode="transit" class="${mode === 'transit' ? 'on' : ''}" aria-pressed="${mode === 'transit'}"><span aria-hidden="true">◇</span>Transit</button>
+        <button type="button" data-navigation-mode="drive" class="${mode === 'drive' ? 'on' : ''}" aria-label="Drive" title="Drive" aria-pressed="${mode === 'drive'}">${icon('drive')}</button>
+        <button type="button" data-navigation-mode="walk" class="${mode === 'walk' ? 'on' : ''}" aria-label="Walk" title="Walk" aria-pressed="${mode === 'walk'}">${icon('walk')}</button>
+        <button type="button" data-navigation-mode="transit" class="${mode === 'transit' ? 'on' : ''} ${transitAvailability?.status === 'unavailable' ? 'is-unavailable' : ''}" aria-label="Transit${transitAvailability?.status === 'unavailable' ? ' unavailable in this region' : ''}" title="${transitAvailability?.status === 'unavailable' ? 'Public transport unavailable in this region' : 'Transit'}" aria-pressed="${mode === 'transit'}" aria-disabled="${transitAvailability?.status === 'unavailable'}">${icon('transit')}</button>
       </div>
     `;
   }

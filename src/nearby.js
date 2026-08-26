@@ -10,12 +10,16 @@ import {
 import {
   RoutingRoadProvider
 } from './search/providers/routing-road-provider.js';
+import {
+  AddressStreetProvider
+} from './search/providers/address-street-provider.js';
 
 // Nearby and destination-search composition root. Keep it lazy so importing
 // navigation logic does not fetch or initialize region data until a search is
 // actually requested.
 let localRegionProvider = null;
 let routingRoadProvider = null;
+let addressStreetProvider = null;
 let sharedRegionRepository = null;
 
 function regionRepository() {
@@ -43,40 +47,45 @@ function roadProvider() {
   return routingRoadProvider;
 }
 
+
+function addressProvider() {
+  if (!addressStreetProvider) {
+    addressStreetProvider = new AddressStreetProvider({
+      regionRepository: regionRepository()
+    });
+  }
+
+  return addressStreetProvider;
+}
+
 export function queryNearby(anchor, radiusMeters = 900) {
   return provider().search(anchor, radiusMeters);
 }
 
-export async function queryDestinations(
-  query,
-  anchor,
-  options = {}
-) {
-  const limit = Math.max(1, options.limit ?? 12);
+function looksLikeRoadQuery(query) {
+  const normalized = String(query ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase()
+    .trim();
 
-  const [placesResult, roadsResult] = await Promise.allSettled([
-    provider().searchByName(query, anchor, {
-      ...options,
-      limit: limit * 2,
-      includeScore: true
-    }),
-    roadProvider().searchByName(query, anchor, {
-      ...options,
-      limit: limit * 2
-    })
-  ]);
+  if (!normalized) return false;
 
-  const places = placesResult.status === 'fulfilled'
-    ? placesResult.value
-    : [];
-  const roads = roadsResult.status === 'fulfilled'
-    ? roadsResult.value
-    : [];
+  const compactPostcode = normalized.replace(/[^a-z0-9]/g, '');
+  const postcodeLike =
+    /^\d{4}\d{0,3}$/.test(compactPostcode) ||
+    /^[a-z]{1,2}\d[a-z\d]?\d[a-z]{2}$/.test(compactPostcode);
 
-  if (!places.length && !roads.length && placesResult.status === 'rejected') {
-    throw placesResult.reason;
-  }
+  // Explicit house numbers and common Portuguese/English street designators
+  // are strong signals that the user wants an address rather than a POI.
+  return (
+    postcodeLike ||
+    /\b\d+[a-z]?\b/.test(normalized) ||
+    /\b(?:rua|r\.|avenida|av\.?|estrada|travessa|largo|praca|praceta|alameda|calcada|beco|road|rd\.?|street|st\.?|avenue|ave\.?|lane|ln\.?|drive|dr\.?|way|boulevard|blvd\.?|close|court|ct\.?|place|pl\.?)\b/.test(normalized)
+  );
+}
 
+function mergeDestinationResults(places, roads, limit) {
   const seen = new Set();
 
   return [...places, ...roads]
@@ -92,6 +101,68 @@ export async function queryDestinations(
     })
     .slice(0, limit)
     .map(({ matchScore, ...place }) => place);
+}
+
+export async function queryDestinations(
+  query,
+  anchor,
+  options = {}
+) {
+  const limit = Math.max(1, options.limit ?? 12);
+  const searchLimit = limit * 2;
+  const roadLikeQuery = looksLikeRoadQuery(query);
+
+  // POI/text search is the fast path. Do not initialize the routing graph for
+  // ordinary destination names: on large regions that graph is hundreds of
+  // MB and was previously on the critical path of every search-box query.
+  let places = [];
+  let placesError = null;
+
+  try {
+    places = await provider().searchByName(query, anchor, {
+      ...options,
+      limit: searchLimit,
+      includeScore: true
+    });
+  } catch (error) {
+    placesError = error;
+  }
+
+  // Dedicated address/street binaries are the primary path for road-like
+  // queries. They stay unloaded for normal POI searches and avoid waking the
+  // much larger routing graph merely to resolve a street name or house number.
+  let addresses = [];
+  if (roadLikeQuery || !places.length) {
+    try {
+      addresses = await addressProvider().search(query, anchor, {
+        ...options,
+        limit: searchLimit
+      });
+    } catch {
+      addresses = [];
+    }
+  }
+
+  // Routing-road lookup is now last-resort compatibility for older installed
+  // regions that do not yet contain address-index.bin/address-records.bin, or
+  // for an indexed address query that returned no useful result.
+  let roads = [];
+  if (!addresses.length && (roadLikeQuery || !places.length)) {
+    try {
+      roads = await roadProvider().searchByName(query, anchor, {
+        ...options,
+        limit: searchLimit
+      });
+    } catch {
+      roads = [];
+    }
+  }
+
+  if (!places.length && !roads.length && placesError) {
+    throw placesError;
+  }
+
+  return mergeDestinationResults([...addresses, ...places], roads, limit);
 }
 
 function humanizeNearbyType(value) {

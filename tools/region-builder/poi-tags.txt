@@ -12,3 +12,7 @@ nwr/natural=beach,peak
 
 # Geographic names used by offline destination search (hidden from Nearby)
 n/place=city,town,village,hamlet,suburb,quarter,neighbourhood,locality,municipality,borough,island
+
+# Exact addresses and named roads for the dedicated offline address search
+nwr/addr:housenumber
+w/highway
