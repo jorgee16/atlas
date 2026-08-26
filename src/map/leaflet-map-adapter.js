@@ -17,6 +17,10 @@ import {
 import {
   adaptiveNavigationZoom
 } from './navigation-camera.js';
+import {
+  carNavigationHeading,
+  smoothHeading
+} from './navigation-heading.js';
 
 const DEFAULT_CENTER = [39.5, -8.0];
 const DEFAULT_ZOOM = 7;
@@ -247,6 +251,8 @@ export class LeafletMapAdapter {
     this.navigationRouteProgress = null;
     this.navigationCameraZoom = null;
     this.navigationCameraTimestamp = null;
+    this.navigationCameraHeading = null;
+    this.navigationHeadingTimestamp = null;
     this.maneuverLayers = [];
     this.userMarker = null;
     this.userAccuracy = null;
@@ -410,6 +416,8 @@ export class LeafletMapAdapter {
     this.navigationRouteProgress = null;
     this.navigationCameraZoom = null;
     this.navigationCameraTimestamp = null;
+    this.navigationCameraHeading = null;
+    this.navigationHeadingTimestamp = null;
     this.maneuverLayers = [];
   }
 
@@ -557,15 +565,76 @@ export class LeafletMapAdapter {
       headingUp = false
     } = {}
   ) {
-    const heading =
+    const gpsHeading =
       Number.isFinite(position?.heading) &&
       (
         !Number.isFinite(position?.speed) ||
         position.speed >=
           MIN_HEADING_SPEED_METERS_PER_SECOND
       )
-        ? position.heading
-        : this.routeBearing;
+        ? normalizeBearing(position.heading)
+        : null;
+
+    const now = performance.now();
+
+    let heading =
+      gpsHeading ?? this.routeBearing;
+
+    if (this.navigationTravelMode === 'drive') {
+      const fusedTarget =
+        carNavigationHeading({
+          gpsHeading,
+          routeHeading: this.routeBearing,
+          speed: position?.speed,
+          accuracy:
+            this.lastUserPosition?.accuracy,
+          distanceFromRouteMeters:
+            this.navigationRouteProgress
+              ?.distanceFromRouteMeters
+        });
+
+      const elapsedSeconds =
+        this.navigationHeadingTimestamp === null
+          ? 0.25
+          : Math.min(
+              1,
+              Math.max(
+                0.05,
+                (
+                  now -
+                  this.navigationHeadingTimestamp
+                ) / 1000
+              )
+            );
+
+      // Keep a little inertia between GPS fixes so segment changes and
+      // noisy course updates rotate the camera rather than snapping it.
+      // The cap prevents a 1 Hz GPS feed from bypassing smoothing.
+      const headingEase = Math.min(
+        0.72,
+        Math.max(
+          0.28,
+          smoothingFactor(2.8, elapsedSeconds)
+        )
+      );
+
+      this.navigationCameraHeading =
+        smoothHeading(
+          this.navigationCameraHeading,
+          fusedTarget,
+          headingEase
+        );
+
+      this.navigationHeadingTimestamp = now;
+      heading = this.navigationCameraHeading;
+    } else if (
+      this.navigationTravelMode !== 'drive'
+    ) {
+      // Walking and ordinary map following intentionally keep their
+      // existing heading behaviour.
+      this.navigationCameraHeading = null;
+      this.navigationHeadingTimestamp = null;
+    }
 
     const bearing =
       headingUp &&
@@ -580,18 +649,26 @@ export class LeafletMapAdapter {
       this.map.setHeading?.(
         heading,
         {
-          ease: 0.16,
-          deadzone: 0.4
+          ease:
+            this.navigationTravelMode === 'drive'
+              ? 0.22
+              : 0.16,
+          deadzone:
+            this.navigationTravelMode === 'drive'
+              ? 0.65
+              : 0.4
         }
       );
+
+      if (this.navigationTravelMode === 'drive') {
+        this.#refreshUserLocationIcon();
+      }
     } else {
       this.setBearing(0);
     }
 
     this.followHeadingUp =
       headingUp;
-
-    const now = performance.now();
 
     const requestedZoom =
       this.navigationTravelMode
@@ -891,12 +968,18 @@ export class LeafletMapAdapter {
         ? MIN_HEADING_SPEED_METERS_PER_SECOND
         : WALK_MIN_PREDICTION_SPEED_METERS_PER_SECOND;
 
+    const predictionHeading =
+      this.navigationTravelMode === 'drive' &&
+      Number.isFinite(this.navigationCameraHeading)
+        ? this.navigationCameraHeading
+        : this.latestUserHeading;
+
     const predictionEnabled =
       maxPredictionSeconds > 0 &&
       Number.isFinite(this.latestUserSpeed) &&
       this.latestUserSpeed >=
         minimumPredictionSpeed &&
-      Number.isFinite(this.latestUserHeading);
+      Number.isFinite(predictionHeading);
 
     const predictionSeconds =
       predictionEnabled &&
@@ -921,7 +1004,7 @@ export class LeafletMapAdapter {
         ? predictPosition(
             this.targetUserPosition,
             this.latestUserSpeed,
-            this.latestUserHeading,
+            predictionHeading,
             predictionSeconds
           )
         : this.targetUserPosition;
@@ -1099,6 +1182,8 @@ export class LeafletMapAdapter {
     if (this.navigationTravelMode !== mode) {
       this.navigationCameraZoom = null;
       this.navigationCameraTimestamp = null;
+      this.navigationCameraHeading = null;
+      this.navigationHeadingTimestamp = null;
     }
 
     this.navigationTravelMode = mode;
@@ -1889,9 +1974,15 @@ export class LeafletMapAdapter {
       position.speed >=
         MIN_HEADING_SPEED_METERS_PER_SECOND;
 
-    const renderedHeading = Number.isFinite(position.heading)
-      ? position.heading + this.#mapBearing()
-      : position.heading;
+    const iconHeading =
+      this.navigationTravelMode === 'drive' &&
+      Number.isFinite(this.navigationCameraHeading)
+        ? this.navigationCameraHeading
+        : position.heading;
+
+    const renderedHeading = Number.isFinite(iconHeading)
+      ? iconHeading + this.#mapBearing()
+      : iconHeading;
 
     this.userMarker.setIcon(
       this.navigationTravelMode === 'drive'
