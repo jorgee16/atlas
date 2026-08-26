@@ -9,8 +9,8 @@ const CACHE_PREFIX =
 const LEGACY_CACHE_NAME =
   'roam-regions-v1';
 
-const LARGE_CACHE_BLOB_THRESHOLD_BYTES =
-  64 * 1024 * 1024;
+const BLOB_CACHE_THRESHOLD_BYTES =
+  8 * 1024 * 1024;
 
 export class RegionDownloader {
   constructor({
@@ -481,7 +481,7 @@ function shouldUseBlobCacheEntry(file, responseSize) {
       ? responseSize
       : 0);
 
-  return size >= LARGE_CACHE_BLOB_THRESHOLD_BYTES;
+  return size >= BLOB_CACHE_THRESHOLD_BYTES;
 }
 
 async function blobBackedCacheResponse(

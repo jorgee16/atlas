@@ -324,9 +324,10 @@ test(
 );
 
 test(
-  'large verified assets are materialized as blob-backed cache entries',
+  'medium and large verified assets are materialized as blob-backed cache entries',
   async () => {
     const bytes = new Uint8Array([1, 2, 3]);
+    const cacheStorage = new FakeCacheStorage();
     const downloader = new RegionDownloader({
       fetchFn: async () =>
         new Response(bytes, {
@@ -335,27 +336,29 @@ test(
             'content-length': String(bytes.byteLength)
           }
         }),
-      cacheStorage: new FakeCacheStorage(),
+      cacheStorage,
       origin: 'https://atlas.test'
     });
 
-    const result = await downloader.download({
-      id: 'large-blob',
-      name: 'Large blob',
-      version: 1,
-      package: {
-        files: [
-          {
-            url: '/large/pois.geojson',
-            sizeBytes: 132_008_571,
-            sha256: '039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81'
-          }
-        ]
-      }
-    });
+    for (const sizeBytes of [34_600_000, 132_008_571]) {
+      const result = await downloader.download({
+        id: `blob-${sizeBytes}`,
+        name: 'Blob-backed asset',
+        version: 1,
+        package: {
+          files: [
+            {
+              url: `/large/${sizeBytes}.bin`,
+              sizeBytes,
+              sha256: '039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81'
+            }
+          ]
+        }
+      });
 
-    assert.equal(result.verifiedFiles, 1);
-    assert.equal(result.sizeBytes, bytes.byteLength);
+      assert.equal(result.verifiedFiles, 1);
+      assert.equal(result.sizeBytes, bytes.byteLength);
+    }
   }
 );
 
