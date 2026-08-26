@@ -262,12 +262,6 @@ test(
         ),
       cacheStorage:
         new FakeCacheStorage(),
-      cryptoRef: {
-        subtle: {
-          digest: async () =>
-            new Uint8Array(32).buffer
-        }
-      },
       origin: 'https://atlas.test'
     });
 
@@ -279,7 +273,7 @@ test(
         files: [
           {
             url: '/london/pois.geojson',
-            sha256: '0'.repeat(64)
+            sha256: '039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81'
           }
         ]
       }
@@ -287,6 +281,76 @@ test(
 
     assert.equal(result.verifiedFiles, 1);
     assert.equal(result.sizeBytes, 3);
+  }
+);
+
+
+test(
+  'verified downloads stream into cache without buffering the source response',
+  async () => {
+    const bytes = new Uint8Array(
+      Array.from({ length: 256 * 1024 }, (_, i) => i & 0xff)
+    );
+
+    const response = new Response(bytes, { status: 200 });
+    response.arrayBuffer = async () => {
+      throw new Error('source response was buffered');
+    };
+
+    const downloader = new RegionDownloader({
+      fetchFn: async () => response,
+      cacheStorage: new FakeCacheStorage(),
+      origin: 'https://atlas.test'
+    });
+
+    const result = await downloader.download({
+      id: 'streamed',
+      name: 'Streamed',
+      version: 1,
+      package: {
+        files: [
+          {
+            url: '/streamed/data.bin',
+            sizeBytes: bytes.byteLength,
+            sha256: '2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9'
+          }
+        ]
+      }
+    });
+
+    assert.equal(result.verifiedFiles, 1);
+    assert.equal(result.sizeBytes, bytes.byteLength);
+  }
+);
+
+test(
+  'network failures name the exact region asset that failed',
+  async () => {
+    const downloader = new RegionDownloader({
+      fetchFn: async () => {
+        throw new TypeError('Failed to fetch');
+      },
+      cacheStorage: new FakeCacheStorage(),
+      origin: 'https://atlas.test'
+    });
+
+    await assert.rejects(
+      downloader.download({
+        id: 'portugal',
+        name: 'Portugal',
+        version: 1,
+        package: {
+          files: [
+            {
+              url: '/portugal/edges.bin',
+              label: 'edges.bin',
+              sizeBytes: 158_516_804
+            }
+          ]
+        }
+      }),
+      /Unable to download Portugal: edges\.bin \(151\.2 MB\): Failed to fetch/
+    );
   }
 );
 

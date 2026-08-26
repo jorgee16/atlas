@@ -96,13 +96,23 @@ export class RegionDownloader {
       for (const file of files) {
         throwIfAborted(signal);
 
-        const response = await this.fetchFn(
-          file.url,
-          {
-            cache: 'no-store',
-            signal
-          }
-        );
+        let response;
+
+        try {
+          response = await this.fetchFn(
+            file.url,
+            {
+              cache: 'no-store',
+              signal
+            }
+          );
+        } catch (error) {
+          throw fileDownloadError(
+            region,
+            file,
+            error
+          );
+        }
 
         if (!response.ok) {
           throw new Error(
@@ -125,30 +135,21 @@ export class RegionDownloader {
         }
 
         let cacheResponse;
+        let verification = null;
 
         if (file.sha256) {
-          const bytes =
-            await response.arrayBuffer();
-
-          throwIfAborted(signal);
-
-          const digest =
-            await sha256(bytes, this.crypto);
-
-          if (digest !== file.sha256) {
-            throw new Error(
-              `${region.name} integrity check failed for ${file.label}.`
+          const streamed =
+            verifiedProgressResponse(
+              response,
+              chunkBytes => {
+                downloadedBytes += chunkBytes;
+                emit(file);
+              }
             );
-          }
 
-          verifiedFiles += 1;
-          downloadedBytes += bytes.byteLength;
-          cacheResponse = cloneResponse(
-            response,
-            bytes
-          );
-
-          emit(file);
+          cacheResponse = streamed.response;
+          verification = streamed.digest;
+          verification.catch(() => {});
         } else {
           cacheResponse =
             progressResponse(
@@ -160,10 +161,41 @@ export class RegionDownloader {
             );
         }
 
-        await cache.put(
-          file.url,
-          cacheResponse
-        );
+        try {
+          await cache.put(
+            file.url,
+            cacheResponse
+          );
+
+          if (verification) {
+            const digest = await verification;
+
+            throwIfAborted(signal);
+
+            if (digest !== file.sha256) {
+              throw new Error(
+                `${region.name} integrity check failed for ${file.label}.`
+              );
+            }
+
+            verifiedFiles += 1;
+          }
+        } catch (error) {
+          if (
+            isAbortError(error, signal) ||
+            String(error?.message ?? '').includes(
+              'integrity check failed'
+            )
+          ) {
+            throw error;
+          }
+
+          throw fileDownloadError(
+            region,
+            file,
+            error
+          );
+        }
 
         completedFiles += 1;
         emit(file);
@@ -449,23 +481,366 @@ function cloneResponse(response, body) {
   });
 }
 
-async function sha256(bytes, cryptoRef) {
-  if (!cryptoRef?.subtle?.digest) {
+function verifiedProgressResponse(
+  response,
+  onChunk
+) {
+  if (!response.body?.getReader) {
     throw new Error(
-      'This browser cannot verify region package checksums.'
+      'This browser cannot stream verified region downloads.'
     );
   }
 
-  const digest = await cryptoRef.subtle.digest(
-    'SHA-256',
-    bytes
+  const reader = response.body.getReader();
+  const hasher = new IncrementalSha256();
+
+  let resolveDigest;
+  let rejectDigest;
+  let settled = false;
+
+  const digest = new Promise(
+    (resolve, reject) => {
+      resolveDigest = resolve;
+      rejectDigest = reject;
+    }
   );
 
-  return [...new Uint8Array(digest)]
-    .map(value =>
-      value.toString(16).padStart(2, '0')
-    )
-    .join('');
+  const body = new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done, value } =
+          await reader.read();
+
+        if (done) {
+          controller.close();
+
+          if (!settled) {
+            settled = true;
+            resolveDigest(hasher.hex());
+          }
+
+          return;
+        }
+
+        hasher.update(value);
+        onChunk(value.byteLength);
+        controller.enqueue(value);
+      } catch (error) {
+        if (!settled) {
+          settled = true;
+          rejectDigest(error);
+        }
+
+        controller.error(error);
+      }
+    },
+
+    async cancel(reason) {
+      if (!settled) {
+        settled = true;
+        rejectDigest(
+          reason instanceof Error
+            ? reason
+            : new Error(
+                'Region download stream cancelled.'
+              )
+        );
+      }
+
+      return reader.cancel(reason);
+    }
+  });
+
+  return {
+    response: cloneResponse(response, body),
+    digest
+  };
+}
+
+class IncrementalSha256 {
+  constructor() {
+    this.state = new Uint32Array([
+      0x6a09e667,
+      0xbb67ae85,
+      0x3c6ef372,
+      0xa54ff53a,
+      0x510e527f,
+      0x9b05688c,
+      0x1f83d9ab,
+      0x5be0cd19
+    ]);
+
+    this.buffer = new Uint8Array(64);
+    this.bufferLength = 0;
+    this.bytesHashed = 0;
+    this.finished = false;
+    this.words = new Uint32Array(64);
+  }
+
+  update(input) {
+    if (this.finished) {
+      throw new Error(
+        'SHA-256 digest is already finalized.'
+      );
+    }
+
+    const bytes =
+      input instanceof Uint8Array
+        ? input
+        : new Uint8Array(input);
+
+    this.bytesHashed += bytes.byteLength;
+
+    let offset = 0;
+
+    if (this.bufferLength > 0) {
+      const needed = 64 - this.bufferLength;
+      const take = Math.min(
+        needed,
+        bytes.byteLength
+      );
+
+      this.buffer.set(
+        bytes.subarray(0, take),
+        this.bufferLength
+      );
+      this.bufferLength += take;
+      offset += take;
+
+      if (this.bufferLength === 64) {
+        this.#compress(this.buffer);
+        this.bufferLength = 0;
+      }
+    }
+
+    while (offset + 64 <= bytes.byteLength) {
+      this.#compress(
+        bytes.subarray(offset, offset + 64)
+      );
+      offset += 64;
+    }
+
+    if (offset < bytes.byteLength) {
+      const remainder = bytes.subarray(offset);
+      this.buffer.set(remainder, 0);
+      this.bufferLength = remainder.byteLength;
+    }
+
+    return this;
+  }
+
+  hex() {
+    if (!this.finished) {
+      this.#finish();
+    }
+
+    return [...this.state]
+      .map(value =>
+        value.toString(16).padStart(8, '0')
+      )
+      .join('');
+  }
+
+  #finish() {
+    const bitLength = this.bytesHashed * 8;
+    const high = Math.floor(
+      bitLength / 0x100000000
+    );
+    const low = bitLength >>> 0;
+
+    this.buffer[this.bufferLength] = 0x80;
+    this.bufferLength += 1;
+
+    if (this.bufferLength > 56) {
+      this.buffer.fill(
+        0,
+        this.bufferLength,
+        64
+      );
+      this.#compress(this.buffer);
+      this.bufferLength = 0;
+    }
+
+    this.buffer.fill(
+      0,
+      this.bufferLength,
+      56
+    );
+
+    writeUint32Be(this.buffer, 56, high);
+    writeUint32Be(this.buffer, 60, low);
+    this.#compress(this.buffer);
+
+    this.bufferLength = 0;
+    this.finished = true;
+  }
+
+  #compress(chunk) {
+    const w = this.words;
+
+    for (let i = 0; i < 16; i += 1) {
+      const offset = i * 4;
+      w[i] = (
+        (chunk[offset] << 24) |
+        (chunk[offset + 1] << 16) |
+        (chunk[offset + 2] << 8) |
+        chunk[offset + 3]
+      ) >>> 0;
+    }
+
+    for (let i = 16; i < 64; i += 1) {
+      const x = w[i - 15];
+      const y = w[i - 2];
+      const s0 = (
+        rotateRight(x, 7) ^
+        rotateRight(x, 18) ^
+        (x >>> 3)
+      ) >>> 0;
+      const s1 = (
+        rotateRight(y, 17) ^
+        rotateRight(y, 19) ^
+        (y >>> 10)
+      ) >>> 0;
+
+      w[i] = (
+        w[i - 16] +
+        s0 +
+        w[i - 7] +
+        s1
+      ) >>> 0;
+    }
+
+    let a = this.state[0];
+    let b = this.state[1];
+    let c = this.state[2];
+    let d = this.state[3];
+    let e = this.state[4];
+    let f = this.state[5];
+    let g = this.state[6];
+    let h = this.state[7];
+
+    for (let i = 0; i < 64; i += 1) {
+      const s1 = (
+        rotateRight(e, 6) ^
+        rotateRight(e, 11) ^
+        rotateRight(e, 25)
+      ) >>> 0;
+      const choice = (
+        (e & f) ^
+        (~e & g)
+      ) >>> 0;
+      const temp1 = (
+        h +
+        s1 +
+        choice +
+        SHA256_K[i] +
+        w[i]
+      ) >>> 0;
+      const s0 = (
+        rotateRight(a, 2) ^
+        rotateRight(a, 13) ^
+        rotateRight(a, 22)
+      ) >>> 0;
+      const majority = (
+        (a & b) ^
+        (a & c) ^
+        (b & c)
+      ) >>> 0;
+      const temp2 = (s0 + majority) >>> 0;
+
+      h = g;
+      g = f;
+      f = e;
+      e = (d + temp1) >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) >>> 0;
+    }
+
+    this.state[0] =
+      (this.state[0] + a) >>> 0;
+    this.state[1] =
+      (this.state[1] + b) >>> 0;
+    this.state[2] =
+      (this.state[2] + c) >>> 0;
+    this.state[3] =
+      (this.state[3] + d) >>> 0;
+    this.state[4] =
+      (this.state[4] + e) >>> 0;
+    this.state[5] =
+      (this.state[5] + f) >>> 0;
+    this.state[6] =
+      (this.state[6] + g) >>> 0;
+    this.state[7] =
+      (this.state[7] + h) >>> 0;
+  }
+}
+
+const SHA256_K = new Uint32Array([
+  0x428a2f98, 0x71374491, 0xb5c0fbcf,
+  0xe9b5dba5, 0x3956c25b, 0x59f111f1,
+  0x923f82a4, 0xab1c5ed5, 0xd807aa98,
+  0x12835b01, 0x243185be, 0x550c7dc3,
+  0x72be5d74, 0x80deb1fe, 0x9bdc06a7,
+  0xc19bf174, 0xe49b69c1, 0xefbe4786,
+  0x0fc19dc6, 0x240ca1cc, 0x2de92c6f,
+  0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8,
+  0xbf597fc7, 0xc6e00bf3, 0xd5a79147,
+  0x06ca6351, 0x14292967, 0x27b70a85,
+  0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+  0x650a7354, 0x766a0abb, 0x81c2c92e,
+  0x92722c85, 0xa2bfe8a1, 0xa81a664b,
+  0xc24b8b70, 0xc76c51a3, 0xd192e819,
+  0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c,
+  0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a,
+  0x5b9cca4f, 0x682e6ff3, 0x748f82ee,
+  0x78a5636f, 0x84c87814, 0x8cc70208,
+  0x90befffa, 0xa4506ceb, 0xbef9a3f7,
+  0xc67178f2
+]);
+
+function rotateRight(value, count) {
+  return (
+    (value >>> count) |
+    (value << (32 - count))
+  ) >>> 0;
+}
+
+function writeUint32Be(bytes, offset, value) {
+  bytes[offset] = value >>> 24;
+  bytes[offset + 1] = value >>> 16;
+  bytes[offset + 2] = value >>> 8;
+  bytes[offset + 3] = value;
+}
+
+function fileDownloadError(region, file, error) {
+  const detail = String(
+    error?.message ?? error ?? 'Network error'
+  );
+
+  return new Error(
+    `Unable to download ${region.name}: ${file.label} (${formatFileSize(file.sizeBytes)}): ${detail}`,
+    { cause: error }
+  );
+}
+
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return 'unknown size';
+  }
+
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  if (bytes >= 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${bytes} B`;
 }
 
 function normalizeSha256(value) {
