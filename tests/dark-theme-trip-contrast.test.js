@@ -103,7 +103,7 @@ test(
 );
 
 test(
-  'dark theme keeps maneuver distance readable on the light guidance card',
+  'dark theme keeps visual maneuver guidance readable on the light guidance card',
   () => {
     assert.match(
       css,
@@ -112,7 +112,7 @@ test(
 
     assert.match(
       css,
-      /html\[data-atlas-theme="dark"\]\s+\.navigation-guidance-banner \.navigation-maneuver-instruction\s*\{[^}]*color:\s*#18202f/i
+      /html\[data-atlas-theme="dark"\]\s+\.navigation-guidance-banner \.navigation-maneuver-road\s*\{[^}]*color:\s*#18202f/i
     );
   }
 );
