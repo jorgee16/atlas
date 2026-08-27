@@ -15,7 +15,8 @@ import {
   splitRouteAtProgress
 } from '../features/navigation/navigation-route-visuals.js';
 import {
-  adaptiveNavigationZoom
+  adaptiveNavigationZoom,
+  navigationForwardOffset
 } from './navigation-camera.js';
 import {
   carNavigationHeading,
@@ -223,6 +224,7 @@ export class LeafletMapAdapter {
       shiftKeyRotate: false,
       bearing: 0
     }).setView(center, zoom);
+
 
     this.onlineLayer = createOnlineOsmLayer()
       .addTo(this.map);
@@ -642,6 +644,7 @@ export class LeafletMapAdapter {
         ? normalizeBearing(heading)
         : 0;
 
+
     if (
       headingUp &&
       Number.isFinite(heading)
@@ -668,7 +671,14 @@ export class LeafletMapAdapter {
     }
 
     this.followHeadingUp =
-      headingUp;
+      headingUp && Number.isFinite(heading);
+
+    // Switching from the forward-looking camera to north-up must also
+    // clear the old forward offset immediately. When stationary there
+    // may be no animation frame left to recenter the map for us.
+    if (!this.followHeadingUp) {
+      this.#centerOnRenderedUserPosition();
+    }
 
     const requestedZoom =
       this.navigationTravelMode
@@ -741,6 +751,11 @@ export class LeafletMapAdapter {
 
     this.map.stopHeadingUp?.();
     this.map.setBearing?.(normalized);
+
+    if (normalized === 0) {
+      this.followHeadingUp = false;
+    }
+
     this.#refreshUserLocationIcon();
 
     return normalized;
@@ -1110,6 +1125,23 @@ export class LeafletMapAdapter {
       );
   }
 
+  #centerOnRenderedUserPosition() {
+    if (!this.renderedUserPosition) {
+      return;
+    }
+
+    this.map.panTo(
+      L.latLng(
+        this.renderedUserPosition.lat,
+        this.renderedUserPosition.lon
+      ),
+      {
+        animate: false,
+        noMoveStart: true
+      }
+    );
+  }
+
   #followRenderedUserPosition() {
     if (
       !this.renderedUserPosition ||
@@ -1143,9 +1175,11 @@ export class LeafletMapAdapter {
         this.map.getSize().y;
 
       const verticalOffset =
-        this.navigationTravelMode === 'walk'
-          ? Math.min(150, height * 0.20)
-          : Math.min(180, height * 0.24);
+        navigationForwardOffset({
+          travelMode: this.navigationTravelMode,
+          height,
+          headingUp: true
+        });
 
       const projected =
         this.map.project(
@@ -1187,6 +1221,17 @@ export class LeafletMapAdapter {
     }
 
     this.navigationTravelMode = mode;
+
+    const container = this.map.getContainer?.();
+
+    container?.classList.toggle(
+      'atlas-drive-camera',
+      mode === 'drive'
+    );
+
+    if (mode !== 'drive') {
+      this.followHeadingUp = false;
+    }
 
     if (mode === null) {
       this.navigationRouteProgress = null;
@@ -1570,12 +1615,16 @@ export class LeafletMapAdapter {
       );
   }
 
+  clearManeuvers() {
+    this.#removeLayers(this.maneuverLayers);
+    this.maneuverLayers = [];
+  }
+
   showManeuvers(
     maneuvers,
     activeIndex = 0
   ) {
-    this.#removeLayers(this.maneuverLayers);
-    this.maneuverLayers = [];
+    this.clearManeuvers();
 
     if (!Array.isArray(maneuvers)) {
       return;

@@ -48,6 +48,11 @@ const OFF_ROUTE_CONFIRMATION_FIXES = 2;
 const OFF_ROUTE_CONFIRMATION_MS = 1_500;
 const ROUTE_CHANGED_NOTICE_MS = 6_000;
 const MINIMUM_REROUTE_INTERVAL_MS = 10_000;
+const REROUTE_ARM_SPEED_METERS_PER_SECOND = 1.8;
+const REROUTE_ARM_DISPLACEMENT_METERS = 18;
+const REROUTE_ARM_CONFIRMATION_FIXES = 2;
+const REROUTE_ARM_CONFIRMATION_MS = 1_000;
+const REROUTE_ARM_MAX_ACCURACY_METERS = 35;
 const ROUTE_PREVIEW_COLLAPSE_MS = 4_500;
 const APPROACHING_DESTINATION_METERS = 100;
 const ARRIVAL_DISTANCE_METERS = 30;
@@ -157,6 +162,10 @@ export class NavigationFeature {
     this.navigationConfidenceState = 'normal';
     this.offRouteEvidenceCount = 0;
     this.offRouteEvidenceSince = 0;
+    this.rerouteArmed = false;
+    this.rerouteArmReferencePosition = null;
+    this.rerouteArmEvidenceCount = 0;
+    this.rerouteArmEvidenceSince = 0;
     this.routeChangedUntil = 0;
     this.previousRoute = null;
     this.arrivalState = null;
@@ -251,6 +260,7 @@ export class NavigationFeature {
     this.navigationContext = context;
     this.arrivalState = null;
     this.pickMode = null;
+    this.#resetRerouteArming();
 
     this.render();
 
@@ -387,6 +397,17 @@ export class NavigationFeature {
       );
 
     if (
+      this.travelMode === 'drive' &&
+      !this.#updateRerouteArming(normalizedPosition, now)
+    ) {
+      this.#resetOffRouteEvidence();
+      if (this.navigationConfidenceState !== 'changed') {
+        this.#setNavigationConfidenceState('normal');
+      }
+      return;
+    }
+
+    if (
       Number.isFinite(normalizedPosition.accuracy) &&
       normalizedPosition.accuracy > GPS_REDUCED_ACCURACY_METERS
     ) {
@@ -459,6 +480,7 @@ export class NavigationFeature {
     this.lastVoiceAnnouncement = null;
     this.navigationConfidenceState = 'normal';
     this.#resetOffRouteEvidence();
+    this.#resetRerouteArming();
     this.routeChangedUntil = 0;
     this.previousRoute = null;
     this.arrivalState = null;
@@ -3337,6 +3359,82 @@ export class NavigationFeature {
         'Possible deviation detected.'
       );
     }
+  }
+
+  #updateRerouteArming(position, now) {
+    if (this.rerouteArmed) {
+      return true;
+    }
+
+    if (
+      Number.isFinite(position?.accuracy) &&
+      position.accuracy > REROUTE_ARM_MAX_ACCURACY_METERS
+    ) {
+      this.rerouteArmEvidenceCount = 0;
+      this.rerouteArmEvidenceSince = 0;
+      return false;
+    }
+
+    if (!this.rerouteArmReferencePosition) {
+      this.rerouteArmReferencePosition = {
+        lat: position.lat,
+        lon: position.lon
+      };
+      return false;
+    }
+
+    const displacement = distanceMeters(
+      this.rerouteArmReferencePosition,
+      position
+    );
+
+    const movementThreshold = Math.max(
+      REROUTE_ARM_DISPLACEMENT_METERS,
+      Number.isFinite(position?.accuracy)
+        ? position.accuracy * 2
+        : 0
+    );
+
+    const moving =
+      (
+        Number.isFinite(position?.speed) &&
+        position.speed >= REROUTE_ARM_SPEED_METERS_PER_SECOND
+      ) ||
+      displacement >= movementThreshold;
+
+    if (!moving) {
+      this.rerouteArmEvidenceCount = 0;
+      this.rerouteArmEvidenceSince = 0;
+      return false;
+    }
+
+    if (!this.rerouteArmEvidenceSince) {
+      this.rerouteArmEvidenceSince = now;
+      this.rerouteArmEvidenceCount = 1;
+      return false;
+    }
+
+    this.rerouteArmEvidenceCount += 1;
+
+    if (
+      this.rerouteArmEvidenceCount < REROUTE_ARM_CONFIRMATION_FIXES ||
+      now - this.rerouteArmEvidenceSince < REROUTE_ARM_CONFIRMATION_MS
+    ) {
+      return false;
+    }
+
+    this.rerouteArmed = true;
+    this.rerouteArmReferencePosition = null;
+    this.rerouteArmEvidenceCount = 0;
+    this.rerouteArmEvidenceSince = 0;
+    return true;
+  }
+
+  #resetRerouteArming() {
+    this.rerouteArmed = false;
+    this.rerouteArmReferencePosition = null;
+    this.rerouteArmEvidenceCount = 0;
+    this.rerouteArmEvidenceSince = 0;
   }
 
   #resetOffRouteEvidence() {

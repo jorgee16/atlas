@@ -1,6 +1,46 @@
 const clamp = (value, min, max) =>
   Math.min(max, Math.max(min, value));
 
+
+
+const NAVIGATION_CAMERA_PROFILES = Object.freeze({
+  drive: Object.freeze({
+    forwardFraction: 0.16,
+    forwardMaxPixels: 220
+  }),
+  walk: Object.freeze({
+    forwardFraction: 0.20,
+    forwardMaxPixels: 150
+  })
+});
+
+export function navigationCameraProfile(
+  travelMode = null
+) {
+  return NAVIGATION_CAMERA_PROFILES[travelMode] ??
+    Object.freeze({
+      forwardFraction: 0,
+      forwardMaxPixels: 0
+    });
+}
+
+export function navigationForwardOffset({
+  travelMode = null,
+  height = 0,
+  headingUp = false
+} = {}) {
+  if (!headingUp || !Number.isFinite(height) || height <= 0) {
+    return 0;
+  }
+
+  const profile = navigationCameraProfile(travelMode);
+
+  return Math.min(
+    profile.forwardMaxPixels,
+    height * profile.forwardFraction
+  );
+}
+
 const maneuverText = maneuver =>
   [
     maneuver?.type,

@@ -69,6 +69,8 @@ test(
     assert.equal(element.dataset.state, 'ready');
     assert.match(element.innerHTML, /250 m/);
     assert.match(element.innerHTML, /maneuver-exit-number">2/);
+    assert.match(element.innerHTML, /Avenida da República · N1/);
+    assert.doesNotMatch(element.innerHTML, /At the roundabout/);
     assert.doesNotMatch(element.innerHTML, />Then</);
     assert.match(element.innerHTML, /Voice on/);
     assert.match(element.innerHTML, /navigation-guidance-compact/);
@@ -137,6 +139,47 @@ test(
     assert.match(element.innerHTML, /navigation-lane is-recommended/);
   }
 );
+
+test(
+  'driving HUD uses arrows, road names and lane arrows instead of instruction sentences',
+  () => {
+    const element = new FakeElement();
+    const guidance = new NavigationGuidance({ element, onStop: () => {} });
+
+    guidance.showRoute({
+      route: { distanceMeters: 2000 },
+      destinationName: 'Cascais',
+      travelMode: 'drive',
+      progress: {
+        distanceToManeuverMeters: 120,
+        remainingDistanceMeters: 1200,
+        remainingDurationSeconds: 180,
+        nextManeuver: {
+          type: 'turn-right',
+          instruction: 'Turn right onto IC25',
+          roadRef: 'IC25',
+          lanes: [
+            { indication: 'straight' },
+            { indication: 'right', recommended: true }
+          ]
+        },
+        followingManeuver: {
+          type: 'turn-left',
+          instruction: 'Turn left onto A5',
+          roadRef: 'A5'
+        }
+      }
+    });
+
+    assert.match(element.innerHTML, /IC25/);
+    assert.match(element.innerHTML, /navigation-lane-guidance/);
+    assert.match(element.innerHTML, /navigation-lane is-recommended/);
+    assert.doesNotMatch(element.innerHTML, /Turn right onto IC25/);
+    assert.doesNotMatch(element.innerHTML, /Turn left onto A5/);
+    assert.doesNotMatch(element.innerHTML, />Then</);
+  }
+);
+
 
 test(
   'voice guidance uses the installed speech engine and announces distance',

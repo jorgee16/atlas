@@ -1838,7 +1838,7 @@ select:focus-visible,
   letter-spacing: -0.04em;
 }
 
-.navigation-maneuver-instruction {
+.navigation-maneuver-road {
   display: -webkit-box;
   overflow: hidden;
   color: #1b2435;
@@ -1896,6 +1896,10 @@ select:focus-visible,
   border-top: 1px solid rgba(24, 32, 47, 0.07);
 }
 
+
+.navigation-following-turn--visual {
+  grid-template-columns: 30px minmax(0, 1fr);
+}
 .navigation-following-turn > small {
   color: #8a93a4;
   font-size: 9px;
@@ -2251,7 +2255,7 @@ select:focus-visible,
     font-size: 22px;
   }
 
-  .navigation-maneuver-instruction {
+  .navigation-maneuver-road {
     font-size: 15px;
   }
 
@@ -3013,7 +3017,7 @@ body:has(.app-tabs:not([hidden])) .map-actions { bottom:82px; }
   font-size: 23px;
 }
 
-.navigation-guidance-banner .navigation-maneuver-instruction {
+.navigation-guidance-banner .navigation-maneuver-road {
   font-size: 16px;
 }
 
@@ -5222,7 +5226,7 @@ body,
   font-size: 20px;
 }
 
-.navigation-guidance-compact .navigation-maneuver-instruction {
+.navigation-guidance-compact .navigation-maneuver-road {
   font-size: 14px;
   line-height: 1.12;
   -webkit-line-clamp: 2;
@@ -5267,7 +5271,7 @@ body,
   font-size: 22px;
 }
 
-.navigation-guidance-expanded .navigation-maneuver-instruction {
+.navigation-guidance-expanded .navigation-maneuver-road {
   font-size: 16px;
 }
 
@@ -8510,7 +8514,7 @@ html[data-atlas-theme="dark"] .navigation-guidance-banner .navigation-maneuver-d
   color: #315efb;
 }
 
-html[data-atlas-theme="dark"] .navigation-guidance-banner .navigation-maneuver-instruction {
+html[data-atlas-theme="dark"] .navigation-guidance-banner .navigation-maneuver-road {
   color: #18202f;
 }
 
@@ -11304,7 +11308,7 @@ html[data-atlas-theme="dark"]
   font-size: 19px;
 }
 
-.app.navigation-active .navigation-guidance-banner .navigation-maneuver-instruction {
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-road {
   font-size: 14px;
   line-height: 1.22;
 }
@@ -11450,7 +11454,7 @@ html[data-atlas-theme="dark"]
   font-size: 18px;
 }
 
-.app.navigation-active .navigation-guidance-banner .navigation-maneuver-instruction {
+.app.navigation-active .navigation-guidance-banner .navigation-maneuver-road {
   font-size: 13.5px;
 }
 
@@ -11636,7 +11640,7 @@ html[data-atlas-theme="dark"]
     font-size: 17px;
   }
 
-  .app.navigation-active .navigation-guidance-banner .navigation-maneuver-instruction {
+  .app.navigation-active .navigation-guidance-banner .navigation-maneuver-road {
     font-size: 12.5px;
     line-height: 1.15;
   }

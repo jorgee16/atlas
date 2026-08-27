@@ -6,6 +6,11 @@ import {
 } from '../src/features/follow/follow-mode-controller.js';
 
 import {
+  navigationCameraProfile,
+  navigationForwardOffset
+} from '../src/map/navigation-camera.js';
+
+import {
   routeBearingFromProgress,
   splitRouteAtProgress
 } from '../src/features/navigation/navigation-route-visuals.js';
@@ -38,6 +43,63 @@ class FakeButton {
     this.listeners.get('click')?.();
   }
 }
+
+test(
+  'car navigation camera keeps a forward-looking flat profile',
+  () => {
+    const profile = navigationCameraProfile('drive');
+
+    assert.deepEqual(profile, {
+      forwardFraction: 0.16,
+      forwardMaxPixels: 220
+    });
+    assert.equal(
+      navigationForwardOffset({
+        travelMode: 'drive',
+        height: 1200,
+        headingUp: true
+      }),
+      192
+    );
+    assert.equal(
+      navigationForwardOffset({
+        travelMode: 'drive',
+        height: 2000,
+        headingUp: true
+      }),
+      220
+    );
+  }
+);
+
+test(
+  'walking and north-up camera keep their existing flat behavior',
+  () => {
+    assert.deepEqual(
+      navigationCameraProfile('walk'),
+      {
+        forwardFraction: 0.20,
+        forwardMaxPixels: 150
+      }
+    );
+    assert.equal(
+      navigationForwardOffset({
+        travelMode: 'walk',
+        height: 1000,
+        headingUp: true
+      }),
+      150
+    );
+    assert.equal(
+      navigationForwardOffset({
+        travelMode: 'drive',
+        height: 1200,
+        headingUp: false
+      }),
+      0
+    );
+  }
+);
 
 test(
   'route progress splits traveled gray geometry from the remaining route',
@@ -150,7 +212,10 @@ test(
       ),
       'false'
     );
-    assert.deepEqual(calls.at(-1), ['bearing', 0]);
+    assert.deepEqual(
+      calls.at(-1),
+      ['follow', { zoom: 18, headingUp: false }]
+    );
 
     const followCallsBeforePreview =
       calls.filter(([name]) =>

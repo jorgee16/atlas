@@ -76,7 +76,7 @@ import {
 } from '../transit/transit-provider-registry.js';
 
 
-import { MapController, LeafletMapAdapter } from '../map.js';
+import { MapController, createMapAdapter } from '../map.js';
 import {
   GpsController
 } from '../gps.js';
@@ -138,8 +138,10 @@ export class AppBootstrap {
   const expandSheet = () => {
     panelController.expand();
   };
-  const mapAdapter = new LeafletMapAdapter({
-    elementId: 'map'
+  const mapAdapter = createMapAdapter({
+    adapterOptions: {
+      elementId: 'map'
+    }
   });
 
   const map = new MapController({
@@ -1974,7 +1976,7 @@ loadTripButton?.addEventListener(
     async () => {
       if (gps.enabled) {
         await gps.stop();
-        map.adapter?.resetGpsDiagnostics?.();
+        map.resetGpsDiagnostics();
 
         status(
           'GPS disabled',

@@ -253,12 +253,32 @@ test(
       }
     });
 
+    // Car rerouting is intentionally disarmed until real movement is
+    // established. This prevents a stationary first GPS fix from
+    // immediately replacing a just-started route.
+    now = 2_000;
+    feature.updatePosition({
+      lat: 40.00005,
+      lon: -7.99995,
+      accuracy: 5,
+      speed: 4
+    });
+
+    now = 3_100;
+    feature.updatePosition({
+      lat: 40.00015,
+      lon: -7.99985,
+      accuracy: 5,
+      speed: 4
+    });
+
     now = 20_000;
 
     feature.updatePosition({
       lat: 40.1,
       lon: -8.1,
-      accuracy: 8
+      accuracy: 8,
+      speed: 4
     });
 
     now = 21_500;
@@ -291,7 +311,44 @@ test(
 );
 
 test(
-  'poor GPS accuracy does not trigger rerouting from a single off-route fix',
+  'car rerouting stays disarmed while stationary after navigation starts',
+  async () => {
+    let now = 0;
+    let routeCalls = 0;
+
+    const { feature } = createFeature(
+      {
+        route: async () => {
+          routeCalls += 1;
+          return routeResult();
+        }
+      },
+      { now: () => now }
+    );
+
+    await feature.start({
+      origin: { lat: 40, lon: -8 },
+      destination: { name: 'Destination', lat: 40.01, lon: -7.99 }
+    });
+
+    for (const t of [20_000, 22_000, 24_000, 26_000]) {
+      now = t;
+      feature.updatePosition({
+        lat: 40.1,
+        lon: -8.1,
+        accuracy: 5,
+        speed: 0
+      });
+    }
+
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(routeCalls, 1);
+    assert.equal(feature.navigationConfidenceState, 'normal');
+  }
+);
+
+test(
+  'poor GPS accuracy before movement does not arm or reduce car rerouting confidence',
   async () => {
     let now = 0;
     let routeCalls = 0;
@@ -315,7 +372,57 @@ test(
     feature.updatePosition({
       lat: 40.1,
       lon: -8.1,
-      accuracy: 90
+      accuracy: 90,
+      speed: 0
+    });
+
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(routeCalls, 1);
+    assert.equal(feature.navigationConfidenceState, 'normal');
+  }
+);
+
+test(
+  'poor GPS accuracy reduces confidence after car rerouting is armed without rerouting',
+  async () => {
+    let now = 0;
+    let routeCalls = 0;
+
+    const { feature } = createFeature(
+      {
+        route: async () => {
+          routeCalls += 1;
+          return routeResult();
+        }
+      },
+      { now: () => now }
+    );
+
+    await feature.start({
+      origin: { lat: 40, lon: -8 },
+      destination: { name: 'Destination', lat: 40.01, lon: -7.99 }
+    });
+
+    for (const [time, lat] of [
+      [1_000, 40.0000],
+      [2_200, 40.0002],
+      [3_400, 40.0004]
+    ]) {
+      now = time;
+      feature.updatePosition({
+        lat,
+        lon: -8,
+        accuracy: 5,
+        speed: 3
+      });
+    }
+
+    now = 20_000;
+    feature.updatePosition({
+      lat: 40.1,
+      lon: -8.1,
+      accuracy: 90,
+      speed: 0
     });
 
     await new Promise(resolve => setImmediate(resolve));

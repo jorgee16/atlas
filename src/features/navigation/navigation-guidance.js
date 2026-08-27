@@ -277,10 +277,16 @@ export class NavigationGuidance {
             <strong class="navigation-maneuver-distance">
               ${formatManeuverDistance(progress.distanceToManeuverMeters)}
             </strong>
-            <span class="navigation-maneuver-instruction">
-              ${escapeHtml(maneuver.instruction)}
-            </span>
-            ${expanded && road ? `<small>${escapeHtml(road)}</small>` : ''}
+            ${travelMode === 'drive' ? (road ? `
+              <span class="navigation-maneuver-road">
+                ${escapeHtml(road)}
+              </span>
+            ` : '') : `
+              <span class="navigation-maneuver-road">
+                ${escapeHtml(maneuver.instruction)}
+              </span>
+              ${expanded && road ? `<small>${escapeHtml(road)}</small>` : ''}
+            `}
           </div>
 
           ${this.#stopButton()}
@@ -289,12 +295,14 @@ export class NavigationGuidance {
         ${showLanes ? laneGuidanceHtml(maneuver) : ''}
 
         ${expanded && following ? `
-          <div class="navigation-following-turn">
-            <span>Then</span>
+          <div class="navigation-following-turn${travelMode === 'drive' ? ' navigation-following-turn--visual' : ''}">
+            ${travelMode === 'walk' ? '<span>Then</span>' : ''}
             ${maneuverIconSvg(following, {
               className: 'maneuver-icon maneuver-icon-small'
             })}
-            <strong>${escapeHtml(following.instruction)}</strong>
+            ${travelMode === 'drive'
+              ? (maneuverRoad(following) ? `<strong>${escapeHtml(maneuverRoad(following))}</strong>` : '')
+              : `<strong>${escapeHtml(following.instruction)}</strong>`}
           </div>
         ` : ''}
       </div>

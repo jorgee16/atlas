@@ -220,18 +220,12 @@ export class FollowModeController {
           return;
         }
 
-        this.setHeadingUpEnabled(!this.headingUpEnabled);
-
-        if (
-          this.headingUpEnabled &&
-          this.enabled &&
-          this.position
-        ) {
-          this.#focusPosition();
-        } else {
-          this.map.setBearing?.(0);
-          this.#renderCompass(0);
-        }
+        // setHeadingUpEnabled owns the complete transition. Keeping the
+        // compass handler single-path prevents duplicate focus/bearing
+        // updates from racing each other.
+        this.setHeadingUpEnabled(
+          !this.headingUpEnabled
+        );
       }
     );
 
