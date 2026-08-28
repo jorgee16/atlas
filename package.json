@@ -19,6 +19,7 @@
     "@capacitor/geolocation": "^8.2.1",
     "@tomickigrzegorz/leaflet-rotate": "0.2.3",
     "leaflet": "^1.9.4",
+    "maplibre-gl": "^6.6.0",
     "pmtiles": "^4.4.1",
     "protomaps-leaflet": "^5.1.0"
   },
