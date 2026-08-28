@@ -1,5 +1,7 @@
 import { LeafletMapAdapter } from './leaflet-map-adapter.js';
-import { MapLibreMapAdapter } from './maplibre-map-adapter.js';
+import {
+  MapLibrePmtilesMapAdapter
+} from './maplibre-pmtiles-map-adapter.js';
 
 export const MAP_RENDERER = Object.freeze({
   LEAFLET: 'leaflet',
@@ -16,7 +18,7 @@ export function createMapAdapter({
     case MAP_RENDERER.LEAFLET:
       return new LeafletMapAdapter(adapterOptions);
     case MAP_RENDERER.MAPLIBRE:
-      return new MapLibreMapAdapter(adapterOptions);
+      return new MapLibrePmtilesMapAdapter(adapterOptions);
     default:
       throw new RangeError(`Unsupported map renderer: ${renderer}`);
   }
