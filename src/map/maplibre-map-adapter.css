@@ -1,0 +1,124 @@
+.maplibregl-map {
+  width: 100%;
+  height: 100%;
+  font: inherit;
+}
+
+.maplibregl-canvas {
+  outline: none;
+}
+
+.maplibre-itinerary-marker,
+.maplibre-nearby-marker,
+.maplibre-user-marker,
+.route-maneuver-marker,
+.bookmark-selection-pin {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.maplibre-itinerary-marker {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #fff;
+  background: #2563eb;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
+  font-size: 14px;
+  font-weight: 800;
+  transform: rotate(-45deg);
+}
+
+.maplibre-itinerary-marker::first-letter {
+  transform: rotate(45deg);
+}
+
+.maplibre-nearby-marker {
+  width: 17px;
+  height: 17px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #315efb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.maplibre-user-marker {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  transition: transform 180ms linear;
+}
+
+.maplibre-user-dot {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.30);
+}
+
+.maplibre-user-marker.drive {
+  width: 38px;
+  height: 38px;
+  background: #fff;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.30);
+}
+
+.maplibre-user-arrow {
+  display: block;
+  width: 0;
+  height: 0;
+  border-right: 8px solid transparent;
+  border-bottom: 20px solid #2563eb;
+  border-left: 8px solid transparent;
+}
+
+.route-maneuver-marker {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: #315efb;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #edf1ff;
+  box-shadow: 0 3px 9px rgba(26, 37, 60, 0.20);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.route-maneuver-marker.active {
+  color: #fff;
+  background: #315efb;
+}
+
+.bookmark-selection-pin {
+  width: 24px;
+  height: 24px;
+  border: 5px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #315efb;
+  box-shadow: 0 3px 11px rgba(0, 0, 0, 0.30);
+  transform: rotate(-45deg);
+}
+
+.maplibregl-popup-content {
+  border-radius: 16px;
+  box-shadow: 0 12px 34px rgba(24, 32, 47, 0.14);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 9px;
+}
+
+html[data-atlas-theme="dark"] .maplibregl-popup-content {
+  color: #18202f;
+  background: #fff;
+}
