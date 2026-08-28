@@ -42,12 +42,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     );
     this.#renderMapSourceBadge();
 
-    // MapLibre removes every custom source/layer whenever setStyle()
-    // switches between the online and offline base map. Navigation state
-    // lives outside the renderer, so recreate Atlas overlays after each
-    // style load instead of letting a base-map change erase the route.
+    // setStyle() destroys every Atlas custom source/layer. Keep the route
+    // renderer self-healing so selecting a destination and pressing Start
+    // never leaves guidance active with an invisible route.
     this.map.on('style.load', () => {
-      this.#restoreStyleOverlays();
+      this.#ensureRouteOverlay();
     });
   }
 
@@ -64,14 +63,42 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         : 'online';
 
     this.#renderMapSourceBadge();
+
+    // super.setRegion() returns immediately after setStyle(). The style may
+    // still be loading, so also register a one-shot restoration here. The
+    // permanent style.load listener above remains the safety net for later
+    // style switches.
+    if (this.currentRoute) {
+      if (this.map.isStyleLoaded?.()) {
+        this.#ensureRouteOverlay();
+      } else {
+        this.map.once('style.load', () => {
+          this.#ensureRouteOverlay();
+        });
+      }
+    }
+
     return offlineLoaded;
   }
 
   showRoute(route, endpoints = {}) {
+    // Store route state BEFORE calling the base renderer. This matters when
+    // showRoute() is invoked while MapLibre is in the middle of setStyle():
+    // style.load can fire asynchronously before the base callback executes.
+    this.currentRoute = route;
+    this.currentRouteProgress = null;
+
     const result =
       super.showRoute(route, endpoints);
 
-    this.currentRoute = route;
+    // If the style is already ready, verify the overlay immediately. If it
+    // is still loading, the style.load listeners will rebuild it afterwards.
+    if (this.map.isStyleLoaded?.()) {
+      queueMicrotask(() => {
+        this.#ensureRouteOverlay();
+      });
+    }
+
     return result;
   }
 
@@ -87,10 +114,18 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRoute = route ?? this.currentRoute;
     this.currentRouteProgress = progress ?? null;
 
-    return super.updateRouteProgress(
+    const result = super.updateRouteProgress(
       route,
       progress
     );
+
+    if (this.map.isStyleLoaded?.()) {
+      queueMicrotask(() => {
+        this.#ensureRouteOverlay();
+      });
+    }
+
+    return result;
   }
 
   showManeuvers(maneuvers, activeIndex = 0) {
@@ -124,21 +159,53 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     return super.clearRoute();
   }
 
-  #restoreStyleOverlays() {
+  #ensureRouteOverlay() {
     if (
       this.restoringStyleOverlays ||
-      !this.currentRoute
+      !this.currentRoute ||
+      !this.map.isStyleLoaded?.()
     ) {
+      return;
+    }
+
+    const routeSource =
+      this.map.getSource?.('atlas-route');
+    const remainingLayer =
+      this.map.getLayer?.('atlas-route-remaining');
+    const casingLayer =
+      this.map.getLayer?.('atlas-route-casing');
+
+    // Nothing to do when the currently loaded style already contains the
+    // complete Atlas route overlay.
+    if (routeSource && remainingLayer && casingLayer) {
       return;
     }
 
     this.restoringStyleOverlays = true;
 
     try {
-      // Use the normal renderer paths so restored overlays stay identical
-      // to the ones created when the route was first selected. fitRoute()
-      // is suppressed during restoration so the user's navigation camera
-      // is not unexpectedly reset by a base-style change.
+      // Remove any partial overlay left by an interrupted style transition.
+      for (const layerId of [
+        'atlas-route-traveled',
+        'atlas-route-remaining',
+        'atlas-route-casing'
+      ]) {
+        if (this.map.getLayer?.(layerId)) {
+          this.map.removeLayer(layerId);
+        }
+      }
+
+      for (const sourceId of [
+        'atlas-route-traveled',
+        'atlas-route'
+      ]) {
+        if (this.map.getSource?.(sourceId)) {
+          this.map.removeSource(sourceId);
+        }
+      }
+
+      // Reuse the exact normal route renderer. fitRoute() is suppressed while
+      // restoring so pressing Start does not unexpectedly reset the camera.
       super.showRoute(this.currentRoute);
 
       if (this.currentRouteProgress) {
