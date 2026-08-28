@@ -7,6 +7,9 @@ import {
 import {
   createMapLibrePmtilesStyle
 } from './layers/maplibre-pmtiles-style.js';
+import {
+  installMapLibreZoomControl
+} from './maplibre-zoom-control.js';
 
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
@@ -19,5 +22,8 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       maplibre,
       createOfflineStyle
     });
+
+    this.zoomControlElement =
+      installMapLibreZoomControl(this.map);
   }
 }
