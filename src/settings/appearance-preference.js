@@ -57,13 +57,13 @@ export class AppearancePreference {
     root.style.colorScheme = resolved;
 
     if (previous && previous !== resolved) {
-      const EventConstructor =
-        this.document?.defaultView?.CustomEvent ??
-        globalThis.CustomEvent;
+      const view = this.document?.defaultView ?? globalThis;
+      const CustomEventConstructor =
+        view?.CustomEvent ?? globalThis.CustomEvent;
 
-      if (typeof EventConstructor === 'function') {
+      if (typeof CustomEventConstructor === 'function') {
         root.dispatchEvent(
-          new EventConstructor('atlasappearancechange', {
+          new CustomEventConstructor('atlasappearancechange', {
             detail: {
               mode: this.mode,
               previous,
@@ -71,6 +71,24 @@ export class AppearancePreference {
             }
           })
         );
+      }
+
+      const refreshLayout = () => {
+        const EventConstructor = view?.Event ?? globalThis.Event;
+        if (
+          typeof EventConstructor === 'function' &&
+          typeof view?.dispatchEvent === 'function'
+        ) {
+          view.dispatchEvent(new EventConstructor('resize'));
+        }
+      };
+
+      if (typeof view?.requestAnimationFrame === 'function') {
+        view.requestAnimationFrame(() => {
+          view.requestAnimationFrame(refreshLayout);
+        });
+      } else if (typeof view?.setTimeout === 'function') {
+        view.setTimeout(refreshLayout, 0);
       }
     }
 
