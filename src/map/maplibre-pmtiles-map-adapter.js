@@ -82,14 +82,15 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   showRoute(route, endpoints = {}) {
-    // Store route state BEFORE calling the base renderer. This matters when
-    // showRoute() is invoked while MapLibre is in the middle of setStyle():
-    // style.load can fire asynchronously before the base callback executes.
-    this.currentRoute = route;
-    this.currentRouteProgress = null;
-
+    // The base renderer starts by calling this.clearRoute(). Because that is
+    // dynamically dispatched, our override below clears currentRoute too.
+    // Therefore render first, then persist the new route. JavaScript runs this
+    // call synchronously, so style.load cannot interleave before state is set.
     const result =
       super.showRoute(route, endpoints);
+
+    this.currentRoute = route;
+    this.currentRouteProgress = null;
 
     // If the style is already ready, verify the overlay immediately. If it
     // is still loading, the style.load listeners will rebuild it afterwards.
