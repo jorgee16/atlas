@@ -50,9 +50,30 @@ export class AppearancePreference {
     const root = this.document?.documentElement;
     if (!root) return resolved;
 
+    const previous = root.dataset.atlasTheme ?? null;
+
     root.dataset.atlasAppearance = this.mode;
     root.dataset.atlasTheme = resolved;
     root.style.colorScheme = resolved;
+
+    if (previous && previous !== resolved) {
+      const EventConstructor =
+        this.document?.defaultView?.CustomEvent ??
+        globalThis.CustomEvent;
+
+      if (typeof EventConstructor === 'function') {
+        root.dispatchEvent(
+          new EventConstructor('atlasappearancechange', {
+            detail: {
+              mode: this.mode,
+              previous,
+              resolved
+            }
+          })
+        );
+      }
+    }
+
     return resolved;
   }
 
