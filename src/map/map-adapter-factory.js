@@ -8,7 +8,7 @@ export const MAP_RENDERER = Object.freeze({
   MAPLIBRE: 'maplibre'
 });
 
-const DEFAULT_RENDERER = MAP_RENDERER.LEAFLET;
+const DEFAULT_RENDERER = MAP_RENDERER.MAPLIBRE;
 
 export function createMapAdapter({
   renderer = DEFAULT_RENDERER,
