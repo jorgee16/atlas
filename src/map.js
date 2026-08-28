@@ -7,6 +7,9 @@ export {
   LeafletMapAdapter
 } from './map/leaflet-map-adapter.js';
 export {
+  MapLibreMapAdapter
+} from './map/maplibre-map-adapter.js';
+export {
   MAP_RENDERER,
   createMapAdapter
 } from './map/map-adapter-factory.js';
