@@ -61,7 +61,10 @@ export class AppearancePreference {
       const CustomEventConstructor =
         view?.CustomEvent ?? globalThis.CustomEvent;
 
-      if (typeof CustomEventConstructor === 'function') {
+      if (
+        typeof CustomEventConstructor === 'function' &&
+        typeof root.dispatchEvent === 'function'
+      ) {
         root.dispatchEvent(
           new CustomEventConstructor('atlasappearancechange', {
             detail: {
