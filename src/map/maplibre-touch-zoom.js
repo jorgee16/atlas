@@ -40,6 +40,30 @@ function setGestureCompositingMode(active) {
   );
 }
 
+function setSymbolLayersVisible(map, visible, previousVisibility = null) {
+  const layers = map?.getStyle?.()?.layers ?? [];
+  const restored = new Map();
+
+  for (const layer of layers) {
+    if (layer?.type !== 'symbol' || !layer?.id) continue;
+
+    try {
+      if (!visible) {
+        const current = map.getLayoutProperty?.(layer.id, 'visibility') ?? 'visible';
+        restored.set(layer.id, current);
+        map.setLayoutProperty?.(layer.id, 'visibility', 'none');
+      } else {
+        const target = previousVisibility?.get(layer.id) ?? 'visible';
+        map.setLayoutProperty?.(layer.id, 'visibility', target);
+      }
+    } catch {
+      // A style swap can remove a layer between gesture start and end.
+    }
+  }
+
+  return restored;
+}
+
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
@@ -53,6 +77,7 @@ export function installMapLibreTouchZoom(adapter) {
 
   let settleTimer = null;
   let manualPinchActive = false;
+  let hiddenSymbolLayers = null;
 
   const beginManualGesture = event => {
     if (event?.touches && event.touches.length < 2) return;
@@ -69,10 +94,25 @@ export function installMapLibreTouchZoom(adapter) {
       // user starts a pinch. Cancel them once and give the native MapLibre
       // touch handler exclusive ownership of the camera for the gesture.
       map.stop?.();
+
+      // Diagnostic: active navigation is smooth while Explore/Preview are not.
+      // Those states normally sit in the zoom range where text collision and
+      // line-label placement are heaviest. Suspend symbol placement only while
+      // the two fingers are down; restore each layer's previous visibility on
+      // release. If this removes the lag, the bottleneck is inside MapLibre's
+      // symbol/layout pipeline rather than Atlas DOM/compositing.
+      hiddenSymbolLayers = setSymbolLayersVisible(map, false);
+      map.triggerRepaint?.();
     }
   };
 
   const finishManualGesture = () => {
+    if (hiddenSymbolLayers) {
+      setSymbolLayersVisible(map, true, hiddenSymbolLayers);
+      hiddenSymbolLayers = null;
+      map.triggerRepaint?.();
+    }
+
     manualPinchActive = false;
     setGestureCompositingMode(false);
     clearTimeout(settleTimer);
@@ -114,6 +154,7 @@ export function installMapLibreTouchZoom(adapter) {
 
   map.on?.('style.load', () => {
     configureTouchSurface(map);
+    hiddenSymbolLayers = null;
   });
 
   container.classList.add('atlas-direct-touch-zoom');
