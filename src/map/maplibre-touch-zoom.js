@@ -30,9 +30,9 @@ function configureTouchGestures(adapter) {
 
   configureTouchSurface(map);
 
-  // Android WebView delivers MapLibre's native touch camera updates in visible
-  // steps on some Atlas screens. Own both one-finger pan and two-finger zoom so
-  // camera updates are synchronized to requestAnimationFrame instead.
+  // Android WebView can deliver MapLibre's native touch-camera updates in
+  // visible steps. Atlas owns pan and pinch and feeds camera changes on
+  // requestAnimationFrame instead.
   map.dragPan?.disable?.();
   map.touchZoomRotate?.disable?.();
   map.touchPitch?.disable?.();
@@ -54,13 +54,6 @@ function touchPoint(touch) {
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
-}
-
-function setGestureCompositingMode(active) {
-  document.documentElement?.classList.toggle(
-    'atlas-map-gesture-active',
-    Boolean(active)
-  );
 }
 
 export function installMapLibreTouchZoom(adapter) {
@@ -149,8 +142,6 @@ export function installMapLibreTouchZoom(adapter) {
         const projected = center ? map.project?.(center) : null;
 
         if (projected && map.unproject) {
-          // Finger moving right/down should drag map content right/down, which
-          // means the geographic camera center moves left/up in screen space.
           const nextCenter = map.unproject([
             projected.x - stepX,
             projected.y - stepY
@@ -205,7 +196,6 @@ export function installMapLibreTouchZoom(adapter) {
       targetZoom = startZoom;
       renderedZoom = startZoom;
       map.stop?.();
-      setGestureCompositingMode(true);
       ensureFrame();
     }
   };
@@ -242,7 +232,6 @@ export function installMapLibreTouchZoom(adapter) {
     targetZoom = null;
     renderedZoom = null;
     stopFrame();
-    setGestureCompositingMode(false);
     settleManualGesture();
   };
 
@@ -281,7 +270,6 @@ export function installMapLibreTouchZoom(adapter) {
       panActive = true;
       markManualGesture();
       map.stop?.();
-      setGestureCompositingMode(true);
     }
 
     if (!panActive) {
@@ -324,7 +312,6 @@ export function installMapLibreTouchZoom(adapter) {
     stopFrame();
 
     if (wasActive) {
-      setGestureCompositingMode(false);
       settleManualGesture();
     }
   };
