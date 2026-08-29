@@ -8,6 +8,9 @@ import {
 import {
   buildSequenceMatches
 } from './portugal-toll-sequence-matcher.mjs';
+import {
+  buildPhysicalMatches
+} from './portugal-toll-physical-matcher.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
@@ -319,13 +322,28 @@ export function buildPortugalTollEvents(pointsDocument) {
   );
 
   const sequenceMatches = buildSequenceMatches(points, sections);
+  const physicalMatches = buildPhysicalMatches(points, sections);
 
   const matches = directMatches.map(item => {
+    const physical = physicalMatches.get(item.id);
     const sequence = sequenceMatches.get(item.id);
 
-    // Prefer explicit physical plazas/gantries. For ordinary motorway sections,
-    // use whole-road ordering when it can recover a previously unresolved or
-    // ambiguous boundary without violating the road sequence.
+    // Physical plazas/gantries are first matched directly by name/operator.
+    // If that is inconclusive, use their order along the exact motorway only
+    // when the clustered physical-point count matches the official count.
+    if (
+      physical &&
+      item.status !== 'matched' &&
+      (
+        item.system === 'electronic-gantry' ||
+        item.system === 'traditional-plaza'
+      )
+    ) {
+      return physical;
+    }
+
+    // For closed/traditional motorway sections, recover unresolved boundaries
+    // from the ordered road sequence plus official inter-section distances.
     if (
       sequence &&
       item.system === 'closed-or-traditional' &&
@@ -341,7 +359,7 @@ export function buildPortugalTollEvents(pointsDocument) {
   const unresolved = matches.filter(item => item.status !== 'matched');
 
   return {
-    version: 3,
+    version: 4,
     datasetVersion: PORTUGAL_TOLL_DATASET_2026.version,
     generatedAt: new Date().toISOString(),
     currency: PORTUGAL_TOLL_DATASET_2026.currency,
