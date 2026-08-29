@@ -3,6 +3,7 @@ import {
 } from './min-priority-queue.js';
 
 import {
+  edgeIsTolledInPortugal,
   estimateEdgeTollEuros
 } from './portugal-toll-estimator.js';
 
@@ -246,7 +247,10 @@ export class AStarRouter {
         if (
           profile === 'drive' &&
           avoidTolls &&
-          this.graph.edgeIsToll?.(edgeIndex)
+          edgeIsTolledInPortugal(
+            this.graph,
+            edgeIndex
+          )
         ) {
           continue;
         }
