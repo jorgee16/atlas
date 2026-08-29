@@ -93,7 +93,7 @@ export class FollowModeController {
 
     this.enabled = true;
     this.#renderButton();
-    this.#focusPosition();
+    this.#focusPosition({ forceCamera: true });
 
     this.mapContext.showFollowing({
       heading: this.position.heading,
@@ -122,7 +122,7 @@ export class FollowModeController {
     }
 
     if (this.enabled) {
-      this.#focusPosition();
+      this.#focusPosition({ forceCamera: true });
     } else {
       this.map.focus(
         this.position.lat,
@@ -155,7 +155,11 @@ export class FollowModeController {
       this.#renderButton();
 
       if (this.position) {
-        this.#focusPosition();
+        // Starting navigation is a hard camera-state transition. The planner
+        // may already have seeded the follow deadbands while previewing, so
+        // explicitly force the first navigation camera update instead of
+        // waiting for movement or a compass tap.
+        this.#focusPosition({ forceCamera: true });
         this.mapContext.showFollowing({
           heading: this.position.heading,
           speed: this.position.speed
@@ -224,7 +228,7 @@ export class FollowModeController {
     });
   }
 
-  #focusPosition() {
+  #focusPosition({ forceCamera = false } = {}) {
     const headingUp =
       this.navigationActive &&
       this.headingUpEnabled;
@@ -234,7 +238,8 @@ export class FollowModeController {
         this.position,
         {
           zoom: this.#zoomLevel(),
-          headingUp
+          headingUp,
+          forceCamera
         }
       );
 
@@ -265,10 +270,7 @@ export class FollowModeController {
     );
 
     if (this.enabled && this.position) {
-      // #focusPosition renders the compass with the actual bearing returned by
-      // the map adapter. Do not immediately overwrite it with 0deg afterward;
-      // that made the button appear stuck in north-up until another GPS fix.
-      this.#focusPosition();
+      this.#focusPosition({ forceCamera: true });
     } else {
       if (!this.headingUpEnabled) {
         this.map.setBearing?.(0);
@@ -287,7 +289,9 @@ export class FollowModeController {
     if (!['near', 'normal', 'far'].includes(value)) return false;
     this.followZoom = value;
     this.#save('atlas.map.followZoom', value);
-    if (this.enabled && this.position) this.#focusPosition();
+    if (this.enabled && this.position) {
+      this.#focusPosition({ forceCamera: true });
+    }
     return true;
   }
 
