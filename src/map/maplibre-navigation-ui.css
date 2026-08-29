@@ -107,25 +107,39 @@
     min-width: 34px !important;
   }
 
-  .navigation-journey-summary {
-    right: 10px !important;
+  /* Override the older max-width/left anchored navigation rules. Keep the
+     HUD centred as an instrument strip so landscape map space stays usable. */
+  .app.navigation-active .navigation-journey-summary {
+    right: auto !important;
     bottom: max(8px, env(safe-area-inset-bottom)) !important;
-    left: 10px !important;
-    min-height: 58px !important;
+    left: 50% !important;
+    width: min(620px, calc(100vw - 120px)) !important;
+    max-width: none !important;
+    min-height: 56px !important;
+    transform: translateX(-50%) !important;
     border-radius: 18px !important;
+  }
+
+  .app.navigation-active .navigation-journey-summary > div:not(.navigation-route-progress) {
+    padding: 7px 10px 9px !important;
   }
 
   .navigation-eta-summary strong,
   .navigation-route-mode-copy strong {
-    font-size: 18px !important;
+    font-size: 17px !important;
   }
 
   .navigation-eta-summary span,
   .navigation-route-mode-copy span {
-    font-size: 10px !important;
+    font-size: 9px !important;
   }
 
-  .map-actions {
+  .app.navigation-active .navigation-journey-summary .navigation-voice-button {
+    min-width: 72px !important;
+    min-height: 56px !important;
+  }
+
+  .app.navigation-active .map-actions {
     right: 10px !important;
     bottom: 76px !important;
   }
