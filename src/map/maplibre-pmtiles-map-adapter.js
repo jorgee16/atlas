@@ -1,35 +1,11 @@
-import * as maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-
 import {
   MapLibreMapAdapter
 } from './maplibre-map-adapter.js';
-import {
-  createMapLibrePmtilesStyle
-} from './layers/maplibre-pmtiles-style.js';
-import {
-  createAtlasMapLibreStyle
-} from './atlas-maplibre-style.js';
-import {
-  installMapLibreZoomControl
-} from './maplibre-zoom-control.js';
-import {
-  installMapLibreTurnHighlight
-} from './maplibre-turn-highlight.js';
-
-installMapLibreTurnHighlight(MapLibreMapAdapter);
-
-const ROUTE_SOURCE = 'atlas-route';
-const TRAVELED_SOURCE = 'atlas-route-traveled';
-const ROUTE_LAYER_IDS = [
-  'atlas-route-traveled',
-  'atlas-route-remaining',
-  'atlas-route-casing'
-];
+import { createMapLibrePmtilesStyle } from './layers/maplibre-pmtiles-style.js';
 
 const STATIONARY_SPEED_METERS_PER_SECOND = 0.8;
-const CAMERA_POSITION_DEADBAND_METERS = 4;
-const CAMERA_HEADING_DEADBAND_DEGREES = 6;
+const CAMERA_POSITION_DEADBAND_METERS = 3;
+const CAMERA_HEADING_DEADBAND_DEGREES = 4;
 
 function normalizeBearing(value) {
   return ((Number(value) % 360) + 360) % 360;
@@ -64,6 +40,15 @@ function distanceMeters(a, b) {
   return earthRadius * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
+function validPoint(point) {
+  return Number.isFinite(point?.lat) && Number.isFinite(point?.lon);
+}
+
+function validRoute(route) {
+  const points = route?.points ?? [];
+  return points.length >= 2 && points.every(validPoint);
+}
+
 function lineFeature(points) {
   return {
     type: 'Feature',
@@ -76,7 +61,38 @@ function lineFeature(points) {
 }
 
 function collection(features) {
-  return { type: 'FeatureCollection', features };
+  return {
+    type: 'FeatureCollection',
+    features
+  };
+}
+
+function bearingFromProgress(points, progress = {}) {
+  if (points.length < 2) return null;
+
+  const index = Math.max(
+    0,
+    Math.min(
+      points.length - 2,
+      Number.isInteger(progress?.segmentIndex)
+        ? progress.segmentIndex
+        : Number.isInteger(progress?.pointIndex)
+          ? progress.pointIndex
+          : 0
+    )
+  );
+
+  const from = points[index];
+  const to = points[index + 1];
+  const lat1 = from.lat * Math.PI / 180;
+  const lat2 = to.lat * Math.PI / 180;
+  const deltaLon = (to.lon - from.lon) * Math.PI / 180;
+  const y = Math.sin(deltaLon) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
+
+  return normalizeBearing(Math.atan2(y, x) * 180 / Math.PI);
 }
 
 function splitRoute(points, progress = {}) {
@@ -109,143 +125,40 @@ function splitRoute(points, progress = {}) {
   };
 }
 
-function bearingFromProgress(points, progress = {}) {
-  if (points.length < 2) return null;
-
-  const index = Math.max(
-    0,
-    Math.min(
-      points.length - 2,
-      Number.isInteger(progress?.segmentIndex)
-        ? progress.segmentIndex
-        : Number.isInteger(progress?.pointIndex)
-          ? progress.pointIndex
-          : 0
-    )
-  );
-
-  const from = points[index];
-  const to = points[index + 1];
-  const lat1 = from.lat * Math.PI / 180;
-  const lat2 = to.lat * Math.PI / 180;
-  const deltaLon = (to.lon - from.lon) * Math.PI / 180;
-  const y = Math.sin(deltaLon) * Math.cos(lat2);
-  const x =
-    Math.cos(lat1) * Math.sin(lat2) -
-    Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
-
-  return normalizeBearing(Math.atan2(y, x) * 180 / Math.PI);
-}
-
-function validRoute(route) {
-  const points = route?.points ?? [];
-  return (
-    points.length >= 2 &&
-    points.every(
-      point =>
-        Number.isFinite(point?.lat) &&
-        Number.isFinite(point?.lon)
-    )
-  );
-}
-
-function leafletNavigationCursorHtml({ drive, heading, showHeading }) {
-  const rotation = Number.isFinite(heading)
-    ? normalizeBearing(heading)
-    : 0;
-
-  if (drive) {
-    return `
-      <div style="width:38px;height:38px;display:grid;place-items:center;background:#fff;border-radius:50%;box-shadow:0 2px 9px rgba(0,0,0,.30);transform:rotate(${rotation}deg);transition:transform 220ms ease;">
-        <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 2.4 20.1 20 12 16.4 3.9 20 12 2.4Z" fill="#2563eb"/>
-        </svg>
-      </div>`;
-  }
-
-  if (showHeading) {
-    return `
-      <div style="position:relative;width:42px;height:42px;transform:rotate(${rotation}deg);transition:transform 220ms ease;">
-        <div style="position:absolute;top:0;left:50%;width:0;height:0;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:22px solid #2563eb;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));"></div>
-        <div style="position:absolute;left:50%;bottom:5px;width:18px;height:18px;transform:translateX(-50%);background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.28);"></div>
-      </div>`;
-  }
-
-  return `
-    <div style="width:20px;height:20px;background:#2563eb;border:4px solid #fff;border-radius:50%;box-shadow:0 2px 9px rgba(0,0,0,.30);"></div>`;
-}
-
 function selectionPinElement() {
   const element = document.createElement('div');
-  element.style.cssText = [
-    'width:30px',
-    'height:38px',
-    'display:grid',
-    'place-items:start center',
-    'filter:drop-shadow(0 3px 6px rgba(0,0,0,.28))'
-  ].join(';');
-  element.innerHTML = `
-    <svg width="30" height="38" viewBox="0 0 30 38" aria-hidden="true">
-      <path d="M15 1.5C7.7 1.5 2 7.1 2 14.2c0 9.3 13 21.9 13 21.9s13-12.6 13-21.9C28 7.1 22.3 1.5 15 1.5Z" fill="#315efb" stroke="#fff" stroke-width="3"/>
-      <circle cx="15" cy="14" r="5" fill="#fff"/>
-    </svg>`;
+  element.className = 'maplibre-selection-pin';
   return element;
 }
 
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
-  constructor({
-    maplibre = maplibregl,
-    createOfflineStyle = createMapLibrePmtilesStyle,
-    style = createAtlasMapLibreStyle(),
-    ...options
-  } = {}) {
-    super({
-      ...options,
-      style,
-      maplibre,
-      createOfflineStyle
-    });
+  constructor(options = {}) {
+    super(options);
 
     this.currentRoute = null;
     this.currentRouteProgress = null;
-    this.currentManeuvers = null;
-    this.currentManeuverIndex = 0;
+    this.routeBearing = null;
+    this.navigationRouteProgress = null;
+    this.navigationTravelMode = null;
     this.routeRenderPending = false;
     this.routeRenderRetryTimer = null;
+    this.selectionMarker = null;
+    this.selectionPopup = null;
     this.lastCameraFollowPosition = null;
     this.lastCameraFollowHeading = null;
+    this.lastCameraFollowHeadingUp = undefined;
+  }
 
-    this.map.dragPan?.enable?.();
-    this.map.scrollZoom?.enable?.();
-    this.map.doubleClickZoom?.enable?.();
-    this.map.touchZoomRotate?.enable?.();
-    this.map.touchPitch?.enable?.();
-    this.map.setMaxPitch?.(60);
-
-    this.zoomControlElement = installMapLibreZoomControl(this.map);
-
-    this.map.on('error', event => {
-      console.error('MapLibre runtime error:', event?.error ?? event);
-    });
-
-    this.map.on('style.load', () => {
-      this.#scheduleRouteRender();
-    });
-
-    this.map.on('load', () => {
-      this.#scheduleRouteRender();
-    });
-
-    this.map.on('movestart', event => {
-      if (event?.originalEvent) {
-        this.lastCameraFollowPosition = null;
-        this.lastCameraFollowHeading = null;
-      }
-    });
+  createOfflineStyle({ pmtilesUrl }) {
+    return createMapLibrePmtilesStyle({ pmtilesUrl });
   }
 
   async setRegion(region, options = {}) {
-    const mapUrl = region?.mapUrl ?? region?.assets?.map ?? null;
+    const mapUrl =
+      region?.map?.url ??
+      region?.mapUrl ??
+      region?.pmtilesUrl ??
+      null;
 
     if (
       options?.preferOffline &&
@@ -291,6 +204,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     const result = super.setNavigationTravelMode(mode);
     this.lastCameraFollowPosition = null;
     this.lastCameraFollowHeading = null;
+    this.lastCameraFollowHeadingUp = undefined;
 
     if (this.lastUserPosition) {
       this.#restoreLeafletCursor(this.lastUserPosition);
@@ -307,6 +221,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       : Number.isFinite(this.routeBearing)
         ? normalizeBearing(this.routeBearing)
         : null;
+    const headingUp = options?.headingUp === true;
 
     const nextCameraPosition = {
       latitude,
@@ -322,8 +237,17 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       this.lastCameraFollowHeading,
       heading
     );
+    const headingModeChanged =
+      typeof this.lastCameraFollowHeadingUp !== 'boolean' ||
+      this.lastCameraFollowHeadingUp !== headingUp;
 
+    // GPS deadband must never suppress a navigation camera-state transition.
+    // Starting navigation while Follow is already enabled changes the desired
+    // zoom/pitch/offset, and the north-up/heading-up button changes bearing.
+    // Both must be applied immediately even when speed is zero and the GPS
+    // coordinates are identical to the previous fix.
     if (
+      !headingModeChanged &&
       stationary &&
       movedMeters < CAMERA_POSITION_DEADBAND_METERS &&
       headingChanged < CAMERA_HEADING_DEADBAND_DEGREES
@@ -336,6 +260,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     const result = super.followPosition(position, options);
     this.lastCameraFollowPosition = nextCameraPosition;
     this.lastCameraFollowHeading = heading;
+    this.lastCameraFollowHeadingUp = headingUp;
     return result;
   }
 
@@ -408,6 +333,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.routeRenderPending = false;
     this.lastCameraFollowPosition = null;
     this.lastCameraFollowHeading = null;
+    this.lastCameraFollowHeadingUp = undefined;
 
     clearTimeout(this.routeRenderRetryTimer);
     this.routeRenderRetryTimer = null;
@@ -428,161 +354,98 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       speed >= STATIONARY_SPEED_METERS_PER_SECOND;
 
     this.userMarkerElement.className = '';
-    this.userMarkerElement.style.width = drive
-      ? '38px'
-      : showHeading
-        ? '42px'
-        : '20px';
-    this.userMarkerElement.style.height = drive
-      ? '38px'
-      : showHeading
-        ? '42px'
-        : '20px';
-    this.userMarkerElement.innerHTML = leafletNavigationCursorHtml({
-      drive,
-      heading,
+    this.userMarkerElement.classList.add('maplibre-user-marker');
+    this.userMarkerElement.classList.toggle(
+      'maplibre-user-marker--drive',
+      drive
+    );
+    this.userMarkerElement.classList.toggle(
+      'maplibre-user-marker--heading',
       showHeading
+    );
+    this.userMarkerElement.style.setProperty(
+      '--atlas-user-heading',
+      `${Number.isFinite(heading) ? normalizeBearing(heading) : 0}deg`
+    );
+  }
+
+  fitRoute(route) {
+    const points = route?.points ?? [];
+    if (points.length < 2) return;
+
+    const bounds = new this.maplibre.LngLatBounds();
+    for (const point of points) {
+      bounds.extend([point.lon, point.lat]);
+    }
+
+    this.map.fitBounds(bounds, {
+      padding: 72,
+      duration: 350,
+      maxZoom: 16
     });
   }
 
   #scheduleRouteRender({ immediate = false } = {}) {
     if (!validRoute(this.currentRoute)) return;
 
-    if (immediate && this.#tryRenderStoredRoute()) return;
-    if (this.routeRenderPending) return;
+    if (immediate) {
+      this.#tryRenderRoute();
+      return;
+    }
 
+    if (this.routeRenderPending) return;
     this.routeRenderPending = true;
 
-    queueMicrotask(() => {
+    requestAnimationFrame(() => {
       this.routeRenderPending = false;
-
-      if (this.#tryRenderStoredRoute()) return;
-
-      clearTimeout(this.routeRenderRetryTimer);
-      this.routeRenderRetryTimer = setTimeout(() => {
-        this.routeRenderRetryTimer = null;
-        this.#tryRenderStoredRoute();
-      }, 120);
+      this.#tryRenderRoute();
     });
   }
 
-  #tryRenderStoredRoute() {
+  #tryRenderRoute() {
     if (!validRoute(this.currentRoute)) return false;
 
     try {
-      const style = this.map.getStyle?.();
-      if (!style || !Array.isArray(style.layers)) return false;
+      const split = splitRoute(
+        this.currentRoute.points,
+        this.currentRouteProgress
+      );
+      const routeSource = this.map.getSource?.('atlas-route');
+      const traveledSource = this.map.getSource?.('atlas-route-traveled');
 
-      this.#removeRouteOverlay();
-
-      const points = this.currentRoute.points;
-      const split = this.currentRouteProgress
-        ? splitRoute(points, this.currentRouteProgress)
-        : null;
-
-      this.map.addSource(ROUTE_SOURCE, {
-        type: 'geojson',
-        data: collection([lineFeature(split?.remaining ?? points)])
-      });
-
-      this.map.addLayer({
-        id: 'atlas-route-casing',
-        type: 'line',
-        source: ROUTE_SOURCE,
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round'
-        },
-        paint: {
-          'line-color': '#ffffff',
-          'line-width': 12,
-          'line-opacity': 0.98
-        }
-      });
-
-      this.map.addLayer({
-        id: 'atlas-route-remaining',
-        type: 'line',
-        source: ROUTE_SOURCE,
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round'
-        },
-        paint: {
-          'line-color': '#2563eb',
-          'line-width': 7,
-          'line-opacity': 1
-        }
-      });
-
-      if (split) {
-        this.map.addSource(TRAVELED_SOURCE, {
-          type: 'geojson',
-          data: collection([lineFeature(split.traveled)])
-        });
-
-        this.map.addLayer({
-          id: 'atlas-route-traveled',
-          type: 'line',
-          source: TRAVELED_SOURCE,
-          layout: {
-            'line-cap': 'round',
-            'line-join': 'round'
-          },
-          paint: {
-            'line-color': '#737b8c',
-            'line-width': 7,
-            'line-opacity': 0.9
-          }
-        });
+      if (routeSource?.setData) {
+        routeSource.setData(collection([lineFeature(split.remaining)]));
+      }
+      if (traveledSource?.setData) {
+        traveledSource.setData(collection([lineFeature(split.traveled)]));
       }
 
-      this.#raiseRouteLayers();
-      if (this.currentManeuvers) {
-        this.showManeuvers(
-          this.currentManeuvers,
-          this.currentManeuverIndex
-        );
-      }
-      this.map.triggerRepaint?.();
-      return Boolean(this.map.getLayer?.('atlas-route-remaining'));
+      return true;
     } catch (error) {
-      console.error('Unable to render MapLibre route.', error);
+      console.warn('Unable to render MapLibre route.', error);
       return false;
-    }
-  }
-
-  #raiseRouteLayers() {
-    for (const layerId of [
-      'atlas-route-casing',
-      'atlas-route-traveled',
-      'atlas-route-remaining'
-    ]) {
-      if (this.map.getLayer?.(layerId)) {
-        this.map.moveLayer?.(layerId);
-      }
     }
   }
 
   #tryRemoveRouteOverlay() {
     try {
-      this.#removeRouteOverlay();
+      for (const layerId of [
+        'atlas-route-remaining',
+        'atlas-route-traveled',
+        'atlas-route-casing'
+      ]) {
+        if (this.map.getLayer?.(layerId)) {
+          this.map.removeLayer(layerId);
+        }
+      }
+
+      for (const sourceId of ['atlas-route', 'atlas-route-traveled']) {
+        if (this.map.getSource?.(sourceId)) {
+          this.map.removeSource(sourceId);
+        }
+      }
     } catch {
-      // Style transitions remove custom layers automatically.
-    }
-  }
-
-  #removeRouteOverlay() {
-    for (const layerId of ROUTE_LAYER_IDS) {
-      if (this.map.getLayer?.(layerId)) {
-        this.map.removeLayer(layerId);
-      }
-    }
-
-    for (const sourceId of [TRAVELED_SOURCE, ROUTE_SOURCE]) {
-      if (this.map.getSource?.(sourceId)) {
-        this.map.removeSource(sourceId);
-      }
+      // Style swaps can remove route layers first.
     }
   }
 }
