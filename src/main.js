@@ -2,7 +2,6 @@ import './styles.css';
 import './map/maplibre-navigation-ui.css';
 import './map/maplibre-touch-zoom.js';
 import './map/maplibre-gesture-performance.css';
-import './map/maplibre-pinch-compositing.css';
 import './map/maplibre-nearby-layer.js';
 import './features/tracks/tracks-shell-ui.css';
 import "./ui/components/header/header.css";
