@@ -3,10 +3,8 @@ import {
 } from './maplibre-pmtiles-map-adapter.js';
 
 const GESTURE_SETTLE_MS = 160;
-const NAVIGATION_TOUCH_ZOOM_RATE = 1.7;
-const BROWSE_TOUCH_ZOOM_RATE = 2.15;
-const NAVIGATION_TOUCH_ZOOM_THRESHOLD = 0.008;
-const BROWSE_TOUCH_ZOOM_THRESHOLD = 0.004;
+const TOUCH_ZOOM_RATE = 1.7;
+const TOUCH_ZOOM_THRESHOLD = 0.008;
 
 function configureTouchSurface(map) {
   const container = map?.getContainer?.();
@@ -26,21 +24,11 @@ function configureTouchZoom(adapter) {
   const map = adapter?.map;
   if (!map) return;
 
-  const navigationActive = Boolean(adapter.navigationTravelMode);
-
   configureTouchSurface(map);
   map.touchZoomRotate?.enable?.();
   map.touchZoomRotate?.disableRotation?.();
-  map.touchZoomRotate?.setZoomRate?.(
-    navigationActive
-      ? NAVIGATION_TOUCH_ZOOM_RATE
-      : BROWSE_TOUCH_ZOOM_RATE
-  );
-  map.touchZoomRotate?.setZoomThreshold?.(
-    navigationActive
-      ? NAVIGATION_TOUCH_ZOOM_THRESHOLD
-      : BROWSE_TOUCH_ZOOM_THRESHOLD
-  );
+  map.touchZoomRotate?.setZoomRate?.(TOUCH_ZOOM_RATE);
+  map.touchZoomRotate?.setZoomThreshold?.(TOUCH_ZOOM_THRESHOLD);
   map.touchPitch?.disable?.();
   map.dragRotate?.disable?.();
 }
@@ -57,6 +45,7 @@ export function installMapLibreTouchZoom(adapter) {
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
   let settleTimer = null;
+  let manualPinchActive = false;
 
   const beginManualGesture = event => {
     if (event?.touches && event.touches.length < 2) return;
@@ -64,9 +53,21 @@ export function installMapLibreTouchZoom(adapter) {
     adapter.__atlasManualMapGesture = true;
     clearTimeout(settleTimer);
     settleTimer = null;
+
+    if (!manualPinchActive) {
+      manualPinchActive = true;
+
+      // Preview/focus/follow camera animations can still be running when the
+      // user starts a pinch. MapLibre then tries to advance that animation and
+      // the native pinch transform at the same time, which feels like another
+      // controller is resisting the fingers. Cancel every camera transition
+      // once, at gesture start, and let the native touch handler own the map.
+      map.stop?.();
+    }
   };
 
   const finishManualGesture = () => {
+    manualPinchActive = false;
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
       adapter.__atlasManualMapGesture = false;
