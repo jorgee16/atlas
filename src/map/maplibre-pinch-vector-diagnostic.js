@@ -1,9 +1,14 @@
-const STATE = new WeakMap();
+import {
+  MapLibrePmtilesMapAdapter
+} from './maplibre-pmtiles-map-adapter.js';
 
-function findMap() {
-  const app = globalThis.roamApp;
-  const adapter = app?.map?.adapter ?? app?.mapAdapter ?? null;
-  return adapter?.map ?? null;
+const STATE = new WeakMap();
+let activeAdapter = null;
+
+function rememberAdapter(adapter) {
+  if (adapter?.map) {
+    activeAdapter = adapter;
+  }
 }
 
 function hideBaseLayers(map) {
@@ -38,7 +43,7 @@ function restoreBaseLayers(map, previous) {
 }
 
 function sync() {
-  const map = findMap();
+  const map = activeAdapter?.map;
   if (!map) return;
 
   const active = document.documentElement.classList.contains('atlas-map-gesture-active');
@@ -56,10 +61,27 @@ function sync() {
   STATE.set(map, state);
 }
 
+const prototype = MapLibrePmtilesMapAdapter?.prototype;
+if (prototype && !prototype.__atlasVectorPinchDiagnosticInstalled) {
+  Object.defineProperty(prototype, '__atlasVectorPinchDiagnosticInstalled', {
+    value: true
+  });
+
+  const originalOnMoveEnd = prototype.onMoveEnd;
+  prototype.onMoveEnd = function onMoveEnd(callback) {
+    rememberAdapter(this);
+    return originalOnMoveEnd.call(this, callback);
+  };
+
+  const originalSetRegion = prototype.setRegion;
+  prototype.setRegion = async function setRegion(region, options = {}) {
+    rememberAdapter(this);
+    return originalSetRegion.call(this, region, options);
+  };
+}
+
 const observer = new MutationObserver(sync);
 observer.observe(document.documentElement, {
   attributes: true,
   attributeFilter: ['class']
 });
-
-queueMicrotask(sync);
