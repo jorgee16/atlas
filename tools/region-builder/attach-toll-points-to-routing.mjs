@@ -25,7 +25,7 @@ function inBounds(p,b){return p.lon>=b[0]&&p.lat>=b[1]&&p.lon<=b[2]&&p.lat<=b[3]
 
 function motorwayRefs(value){
   const matches=String(value??'').toUpperCase().match(/\bA\s*\d+(?:\s*-\s*\d+)?\b/g)||[];
-  return [...new Set(matches.map(ref=>ref.replace(/\s+/g,'').replace(/-(?=\d)/,'-')))];
+  return [...new Set(matches.map(ref=>ref.replace(/\s+/g,'')))];
 }
 
 async function loadGraph(dir,id){
@@ -38,19 +38,51 @@ async function loadGraph(dir,id){
   return new RoutingGraph({nodes,edges,geometry,roads,strings,restrictions,spatialIndex,metadata});
 }
 
-function edgeCandidates(graph,node){
-  const out=[];
-  const seen=new Set();
-  const nodes=[node];
-  for(let depth=0;depth<3;depth++){
-    for(const from of nodes.splice(0)){
-      for(const edge of graph.outgoingEdges(from)){
-        if(!edge.driveAllowed||seen.has(edge.edgeIndex)) continue;
-        seen.add(edge.edgeIndex);out.push({from,...edge});nodes.push(edge.to);
+function topologyCandidates(graph,startNode,point){
+  const queue=[{node:startNode,networkMeters:0,hops:0}];
+  const bestNodeCost=new Map([[startNode,0]]);
+  const seenEdges=new Set();
+  const edges=[];
+
+  while(queue.length){
+    const current=queue.shift();
+    if(current.hops>10||current.networkMeters>2600) continue;
+
+    for(const edge of graph.outgoingEdges(current.node)){
+      if(!edge.driveAllowed) continue;
+      const distance=edge.distanceDecimeters/10;
+      const nextCost=current.networkMeters+distance;
+      if(nextCost>2600) continue;
+
+      if(!seenEdges.has(edge.edgeIndex)){
+        seenEdges.add(edge.edgeIndex);
+        const route=graph.routePath(current.node,[edge.edgeIndex]);
+        const road=graph.road(edge.road,edge.geometryReversed);
+        const geometricDistance=Math.round(lineDist(point,route.points)*10)/10;
+        edges.push({
+          partitionId:null,
+          edgeIndex:edge.edgeIndex,
+          fromNode:current.node,
+          toNode:edge.to,
+          roadIndex:edge.road,
+          roadRef:road.ref||'',
+          roadName:road.name||'',
+          distanceMeters:geometricDistance,
+          networkMetersFromSnap:Math.round(current.networkMeters*10)/10,
+          osmTollTagged:Boolean(road.toll),
+          electronicTollTagged:Boolean(road.electronicToll)
+        });
+      }
+
+      const previous=bestNodeCost.get(edge.to);
+      if(previous===undefined||nextCost+1<previous){
+        bestNodeCost.set(edge.to,nextCost);
+        queue.push({node:edge.to,networkMeters:nextCost,hops:current.hops+1});
       }
     }
   }
-  return out;
+
+  return edges;
 }
 
 function chooseMotorwayRef(edges,point){
@@ -59,58 +91,58 @@ function chooseMotorwayRef(edges,point){
 
   for(const edge of edges){
     for(const ref of motorwayRefs(edge.roadRef)){
-      candidates.push({ref,distanceMeters:edge.distanceMeters,toll:edge.osmTollTagged,electronic:edge.electronicTollTagged});
+      const score=edge.networkMetersFromSnap + edge.distanceMeters*2 -
+        (edge.osmTollTagged?120:0) -
+        (edge.electronicTollTagged?100:0);
+      candidates.push({ref,score,edge});
     }
   }
 
-  candidates.sort((a,b)=>
-    a.distanceMeters-b.distanceMeters ||
-    Number(b.toll)-Number(a.toll) ||
-    Number(b.electronic)-Number(a.electronic)
-  );
+  candidates.sort((a,b)=>a.score-b.score);
 
   if(explicit.length){
     const confirmed=candidates.find(candidate=>explicit.includes(candidate.ref));
-    if(confirmed) return {ref:confirmed.ref,source:'edge-confirmed-explicit'};
+    if(confirmed&&confirmed.edge.networkMetersFromSnap<=1800){
+      return {ref:confirmed.ref,source:'topology-confirmed-explicit',edge:confirmed.edge};
+    }
   }
 
   if(candidates.length){
     const best=candidates[0];
     const rival=candidates.find(candidate=>candidate.ref!==best.ref);
-    if(!rival||best.distanceMeters+25<rival.distanceMeters){
-      return {ref:best.ref,source:'nearest-routing-edge'};
-    }
-
-    const tollBest=candidates.find(candidate=>candidate.toll||candidate.electronic);
-    if(tollBest&&tollBest.distanceMeters<=best.distanceMeters+20){
-      return {ref:tollBest.ref,source:'nearest-toll-routing-edge'};
+    const clear=!rival||best.score+180<rival.score;
+    if(clear&&best.edge.networkMetersFromSnap<=2200){
+      return {ref:best.ref,source:'routing-topology',edge:best.edge};
     }
   }
 
   if(explicit.length===1){
-    return {ref:explicit[0],source:'osm-explicit-unconfirmed'};
+    return {ref:explicit[0],source:'osm-explicit-unconfirmed',edge:null};
   }
 
-  return {ref:'',source:'unresolved'};
+  return {ref:'',source:'unresolved',edge:null};
 }
 
 function attach(graph,partitionId,point){
   const nearest=graph.findNearest(point,{maxDistanceMeters:1200,profile:'drive'});
   if(!nearest) return null;
-  const edges=edgeCandidates(graph,nearest.node).map(e=>{
-    const route=graph.routePath(e.from,[e.edgeIndex]);
-    const road=graph.road(e.road,e.geometryReversed);
-    return {partitionId,edgeIndex:e.edgeIndex,fromNode:e.from,toNode:e.to,roadIndex:e.road,roadRef:road.ref||'',roadName:road.name||'',distanceMeters:Math.round(lineDist(point,route.points)*10)/10,osmTollTagged:Boolean(road.toll),electronicTollTagged:Boolean(road.electronicToll)};
-  }).filter(e=>e.distanceMeters<=180).sort((a,b)=>a.distanceMeters-b.distanceMeters).slice(0,10);
+
+  const edges=topologyCandidates(graph,nearest.node,point)
+    .map(edge=>({...edge,partitionId}))
+    .sort((a,b)=>
+      a.networkMetersFromSnap-b.networkMetersFromSnap ||
+      a.distanceMeters-b.distanceMeters
+    );
 
   const inferred=chooseMotorwayRef(edges,point);
   return {
     partitionId,
     nearestNode:nearest.node,
     nearestNodeDistanceMeters:Math.round(nearest.distanceMeters*10)/10,
-    edges,
     inferredRoadRef:inferred.ref,
-    inferredRoadRefSource:inferred.source
+    inferredRoadRefSource:inferred.source,
+    inferredEdge:inferred.edge,
+    edges:edges.slice(0,24)
   };
 }
 
@@ -129,13 +161,13 @@ async function main(){
     points.push({...point,inferredRoadRef:routingMatch?.inferredRoadRef||'',routingMatch});
   }
   const output=path.join(dir,'toll-points-routed.json');
-  await fs.writeFile(output,JSON.stringify({version:2,points},null,2)+'\n');
+  await fs.writeFile(output,JSON.stringify({version:3,points},null,2)+'\n');
   const physical=points.filter(p=>p.kind==='toll_booth'||p.kind==='toll_gantry');
   const attached=physical.filter(p=>p.routingMatch?.edges?.length);
   const motorway=attached.filter(p=>/^A\d+(?:-\d+)?$/i.test(p.inferredRoadRef||''));
   const bySource={};
-  for(const p of motorway){
-    const source=p.routingMatch?.inferredRoadRefSource||'unknown';
+  for(const p of physical){
+    const source=p.routingMatch?.inferredRoadRefSource||'unresolved';
     bySource[source]=(bySource[source]||0)+1;
   }
   console.log(`Attached ${attached.length}/${physical.length} physical toll points; ${motorway.length} resolved to an A-road.`);
