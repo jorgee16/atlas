@@ -62,9 +62,71 @@
     margin-top: 7px !important;
   }
 
-  /* During active navigation pinch/double-tap remain available. Removing the
-     fixed +/- block prevents it from sitting underneath the turn banner. */
   body:has(.navigation-guidance-banner) .atlas-maplibre-zoom-control {
     display: none !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  .navigation-guidance-banner {
+    top: 8px !important;
+    left: 10px !important;
+    width: min(360px, 45vw) !important;
+    padding: 8px 10px !important;
+    border-radius: 18px !important;
+  }
+
+  .navigation-guidance-primary {
+    grid-template-columns: 46px minmax(0, 1fr) 34px !important;
+    gap: 8px !important;
+  }
+
+  .navigation-maneuver-tile {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    border-radius: 14px !important;
+  }
+
+  .navigation-maneuver-tile svg {
+    width: 29px !important;
+    height: 29px !important;
+  }
+
+  .navigation-maneuver-distance {
+    font-size: 18px !important;
+  }
+
+  .navigation-maneuver-road {
+    font-size: 12px !important;
+  }
+
+  .navigation-guidance-stop {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+  }
+
+  .navigation-journey-summary {
+    right: 10px !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    left: 10px !important;
+    min-height: 58px !important;
+    border-radius: 18px !important;
+  }
+
+  .navigation-eta-summary strong,
+  .navigation-route-mode-copy strong {
+    font-size: 18px !important;
+  }
+
+  .navigation-eta-summary span,
+  .navigation-route-mode-copy span {
+    font-size: 10px !important;
+  }
+
+  .map-actions {
+    right: 10px !important;
+    bottom: 76px !important;
   }
 }
