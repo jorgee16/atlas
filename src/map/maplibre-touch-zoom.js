@@ -6,6 +6,9 @@ const GESTURE_SETTLE_MS = 120;
 const PINCH_ZOOM_SCALE = 1.35;
 const PINCH_EASE = 0.42;
 const PINCH_EPSILON = 0.002;
+const PAN_EASE = 0.58;
+const PAN_EPSILON_PX = 0.12;
+const PAN_START_THRESHOLD_PX = 4;
 
 function configureTouchSurface(map) {
   const container = map?.getContainer?.();
@@ -21,16 +24,16 @@ function configureTouchSurface(map) {
   }
 }
 
-function configureTouchZoom(adapter) {
+function configureTouchGestures(adapter) {
   const map = adapter?.map;
   if (!map) return;
 
   configureTouchSurface(map);
 
-  // Android WebView was delivering MapLibre's native pinch camera updates in
-  // visible steps outside active navigation. Keep normal one-finger panning,
-  // but own two-finger zoom ourselves and feed the camera once per animation
-  // frame instead of once per browser touch event.
+  // Android WebView delivers MapLibre's native touch camera updates in visible
+  // steps on some Atlas screens. Own both one-finger pan and two-finger zoom so
+  // camera updates are synchronized to requestAnimationFrame instead.
+  map.dragPan?.disable?.();
   map.touchZoomRotate?.disable?.();
   map.touchPitch?.disable?.();
   map.dragRotate?.disable?.();
@@ -41,6 +44,12 @@ function touchDistance(touches) {
   const dx = touches[1].clientX - touches[0].clientX;
   const dy = touches[1].clientY - touches[0].clientY;
   return Math.hypot(dx, dy);
+}
+
+function touchPoint(touch) {
+  return touch
+    ? { x: touch.clientX, y: touch.clientY }
+    : null;
 }
 
 function clamp(value, minimum, maximum) {
@@ -59,52 +68,123 @@ export function installMapLibreTouchZoom(adapter) {
   const container = map?.getContainer?.();
   if (!map || !container) return adapter;
 
-  configureTouchZoom(adapter);
+  configureTouchGestures(adapter);
 
   if (adapter.__atlasTouchZoomInstalled) return adapter;
 
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
   let settleTimer = null;
+  let frame = null;
+
   let pinchActive = false;
   let startDistance = null;
   let startZoom = null;
   let targetZoom = null;
   let renderedZoom = null;
-  let frame = null;
-  let dragPanWasEnabled = true;
 
-  const stopFrame = () => {
-    if (frame !== null) {
-      cancelAnimationFrame(frame);
-      frame = null;
-    }
+  let panTracking = false;
+  let panActive = false;
+  let panStartPoint = null;
+  let panLastPoint = null;
+  let panTargetX = 0;
+  let panTargetY = 0;
+  let panRenderedX = 0;
+  let panRenderedY = 0;
+
+  const markManualGesture = () => {
+    adapter.__atlasManualMapGesture = true;
+    clearTimeout(settleTimer);
+    settleTimer = null;
   };
 
-  const renderPinchFrame = () => {
+  const settleManualGesture = () => {
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => {
+      adapter.__atlasManualMapGesture = false;
+      settleTimer = null;
+    }, GESTURE_SETTLE_MS);
+  };
+
+  const resetPan = () => {
+    panTracking = false;
+    panActive = false;
+    panStartPoint = null;
+    panLastPoint = null;
+    panTargetX = 0;
+    panTargetY = 0;
+    panRenderedX = 0;
+    panRenderedY = 0;
+  };
+
+  const renderFrame = () => {
     frame = null;
+    let needsAnotherFrame = false;
 
-    if (!pinchActive || !Number.isFinite(targetZoom)) return;
+    if (pinchActive && Number.isFinite(targetZoom)) {
+      const current = Number.isFinite(renderedZoom)
+        ? renderedZoom
+        : map.getZoom();
+      const delta = targetZoom - current;
+      const nextZoom = Math.abs(delta) <= PINCH_EPSILON
+        ? targetZoom
+        : current + delta * PINCH_EASE;
 
-    const current = Number.isFinite(renderedZoom)
-      ? renderedZoom
-      : map.getZoom();
-    const delta = targetZoom - current;
-    const nextZoom = Math.abs(delta) <= PINCH_EPSILON
-      ? targetZoom
-      : current + delta * PINCH_EASE;
+      renderedZoom = nextZoom;
+      map.jumpTo({ zoom: nextZoom });
+      needsAnotherFrame =
+        pinchActive || Math.abs(targetZoom - nextZoom) > PINCH_EPSILON;
+    } else if (panActive) {
+      const remainingX = panTargetX - panRenderedX;
+      const remainingY = panTargetY - panRenderedY;
+      const stepX = Math.abs(remainingX) <= PAN_EPSILON_PX
+        ? remainingX
+        : remainingX * PAN_EASE;
+      const stepY = Math.abs(remainingY) <= PAN_EPSILON_PX
+        ? remainingY
+        : remainingY * PAN_EASE;
 
-    renderedZoom = nextZoom;
-    map.jumpTo({ zoom: nextZoom });
+      if (stepX !== 0 || stepY !== 0) {
+        const center = map.getCenter?.();
+        const projected = center ? map.project?.(center) : null;
 
-    if (pinchActive || Math.abs(targetZoom - nextZoom) > PINCH_EPSILON) {
-      frame = requestAnimationFrame(renderPinchFrame);
+        if (projected && map.unproject) {
+          // Finger moving right/down should drag map content right/down, which
+          // means the geographic camera center moves left/up in screen space.
+          const nextCenter = map.unproject([
+            projected.x - stepX,
+            projected.y - stepY
+          ]);
+          map.jumpTo({ center: nextCenter });
+        }
+
+        panRenderedX += stepX;
+        panRenderedY += stepY;
+      }
+
+      needsAnotherFrame =
+        panActive &&
+        (
+          Math.abs(panTargetX - panRenderedX) > PAN_EPSILON_PX ||
+          Math.abs(panTargetY - panRenderedY) > PAN_EPSILON_PX
+        );
+    }
+
+    if (needsAnotherFrame) {
+      frame = requestAnimationFrame(renderFrame);
     }
   };
 
   const ensureFrame = () => {
     if (frame === null) {
-      frame = requestAnimationFrame(renderPinchFrame);
+      frame = requestAnimationFrame(renderFrame);
+    }
+  };
+
+  const stopFrame = () => {
+    if (frame !== null) {
+      cancelAnimationFrame(frame);
+      frame = null;
     }
   };
 
@@ -115,18 +195,15 @@ export function installMapLibreTouchZoom(adapter) {
     if (!Number.isFinite(distance) || distance <= 0) return;
 
     event.preventDefault?.();
-    adapter.__atlasManualMapGesture = true;
-    clearTimeout(settleTimer);
-    settleTimer = null;
+    markManualGesture();
 
     if (!pinchActive) {
+      resetPan();
       pinchActive = true;
       startDistance = distance;
       startZoom = map.getZoom();
       targetZoom = startZoom;
       renderedZoom = startZoom;
-      dragPanWasEnabled = map.dragPan?.isEnabled?.() ?? true;
-      map.dragPan?.disable?.();
       map.stop?.();
       setGestureCompositingMode(true);
       ensureFrame();
@@ -159,47 +236,148 @@ export function installMapLibreTouchZoom(adapter) {
     startZoom = null;
 
     if (Number.isFinite(targetZoom)) {
-      renderedZoom = targetZoom;
       map.jumpTo({ zoom: targetZoom });
     }
 
     targetZoom = null;
     renderedZoom = null;
     stopFrame();
-
-    if (dragPanWasEnabled) {
-      map.dragPan?.enable?.();
-    }
-
     setGestureCompositingMode(false);
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(() => {
-      adapter.__atlasManualMapGesture = false;
-      settleTimer = null;
-    }, GESTURE_SETTLE_MS);
+    settleManualGesture();
   };
 
-  container.addEventListener('touchstart', beginPinch, {
+  const beginPanTracking = event => {
+    if ((event?.touches?.length ?? 0) !== 1 || pinchActive) return;
+
+    const point = touchPoint(event.touches[0]);
+    if (!point) return;
+
+    panTracking = true;
+    panActive = false;
+    panStartPoint = point;
+    panLastPoint = point;
+    panTargetX = 0;
+    panTargetY = 0;
+    panRenderedX = 0;
+    panRenderedY = 0;
+  };
+
+  const updatePan = event => {
+    if ((event?.touches?.length ?? 0) !== 1 || pinchActive) return;
+
+    if (!panTracking) beginPanTracking(event);
+    if (!panTracking || !panLastPoint || !panStartPoint) return;
+
+    const point = touchPoint(event.touches[0]);
+    if (!point) return;
+
+    const totalDx = point.x - panStartPoint.x;
+    const totalDy = point.y - panStartPoint.y;
+
+    if (
+      !panActive &&
+      Math.hypot(totalDx, totalDy) >= PAN_START_THRESHOLD_PX
+    ) {
+      panActive = true;
+      markManualGesture();
+      map.stop?.();
+      setGestureCompositingMode(true);
+    }
+
+    if (!panActive) {
+      panLastPoint = point;
+      return;
+    }
+
+    event.preventDefault?.();
+
+    panTargetX += point.x - panLastPoint.x;
+    panTargetY += point.y - panLastPoint.y;
+    panLastPoint = point;
+    ensureFrame();
+  };
+
+  const finishPan = () => {
+    if (!panTracking) return;
+
+    const wasActive = panActive;
+
+    if (wasActive) {
+      const remainingX = panTargetX - panRenderedX;
+      const remainingY = panTargetY - panRenderedY;
+
+      if (remainingX !== 0 || remainingY !== 0) {
+        const center = map.getCenter?.();
+        const projected = center ? map.project?.(center) : null;
+        if (projected && map.unproject) {
+          map.jumpTo({
+            center: map.unproject([
+              projected.x - remainingX,
+              projected.y - remainingY
+            ])
+          });
+        }
+      }
+    }
+
+    resetPan();
+    stopFrame();
+
+    if (wasActive) {
+      setGestureCompositingMode(false);
+      settleManualGesture();
+    }
+  };
+
+  container.addEventListener('touchstart', event => {
+    if ((event?.touches?.length ?? 0) >= 2) {
+      beginPinch(event);
+      return;
+    }
+
+    beginPanTracking(event);
+  }, {
     passive: false,
     capture: true
   });
-  container.addEventListener('touchmove', updatePinch, {
+
+  container.addEventListener('touchmove', event => {
+    if ((event?.touches?.length ?? 0) >= 2) {
+      updatePinch(event);
+      return;
+    }
+
+    updatePan(event);
+  }, {
     passive: false,
     capture: true
   });
+
   container.addEventListener('touchend', event => {
-    if ((event?.touches?.length ?? 0) < 2) finishPinch();
+    const touchCount = event?.touches?.length ?? 0;
+
+    if (pinchActive && touchCount < 2) {
+      finishPinch();
+      if (touchCount === 1) beginPanTracking(event);
+      return;
+    }
+
+    if (touchCount === 0) finishPan();
   }, {
     passive: true,
     capture: true
   });
-  container.addEventListener('touchcancel', finishPinch, {
+
+  container.addEventListener('touchcancel', () => {
+    finishPinch();
+    finishPan();
+  }, {
     passive: true,
     capture: true
   });
 
   map.on?.('style.load', () => {
-    configureTouchZoom(adapter);
+    configureTouchGestures(adapter);
   });
 
   container.classList.add('atlas-direct-touch-zoom');
@@ -216,14 +394,14 @@ if (prototype && !prototype.__atlasDirectTouchZoomInstalled) {
   prototype.setRegion = async function setRegion(region, options = {}) {
     installMapLibreTouchZoom(this);
     const result = await originalSetRegion.call(this, region, options);
-    configureTouchZoom(this);
+    configureTouchGestures(this);
     return result;
   };
 
   const originalSetNavigationTravelMode = prototype.setNavigationTravelMode;
   prototype.setNavigationTravelMode = function setNavigationTravelMode(mode = null) {
     const result = originalSetNavigationTravelMode.call(this, mode);
-    configureTouchZoom(this);
+    configureTouchGestures(this);
     return result;
   };
 
