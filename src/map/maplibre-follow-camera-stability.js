@@ -221,6 +221,16 @@ export function installMapLibreFollowCameraStability() {
         : 0;
     }
 
+    if (forceCamera) {
+      // The PMTiles adapter has a second stationary deadband underneath this
+      // wrapper. Reset only its camera cache for explicit user/navigation
+      // transitions so the forced update reaches the base camera immediately.
+      this.lastCameraFollowPosition = null;
+      this.lastCameraFollowHeading = null;
+      this.navigationCameraZoom = null;
+      this.navigationCameraTimestamp = null;
+    }
+
     const result = originalFollowPosition.call(
       this,
       position,
