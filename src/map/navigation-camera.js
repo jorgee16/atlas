@@ -1,16 +1,18 @@
 const clamp = (value, min, max) =>
   Math.min(max, Math.max(min, value));
 
-
-
 const NAVIGATION_CAMERA_PROFILES = Object.freeze({
   drive: Object.freeze({
-    forwardFraction: 0.16,
-    forwardMaxPixels: 220
+    forwardFraction: 0.20,
+    forwardMaxPixels: 260,
+    pitchMin: 36,
+    pitchMax: 52
   }),
   walk: Object.freeze({
-    forwardFraction: 0.20,
-    forwardMaxPixels: 150
+    forwardFraction: 0.16,
+    forwardMaxPixels: 140,
+    pitchMin: 0,
+    pitchMax: 18
   })
 });
 
@@ -20,25 +22,65 @@ export function navigationCameraProfile(
   return NAVIGATION_CAMERA_PROFILES[travelMode] ??
     Object.freeze({
       forwardFraction: 0,
-      forwardMaxPixels: 0
+      forwardMaxPixels: 0,
+      pitchMin: 0,
+      pitchMax: 0
     });
 }
 
 export function navigationForwardOffset({
   travelMode = null,
   height = 0,
-  headingUp = false
+  headingUp = false,
+  speed = null
 } = {}) {
   if (!headingUp || !Number.isFinite(height) || height <= 0) {
     return 0;
   }
 
   const profile = navigationCameraProfile(travelMode);
+  const speedMps = Number.isFinite(speed) ? Math.max(0, speed) : 0;
+
+  const speedBoost =
+    travelMode === 'drive'
+      ? clamp(speedMps / 30, 0, 1) * 0.05
+      : 0;
 
   return Math.min(
     profile.forwardMaxPixels,
-    height * profile.forwardFraction
+    height * (profile.forwardFraction + speedBoost)
   );
+}
+
+export function navigationPitch({
+  travelMode = null,
+  headingUp = false,
+  speed = null,
+  progress = null
+} = {}) {
+  if (!headingUp || !travelMode) return 0;
+
+  const profile = navigationCameraProfile(travelMode);
+
+  if (travelMode !== 'drive') {
+    return profile.pitchMin;
+  }
+
+  const speedMps = Number.isFinite(speed) ? Math.max(0, speed) : 0;
+  const speedKph = speedMps * 3.6;
+  const speedFactor = clamp(speedKph / 90, 0, 1);
+
+  let pitch =
+    profile.pitchMin +
+    (profile.pitchMax - profile.pitchMin) * speedFactor;
+
+  const distanceToManeuver = progress?.distanceToManeuverMeters;
+  if (Number.isFinite(distanceToManeuver) && distanceToManeuver >= 0) {
+    const maneuverFocus = clamp(1 - distanceToManeuver / 120, 0, 1);
+    pitch -= maneuverFocus * 8;
+  }
+
+  return clamp(pitch, 30, profile.pitchMax);
 }
 
 const maneuverText = maneuver =>
@@ -64,15 +106,6 @@ function drivingBaseZoom(
   const speedKph =
     speedMps * 3.6;
 
-  /*
-   * preferredZoom is the user's follow preference:
-   * near   -> 19
-   * normal -> 18
-   * far    -> 17
-   *
-   * Speed adjusts around that preference rather than
-   * replacing it completely.
-   */
   let offset = 0;
 
   if (speedKph <= 15) {
@@ -107,10 +140,6 @@ function drivingBaseZoom(
 function walkingBaseZoom(
   preferredZoom
 ) {
-  /*
-   * Walking benefits from a closer map.
-   * Keep the user's preference meaningful.
-   */
   return preferredZoom + 0.35;
 }
 
@@ -153,10 +182,6 @@ function maneuverFocus({
       ? Math.max(speed, 0)
       : 0;
 
-  /*
-   * Use a minimum effective speed so GPS noise at rest
-   * does not make time-to-turn explode.
-   */
   const effectiveSpeed =
     walking
       ? Math.max(speedMps, 1.2)
@@ -199,12 +224,6 @@ function maneuverFocus({
       1
     );
 
-  /*
-   * Either time or distance can make a maneuver relevant.
-   * This means:
-   * - high speed -> focus starts farther away
-   * - low speed -> we wait until geographically closer
-   */
   const relevance =
     Math.max(
       distanceRelevance,
