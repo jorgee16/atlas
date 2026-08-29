@@ -5,6 +5,29 @@ function roadKey(value) {
   return String(value ?? '').toUpperCase().replace(/\s+/g, '').trim();
 }
 
+function motorwayRefs(value) {
+  const matches = String(value ?? '')
+    .toUpperCase()
+    .match(/\bA\s*\d+(?:\s*-\s*\d+)?\b/g) ?? [];
+  return new Set(matches.map(ref => roadKey(ref)));
+}
+
+function roadIdentityRefs(value) {
+  const motorways = motorwayRefs(value);
+  if (motorways.size) return motorways;
+
+  const key = roadKey(value);
+  return key ? new Set([key]) : new Set();
+}
+
+function refsOverlap(left, right) {
+  if (!left.size || !right.size) return false;
+  for (const ref of left) {
+    if (right.has(ref)) return true;
+  }
+  return false;
+}
+
 function pointIds(point) {
   if (!point) return [];
   return [point.osmId, ...(Array.isArray(point.pairedOsmIds) ? point.pairedOsmIds : [])]
@@ -23,6 +46,7 @@ function compactRoutingEvidence(point) {
     toNode: edge.toNode,
     roadIndex: edge.roadIndex,
     roadRef: edge.roadRef ?? '',
+    inferredRoadRef: point.inferredRoadRef ?? match.inferredRoadRef ?? '',
     roadName: edge.roadName ?? '',
     distanceMeters: edge.distanceMeters ?? null,
     networkMetersFromSnap: edge.networkMetersFromSnap ?? null,
@@ -47,6 +71,12 @@ function evidenceForEvent(event, byOsmId) {
     }
   }
   return evidence;
+}
+
+function evidenceRoadRefs(edge) {
+  const inferred = roadIdentityRefs(edge.inferredRoadRef);
+  if (inferred.size) return inferred;
+  return roadIdentityRefs(edge.roadRef);
 }
 
 async function main() {
@@ -74,12 +104,20 @@ async function main() {
       audit.physicalEvents += 1;
       if (routingEdges.length) {
         audit.physicalEventsWithRoutingEvidence += 1;
-        const expected = roadKey(event.roadRef);
-        const refs = new Set(routingEdges.map(edge => roadKey(edge.roadRef)).filter(Boolean));
-        if (!expected || refs.has(expected)) audit.physicalRoadAgreement += 1;
+        const expected = roadIdentityRefs(event.roadRef);
+        const agrees = !expected.size || routingEdges.some(edge =>
+          refsOverlap(expected, evidenceRoadRefs(edge))
+        );
+
+        if (agrees) audit.physicalRoadAgreement += 1;
         else {
           audit.physicalRoadConflict += 1;
-          audit.physicalConflicts.push({id:event.id, expectedRoadRef:event.roadRef, inferredRoadRefs:[...refs], routingEdges});
+          audit.physicalConflicts.push({
+            id:event.id,
+            expectedRoadRef:event.roadRef,
+            inferredRoadRefs:[...new Set(routingEdges.flatMap(edge => [...evidenceRoadRefs(edge)]))],
+            routingEdges
+          });
         }
       } else {
         audit.physicalWithoutEvidence.push({id:event.id, roadRef:event.roadRef, system:event.system, matchMethod:event.matchMethod});
@@ -90,7 +128,7 @@ async function main() {
 
   const outputPath = path.join(routingDir, 'toll-events-routed.json');
   const auditPath = path.join(routingDir, 'toll-events-routing-audit.json');
-  await fs.writeFile(outputPath, JSON.stringify({...eventsDocument, version:5, events}, null, 2) + '\n');
+  await fs.writeFile(outputPath, JSON.stringify({...eventsDocument, version:6, events}, null, 2) + '\n');
   await fs.writeFile(auditPath, JSON.stringify(audit, null, 2) + '\n');
 
   console.log({
