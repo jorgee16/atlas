@@ -60,7 +60,8 @@
 }
 
 .tracks-import-primary,
-.tracks-empty button {
+.tracks-empty button,
+.tracks-start-button {
   min-height: 48px;
   border: 0;
   border-radius: 16px;
@@ -274,6 +275,183 @@
   color: var(--danger, #d34848);
 }
 
+.tracks-detail {
+  padding: 16px;
+}
+
+.tracks-card--detail > .tracks-header,
+.tracks-card--detail > .tracks-library-heading,
+.tracks-card--detail > .tracks-library,
+.tracks-card--detail > .tracks-format-note {
+  display: none;
+}
+
+.tracks-detail-toolbar {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.tracks-detail-toolbar small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.tracks-detail-toolbar h2 {
+  margin: 3px 0 0;
+  overflow: hidden;
+  font-size: 21px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tracks-detail-back {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.tracks-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tracks-detail-stats > div,
+.tracks-live-metrics > div {
+  min-width: 0;
+  padding: 12px 9px;
+  border-radius: 14px;
+  background: var(--surface-muted);
+  text-align: center;
+}
+
+.tracks-detail-stats strong,
+.tracks-detail-stats span,
+.tracks-live-metrics strong,
+.tracks-live-metrics span {
+  display: block;
+}
+
+.tracks-detail-stats strong,
+.tracks-live-metrics strong {
+  font-size: 15px;
+}
+
+.tracks-detail-stats span,
+.tracks-live-metrics span {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tracks-detail-section {
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-muted) 72%, transparent);
+}
+
+.tracks-detail-section-title,
+.tracks-live-progress-head,
+.tracks-elevation-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tracks-detail-section-title span,
+.tracks-live-progress-head span,
+.tracks-elevation-range {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.tracks-elevation-chart {
+  margin-top: 8px;
+}
+
+.tracks-elevation-chart svg {
+  display: block;
+  width: 100%;
+  height: 82px;
+  overflow: visible;
+}
+
+.tracks-elevation-chart polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tracks-no-elevation {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+.tracks-live-progress {
+  margin-top: 12px;
+  padding: 13px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent-soft) 70%, var(--surface-muted));
+}
+
+.tracks-live-progress[hidden] {
+  display: none;
+}
+
+.tracks-progress-bar {
+  height: 8px;
+  margin: 10px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface-muted));
+}
+
+.tracks-progress-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 220ms linear;
+}
+
+.tracks-live-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tracks-start-button {
+  width: 100%;
+  margin-top: 14px;
+  font-size: 16px;
+}
+
+.tracks-start-button.is-active {
+  background: var(--danger, #d34848);
+}
+
 .tracks-format-note {
   display: flex;
   gap: 10px;
@@ -332,6 +510,10 @@ html[data-theme="dark"] .tracks-count {
   .tracks-card {
     max-height: min(58vh, 590px);
     border-radius: 24px;
+  }
+
+  .tracks-card--detail {
+    max-height: min(64vh, 640px);
   }
 
   .tracks-header {
@@ -415,6 +597,10 @@ html[data-theme="dark"] .tracks-count {
     width: 100%;
     justify-content: center;
   }
+
+  .tracks-detail-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (orientation: landscape) and (max-height: 620px) {
@@ -462,5 +648,13 @@ html[data-theme="dark"] .tracks-count {
 
   .tracks-empty {
     padding: 18px 14px;
+  }
+
+  .tracks-detail {
+    padding: 12px;
+  }
+
+  .tracks-detail-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
