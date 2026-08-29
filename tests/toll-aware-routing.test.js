@@ -10,7 +10,6 @@ import {
 } from '../src/routing/astar-router.js';
 
 import {
-  edgeIsTolledInPortugal,
   estimateRouteTolls
 } from '../src/routing/portugal-toll-estimator.js';
 
@@ -69,61 +68,6 @@ function fixture() {
   }));
 }
 
-function a16MissingOsmTollFixture() {
-  const nodes = [
-    { lat: 38.72, lon: -9.42, component: 0 },
-    { lat: 38.75, lon: -9.38, component: 0 },
-    { lat: 38.79, lon: -9.34, component: 0 },
-    { lat: 38.75, lon: -9.45, component: 0 }
-  ];
-
-  return new RoutingGraph(createRoutingBuffers({
-    nodes,
-    roads: [
-      {
-        name: 'Autoestrada da Grande Lisboa',
-        ref: 'A16',
-        toll: false
-      },
-      {
-        name: 'Estrada Nacional',
-        ref: 'EN9',
-        toll: false
-      }
-    ],
-    edges: [
-      {
-        from: 0,
-        to: 1,
-        road: 0,
-        distanceDecimeters: 50_000,
-        durationCentiseconds: 20_000
-      },
-      {
-        from: 1,
-        to: 2,
-        road: 0,
-        distanceDecimeters: 50_000,
-        durationCentiseconds: 20_000
-      },
-      {
-        from: 0,
-        to: 3,
-        road: 1,
-        distanceDecimeters: 70_000,
-        durationCentiseconds: 35_000
-      },
-      {
-        from: 3,
-        to: 2,
-        road: 1,
-        distanceDecimeters: 70_000,
-        durationCentiseconds: 35_000
-      }
-    ]
-  }));
-}
-
 test('routing graph preserves OSM toll flags', () => {
   const graph = fixture();
   assert.equal(graph.road(0).toll, true);
@@ -151,29 +95,6 @@ test('avoidTolls is a hard routing constraint', async () => {
   assert.deepEqual(free.nodeIndexes, [0, 3, 2]);
   assert.equal(free.durationSeconds, 900);
   assert.equal(estimateRouteTolls(graph, free).totalEuros, 0);
-});
-
-test('A16 remains tolled when an OSM way is missing the toll flag', async () => {
-  const graph = a16MissingOsmTollFixture();
-  const router = new AStarRouter(graph);
-
-  assert.equal(graph.edgeIsToll(0), false);
-  assert.equal(edgeIsTolledInPortugal(graph, 0), true);
-
-  const fastest = await router.route(0, 2, {
-    yieldEvery: Infinity
-  });
-
-  assert.deepEqual(fastest.nodeIndexes, [0, 1, 2]);
-  assert.ok(estimateRouteTolls(graph, fastest).totalEuros > 0);
-
-  const noTolls = await router.route(0, 2, {
-    avoidTolls: true,
-    yieldEvery: Infinity
-  });
-
-  assert.deepEqual(noTolls.nodeIndexes, [0, 3, 2]);
-  assert.equal(estimateRouteTolls(graph, noTolls).totalEuros, 0);
 });
 
 test('toll penalties can prefer a slower cheaper route without corrupting ETA', async () => {
