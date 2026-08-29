@@ -43,14 +43,30 @@ const MAPLIBRE_ANDROID_VECTOR_STYLE = {
         'fill-color': [
           'match',
           ['get', 'kind'],
-          'forest', '#dce8d4',
-          'grass', '#e4edd8',
-          'meadow', '#e7eedc',
-          'orchard', '#e3ead8',
-          'vineyard', '#e3ead8',
+          'forest', '#d9e8d2',
+          'wood', '#d9e8d2',
+          'grass', '#e3edd9',
+          'grassland', '#e3edd9',
+          'meadow', '#e8efdf',
+          'park', '#dfead8',
+          'recreation_ground', '#e2ecda',
+          'orchard', '#e1ead5',
+          'vineyard', '#e4ead9',
+          'farmland', '#eee9d8',
+          'farmyard', '#eee6d7',
+          'cemetery', '#dfe8d8',
+          'residential', '#f0efea',
+          'commercial', '#eee9e5',
+          'retail', '#f0e8e5',
+          'industrial', '#e9e7e3',
+          'railway', '#e8e6e2',
+          'quarry', '#e4dfd8',
+          'wetland', '#dce8dd',
+          'beach', '#f4e8c7',
+          'sand', '#f3e6c5',
           '#e8eadf'
         ],
-        'fill-opacity': 0.82
+        'fill-opacity': 0.88
       }
     },
     {
