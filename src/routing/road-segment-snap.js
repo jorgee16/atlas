@@ -95,6 +95,14 @@ function geometryDistance(points) {
   return total;
 }
 
+function driveDegree(graph, nodeIndex) {
+  return new Set(
+    graph.outgoingEdges(nodeIndex)
+      .filter(edge => edge.driveAllowed)
+      .map(edge => edge.to)
+  ).size;
+}
+
 function candidateNodes(graph, point, maxDistanceMeters) {
   const nodes = new Map();
 
@@ -180,6 +188,10 @@ export function findDriveRoadSegmentSnaps(
       const remainingDurationSeconds =
         edge.durationCentiseconds / 100 * remainingFraction;
       const road = graph.road(edge.road, edge.geometryReversed);
+      const fromDegree = driveDegree(graph, nodeSnap.node);
+      const toDegree = driveDegree(graph, edge.to);
+      const deadEnd = fromDegree <= 1 || toDegree <= 1;
+      const weaklyConnected = fromDegree <= 2 && toDegree <= 2;
 
       candidates.push({
         point: bestProjection.point,
@@ -192,6 +204,10 @@ export function findDriveRoadSegmentSnaps(
         road,
         roadClass: edge.roadClass,
         oneWay: edge.oneWay,
+        fromDegree,
+        toDegree,
+        deadEnd,
+        weaklyConnected,
         remainingPoints,
         remainingDistanceMeters,
         remainingDurationSeconds,
@@ -202,6 +218,7 @@ export function findDriveRoadSegmentSnaps(
   }
 
   candidates.sort((a, b) =>
+    Number(a.deadEnd) - Number(b.deadEnd) ||
     a.distanceMeters - b.distanceMeters ||
     Number(a.road?.link === true) - Number(b.road?.link === true) ||
     b.roadClass - a.roadClass ||
