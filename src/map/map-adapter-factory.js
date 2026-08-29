@@ -11,9 +11,13 @@ import {
 import {
   installMapLibreFollowCameraStability
 } from './maplibre-follow-camera-stability.js';
+import {
+  installMapLibreUserGesturePolicy
+} from './maplibre-user-gesture-policy.js';
 
 installMapLibreRouteStability();
 installMapLibreFollowCameraStability();
+installMapLibreUserGesturePolicy();
 
 export const MAP_RENDERER = Object.freeze({
   LEAFLET: 'leaflet',
