@@ -33,6 +33,13 @@ function configureTouchZoom(adapter) {
   map.dragRotate?.disable?.();
 }
 
+function setGestureCompositingMode(active) {
+  document.documentElement?.classList.toggle(
+    'atlas-map-gesture-active',
+    Boolean(active)
+  );
+}
+
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
@@ -56,18 +63,18 @@ export function installMapLibreTouchZoom(adapter) {
 
     if (!manualPinchActive) {
       manualPinchActive = true;
+      setGestureCompositingMode(true);
 
       // Preview/focus/follow camera animations can still be running when the
-      // user starts a pinch. MapLibre then tries to advance that animation and
-      // the native pinch transform at the same time, which feels like another
-      // controller is resisting the fingers. Cancel every camera transition
-      // once, at gesture start, and let the native touch handler own the map.
+      // user starts a pinch. Cancel them once and give the native MapLibre
+      // touch handler exclusive ownership of the camera for the gesture.
       map.stop?.();
     }
   };
 
   const finishManualGesture = () => {
     manualPinchActive = false;
+    setGestureCompositingMode(false);
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
       adapter.__atlasManualMapGesture = false;
@@ -102,7 +109,7 @@ export function installMapLibreTouchZoom(adapter) {
     }
   });
   map.on?.('zoomend', event => {
-    if (event?.originalEvent) finishManualGesture();
+    if (event?.originalEvent && !manualPinchActive) finishManualGesture();
   });
 
   map.on?.('style.load', () => {
