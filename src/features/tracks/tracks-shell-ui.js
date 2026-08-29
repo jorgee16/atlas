@@ -65,23 +65,46 @@ export function installTracksShellUI(root) {
   const fileInput = tracksWorkspace.querySelector('#tracksFileInput');
   const library = tracksWorkspace.querySelector('#tracksLibrary');
   const count = tracksWorkspace.querySelector('#tracksCount');
+  const transientMapControls = [
+    root.querySelector('#searchAreaBtn'),
+    root.querySelector('#routePlannerBtn'),
+    root.querySelector('#recenterBtn'),
+    root.querySelector('#compassBtn')
+  ].filter(Boolean);
   const importedFiles = [];
+  const controlHiddenState = new Map();
   let tracksActive = false;
 
   const setTracksActive = active => {
     tracksActive = active;
     tracksWorkspace.hidden = !active;
     tracksTab.classList.toggle('on', active);
+    root.classList.toggle('tracks-active', active);
+
     if (active) {
       tracksTab.setAttribute('aria-current', 'page');
       for (const button of appTabs.querySelectorAll('[data-app-tab]')) {
         button.classList.remove('on');
         button.removeAttribute('aria-current');
       }
-      for (const workspace of root.querySelectorAll('#exploreWorkspace, #tripWorkspace, #navigationWorkspace')) workspace.hidden = true;
-    } else {
-      tracksTab.removeAttribute('aria-current');
+      for (const workspace of root.querySelectorAll('#exploreWorkspace, #tripWorkspace, #navigationWorkspace')) {
+        workspace.hidden = true;
+      }
+
+      for (const control of transientMapControls) {
+        controlHiddenState.set(control, control.hidden);
+        control.hidden = true;
+      }
+      return;
     }
+
+    tracksTab.removeAttribute('aria-current');
+    for (const control of transientMapControls) {
+      if (controlHiddenState.has(control)) {
+        control.hidden = controlHiddenState.get(control);
+      }
+    }
+    controlHiddenState.clear();
   };
 
   const fileSize = bytes => {
