@@ -1,6 +1,7 @@
 import './styles.css';
 import './map/maplibre-navigation-ui.css';
 import './map/maplibre-touch-zoom.js';
+import './map/maplibre-gesture-performance.css';
 import './features/tracks/tracks-shell-ui.css';
 import "./ui/components/header/header.css";
 import "./ui/components/status-toast/status-toast.css";
