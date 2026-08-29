@@ -3,6 +3,8 @@ import {
 } from './maplibre-pmtiles-map-adapter.js';
 
 const GESTURE_SETTLE_MS = 180;
+const TOUCH_ZOOM_RATE = 1.35;
+const TOUCH_ZOOM_THRESHOLD = 0.025;
 
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
@@ -13,11 +15,12 @@ export function installMapLibreTouchZoom(adapter) {
 
   // Let MapLibre's native touch handler own pinch scaling completely. Atlas
   // still disables rotation/pitch because heading is controlled explicitly by
-  // north-up / heading-up, but we must not stop() the camera from inside a
-  // touch/zoom event: doing that aborts MapLibre's own gesture interpolation
-  // and makes pinch feel sticky or difficult to trigger.
+  // north-up / heading-up. Make the gesture engage sooner and amplify finger
+  // movement slightly so zoom feels closer to a native phone maps app.
   map.touchZoomRotate?.enable?.();
   map.touchZoomRotate?.disableRotation?.();
+  map.touchZoomRotate?.setZoomRate?.(TOUCH_ZOOM_RATE);
+  map.touchZoomRotate?.setZoomThreshold?.(TOUCH_ZOOM_THRESHOLD);
   map.touchPitch?.disable?.();
   map.dragRotate?.disable?.();
 
@@ -54,8 +57,6 @@ export function installMapLibreTouchZoom(adapter) {
     passive: true
   });
 
-  // MapLibre's gesture events are useful as a second signal on browsers where
-  // touch lists are inconsistent, but never call map.stop() from here.
   map.on?.('zoomstart', event => {
     if (event?.originalEvent) {
       adapter.__atlasManualMapGesture = true;
