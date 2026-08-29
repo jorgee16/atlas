@@ -2,6 +2,9 @@ import {
   distanceMeters
 } from '../features/navigation/navigation-geometry.js';
 
+const STARTUP_DEPART_WINDOW_METERS = 25;
+const STARTUP_TURN_PREVIEW_METERS = 220;
+
 export function routeCumulativeDistances(points) {
   const cumulative = new Float64Array(
     points.length
@@ -182,18 +185,27 @@ export function findRouteProgress(
       )
     );
 
+  const firstRealManeuver = route.maneuvers?.[1] ?? null;
+  const previewFirstTurnAtStartup =
+    distanceAlongRouteMeters < STARTUP_DEPART_WINDOW_METERS &&
+    firstRealManeuver &&
+    firstRealManeuver.type !== 'arrive' &&
+    firstRealManeuver.routeDistanceMeters <= STARTUP_TURN_PREVIEW_METERS;
+
   const foundManeuverIndex =
-    distanceAlongRouteMeters < 25
-      ? 0
-      : route.maneuvers.findIndex(
-          (maneuver, index) =>
-            index > 0 &&
-            (
-              maneuver.routeDistanceMeters >
-                distanceAlongRouteMeters + 12 ||
-              maneuver.type === 'arrive'
-            )
-        );
+    previewFirstTurnAtStartup
+      ? 1
+      : distanceAlongRouteMeters < STARTUP_DEPART_WINDOW_METERS
+        ? 0
+        : route.maneuvers.findIndex(
+            (maneuver, index) =>
+              index > 0 &&
+              (
+                maneuver.routeDistanceMeters >
+                  distanceAlongRouteMeters + 12 ||
+                maneuver.type === 'arrive'
+              )
+          );
 
   const nextManeuverIndex =
     foundManeuverIndex >= 0
