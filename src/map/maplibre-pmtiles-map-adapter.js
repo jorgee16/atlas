@@ -11,8 +11,12 @@ import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 
+// Use MapLibre's own public demo style as a controlled diagnostic baseline.
+// If this style fails inside the Android WebView, the problem is no longer our
+// PMTiles schema or OpenFreeMap style choice; the visible error panel below
+// will expose the actual MapLibre/WebView resource error.
 const ONLINE_VECTOR_STYLE =
-  'https://tiles.openfreemap.org/styles/liberty';
+  'https://demotiles.maplibre.org/style.json';
 
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
@@ -122,6 +126,16 @@ function validRoute(route) {
   );
 }
 
+function mapErrorMessage(event) {
+  const error = event?.error ?? event;
+  return String(
+    error?.message ??
+    error?.statusText ??
+    error ??
+    'Unknown MapLibre error'
+  );
+}
+
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
@@ -140,13 +154,10 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRouteProgress = null;
     this.currentManeuvers = null;
     this.currentManeuverIndex = 0;
-    this.mapSourceMode = 'online';
+    this.mapSourceMode = 'demo';
     this.routeRenderPending = false;
     this.routeRenderRetryTimer = null;
 
-    // Explicitly enable the native MapLibre gesture handlers. On Android the
-    // map must behave like a real touch map: one-finger pan, pinch zoom,
-    // two-finger rotate and two-finger pitch. The +/- buttons are optional.
     this.map.dragPan?.enable?.();
     this.map.scrollZoom?.enable?.();
     this.map.doubleClickZoom?.enable?.();
@@ -165,9 +176,36 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     );
     this.#renderMapSourceBadge();
 
-    // A setStyle() removes every application-owned source/layer. Restore the
-    // active route whenever a style becomes mutation-ready.
+    this.mapErrorElement = document.createElement('div');
+    this.mapErrorElement.className = 'atlas-maplibre-runtime-error';
+    this.mapErrorElement.hidden = true;
+    Object.assign(this.mapErrorElement.style, {
+      position: 'absolute',
+      zIndex: '2000',
+      left: '12px',
+      right: '12px',
+      top: '225px',
+      padding: '9px 11px',
+      borderRadius: '10px',
+      background: 'rgba(170, 20, 20, 0.94)',
+      color: '#fff',
+      fontSize: '11px',
+      fontWeight: '700',
+      lineHeight: '1.25',
+      pointerEvents: 'none'
+    });
+    this.map.getContainer().appendChild(this.mapErrorElement);
+
+    this.map.on('error', event => {
+      const message = mapErrorMessage(event);
+      console.error('MapLibre runtime error:', event?.error ?? event);
+      this.mapErrorElement.textContent =
+        `MapLibre error: ${message}`;
+      this.mapErrorElement.hidden = false;
+    });
+
     this.map.on('style.load', () => {
+      this.mapSourceBadge.textContent = 'Demo style loaded';
       this.#scheduleRouteRender();
     });
 
@@ -177,38 +215,18 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   async setRegion(region, options = {}) {
+    void options;
+
     const mapUrl =
       region?.mapUrl ??
       region?.assets?.map ??
       null;
 
-    /*
-     * IMPORTANT DURING THE MAPLIBRE MIGRATION:
-     *
-     * The existing Atlas PMTiles archive was packaged for the Leaflet vector
-     * layer and its source-layer schema does not yet match the provisional
-     * MapLibre PMTiles style. Loading that style produces exactly the blank
-     * beige map seen on Android: the background layer renders, but the road,
-     * place and building source-layers do not.
-     *
-     * Keep MapLibre on the known-good online vector style until the PMTiles
-     * schema/style pair is rebuilt and verified. Offline search/routing remain
-     * independent from this renderer choice.
-     */
-    void options;
-
-    this.mapSourceMode = 'online';
+    // Do not call setStyle here during this diagnostic build. The constructor
+    // already owns the official MapLibre demo style, and a region change must
+    // not replace it with our still-unverified PMTiles style.
+    this.mapSourceMode = 'demo';
     this.#renderMapSourceBadge();
-
-    const currentStyle = this.map.getStyle?.();
-    const currentStyleName = currentStyle?.name ?? '';
-
-    // Avoid unnecessary setStyle() calls because each one destroys the route
-    // overlay and reloads the vector style.
-    if (!/liberty/i.test(currentStyleName)) {
-      this.map.setStyle(ONLINE_VECTOR_STYLE);
-    }
-
     return Boolean(mapUrl);
   }
 
@@ -221,9 +239,6 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
 
     this.currentRoute = route;
     this.currentRouteProgress = null;
-
-    // Fit first so a successful route calculation is immediately obvious to
-    // the user even before the style mutation occurs.
     this.fitRoute(route);
     this.#scheduleRouteRender({ immediate: true });
     return true;
@@ -305,10 +320,6 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         return;
       }
 
-      // If showRoute() arrived during setStyle(), style.load will normally
-      // render it. This short retry also covers WebView timing where the style
-      // event has just fired but source mutation is not accepted until the
-      // following frame.
       clearTimeout(this.routeRenderRetryTimer);
       this.routeRenderRetryTimer = setTimeout(() => {
         this.routeRenderRetryTimer = null;
@@ -402,12 +413,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         this.map.getLayer?.('atlas-route-remaining')
       );
     } catch (error) {
-      // "Style is not done loading" is expected only during a style swap.
-      // Keep the route in memory and let style.load/retry render it.
-      const message = String(error?.message ?? error);
-      if (!/style|source|layer/i.test(message)) {
-        console.error('Unable to render MapLibre route.', error);
-      }
+      const message = mapErrorMessage(error);
+      this.mapErrorElement.textContent =
+        `Route layer error: ${message}`;
+      this.mapErrorElement.hidden = false;
+      console.error('Unable to render MapLibre route.', error);
       return false;
     }
   }
@@ -428,8 +438,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     try {
       this.#removeRouteOverlay();
     } catch {
-      // setStyle() may be between style instances; there is nothing useful to
-      // remove in that interval because MapLibre discards old custom layers.
+      // setStyle() may be between style instances.
     }
   }
 
@@ -453,16 +462,10 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   #renderMapSourceBadge() {
     if (!this.mapSourceBadge) return;
 
-    const offline =
-      this.mapSourceMode === 'offline';
-
     this.mapSourceBadge.textContent =
-      offline ? 'Offline vector' : 'Online vector';
-    this.mapSourceBadge.dataset.mode =
-      offline ? 'offline' : 'online';
+      'MapLibre demo';
+    this.mapSourceBadge.dataset.mode = 'online';
     this.mapSourceBadge.title =
-      offline
-        ? 'Atlas is using the downloaded regional vector map.'
-        : 'Atlas is using an online MapLibre vector style.';
+      'Official MapLibre demo vector style diagnostic build.';
   }
 }
