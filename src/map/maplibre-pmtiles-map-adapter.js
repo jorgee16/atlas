@@ -11,8 +11,16 @@ import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 
+const ONLINE_VECTOR_STYLE =
+  'https://tiles.openfreemap.org/styles/liberty';
+
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
+const ROUTE_LAYER_IDS = [
+  'atlas-route-traveled',
+  'atlas-route-remaining',
+  'atlas-route-casing'
+];
 
 function normalizeBearing(value) {
   return ((Number(value) % 360) + 360) % 360;
@@ -114,14 +122,22 @@ function validRoute(route) {
   );
 }
 
+function resolveAssetUrl(url) {
+  if (/^https?:\/\//i.test(url)) return url;
+  const relativeUrl = String(url).replace(/^\//, '');
+  return `${import.meta.env.BASE_URL}${relativeUrl}`;
+}
+
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
     createOfflineStyle = createMapLibrePmtilesStyle,
+    style = ONLINE_VECTOR_STYLE,
     ...options
   } = {}) {
     super({
       ...options,
+      style,
       maplibre,
       createOfflineStyle
     });
@@ -131,13 +147,17 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentManeuvers = null;
     this.currentManeuverIndex = 0;
     this.mapSourceMode = 'online';
+    this.routeRenderPending = false;
+    this.routeRenderRetryTimer = null;
 
-    // Do not use map.isStyleLoaded() as a gate for route rendering. In
-    // MapLibre it can remain false while raster/vector source tiles are still
-    // loading even though style.load has already fired. Waiting for another
-    // style.load in that state can strand the route forever. Track the
-    // style-load lifecycle explicitly instead.
-    this.atlasStyleReady = false;
+    // Explicitly enable the native MapLibre gesture handlers. On Android the
+    // map must behave like a real touch map: one-finger pan, pinch zoom,
+    // two-finger rotate and two-finger pitch. The +/- buttons are optional.
+    this.map.dragPan?.enable?.();
+    this.map.scrollZoom?.enable?.();
+    this.map.doubleClickZoom?.enable?.();
+    this.map.touchZoomRotate?.enable?.();
+    this.map.touchPitch?.enable?.();
 
     this.zoomControlElement =
       installMapLibreZoomControl(this.map);
@@ -151,41 +171,59 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     );
     this.#renderMapSourceBadge();
 
+    // A setStyle() removes every application-owned source/layer. Restore the
+    // active route whenever a style becomes mutation-ready.
     this.map.on('style.load', () => {
-      this.atlasStyleReady = true;
-      this.#renderStoredRoute();
+      this.#scheduleRouteRender();
     });
 
-    // The initial style can theoretically finish before this subclass has
-    // installed its listener. In that case the style object is already ready
-    // for mutations and the initial renderer can proceed immediately.
-    if (this.map.isStyleLoaded?.()) {
-      this.atlasStyleReady = true;
-    }
+    this.map.on('load', () => {
+      this.#scheduleRouteRender();
+    });
   }
 
   async setRegion(region, options = {}) {
     const preferOffline =
       Boolean(options?.preferOffline);
+    const mapUrl =
+      region?.mapUrl ??
+      region?.assets?.map ??
+      null;
 
-    // A new setStyle() invalidates all application-owned layers. Mark the
-    // renderer unavailable before the base adapter begins the style swap;
-    // style.load above is the only event that marks it ready again.
-    this.atlasStyleReady = false;
+    if (!preferOffline || !mapUrl) {
+      this.mapSourceMode = 'online';
+      this.#renderMapSourceBadge();
+      this.map.setStyle(ONLINE_VECTOR_STYLE);
+      return Boolean(mapUrl);
+    }
 
-    const offlineLoaded =
-      await super.setRegion(region, options);
+    try {
+      const offlineStyle = await this.createOfflineStyle?.({
+        region,
+        url: resolveAssetUrl(mapUrl),
+        maplibre: this.maplibre
+      });
 
-    this.mapSourceMode =
-      preferOffline && offlineLoaded
-        ? 'offline'
-        : 'online';
+      if (offlineStyle) {
+        this.mapSourceMode = 'offline';
+        this.#renderMapSourceBadge();
+        this.map.setStyle(offlineStyle);
+        return true;
+      }
+    } catch (error) {
+      console.warn(
+        `Unable to load MapLibre offline map for ${region?.name ?? 'region'}; using online vector map.`,
+        error
+      );
+    }
 
+    this.mapSourceMode = 'online';
     this.#renderMapSourceBadge();
-    return offlineLoaded;
+    this.map.setStyle(ONLINE_VECTOR_STYLE);
+    return false;
   }
 
-  showRoute(route, endpoints = {}) {
+  showRoute(route) {
     if (!validRoute(route)) {
       throw new TypeError(
         'showRoute requires at least two valid route points.'
@@ -195,13 +233,10 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRoute = route;
     this.currentRouteProgress = null;
 
-    if (this.atlasStyleReady) {
-      this.#renderStoredRoute();
-    }
-
-    // Camera fitting is independent of style/source loading and can happen
-    // immediately, so the preview framing stays responsive.
+    // Fit first so a successful route calculation is immediately obvious to
+    // the user even before the style mutation occurs.
     this.fitRoute(route);
+    this.#scheduleRouteRender({ immediate: true });
     return true;
   }
 
@@ -213,7 +248,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRouteProgress = progress ?? null;
     this.navigationRouteProgress = progress ?? null;
 
-    if (!this.currentRoute || !validRoute(this.currentRoute)) {
+    if (!validRoute(this.currentRoute)) {
       return;
     }
 
@@ -222,55 +257,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       progress
     );
 
-    if (!this.atlasStyleReady) {
-      return;
-    }
-
-    const split = splitRoute(
-      this.currentRoute.points,
-      progress
-    );
-
-    const routeSource = this.map.getSource(ROUTE_SOURCE);
-    if (!routeSource) {
-      this.#renderStoredRoute();
-      return;
-    }
-
-    routeSource.setData(
-      collection([lineFeature(split.remaining)])
-    );
-
-    let traveledSource =
-      this.map.getSource(TRAVELED_SOURCE);
-
-    if (!traveledSource) {
-      this.map.addSource(TRAVELED_SOURCE, {
-        type: 'geojson',
-        data: collection([lineFeature(split.traveled)])
-      });
-
-      this.map.addLayer({
-        id: 'atlas-route-traveled',
-        type: 'line',
-        source: TRAVELED_SOURCE,
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round'
-        },
-        paint: {
-          'line-color': '#737b8c',
-          'line-width': 5,
-          'line-opacity': 0.88
-        }
-      });
-    } else {
-      traveledSource.setData(
-        collection([lineFeature(split.traveled)])
-      );
-    }
-
-    this.#raiseRouteLayers();
+    this.#scheduleRouteRender({ immediate: true });
   }
 
   showManeuvers(maneuvers, activeIndex = 0) {
@@ -299,115 +286,167 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.navigationRouteProgress = null;
     this.navigationCameraZoom = null;
     this.navigationCameraTimestamp = null;
+    this.routeRenderPending = false;
 
-    if (!this.atlasStyleReady) {
-      return;
-    }
+    clearTimeout(this.routeRenderRetryTimer);
+    this.routeRenderRetryTimer = null;
 
-    this.#removeRouteOverlay();
+    this.#tryRemoveRouteOverlay();
   }
 
-  #renderStoredRoute() {
-    if (
-      !this.atlasStyleReady ||
-      !validRoute(this.currentRoute)
-    ) {
+  #scheduleRouteRender({ immediate = false } = {}) {
+    if (!validRoute(this.currentRoute)) {
       return;
     }
 
-    this.#removeRouteOverlay();
+    if (immediate && this.#tryRenderStoredRoute()) {
+      return;
+    }
 
-    const points = this.currentRoute.points;
-    const split = this.currentRouteProgress
-      ? splitRoute(points, this.currentRouteProgress)
-      : null;
+    if (this.routeRenderPending) {
+      return;
+    }
 
-    this.map.addSource(ROUTE_SOURCE, {
-      type: 'geojson',
-      data: collection([
-        lineFeature(
-          split?.remaining ?? points
-        )
-      ])
-    });
+    this.routeRenderPending = true;
 
-    this.map.addLayer({
-      id: 'atlas-route-casing',
-      type: 'line',
-      source: ROUTE_SOURCE,
-      layout: {
-        'line-cap': 'round',
-        'line-join': 'round'
-      },
-      paint: {
-        'line-color': '#ffffff',
-        'line-width': 10,
-        'line-opacity': 0.96
+    queueMicrotask(() => {
+      this.routeRenderPending = false;
+
+      if (this.#tryRenderStoredRoute()) {
+        return;
       }
-    });
 
-    this.map.addLayer({
-      id: 'atlas-route-remaining',
-      type: 'line',
-      source: ROUTE_SOURCE,
-      layout: {
-        'line-cap': 'round',
-        'line-join': 'round'
-      },
-      paint: {
-        'line-color': '#315efb',
-        'line-width': 6,
-        'line-opacity': 1
+      // If showRoute() arrived during setStyle(), style.load will normally
+      // render it. This short retry also covers WebView timing where the style
+      // event has just fired but source mutation is not accepted until the
+      // following frame.
+      clearTimeout(this.routeRenderRetryTimer);
+      this.routeRenderRetryTimer = setTimeout(() => {
+        this.routeRenderRetryTimer = null;
+        this.#tryRenderStoredRoute();
+      }, 120);
+    });
+  }
+
+  #tryRenderStoredRoute() {
+    if (!validRoute(this.currentRoute)) {
+      return false;
+    }
+
+    try {
+      const style = this.map.getStyle?.();
+      if (!style || !Array.isArray(style.layers)) {
+        return false;
       }
-    });
 
-    if (split) {
-      this.map.addSource(TRAVELED_SOURCE, {
+      this.#removeRouteOverlay();
+
+      const points = this.currentRoute.points;
+      const split = this.currentRouteProgress
+        ? splitRoute(points, this.currentRouteProgress)
+        : null;
+
+      this.map.addSource(ROUTE_SOURCE, {
         type: 'geojson',
-        data: collection([lineFeature(split.traveled)])
+        data: collection([
+          lineFeature(split?.remaining ?? points)
+        ])
       });
 
       this.map.addLayer({
-        id: 'atlas-route-traveled',
+        id: 'atlas-route-casing',
         type: 'line',
-        source: TRAVELED_SOURCE,
+        source: ROUTE_SOURCE,
         layout: {
           'line-cap': 'round',
           'line-join': 'round'
         },
         paint: {
-          'line-color': '#737b8c',
-          'line-width': 6,
-          'line-opacity': 0.9
+          'line-color': '#ffffff',
+          'line-width': 12,
+          'line-opacity': 0.98
         }
       });
-    }
 
-    this.#raiseRouteLayers();
+      this.map.addLayer({
+        id: 'atlas-route-remaining',
+        type: 'line',
+        source: ROUTE_SOURCE,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round'
+        },
+        paint: {
+          'line-color': '#2563eb',
+          'line-width': 7,
+          'line-opacity': 1
+        }
+      });
+
+      if (split) {
+        this.map.addSource(TRAVELED_SOURCE, {
+          type: 'geojson',
+          data: collection([
+            lineFeature(split.traveled)
+          ])
+        });
+
+        this.map.addLayer({
+          id: 'atlas-route-traveled',
+          type: 'line',
+          source: TRAVELED_SOURCE,
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          paint: {
+            'line-color': '#737b8c',
+            'line-width': 7,
+            'line-opacity': 0.9
+          }
+        });
+      }
+
+      this.#raiseRouteLayers();
+      this.map.triggerRepaint?.();
+      return Boolean(
+        this.map.getLayer?.('atlas-route-remaining')
+      );
+    } catch (error) {
+      // "Style is not done loading" is expected only during a style swap.
+      // Keep the route in memory and let style.load/retry render it.
+      const message = String(error?.message ?? error);
+      if (!/style|source|layer/i.test(message)) {
+        console.error('Unable to render MapLibre route.', error);
+      }
+      return false;
+    }
   }
 
   #raiseRouteLayers() {
-    // addLayer() without beforeId already appends above the base style. Move
-    // explicitly as a defensive guarantee after style swaps and progress
-    // updates so the route can never sit underneath a raster/vector base.
     for (const layerId of [
       'atlas-route-casing',
       'atlas-route-traveled',
       'atlas-route-remaining'
     ]) {
-      if (this.map.getLayer(layerId)) {
-        this.map.moveLayer(layerId);
+      if (this.map.getLayer?.(layerId)) {
+        this.map.moveLayer?.(layerId);
       }
     }
   }
 
+  #tryRemoveRouteOverlay() {
+    try {
+      this.#removeRouteOverlay();
+    } catch {
+      // setStyle() may be between style instances; there is nothing useful to
+      // remove in that interval because MapLibre discards old custom layers.
+    }
+  }
+
   #removeRouteOverlay() {
-    for (const layerId of [
-      'atlas-route-traveled',
-      'atlas-route-remaining',
-      'atlas-route-casing'
-    ]) {
-      if (this.map.getLayer(layerId)) {
+    for (const layerId of ROUTE_LAYER_IDS) {
+      if (this.map.getLayer?.(layerId)) {
         this.map.removeLayer(layerId);
       }
     }
@@ -416,7 +455,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       TRAVELED_SOURCE,
       ROUTE_SOURCE
     ]) {
-      if (this.map.getSource(sourceId)) {
+      if (this.map.getSource?.(sourceId)) {
         this.map.removeSource(sourceId);
       }
     }
@@ -429,12 +468,12 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       this.mapSourceMode === 'offline';
 
     this.mapSourceBadge.textContent =
-      offline ? 'Offline map' : 'Online map';
+      offline ? 'Offline vector' : 'Online vector';
     this.mapSourceBadge.dataset.mode =
       offline ? 'offline' : 'online';
     this.mapSourceBadge.title =
       offline
-        ? 'Atlas is using the downloaded regional map.'
-        : 'Atlas is using the online OpenStreetMap layer.';
+        ? 'Atlas is using the downloaded regional vector map.'
+        : 'Atlas is using an online MapLibre vector style.';
   }
 }
