@@ -57,6 +57,17 @@ function bearing(from, to) {
   return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
+function signedBearingDelta(fromBearing, toBearing) {
+  return ((toBearing - fromBearing + 540) % 360) - 180;
+}
+
+function turnDirection(delta) {
+  if (delta <= -135 || delta >= 135) return 'uturn';
+  if (delta < -25) return 'left';
+  if (delta > 25) return 'right';
+  return 'straight';
+}
+
 function activeManeuver(maneuvers, activeIndex) {
   return maneuvers
     .slice(Math.max(0, activeIndex))
@@ -65,7 +76,7 @@ function activeManeuver(maneuvers, activeIndex) {
 
 function turnGeometry(route, maneuver) {
   const points = route?.points?.filter(validPoint) ?? [];
-  if (points.length < 2 || !validPoint(maneuver?.location)) return null;
+  if (points.length < 3 || !validPoint(maneuver?.location)) return null;
 
   const turnIndex = nearestRouteIndex(points, maneuver.location);
   const startIndex = Math.max(0, turnIndex - 2);
@@ -74,32 +85,53 @@ function turnGeometry(route, maneuver) {
 
   if (segment.length < 2) return null;
 
-  const outgoingIndex = Math.min(points.length - 1, turnIndex + 1);
-  const incomingIndex = Math.max(0, Math.min(turnIndex, points.length - 2));
-  const arrowFrom = points[incomingIndex];
-  const arrowTo = points[outgoingIndex];
+  const incomingFromIndex = Math.max(0, turnIndex - 1);
+  const incomingToIndex = Math.max(
+    incomingFromIndex + 1,
+    Math.min(turnIndex, points.length - 1)
+  );
+  const outgoingFromIndex = Math.min(turnIndex, points.length - 2);
+  const outgoingToIndex = Math.min(points.length - 1, outgoingFromIndex + 1);
+
+  const incomingBearing = bearing(
+    points[incomingFromIndex],
+    points[incomingToIndex]
+  );
+  const outgoingBearing = bearing(
+    points[outgoingFromIndex],
+    points[outgoingToIndex]
+  );
+  const delta = signedBearingDelta(incomingBearing, outgoingBearing);
 
   return {
     segment,
-    arrowBearing: bearing(arrowFrom, arrowTo)
+    direction: turnDirection(delta),
+    delta
   };
 }
 
-function arrowElement(rotation) {
+function arrowElement(direction) {
   const element = document.createElement('div');
   element.style.cssText = [
-    'width:26px',
-    'height:26px',
+    'width:30px',
+    'height:30px',
     'display:grid',
     'place-items:center',
-    `transform:rotate(${rotation}deg)`,
-    'filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))',
+    'filter:drop-shadow(0 2px 3px rgba(0,0,0,.30))',
     'pointer-events:none'
   ].join(';');
+
+  const paths = {
+    left: 'M20 5v5h-7.2c-3.7 0-6.8 3-6.8 6.8V20h4v-3.2c0-1.5 1.3-2.8 2.8-2.8H20v5l7-7-7-7Z',
+    right: 'M10 5v5h7.2c3.7 0 6.8 3 6.8 6.8V20h-4v-3.2c0-1.5-1.3-2.8-2.8-2.8H10v5l-7-7 7-7Z',
+    straight: 'M15 3 7 11h5v16h6V11h5L15 3Z',
+    uturn: 'M9 25v-9c0-4.4 3.6-8 8-8h2V3l8 7-8 7v-5h-2c-2.2 0-4 1.8-4 4v9H9Z'
+  };
+
   element.innerHTML = `
-    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2.5 20 19.5 12 16.1 4 19.5 12 2.5Z"
-        fill="#f59e0b" stroke="#ffffff" stroke-width="2.2" stroke-linejoin="round"/>
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <path d="${paths[direction] ?? paths.straight}"
+        fill="#f59e0b" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
     </svg>`;
   return element;
 }
@@ -186,9 +218,9 @@ export function installMapLibreTurnHighlight(AdapterClass) {
       });
 
       const marker = new this.maplibre.Marker({
-        element: arrowElement(geometry.arrowBearing),
+        element: arrowElement(geometry.direction),
         anchor: 'center',
-        rotationAlignment: 'map'
+        rotationAlignment: 'viewport'
       })
         .setLngLat([maneuver.location.lon, maneuver.location.lat])
         .addTo(this.map);
