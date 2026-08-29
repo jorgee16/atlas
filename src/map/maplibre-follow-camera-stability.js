@@ -151,17 +151,13 @@ export function installMapLibreFollowCameraStability() {
         ? normalizeBearing(this.routeBearing)
         : null;
     const headingUp = options?.headingUp === true;
+    const forceCamera = options?.forceCamera === true;
     const previousHeadingUp = this.__atlasStableCameraHeadingUp;
     const headingModeChanged =
       typeof previousHeadingUp !== 'boolean' ||
       previousHeadingUp !== headingUp;
 
-    // Manual pinch/zoom should suspend normal follow-camera corrections, but
-    // an explicit north-up <-> heading-up toggle is a higher-priority user
-    // action. Let that transition bypass the gesture settle window so the
-    // compass button always responds immediately, even if the user just
-    // finished zooming a fraction of a second earlier.
-    if (this.__atlasManualMapGesture && !headingModeChanged) {
+    if (this.__atlasManualMapGesture && !headingModeChanged && !forceCamera) {
       return Number.isFinite(this.map?.getBearing?.())
         ? normalizeBearing(-this.map.getBearing())
         : 0;
@@ -180,7 +176,10 @@ export function installMapLibreFollowCameraStability() {
         if (this.lastUserPosition && this.navigationTravelMode) {
           this.followPosition(
             this.lastUserPosition,
-            this.__atlasLastFollowOptions ?? options
+            {
+              ...(this.__atlasLastFollowOptions ?? options),
+              forceCamera: true
+            }
           );
         }
       });
@@ -204,6 +203,7 @@ export function installMapLibreFollowCameraStability() {
     const outsideComfortArea = shouldRecenterForScreen(this, position);
 
     const shouldUpdateCamera =
+      forceCamera ||
       !previousPosition ||
       headingModeChanged ||
       outsideComfortArea ||
