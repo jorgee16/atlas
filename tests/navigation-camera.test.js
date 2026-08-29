@@ -7,7 +7,8 @@ import {
 
 import {
   navigationCameraProfile,
-  navigationForwardOffset
+  navigationForwardOffset,
+  navigationPitch
 } from '../src/map/navigation-camera.js';
 
 import {
@@ -45,13 +46,15 @@ class FakeButton {
 }
 
 test(
-  'car navigation camera keeps a forward-looking flat profile',
+  'car navigation camera keeps a forward-looking adaptive profile',
   () => {
     const profile = navigationCameraProfile('drive');
 
     assert.deepEqual(profile, {
-      forwardFraction: 0.16,
-      forwardMaxPixels: 220
+      forwardFraction: 0.20,
+      forwardMaxPixels: 260,
+      pitchMin: 36,
+      pitchMax: 52
     });
     assert.equal(
       navigationForwardOffset({
@@ -59,7 +62,7 @@ test(
         height: 1200,
         headingUp: true
       }),
-      192
+      240
     );
     assert.equal(
       navigationForwardOffset({
@@ -67,19 +70,57 @@ test(
         height: 2000,
         headingUp: true
       }),
-      220
+      260
+    );
+    assert.equal(
+      navigationForwardOffset({
+        travelMode: 'drive',
+        height: 1000,
+        headingUp: true,
+        speed: 30
+      }),
+      250
+    );
+
+    assert.equal(
+      navigationPitch({
+        travelMode: 'drive',
+        headingUp: true,
+        speed: 0
+      }),
+      36
+    );
+    assert.equal(
+      navigationPitch({
+        travelMode: 'drive',
+        headingUp: true,
+        speed: 25
+      }),
+      52
+    );
+    assert.ok(
+      navigationPitch({
+        travelMode: 'drive',
+        headingUp: true,
+        speed: 25,
+        progress: {
+          distanceToManeuverMeters: 30
+        }
+      }) < 52
     );
   }
 );
 
 test(
-  'walking and north-up camera keep their existing flat behavior',
+  'walking and north-up camera keep their restrained behavior',
   () => {
     assert.deepEqual(
       navigationCameraProfile('walk'),
       {
-        forwardFraction: 0.20,
-        forwardMaxPixels: 150
+        forwardFraction: 0.16,
+        forwardMaxPixels: 140,
+        pitchMin: 0,
+        pitchMax: 18
       }
     );
     assert.equal(
@@ -88,13 +129,29 @@ test(
         height: 1000,
         headingUp: true
       }),
-      150
+      140
     );
     assert.equal(
       navigationForwardOffset({
         travelMode: 'drive',
         height: 1200,
         headingUp: false
+      }),
+      0
+    );
+    assert.equal(
+      navigationPitch({
+        travelMode: 'walk',
+        headingUp: true,
+        speed: 1.5
+      }),
+      0
+    );
+    assert.equal(
+      navigationPitch({
+        travelMode: 'drive',
+        headingUp: false,
+        speed: 20
       }),
       0
     );
