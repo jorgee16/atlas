@@ -20,8 +20,6 @@ export class FollowModeController {
     this.compassButton = compassButton;
     this.status = status;
 
-    // GPS availability and camera following are separate states.
-    // Start unfollowed: GPS updates the marker, while Follow/Recenter own camera movement.
     this.enabled = false;
     this.navigationActive = false;
     this.navigationTracksPosition = true;
@@ -153,10 +151,6 @@ export class FollowModeController {
     }
 
     if (this.navigationTracksPosition) {
-      // Starting road navigation always enters Follow mode. This is an
-      // intentional navigation-state transition, not a user preference:
-      // the map should immediately recenter on the latest GPS fix and keep
-      // following subsequent fixes without requiring a second tap.
       this.enabled = true;
       this.#renderButton();
 
@@ -167,7 +161,6 @@ export class FollowModeController {
           speed: this.position.speed
         });
       } else {
-        // Keep Follow armed. The next GPS update will focus the camera.
         this.#renderCompass(0);
       }
 
@@ -220,9 +213,6 @@ export class FollowModeController {
           return;
         }
 
-        // setHeadingUpEnabled owns the complete transition. Keeping the
-        // compass handler single-path prevents duplicate focus/bearing
-        // updates from racing each other.
         this.setHeadingUpEnabled(
           !this.headingUpEnabled
         );
@@ -263,14 +253,71 @@ export class FollowModeController {
     );
   }
 
-  getHeadingUpEnabled() { return this.headingUpEnabled; }
-  setHeadingUpEnabled(value) { this.headingUpEnabled = value === true; this.#save('atlas.navigation.headingUp', String(this.headingUpEnabled)); if (this.enabled && this.position) this.#focusPosition(); else if (!this.headingUpEnabled) this.map.setBearing?.(0); this.#renderCompass(0); return this.headingUpEnabled; }
-  getFollowZoom() { return this.followZoom; }
-  setFollowZoom(value) { if (!['near','normal','far'].includes(value)) return false; this.followZoom=value; this.#save('atlas.map.followZoom', value); if (this.enabled && this.position) this.#focusPosition(); return true; }
-  #zoomLevel() { return { near:19, normal:18, far:17 }[this.followZoom] ?? 18; }
-  #loadZoom() { try { const v=globalThis.localStorage?.getItem('atlas.map.followZoom'); return ['near','normal','far'].includes(v) ? v : 'normal'; } catch { return 'normal'; } }
-  #loadBool(key,fallback) { try { const v=globalThis.localStorage?.getItem(key); return v == null ? fallback : v !== 'false'; } catch { return fallback; } }
-  #save(key,value) { try { globalThis.localStorage?.setItem(key,value); } catch {} }
+  getHeadingUpEnabled() {
+    return this.headingUpEnabled;
+  }
+
+  setHeadingUpEnabled(value) {
+    this.headingUpEnabled = value === true;
+    this.#save(
+      'atlas.navigation.headingUp',
+      String(this.headingUpEnabled)
+    );
+
+    if (this.enabled && this.position) {
+      // #focusPosition renders the compass with the actual bearing returned by
+      // the map adapter. Do not immediately overwrite it with 0deg afterward;
+      // that made the button appear stuck in north-up until another GPS fix.
+      this.#focusPosition();
+    } else {
+      if (!this.headingUpEnabled) {
+        this.map.setBearing?.(0);
+      }
+      this.#renderCompass(0);
+    }
+
+    return this.headingUpEnabled;
+  }
+
+  getFollowZoom() {
+    return this.followZoom;
+  }
+
+  setFollowZoom(value) {
+    if (!['near', 'normal', 'far'].includes(value)) return false;
+    this.followZoom = value;
+    this.#save('atlas.map.followZoom', value);
+    if (this.enabled && this.position) this.#focusPosition();
+    return true;
+  }
+
+  #zoomLevel() {
+    return { near: 19, normal: 18, far: 17 }[this.followZoom] ?? 18;
+  }
+
+  #loadZoom() {
+    try {
+      const value = globalThis.localStorage?.getItem('atlas.map.followZoom');
+      return ['near', 'normal', 'far'].includes(value) ? value : 'normal';
+    } catch {
+      return 'normal';
+    }
+  }
+
+  #loadBool(key, fallback) {
+    try {
+      const value = globalThis.localStorage?.getItem(key);
+      return value == null ? fallback : value !== 'false';
+    } catch {
+      return fallback;
+    }
+  }
+
+  #save(key, value) {
+    try {
+      globalThis.localStorage?.setItem(key, value);
+    } catch {}
+  }
 
   #renderButton() {
     if (!this.followButton) {
