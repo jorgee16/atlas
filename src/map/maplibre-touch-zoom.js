@@ -3,26 +3,47 @@ import {
 } from './maplibre-pmtiles-map-adapter.js';
 
 const GESTURE_SETTLE_MS = 160;
-const TOUCH_ZOOM_RATE = 1.7;
-const TOUCH_ZOOM_THRESHOLD = 0.008;
+const NAVIGATION_TOUCH_ZOOM_RATE = 1.7;
+const BROWSE_TOUCH_ZOOM_RATE = 2.15;
+const NAVIGATION_TOUCH_ZOOM_THRESHOLD = 0.008;
+const BROWSE_TOUCH_ZOOM_THRESHOLD = 0.004;
+
+function configureTouchZoom(adapter) {
+  const map = adapter?.map;
+  if (!map) return;
+
+  const navigationActive = Boolean(adapter.navigationTravelMode);
+
+  map.touchZoomRotate?.enable?.();
+  map.touchZoomRotate?.disableRotation?.();
+  map.touchZoomRotate?.setZoomRate?.(
+    navigationActive
+      ? NAVIGATION_TOUCH_ZOOM_RATE
+      : BROWSE_TOUCH_ZOOM_RATE
+  );
+  map.touchZoomRotate?.setZoomThreshold?.(
+    navigationActive
+      ? NAVIGATION_TOUCH_ZOOM_THRESHOLD
+      : BROWSE_TOUCH_ZOOM_THRESHOLD
+  );
+  map.touchPitch?.disable?.();
+  map.dragRotate?.disable?.();
+}
 
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
-  if (!map || !container || adapter.__atlasTouchZoomInstalled) return adapter;
+  if (!map || !container) return adapter;
+
+  // Always re-apply the interaction profile. Preview/explore do not have a
+  // navigationTravelMode, while active guidance does. Previously the tuned
+  // profile was effectively refreshed when navigation started, which made
+  // pinch feel noticeably more responsive there than while browsing.
+  configureTouchZoom(adapter);
+
+  if (adapter.__atlasTouchZoomInstalled) return adapter;
 
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
-
-  // Keep MapLibre's native pinch handler in control, but make it engage with
-  // very little finger travel and react more strongly to the same pinch
-  // distance. Rotation/pitch stay disabled because Atlas owns
-  // heading-up/north-up explicitly.
-  map.touchZoomRotate?.enable?.();
-  map.touchZoomRotate?.disableRotation?.();
-  map.touchZoomRotate?.setZoomRate?.(TOUCH_ZOOM_RATE);
-  map.touchZoomRotate?.setZoomThreshold?.(TOUCH_ZOOM_THRESHOLD);
-  map.touchPitch?.disable?.();
-  map.dragRotate?.disable?.();
 
   let settleTimer = null;
 
@@ -86,7 +107,20 @@ if (prototype && !prototype.__atlasDirectTouchZoomInstalled) {
 
   const originalSetNavigationTravelMode = prototype.setNavigationTravelMode;
   prototype.setNavigationTravelMode = function setNavigationTravelMode(mode = null) {
-    installMapLibreTouchZoom(this);
-    return originalSetNavigationTravelMode.call(this, mode);
+    const result = originalSetNavigationTravelMode.call(this, mode);
+    configureTouchZoom(this);
+    return result;
   };
+
+  // Bootstrap registers move listeners immediately after constructing the map.
+  // Install the browse interaction profile at that point too, so Explore and
+  // route preview get the same direct native pinch setup even before a region
+  // or navigation mode has been selected.
+  const originalOnMoveEnd = prototype.onMoveEnd;
+  if (typeof originalOnMoveEnd === 'function') {
+    prototype.onMoveEnd = function onMoveEnd(callback) {
+      installMapLibreTouchZoom(this);
+      return originalOnMoveEnd.call(this, callback);
+    };
+  }
 }
