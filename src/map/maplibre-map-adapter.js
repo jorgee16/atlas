@@ -1,6 +1,7 @@
 import {
   adaptiveNavigationZoom,
-  navigationForwardOffset
+  navigationForwardOffset,
+  navigationPitch
 } from './navigation-camera.js';
 import {
   carNavigationHeading,
@@ -355,16 +356,24 @@ export class MapLibreMapAdapter {
     const forwardOffset = navigationForwardOffset({
       travelMode: this.navigationTravelMode,
       height: containerHeight,
-      headingUp
+      headingUp,
+      speed: position?.speed
+    });
+    const pitch = navigationPitch({
+      travelMode: this.navigationTravelMode,
+      headingUp,
+      speed: position?.speed,
+      progress: this.navigationRouteProgress
     });
 
     this.map.easeTo({
       center: [lon, lat],
       zoom: this.navigationCameraZoom,
       bearing,
-      pitch: this.navigationTravelMode === 'drive' && headingUp ? 42 : 0,
+      pitch,
       offset: [0, forwardOffset],
-      duration: this.navigationTravelMode === 'drive' ? 260 : 220,
+      duration: this.navigationTravelMode === 'drive' ? 280 : 220,
+      easing: t => 1 - Math.pow(1 - t, 3),
       essential: true
     });
 
