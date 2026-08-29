@@ -16,6 +16,12 @@ import {
 const ONLINE_VECTOR_STYLE =
   'https://tiles.openfreemap.org/styles/liberty';
 
+// Diagnostic ceiling while isolating the Android/WebView high-zoom failure.
+// OpenFreeMap renders street detail well below this level, so GPS should still
+// be useful while we prove whether the blank map is caused specifically by the
+// previous 16-18 zoom jump rather than by coordinates or style loading.
+const GPS_DIAGNOSTIC_MAX_ZOOM = 14;
+
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
 const ROUTE_LAYER_IDS = [
@@ -220,12 +226,58 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       region?.assets?.map ??
       null;
 
-    // During this validation pass, region changes must not replace the
-    // verified online street style with the still-unverified PMTiles style.
-    // Offline routing/search remain independent from the visual base map.
     this.mapSourceMode = 'online';
     this.#renderMapSourceBadge();
     return Boolean(mapUrl);
+  }
+
+  updateUserLocation(position, firstFix = false) {
+    const latitude = position?.latitude;
+    const longitude = position?.longitude;
+
+    // Let the base adapter own the marker, but prevent its hard-coded zoom 16
+    // first-fix jump. We perform the diagnostic first-fix camera ourselves.
+    super.updateUserLocation(position, false);
+
+    if (
+      firstFix &&
+      Number.isFinite(latitude) &&
+      Number.isFinite(longitude)
+    ) {
+      this.map.easeTo({
+        center: [longitude, latitude],
+        zoom: GPS_DIAGNOSTIC_MAX_ZOOM,
+        duration: 350,
+        essential: true
+      });
+
+      this.mapSourceBadge.textContent =
+        `GPS ${latitude.toFixed(4)}, ${longitude.toFixed(4)} · z${GPS_DIAGNOSTIC_MAX_ZOOM}`;
+    }
+  }
+
+  followPosition(position, options = {}) {
+    return super.followPosition(position, {
+      ...options,
+      zoom: Math.min(
+        Number.isFinite(options?.zoom)
+          ? options.zoom
+          : GPS_DIAGNOSTIC_MAX_ZOOM,
+        GPS_DIAGNOSTIC_MAX_ZOOM
+      )
+    });
+  }
+
+  fitRoute(route, options = {}) {
+    return super.fitRoute(route, {
+      ...options,
+      maxZoom: Math.min(
+        Number.isFinite(options?.maxZoom)
+          ? options.maxZoom
+          : GPS_DIAGNOSTIC_MAX_ZOOM,
+        GPS_DIAGNOSTIC_MAX_ZOOM
+      )
+    });
   }
 
   showRoute(route) {
