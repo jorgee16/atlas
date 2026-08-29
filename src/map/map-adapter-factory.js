@@ -13,6 +13,8 @@ const DEFAULT_RENDERER = MAP_RENDERER.MAPLIBRE;
 const MAPLIBRE_ANDROID_VECTOR_STYLE = {
   version: 8,
   name: 'Atlas VersaTiles direct MVT',
+  glyphs:
+    'https://tiles.versatiles.org/assets/glyphs/{fontstack}/{range}.pbf',
   sources: {
     openmaptiles: {
       type: 'vector',
@@ -126,6 +128,31 @@ const MAPLIBRE_ANDROID_VECTOR_STYLE = {
           14, 3.7,
           18, 8.7
         ]
+      }
+    },
+    {
+      id: 'atlas-place-labels',
+      type: 'symbol',
+      source: 'openmaptiles',
+      'source-layer': 'place_labels',
+      minzoom: 4,
+      layout: {
+        'text-field': ['coalesce', ['get', 'name'], ''],
+        'text-font': ['fira_sans_regular'],
+        'text-size': [
+          'interpolate', ['linear'], ['zoom'],
+          4, 11,
+          8, 13,
+          12, 15,
+          15, 16
+        ],
+        'text-padding': 7,
+        'text-allow-overlap': false
+      },
+      paint: {
+        'text-color': '#303744',
+        'text-halo-color': 'rgba(255,255,255,0.96)',
+        'text-halo-width': 1.8
       }
     }
   ]
