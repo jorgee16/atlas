@@ -142,12 +142,6 @@ export function installMapLibreFollowCameraStability() {
   );
 
   prototype.followPosition = function followPosition(position, options = {}) {
-    if (this.__atlasManualMapGesture) {
-      return Number.isFinite(this.map?.getBearing?.())
-        ? normalizeBearing(-this.map.getBearing())
-        : 0;
-    }
-
     const latitude = position?.latitude ?? position?.lat;
     const longitude = position?.longitude ?? position?.lon;
     const speed = Number.isFinite(position?.speed) ? position.speed : 0;
@@ -157,6 +151,21 @@ export function installMapLibreFollowCameraStability() {
         ? normalizeBearing(this.routeBearing)
         : null;
     const headingUp = options?.headingUp === true;
+    const previousHeadingUp = this.__atlasStableCameraHeadingUp;
+    const headingModeChanged =
+      typeof previousHeadingUp !== 'boolean' ||
+      previousHeadingUp !== headingUp;
+
+    // Manual pinch/zoom should suspend normal follow-camera corrections, but
+    // an explicit north-up <-> heading-up toggle is a higher-priority user
+    // action. Let that transition bypass the gesture settle window so the
+    // compass button always responds immediately, even if the user just
+    // finished zooming a fraction of a second earlier.
+    if (this.__atlasManualMapGesture && !headingModeChanged) {
+      return Number.isFinite(this.map?.getBearing?.())
+        ? normalizeBearing(-this.map.getBearing())
+        : 0;
+    }
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return originalFollowPosition.call(this, position, options);
@@ -180,7 +189,6 @@ export function installMapLibreFollowCameraStability() {
     const nextPosition = { latitude, longitude };
     const previousPosition = this.__atlasStableCameraPosition ?? null;
     const previousHeading = this.__atlasStableCameraHeading ?? null;
-    const previousHeadingUp = this.__atlasStableCameraHeadingUp;
     const mode = this.navigationTravelMode;
     const stationary = speed < STATIONARY_SPEED_METERS_PER_SECOND;
 
@@ -194,9 +202,6 @@ export function installMapLibreFollowCameraStability() {
     const movedMeters = distanceMeters(previousPosition, nextPosition);
     const headingChanged = bearingDelta(previousHeading, heading);
     const outsideComfortArea = shouldRecenterForScreen(this, position);
-    const headingModeChanged =
-      typeof previousHeadingUp !== 'boolean' ||
-      previousHeadingUp !== headingUp;
 
     const shouldUpdateCamera =
       !previousPosition ||
