@@ -11,17 +11,10 @@ import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 
-// Verified against both OpenFreeMap's quick start and MapLibre's own examples.
-// This is a full street-level vector style suitable for zoomed-in navigation.
 const ONLINE_VECTOR_STYLE =
   'https://tiles.openfreemap.org/styles/liberty';
 
-// Diagnostic ceiling while isolating the Android/WebView high-zoom failure.
-// OpenFreeMap renders street detail well below this level, so GPS should still
-// be useful while we prove whether the blank map is caused specifically by the
-// previous 16-18 zoom jump rather than by coordinates or style loading.
 const GPS_DIAGNOSTIC_MAX_ZOOM = 14;
-
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
 const ROUTE_LAYER_IDS = [
@@ -140,6 +133,37 @@ function mapErrorMessage(event) {
   );
 }
 
+function leafletNavigationCursorHtml({
+  drive,
+  heading,
+  showHeading
+}) {
+  const rotation =
+    Number.isFinite(heading)
+      ? normalizeBearing(heading)
+      : 0;
+
+  if (drive) {
+    return `
+      <div style="width:38px;height:38px;display:grid;place-items:center;background:#fff;border-radius:50%;box-shadow:0 2px 9px rgba(0,0,0,.30);transform:rotate(${rotation}deg);transition:transform 220ms ease;">
+        <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2.4 20.1 20 12 16.4 3.9 20 12 2.4Z" fill="#2563eb"/>
+        </svg>
+      </div>`;
+  }
+
+  if (showHeading) {
+    return `
+      <div style="position:relative;width:42px;height:42px;transform:rotate(${rotation}deg);transition:transform 220ms ease;">
+        <div style="position:absolute;top:0;left:50%;width:0;height:0;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:22px solid #2563eb;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));"></div>
+        <div style="position:absolute;left:50%;bottom:5px;width:18px;height:18px;transform:translateX(-50%);background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.28);"></div>
+      </div>`;
+  }
+
+  return `
+    <div style="width:20px;height:20px;background:#2563eb;border:4px solid #fff;border-radius:50%;box-shadow:0 2px 9px rgba(0,0,0,.30);"></div>`;
+}
+
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
@@ -200,21 +224,56 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     });
     this.map.getContainer().appendChild(this.mapErrorElement);
 
+    this.renderDiagnosticsElement =
+      document.createElement('div');
+    Object.assign(this.renderDiagnosticsElement.style, {
+      position: 'absolute',
+      zIndex: '1999',
+      left: '12px',
+      bottom: '118px',
+      maxWidth: 'min(420px, calc(100% - 24px))',
+      padding: '7px 9px',
+      borderRadius: '9px',
+      background: 'rgba(20, 28, 42, 0.88)',
+      color: '#fff',
+      fontSize: '10px',
+      fontWeight: '650',
+      lineHeight: '1.3',
+      whiteSpace: 'pre-wrap',
+      pointerEvents: 'none'
+    });
+    this.renderDiagnosticsElement.textContent =
+      'MapLibre diagnostics waiting…';
+    this.map.getContainer().appendChild(
+      this.renderDiagnosticsElement
+    );
+
     this.map.on('error', event => {
       const message = mapErrorMessage(event);
       console.error('MapLibre runtime error:', event?.error ?? event);
       this.mapErrorElement.textContent =
         `MapLibre error: ${message}`;
       this.mapErrorElement.hidden = false;
+      this.#refreshRenderDiagnostics();
     });
 
     this.map.on('style.load', () => {
       this.mapSourceBadge.textContent = 'OpenFreeMap loaded';
       this.#scheduleRouteRender();
+      this.#refreshRenderDiagnostics();
     });
 
     this.map.on('load', () => {
       this.#scheduleRouteRender();
+      this.#refreshRenderDiagnostics();
+    });
+
+    this.map.on('idle', () => {
+      this.#refreshRenderDiagnostics();
+    });
+
+    this.map.on('moveend', () => {
+      this.#refreshRenderDiagnostics();
     });
   }
 
@@ -235,9 +294,8 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     const latitude = position?.latitude;
     const longitude = position?.longitude;
 
-    // Let the base adapter own the marker, but prevent its hard-coded zoom 16
-    // first-fix jump. We perform the diagnostic first-fix camera ourselves.
     super.updateUserLocation(position, false);
+    this.#restoreLeafletCursor(position);
 
     if (
       firstFix &&
@@ -254,10 +312,22 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       this.mapSourceBadge.textContent =
         `GPS ${latitude.toFixed(4)}, ${longitude.toFixed(4)} · z${GPS_DIAGNOSTIC_MAX_ZOOM}`;
     }
+
+    queueMicrotask(() => {
+      this.#refreshRenderDiagnostics();
+    });
+  }
+
+  setNavigationTravelMode(mode = null) {
+    const result = super.setNavigationTravelMode(mode);
+    if (this.lastUserPosition) {
+      this.#restoreLeafletCursor(this.lastUserPosition);
+    }
+    return result;
   }
 
   followPosition(position, options = {}) {
-    return super.followPosition(position, {
+    const result = super.followPosition(position, {
       ...options,
       zoom: Math.min(
         Number.isFinite(options?.zoom)
@@ -266,6 +336,8 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         GPS_DIAGNOSTIC_MAX_ZOOM
       )
     });
+    this.#refreshRenderDiagnostics();
+    return result;
   }
 
   fitRoute(route, options = {}) {
@@ -346,6 +418,76 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.routeRenderRetryTimer = null;
 
     this.#tryRemoveRouteOverlay();
+  }
+
+  #restoreLeafletCursor(position) {
+    if (!this.userMarkerElement) {
+      return;
+    }
+
+    const drive =
+      this.navigationTravelMode === 'drive';
+    const speed = position?.speed;
+    const heading = position?.heading;
+    const showHeading =
+      Number.isFinite(heading) &&
+      Number.isFinite(speed) &&
+      speed >= 0.8;
+
+    this.userMarkerElement.className = '';
+    this.userMarkerElement.style.width = drive
+      ? '38px'
+      : showHeading
+        ? '42px'
+        : '20px';
+    this.userMarkerElement.style.height = drive
+      ? '38px'
+      : showHeading
+        ? '42px'
+        : '20px';
+    this.userMarkerElement.innerHTML =
+      leafletNavigationCursorHtml({
+        drive,
+        heading,
+        showHeading
+      });
+  }
+
+  #refreshRenderDiagnostics() {
+    if (!this.renderDiagnosticsElement) return;
+
+    try {
+      const center = this.map.getCenter?.();
+      const zoom = this.map.getZoom?.();
+      const styleLoaded =
+        Boolean(this.map.isStyleLoaded?.());
+      const tilesLoaded =
+        Boolean(this.map.areTilesLoaded?.());
+      const source =
+        this.map.getSource?.('openmaptiles');
+
+      let rendered = '—';
+      try {
+        rendered = String(
+          this.map.queryRenderedFeatures?.().length ?? '—'
+        );
+      } catch {
+        rendered = 'err';
+      }
+
+      const sourceState = source
+        ? source.constructor?.name ?? 'present'
+        : 'missing';
+
+      this.renderDiagnosticsElement.textContent = [
+        `center ${Number(center?.lat).toFixed(4)}, ${Number(center?.lng).toFixed(4)}  z${Number(zoom).toFixed(2)}`,
+        `style ${styleLoaded ? 'ready' : 'loading'}  tiles ${tilesLoaded ? 'ready' : 'loading'}`,
+        `openmaptiles ${sourceState}  rendered ${rendered}`
+      ].join('\n');
+    } catch (error) {
+      this.renderDiagnosticsElement.textContent =
+        `diagnostics error: ${mapErrorMessage(error)}`;
+    }
   }
 
   #scheduleRouteRender({ immediate = false } = {}) {
