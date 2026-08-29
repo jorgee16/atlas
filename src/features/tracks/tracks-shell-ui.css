@@ -53,7 +53,7 @@
 
 .tracks-header p {
   margin: 0;
-  max-width: 380px;
+  max-width: 390px;
   color: var(--text-muted);
   font-size: 14px;
   line-height: 1.45;
@@ -74,6 +74,19 @@
   align-items: center;
   gap: 8px;
   padding: 0 16px;
+}
+
+.tracks-import-primary:disabled {
+  opacity: .68;
+}
+
+.tracks-import-primary.is-loading svg {
+  animation: tracks-import-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes tracks-import-pulse {
+  from { transform: translateY(0); }
+  to { transform: translateY(-2px); }
 }
 
 .tracks-import-primary svg {
@@ -169,7 +182,7 @@
 
 .tracks-file-card {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) auto;
+  grid-template-columns: 54px minmax(0, 1fr) 36px;
   gap: 13px;
   align-items: center;
   min-height: 78px;
@@ -178,12 +191,36 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface-muted);
+  cursor: pointer;
+  transition:
+    border-color var(--atlas-motion-fast, 140ms) ease,
+    background var(--atlas-motion-fast, 140ms) ease,
+    transform var(--atlas-motion-fast, 140ms) ease;
+}
+
+.tracks-file-card:active {
+  transform: scale(.992);
+}
+
+.tracks-file-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tracks-file-card--selected {
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 58%, var(--surface-muted));
 }
 
 .tracks-file-icon {
   width: 54px;
   height: 54px;
   border-radius: 16px;
+}
+
+.tracks-file-card--selected .tracks-file-icon {
+  background: var(--accent);
+  color: #fff;
 }
 
 .tracks-file-copy {
@@ -210,14 +247,31 @@
   font-size: 12px;
 }
 
+.tracks-file-copy small {
+  line-height: 1.35;
+}
+
 .tracks-file-copy b {
   color: var(--accent);
 }
 
-.tracks-file-chevron {
+.tracks-file-delete {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
   color: var(--text-muted);
-  font-size: 28px;
+  font-size: 25px;
   line-height: 1;
+}
+
+.tracks-file-delete:hover,
+.tracks-file-delete:focus-visible {
+  background: color-mix(in srgb, var(--danger, #d34848) 12%, transparent);
+  color: var(--danger, #d34848);
 }
 
 .tracks-format-note {
@@ -336,6 +390,15 @@ html[data-theme="dark"] .tracks-count {
 
   .tracks-empty button {
     min-height: 44px;
+  }
+
+  .tracks-file-card {
+    grid-template-columns: 48px minmax(0, 1fr) 34px;
+  }
+
+  .tracks-file-icon {
+    width: 48px;
+    height: 48px;
   }
 
   .tracks-format-note {
