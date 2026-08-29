@@ -1,6 +1,9 @@
 const TURN_SOURCE = 'atlas-turn-highlight';
 const TURN_CASING_LAYER = 'atlas-turn-highlight-casing';
 const TURN_LAYER = 'atlas-turn-highlight-line';
+const TURN_ARROW_SOURCE = 'atlas-turn-highlight-arrow';
+const TURN_ARROW_CASING_LAYER = 'atlas-turn-highlight-arrow-casing';
+const TURN_ARROW_LAYER = 'atlas-turn-highlight-arrow-line';
 
 function validPoint(point) {
   return Number.isFinite(point?.lat) && Number.isFinite(point?.lon);
@@ -13,6 +16,19 @@ function lineFeature(points) {
     geometry: {
       type: 'LineString',
       coordinates: points.map(point => [point.lon, point.lat])
+    }
+  };
+}
+
+function multiLineFeature(lines) {
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiLineString',
+      coordinates: lines.map(line =>
+        line.map(point => [point.lon, point.lat])
+      )
     }
   };
 }
@@ -61,6 +77,35 @@ function signedBearingDelta(fromBearing, toBearing) {
   return ((toBearing - fromBearing + 540) % 360) - 180;
 }
 
+function destinationPoint(point, bearingDegrees, distanceMeters) {
+  const earthRadiusMeters = 6371000;
+  const angularDistance = distanceMeters / earthRadiusMeters;
+  const bearingRadians = bearingDegrees * Math.PI / 180;
+  const latitude1 = point.lat * Math.PI / 180;
+  const longitude1 = point.lon * Math.PI / 180;
+
+  const latitude2 = Math.asin(
+    Math.sin(latitude1) * Math.cos(angularDistance) +
+    Math.cos(latitude1) * Math.sin(angularDistance) * Math.cos(bearingRadians)
+  );
+  const longitude2 = longitude1 + Math.atan2(
+    Math.sin(bearingRadians) * Math.sin(angularDistance) * Math.cos(latitude1),
+    Math.cos(angularDistance) - Math.sin(latitude1) * Math.sin(latitude2)
+  );
+
+  return {
+    lat: latitude2 * 180 / Math.PI,
+    lon: longitude2 * 180 / Math.PI
+  };
+}
+
+function interpolatePoint(from, to, fraction) {
+  return {
+    lat: from.lat + (to.lat - from.lat) * fraction,
+    lon: from.lon + (to.lon - from.lon) * fraction
+  };
+}
+
 function geometryDirection(delta) {
   if (delta <= -135 || delta >= 135) return 'uturn';
   if (delta < -25) return 'left';
@@ -74,9 +119,7 @@ function maneuverDirection(maneuver, fallback) {
     maneuver?.modifier ?? maneuver?.direction ?? ''
   ).toLowerCase();
 
-  if (type.includes('roundabout') || type.includes('rotary')) {
-    return 'roundabout';
-  }
+  if (type.includes('roundabout') || type.includes('rotary')) return 'roundabout';
   if (modifier.includes('uturn') || modifier.includes('u-turn')) return 'uturn';
   if (modifier.includes('left') || type.includes('left')) return 'left';
   if (modifier.includes('right') || type.includes('right')) return 'right';
@@ -103,16 +146,31 @@ function maneuverSignature(maneuver, activeIndex) {
   ].join(':');
 }
 
+function routeArrowGeometry(points, turnIndex, direction) {
+  if (direction === 'roundabout') return null;
+
+  const outgoingFromIndex = Math.min(turnIndex, points.length - 2);
+  const outgoingToIndex = Math.min(points.length - 1, outgoingFromIndex + 1);
+  const outgoingFrom = points[outgoingFromIndex];
+  const outgoingTo = points[outgoingToIndex];
+
+  if (!outgoingFrom || !outgoingTo) return null;
+
+  const routeBearing = bearing(outgoingFrom, outgoingTo);
+  const tip = interpolatePoint(outgoingFrom, outgoingTo, 0.55);
+  const wingLengthMeters = 8;
+
+  return [
+    [tip, destinationPoint(tip, routeBearing + 150, wingLengthMeters)],
+    [tip, destinationPoint(tip, routeBearing - 150, wingLengthMeters)]
+  ];
+}
+
 function turnGeometry(route, maneuver) {
   const points = route?.points?.filter(validPoint) ?? [];
   if (points.length < 3 || !validPoint(maneuver?.location)) return null;
 
   const turnIndex = nearestRouteIndex(points, maneuver.location);
-
-  // Keep the whole route blue. The orange overlay is deliberately limited to
-  // the actual manoeuvre: one route vertex before the turn and one after it.
-  // This avoids the previous long orange corridor that looked like a second
-  // route rather than a turn cue.
   const startIndex = Math.max(0, turnIndex - 1);
   const endIndex = Math.min(points.length - 1, turnIndex + 1);
   const segment = points.slice(startIndex, endIndex + 1);
@@ -136,76 +194,31 @@ function turnGeometry(route, maneuver) {
     points[outgoingToIndex]
   );
   const delta = signedBearingDelta(incomingBearing, outgoingBearing);
+  const direction = maneuverDirection(maneuver, geometryDirection(delta));
 
   return {
     segment,
-    direction: maneuverDirection(maneuver, geometryDirection(delta)),
+    direction,
+    arrowLines: routeArrowGeometry(points, turnIndex, direction),
     delta
   };
 }
 
-function arrowElement(direction) {
-  const element = document.createElement('div');
-  element.style.cssText = [
-    'width:34px',
-    'height:34px',
-    'display:grid',
-    'place-items:center',
-    'filter:drop-shadow(0 2px 4px rgba(0,0,0,.34))',
-    'pointer-events:none'
-  ].join(';');
-
-  const paths = {
-    left: `
-      <path d="M24 24v-4.5c0-5-4-9-9-9H7"></path>
-      <path d="m12 5.5-5 5 5 5"></path>
-    `,
-    right: `
-      <path d="M10 24v-4.5c0-5 4-9 9-9h8"></path>
-      <path d="m22 5.5 5 5-5 5"></path>
-    `,
-    straight: `
-      <path d="M17 27V7"></path>
-      <path d="m10.5 13.5 6.5-6.5 6.5 6.5"></path>
-    `,
-    uturn: `
-      <path d="M23 27V16a6 6 0 0 0-12 0v4"></path>
-      <path d="m6 15 5 5 5-5"></path>
-    `,
-    roundabout: `
-      <path d="M12 10.5a8 8 0 1 1-1.5 10.8"></path>
-      <path d="m7.5 18 3 3.3 3.6-2.7"></path>
-      <path d="M20 10.5h7"></path>
-      <path d="m23 7.5 4 3-4 3"></path>
-    `
-  };
-
-  element.innerHTML = `
-    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
-      <g stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-        ${paths[direction] ?? paths.straight}
-      </g>
-      <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-        ${paths[direction] ?? paths.straight}
-      </g>
-    </svg>`;
-  return element;
-}
-
 function removeTurnOverlay(adapter) {
-  for (const marker of adapter.maneuverMarkers ?? []) {
-    marker?.remove?.();
-  }
+  for (const marker of adapter.maneuverMarkers ?? []) marker?.remove?.();
   adapter.maneuverMarkers = [];
 
   try {
-    for (const layerId of [TURN_LAYER, TURN_CASING_LAYER]) {
-      if (adapter.map.getLayer?.(layerId)) {
-        adapter.map.removeLayer(layerId);
-      }
+    for (const layerId of [
+      TURN_ARROW_LAYER,
+      TURN_ARROW_CASING_LAYER,
+      TURN_LAYER,
+      TURN_CASING_LAYER
+    ]) {
+      if (adapter.map.getLayer?.(layerId)) adapter.map.removeLayer(layerId);
     }
-    if (adapter.map.getSource?.(TURN_SOURCE)) {
-      adapter.map.removeSource(TURN_SOURCE);
+    for (const sourceId of [TURN_ARROW_SOURCE, TURN_SOURCE]) {
+      if (adapter.map.getSource?.(sourceId)) adapter.map.removeSource(sourceId);
     }
   } catch {
     // A style swap can remove the overlay before Atlas gets here.
@@ -216,8 +229,7 @@ function turnOverlayReady(adapter) {
   return Boolean(
     adapter.map.getSource?.(TURN_SOURCE) &&
     adapter.map.getLayer?.(TURN_LAYER) &&
-    adapter.map.getLayer?.(TURN_CASING_LAYER) &&
-    (adapter.maneuverMarkers?.length ?? 0) > 0
+    adapter.map.getLayer?.(TURN_CASING_LAYER)
   );
 }
 
@@ -303,19 +315,52 @@ export function installMapLibreTurnHighlight(AdapterClass) {
         }
       });
 
-      const marker = new this.maplibre.Marker({
-        element: arrowElement(geometry.direction),
-        anchor: 'center',
-        rotationAlignment: 'viewport'
-      })
-        .setLngLat([maneuver.location.lon, maneuver.location.lat])
-        .addTo(this.map);
+      if (geometry.arrowLines?.length) {
+        this.map.addSource(TURN_ARROW_SOURCE, {
+          type: 'geojson',
+          data: collection([multiLineFeature(geometry.arrowLines)])
+        });
 
-      this.maneuverMarkers = [marker];
+        this.map.addLayer({
+          id: TURN_ARROW_CASING_LAYER,
+          type: 'line',
+          source: TURN_ARROW_SOURCE,
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          paint: {
+            'line-color': '#f59e0b',
+            'line-width': 8,
+            'line-opacity': 1
+          }
+        });
+
+        this.map.addLayer({
+          id: TURN_ARROW_LAYER,
+          type: 'line',
+          source: TURN_ARROW_SOURCE,
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          paint: {
+            'line-color': '#ffffff',
+            'line-width': 4,
+            'line-opacity': 1
+          }
+        });
+      }
+
+      this.maneuverMarkers = [];
       this.__atlasTurnSignature = signature;
       this.__atlasTurnRoute = this.currentRoute;
       this.map.moveLayer?.(TURN_CASING_LAYER);
       this.map.moveLayer?.(TURN_LAYER);
+      if (this.map.getLayer?.(TURN_ARROW_CASING_LAYER)) {
+        this.map.moveLayer?.(TURN_ARROW_CASING_LAYER);
+        this.map.moveLayer?.(TURN_ARROW_LAYER);
+      }
     } catch (error) {
       this.__atlasTurnSignature = null;
       this.__atlasTurnRoute = null;
