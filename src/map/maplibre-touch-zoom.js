@@ -82,6 +82,13 @@ export function installMapLibreTouchZoom(adapter) {
   const beginManualGesture = event => {
     if (event?.touches && event.touches.length < 2) return;
 
+    // Active navigation calls setNavigationTravelMode(), which refreshes the
+    // MapLibre touch handlers and is the one state where pinch remains smooth.
+    // Refresh the same handler state at the start of every pinch so Explore and
+    // Preview use the exact same touch configuration before MapLibre processes
+    // the live two-finger gesture.
+    configureTouchZoom(adapter);
+
     adapter.__atlasManualMapGesture = true;
     clearTimeout(settleTimer);
     settleTimer = null;
@@ -90,17 +97,8 @@ export function installMapLibreTouchZoom(adapter) {
       manualPinchActive = true;
       setGestureCompositingMode(true);
 
-      // Preview/focus/follow camera animations can still be running when the
-      // user starts a pinch. Cancel them once and give the native MapLibre
-      // touch handler exclusive ownership of the camera for the gesture.
       map.stop?.();
 
-      // Diagnostic: active navigation is smooth while Explore/Preview are not.
-      // Those states normally sit in the zoom range where text collision and
-      // line-label placement are heaviest. Suspend symbol placement only while
-      // the two fingers are down; restore each layer's previous visibility on
-      // release. If this removes the lag, the bottleneck is inside MapLibre's
-      // symbol/layout pipeline rather than Atlas DOM/compositing.
       hiddenSymbolLayers = setSymbolLayersVisible(map, false);
       map.triggerRepaint?.();
     }
@@ -153,7 +151,7 @@ export function installMapLibreTouchZoom(adapter) {
   });
 
   map.on?.('style.load', () => {
-    configureTouchSurface(map);
+    configureTouchZoom(adapter);
     hiddenSymbolLayers = null;
   });
 
