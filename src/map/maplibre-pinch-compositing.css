@@ -1,7 +1,10 @@
 /* During a live two-finger MapLibre gesture, avoid forcing Android WebView to
-   re-blur the moving WebGL surface through every translucent Atlas overlay.
-   The UI remains visible; only expensive backdrop compositing is suspended
-   until the gesture ends. */
+   re-blur the moving WebGL surface through translucent Atlas overlays.
+
+   backdrop-filter is not inherited, so disabling it only on a workspace does
+   not affect descendants that create their own backdrop/compositing layers.
+   Explore and route preview both contain several of those descendants while
+   active navigation does not. Keep the isolation scoped to the live gesture. */
 html.atlas-map-gesture-active .brand-inline,
 html.atlas-map-gesture-active .icon-btn,
 html.atlas-map-gesture-active .map-action,
@@ -9,13 +12,26 @@ html.atlas-map-gesture-active .attribution-note,
 html.atlas-map-gesture-active .bottom-sheet,
 html.atlas-map-gesture-active .search-area-btn,
 html.atlas-map-gesture-active .app-tabs,
+html.atlas-map-gesture-active .bookmark-confirm-bar,
+html.atlas-map-gesture-active .explore-workspace,
+html.atlas-map-gesture-active .explore-workspace *,
 html.atlas-map-gesture-active .navigation-workspace,
 html.atlas-map-gesture-active .navigation-search-card,
 html.atlas-map-gesture-active .navigation-confirm-card,
 html.atlas-map-gesture-active .navigation-map-pick-prompt,
-html.atlas-map-gesture-active .bookmark-confirm-bar {
+html.atlas-map-gesture-active .navigation-planner--preview,
+html.atlas-map-gesture-active .navigation-planner--preview * {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* Large soft shadows also require extra off-screen raster/composite work over
+   the moving WebGL canvas. Remove them only from the two laggy states while
+   the fingers are down; their normal appearance returns immediately after. */
+html.atlas-map-gesture-active .explore-workspace *,
+html.atlas-map-gesture-active .navigation-planner--preview * {
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 /* Do not animate chrome while the WebGL camera is changing under the fingers. */
@@ -25,6 +41,11 @@ html.atlas-map-gesture-active .map-action,
 html.atlas-map-gesture-active .search-area-btn,
 html.atlas-map-gesture-active .bottom-sheet,
 html.atlas-map-gesture-active .app-tabs,
-html.atlas-map-gesture-active .navigation-workspace {
+html.atlas-map-gesture-active .explore-workspace,
+html.atlas-map-gesture-active .explore-workspace *,
+html.atlas-map-gesture-active .navigation-workspace,
+html.atlas-map-gesture-active .navigation-planner--preview,
+html.atlas-map-gesture-active .navigation-planner--preview * {
   transition: none !important;
+  animation: none !important;
 }
