@@ -63,6 +63,7 @@ if (!region) {
 }
 
 await prepareBinarySearchAssets(region);
+await prepareRoutingTollAssets(region);
 
 const assets = collectAssets(
   region.assets ?? {}
@@ -170,6 +171,38 @@ async function prepareBinarySearchAssets(region) {
       rm(localAssetPath(url), { force: true })
     )
   );
+}
+
+async function prepareRoutingTollAssets(region) {
+  const partitions = region.assets?.routing?.partitions;
+
+  if (!Array.isArray(partitions)) {
+    return;
+  }
+
+  for (const partition of partitions) {
+    if (typeof partition?.metadata !== 'string') {
+      continue;
+    }
+
+    const tollEventsUrl = partition.metadata.replace(
+      /metadata\.json(?:\?.*)?$/,
+      'toll-events.json'
+    );
+
+    if (tollEventsUrl === partition.metadata) {
+      continue;
+    }
+
+    try {
+      const info = await stat(localAssetPath(tollEventsUrl));
+      if (info.isFile()) {
+        partition.tollEvents = tollEventsUrl;
+      }
+    } catch {
+      // Toll events are optional for regions/partitions that do not have them.
+    }
+  }
 }
 
 function collectAssets(root) {
