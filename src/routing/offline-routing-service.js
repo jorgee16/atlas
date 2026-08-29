@@ -35,6 +35,10 @@ const DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS = 50;
 const DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS = 8;
 const DRIVE_ORIGIN_LINK_PENALTY_SECONDS = 5;
 
+function routeSignature(route) {
+  return (route?.edgeIndexes ?? []).join(',');
+}
+
 export class OfflineRoutingService {
   constructor({
     repository = new RoutingRepository(),
@@ -180,10 +184,6 @@ export class OfflineRoutingService {
             ? DRIVE_ORIGIN_LINK_PENALTY_SECONDS
             : 0);
 
-        // Keep the exact road-segment projection as the start point, but make
-        // it expensive to select a nearby driveway/dead-end when a similarly
-        // close through-road candidate exists. Route time still dominates
-        // once candidates have comparable topology.
         const score =
           withSegment.durationSeconds +
           segmentSnap.distanceMeters * 0.35 +
@@ -345,11 +345,14 @@ export class OfflineRoutingService {
       );
 
       candidate.routePolicy = policy.kind;
+      candidate.routePolicyPenalty = policy.penalty;
       candidates.push(candidate);
     }
 
+    let explicitNoTolls = null;
+
     try {
-      const noTolls = await this.route(
+      explicitNoTolls = await this.route(
         origin,
         destination,
         {
@@ -360,28 +363,43 @@ export class OfflineRoutingService {
         }
       );
 
-      noTolls.routePolicy = 'no-tolls';
-      candidates.push(noTolls);
+      explicitNoTolls.routePolicy = 'no-tolls';
+      explicitNoTolls.avoidsTolls = true;
+      candidates.push(explicitNoTolls);
     } catch (error) {
       if (error?.name === 'AbortError') {
         throw error;
       }
     }
 
-    const unique = [];
-    const signatures = new Set();
+    // Keep only one geometry for ranking, but preserve which routing policies
+    // produced that geometry. A zero toll estimate alone must never turn a
+    // Fastest route into a "No tolls" route.
+    const uniqueBySignature = new Map();
 
     for (const candidate of candidates) {
-      const signature =
-        candidate.edgeIndexes.join(',');
+      const signature = routeSignature(candidate);
+      const existing = uniqueBySignature.get(signature);
 
-      if (signatures.has(signature)) {
+      if (!existing) {
+        candidate.routePolicies = [candidate.routePolicy];
+        uniqueBySignature.set(signature, candidate);
         continue;
       }
 
-      signatures.add(signature);
-      unique.push(candidate);
+      existing.routePolicies = [
+        ...new Set([
+          ...(existing.routePolicies ?? [existing.routePolicy]),
+          candidate.routePolicy
+        ])
+      ];
+
+      if (candidate.routePolicy === 'no-tolls') {
+        existing.avoidsTolls = true;
+      }
     }
+
+    const unique = [...uniqueBySignature.values()];
 
     unique.sort(
       (a, b) =>
@@ -406,7 +424,7 @@ export class OfflineRoutingService {
         )
     );
 
-    const fastest = frontier.reduce(
+    const fastest = unique.reduce(
       (best, route) =>
         !best || route.durationSeconds < best.durationSeconds
           ? route
@@ -414,28 +432,33 @@ export class OfflineRoutingService {
       null
     );
 
-    const noTolls = frontier
-      .filter(route => route.tolls.totalEuros === 0)
-      .reduce(
-        (best, route) =>
-          !best || route.durationSeconds < best.durationSeconds
-            ? route
-            : best,
-        null
-      );
+    const explicitNoTollsSignature =
+      explicitNoTolls
+        ? routeSignature(explicitNoTolls)
+        : null;
+
+    const noTolls = explicitNoTollsSignature != null
+      ? uniqueBySignature.get(explicitNoTollsSignature) ?? null
+      : null;
 
     const balanced = selectBalancedDriveRoute(
-      frontier,
+      frontier.length ? frontier : unique,
       fastest,
       noTolls
     );
 
     const output = [];
+    const outputSignatures = new Set();
+
     const add = (kind, route, recommended = false) => {
-      if (!route || output.some(item => item.route === route)) {
+      if (!route) return;
+
+      const signature = routeSignature(route);
+      if (outputSignatures.has(signature)) {
         return;
       }
 
+      outputSignatures.add(signature);
       output.push({
         kind,
         label:
@@ -449,8 +472,12 @@ export class OfflineRoutingService {
       });
     };
 
-    add('fastest', fastest);
-    add('balanced', balanced, balanced !== fastest);
+    add('fastest', fastest, true);
+    add(
+      'balanced',
+      balanced,
+      balanced !== fastest
+    );
     add('no-tolls', noTolls);
 
     return output;
