@@ -1,6 +1,10 @@
 import {
   MapLibrePmtilesMapAdapter
 } from './maplibre-pmtiles-map-adapter.js';
+import {
+  fovAdjustedPreferredZoom,
+  navigationLookAheadMeters
+} from './navigation-fov.js';
 
 const STATIONARY_SPEED_METERS_PER_SECOND = 0.8;
 const WALKING_POSITION_DEADBAND_METERS = 5;
@@ -8,6 +12,7 @@ const DRIVING_POSITION_DEADBAND_METERS = 8;
 const WALKING_HEADING_DEADBAND_DEGREES = 10;
 const DRIVING_HEADING_DEADBAND_DEGREES = 7;
 const RECENTER_SCREEN_MARGIN_RATIO = 0.22;
+const WEB_MERCATOR_CIRCUMFERENCE_METERS = 40075016.686;
 
 function normalizeBearing(value) {
   return ((Number(value) % 360) + 360) % 360;
@@ -40,6 +45,59 @@ function distanceMeters(a, b) {
     Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
 
   return earthRadius * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function viewportState(adapter, latitude) {
+  const container = adapter?.map?.getContainer?.();
+  const width = Number(container?.clientWidth) || 0;
+  const height = Number(container?.clientHeight) || 0;
+  const landscape = width > height && width > 0 && height > 0;
+  const zoom = Number(adapter?.map?.getZoom?.());
+
+  if (!width || !height || !Number.isFinite(zoom)) {
+    return { landscape, visibleMeters: 0 };
+  }
+
+  const metersPerPixel =
+    WEB_MERCATOR_CIRCUMFERENCE_METERS *
+    Math.max(0.1, Math.cos(latitude * Math.PI / 180)) /
+    (512 * Math.pow(2, zoom));
+
+  // Only count the useful forward map area. Guidance consumes the top and the
+  // journey summary consumes the bottom; landscape has less vertical space.
+  const usableForwardPixels = height * (landscape ? 0.44 : 0.56);
+
+  return {
+    landscape,
+    visibleMeters: usableForwardPixels * metersPerPixel
+  };
+}
+
+function fovOptions(adapter, position, options) {
+  if (!adapter.navigationTravelMode) return options;
+
+  const latitude = position?.latitude ?? position?.lat;
+  if (!Number.isFinite(latitude)) return options;
+
+  const viewport = viewportState(adapter, latitude);
+  const preferredZoom = Number.isFinite(options?.zoom) ? options.zoom : 18;
+  const targetMeters = navigationLookAheadMeters({
+    travelMode: adapter.navigationTravelMode,
+    speed: position?.speed,
+    landscape: viewport.landscape,
+    distanceToManeuverMeters:
+      adapter.navigationRouteProgress?.distanceToManeuverMeters
+  });
+
+  return {
+    ...options,
+    zoom: fovAdjustedPreferredZoom({
+      preferredZoom,
+      visibleMeters: viewport.visibleMeters,
+      targetMeters,
+      minimumZoom: adapter.navigationTravelMode === 'walk' ? 16.2 : 15.6
+    })
+  };
 }
 
 function shouldRecenterForScreen(adapter, position) {
@@ -100,6 +158,21 @@ export function installMapLibreFollowCameraStability() {
       return originalFollowPosition.call(this, position, options);
     }
 
+    this.__atlasLastFollowOptions = options;
+
+    if (!this.__atlasFovResizeBound) {
+      this.__atlasFovResizeBound = true;
+      this.map?.on?.('resize', () => {
+        this.__atlasStableCameraPosition = null;
+        if (this.lastUserPosition && this.navigationTravelMode) {
+          this.followPosition(
+            this.lastUserPosition,
+            this.__atlasLastFollowOptions ?? options
+          );
+        }
+      });
+    }
+
     const nextPosition = { latitude, longitude };
     const previousPosition = this.__atlasStableCameraPosition ?? null;
     const previousHeading = this.__atlasStableCameraHeading ?? null;
@@ -121,12 +194,6 @@ export function installMapLibreFollowCameraStability() {
       typeof previousHeadingUp !== 'boolean' ||
       previousHeadingUp !== headingUp;
 
-    // Waze-like behaviour: the rendered user marker may continue moving
-    // smoothly, but the camera does not chase every GPS fix or small heading
-    // correction. Recenter only after meaningful movement, meaningful heading
-    // change, or when the user approaches the screen edge. A direct compass
-    // toggle is different: north-up <-> heading-up must always be applied
-    // immediately, even if the user has not moved.
     const shouldUpdateCamera =
       !previousPosition ||
       headingModeChanged ||
@@ -145,7 +212,11 @@ export function installMapLibreFollowCameraStability() {
         : 0;
     }
 
-    const result = originalFollowPosition.call(this, position, options);
+    const result = originalFollowPosition.call(
+      this,
+      position,
+      fovOptions(this, position, options)
+    );
     this.__atlasStableCameraPosition = nextPosition;
     this.__atlasStableCameraHeadingUp = headingUp;
     if (Number.isFinite(heading)) {
