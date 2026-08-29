@@ -68,10 +68,14 @@ export class FollowModeController {
     }
   }
 
-  stopFollowing() {
+  stopFollowing({ preserveBearing = false } = {}) {
     this.enabled = false;
-    this.map.setBearing?.(0);
-    this.#renderCompass(0);
+
+    if (!preserveBearing) {
+      this.map.setBearing?.(0);
+      this.#renderCompass(0);
+    }
+
     this.#renderButton();
 
     if (this.mapCenter) {
@@ -124,11 +128,9 @@ export class FollowModeController {
     if (this.enabled) {
       this.#focusPosition({ forceCamera: true });
     } else {
-      this.map.focus(
-        this.position.lat,
-        this.position.lon,
-        16
-      );
+      this.enabled = true;
+      this.#renderButton();
+      this.#focusPosition({ forceCamera: true });
     }
 
     return true;
@@ -155,10 +157,6 @@ export class FollowModeController {
       this.#renderButton();
 
       if (this.position) {
-        // Starting navigation is a hard camera-state transition. The planner
-        // may already have seeded the follow deadbands while previewing, so
-        // explicitly force the first navigation camera update instead of
-        // waiting for movement or a compass tap.
         this.#focusPosition({ forceCamera: true });
         this.mapContext.showFollowing({
           heading: this.position.heading,
@@ -224,7 +222,14 @@ export class FollowModeController {
     );
 
     this.map.onUserMoveStart(() => {
-      this.stopFollowing();
+      // During active navigation, dragging/pinching should pause auto-centering
+      // without destroying the chosen orientation. Keep the current bearing so
+      // heading-up remains heading-up while the user explores the nearby map.
+      this.stopFollowing({
+        preserveBearing:
+          this.navigationActive &&
+          this.navigationTracksPosition
+      });
     });
   }
 
