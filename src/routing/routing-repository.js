@@ -252,14 +252,22 @@ export class RoutingRepository {
       );
     }
 
+    const tollEvents = new TollEventIndex(
+      tollEventsDocument
+    );
+
+    if (tollEvents.available) {
+      graph.tollEvents = tollEvents;
+      graph.edgeIsToll = edgeIndex =>
+        tollEvents.edgeHasCharge(edgeIndex, 1);
+    }
+
     return {
       region,
       partitionId: assets.id ?? null,
       metadata,
       graph,
-      tollEvents: new TollEventIndex(
-        tollEventsDocument
-      )
+      tollEvents
     };
   }
 
