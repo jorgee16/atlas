@@ -2,9 +2,9 @@ import {
   MapLibrePmtilesMapAdapter
 } from './maplibre-pmtiles-map-adapter.js';
 
-const GESTURE_SETTLE_MS = 140;
-const TOUCH_ZOOM_RATE = 1.55;
-const TOUCH_ZOOM_THRESHOLD = 0.015;
+const GESTURE_SETTLE_MS = 160;
+const TOUCH_ZOOM_RATE = 1.7;
+const TOUCH_ZOOM_THRESHOLD = 0.008;
 
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
@@ -14,8 +14,9 @@ export function installMapLibreTouchZoom(adapter) {
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
   // Keep MapLibre's native pinch handler in control, but make it engage with
-  // less finger travel and react more strongly to the same pinch distance.
-  // Rotation/pitch stay disabled because Atlas owns heading-up/north-up.
+  // very little finger travel and react more strongly to the same pinch
+  // distance. Rotation/pitch stay disabled because Atlas owns
+  // heading-up/north-up explicitly.
   map.touchZoomRotate?.enable?.();
   map.touchZoomRotate?.disableRotation?.();
   map.touchZoomRotate?.setZoomRate?.(TOUCH_ZOOM_RATE);
