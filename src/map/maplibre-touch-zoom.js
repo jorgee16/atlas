@@ -40,30 +40,6 @@ function setGestureCompositingMode(active) {
   );
 }
 
-function setSymbolLayersVisible(map, visible, previousVisibility = null) {
-  const layers = map?.getStyle?.()?.layers ?? [];
-  const restored = new Map();
-
-  for (const layer of layers) {
-    if (layer?.type !== 'symbol' || !layer?.id) continue;
-
-    try {
-      if (!visible) {
-        const current = map.getLayoutProperty?.(layer.id, 'visibility') ?? 'visible';
-        restored.set(layer.id, current);
-        map.setLayoutProperty?.(layer.id, 'visibility', 'none');
-      } else {
-        const target = previousVisibility?.get(layer.id) ?? 'visible';
-        map.setLayoutProperty?.(layer.id, 'visibility', target);
-      }
-    } catch {
-      // A style swap can remove a layer between gesture start and end.
-    }
-  }
-
-  return restored;
-}
-
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
@@ -77,17 +53,32 @@ export function installMapLibreTouchZoom(adapter) {
 
   let settleTimer = null;
   let manualPinchActive = false;
-  let hiddenSymbolLayers = null;
+  let repaintFrame = null;
+
+  const pumpRepaint = () => {
+    if (!manualPinchActive) {
+      repaintFrame = null;
+      return;
+    }
+
+    map.triggerRepaint?.();
+    repaintFrame = requestAnimationFrame(pumpRepaint);
+  };
+
+  const startRepaintPump = () => {
+    if (repaintFrame !== null) return;
+    repaintFrame = requestAnimationFrame(pumpRepaint);
+  };
+
+  const stopRepaintPump = () => {
+    if (repaintFrame !== null) {
+      cancelAnimationFrame(repaintFrame);
+      repaintFrame = null;
+    }
+  };
 
   const beginManualGesture = event => {
     if (event?.touches && event.touches.length < 2) return;
-
-    // Active navigation calls setNavigationTravelMode(), which refreshes the
-    // MapLibre touch handlers and is the one state where pinch remains smooth.
-    // Refresh the same handler state at the start of every pinch so Explore and
-    // Preview use the exact same touch configuration before MapLibre processes
-    // the live two-finger gesture.
-    configureTouchZoom(adapter);
 
     adapter.__atlasManualMapGesture = true;
     clearTimeout(settleTimer);
@@ -96,22 +87,20 @@ export function installMapLibreTouchZoom(adapter) {
     if (!manualPinchActive) {
       manualPinchActive = true;
       setGestureCompositingMode(true);
-
       map.stop?.();
 
-      hiddenSymbolLayers = setSymbolLayersVisible(map, false);
-      map.triggerRepaint?.();
+      // Active navigation already keeps the map in a continuously changing
+      // camera/render loop. Explore and Preview can otherwise render only when
+      // Android WebView delivers the next touch update, which makes pinch feel
+      // visibly stepped. Keep MapLibre's render loop alive for every display
+      // frame while the two-finger gesture is active.
+      startRepaintPump();
     }
   };
 
   const finishManualGesture = () => {
-    if (hiddenSymbolLayers) {
-      setSymbolLayersVisible(map, true, hiddenSymbolLayers);
-      hiddenSymbolLayers = null;
-      map.triggerRepaint?.();
-    }
-
     manualPinchActive = false;
+    stopRepaintPump();
     setGestureCompositingMode(false);
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
@@ -152,7 +141,6 @@ export function installMapLibreTouchZoom(adapter) {
 
   map.on?.('style.load', () => {
     configureTouchZoom(adapter);
-    hiddenSymbolLayers = null;
   });
 
   container.classList.add('atlas-direct-touch-zoom');
