@@ -10,12 +10,12 @@ import {
 import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
+import {
+  installMapLibreTurnHighlight
+} from './maplibre-turn-highlight.js';
 
-// Use the OpenFreeMap OpenMapTiles source directly instead of the full
-// Liberty style while diagnosing Android/WebView rendering. This removes
-// glyphs, sprites and auxiliary raster sources from the equation and leaves a
-// small, deterministic vector-only style with the layers Atlas actually needs
-// to prove street rendering.
+installMapLibreTurnHighlight(MapLibreMapAdapter);
+
 const ONLINE_VECTOR_STYLE = {
   version: 8,
   name: 'Atlas OpenFreeMap diagnostic',
@@ -30,103 +30,6 @@ const ONLINE_VECTOR_STYLE = {
       id: 'atlas-background',
       type: 'background',
       paint: { 'background-color': '#f3f1ec' }
-    },
-    {
-      id: 'atlas-landcover',
-      type: 'fill',
-      source: 'openmaptiles',
-      'source-layer': 'landcover',
-      paint: {
-        'fill-color': [
-          'match',
-          ['get', 'class'],
-          'wood', '#dce8d4',
-          'grass', '#e5edd8',
-          '#e8eadf'
-        ],
-        'fill-opacity': 0.75
-      }
-    },
-    {
-      id: 'atlas-water',
-      type: 'fill',
-      source: 'openmaptiles',
-      'source-layer': 'water',
-      paint: { 'fill-color': '#b9dceb' }
-    },
-    {
-      id: 'atlas-buildings',
-      type: 'fill',
-      source: 'openmaptiles',
-      'source-layer': 'building',
-      minzoom: 12,
-      paint: {
-        'fill-color': '#d9d5cf',
-        'fill-outline-color': '#c8c3bc'
-      }
-    },
-    {
-      id: 'atlas-roads-casing',
-      type: 'line',
-      source: 'openmaptiles',
-      'source-layer': 'transportation',
-      minzoom: 5,
-      filter: [
-        'match',
-        ['geometry-type'],
-        ['LineString'], true,
-        false
-      ],
-      layout: {
-        'line-cap': 'round',
-        'line-join': 'round'
-      },
-      paint: {
-        'line-color': '#c8c4be',
-        'line-width': [
-          'interpolate', ['linear'], ['zoom'],
-          5, 0.7,
-          10, 1.8,
-          14, 4.8,
-          18, 11
-        ]
-      }
-    },
-    {
-      id: 'atlas-roads',
-      type: 'line',
-      source: 'openmaptiles',
-      'source-layer': 'transportation',
-      minzoom: 5,
-      filter: [
-        'match',
-        ['geometry-type'],
-        ['LineString'], true,
-        false
-      ],
-      layout: {
-        'line-cap': 'round',
-        'line-join': 'round'
-      },
-      paint: {
-        'line-color': [
-          'match',
-          ['get', 'class'],
-          'motorway', '#e3a59d',
-          'trunk', '#efc38f',
-          'primary', '#f1d8ad',
-          'secondary', '#ffffff',
-          'tertiary', '#ffffff',
-          '#ffffff'
-        ],
-        'line-width': [
-          'interpolate', ['linear'], ['zoom'],
-          5, 0.4,
-          10, 1.2,
-          14, 3.4,
-          18, 8.5
-        ]
-      }
     }
   ]
 };
@@ -156,10 +59,7 @@ function lineFeature(points) {
 }
 
 function collection(features) {
-  return {
-    type: 'FeatureCollection',
-    features
-  };
+  return { type: 'FeatureCollection', features };
 }
 
 function splitRoute(points, progress = {}) {
@@ -187,14 +87,8 @@ function splitRoute(points, progress = {}) {
   };
 
   return {
-    traveled: [
-      ...points.slice(0, segmentIndex + 1),
-      interpolated
-    ],
-    remaining: [
-      interpolated,
-      ...points.slice(segmentIndex + 1)
-    ]
+    traveled: [...points.slice(0, segmentIndex + 1), interpolated],
+    remaining: [interpolated, ...points.slice(segmentIndex + 1)]
   };
 }
 
@@ -223,9 +117,7 @@ function bearingFromProgress(points, progress = {}) {
     Math.cos(lat1) * Math.sin(lat2) -
     Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
 
-  return normalizeBearing(
-    Math.atan2(y, x) * 180 / Math.PI
-  );
+  return normalizeBearing(Math.atan2(y, x) * 180 / Math.PI);
 }
 
 function validRoute(route) {
@@ -250,15 +142,10 @@ function mapErrorMessage(event) {
   );
 }
 
-function leafletNavigationCursorHtml({
-  drive,
-  heading,
-  showHeading
-}) {
-  const rotation =
-    Number.isFinite(heading)
-      ? normalizeBearing(heading)
-      : 0;
+function leafletNavigationCursorHtml({ drive, heading, showHeading }) {
+  const rotation = Number.isFinite(heading)
+    ? normalizeBearing(heading)
+    : 0;
 
   if (drive) {
     return `
@@ -326,16 +213,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.map.touchZoomRotate?.enable?.();
     this.map.touchPitch?.enable?.();
 
-    this.zoomControlElement =
-      installMapLibreZoomControl(this.map);
+    this.zoomControlElement = installMapLibreZoomControl(this.map);
 
-    this.mapSourceBadge =
-      document.createElement('div');
-    this.mapSourceBadge.className =
-      'atlas-maplibre-source-badge';
-    this.map.getContainer().appendChild(
-      this.mapSourceBadge
-    );
+    this.mapSourceBadge = document.createElement('div');
+    this.mapSourceBadge.className = 'atlas-maplibre-source-badge';
+    this.map.getContainer().appendChild(this.mapSourceBadge);
     this.#renderMapSourceBadge();
 
     this.mapErrorElement = document.createElement('div');
@@ -358,8 +240,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     });
     this.map.getContainer().appendChild(this.mapErrorElement);
 
-    this.renderDiagnosticsElement =
-      document.createElement('div');
+    this.renderDiagnosticsElement = document.createElement('div');
     Object.assign(this.renderDiagnosticsElement.style, {
       position: 'absolute',
       zIndex: '1999',
@@ -376,23 +257,19 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       whiteSpace: 'pre-wrap',
       pointerEvents: 'none'
     });
-    this.renderDiagnosticsElement.textContent =
-      'MapLibre diagnostics waiting…';
-    this.map.getContainer().appendChild(
-      this.renderDiagnosticsElement
-    );
+    this.renderDiagnosticsElement.textContent = 'MapLibre diagnostics waiting…';
+    this.map.getContainer().appendChild(this.renderDiagnosticsElement);
 
     this.map.on('error', event => {
       const message = mapErrorMessage(event);
       console.error('MapLibre runtime error:', event?.error ?? event);
-      this.mapErrorElement.textContent =
-        `MapLibre error: ${message}`;
+      this.mapErrorElement.textContent = `MapLibre error: ${message}`;
       this.mapErrorElement.hidden = false;
       this.#refreshRenderDiagnostics();
     });
 
     this.map.on('style.load', () => {
-      this.mapSourceBadge.textContent = 'OpenFreeMap source loaded';
+      this.mapSourceBadge.textContent = 'Vector map loaded';
       this.#scheduleRouteRender();
       this.#refreshRenderDiagnostics();
     });
@@ -402,23 +279,13 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       this.#refreshRenderDiagnostics();
     });
 
-    this.map.on('idle', () => {
-      this.#refreshRenderDiagnostics();
-    });
-
-    this.map.on('moveend', () => {
-      this.#refreshRenderDiagnostics();
-    });
+    this.map.on('idle', () => this.#refreshRenderDiagnostics());
+    this.map.on('moveend', () => this.#refreshRenderDiagnostics());
   }
 
   async setRegion(region, options = {}) {
     void options;
-
-    const mapUrl =
-      region?.mapUrl ??
-      region?.assets?.map ??
-      null;
-
+    const mapUrl = region?.mapUrl ?? region?.assets?.map ?? null;
     this.mapSourceMode = 'online';
     this.#renderMapSourceBadge();
     return Boolean(mapUrl);
@@ -442,14 +309,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         duration: 350,
         essential: true
       });
-
       this.mapSourceBadge.textContent =
         `GPS ${latitude.toFixed(4)}, ${longitude.toFixed(4)} · z${GPS_DIAGNOSTIC_MAX_ZOOM}`;
     }
 
-    queueMicrotask(() => {
-      this.#refreshRenderDiagnostics();
-    });
+    queueMicrotask(() => this.#refreshRenderDiagnostics());
   }
 
   setNavigationTravelMode(mode = null) {
@@ -491,8 +355,6 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       throw new TypeError('showSelectionPin requires lat and lon.');
     }
 
-    // Always replace the selection marker. Using one self-contained SVG avoids
-    // the old CSS pin plus nested MapLibre shape rendering as two indicators.
     this.selectionPopup?.remove?.();
     this.selectionPopup = null;
     this.selectionMarker?.remove?.();
@@ -523,9 +385,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
 
   showRoute(route) {
     if (!validRoute(route)) {
-      throw new TypeError(
-        'showRoute requires at least two valid route points.'
-      );
+      throw new TypeError('showRoute requires at least two valid route points.');
     }
 
     this.currentRoute = route;
@@ -543,35 +403,10 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRouteProgress = progress ?? null;
     this.navigationRouteProgress = progress ?? null;
 
-    if (!validRoute(this.currentRoute)) {
-      return;
-    }
+    if (!validRoute(this.currentRoute)) return;
 
-    this.routeBearing = bearingFromProgress(
-      this.currentRoute.points,
-      progress
-    );
-
+    this.routeBearing = bearingFromProgress(this.currentRoute.points, progress);
     this.#scheduleRouteRender({ immediate: true });
-  }
-
-  showManeuvers(maneuvers, activeIndex = 0) {
-    this.currentManeuvers =
-      Array.isArray(maneuvers)
-        ? maneuvers
-        : null;
-    this.currentManeuverIndex = activeIndex;
-
-    return super.showManeuvers(
-      maneuvers,
-      activeIndex
-    );
-  }
-
-  clearManeuvers() {
-    this.currentManeuvers = null;
-    this.currentManeuverIndex = 0;
-    return super.clearManeuvers();
   }
 
   clearRoute() {
@@ -586,16 +421,14 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     clearTimeout(this.routeRenderRetryTimer);
     this.routeRenderRetryTimer = null;
 
+    this.clearManeuvers();
     this.#tryRemoveRouteOverlay();
   }
 
   #restoreLeafletCursor(position) {
-    if (!this.userMarkerElement) {
-      return;
-    }
+    if (!this.userMarkerElement) return;
 
-    const drive =
-      this.navigationTravelMode === 'drive';
+    const drive = this.navigationTravelMode === 'drive';
     const speed = position?.speed;
     const heading = position?.heading;
     const showHeading =
@@ -614,12 +447,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       : showHeading
         ? '42px'
         : '20px';
-    this.userMarkerElement.innerHTML =
-      leafletNavigationCursorHtml({
-        drive,
-        heading,
-        showHeading
-      });
+    this.userMarkerElement.innerHTML = leafletNavigationCursorHtml({
+      drive,
+      heading,
+      showHeading
+    });
   }
 
   #refreshRenderDiagnostics() {
@@ -628,12 +460,9 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     try {
       const center = this.map.getCenter?.();
       const zoom = this.map.getZoom?.();
-      const styleLoaded =
-        Boolean(this.map.isStyleLoaded?.());
-      const tilesLoaded =
-        Boolean(this.map.areTilesLoaded?.());
-      const source =
-        this.map.getSource?.('openmaptiles');
+      const styleLoaded = Boolean(this.map.isStyleLoaded?.());
+      const tilesLoaded = Boolean(this.map.areTilesLoaded?.());
+      const source = this.map.getSource?.('openmaptiles');
 
       let rendered = '—';
       try {
@@ -660,26 +489,17 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   #scheduleRouteRender({ immediate = false } = {}) {
-    if (!validRoute(this.currentRoute)) {
-      return;
-    }
+    if (!validRoute(this.currentRoute)) return;
 
-    if (immediate && this.#tryRenderStoredRoute()) {
-      return;
-    }
-
-    if (this.routeRenderPending) {
-      return;
-    }
+    if (immediate && this.#tryRenderStoredRoute()) return;
+    if (this.routeRenderPending) return;
 
     this.routeRenderPending = true;
 
     queueMicrotask(() => {
       this.routeRenderPending = false;
 
-      if (this.#tryRenderStoredRoute()) {
-        return;
-      }
+      if (this.#tryRenderStoredRoute()) return;
 
       clearTimeout(this.routeRenderRetryTimer);
       this.routeRenderRetryTimer = setTimeout(() => {
@@ -690,15 +510,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   #tryRenderStoredRoute() {
-    if (!validRoute(this.currentRoute)) {
-      return false;
-    }
+    if (!validRoute(this.currentRoute)) return false;
 
     try {
       const style = this.map.getStyle?.();
-      if (!style || !Array.isArray(style.layers)) {
-        return false;
-      }
+      if (!style || !Array.isArray(style.layers)) return false;
 
       this.#removeRouteOverlay();
 
@@ -709,9 +525,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
 
       this.map.addSource(ROUTE_SOURCE, {
         type: 'geojson',
-        data: collection([
-          lineFeature(split?.remaining ?? points)
-        ])
+        data: collection([lineFeature(split?.remaining ?? points)])
       });
 
       this.map.addLayer({
@@ -747,9 +561,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       if (split) {
         this.map.addSource(TRAVELED_SOURCE, {
           type: 'geojson',
-          data: collection([
-            lineFeature(split.traveled)
-          ])
+          data: collection([lineFeature(split.traveled)])
         });
 
         this.map.addLayer({
@@ -769,14 +581,17 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       }
 
       this.#raiseRouteLayers();
+      if (this.currentManeuvers) {
+        this.showManeuvers(
+          this.currentManeuvers,
+          this.currentManeuverIndex
+        );
+      }
       this.map.triggerRepaint?.();
-      return Boolean(
-        this.map.getLayer?.('atlas-route-remaining')
-      );
+      return Boolean(this.map.getLayer?.('atlas-route-remaining'));
     } catch (error) {
       const message = mapErrorMessage(error);
-      this.mapErrorElement.textContent =
-        `Route layer error: ${message}`;
+      this.mapErrorElement.textContent = `Route layer error: ${message}`;
       this.mapErrorElement.hidden = false;
       console.error('Unable to render MapLibre route.', error);
       return false;
@@ -799,7 +614,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     try {
       this.#removeRouteOverlay();
     } catch {
-      // setStyle() may be between style instances.
+      // style transition
     }
   }
 
@@ -810,10 +625,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       }
     }
 
-    for (const sourceId of [
-      TRAVELED_SOURCE,
-      ROUTE_SOURCE
-    ]) {
+    for (const sourceId of [TRAVELED_SOURCE, ROUTE_SOURCE]) {
       if (this.map.getSource?.(sourceId)) {
         this.map.removeSource(sourceId);
       }
@@ -823,10 +635,8 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   #renderMapSourceBadge() {
     if (!this.mapSourceBadge) return;
 
-    this.mapSourceBadge.textContent =
-      'OpenFreeMap vector source';
+    this.mapSourceBadge.textContent = 'Vector map';
     this.mapSourceBadge.dataset.mode = 'online';
-    this.mapSourceBadge.title =
-      'Direct OpenFreeMap OpenMapTiles source diagnostic.';
+    this.mapSourceBadge.title = 'MapLibre vector map validation build.';
   }
 }
