@@ -1,12 +1,10 @@
 /*
- * Portugal 2026 toll estimator.
+ * Portugal toll estimation.
  *
- * The binary graph preserves OSM toll tags, but some Portuguese concessions
- * are not consistently tagged on every individual OSM way. Runtime routing
- * therefore keeps a deliberately small, evidence-backed fallback list for
- * concessions that are known to be tolled and whose road reference is carried
- * by the graph. This also fixes already-downloaded region packages without
- * requiring users to rebuild/re-download them immediately.
+ * Preferred path: an audited per-partition toll-event asset maps real physical
+ * collection events to directed routing edges and carries official tariffs.
+ * Legacy region packages without that asset fall back only to OSM toll tags;
+ * there is deliberately no motorway-wide road-reference fallback.
  */
 
 const CLASS_MULTIPLIERS = Object.freeze({
@@ -16,7 +14,6 @@ const CLASS_MULTIPLIERS = Object.freeze({
   4: 2.5
 });
 
-/* Approximate Class-1 euro/km rates from 2026 published concession tariffs. */
 const CLASS1_EUROS_PER_KM = Object.freeze({
   A1: 0.073,
   A2: 0.074,
@@ -50,14 +47,6 @@ const CLASS1_EUROS_PER_KM = Object.freeze({
 
 const DEFAULT_CLASS1_EUROS_PER_KM = 0.08;
 
-// Ascendi's Grande Lisboa concession identifies the A16 as a tolled road with
-// traditional toll collection. Keep this targeted rather than assuming every
-// motorway reference in the generic tariff table is tolled end-to-end: several
-// Portuguese motorways contain free sections.
-const KNOWN_TOLLED_ROAD_REFS = new Set([
-  'A16'
-]);
-
 function normalizedRoadRefs(value) {
   return String(value ?? '')
     .toUpperCase()
@@ -79,20 +68,26 @@ function roadForEdge(graph, edgeIndex) {
   );
 }
 
+function officialIndex(graph) {
+  return graph?.tollEvents?.available
+    ? graph.tollEvents
+    : null;
+}
+
 export function edgeIsTolledInPortugal(
   graph,
-  edgeIndex
+  edgeIndex,
+  vehicleClass = 1
 ) {
-  if (graph?.edgeIsToll?.(edgeIndex)) {
-    return true;
+  const official = officialIndex(graph);
+  if (official) {
+    return official.edgeHasCharge(
+      edgeIndex,
+      vehicleClass
+    );
   }
 
-  const road = roadForEdge(graph, edgeIndex);
-  if (!road) return false;
-
-  return normalizedRoadRefs(road.ref).some(
-    ref => KNOWN_TOLLED_ROAD_REFS.has(ref)
-  );
+  return Boolean(graph?.edgeIsToll?.(edgeIndex));
 }
 
 export function tollRateEurosPerKm(
@@ -117,7 +112,15 @@ export function estimateEdgeTollEuros(
   edgeIndex,
   vehicleClass = 1
 ) {
-  if (!edgeIsTolledInPortugal(graph, edgeIndex)) {
+  const official = officialIndex(graph);
+  if (official) {
+    return official.edgeChargeEuros(
+      edgeIndex,
+      vehicleClass
+    );
+  }
+
+  if (!edgeIsTolledInPortugal(graph, edgeIndex, vehicleClass)) {
     return 0;
   }
 
@@ -135,6 +138,55 @@ export function estimateEdgeTollEuros(
     );
 }
 
+function estimateOfficialRouteTolls(
+  graph,
+  route,
+  vehicleClass
+) {
+  const charges = graph.tollEvents.routeCharges(
+    route?.edgeIndexes ?? [],
+    vehicleClass
+  );
+
+  const roads = new Map();
+  let totalEuros = 0;
+
+  for (const charge of charges) {
+    totalEuros += charge.euros;
+    const key = charge.roadRef || 'Toll';
+    const current = roads.get(key) ?? {
+      road: key,
+      distanceMeters: 0,
+      euros: 0,
+      events: []
+    };
+
+    current.euros += charge.euros;
+    current.events.push({
+      id: charge.id,
+      euros: charge.euros,
+      system: charge.system,
+      operator: charge.operator,
+      edgeIndex: charge.edgeIndex
+    });
+    roads.set(key, current);
+  }
+
+  return {
+    vehicleClass,
+    estimated: false,
+    source: 'official-events',
+    totalEuros:
+      Math.round(totalEuros * 100) / 100,
+    tolledDistanceMeters: 0,
+    events: charges,
+    roads: [...roads.values()].map(item => ({
+      ...item,
+      euros: Math.round(item.euros * 100) / 100
+    }))
+  };
+}
+
 export function estimateRouteTolls(
   graph,
   route,
@@ -142,12 +194,20 @@ export function estimateRouteTolls(
     vehicleClass = 1
   } = {}
 ) {
+  if (officialIndex(graph)) {
+    return estimateOfficialRouteTolls(
+      graph,
+      route,
+      vehicleClass
+    );
+  }
+
   let totalEuros = 0;
   let tolledDistanceMeters = 0;
   const roads = new Map();
 
   for (const edgeIndex of route?.edgeIndexes ?? []) {
-    if (!edgeIsTolledInPortugal(graph, edgeIndex)) {
+    if (!edgeIsTolledInPortugal(graph, edgeIndex, vehicleClass)) {
       continue;
     }
 
@@ -182,6 +242,7 @@ export function estimateRouteTolls(
   return {
     vehicleClass,
     estimated: totalEuros > 0,
+    source: 'osm-estimate',
     totalEuros:
       Math.round(totalEuros * 100) / 100,
     tolledDistanceMeters,
