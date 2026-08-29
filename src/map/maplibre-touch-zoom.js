@@ -7,7 +7,20 @@ const NAVIGATION_TOUCH_ZOOM_RATE = 1.7;
 const BROWSE_TOUCH_ZOOM_RATE = 2.15;
 const NAVIGATION_TOUCH_ZOOM_THRESHOLD = 0.008;
 const BROWSE_TOUCH_ZOOM_THRESHOLD = 0.004;
-const BROWSE_SYMBOL_RESTORE_MS = 90;
+
+function configureTouchSurface(map) {
+  const container = map?.getContainer?.();
+  const canvas = map?.getCanvas?.();
+  const canvasContainer = canvas?.parentElement ?? null;
+
+  for (const element of [container, canvasContainer, canvas].filter(Boolean)) {
+    element.style.touchAction = 'none';
+    element.style.overscrollBehavior = 'contain';
+    element.style.webkitUserSelect = 'none';
+    element.style.userSelect = 'none';
+    element.style.webkitTouchCallout = 'none';
+  }
+}
 
 function configureTouchZoom(adapter) {
   const map = adapter?.map;
@@ -15,6 +28,7 @@ function configureTouchZoom(adapter) {
 
   const navigationActive = Boolean(adapter.navigationTravelMode);
 
+  configureTouchSurface(map);
   map.touchZoomRotate?.enable?.();
   map.touchZoomRotate?.disableRotation?.();
   map.touchZoomRotate?.setZoomRate?.(
@@ -31,48 +45,6 @@ function configureTouchZoom(adapter) {
   map.dragRotate?.disable?.();
 }
 
-function suspendBrowseSymbols(adapter) {
-  if (adapter.navigationTravelMode || adapter.__atlasBrowseSymbolsSuspended) return;
-
-  const map = adapter.map;
-  const layers = map?.getStyle?.()?.layers ?? [];
-  const previous = [];
-
-  for (const layer of layers) {
-    if (layer?.type !== 'symbol' || !layer?.id) continue;
-
-    let visibility = 'visible';
-    try {
-      visibility = map.getLayoutProperty?.(layer.id, 'visibility') ?? 'visible';
-      if (visibility === 'none') continue;
-      map.setLayoutProperty?.(layer.id, 'visibility', 'none');
-      previous.push([layer.id, visibility]);
-    } catch {
-      // Style can swap while a gesture is starting; skip unavailable layers.
-    }
-  }
-
-  adapter.__atlasBrowseSymbolsSuspended = previous;
-}
-
-function restoreBrowseSymbols(adapter) {
-  const previous = adapter.__atlasBrowseSymbolsSuspended;
-  if (!Array.isArray(previous)) return;
-
-  adapter.__atlasBrowseSymbolsSuspended = null;
-  const map = adapter.map;
-
-  for (const [layerId, visibility] of previous) {
-    try {
-      if (map.getLayer?.(layerId)) {
-        map.setLayoutProperty?.(layerId, 'visibility', visibility ?? 'visible');
-      }
-    } catch {
-      // Ignore layers removed during a style swap.
-    }
-  }
-}
-
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
@@ -85,7 +57,6 @@ export function installMapLibreTouchZoom(adapter) {
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
   let settleTimer = null;
-  let symbolRestoreTimer = null;
 
   const beginManualGesture = event => {
     if (event?.touches && event.touches.length < 2) return;
@@ -93,12 +64,6 @@ export function installMapLibreTouchZoom(adapter) {
     adapter.__atlasManualMapGesture = true;
     clearTimeout(settleTimer);
     settleTimer = null;
-
-    if (!adapter.navigationTravelMode) {
-      clearTimeout(symbolRestoreTimer);
-      symbolRestoreTimer = null;
-      suspendBrowseSymbols(adapter);
-    }
   };
 
   const finishManualGesture = () => {
@@ -107,27 +72,25 @@ export function installMapLibreTouchZoom(adapter) {
       adapter.__atlasManualMapGesture = false;
       settleTimer = null;
     }, GESTURE_SETTLE_MS);
-
-    clearTimeout(symbolRestoreTimer);
-    symbolRestoreTimer = setTimeout(() => {
-      restoreBrowseSymbols(adapter);
-      symbolRestoreTimer = null;
-    }, BROWSE_SYMBOL_RESTORE_MS);
   };
 
   container.addEventListener('touchstart', beginManualGesture, {
-    passive: true
+    passive: true,
+    capture: true
   });
   container.addEventListener('touchmove', beginManualGesture, {
-    passive: true
+    passive: true,
+    capture: true
   });
   container.addEventListener('touchend', event => {
     if ((event?.touches?.length ?? 0) < 2) finishManualGesture();
   }, {
-    passive: true
+    passive: true,
+    capture: true
   });
   container.addEventListener('touchcancel', finishManualGesture, {
-    passive: true
+    passive: true,
+    capture: true
   });
 
   map.on?.('zoomstart', event => {
@@ -135,7 +98,6 @@ export function installMapLibreTouchZoom(adapter) {
       adapter.__atlasManualMapGesture = true;
       clearTimeout(settleTimer);
       settleTimer = null;
-      if (!adapter.navigationTravelMode) suspendBrowseSymbols(adapter);
     }
   });
   map.on?.('zoomend', event => {
@@ -143,7 +105,7 @@ export function installMapLibreTouchZoom(adapter) {
   });
 
   map.on?.('style.load', () => {
-    adapter.__atlasBrowseSymbolsSuspended = null;
+    configureTouchSurface(map);
   });
 
   container.classList.add('atlas-direct-touch-zoom');
@@ -159,12 +121,13 @@ if (prototype && !prototype.__atlasDirectTouchZoomInstalled) {
   const originalSetRegion = prototype.setRegion;
   prototype.setRegion = async function setRegion(region, options = {}) {
     installMapLibreTouchZoom(this);
-    return originalSetRegion.call(this, region, options);
+    const result = await originalSetRegion.call(this, region, options);
+    configureTouchZoom(this);
+    return result;
   };
 
   const originalSetNavigationTravelMode = prototype.setNavigationTravelMode;
   prototype.setNavigationTravelMode = function setNavigationTravelMode(mode = null) {
-    restoreBrowseSymbols(this);
     const result = originalSetNavigationTravelMode.call(this, mode);
     configureTouchZoom(this);
     return result;
