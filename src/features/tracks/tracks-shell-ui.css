@@ -269,29 +269,88 @@ html[data-theme="dark"] .tracks-count {
 
 @media (max-width: 700px) {
   .tracks-workspace {
-    left: 12px;
-    right: 12px;
-    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+    left: 14px;
+    right: 14px;
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+    align-items: flex-end;
   }
 
   .tracks-card {
-    max-height: 64vh;
+    max-height: min(58vh, 590px);
     border-radius: 24px;
   }
 
   .tracks-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 16px 16px 14px;
+  }
+
+  .tracks-header h2 {
+    font-size: 25px;
+  }
+
+  .tracks-header p {
+    display: none;
+  }
+
+  .tracks-import-primary {
+    min-height: 44px;
+    padding: 0 13px;
+    border-radius: 14px;
+  }
+
+  .tracks-import-primary span {
+    font-size: 14px;
+  }
+
+  .tracks-library-heading {
+    padding: 14px 16px 8px;
+  }
+
+  .tracks-library {
+    padding: 4px 12px 12px;
+  }
+
+  .tracks-empty {
+    padding: 24px 18px 22px;
+  }
+
+  .tracks-empty-icon {
+    width: 54px;
+    height: 54px;
+    margin-bottom: 11px;
+    border-radius: 17px;
+  }
+
+  .tracks-empty-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .tracks-empty p {
+    margin-bottom: 14px;
+    font-size: 14px;
+  }
+
+  .tracks-empty button {
+    min-height: 44px;
+  }
+
+  .tracks-format-note {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .tracks-header {
     grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 20px 18px 16px;
   }
 
   .tracks-import-primary {
     width: 100%;
     justify-content: center;
-  }
-
-  .tracks-library-heading {
-    padding-inline: 18px;
   }
 }
 
@@ -312,14 +371,33 @@ html[data-theme="dark"] .tracks-count {
   }
 
   .tracks-header {
-    padding: 16px;
+    grid-template-columns: 1fr;
+    padding: 14px;
   }
 
   .tracks-header h2 {
-    font-size: 24px;
+    font-size: 23px;
+  }
+
+  .tracks-header p,
+  .tracks-format-note {
+    display: none;
+  }
+
+  .tracks-import-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tracks-library-heading {
+    padding: 12px 14px 7px;
+  }
+
+  .tracks-library {
+    padding: 4px 10px 10px;
   }
 
   .tracks-empty {
-    padding: 22px 16px;
+    padding: 18px 14px;
   }
 }
