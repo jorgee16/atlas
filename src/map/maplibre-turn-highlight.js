@@ -61,11 +61,27 @@ function signedBearingDelta(fromBearing, toBearing) {
   return ((toBearing - fromBearing + 540) % 360) - 180;
 }
 
-function turnDirection(delta) {
+function geometryDirection(delta) {
   if (delta <= -135 || delta >= 135) return 'uturn';
   if (delta < -25) return 'left';
   if (delta > 25) return 'right';
   return 'straight';
+}
+
+function maneuverDirection(maneuver, fallback) {
+  const type = String(maneuver?.type ?? '').toLowerCase();
+  const modifier = String(
+    maneuver?.modifier ?? maneuver?.direction ?? ''
+  ).toLowerCase();
+
+  if (type.includes('roundabout') || type.includes('rotary')) {
+    return 'roundabout';
+  }
+  if (modifier.includes('uturn') || modifier.includes('u-turn')) return 'uturn';
+  if (modifier.includes('left') || type.includes('left')) return 'left';
+  if (modifier.includes('right') || type.includes('right')) return 'right';
+  if (modifier.includes('straight')) return 'straight';
+  return fallback;
 }
 
 function activeManeuver(maneuvers, activeIndex) {
@@ -80,6 +96,7 @@ function maneuverSignature(maneuver, activeIndex) {
   return [
     activeIndex,
     maneuver.type ?? '',
+    maneuver.modifier ?? maneuver.direction ?? '',
     Number(maneuver.location.lat).toFixed(6),
     Number(maneuver.location.lon).toFixed(6),
     maneuver.instruction ?? maneuver.name ?? ''
@@ -91,8 +108,13 @@ function turnGeometry(route, maneuver) {
   if (points.length < 3 || !validPoint(maneuver?.location)) return null;
 
   const turnIndex = nearestRouteIndex(points, maneuver.location);
-  const startIndex = Math.max(0, turnIndex - 2);
-  const endIndex = Math.min(points.length - 1, turnIndex + 3);
+
+  // Keep the whole route blue. The orange overlay is deliberately limited to
+  // the actual manoeuvre: one route vertex before the turn and one after it.
+  // This avoids the previous long orange corridor that looked like a second
+  // route rather than a turn cue.
+  const startIndex = Math.max(0, turnIndex - 1);
+  const endIndex = Math.min(points.length - 1, turnIndex + 1);
   const segment = points.slice(startIndex, endIndex + 1);
 
   if (segment.length < 2) return null;
@@ -117,7 +139,7 @@ function turnGeometry(route, maneuver) {
 
   return {
     segment,
-    direction: turnDirection(delta),
+    direction: maneuverDirection(maneuver, geometryDirection(delta)),
     delta
   };
 }
@@ -125,25 +147,47 @@ function turnGeometry(route, maneuver) {
 function arrowElement(direction) {
   const element = document.createElement('div');
   element.style.cssText = [
-    'width:30px',
-    'height:30px',
+    'width:34px',
+    'height:34px',
     'display:grid',
     'place-items:center',
-    'filter:drop-shadow(0 2px 3px rgba(0,0,0,.30))',
+    'filter:drop-shadow(0 2px 4px rgba(0,0,0,.34))',
     'pointer-events:none'
   ].join(';');
 
   const paths = {
-    left: 'M20 5v5h-7.2c-3.7 0-6.8 3-6.8 6.8V20h4v-3.2c0-1.5 1.3-2.8 2.8-2.8H20v5l7-7-7-7Z',
-    right: 'M10 5v5h7.2c3.7 0 6.8 3 6.8 6.8V20h-4v-3.2c0-1.5-1.3-2.8-2.8-2.8H10v5l-7-7 7-7Z',
-    straight: 'M15 3 7 11h5v16h6V11h5L15 3Z',
-    uturn: 'M9 25v-9c0-4.4 3.6-8 8-8h2V3l8 7-8 7v-5h-2c-2.2 0-4 1.8-4 4v9H9Z'
+    left: `
+      <path d="M24 24v-4.5c0-5-4-9-9-9H7"></path>
+      <path d="m12 5.5-5 5 5 5"></path>
+    `,
+    right: `
+      <path d="M10 24v-4.5c0-5 4-9 9-9h8"></path>
+      <path d="m22 5.5 5 5-5 5"></path>
+    `,
+    straight: `
+      <path d="M17 27V7"></path>
+      <path d="m10.5 13.5 6.5-6.5 6.5 6.5"></path>
+    `,
+    uturn: `
+      <path d="M23 27V16a6 6 0 0 0-12 0v4"></path>
+      <path d="m6 15 5 5 5-5"></path>
+    `,
+    roundabout: `
+      <path d="M12 10.5a8 8 0 1 1-1.5 10.8"></path>
+      <path d="m7.5 18 3 3.3 3.6-2.7"></path>
+      <path d="M20 10.5h7"></path>
+      <path d="m23 7.5 4 3-4 3"></path>
+    `
   };
 
   element.innerHTML = `
-    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
-      <path d="${paths[direction] ?? paths.straight}"
-        fill="#f59e0b" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+      <g stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+        ${paths[direction] ?? paths.straight}
+      </g>
+      <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        ${paths[direction] ?? paths.straight}
+      </g>
     </svg>`;
   return element;
 }
@@ -205,11 +249,6 @@ export function installMapLibreTurnHighlight(AdapterClass) {
     const maneuver = activeManeuver(maneuvers, activeIndex);
     const signature = maneuverSignature(maneuver, activeIndex);
 
-    // NavigationFeature calls showManeuvers on every GPS fix. Rebuilding the
-    // same source/layers/marker each time makes the highlighted route segment
-    // disappear for a frame and looks like the whole route is recalculating.
-    // If the route and active maneuver are unchanged, keep the existing
-    // overlay mounted exactly as it is.
     if (
       signature &&
       signature === this.__atlasTurnSignature &&
@@ -244,8 +283,8 @@ export function installMapLibreTurnHighlight(AdapterClass) {
         },
         paint: {
           'line-color': '#ffffff',
-          'line-width': 13,
-          'line-opacity': 0.96
+          'line-width': 12,
+          'line-opacity': 0.98
         }
       });
 
@@ -259,7 +298,7 @@ export function installMapLibreTurnHighlight(AdapterClass) {
         },
         paint: {
           'line-color': '#f59e0b',
-          'line-width': 8,
+          'line-width': 7,
           'line-opacity': 1
         }
       });
