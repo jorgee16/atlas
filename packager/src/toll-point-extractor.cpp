@@ -41,11 +41,10 @@ bool electronic(const osmium::TagList& tags) {
   return false;
 }
 
-std::string roadReference(const osmium::TagList& tags) {
+std::string explicitRoadReference(const osmium::TagList& tags) {
   for (const char* key : {
     "road_ref",
-    "road:ref",
-    "ref"
+    "road:ref"
   }) {
     if (const char* raw = tags[key]) {
       return raw;
@@ -104,7 +103,7 @@ public:
       displayName(node.tags()),
       tagValue(node.tags(), "ref"),
       tagValue(node.tags(), "operator"),
-      roadReference(node.tags()),
+      explicitRoadReference(node.tags()),
       kind,
       electronic(node.tags())
     });
@@ -137,9 +136,10 @@ public:
 
       auto& point = points_[found->second];
 
-      // Toll nodes and motorway junctions frequently carry only their local
-      // label/ref while the containing motorway way carries Axx. Preserve
-      // explicit node metadata and fill only missing fields from the way.
+      // A motorway_junction node's `ref` is normally the exit number, not the
+      // motorway reference. Keep it in `reference` and derive `roadReference`
+      // from the containing way instead. This avoids values such as "13" or
+      // "25" being mistaken for A-road identifiers by the toll matcher.
       if (point.roadReference.empty() && !wayRef.empty()) {
         point.roadReference = wayRef;
       }
