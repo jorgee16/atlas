@@ -105,6 +105,128 @@ function orderedSections(sections) {
   });
 }
 
+function tokenSet(value) {
+  return new Set(
+    normalize(value)
+      .split(' ')
+      .filter(token => token.length > 2)
+  );
+}
+
+function labelFor(section) {
+  return section.name || section.from || section.to || '';
+}
+
+function clusterText(item) {
+  return item.points
+    .map(point => `${point.name ?? ''} ${point.ref ?? ''} ${point.operator ?? ''}`)
+    .join(' ');
+}
+
+function affinity(section, item) {
+  const expected = tokenSet(labelFor(section));
+  const observed = tokenSet(clusterText(item));
+  if (!expected.size || !observed.size) return 0;
+
+  let common = 0;
+  for (const token of expected) {
+    if (observed.has(token)) common += 1;
+  }
+
+  return common / expected.size;
+}
+
+function operatorAffinity(section, item) {
+  const expected = tokenSet(section.operator);
+  const observed = tokenSet(
+    item.points.map(point => point.operator ?? '').join(' ')
+  );
+  if (!expected.size || !observed.size) return 0;
+
+  let common = 0;
+  for (const token of expected) {
+    if (observed.has(token)) common += 1;
+  }
+  return common / expected.size;
+}
+
+function alignOrderedSubsequence(official, orderedClusters) {
+  const n = official.length;
+  const m = orderedClusters.length;
+  if (!n || m < n) return null;
+
+  const dp = Array.from({ length: n }, () => Array(m).fill(-Infinity));
+  const previous = Array.from({ length: n }, () => Array(m).fill(-1));
+
+  for (let j = 0; j < m; ++j) {
+    dp[0][j] = affinity(official[0], orderedClusters[j]) * 1.4 +
+      operatorAffinity(official[0], orderedClusters[j]) * 0.25 -
+      j * 0.045;
+  }
+
+  for (let i = 1; i < n; ++i) {
+    for (let j = i; j < m; ++j) {
+      const local = affinity(official[i], orderedClusters[j]) * 1.4 +
+        operatorAffinity(official[i], orderedClusters[j]) * 0.25;
+
+      for (let k = i - 1; k < j; ++k) {
+        if (!Number.isFinite(dp[i - 1][k])) continue;
+        const skipped = j - k - 1;
+        const separationMeters = distanceMeters(
+          orderedClusters[k],
+          orderedClusters[j]
+        );
+        if (separationMeters < 120) continue;
+
+        const score = dp[i - 1][k] + local - skipped * 0.055;
+        if (score > dp[i][j]) {
+          dp[i][j] = score;
+          previous[i][j] = k;
+        }
+      }
+    }
+  }
+
+  let end = -1;
+  let score = -Infinity;
+  for (let j = n - 1; j < m; ++j) {
+    if (dp[n - 1][j] > score) {
+      score = dp[n - 1][j];
+      end = j;
+    }
+  }
+  if (end < 0) return null;
+
+  const indexes = Array(n).fill(-1);
+  let cursor = end;
+  for (let i = n - 1; i >= 0; --i) {
+    indexes[i] = cursor;
+    cursor = previous[i][cursor];
+  }
+
+  const selected = indexes.map(index => orderedClusters[index]);
+  const affinities = selected.map((item, index) => affinity(official[index], item));
+  const anchors = affinities.filter(value => value >= 0.34).length;
+  const average = score / n;
+
+  return {
+    score,
+    average,
+    selected,
+    affinities,
+    anchors
+  };
+}
+
+function chooseAlignment(official, clusters) {
+  const forward = alignOrderedSubsequence(official, clusters);
+  const reverse = alignOrderedSubsequence(official, clusters.slice().reverse());
+
+  if (!forward) return reverse;
+  if (!reverse) return forward;
+  return forward.score >= reverse.score ? forward : reverse;
+}
+
 function buildForRoad(points, sections) {
   const roadRef = sections[0]?.roadRef;
   const system = sections[0]?.system;
@@ -119,40 +241,42 @@ function buildForRoad(points, sections) {
   if (!clusters.length) return new Map();
 
   const official = orderedSections(sections);
+  if (clusters.length < official.length) return new Map();
 
-  // Physical toll systems expose one logical charge point per plaza/gantry,
-  // often duplicated by carriageway. If counts line up after clustering, road
-  // order is much safer than fuzzy names. Test both directions because the
-  // principal axis has no inherent motorway direction.
-  if (clusters.length !== official.length) {
+  const alignment = chooseAlignment(official, clusters);
+  if (!alignment) return new Map();
+
+  // Do not infer an entire physical toll road from order alone. Require name
+  // anchors in OSM, or strong operator metadata across the sequence. One anchor
+  // is enough for a 3-plaza road such as A16; longer gantry roads require two.
+  const requiredAnchors = official.length <= 3 ? 1 : 2;
+  const operatorAnchors = alignment.selected.filter((item, index) =>
+    operatorAffinity(official[index], item) >= 0.5
+  ).length;
+
+  if (
+    alignment.anchors < requiredAnchors &&
+    operatorAnchors < Math.max(2, Math.ceil(official.length / 2))
+  ) {
     return new Map();
   }
 
-  const forward = clusters;
-  const reverse = clusters.slice().reverse();
+  if (alignment.average < 0.08) return new Map();
 
-  function nameAffinity(sequence) {
-    let score = 0;
-    for (let index = 0; index < official.length; ++index) {
-      const label = normalize(official[index].name || official[index].from || official[index].to);
-      const pointNames = normalize(sequence[index].points.map(point => point.name).join(' '));
-      if (!label || !pointNames) continue;
-      const labelTokens = new Set(label.split(' ').filter(Boolean));
-      const pointTokens = new Set(pointNames.split(' ').filter(Boolean));
-      for (const token of labelTokens) {
-        if (token.length > 2 && pointTokens.has(token)) score += 1;
-      }
-    }
-    return score;
-  }
-
-  const chosen = nameAffinity(reverse) > nameAffinity(forward) ? reverse : forward;
   const matches = new Map();
-
   official.forEach((section, index) => {
+    const labelConfidence = alignment.affinities[index];
+    const operatorConfidence = operatorAffinity(section, alignment.selected[index]);
+    const confidence = Math.max(
+      0.62,
+      Math.min(0.93, 0.66 + labelConfidence * 0.19 + operatorConfidence * 0.08)
+    );
+
     matches.set(section.id, {
       status: 'matched',
-      matchMethod: 'physical-road-order',
+      matchMethod: clusters.length === official.length
+        ? 'physical-road-order'
+        : 'physical-road-subsequence',
       id: section.id,
       roadRef: section.roadRef,
       system: section.system,
@@ -160,8 +284,8 @@ function buildForRoad(points, sections) {
       tariffs: section.tariffs,
       direction: section.direction ?? null,
       source: section.source,
-      point: compactCluster(chosen[index]),
-      confidence: 0.82
+      point: compactCluster(alignment.selected[index]),
+      confidence: Math.round(confidence * 1000) / 1000
     });
   });
 
