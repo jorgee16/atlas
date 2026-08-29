@@ -131,6 +131,37 @@ const MAPLIBRE_ANDROID_VECTOR_STYLE = {
       }
     },
     {
+      id: 'atlas-street-labels',
+      type: 'symbol',
+      source: 'openmaptiles',
+      'source-layer': 'street_labels',
+      minzoom: 12,
+      layout: {
+        'symbol-placement': 'line',
+        'symbol-spacing': 300,
+        'text-field': ['coalesce', ['get', 'name'], ['get', 'ref'], ''],
+        'text-font': ['fira_sans_regular'],
+        'text-size': [
+          'interpolate', ['linear'], ['zoom'],
+          12, 10,
+          14, 11,
+          16, 12.5,
+          18, 14
+        ],
+        'text-padding': 4,
+        'text-max-angle': 35,
+        'text-rotation-alignment': 'map',
+        'text-pitch-alignment': 'viewport',
+        'text-allow-overlap': false
+      },
+      paint: {
+        'text-color': '#4e5562',
+        'text-halo-color': 'rgba(255,255,255,0.96)',
+        'text-halo-width': 1.6,
+        'text-halo-blur': 0.35
+      }
+    },
+    {
       id: 'atlas-place-labels',
       type: 'symbol',
       source: 'openmaptiles',
