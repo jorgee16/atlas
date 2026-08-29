@@ -31,6 +31,10 @@ import {
   prependDriveSegmentToRoute
 } from './road-segment-snap.js';
 
+const DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS = 50;
+const DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS = 8;
+const DRIVE_ORIGIN_LINK_PENALTY_SECONDS = 5;
+
 export class OfflineRoutingService {
   constructor({
     repository = new RoutingRepository(),
@@ -165,12 +169,25 @@ export class OfflineRoutingService {
             segmentSnap
           );
 
-        // Route time dominates. A modest snap-distance term only resolves
-        // similarly good candidates and prevents selecting a farther road
-        // merely because its downstream graph route is a few seconds faster.
+        const topologyPenalty =
+          (segmentSnap.deadEnd
+            ? DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS
+            : 0) +
+          (segmentSnap.weaklyConnected
+            ? DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS
+            : 0) +
+          (segmentSnap.road?.link === true
+            ? DRIVE_ORIGIN_LINK_PENALTY_SECONDS
+            : 0);
+
+        // Keep the exact road-segment projection as the start point, but make
+        // it expensive to select a nearby driveway/dead-end when a similarly
+        // close through-road candidate exists. Route time still dominates
+        // once candidates have comparable topology.
         const score =
           withSegment.durationSeconds +
-          segmentSnap.distanceMeters * 0.35;
+          segmentSnap.distanceMeters * 0.35 +
+          topologyPenalty;
 
         if (!best || score < best.score) {
           best = {
@@ -191,7 +208,9 @@ export class OfflineRoutingService {
           component: best.snap.component,
           edgeIndex: best.snap.edgeIndex,
           roadIndex: best.snap.roadIndex,
-          snapStrategy: 'road-segment'
+          snapStrategy: 'road-segment',
+          deadEnd: best.snap.deadEnd,
+          weaklyConnected: best.snap.weaklyConnected
         };
       }
     }
