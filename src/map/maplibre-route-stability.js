@@ -4,6 +4,9 @@ import {
 
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
+const WALK_PROGRESS_RENDER_DEADBAND_METERS = 2.5;
+const DRIVE_PROGRESS_RENDER_DEADBAND_METERS = 4;
+const EARTH_RADIUS_METERS = 6371000;
 
 function normalizeBearing(value) {
   return ((Number(value) % 360) + 360) % 360;
@@ -36,8 +39,8 @@ function collection(features) {
   };
 }
 
-function splitRoute(points, progress = {}) {
-  const segmentIndex = Math.max(
+function progressSegmentIndex(points, progress = {}) {
+  return Math.max(
     0,
     Math.min(
       points.length - 1,
@@ -48,17 +51,45 @@ function splitRoute(points, progress = {}) {
           : 0
     )
   );
+}
 
+function progressPoint(points, progress = {}) {
+  const segmentIndex = progressSegmentIndex(points, progress);
   const fraction = Number.isFinite(progress?.segmentFraction)
     ? Math.max(0, Math.min(1, progress.segmentFraction))
     : 0;
-
   const current = points[segmentIndex];
   const next = points[segmentIndex + 1] ?? current;
-  const interpolated = {
+
+  return {
     lat: current.lat + (next.lat - current.lat) * fraction,
     lon: current.lon + (next.lon - current.lon) * fraction
   };
+}
+
+function distanceMeters(a, b) {
+  if (!validPoint(a) || !validPoint(b)) return Infinity;
+
+  const lat1 = a.lat * Math.PI / 180;
+  const lat2 = b.lat * Math.PI / 180;
+  const deltaLat = (b.lat - a.lat) * Math.PI / 180;
+  const deltaLon = (b.lon - a.lon) * Math.PI / 180;
+  const sinLat = Math.sin(deltaLat / 2);
+  const sinLon = Math.sin(deltaLon / 2);
+  const h =
+    sinLat * sinLat +
+    Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+
+  return (
+    EARTH_RADIUS_METERS *
+    2 *
+    Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+  );
+}
+
+function splitRoute(points, progress = {}) {
+  const segmentIndex = progressSegmentIndex(points, progress);
+  const interpolated = progressPoint(points, progress);
 
   return {
     traveled: [...points.slice(0, segmentIndex + 1), interpolated],
@@ -73,11 +104,7 @@ function bearingFromProgress(points, progress = {}) {
     0,
     Math.min(
       points.length - 2,
-      Number.isInteger(progress?.segmentIndex)
-        ? progress.segmentIndex
-        : Number.isInteger(progress?.pointIndex)
-          ? progress.pointIndex
-          : 0
+      progressSegmentIndex(points, progress)
     )
   );
 
@@ -127,6 +154,7 @@ export function installMapLibreRouteStability() {
   }
 
   const originalUpdateRouteProgress = prototype.updateRouteProgress;
+  const originalClearRoute = prototype.clearRoute;
 
   Object.defineProperty(
     prototype,
@@ -135,6 +163,10 @@ export function installMapLibreRouteStability() {
   );
 
   prototype.updateRouteProgress = function updateRouteProgress(route, progress) {
+    const routeChanged =
+      validRoute(route) &&
+      route !== this.currentRoute;
+
     if (validRoute(route)) {
       this.currentRoute = route;
     }
@@ -144,28 +176,54 @@ export function installMapLibreRouteStability() {
 
     if (!validRoute(this.currentRoute)) return;
 
-    this.routeBearing = bearingFromProgress(
-      this.currentRoute.points,
-      progress
-    );
+    const points = this.currentRoute.points;
+    const segmentIndex = progressSegmentIndex(points, progress);
+    const renderedPoint = progressPoint(points, progress);
 
-    // The previous MapLibre implementation removed and recreated every
-    // route source/layer for every GPS progress update. WebGL briefly had no
-    // route between those operations, which made the path visibly blink even
-    // while the user was stationary. Keep the layers mounted and only mutate
-    // their GeoJSON data, matching the stable Leaflet behaviour.
+    this.routeBearing = bearingFromProgress(points, progress);
+
+    const previousRoute = this.__atlasRenderedProgressRoute ?? null;
+    const previousPoint = this.__atlasRenderedProgressPoint ?? null;
+    const previousSegmentIndex =
+      this.__atlasRenderedProgressSegmentIndex;
+    const renderDeadband =
+      this.navigationTravelMode === 'drive'
+        ? DRIVE_PROGRESS_RENDER_DEADBAND_METERS
+        : WALK_PROGRESS_RENDER_DEADBAND_METERS;
+
+    const sameRoute =
+      !routeChanged &&
+      previousRoute === this.currentRoute;
+    const sameSegment =
+      Number.isInteger(previousSegmentIndex) &&
+      previousSegmentIndex === segmentIndex;
+    const progressMovement =
+      distanceMeters(previousPoint, renderedPoint);
+
+    // GPS and guidance can keep updating at their normal rate. The route
+    // geometry does not need to be pushed through MapLibre for every noisy
+    // fix. While progress remains on the same segment and moves less than a
+    // few metres, leave the already-rendered route completely untouched.
+    if (
+      sameRoute &&
+      sameSegment &&
+      progressMovement < renderDeadband
+    ) {
+      return;
+    }
+
     try {
       const remainingSource = this.map.getSource?.(ROUTE_SOURCE);
       const styleReady = this.map.isStyleLoaded?.() ?? false;
 
       if (!remainingSource || !styleReady) {
+        this.__atlasRenderedProgressRoute = this.currentRoute;
+        this.__atlasRenderedProgressPoint = renderedPoint;
+        this.__atlasRenderedProgressSegmentIndex = segmentIndex;
         return originalUpdateRouteProgress.call(this, route, progress);
       }
 
-      const split = splitRoute(
-        this.currentRoute.points,
-        progress
-      );
+      const split = splitRoute(points, progress);
 
       remainingSource.setData(
         collection([lineFeature(split.remaining)])
@@ -176,24 +234,27 @@ export function installMapLibreRouteStability() {
         .getSource(TRAVELED_SOURCE)
         ?.setData(collection([lineFeature(split.traveled)]));
 
-      // Keep route layers above the base map without tearing them down.
-      for (const layerId of [
-        'atlas-route-casing',
-        'atlas-route-traveled',
-        'atlas-route-remaining'
-      ]) {
-        if (this.map.getLayer?.(layerId)) {
-          this.map.moveLayer?.(layerId);
-        }
-      }
-
-      this.map.triggerRepaint?.();
+      // setData() schedules the MapLibre render itself. Do not force an extra
+      // repaint for every GPS fix, and do not reorder layers repeatedly.
+      this.__atlasRenderedProgressRoute = this.currentRoute;
+      this.__atlasRenderedProgressPoint = renderedPoint;
+      this.__atlasRenderedProgressSegmentIndex = segmentIndex;
     } catch (error) {
       console.warn(
         'Stable MapLibre route progress update failed; falling back to full render.',
         error
       );
+      this.__atlasRenderedProgressRoute = this.currentRoute;
+      this.__atlasRenderedProgressPoint = renderedPoint;
+      this.__atlasRenderedProgressSegmentIndex = segmentIndex;
       originalUpdateRouteProgress.call(this, route, progress);
     }
+  };
+
+  prototype.clearRoute = function clearRoute(...args) {
+    this.__atlasRenderedProgressRoute = null;
+    this.__atlasRenderedProgressPoint = null;
+    this.__atlasRenderedProgressSegmentIndex = undefined;
+    return originalClearRoute.apply(this, args);
   };
 }
