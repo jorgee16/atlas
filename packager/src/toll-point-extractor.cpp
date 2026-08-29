@@ -5,6 +5,7 @@
 
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace roam {
@@ -65,9 +66,9 @@ std::string kindFor(const osmium::TagList& tags) {
   return {};
 }
 
-class Handler final : public osmium::handler::Handler {
+class NodeHandler final : public osmium::handler::Handler {
 public:
-  explicit Handler(std::vector<TollPoint>& points)
+  explicit NodeHandler(std::vector<TollPoint>& points)
     : points_(points) {
   }
 
@@ -98,21 +99,76 @@ private:
   std::vector<TollPoint>& points_;
 };
 
+class WayEnrichmentHandler final : public osmium::handler::Handler {
+public:
+  explicit WayEnrichmentHandler(
+    std::vector<TollPoint>& points
+  ) : points_(points) {
+    for (std::size_t index = 0; index < points_.size(); ++index) {
+      indexes_.insert_or_assign(points_[index].osmId, index);
+    }
+  }
+
+  void way(const osmium::Way& way) {
+    const auto wayRef = tagValue(way.tags(), "ref");
+    const auto wayName = tagValue(way.tags(), "name");
+    const auto wayOperator = tagValue(way.tags(), "operator");
+
+    for (const auto& node : way.nodes()) {
+      const auto found = indexes_.find(node.ref());
+      if (found == indexes_.end()) {
+        continue;
+      }
+
+      auto& point = points_[found->second];
+
+      // Toll nodes frequently carry only barrier/highway tags while the
+      // containing motorway way carries the useful Axx reference. Preserve
+      // explicit node metadata and fill only missing fields from the way.
+      if (point.roadReference.empty() && !wayRef.empty()) {
+        point.roadReference = wayRef;
+      }
+      if (point.name.empty() && !wayName.empty()) {
+        point.name = wayName;
+      }
+      if (point.operatorName.empty() && !wayOperator.empty()) {
+        point.operatorName = wayOperator;
+      }
+    }
+  }
+
+private:
+  std::vector<TollPoint>& points_;
+  std::unordered_map<std::int64_t, std::size_t> indexes_;
+};
+
 }
 
 std::vector<TollPoint> TollPointExtractor::extract(
   const std::filesystem::path& osmPath
 ) const {
   std::vector<TollPoint> points;
-  Handler handler {points};
+  NodeHandler nodeHandler {points};
 
-  osmium::io::Reader reader {
+  osmium::io::Reader nodeReader {
     osmPath.string(),
     osmium::osm_entity_bits::node
   };
 
-  osmium::apply(reader, handler);
-  reader.close();
+  osmium::apply(nodeReader, nodeHandler);
+  nodeReader.close();
+
+  if (!points.empty()) {
+    WayEnrichmentHandler wayHandler {points};
+
+    osmium::io::Reader wayReader {
+      osmPath.string(),
+      osmium::osm_entity_bits::way
+    };
+
+    osmium::apply(wayReader, wayHandler);
+    wayReader.close();
+  }
 
   return points;
 }
