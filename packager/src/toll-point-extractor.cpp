@@ -63,6 +63,21 @@ std::string kindFor(const osmium::TagList& tags) {
   if (barrier == "toll_booth") return "toll_booth";
   if (highway == "toll_gantry") return "toll_gantry";
   if (barrier == "toll_gantry") return "toll_gantry";
+  if (highway == "motorway_junction") return "motorway_junction";
+  return {};
+}
+
+std::string displayName(const osmium::TagList& tags) {
+  for (const char* key : {
+    "name",
+    "exit_to",
+    "destination",
+    "junction:ref"
+  }) {
+    if (const char* raw = tags[key]) {
+      return raw;
+    }
+  }
   return {};
 }
 
@@ -86,7 +101,7 @@ public:
       node.id(),
       node.location().lat(),
       node.location().lon(),
-      tagValue(node.tags(), "name"),
+      displayName(node.tags()),
       tagValue(node.tags(), "ref"),
       tagValue(node.tags(), "operator"),
       roadReference(node.tags()),
@@ -122,8 +137,8 @@ public:
 
       auto& point = points_[found->second];
 
-      // Toll nodes frequently carry only barrier/highway tags while the
-      // containing motorway way carries the useful Axx reference. Preserve
+      // Toll nodes and motorway junctions frequently carry only their local
+      // label/ref while the containing motorway way carries Axx. Preserve
       // explicit node metadata and fill only missing fields from the way.
       if (point.roadReference.empty() && !wayRef.empty()) {
         point.roadReference = wayRef;
