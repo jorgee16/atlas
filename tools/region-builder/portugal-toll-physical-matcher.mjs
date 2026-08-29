@@ -225,6 +225,16 @@ function physicalPointsForRoad(points, target, kind, corridors) {
   for (const point of points) {
     if (point.kind !== kind) continue;
 
+    // Routing topology evidence is authoritative for assigning a physical
+    // booth/gantry to a motorway. Never let the geographic corridor fallback
+    // overwrite a conflicting routed motorway identity (for example A3 Maia
+    // being reused as the A41 Lipor-EN13 gantry).
+    const routedRoad = roadKey(point.inferredRoadRef);
+    if (routedRoad && isMotorwayRoadKey(routedRoad)) {
+      if (routedRoad === target) exact.push(point);
+      continue;
+    }
+
     if (roadKey(point.roadRef) === target) {
       exact.push(point);
       continue;
@@ -358,7 +368,7 @@ function buildForRoad(points, sections, corridors) {
   ).length;
 
   const inferredAnchors = alignment.selected.filter(item =>
-    item.points.some(point => point.inferredRoadRef === target)
+    item.points.some(point => roadKey(point.inferredRoadRef) === target)
   ).length;
 
   if (
@@ -378,7 +388,7 @@ function buildForRoad(points, sections, corridors) {
     const labelConfidence = alignment.affinities[index];
     const operatorConfidence = operatorAffinity(section, alignment.selected[index]);
     const wasInferred = alignment.selected[index].points.some(
-      point => point.inferredRoadRef === target
+      point => roadKey(point.inferredRoadRef) === target
     );
     const confidence = Math.max(
       0.60,
@@ -390,7 +400,7 @@ function buildForRoad(points, sections, corridors) {
     matches.set(section.id, {
       status: 'matched',
       matchMethod: wasInferred
-        ? 'physical-corridor-inference'
+        ? 'physical-routing-road'
         : clusters.length === official.length
           ? 'physical-road-order'
           : 'physical-road-subsequence',
