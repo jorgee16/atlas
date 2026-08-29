@@ -1,5 +1,7 @@
 const EARTH_RADIUS_METERS = 6371008.8;
 const CLUSTER_RADIUS_METERS = 500;
+const CORRIDOR_MAX_DISTANCE_METERS = 1800;
+const CORRIDOR_WIN_RATIO = 0.68;
 
 function normalize(value) {
   return String(value ?? '')
@@ -13,6 +15,10 @@ function normalize(value) {
 
 function roadKey(value) {
   return normalize(value).replace(/\s+/g, '');
+}
+
+function isMotorwayRoadKey(value) {
+  return /^A\d+(?:-\d+)?$/.test(roadKey(value));
 }
 
 function radians(value) {
@@ -91,6 +97,7 @@ function compactCluster(item) {
     name: item.points.map(point => point.name).filter(Boolean).join(' | '),
     ref: best.ref,
     roadRef: best.roadRef,
+    inferredRoadRef: best.inferredRoadRef ?? null,
     operator: best.operator,
     kind: best.kind,
     pairedOsmIds: item.points.map(point => point.osmId)
@@ -148,6 +155,108 @@ function operatorAffinity(section, item) {
     if (observed.has(token)) common += 1;
   }
   return common / expected.size;
+}
+
+function localXY(point, originLat) {
+  const latScale = Math.PI * EARTH_RADIUS_METERS / 180;
+  const lonScale = latScale * Math.cos(radians(originLat));
+  return {
+    x: point.lon * lonScale,
+    y: point.lat * latScale
+  };
+}
+
+function pointSegmentDistanceMeters(point, a, b) {
+  const originLat = (point.lat + a.lat + b.lat) / 3;
+  const p = localXY(point, originLat);
+  const aa = localXY(a, originLat);
+  const bb = localXY(b, originLat);
+  const dx = bb.x - aa.x;
+  const dy = bb.y - aa.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= 1) {
+    return Math.hypot(p.x - aa.x, p.y - aa.y);
+  }
+  const t = Math.max(0, Math.min(1,
+    ((p.x - aa.x) * dx + (p.y - aa.y) * dy) / lengthSquared
+  ));
+  const x = aa.x + t * dx;
+  const y = aa.y + t * dy;
+  return Math.hypot(p.x - x, p.y - y);
+}
+
+function corridorDistanceMeters(point, corridor) {
+  if (!corridor.length) return Infinity;
+  if (corridor.length === 1) return distanceMeters(point, corridor[0]);
+
+  let best = Infinity;
+  for (let index = 1; index < corridor.length; ++index) {
+    best = Math.min(
+      best,
+      pointSegmentDistanceMeters(point, corridor[index - 1], corridor[index])
+    );
+  }
+  return best;
+}
+
+function buildMotorwayCorridors(points) {
+  const groups = new Map();
+  for (const point of points) {
+    if (point.kind !== 'motorway_junction' || !isMotorwayRoadKey(point.roadRef)) {
+      continue;
+    }
+    const key = roadKey(point.roadRef);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(point);
+  }
+
+  const corridors = new Map();
+  for (const [key, roadPoints] of groups) {
+    const ordered = principalOrder(cluster(roadPoints));
+    if (ordered.length >= 2) corridors.set(key, ordered);
+  }
+  return corridors;
+}
+
+function physicalPointsForRoad(points, target, kind, corridors) {
+  const exact = [];
+  const inferred = [];
+
+  for (const point of points) {
+    if (point.kind !== kind) continue;
+
+    if (roadKey(point.roadRef) === target) {
+      exact.push(point);
+      continue;
+    }
+
+    const targetCorridor = corridors.get(target);
+    if (!targetCorridor) continue;
+
+    const targetDistance = corridorDistanceMeters(point, targetCorridor);
+    if (targetDistance > CORRIDOR_MAX_DISTANCE_METERS) continue;
+
+    let competingDistance = Infinity;
+    for (const [road, corridor] of corridors) {
+      if (road === target) continue;
+      competingDistance = Math.min(
+        competingDistance,
+        corridorDistanceMeters(point, corridor)
+      );
+    }
+
+    const winsClearly = !Number.isFinite(competingDistance) ||
+      targetDistance <= competingDistance * CORRIDOR_WIN_RATIO;
+
+    if (!winsClearly) continue;
+
+    inferred.push({
+      ...point,
+      inferredRoadRef: target
+    });
+  }
+
+  return [...exact, ...inferred];
 }
 
 function alignOrderedSubsequence(official, orderedClusters) {
@@ -227,16 +336,13 @@ function chooseAlignment(official, clusters) {
   return forward.score >= reverse.score ? forward : reverse;
 }
 
-function buildForRoad(points, sections) {
+function buildForRoad(points, sections, corridors) {
   const roadRef = sections[0]?.roadRef;
   const system = sections[0]?.system;
   const kind = system === 'electronic-gantry' ? 'toll_gantry' : 'toll_booth';
   const target = roadKey(roadRef);
 
-  const roadPoints = points.filter(point =>
-    point.kind === kind && roadKey(point.roadRef) === target
-  );
-
+  const roadPoints = physicalPointsForRoad(points, target, kind, corridors);
   const clusters = principalOrder(cluster(roadPoints));
   if (!clusters.length) return new Map();
 
@@ -246,37 +352,48 @@ function buildForRoad(points, sections) {
   const alignment = chooseAlignment(official, clusters);
   if (!alignment) return new Map();
 
-  // Do not infer an entire physical toll road from order alone. Require name
-  // anchors in OSM, or strong operator metadata across the sequence. One anchor
-  // is enough for a 3-plaza road such as A16; longer gantry roads require two.
   const requiredAnchors = official.length <= 3 ? 1 : 2;
   const operatorAnchors = alignment.selected.filter((item, index) =>
     operatorAffinity(official[index], item) >= 0.5
   ).length;
 
+  const inferredAnchors = alignment.selected.filter(item =>
+    item.points.some(point => point.inferredRoadRef === target)
+  ).length;
+
   if (
     alignment.anchors < requiredAnchors &&
-    operatorAnchors < Math.max(2, Math.ceil(official.length / 2))
+    operatorAnchors < Math.max(2, Math.ceil(official.length / 2)) &&
+    inferredAnchors < Math.max(2, Math.ceil(official.length / 2))
   ) {
     return new Map();
   }
 
-  if (alignment.average < 0.08) return new Map();
+  if (alignment.average < 0.05 && inferredAnchors < official.length) {
+    return new Map();
+  }
 
   const matches = new Map();
   official.forEach((section, index) => {
     const labelConfidence = alignment.affinities[index];
     const operatorConfidence = operatorAffinity(section, alignment.selected[index]);
+    const wasInferred = alignment.selected[index].points.some(
+      point => point.inferredRoadRef === target
+    );
     const confidence = Math.max(
-      0.62,
-      Math.min(0.93, 0.66 + labelConfidence * 0.19 + operatorConfidence * 0.08)
+      0.60,
+      Math.min(0.93,
+        0.65 + labelConfidence * 0.18 + operatorConfidence * 0.08 + (wasInferred ? 0.04 : 0)
+      )
     );
 
     matches.set(section.id, {
       status: 'matched',
-      matchMethod: clusters.length === official.length
-        ? 'physical-road-order'
-        : 'physical-road-subsequence',
+      matchMethod: wasInferred
+        ? 'physical-corridor-inference'
+        : clusters.length === official.length
+          ? 'physical-road-order'
+          : 'physical-road-subsequence',
       id: section.id,
       roadRef: section.roadRef,
       system: section.system,
@@ -305,9 +422,10 @@ export function buildPhysicalMatches(points, sections) {
     groups.get(key).push(section);
   }
 
+  const corridors = buildMotorwayCorridors(points);
   const result = new Map();
   for (const group of groups.values()) {
-    for (const [id, match] of buildForRoad(points, group)) {
+    for (const [id, match] of buildForRoad(points, group, corridors)) {
       result.set(id, match);
     }
   }
