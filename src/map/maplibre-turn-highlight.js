@@ -74,6 +74,18 @@ function activeManeuver(maneuvers, activeIndex) {
     .find(item => item?.type !== 'depart' && validPoint(item?.location));
 }
 
+function maneuverSignature(maneuver, activeIndex) {
+  if (!maneuver || !validPoint(maneuver.location)) return null;
+
+  return [
+    activeIndex,
+    maneuver.type ?? '',
+    Number(maneuver.location.lat).toFixed(6),
+    Number(maneuver.location.lon).toFixed(6),
+    maneuver.instruction ?? maneuver.name ?? ''
+  ].join(':');
+}
+
 function turnGeometry(route, maneuver) {
   const points = route?.points?.filter(validPoint) ?? [];
   if (points.length < 3 || !validPoint(maneuver?.location)) return null;
@@ -156,6 +168,15 @@ function removeTurnOverlay(adapter) {
   }
 }
 
+function turnOverlayReady(adapter) {
+  return Boolean(
+    adapter.map.getSource?.(TURN_SOURCE) &&
+    adapter.map.getLayer?.(TURN_LAYER) &&
+    adapter.map.getLayer?.(TURN_CASING_LAYER) &&
+    (adapter.maneuverMarkers?.length ?? 0) > 0
+  );
+}
+
 export function installMapLibreTurnHighlight(AdapterClass) {
   if (!AdapterClass?.prototype || AdapterClass.prototype.__atlasTurnHighlightInstalled) {
     return;
@@ -173,13 +194,39 @@ export function installMapLibreTurnHighlight(AdapterClass) {
   ) {
     this.currentManeuvers = Array.isArray(maneuvers) ? maneuvers : null;
     this.currentManeuverIndex = activeIndex;
-    removeTurnOverlay(this);
 
-    if (!Array.isArray(maneuvers)) return;
+    if (!Array.isArray(maneuvers)) {
+      this.__atlasTurnSignature = null;
+      this.__atlasTurnRoute = null;
+      removeTurnOverlay(this);
+      return;
+    }
 
     const maneuver = activeManeuver(maneuvers, activeIndex);
+    const signature = maneuverSignature(maneuver, activeIndex);
+
+    // NavigationFeature calls showManeuvers on every GPS fix. Rebuilding the
+    // same source/layers/marker each time makes the highlighted route segment
+    // disappear for a frame and looks like the whole route is recalculating.
+    // If the route and active maneuver are unchanged, keep the existing
+    // overlay mounted exactly as it is.
+    if (
+      signature &&
+      signature === this.__atlasTurnSignature &&
+      this.__atlasTurnRoute === this.currentRoute &&
+      turnOverlayReady(this)
+    ) {
+      return;
+    }
+
+    removeTurnOverlay(this);
+
     const geometry = turnGeometry(this.currentRoute, maneuver);
-    if (!maneuver || !geometry) return;
+    if (!maneuver || !geometry) {
+      this.__atlasTurnSignature = null;
+      this.__atlasTurnRoute = null;
+      return;
+    }
 
     try {
       this.map.addSource(TURN_SOURCE, {
@@ -226,10 +273,13 @@ export function installMapLibreTurnHighlight(AdapterClass) {
         .addTo(this.map);
 
       this.maneuverMarkers = [marker];
+      this.__atlasTurnSignature = signature;
+      this.__atlasTurnRoute = this.currentRoute;
       this.map.moveLayer?.(TURN_CASING_LAYER);
       this.map.moveLayer?.(TURN_LAYER);
-      this.map.triggerRepaint?.();
     } catch (error) {
+      this.__atlasTurnSignature = null;
+      this.__atlasTurnRoute = null;
       console.warn('Unable to render MapLibre turn highlight.', error);
     }
   };
@@ -237,6 +287,8 @@ export function installMapLibreTurnHighlight(AdapterClass) {
   AdapterClass.prototype.clearManeuvers = function clearManeuvers() {
     this.currentManeuvers = null;
     this.currentManeuverIndex = 0;
+    this.__atlasTurnSignature = null;
+    this.__atlasTurnRoute = null;
     removeTurnOverlay(this);
   };
 }
