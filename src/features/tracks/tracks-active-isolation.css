@@ -1,0 +1,46 @@
+/* Tracks owns the lower map workspace while active. Some Explore controls live
+ * outside #exploreWorkspace and can be re-shown by timers after Tracks opens,
+ * so keep them suppressed at the Tracks state boundary. */
+#app.tracks-active #searchAreaBtn,
+#app.tracks-active #routePlannerBtn,
+#app.tracks-active #recenterBtn,
+#app.tracks-active #compassBtn,
+#app.tracks-active .search-area-btn,
+#app.tracks-active .bottom-sheet {
+  display: none !important;
+}
+
+/* Keep the Tracks surface visually independent from any hidden/transitioning
+ * Explore sheet beneath it. */
+#app.tracks-active .tracks-workspace {
+  z-index: 820;
+}
+
+#app.tracks-active .tracks-card {
+  isolation: isolate;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 700px) {
+  #app.tracks-active .tracks-workspace {
+    bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #app.tracks-active .tracks-card {
+    max-height: calc(100dvh - 330px - env(safe-area-inset-bottom, 0px));
+  }
+
+  #app.tracks-active .tracks-library {
+    padding-bottom: 18px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  #app.tracks-active .tracks-workspace {
+    bottom: 76px;
+  }
+
+  #app.tracks-active .tracks-card {
+    max-height: 100%;
+  }
+}
