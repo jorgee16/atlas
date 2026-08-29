@@ -668,9 +668,14 @@ export class MapLibreMapAdapter {
     if (typeof callback !== 'function') {
       throw new TypeError('onUserMoveStart requires a callback.');
     }
+
+    // A pinch-to-zoom should preserve Follow and the current north-up /
+    // heading-up mode. Only gestures that deliberately move/orient the map
+    // stop following. Treating zoomstart as a user move was forcing
+    // FollowModeController.stopFollowing(), which calls setBearing(0), so
+    // every pinch snapped the map back to north-up.
     for (const eventName of [
       'dragstart',
-      'zoomstart',
       'rotatestart',
       'pitchstart'
     ]) {
@@ -758,37 +763,17 @@ export class MapLibreMapAdapter {
     this.map.once('style.load', callback);
   }
 
-  #fitPoints(points, maxZoom) {
-    if (points.length === 1) {
-      this.map.easeTo({
-        center: [points[0].lon, points[0].lat],
-        zoom: maxZoom,
-        duration: 250
-      });
-      return;
-    }
-
-    const first = [points[0].lon, points[0].lat];
-    const bounds = new this.maplibre.LngLatBounds(first, first);
-    for (const point of points.slice(1)) {
-      bounds.extend([point.lon, point.lat]);
-    }
-
-    const container = this.map.getContainer();
-    const landscape =
-      Number(container?.clientWidth ?? 0) >
-      Number(container?.clientHeight ?? 0);
-
+  #fitPoints(points, maxZoom = 16) {
+    const bounds = new this.maplibre.LngLatBounds();
+    points.forEach(point => bounds.extend([point.lon, point.lat]));
     this.map.fitBounds(bounds, {
-      padding: landscape
-        ? { top: 28, right: 32, bottom: 126, left: 32 }
-        : { top: 112, right: 28, bottom: 196, left: 28 },
+      padding: 64,
       maxZoom,
-      duration: 350
+      duration: 250
     });
   }
 
   #removeMarkers(markers) {
-    for (const marker of markers) marker?.remove?.();
+    markers.forEach(marker => marker.remove());
   }
 }
