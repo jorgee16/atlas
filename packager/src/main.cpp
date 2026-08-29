@@ -2,6 +2,7 @@
 #include "roam/road-extractor.hpp"
 #include "roam/routing-writer.hpp"
 #include "roam/spatial-index.hpp"
+#include "roam/toll-point-extractor.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -155,6 +156,45 @@ std::vector<roam::Poi> writePois(
   return pois;
 }
 
+void writeTollPoints(
+  const fs::path& input,
+  const fs::path& output
+) {
+  roam::TollPointExtractor extractor;
+  const auto points = extractor.extract(input);
+
+  nlohmann::json document;
+  document["version"] = 1;
+  document["points"] = nlohmann::json::array();
+
+  for (const auto& point : points) {
+    document["points"].push_back({
+      {"osmId", point.osmId},
+      {"lat", point.lat},
+      {"lon", point.lon},
+      {"name", point.name},
+      {"ref", point.reference},
+      {"operator", point.operatorName},
+      {"roadRef", point.roadReference},
+      {"kind", point.kind},
+      {"electronic", point.electronic}
+    });
+  }
+
+  std::ofstream stream {
+    output / "toll-points.json"
+  };
+
+  stream
+    << document.dump(2)
+    << '\n';
+
+  std::cout
+    << "Extracted "
+    << points.size()
+    << " OSM toll points\n";
+}
+
 void writeRouting(
   const std::string& region,
   const fs::path& input,
@@ -181,6 +221,11 @@ void writeRouting(
   roam::RoutingWriter::write(
     region,
     std::move(graph),
+    output / "routing"
+  );
+
+  writeTollPoints(
+    input,
     output / "routing"
   );
 }
