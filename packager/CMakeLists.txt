@@ -32,6 +32,7 @@ add_executable(
   src/road-extractor.cpp
   src/routing-writer.cpp
   src/spatial-index.cpp
+  src/toll-point-extractor.cpp
 )
 
 target_include_directories(
