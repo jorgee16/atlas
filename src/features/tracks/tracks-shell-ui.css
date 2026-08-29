@@ -1,0 +1,325 @@
+.tracks-workspace {
+  position: absolute;
+  z-index: 760;
+  left: 16px;
+  right: 16px;
+  bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.tracks-workspace[hidden] {
+  display: none;
+}
+
+.tracks-card {
+  width: min(620px, 100%);
+  max-height: min(68vh, 690px);
+  overflow: auto;
+  pointer-events: auto;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--surface-solid) 96%, transparent);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(18px);
+}
+
+.tracks-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tracks-header small,
+.tracks-library-heading small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.tracks-header h2 {
+  margin: 4px 0 4px;
+  font-size: clamp(24px, 4.8vw, 31px);
+  line-height: 1.05;
+}
+
+.tracks-header p {
+  margin: 0;
+  max-width: 380px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.tracks-import-primary,
+.tracks-empty button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+}
+
+.tracks-import-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.tracks-import-primary svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tracks-library-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 10px;
+}
+
+.tracks-library-heading strong {
+  display: block;
+  font-size: 17px;
+}
+
+.tracks-count {
+  display: grid;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.tracks-library {
+  padding: 6px 14px 14px;
+}
+
+.tracks-empty {
+  display: grid;
+  justify-items: center;
+  padding: 34px 22px 30px;
+  text-align: center;
+  border: 1px dashed var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface-muted);
+}
+
+.tracks-empty-icon,
+.tracks-file-icon {
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tracks-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+  border-radius: 20px;
+}
+
+.tracks-empty-icon svg,
+.tracks-file-icon svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tracks-empty strong {
+  font-size: 19px;
+}
+
+.tracks-empty p {
+  max-width: 400px;
+  margin: 7px 0 18px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.tracks-empty button {
+  padding: 0 18px;
+}
+
+.tracks-file-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  min-height: 78px;
+  margin-bottom: 9px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface-muted);
+}
+
+.tracks-file-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+}
+
+.tracks-file-copy {
+  min-width: 0;
+}
+
+.tracks-file-copy strong,
+.tracks-file-copy span,
+.tracks-file-copy small {
+  display: block;
+}
+
+.tracks-file-copy strong {
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tracks-file-copy span,
+.tracks-file-copy small {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.tracks-file-copy b {
+  color: var(--accent);
+}
+
+.tracks-file-chevron {
+  color: var(--text-muted);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.tracks-format-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 14px 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+.tracks-format-note span {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.tracks-format-note p {
+  margin: 1px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.app-tab--overflow-only {
+  display: none !important;
+}
+
+html[data-atlas-theme="dark"] .tracks-card,
+html[data-theme="dark"] .tracks-card {
+  border-color: rgba(255, 255, 255, .10);
+}
+
+html[data-atlas-theme="dark"] .tracks-empty,
+html[data-atlas-theme="dark"] .tracks-file-card,
+html[data-atlas-theme="dark"] .tracks-format-note,
+html[data-atlas-theme="dark"] .tracks-count,
+html[data-theme="dark"] .tracks-empty,
+html[data-theme="dark"] .tracks-file-card,
+html[data-theme="dark"] .tracks-format-note,
+html[data-theme="dark"] .tracks-count {
+  border-color: rgba(255, 255, 255, .12);
+}
+
+@media (max-width: 700px) {
+  .tracks-workspace {
+    left: 12px;
+    right: 12px;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tracks-card {
+    max-height: 64vh;
+    border-radius: 24px;
+  }
+
+  .tracks-header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 20px 18px 16px;
+  }
+
+  .tracks-import-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tracks-library-heading {
+    padding-inline: 18px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  .tracks-workspace {
+    left: 18px;
+    right: auto;
+    top: 92px;
+    bottom: 76px;
+    width: min(430px, 44vw);
+    align-items: flex-start;
+  }
+
+  .tracks-card {
+    width: 100%;
+    max-height: 100%;
+    border-radius: 22px;
+  }
+
+  .tracks-header {
+    padding: 16px;
+  }
+
+  .tracks-header h2 {
+    font-size: 24px;
+  }
+
+  .tracks-empty {
+    padding: 22px 16px;
+  }
+}
