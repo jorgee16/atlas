@@ -3,7 +3,8 @@ import {
 } from './min-priority-queue.js';
 
 import {
-  estimateEdgeTollEuros
+  estimateEdgeTollEuros,
+  edgeIsTolledInPortugal
 } from './portugal-toll-estimator.js';
 
 const EARTH_RADIUS_METERS = 6_371_000;
@@ -246,7 +247,11 @@ export class AStarRouter {
         if (
           profile === 'drive' &&
           avoidTolls &&
-          this.graph.edgeIsToll?.(edgeIndex)
+          edgeIsTolledInPortugal(
+            this.graph,
+            edgeIndex,
+            vehicleClass
+          )
         ) {
           continue;
         }
