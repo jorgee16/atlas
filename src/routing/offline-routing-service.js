@@ -27,9 +27,10 @@ import {
 } from './route-road-summary.js';
 import { calibrateDriveEta } from './drive-eta.js';
 
-const DRIVE_ORIGIN_PROBE_RADII_METERS = [12, 24, 40];
+const DRIVE_ORIGIN_PROBE_RADII_METERS = [8, 16, 24];
 const DRIVE_ORIGIN_PROBE_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315];
-const DRIVE_ORIGIN_MAX_ALTERNATIVE_OFFSET_METERS = 65;
+const DRIVE_ORIGIN_MAX_ALTERNATIVE_OFFSET_METERS = 32;
+const DRIVE_ORIGIN_MAX_EXTRA_DISTANCE_METERS = 18;
 
 function pointDistanceMeters(a, b) {
   const earthRadius = 6371000;
@@ -88,14 +89,10 @@ function driveOriginScore(graph, origin, snap) {
   const actualDistance = pointDistanceMeters(origin, snap.point);
   const quality = driveNodeQuality(graph, snap.node);
 
-  // A pure nearest-node snap is often wrong when GPS sits beside a driveway,
-  // parking spur or dead-end access road. Prefer a slightly farther node when
-  // it belongs to a genuinely connected drivable road. Distance remains the
-  // dominant signal once candidates have comparable connectivity.
-  const deadEndPenalty = quality.degree <= 1 ? 45 : 0;
-  const weakJunctionPenalty = quality.degree === 2 ? 4 : 0;
-  const unnamedPenalty = quality.namedRoad ? 0 : 8;
-  const linkPenalty = quality.allLinks ? 8 : 0;
+  const deadEndPenalty = quality.degree <= 1 ? 16 : 0;
+  const weakJunctionPenalty = quality.degree === 2 ? 2 : 0;
+  const unnamedPenalty = quality.namedRoad ? 0 : 4;
+  const linkPenalty = quality.allLinks ? 4 : 0;
 
   return {
     score:
@@ -130,7 +127,7 @@ function findDriveOriginSnap(
     for (const bearing of DRIVE_ORIGIN_PROBE_BEARINGS) {
       const probe = offsetPoint(origin, bearing, radius);
       const snap = graph.findNearest(probe, {
-        maxDistanceMeters: 28,
+        maxDistanceMeters: 16,
         profile: 'drive'
       });
 
@@ -163,9 +160,30 @@ function findDriveOriginSnap(
 
     const info = driveOriginScore(graph, origin, candidate);
 
-    // Never jump far away merely because another road has a nicer topology.
-    // The preference exists only to resolve ambiguous nearby road choices.
-    if (info.actualDistance > directInfo.actualDistance + 50) continue;
+    if (
+      info.actualDistance >
+      Math.min(
+        DRIVE_ORIGIN_MAX_ALTERNATIVE_OFFSET_METERS,
+        directInfo.actualDistance + DRIVE_ORIGIN_MAX_EXTRA_DISTANCE_METERS
+      )
+    ) {
+      continue;
+    }
+
+    // If GPS is already very close to a routable node, only abandon that node
+    // for an obviously better connected candidate that is still almost as
+    // close. This prevents snapping across a block merely to avoid a dead end.
+    if (
+      directInfo.actualDistance <= 12 &&
+      candidate.node !== direct.node &&
+      (
+        directInfo.quality.degree > 1 ||
+        info.quality.degree < 2 ||
+        info.actualDistance > directInfo.actualDistance + 10
+      )
+    ) {
+      continue;
+    }
 
     if (info.score < bestInfo.score) {
       best = candidate;
@@ -280,9 +298,6 @@ export class OfflineRoutingService {
       );
     }
 
-    // The stored component id is graph-global, not profile-specific.
-    // Keep the fast connectivity rejection for Drive, but let the
-    // walk-aware A* determine pedestrian connectivity itself.
     if (
       profile === 'drive' &&
       originSnap.point.component !==
@@ -431,7 +446,6 @@ export class OfflineRoutingService {
       if (error?.name === 'AbortError') {
         throw error;
       }
-      // Some islands/areas can genuinely have no toll-free connection.
     }
 
     const unique = [];
