@@ -11,8 +11,125 @@ import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 
-const ONLINE_VECTOR_STYLE =
-  'https://tiles.openfreemap.org/styles/liberty';
+// Use the OpenFreeMap OpenMapTiles source directly instead of the full
+// Liberty style while diagnosing Android/WebView rendering. This removes
+// glyphs, sprites and auxiliary raster sources from the equation and leaves a
+// small, deterministic vector-only style with the layers Atlas actually needs
+// to prove street rendering.
+const ONLINE_VECTOR_STYLE = {
+  version: 8,
+  name: 'Atlas OpenFreeMap diagnostic',
+  sources: {
+    openmaptiles: {
+      type: 'vector',
+      url: 'https://tiles.openfreemap.org/planet'
+    }
+  },
+  layers: [
+    {
+      id: 'atlas-background',
+      type: 'background',
+      paint: { 'background-color': '#f3f1ec' }
+    },
+    {
+      id: 'atlas-landcover',
+      type: 'fill',
+      source: 'openmaptiles',
+      'source-layer': 'landcover',
+      paint: {
+        'fill-color': [
+          'match',
+          ['get', 'class'],
+          'wood', '#dce8d4',
+          'grass', '#e5edd8',
+          '#e8eadf'
+        ],
+        'fill-opacity': 0.75
+      }
+    },
+    {
+      id: 'atlas-water',
+      type: 'fill',
+      source: 'openmaptiles',
+      'source-layer': 'water',
+      paint: { 'fill-color': '#b9dceb' }
+    },
+    {
+      id: 'atlas-buildings',
+      type: 'fill',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      minzoom: 12,
+      paint: {
+        'fill-color': '#d9d5cf',
+        'fill-outline-color': '#c8c3bc'
+      }
+    },
+    {
+      id: 'atlas-roads-casing',
+      type: 'line',
+      source: 'openmaptiles',
+      'source-layer': 'transportation',
+      minzoom: 5,
+      filter: [
+        'match',
+        ['geometry-type'],
+        ['LineString'], true,
+        false
+      ],
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      paint: {
+        'line-color': '#c8c4be',
+        'line-width': [
+          'interpolate', ['linear'], ['zoom'],
+          5, 0.7,
+          10, 1.8,
+          14, 4.8,
+          18, 11
+        ]
+      }
+    },
+    {
+      id: 'atlas-roads',
+      type: 'line',
+      source: 'openmaptiles',
+      'source-layer': 'transportation',
+      minzoom: 5,
+      filter: [
+        'match',
+        ['geometry-type'],
+        ['LineString'], true,
+        false
+      ],
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      paint: {
+        'line-color': [
+          'match',
+          ['get', 'class'],
+          'motorway', '#e3a59d',
+          'trunk', '#efc38f',
+          'primary', '#f1d8ad',
+          'secondary', '#ffffff',
+          'tertiary', '#ffffff',
+          '#ffffff'
+        ],
+        'line-width': [
+          'interpolate', ['linear'], ['zoom'],
+          5, 0.4,
+          10, 1.2,
+          14, 3.4,
+          18, 8.5
+        ]
+      }
+    }
+  ]
+};
 
 const GPS_DIAGNOSTIC_MAX_ZOOM = 14;
 const ROUTE_SOURCE = 'atlas-route';
@@ -164,6 +281,23 @@ function leafletNavigationCursorHtml({
     <div style="width:20px;height:20px;background:#2563eb;border:4px solid #fff;border-radius:50%;box-shadow:0 2px 9px rgba(0,0,0,.30);"></div>`;
 }
 
+function selectionPinElement() {
+  const element = document.createElement('div');
+  element.style.cssText = [
+    'width:30px',
+    'height:38px',
+    'display:grid',
+    'place-items:start center',
+    'filter:drop-shadow(0 3px 6px rgba(0,0,0,.28))'
+  ].join(';');
+  element.innerHTML = `
+    <svg width="30" height="38" viewBox="0 0 30 38" aria-hidden="true">
+      <path d="M15 1.5C7.7 1.5 2 7.1 2 14.2c0 9.3 13 21.9 13 21.9s13-12.6 13-21.9C28 7.1 22.3 1.5 15 1.5Z" fill="#315efb" stroke="#fff" stroke-width="3"/>
+      <circle cx="15" cy="14" r="5" fill="#fff"/>
+    </svg>`;
+  return element;
+}
+
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
@@ -258,7 +392,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     });
 
     this.map.on('style.load', () => {
-      this.mapSourceBadge.textContent = 'OpenFreeMap loaded';
+      this.mapSourceBadge.textContent = 'OpenFreeMap source loaded';
       this.#scheduleRouteRender();
       this.#refreshRenderDiagnostics();
     });
@@ -350,6 +484,41 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         GPS_DIAGNOSTIC_MAX_ZOOM
       )
     });
+  }
+
+  showSelectionPin(lat, lon, popupContent = null) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      throw new TypeError('showSelectionPin requires lat and lon.');
+    }
+
+    // Always replace the selection marker. Using one self-contained SVG avoids
+    // the old CSS pin plus nested MapLibre shape rendering as two indicators.
+    this.selectionPopup?.remove?.();
+    this.selectionPopup = null;
+    this.selectionMarker?.remove?.();
+    this.selectionMarker = new this.maplibre.Marker({
+      element: selectionPinElement(),
+      anchor: 'bottom'
+    })
+      .setLngLat([lon, lat])
+      .addTo(this.map);
+
+    if (!popupContent) return;
+
+    this.selectionPopup = new this.maplibre.Popup({
+      offset: [0, -10],
+      maxWidth: '224px',
+      closeOnClick: false,
+      focusAfterOpen: false
+    }).setLngLat([lon, lat]);
+
+    if (typeof popupContent === 'string') {
+      this.selectionPopup.setHTML(popupContent);
+    } else {
+      this.selectionPopup.setDOMContent(popupContent);
+    }
+
+    this.selectionPopup.addTo(this.map);
   }
 
   showRoute(route) {
@@ -655,9 +824,9 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     if (!this.mapSourceBadge) return;
 
     this.mapSourceBadge.textContent =
-      'OpenFreeMap vector';
+      'OpenFreeMap vector source';
     this.mapSourceBadge.dataset.mode = 'online';
     this.mapSourceBadge.title =
-      'Verified OpenFreeMap Liberty vector street style.';
+      'Direct OpenFreeMap OpenMapTiles source diagnostic.';
   }
 }
