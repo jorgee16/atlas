@@ -122,12 +122,6 @@ function validRoute(route) {
   );
 }
 
-function resolveAssetUrl(url) {
-  if (/^https?:\/\//i.test(url)) return url;
-  const relativeUrl = String(url).replace(/^\//, '');
-  return `${import.meta.env.BASE_URL}${relativeUrl}`;
-}
-
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
@@ -183,44 +177,39 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   async setRegion(region, options = {}) {
-    const preferOffline =
-      Boolean(options?.preferOffline);
     const mapUrl =
       region?.mapUrl ??
       region?.assets?.map ??
       null;
 
-    if (!preferOffline || !mapUrl) {
-      this.mapSourceMode = 'online';
-      this.#renderMapSourceBadge();
-      this.map.setStyle(ONLINE_VECTOR_STYLE);
-      return Boolean(mapUrl);
-    }
-
-    try {
-      const offlineStyle = await this.createOfflineStyle?.({
-        region,
-        url: resolveAssetUrl(mapUrl),
-        maplibre: this.maplibre
-      });
-
-      if (offlineStyle) {
-        this.mapSourceMode = 'offline';
-        this.#renderMapSourceBadge();
-        this.map.setStyle(offlineStyle);
-        return true;
-      }
-    } catch (error) {
-      console.warn(
-        `Unable to load MapLibre offline map for ${region?.name ?? 'region'}; using online vector map.`,
-        error
-      );
-    }
+    /*
+     * IMPORTANT DURING THE MAPLIBRE MIGRATION:
+     *
+     * The existing Atlas PMTiles archive was packaged for the Leaflet vector
+     * layer and its source-layer schema does not yet match the provisional
+     * MapLibre PMTiles style. Loading that style produces exactly the blank
+     * beige map seen on Android: the background layer renders, but the road,
+     * place and building source-layers do not.
+     *
+     * Keep MapLibre on the known-good online vector style until the PMTiles
+     * schema/style pair is rebuilt and verified. Offline search/routing remain
+     * independent from this renderer choice.
+     */
+    void options;
 
     this.mapSourceMode = 'online';
     this.#renderMapSourceBadge();
-    this.map.setStyle(ONLINE_VECTOR_STYLE);
-    return false;
+
+    const currentStyle = this.map.getStyle?.();
+    const currentStyleName = currentStyle?.name ?? '';
+
+    // Avoid unnecessary setStyle() calls because each one destroys the route
+    // overlay and reloads the vector style.
+    if (!/liberty/i.test(currentStyleName)) {
+      this.map.setStyle(ONLINE_VECTOR_STYLE);
+    }
+
+    return Boolean(mapUrl);
   }
 
   showRoute(route) {
