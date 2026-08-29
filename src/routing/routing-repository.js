@@ -7,6 +7,10 @@ import {
 } from './routing-graph.js';
 
 import {
+  TollEventIndex
+} from './toll-event-index.js';
+
+import {
   defaultRegionAssetOrigin,
   resolveRegionAssetUrl
 } from '../regions/region-asset-url.js';
@@ -193,7 +197,8 @@ export class RoutingRepository {
       roads,
       strings,
       restrictions,
-      spatialIndex
+      spatialIndex,
+      tollEventsDocument
     ] = await Promise.all([
       responseMap.metadata.json(),
       responseMap.nodes.arrayBuffer(),
@@ -202,7 +207,8 @@ export class RoutingRepository {
       responseMap.roads.arrayBuffer(),
       responseMap.strings.arrayBuffer(),
       responseMap.restrictions.arrayBuffer(),
-      responseMap.spatialIndex.arrayBuffer()
+      responseMap.spatialIndex.arrayBuffer(),
+      this.#loadOptionalTollEvents(assets)
     ]);
 
     const graph = new RoutingGraph({
@@ -250,8 +256,39 @@ export class RoutingRepository {
       region,
       partitionId: assets.id ?? null,
       metadata,
-      graph
+      graph,
+      tollEvents: new TollEventIndex(
+        tollEventsDocument
+      )
     };
+  }
+
+  async #loadOptionalTollEvents(assets) {
+    const explicit = assets?.tollEvents;
+    const sibling = explicit || this.#siblingAsset(
+      assets?.metadata,
+      'toll-events.json'
+    );
+
+    if (!sibling) return null;
+
+    try {
+      const response = await this.#fetchRegionAsset(
+        this.#resolveRegionUrl(sibling)
+      );
+
+      if (!response.ok) return null;
+      return await response.json();
+    } catch {
+      return null;
+    }
+  }
+
+  #siblingAsset(asset, filename) {
+    const value = String(asset ?? '');
+    const slash = value.lastIndexOf('/');
+    if (slash < 0) return null;
+    return `${value.slice(0, slash + 1)}${filename}`;
   }
 
   #routingForEndpoints(
