@@ -3,10 +3,10 @@ const clamp = (value, min, max) =>
 
 const NAVIGATION_CAMERA_PROFILES = Object.freeze({
   drive: Object.freeze({
-    forwardFraction: 0.20,
-    forwardMaxPixels: 260,
-    pitchMin: 36,
-    pitchMax: 52
+    forwardFraction: 0.23,
+    forwardMaxPixels: 290,
+    pitchMin: 46,
+    pitchMax: 60
   }),
   walk: Object.freeze({
     forwardFraction: 0.16,
@@ -77,10 +77,10 @@ export function navigationPitch({
   const distanceToManeuver = progress?.distanceToManeuverMeters;
   if (Number.isFinite(distanceToManeuver) && distanceToManeuver >= 0) {
     const maneuverFocus = clamp(1 - distanceToManeuver / 120, 0, 1);
-    pitch -= maneuverFocus * 8;
+    pitch -= maneuverFocus * 5;
   }
 
-  return clamp(pitch, 30, profile.pitchMax);
+  return clamp(pitch, 42, profile.pitchMax);
 }
 
 const maneuverText = maneuver =>
