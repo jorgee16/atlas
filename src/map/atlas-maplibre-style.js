@@ -1,8 +1,8 @@
 const VECTOR_SOURCE = 'atlas-vector';
 const TILE_URL = 'https://tiles.versatiles.org/tiles/osm/{z}/{x}/{y}';
 const GLYPHS_URL = 'https://tiles.versatiles.org/assets/glyphs/{fontstack}/{range}.pbf';
-const FONT_REGULAR = ['noto_sans_regular'];
-const FONT_SEMIBOLD = ['noto_sans_semibold'];
+const FONT_REGULAR = ['fira_sans_regular'];
+const FONT_SEMIBOLD = ['fira_sans_regular'];
 
 const roadWidth = [
   'interpolate', ['linear'], ['zoom'],
