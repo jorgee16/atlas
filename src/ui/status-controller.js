@@ -12,6 +12,7 @@ export class StatusController {
     this.element = element;
     this.hideAfterMs = hideAfterMs;
     this.timer = null;
+    this.gpsFixShown = false;
 
     this.titleElement =
       element.querySelector('b');
@@ -30,6 +31,11 @@ export class StatusController {
   }
 
   show(title, subtitle = '') {
+    if (title === '📍 You are here') {
+      if (this.gpsFixShown) return;
+      this.gpsFixShown = true;
+    }
+
     this.titleElement.textContent = title;
     this.subtitleElement.textContent = subtitle;
 
