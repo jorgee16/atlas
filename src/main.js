@@ -2,7 +2,17 @@ import './styles.css';
 import "./ui/components/header/header.css";
 import "./ui/components/status-toast/status-toast.css";
 import "./ui/components/overflow-menu/overflow-menu.css";
+import * as maplibregl from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createApp } from './app.js';
+
+// MapLibre GL JS 6 requires bundler consumers to provide an emitted worker
+// URL explicitly. Without this Vite/Capacitor can mount the WebGL canvas and
+// raster/background layers while the vector-tile worker never starts, leaving
+// the style permanently "loading" with zero rendered vector features.
+// `?worker&url` makes Vite bundle the worker and its shared module as a
+// self-contained asset that Capacitor copies into the Android web bundle.
+maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
 const root = document.querySelector('#app');
 
@@ -21,4 +31,3 @@ if ('serviceWorker' in navigator) {
       .catch(console.error)
   );
 }
-
