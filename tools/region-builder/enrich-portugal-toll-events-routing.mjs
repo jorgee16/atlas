@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+const MAX_PHYSICAL_EDGE_DISTANCE_METERS = 120;
+
 function roadKey(value) {
   return String(value ?? '').toUpperCase().replace(/\s+/g, '').trim();
 }
@@ -34,12 +36,23 @@ function pointIds(point) {
     .filter(value => value !== undefined && value !== null);
 }
 
-function compactRoutingEvidence(point) {
-  const match = point?.routingMatch;
-  if (!match) return null;
-  const edge = match.inferredEdge ?? match.edges?.[0] ?? null;
+function closestPhysicalEdge(match) {
+  const candidates = Array.isArray(match?.edges) ? match.edges : [];
+  if (!candidates.length) return null;
+
+  return candidates
+    .filter(edge => Number.isFinite(edge.distanceMeters))
+    .slice()
+    .sort((a, b) =>
+      a.distanceMeters - b.distanceMeters ||
+      (a.networkMetersFromSnap ?? Infinity) - (b.networkMetersFromSnap ?? Infinity)
+    )[0] ?? null;
+}
+
+function compactEdge(edge, match, point, role) {
   if (!edge) return null;
   return {
+    role,
     partitionId: match.partitionId ?? edge.partitionId ?? null,
     edgeIndex: edge.edgeIndex,
     fromNode: edge.fromNode,
@@ -56,21 +69,51 @@ function compactRoutingEvidence(point) {
   };
 }
 
+function routingEvidenceForPoint(point) {
+  const match = point?.routingMatch;
+  if (!match) return null;
+
+  const physicalEdge = closestPhysicalEdge(match);
+  const identityEdge = match.inferredEdge ?? null;
+  if (!physicalEdge && !identityEdge) return null;
+
+  return {
+    physicalEdge: compactEdge(physicalEdge, match, point, 'physical-crossing'),
+    identityEdge: compactEdge(identityEdge, match, point, 'road-identity')
+  };
+}
+
 function evidenceForEvent(event, byOsmId) {
   const eventPoints = [event.point, event.from, event.to].filter(Boolean);
-  const evidence = [];
-  const seen = new Set();
+  const physicalEdges = [];
+  const identityEdges = [];
+  const seenPhysical = new Set();
+  const seenIdentity = new Set();
+
   for (const eventPoint of eventPoints) {
     for (const osmId of pointIds(eventPoint)) {
-      const compact = compactRoutingEvidence(byOsmId.get(String(osmId)));
-      if (!compact) continue;
-      const key = `${compact.partitionId}:${compact.edgeIndex}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      evidence.push(compact);
+      const evidence = routingEvidenceForPoint(byOsmId.get(String(osmId)));
+      if (!evidence) continue;
+
+      if (evidence.physicalEdge) {
+        const key = `${evidence.physicalEdge.partitionId}:${evidence.physicalEdge.edgeIndex}`;
+        if (!seenPhysical.has(key)) {
+          seenPhysical.add(key);
+          physicalEdges.push(evidence.physicalEdge);
+        }
+      }
+
+      if (evidence.identityEdge) {
+        const key = `${evidence.identityEdge.partitionId}:${evidence.identityEdge.edgeIndex}`;
+        if (!seenIdentity.has(key)) {
+          seenIdentity.add(key);
+          identityEdges.push(evidence.identityEdge);
+        }
+      }
     }
   }
-  return evidence;
+
+  return { physicalEdges, identityEdges };
 }
 
 function evidenceRoadRefs(edge) {
@@ -93,19 +136,28 @@ async function main() {
     physicalRoadAgreement: 0,
     physicalRoadConflict: 0,
     physicalWithoutEvidence: [],
-    physicalConflicts: []
+    physicalConflicts: [],
+    physicalEventsWithSafeCrossingEdge: 0,
+    physicalEventsWithDistantCrossingEdge: 0,
+    distantPhysicalCrossings: []
   };
 
   const events = (eventsDocument.events ?? []).map(event => {
-    const routingEdges = evidenceForEvent(event, byOsmId);
+    const { physicalEdges, identityEdges } = evidenceForEvent(event, byOsmId);
+    const hasEvidence = physicalEdges.length || identityEdges.length;
     const physical = ['electronic-gantry', 'traditional-plaza', 'bridge-plaza'].includes(event.system);
-    if (routingEdges.length) audit.eventsWithRoutingEvidence += 1;
+
+    if (hasEvidence) audit.eventsWithRoutingEvidence += 1;
+
     if (physical) {
       audit.physicalEvents += 1;
-      if (routingEdges.length) {
+
+      if (hasEvidence) {
         audit.physicalEventsWithRoutingEvidence += 1;
+
         const expected = roadIdentityRefs(event.roadRef);
-        const agrees = !expected.size || routingEdges.some(edge =>
+        const roadEvidence = identityEdges.length ? identityEdges : physicalEdges;
+        const agrees = !expected.size || roadEvidence.some(edge =>
           refsOverlap(expected, evidenceRoadRefs(edge))
         );
 
@@ -115,20 +167,39 @@ async function main() {
           audit.physicalConflicts.push({
             id:event.id,
             expectedRoadRef:event.roadRef,
-            inferredRoadRefs:[...new Set(routingEdges.flatMap(edge => [...evidenceRoadRefs(edge)]))],
-            routingEdges
+            inferredRoadRefs:[...new Set(roadEvidence.flatMap(edge => [...evidenceRoadRefs(edge)]))],
+            identityEdges: roadEvidence
+          });
+        }
+
+        const safeCrossings = physicalEdges.filter(edge =>
+          Number.isFinite(edge.distanceMeters) &&
+          edge.distanceMeters <= MAX_PHYSICAL_EDGE_DISTANCE_METERS
+        );
+
+        if (safeCrossings.length) {
+          audit.physicalEventsWithSafeCrossingEdge += 1;
+        } else {
+          audit.physicalEventsWithDistantCrossingEdge += 1;
+          audit.distantPhysicalCrossings.push({
+            id: event.id,
+            roadRef: event.roadRef,
+            physicalEdges
           });
         }
       } else {
         audit.physicalWithoutEvidence.push({id:event.id, roadRef:event.roadRef, system:event.system, matchMethod:event.matchMethod});
       }
     }
-    return routingEdges.length ? {...event, routingEdges} : event;
+
+    return hasEvidence
+      ? {...event, routingEdges: physicalEdges, routingIdentityEdges: identityEdges}
+      : event;
   });
 
   const outputPath = path.join(routingDir, 'toll-events-routed.json');
   const auditPath = path.join(routingDir, 'toll-events-routing-audit.json');
-  await fs.writeFile(outputPath, JSON.stringify({...eventsDocument, version:6, events}, null, 2) + '\n');
+  await fs.writeFile(outputPath, JSON.stringify({...eventsDocument, version:7, events}, null, 2) + '\n');
   await fs.writeFile(auditPath, JSON.stringify(audit, null, 2) + '\n');
 
   console.log({
@@ -138,7 +209,9 @@ async function main() {
     physicalEventsWithRoutingEvidence:audit.physicalEventsWithRoutingEvidence,
     physicalRoadAgreement:audit.physicalRoadAgreement,
     physicalRoadConflict:audit.physicalRoadConflict,
-    physicalWithoutEvidence:audit.physicalWithoutEvidence.length
+    physicalWithoutEvidence:audit.physicalWithoutEvidence.length,
+    physicalEventsWithSafeCrossingEdge:audit.physicalEventsWithSafeCrossingEdge,
+    physicalEventsWithDistantCrossingEdge:audit.physicalEventsWithDistantCrossingEdge
   });
   console.log(`Wrote ${outputPath}`);
   console.log(`Wrote ${auditPath}`);
