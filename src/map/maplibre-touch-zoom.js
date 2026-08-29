@@ -2,7 +2,7 @@ import {
   MapLibrePmtilesMapAdapter
 } from './maplibre-pmtiles-map-adapter.js';
 
-const GESTURE_SETTLE_MS = 420;
+const GESTURE_SETTLE_MS = 180;
 
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
@@ -11,9 +11,11 @@ export function installMapLibreTouchZoom(adapter) {
 
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
-  // Dedicate two-finger gestures to zoom. Rotation/pitch during the same
-  // gesture makes Android pinch feel heavy and is unnecessary because Atlas
-  // already owns heading-up/north-up explicitly.
+  // Let MapLibre's native touch handler own pinch scaling completely. Atlas
+  // still disables rotation/pitch because heading is controlled explicitly by
+  // north-up / heading-up, but we must not stop() the camera from inside a
+  // touch/zoom event: doing that aborts MapLibre's own gesture interpolation
+  // and makes pinch feel sticky or difficult to trigger.
   map.touchZoomRotate?.enable?.();
   map.touchZoomRotate?.disableRotation?.();
   map.touchPitch?.disable?.();
@@ -21,15 +23,10 @@ export function installMapLibreTouchZoom(adapter) {
 
   let settleTimer = null;
 
-  const startManualGesture = event => {
-    if ((event?.touches?.length ?? 0) < 2) return;
+  const beginManualGesture = event => {
+    if (event?.touches && event.touches.length < 2) return;
 
-    // Cancel any navigation easeTo immediately. Otherwise MapLibre is trying
-    // to interpolate the follow camera while the user's fingers are changing
-    // zoom, which feels like input latency / resistance.
-    map.stop?.();
     adapter.__atlasManualMapGesture = true;
-
     clearTimeout(settleTimer);
     settleTimer = null;
   };
@@ -42,20 +39,28 @@ export function installMapLibreTouchZoom(adapter) {
     }, GESTURE_SETTLE_MS);
   };
 
-  container.addEventListener('touchstart', startManualGesture, {
+  container.addEventListener('touchstart', beginManualGesture, {
     passive: true
   });
-  container.addEventListener('touchend', finishManualGesture, {
+  container.addEventListener('touchmove', beginManualGesture, {
+    passive: true
+  });
+  container.addEventListener('touchend', event => {
+    if ((event?.touches?.length ?? 0) < 2) finishManualGesture();
+  }, {
     passive: true
   });
   container.addEventListener('touchcancel', finishManualGesture, {
     passive: true
   });
 
+  // MapLibre's gesture events are useful as a second signal on browsers where
+  // touch lists are inconsistent, but never call map.stop() from here.
   map.on?.('zoomstart', event => {
     if (event?.originalEvent) {
-      map.stop?.();
       adapter.__atlasManualMapGesture = true;
+      clearTimeout(settleTimer);
+      settleTimer = null;
     }
   });
   map.on?.('zoomend', event => {
