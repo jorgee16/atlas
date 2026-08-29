@@ -8,8 +8,12 @@ import {
 import {
   installMapLibreRouteStability
 } from './maplibre-route-stability.js';
+import {
+  installMapLibreFollowCameraStability
+} from './maplibre-follow-camera-stability.js';
 
 installMapLibreRouteStability();
+installMapLibreFollowCameraStability();
 
 export const MAP_RENDERER = Object.freeze({
   LEAFLET: 'leaflet',
