@@ -8,6 +8,9 @@ import {
   createMapLibrePmtilesStyle
 } from './layers/maplibre-pmtiles-style.js';
 import {
+  createAtlasMapLibreStyle
+} from './atlas-maplibre-style.js';
+import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 import {
@@ -16,25 +19,6 @@ import {
 
 installMapLibreTurnHighlight(MapLibreMapAdapter);
 
-const ONLINE_VECTOR_STYLE = {
-  version: 8,
-  name: 'Atlas OpenFreeMap diagnostic',
-  sources: {
-    openmaptiles: {
-      type: 'vector',
-      url: 'https://tiles.openfreemap.org/planet'
-    }
-  },
-  layers: [
-    {
-      id: 'atlas-background',
-      type: 'background',
-      paint: { 'background-color': '#f3f1ec' }
-    }
-  ]
-};
-
-const GPS_DIAGNOSTIC_MAX_ZOOM = 14;
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
 const ROUTE_LAYER_IDS = [
@@ -43,8 +27,41 @@ const ROUTE_LAYER_IDS = [
   'atlas-route-casing'
 ];
 
+const STATIONARY_SPEED_METERS_PER_SECOND = 0.8;
+const CAMERA_POSITION_DEADBAND_METERS = 4;
+const CAMERA_HEADING_DEADBAND_DEGREES = 6;
+
 function normalizeBearing(value) {
   return ((Number(value) % 360) + 360) % 360;
+}
+
+function bearingDelta(a, b) {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return Infinity;
+  return Math.abs(((a - b + 540) % 360) - 180);
+}
+
+function distanceMeters(a, b) {
+  if (
+    !Number.isFinite(a?.latitude) ||
+    !Number.isFinite(a?.longitude) ||
+    !Number.isFinite(b?.latitude) ||
+    !Number.isFinite(b?.longitude)
+  ) {
+    return Infinity;
+  }
+
+  const earthRadius = 6371000;
+  const lat1 = a.latitude * Math.PI / 180;
+  const lat2 = b.latitude * Math.PI / 180;
+  const deltaLat = (b.latitude - a.latitude) * Math.PI / 180;
+  const deltaLon = (b.longitude - a.longitude) * Math.PI / 180;
+  const sinLat = Math.sin(deltaLat / 2);
+  const sinLon = Math.sin(deltaLon / 2);
+  const h =
+    sinLat * sinLat +
+    Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+
+  return earthRadius * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
 function lineFeature(points) {
@@ -132,16 +149,6 @@ function validRoute(route) {
   );
 }
 
-function mapErrorMessage(event) {
-  const error = event?.error ?? event;
-  return String(
-    error?.message ??
-    error?.statusText ??
-    error ??
-    'Unknown MapLibre error'
-  );
-}
-
 function leafletNavigationCursorHtml({ drive, heading, showHeading }) {
   const rotation = Number.isFinite(heading)
     ? normalizeBearing(heading)
@@ -189,7 +196,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
     createOfflineStyle = createMapLibrePmtilesStyle,
-    style = ONLINE_VECTOR_STYLE,
+    style = createAtlasMapLibreStyle(),
     ...options
   } = {}) {
     super({
@@ -203,91 +210,59 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRouteProgress = null;
     this.currentManeuvers = null;
     this.currentManeuverIndex = 0;
-    this.mapSourceMode = 'online';
     this.routeRenderPending = false;
     this.routeRenderRetryTimer = null;
+    this.lastCameraFollowPosition = null;
+    this.lastCameraFollowHeading = null;
 
     this.map.dragPan?.enable?.();
     this.map.scrollZoom?.enable?.();
     this.map.doubleClickZoom?.enable?.();
     this.map.touchZoomRotate?.enable?.();
     this.map.touchPitch?.enable?.();
+    this.map.setMaxPitch?.(60);
 
     this.zoomControlElement = installMapLibreZoomControl(this.map);
 
-    this.mapSourceBadge = document.createElement('div');
-    this.mapSourceBadge.className = 'atlas-maplibre-source-badge';
-    this.map.getContainer().appendChild(this.mapSourceBadge);
-    this.#renderMapSourceBadge();
-
-    this.mapErrorElement = document.createElement('div');
-    this.mapErrorElement.className = 'atlas-maplibre-runtime-error';
-    this.mapErrorElement.hidden = true;
-    Object.assign(this.mapErrorElement.style, {
-      position: 'absolute',
-      zIndex: '2000',
-      left: '12px',
-      right: '12px',
-      top: '225px',
-      padding: '9px 11px',
-      borderRadius: '10px',
-      background: 'rgba(170, 20, 20, 0.94)',
-      color: '#fff',
-      fontSize: '11px',
-      fontWeight: '700',
-      lineHeight: '1.25',
-      pointerEvents: 'none'
-    });
-    this.map.getContainer().appendChild(this.mapErrorElement);
-
-    this.renderDiagnosticsElement = document.createElement('div');
-    Object.assign(this.renderDiagnosticsElement.style, {
-      position: 'absolute',
-      zIndex: '1999',
-      left: '12px',
-      bottom: '118px',
-      maxWidth: 'min(420px, calc(100% - 24px))',
-      padding: '7px 9px',
-      borderRadius: '9px',
-      background: 'rgba(20, 28, 42, 0.88)',
-      color: '#fff',
-      fontSize: '10px',
-      fontWeight: '650',
-      lineHeight: '1.3',
-      whiteSpace: 'pre-wrap',
-      pointerEvents: 'none'
-    });
-    this.renderDiagnosticsElement.textContent = 'MapLibre diagnostics waiting…';
-    this.map.getContainer().appendChild(this.renderDiagnosticsElement);
-
     this.map.on('error', event => {
-      const message = mapErrorMessage(event);
       console.error('MapLibre runtime error:', event?.error ?? event);
-      this.mapErrorElement.textContent = `MapLibre error: ${message}`;
-      this.mapErrorElement.hidden = false;
-      this.#refreshRenderDiagnostics();
     });
 
     this.map.on('style.load', () => {
-      this.mapSourceBadge.textContent = 'Vector map loaded';
       this.#scheduleRouteRender();
-      this.#refreshRenderDiagnostics();
     });
 
     this.map.on('load', () => {
       this.#scheduleRouteRender();
-      this.#refreshRenderDiagnostics();
     });
 
-    this.map.on('idle', () => this.#refreshRenderDiagnostics());
-    this.map.on('moveend', () => this.#refreshRenderDiagnostics());
+    this.map.on('movestart', event => {
+      if (event?.originalEvent) {
+        this.lastCameraFollowPosition = null;
+        this.lastCameraFollowHeading = null;
+      }
+    });
   }
 
   async setRegion(region, options = {}) {
-    void options;
     const mapUrl = region?.mapUrl ?? region?.assets?.map ?? null;
-    this.mapSourceMode = 'online';
-    this.#renderMapSourceBadge();
+
+    if (
+      options?.preferOffline &&
+      mapUrl &&
+      typeof this.createOfflineStyle === 'function'
+    ) {
+      try {
+        const loaded = await super.setRegion(region, options);
+        if (loaded) return true;
+      } catch (error) {
+        console.warn(
+          'MapLibre offline style failed; continuing with Atlas online vector style.',
+          error
+        );
+      }
+    }
+
     return Boolean(mapUrl);
   }
 
@@ -305,19 +280,18 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     ) {
       this.map.easeTo({
         center: [longitude, latitude],
-        zoom: GPS_DIAGNOSTIC_MAX_ZOOM,
+        zoom: 16,
         duration: 350,
         essential: true
       });
-      this.mapSourceBadge.textContent =
-        `GPS ${latitude.toFixed(4)}, ${longitude.toFixed(4)} · z${GPS_DIAGNOSTIC_MAX_ZOOM}`;
     }
-
-    queueMicrotask(() => this.#refreshRenderDiagnostics());
   }
 
   setNavigationTravelMode(mode = null) {
     const result = super.setNavigationTravelMode(mode);
+    this.lastCameraFollowPosition = null;
+    this.lastCameraFollowHeading = null;
+
     if (this.lastUserPosition) {
       this.#restoreLeafletCursor(this.lastUserPosition);
     }
@@ -325,29 +299,44 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   followPosition(position, options = {}) {
-    const result = super.followPosition(position, {
-      ...options,
-      zoom: Math.min(
-        Number.isFinite(options?.zoom)
-          ? options.zoom
-          : GPS_DIAGNOSTIC_MAX_ZOOM,
-        GPS_DIAGNOSTIC_MAX_ZOOM
-      )
-    });
-    this.#refreshRenderDiagnostics();
-    return result;
-  }
+    const latitude = position?.latitude ?? position?.lat;
+    const longitude = position?.longitude ?? position?.lon;
+    const speed = Number.isFinite(position?.speed) ? position.speed : 0;
+    const heading = Number.isFinite(position?.heading)
+      ? normalizeBearing(position.heading)
+      : Number.isFinite(this.routeBearing)
+        ? normalizeBearing(this.routeBearing)
+        : null;
 
-  fitRoute(route, options = {}) {
-    return super.fitRoute(route, {
-      ...options,
-      maxZoom: Math.min(
-        Number.isFinite(options?.maxZoom)
-          ? options.maxZoom
-          : GPS_DIAGNOSTIC_MAX_ZOOM,
-        GPS_DIAGNOSTIC_MAX_ZOOM
-      )
-    });
+    const nextCameraPosition = {
+      latitude,
+      longitude
+    };
+
+    const stationary = speed < STATIONARY_SPEED_METERS_PER_SECOND;
+    const movedMeters = distanceMeters(
+      this.lastCameraFollowPosition,
+      nextCameraPosition
+    );
+    const headingChanged = bearingDelta(
+      this.lastCameraFollowHeading,
+      heading
+    );
+
+    if (
+      stationary &&
+      movedMeters < CAMERA_POSITION_DEADBAND_METERS &&
+      headingChanged < CAMERA_HEADING_DEADBAND_DEGREES
+    ) {
+      return Number.isFinite(this.map.getBearing?.())
+        ? normalizeBearing(-this.map.getBearing())
+        : 0;
+    }
+
+    const result = super.followPosition(position, options);
+    this.lastCameraFollowPosition = nextCameraPosition;
+    this.lastCameraFollowHeading = heading;
+    return result;
   }
 
   showSelectionPin(lat, lon, popupContent = null) {
@@ -417,6 +406,8 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.navigationCameraZoom = null;
     this.navigationCameraTimestamp = null;
     this.routeRenderPending = false;
+    this.lastCameraFollowPosition = null;
+    this.lastCameraFollowHeading = null;
 
     clearTimeout(this.routeRenderRetryTimer);
     this.routeRenderRetryTimer = null;
@@ -434,7 +425,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     const showHeading =
       Number.isFinite(heading) &&
       Number.isFinite(speed) &&
-      speed >= 0.8;
+      speed >= STATIONARY_SPEED_METERS_PER_SECOND;
 
     this.userMarkerElement.className = '';
     this.userMarkerElement.style.width = drive
@@ -452,40 +443,6 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       heading,
       showHeading
     });
-  }
-
-  #refreshRenderDiagnostics() {
-    if (!this.renderDiagnosticsElement) return;
-
-    try {
-      const center = this.map.getCenter?.();
-      const zoom = this.map.getZoom?.();
-      const styleLoaded = Boolean(this.map.isStyleLoaded?.());
-      const tilesLoaded = Boolean(this.map.areTilesLoaded?.());
-      const source = this.map.getSource?.('openmaptiles');
-
-      let rendered = '—';
-      try {
-        rendered = String(
-          this.map.queryRenderedFeatures?.().length ?? '—'
-        );
-      } catch {
-        rendered = 'err';
-      }
-
-      const sourceState = source
-        ? source.constructor?.name ?? 'present'
-        : 'missing';
-
-      this.renderDiagnosticsElement.textContent = [
-        `center ${Number(center?.lat).toFixed(4)}, ${Number(center?.lng).toFixed(4)}  z${Number(zoom).toFixed(2)}`,
-        `style ${styleLoaded ? 'ready' : 'loading'}  tiles ${tilesLoaded ? 'ready' : 'loading'}`,
-        `openmaptiles ${sourceState}  rendered ${rendered}`
-      ].join('\n');
-    } catch (error) {
-      this.renderDiagnosticsElement.textContent =
-        `diagnostics error: ${mapErrorMessage(error)}`;
-    }
   }
 
   #scheduleRouteRender({ immediate = false } = {}) {
@@ -590,9 +547,6 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       this.map.triggerRepaint?.();
       return Boolean(this.map.getLayer?.('atlas-route-remaining'));
     } catch (error) {
-      const message = mapErrorMessage(error);
-      this.mapErrorElement.textContent = `Route layer error: ${message}`;
-      this.mapErrorElement.hidden = false;
       console.error('Unable to render MapLibre route.', error);
       return false;
     }
@@ -614,7 +568,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     try {
       this.#removeRouteOverlay();
     } catch {
-      // style transition
+      // Style transitions remove custom layers automatically.
     }
   }
 
@@ -630,13 +584,5 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         this.map.removeSource(sourceId);
       }
     }
-  }
-
-  #renderMapSourceBadge() {
-    if (!this.mapSourceBadge) return;
-
-    this.mapSourceBadge.textContent = 'Vector map';
-    this.mapSourceBadge.dataset.mode = 'online';
-    this.mapSourceBadge.title = 'MapLibre vector map validation build.';
   }
 }
