@@ -8,6 +8,8 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
+const EARTH_RADIUS_METERS = 6371008.8;
+const LOGICAL_BOUNDARY_RADIUS_METERS = 450;
 
 function normalize(value) {
   return String(value ?? '')
@@ -18,6 +20,23 @@ function normalize(value) {
     .replace(/[^A-Z0-9]+/g, ' ')
     .trim()
     .replace(/\s+/g, ' ');
+}
+
+function labelVariants(value) {
+  const base = normalize(value);
+  const withoutRoadRefs = base
+    .replace(/\b(?:A|IP|IC)\s*\d+(?:\s*-\s*\d+)?\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const withoutRomanSuffix = withoutRoadRefs
+    .replace(/\s+(?:I|II|III|IV|V)$/g, '')
+    .trim();
+
+  return [...new Set([
+    base,
+    withoutRoadRefs,
+    withoutRomanSuffix
+  ].filter(Boolean))];
 }
 
 function tokens(value) {
@@ -39,6 +58,14 @@ function tokenScore(a, b) {
   }
 
   return (2 * common) / (left.size + right.size);
+}
+
+function bestLabelScore(pointName, label) {
+  let best = 0;
+  for (const variant of labelVariants(label)) {
+    best = Math.max(best, tokenScore(pointName, variant));
+  }
+  return best;
 }
 
 function roadRefs(value) {
@@ -63,12 +90,25 @@ function operatorScore(point, section) {
   return tokenScore(point.operator, section.operator);
 }
 
+function distanceMeters(a, b) {
+  const radians = value => value * Math.PI / 180;
+  const lat1 = radians(a.lat);
+  const lat2 = radians(b.lat);
+  const dLat = lat2 - lat1;
+  const dLon = radians(b.lon - a.lon);
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const h = sinLat * sinLat +
+    Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+  return 2 * EARTH_RADIUS_METERS * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
 function candidateScore(point, label, section) {
-  let score = tokenScore(point.name, label) * 0.72;
+  let score = bestLabelScore(point.name, label) * 0.72;
   const refMatch = sharesRoadRef(point, section);
 
-  if (refMatch === true) score += 0.22;
-  if (refMatch === false) score -= 0.35;
+  if (refMatch === true) score += 0.24;
+  if (refMatch === false) score -= 0.55;
 
   score += operatorScore(point, section) * 0.06;
 
@@ -79,9 +119,42 @@ function candidateScore(point, label, section) {
   return score;
 }
 
+function roadScopedPoints(points, section, allowedKinds) {
+  const kindPoints = points.filter(point => allowedKinds.has(point.kind));
+  const exactRoad = kindPoints.filter(point => sharesRoadRef(point, section) === true);
+
+  // When the PBF exposes motorway refs, never let a same-name junction on the
+  // opposite side of the country compete. If OSM omitted the ref entirely,
+  // retain those unreferenced candidates as a fallback.
+  if (exactRoad.length) {
+    return [
+      ...exactRoad,
+      ...kindPoints.filter(point => sharesRoadRef(point, section) === null)
+    ];
+  }
+
+  return kindPoints.filter(point => sharesRoadRef(point, section) !== false);
+}
+
+function sameLogicalBoundary(left, right) {
+  if (!left || !right) return false;
+  if (distanceMeters(left.point, right.point) > LOGICAL_BOUNDARY_RADIUS_METERS) {
+    return false;
+  }
+
+  const leftRef = normalize(left.point.roadRef);
+  const rightRef = normalize(right.point.roadRef);
+  if (leftRef && rightRef && leftRef !== rightRef) {
+    return false;
+  }
+
+  // Motorways commonly have one junction/toll node per carriageway. Treat
+  // those close parallel nodes as one boundary instead of an ambiguity.
+  return true;
+}
+
 function bestBoundary(points, label, section, allowedKinds) {
-  const candidates = points
-    .filter(point => allowedKinds.has(point.kind))
+  const candidates = roadScopedPoints(points, section, allowedKinds)
     .map(point => ({
       point,
       score: candidateScore(point, label, section)
@@ -90,14 +163,17 @@ function bestBoundary(points, label, section, allowedKinds) {
 
   const best = candidates[0] ?? null;
   const second = candidates[1] ?? null;
+  const duplicateCarriageway = sameLogicalBoundary(best, second);
 
   return {
     best,
     second,
+    duplicateCarriageway,
     ambiguous: Boolean(
       best &&
       second &&
-      best.score >= 0.55 &&
+      !duplicateCarriageway &&
+      best.score >= 0.48 &&
       second.score >= best.score - 0.04
     )
   };
@@ -117,6 +193,18 @@ function compactPoint(point, score) {
   };
 }
 
+function compactBoundary(match) {
+  if (!match.best) return null;
+  const result = compactPoint(match.best.point, match.best.score);
+  if (match.duplicateCarriageway && match.second) {
+    result.pairedOsmIds = [
+      match.best.point.osmId,
+      match.second.point.osmId
+    ];
+  }
+  return result;
+}
+
 function matchSection(points, section) {
   const physicalCharge =
     section.system === 'electronic-gantry' ||
@@ -132,7 +220,7 @@ function matchSection(points, section) {
       new Set(['toll_booth', 'toll_gantry'])
     );
 
-    if (!match.best || match.best.score < 0.52 || match.ambiguous) {
+    if (!match.best || match.best.score < 0.46 || match.ambiguous) {
       return {
         status: match.ambiguous ? 'ambiguous' : 'unresolved',
         id: section.id,
@@ -154,7 +242,7 @@ function matchSection(points, section) {
       tariffs: section.tariffs,
       direction: section.direction ?? null,
       source: section.source,
-      point: compactPoint(match.best.point, match.best.score)
+      point: compactBoundary(match)
     };
   }
 
@@ -171,8 +259,8 @@ function matchSection(points, section) {
     new Set(['motorway_junction', 'toll_booth'])
   );
 
-  const validFrom = from.best && from.best.score >= 0.50 && !from.ambiguous;
-  const validTo = to.best && to.best.score >= 0.50 && !to.ambiguous;
+  const validFrom = from.best && from.best.score >= 0.46 && !from.ambiguous;
+  const validTo = to.best && to.best.score >= 0.46 && !to.ambiguous;
 
   if (!validFrom || !validTo) {
     return {
@@ -191,15 +279,18 @@ function matchSection(points, section) {
     };
   }
 
-  if (from.best.point.osmId === to.best.point.osmId) {
+  if (
+    from.best.point.osmId === to.best.point.osmId ||
+    distanceMeters(from.best.point, to.best.point) < 100
+  ) {
     return {
       status: 'ambiguous',
       id: section.id,
       roadRef: section.roadRef,
       system: section.system,
       reason: 'same-boundary',
-      from: compactPoint(from.best.point, from.best.score),
-      to: compactPoint(to.best.point, to.best.score)
+      from: compactBoundary(from),
+      to: compactBoundary(to)
     };
   }
 
@@ -212,8 +303,8 @@ function matchSection(points, section) {
     tariffs: section.tariffs,
     source: section.source,
     km: section.km,
-    from: compactPoint(from.best.point, from.best.score),
-    to: compactPoint(to.best.point, to.best.score)
+    from: compactBoundary(from),
+    to: compactBoundary(to)
   };
 }
 
@@ -230,7 +321,7 @@ export function buildPortugalTollEvents(pointsDocument) {
   const unresolved = matches.filter(item => item.status !== 'matched');
 
   return {
-    version: 1,
+    version: 2,
     datasetVersion: PORTUGAL_TOLL_DATASET_2026.version,
     generatedAt: new Date().toISOString(),
     currency: PORTUGAL_TOLL_DATASET_2026.currency,
@@ -245,7 +336,7 @@ export function buildPortugalTollEvents(pointsDocument) {
 
 async function main() {
   const routingDir = path.resolve(
-    process.argv[2] ?? path.join(repoRoot, 'packager/build/portugal/routing')
+    process.argv[2] ?? path.join(repoRoot, 'build/portugal/routing')
   );
 
   const input = path.join(routingDir, 'toll-points.json');
