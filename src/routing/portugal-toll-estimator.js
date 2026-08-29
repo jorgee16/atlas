@@ -2,11 +2,12 @@
  * Portugal toll estimation.
  *
  * Preferred path: audited per-partition toll events carry official tariffs.
- * The event dataset is not yet nationally exhaustive, so edges without an
- * audited event still fall back to the routing graph's OSM toll flag. This is
- * important both for estimates and for avoid-tolls routing: the presence of a
- * partial official event index must never make every uncovered motorway look
- * free.
+ * That event dataset is not yet nationally exhaustive. Uncovered edges first
+ * fall back to OSM toll metadata and, for a conservative set of motorways that
+ * are known to retain conventional tolling, to the road reference itself.
+ *
+ * IMPORTANT: roads with mixed/free sections (notably A16) are deliberately
+ * excluded from the reference fallback and must be covered by audited events.
  */
 
 const CLASS_MULTIPLIERS = Object.freeze({
@@ -47,6 +48,25 @@ const CLASS1_EUROS_PER_KM = Object.freeze({
   A43: 0.080
 });
 
+// Only use reference fallback for motorways where treating an uncovered
+// segment as potentially tolled is safer than silently declaring it free.
+// Mixed/free concessions stay out of this list and rely on audited events.
+const REFERENCE_TOLL_FALLBACK = new Set([
+  'A1',
+  'A2',
+  'A3',
+  'A5',
+  'A6',
+  'A8',
+  'A9',
+  'A10',
+  'A12',
+  'A13',
+  'A14',
+  'A15',
+  'A17'
+]);
+
 const DEFAULT_CLASS1_EUROS_PER_KM = 0.08;
 
 function normalizedRoadRefs(value) {
@@ -84,6 +104,15 @@ function officialEdgeHasEvent(graph, edgeIndex) {
   );
 }
 
+function edgeHasReferenceTollFallback(graph, edgeIndex) {
+  const road = roadForEdge(graph, edgeIndex);
+  if (!road) return false;
+
+  return normalizedRoadRefs(road.ref).some(
+    ref => REFERENCE_TOLL_FALLBACK.has(ref)
+  );
+}
+
 export function edgeIsTolledInPortugal(
   graph,
   edgeIndex,
@@ -98,10 +127,20 @@ export function edgeIsTolledInPortugal(
     return true;
   }
 
-  // The audited event index is intentionally allowed to be partial. For an
-  // uncovered edge, preserve the graph's OSM toll semantics rather than
-  // silently treating it as free.
-  return Boolean(graph?.edgeIsToll?.(edgeIndex));
+  if (graph?.edgeIsToll?.(edgeIndex)) {
+    return true;
+  }
+
+  // An audited zero/metadata event is authoritative for that exact edge and
+  // prevents a road-reference fallback from reclassifying a known-free edge.
+  if (officialEdgeHasEvent(graph, edgeIndex)) {
+    return false;
+  }
+
+  return edgeHasReferenceTollFallback(
+    graph,
+    edgeIndex
+  );
 }
 
 export function tollRateEurosPerKm(
@@ -121,12 +160,15 @@ export function tollRateEurosPerKm(
   return class1Rate * multiplier;
 }
 
-function estimateOsmEdgeTollEuros(
+function estimateFallbackEdgeTollEuros(
   graph,
   edgeIndex,
   vehicleClass = 1
 ) {
-  if (!graph?.edgeIsToll?.(edgeIndex)) {
+  if (
+    !graph?.edgeIsToll?.(edgeIndex) &&
+    !edgeHasReferenceTollFallback(graph, edgeIndex)
+  ) {
     return 0;
   }
 
@@ -150,6 +192,7 @@ export function estimateEdgeTollEuros(
   vehicleClass = 1
 ) {
   const official = officialIndex(graph);
+
   if (
     official &&
     official.edgeHasCharge(edgeIndex, vehicleClass)
@@ -160,7 +203,11 @@ export function estimateEdgeTollEuros(
     );
   }
 
-  return estimateOsmEdgeTollEuros(
+  if (officialEdgeHasEvent(graph, edgeIndex)) {
+    return 0;
+  }
+
+  return estimateFallbackEdgeTollEuros(
     graph,
     edgeIndex,
     vehicleClass
@@ -186,6 +233,7 @@ function estimateHybridRouteTolls(
   let fallbackEuros = 0;
   let tolledDistanceMeters = 0;
   let fallbackEdgeCount = 0;
+  let referenceFallbackEdgeCount = 0;
 
   for (const charge of charges) {
     officialEuros += charge.euros;
@@ -211,9 +259,12 @@ function estimateHybridRouteTolls(
   for (const edgeIndex of route?.edgeIndexes ?? []) {
     if (
       officialEdges.has(edgeIndex) ||
-      officialEdgeHasEvent(graph, edgeIndex) ||
-      !graph?.edgeIsToll?.(edgeIndex)
+      officialEdgeHasEvent(graph, edgeIndex)
     ) {
+      continue;
+    }
+
+    if (!edgeIsTolledInPortugal(graph, edgeIndex, vehicleClass)) {
       continue;
     }
 
@@ -223,7 +274,7 @@ function estimateHybridRouteTolls(
     const distanceMeters =
       graph.edgeDistanceDecimeters(edgeIndex) /
       10;
-    const euros = estimateOsmEdgeTollEuros(
+    const euros = estimateFallbackEdgeTollEuros(
       graph,
       edgeIndex,
       vehicleClass
@@ -232,6 +283,13 @@ function estimateHybridRouteTolls(
     if (euros <= 0) continue;
 
     fallbackEdgeCount += 1;
+    if (
+      !graph?.edgeIsToll?.(edgeIndex) &&
+      edgeHasReferenceTollFallback(graph, edgeIndex)
+    ) {
+      referenceFallbackEdgeCount += 1;
+    }
+
     fallbackEuros += euros;
     tolledDistanceMeters += distanceMeters;
 
@@ -254,14 +312,17 @@ function estimateHybridRouteTolls(
     vehicleClass,
     estimated: fallbackEdgeCount > 0,
     source:
-      fallbackEdgeCount > 0
-        ? 'official-events+osm-estimate'
-        : 'official-events',
+      referenceFallbackEdgeCount > 0
+        ? 'official-events+road-ref-estimate'
+        : fallbackEdgeCount > 0
+          ? 'official-events+osm-estimate'
+          : 'official-events',
     totalEuros:
       Math.round(totalEuros * 100) / 100,
     tolledDistanceMeters,
     events: charges,
     fallbackEdgeCount,
+    referenceFallbackEdgeCount,
     roads: [...roads.values()].map(item => ({
       ...item,
       euros: Math.round(item.euros * 100) / 100
@@ -286,6 +347,7 @@ export function estimateRouteTolls(
 
   let totalEuros = 0;
   let tolledDistanceMeters = 0;
+  let referenceFallbackEdgeCount = 0;
   const roads = new Map();
 
   for (const edgeIndex of route?.edgeIndexes ?? []) {
@@ -306,6 +368,15 @@ export function estimateRouteTolls(
       vehicleClass
     );
 
+    if (euros <= 0) continue;
+
+    if (
+      !graph?.edgeIsToll?.(edgeIndex) &&
+      edgeHasReferenceTollFallback(graph, edgeIndex)
+    ) {
+      referenceFallbackEdgeCount += 1;
+    }
+
     totalEuros += euros;
     tolledDistanceMeters += distanceMeters;
 
@@ -324,10 +395,14 @@ export function estimateRouteTolls(
   return {
     vehicleClass,
     estimated: totalEuros > 0,
-    source: 'osm-estimate',
+    source:
+      referenceFallbackEdgeCount > 0
+        ? 'road-ref-estimate'
+        : 'osm-estimate',
     totalEuros:
       Math.round(totalEuros * 100) / 100,
     tolledDistanceMeters,
+    referenceFallbackEdgeCount,
     roads: [...roads.values()].map(item => ({
       ...item,
       euros: Math.round(item.euros * 100) / 100
