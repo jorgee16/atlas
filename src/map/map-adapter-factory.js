@@ -162,6 +162,36 @@ const MAPLIBRE_ANDROID_VECTOR_STYLE = {
       }
     },
     {
+      id: 'atlas-poi-labels',
+      type: 'symbol',
+      source: 'openmaptiles',
+      'source-layer': 'pois',
+      minzoom: 14,
+      filter: ['has', 'name'],
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': ['fira_sans_regular'],
+        'text-size': [
+          'interpolate', ['linear'], ['zoom'],
+          14, 10,
+          16, 11,
+          18, 12
+        ],
+        'text-anchor': 'top',
+        'text-offset': [0, 0.55],
+        'text-padding': 5,
+        'text-max-width': 12,
+        'text-optional': true,
+        'text-allow-overlap': false
+      },
+      paint: {
+        'text-color': '#5d6470',
+        'text-halo-color': 'rgba(255,255,255,0.96)',
+        'text-halo-width': 1.4,
+        'text-halo-blur': 0.25
+      }
+    },
+    {
       id: 'atlas-place-labels',
       type: 'symbol',
       source: 'openmaptiles',
