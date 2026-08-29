@@ -2,9 +2,10 @@ import {
   MapLibrePmtilesMapAdapter
 } from './maplibre-pmtiles-map-adapter.js';
 
-const GESTURE_SETTLE_MS = 160;
-const TOUCH_ZOOM_RATE = 1.7;
-const TOUCH_ZOOM_THRESHOLD = 0.008;
+const GESTURE_SETTLE_MS = 120;
+const PINCH_ZOOM_SCALE = 1.35;
+const PINCH_EASE = 0.42;
+const PINCH_EPSILON = 0.002;
 
 function configureTouchSurface(map) {
   const container = map?.getContainer?.();
@@ -25,12 +26,25 @@ function configureTouchZoom(adapter) {
   if (!map) return;
 
   configureTouchSurface(map);
-  map.touchZoomRotate?.enable?.();
-  map.touchZoomRotate?.disableRotation?.();
-  map.touchZoomRotate?.setZoomRate?.(TOUCH_ZOOM_RATE);
-  map.touchZoomRotate?.setZoomThreshold?.(TOUCH_ZOOM_THRESHOLD);
+
+  // Android WebView was delivering MapLibre's native pinch camera updates in
+  // visible steps outside active navigation. Keep normal one-finger panning,
+  // but own two-finger zoom ourselves and feed the camera once per animation
+  // frame instead of once per browser touch event.
+  map.touchZoomRotate?.disable?.();
   map.touchPitch?.disable?.();
   map.dragRotate?.disable?.();
+}
+
+function touchDistance(touches) {
+  if (!touches || touches.length < 2) return null;
+  const dx = touches[1].clientX - touches[0].clientX;
+  const dy = touches[1].clientY - touches[0].clientY;
+  return Math.hypot(dx, dy);
+}
+
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
 }
 
 function setGestureCompositingMode(active) {
@@ -52,55 +66,111 @@ export function installMapLibreTouchZoom(adapter) {
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
   let settleTimer = null;
-  let manualPinchActive = false;
-  let repaintFrame = null;
+  let pinchActive = false;
+  let startDistance = null;
+  let startZoom = null;
+  let targetZoom = null;
+  let renderedZoom = null;
+  let frame = null;
+  let dragPanWasEnabled = true;
 
-  const pumpRepaint = () => {
-    if (!manualPinchActive) {
-      repaintFrame = null;
-      return;
-    }
-
-    map.triggerRepaint?.();
-    repaintFrame = requestAnimationFrame(pumpRepaint);
-  };
-
-  const startRepaintPump = () => {
-    if (repaintFrame !== null) return;
-    repaintFrame = requestAnimationFrame(pumpRepaint);
-  };
-
-  const stopRepaintPump = () => {
-    if (repaintFrame !== null) {
-      cancelAnimationFrame(repaintFrame);
-      repaintFrame = null;
+  const stopFrame = () => {
+    if (frame !== null) {
+      cancelAnimationFrame(frame);
+      frame = null;
     }
   };
 
-  const beginManualGesture = event => {
-    if (event?.touches && event.touches.length < 2) return;
+  const renderPinchFrame = () => {
+    frame = null;
 
+    if (!pinchActive || !Number.isFinite(targetZoom)) return;
+
+    const current = Number.isFinite(renderedZoom)
+      ? renderedZoom
+      : map.getZoom();
+    const delta = targetZoom - current;
+    const nextZoom = Math.abs(delta) <= PINCH_EPSILON
+      ? targetZoom
+      : current + delta * PINCH_EASE;
+
+    renderedZoom = nextZoom;
+    map.jumpTo({ zoom: nextZoom });
+
+    if (pinchActive || Math.abs(targetZoom - nextZoom) > PINCH_EPSILON) {
+      frame = requestAnimationFrame(renderPinchFrame);
+    }
+  };
+
+  const ensureFrame = () => {
+    if (frame === null) {
+      frame = requestAnimationFrame(renderPinchFrame);
+    }
+  };
+
+  const beginPinch = event => {
+    if ((event?.touches?.length ?? 0) < 2) return;
+
+    const distance = touchDistance(event.touches);
+    if (!Number.isFinite(distance) || distance <= 0) return;
+
+    event.preventDefault?.();
     adapter.__atlasManualMapGesture = true;
     clearTimeout(settleTimer);
     settleTimer = null;
 
-    if (!manualPinchActive) {
-      manualPinchActive = true;
-      setGestureCompositingMode(true);
+    if (!pinchActive) {
+      pinchActive = true;
+      startDistance = distance;
+      startZoom = map.getZoom();
+      targetZoom = startZoom;
+      renderedZoom = startZoom;
+      dragPanWasEnabled = map.dragPan?.isEnabled?.() ?? true;
+      map.dragPan?.disable?.();
       map.stop?.();
-
-      // Active navigation already keeps the map in a continuously changing
-      // camera/render loop. Explore and Preview can otherwise render only when
-      // Android WebView delivers the next touch update, which makes pinch feel
-      // visibly stepped. Keep MapLibre's render loop alive for every display
-      // frame while the two-finger gesture is active.
-      startRepaintPump();
+      setGestureCompositingMode(true);
+      ensureFrame();
     }
   };
 
-  const finishManualGesture = () => {
-    manualPinchActive = false;
-    stopRepaintPump();
+  const updatePinch = event => {
+    if ((event?.touches?.length ?? 0) < 2) return;
+
+    if (!pinchActive) beginPinch(event);
+    if (!pinchActive) return;
+
+    const distance = touchDistance(event.touches);
+    if (!Number.isFinite(distance) || distance <= 0 || !startDistance) return;
+
+    event.preventDefault?.();
+
+    const zoomDelta = Math.log2(distance / startDistance) * PINCH_ZOOM_SCALE;
+    const minimum = map.getMinZoom?.() ?? 0;
+    const maximum = map.getMaxZoom?.() ?? 24;
+    targetZoom = clamp(startZoom + zoomDelta, minimum, maximum);
+    ensureFrame();
+  };
+
+  const finishPinch = () => {
+    if (!pinchActive) return;
+
+    pinchActive = false;
+    startDistance = null;
+    startZoom = null;
+
+    if (Number.isFinite(targetZoom)) {
+      renderedZoom = targetZoom;
+      map.jumpTo({ zoom: targetZoom });
+    }
+
+    targetZoom = null;
+    renderedZoom = null;
+    stopFrame();
+
+    if (dragPanWasEnabled) {
+      map.dragPan?.enable?.();
+    }
+
     setGestureCompositingMode(false);
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
@@ -109,34 +179,23 @@ export function installMapLibreTouchZoom(adapter) {
     }, GESTURE_SETTLE_MS);
   };
 
-  container.addEventListener('touchstart', beginManualGesture, {
-    passive: true,
+  container.addEventListener('touchstart', beginPinch, {
+    passive: false,
     capture: true
   });
-  container.addEventListener('touchmove', beginManualGesture, {
-    passive: true,
+  container.addEventListener('touchmove', updatePinch, {
+    passive: false,
     capture: true
   });
   container.addEventListener('touchend', event => {
-    if ((event?.touches?.length ?? 0) < 2) finishManualGesture();
+    if ((event?.touches?.length ?? 0) < 2) finishPinch();
   }, {
     passive: true,
     capture: true
   });
-  container.addEventListener('touchcancel', finishManualGesture, {
+  container.addEventListener('touchcancel', finishPinch, {
     passive: true,
     capture: true
-  });
-
-  map.on?.('zoomstart', event => {
-    if (event?.originalEvent) {
-      adapter.__atlasManualMapGesture = true;
-      clearTimeout(settleTimer);
-      settleTimer = null;
-    }
-  });
-  map.on?.('zoomend', event => {
-    if (event?.originalEvent && !manualPinchActive) finishManualGesture();
   });
 
   map.on?.('style.load', () => {
