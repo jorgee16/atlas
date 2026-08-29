@@ -25,16 +25,12 @@ html.atlas-map-gesture-active .navigation-planner--preview * {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Large soft shadows also require extra off-screen raster/composite work over
-   the moving WebGL canvas. Remove them only from the two laggy states while
-   the fingers are down; their normal appearance returns immediately after. */
 html.atlas-map-gesture-active .explore-workspace *,
 html.atlas-map-gesture-active .navigation-planner--preview * {
   box-shadow: none !important;
   filter: none !important;
 }
 
-/* Do not animate chrome while the WebGL camera is changing under the fingers. */
 html.atlas-map-gesture-active .brand-inline,
 html.atlas-map-gesture-active .icon-btn,
 html.atlas-map-gesture-active .map-action,
@@ -50,15 +46,20 @@ html.atlas-map-gesture-active .navigation-planner--preview * {
   animation: none !important;
 }
 
-/* Diagnostic fast path: active navigation proves the MapLibre gesture itself
-   can run smoothly on the same device. Remove the two state-specific chrome
-   trees from paint while a pinch is live. If Explore/Preview now match active
-   navigation, the remaining bottleneck is DOM/style/compositing rather than
-   MapLibre camera/tile work. `visibility` preserves layout and restores the
-   UI immediately when the gesture settles. */
+/* Diagnostic fast path: active navigation does not merely hide these trees;
+   AppBootstrap sets their `hidden` attributes, so they become display:none and
+   stop participating in layout/style matching. Reproduce that state during a
+   live pinch instead of visibility:hidden, which left the expensive trees in
+   layout and made the previous diagnostic inconclusive. */
 html.atlas-map-gesture-active .explore-workspace:not([hidden]),
 html.atlas-map-gesture-active .navigation-workspace:not([hidden]),
+html.atlas-map-gesture-active .trip-workspace:not([hidden]),
 html.atlas-map-gesture-active .landscape-explore-search,
-html.atlas-map-gesture-active .app-tabs:not([hidden]) {
-  visibility: hidden !important;
+html.atlas-map-gesture-active .app-tabs:not([hidden]),
+html.atlas-map-gesture-active .bottom-sheet:not([hidden]),
+html.atlas-map-gesture-active .status-toast,
+html.atlas-map-gesture-active .map-header,
+html.atlas-map-gesture-active .map-actions,
+html.atlas-map-gesture-active .attribution-note {
+  display: none !important;
 }
