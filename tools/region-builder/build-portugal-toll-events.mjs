@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url';
 import {
   PORTUGAL_TOLL_DATASET_2026
 } from '../../src/routing/data/portugal-tolls-2026.js';
+import {
+  buildSequenceMatches
+} from './portugal-toll-sequence-matcher.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
@@ -123,9 +126,6 @@ function roadScopedPoints(points, section, allowedKinds) {
   const kindPoints = points.filter(point => allowedKinds.has(point.kind));
   const exactRoad = kindPoints.filter(point => sharesRoadRef(point, section) === true);
 
-  // When the PBF exposes motorway refs, never let a same-name junction on the
-  // opposite side of the country compete. If OSM omitted the ref entirely,
-  // retain those unreferenced candidates as a fallback.
   if (exactRoad.length) {
     return [
       ...exactRoad,
@@ -148,8 +148,6 @@ function sameLogicalBoundary(left, right) {
     return false;
   }
 
-  // Motorways commonly have one junction/toll node per carriageway. Treat
-  // those close parallel nodes as one boundary instead of an ambiguity.
   return true;
 }
 
@@ -235,6 +233,7 @@ function matchSection(points, section) {
 
     return {
       status: 'matched',
+      matchMethod: 'physical-charge-point',
       id: section.id,
       roadRef: section.roadRef,
       system: section.system,
@@ -296,6 +295,7 @@ function matchSection(points, section) {
 
   return {
     status: 'matched',
+    matchMethod: 'direct-boundary-name',
     id: section.id,
     roadRef: section.roadRef,
     system: section.system,
@@ -313,15 +313,35 @@ export function buildPortugalTollEvents(pointsDocument) {
     ? pointsDocument.points
     : [];
 
-  const matches = PORTUGAL_TOLL_DATASET_2026.sections.map(
+  const sections = PORTUGAL_TOLL_DATASET_2026.sections;
+  const directMatches = sections.map(
     section => matchSection(points, section)
   );
+
+  const sequenceMatches = buildSequenceMatches(points, sections);
+
+  const matches = directMatches.map(item => {
+    const sequence = sequenceMatches.get(item.id);
+
+    // Prefer explicit physical plazas/gantries. For ordinary motorway sections,
+    // use whole-road ordering when it can recover a previously unresolved or
+    // ambiguous boundary without violating the road sequence.
+    if (
+      sequence &&
+      item.system === 'closed-or-traditional' &&
+      item.status !== 'matched'
+    ) {
+      return sequence;
+    }
+
+    return item;
+  });
 
   const matched = matches.filter(item => item.status === 'matched');
   const unresolved = matches.filter(item => item.status !== 'matched');
 
   return {
-    version: 2,
+    version: 3,
     datasetVersion: PORTUGAL_TOLL_DATASET_2026.version,
     generatedAt: new Date().toISOString(),
     currency: PORTUGAL_TOLL_DATASET_2026.currency,
