@@ -11,6 +11,109 @@ import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 
+const ROUTE_SOURCE = 'atlas-route';
+const TRAVELED_SOURCE = 'atlas-route-traveled';
+
+function normalizeBearing(value) {
+  return ((Number(value) % 360) + 360) % 360;
+}
+
+function lineFeature(points) {
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: points.map(point => [point.lon, point.lat])
+    }
+  };
+}
+
+function collection(features) {
+  return {
+    type: 'FeatureCollection',
+    features
+  };
+}
+
+function splitRoute(points, progress = {}) {
+  const segmentIndex = Math.max(
+    0,
+    Math.min(
+      points.length - 1,
+      Number.isInteger(progress?.segmentIndex)
+        ? progress.segmentIndex
+        : Number.isInteger(progress?.pointIndex)
+          ? progress.pointIndex
+          : 0
+    )
+  );
+
+  const fraction = Number.isFinite(progress?.segmentFraction)
+    ? Math.max(0, Math.min(1, progress.segmentFraction))
+    : 0;
+
+  const current = points[segmentIndex];
+  const next = points[segmentIndex + 1] ?? current;
+  const interpolated = {
+    lat: current.lat + (next.lat - current.lat) * fraction,
+    lon: current.lon + (next.lon - current.lon) * fraction
+  };
+
+  return {
+    traveled: [
+      ...points.slice(0, segmentIndex + 1),
+      interpolated
+    ],
+    remaining: [
+      interpolated,
+      ...points.slice(segmentIndex + 1)
+    ]
+  };
+}
+
+function bearingFromProgress(points, progress = {}) {
+  if (points.length < 2) return null;
+
+  const index = Math.max(
+    0,
+    Math.min(
+      points.length - 2,
+      Number.isInteger(progress?.segmentIndex)
+        ? progress.segmentIndex
+        : Number.isInteger(progress?.pointIndex)
+          ? progress.pointIndex
+          : 0
+    )
+  );
+
+  const from = points[index];
+  const to = points[index + 1];
+  const lat1 = from.lat * Math.PI / 180;
+  const lat2 = to.lat * Math.PI / 180;
+  const deltaLon = (to.lon - from.lon) * Math.PI / 180;
+  const y = Math.sin(deltaLon) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
+
+  return normalizeBearing(
+    Math.atan2(y, x) * 180 / Math.PI
+  );
+}
+
+function validRoute(route) {
+  const points = route?.points ?? [];
+  return (
+    points.length >= 2 &&
+    points.every(
+      point =>
+        Number.isFinite(point?.lat) &&
+        Number.isFinite(point?.lon)
+    )
+  );
+}
+
 export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   constructor({
     maplibre = maplibregl,
@@ -27,8 +130,14 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRouteProgress = null;
     this.currentManeuvers = null;
     this.currentManeuverIndex = 0;
-    this.restoringStyleOverlays = false;
     this.mapSourceMode = 'online';
+
+    // Do not use map.isStyleLoaded() as a gate for route rendering. In
+    // MapLibre it can remain false while raster/vector source tiles are still
+    // loading even though style.load has already fired. Waiting for another
+    // style.load in that state can strand the route forever. Track the
+    // style-load lifecycle explicitly instead.
+    this.atlasStyleReady = false;
 
     this.zoomControlElement =
       installMapLibreZoomControl(this.map);
@@ -42,17 +151,27 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     );
     this.#renderMapSourceBadge();
 
-    // setStyle() destroys every Atlas custom source/layer. Keep the route
-    // renderer self-healing so selecting a destination and pressing Start
-    // never leaves guidance active with an invisible route.
     this.map.on('style.load', () => {
-      this.#ensureRouteOverlay();
+      this.atlasStyleReady = true;
+      this.#renderStoredRoute();
     });
+
+    // The initial style can theoretically finish before this subclass has
+    // installed its listener. In that case the style object is already ready
+    // for mutations and the initial renderer can proceed immediately.
+    if (this.map.isStyleLoaded?.()) {
+      this.atlasStyleReady = true;
+    }
   }
 
   async setRegion(region, options = {}) {
     const preferOffline =
       Boolean(options?.preferOffline);
+
+    // A new setStyle() invalidates all application-owned layers. Mark the
+    // renderer unavailable before the base adapter begins the style swap;
+    // style.load above is the only event that marks it ready again.
+    this.atlasStyleReady = false;
 
     const offlineLoaded =
       await super.setRegion(region, options);
@@ -63,70 +182,95 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
         : 'online';
 
     this.#renderMapSourceBadge();
-
-    // super.setRegion() returns immediately after setStyle(). The style may
-    // still be loading, so also register a one-shot restoration here. The
-    // permanent style.load listener above remains the safety net for later
-    // style switches.
-    if (this.currentRoute) {
-      if (this.map.isStyleLoaded?.()) {
-        this.#ensureRouteOverlay();
-      } else {
-        this.map.once('style.load', () => {
-          this.#ensureRouteOverlay();
-        });
-      }
-    }
-
     return offlineLoaded;
   }
 
   showRoute(route, endpoints = {}) {
-    // The base renderer starts by calling this.clearRoute(). Because that is
-    // dynamically dispatched, our override below clears currentRoute too.
-    // Therefore render first, then persist the new route. JavaScript runs this
-    // call synchronously, so style.load cannot interleave before state is set.
-    const result =
-      super.showRoute(route, endpoints);
+    if (!validRoute(route)) {
+      throw new TypeError(
+        'showRoute requires at least two valid route points.'
+      );
+    }
 
     this.currentRoute = route;
     this.currentRouteProgress = null;
 
-    // If the style is already ready, verify the overlay immediately. If it
-    // is still loading, the style.load listeners will rebuild it afterwards.
-    if (this.map.isStyleLoaded?.()) {
-      queueMicrotask(() => {
-        this.#ensureRouteOverlay();
-      });
+    if (this.atlasStyleReady) {
+      this.#renderStoredRoute();
     }
 
-    return result;
-  }
-
-  fitRoute(route, options = {}) {
-    if (this.restoringStyleOverlays) {
-      return true;
-    }
-
-    return super.fitRoute(route, options);
+    // Camera fitting is independent of style/source loading and can happen
+    // immediately, so the preview framing stays responsive.
+    this.fitRoute(route);
+    return true;
   }
 
   updateRouteProgress(route, progress) {
-    this.currentRoute = route ?? this.currentRoute;
-    this.currentRouteProgress = progress ?? null;
+    if (validRoute(route)) {
+      this.currentRoute = route;
+    }
 
-    const result = super.updateRouteProgress(
-      route,
+    this.currentRouteProgress = progress ?? null;
+    this.navigationRouteProgress = progress ?? null;
+
+    if (!this.currentRoute || !validRoute(this.currentRoute)) {
+      return;
+    }
+
+    this.routeBearing = bearingFromProgress(
+      this.currentRoute.points,
       progress
     );
 
-    if (this.map.isStyleLoaded?.()) {
-      queueMicrotask(() => {
-        this.#ensureRouteOverlay();
-      });
+    if (!this.atlasStyleReady) {
+      return;
     }
 
-    return result;
+    const split = splitRoute(
+      this.currentRoute.points,
+      progress
+    );
+
+    const routeSource = this.map.getSource(ROUTE_SOURCE);
+    if (!routeSource) {
+      this.#renderStoredRoute();
+      return;
+    }
+
+    routeSource.setData(
+      collection([lineFeature(split.remaining)])
+    );
+
+    let traveledSource =
+      this.map.getSource(TRAVELED_SOURCE);
+
+    if (!traveledSource) {
+      this.map.addSource(TRAVELED_SOURCE, {
+        type: 'geojson',
+        data: collection([lineFeature(split.traveled)])
+      });
+
+      this.map.addLayer({
+        id: 'atlas-route-traveled',
+        type: 'line',
+        source: TRAVELED_SOURCE,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round'
+        },
+        paint: {
+          'line-color': '#737b8c',
+          'line-width': 5,
+          'line-opacity': 0.88
+        }
+      });
+    } else {
+      traveledSource.setData(
+        collection([lineFeature(split.traveled)])
+      );
+    }
+
+    this.#raiseRouteLayers();
   }
 
   showManeuvers(maneuvers, activeIndex = 0) {
@@ -143,87 +287,138 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
   }
 
   clearManeuvers() {
-    if (!this.restoringStyleOverlays) {
-      this.currentManeuvers = null;
-      this.currentManeuverIndex = 0;
-    }
-
+    this.currentManeuvers = null;
+    this.currentManeuverIndex = 0;
     return super.clearManeuvers();
   }
 
   clearRoute() {
-    if (!this.restoringStyleOverlays) {
-      this.currentRoute = null;
-      this.currentRouteProgress = null;
+    this.currentRoute = null;
+    this.currentRouteProgress = null;
+    this.routeBearing = null;
+    this.navigationRouteProgress = null;
+    this.navigationCameraZoom = null;
+    this.navigationCameraTimestamp = null;
+
+    if (!this.atlasStyleReady) {
+      return;
     }
 
-    return super.clearRoute();
+    this.#removeRouteOverlay();
   }
 
-  #ensureRouteOverlay() {
+  #renderStoredRoute() {
     if (
-      this.restoringStyleOverlays ||
-      !this.currentRoute ||
-      !this.map.isStyleLoaded?.()
+      !this.atlasStyleReady ||
+      !validRoute(this.currentRoute)
     ) {
       return;
     }
 
-    const routeSource =
-      this.map.getSource?.('atlas-route');
-    const remainingLayer =
-      this.map.getLayer?.('atlas-route-remaining');
-    const casingLayer =
-      this.map.getLayer?.('atlas-route-casing');
+    this.#removeRouteOverlay();
 
-    // Nothing to do when the currently loaded style already contains the
-    // complete Atlas route overlay.
-    if (routeSource && remainingLayer && casingLayer) {
-      return;
+    const points = this.currentRoute.points;
+    const split = this.currentRouteProgress
+      ? splitRoute(points, this.currentRouteProgress)
+      : null;
+
+    this.map.addSource(ROUTE_SOURCE, {
+      type: 'geojson',
+      data: collection([
+        lineFeature(
+          split?.remaining ?? points
+        )
+      ])
+    });
+
+    this.map.addLayer({
+      id: 'atlas-route-casing',
+      type: 'line',
+      source: ROUTE_SOURCE,
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      paint: {
+        'line-color': '#ffffff',
+        'line-width': 10,
+        'line-opacity': 0.96
+      }
+    });
+
+    this.map.addLayer({
+      id: 'atlas-route-remaining',
+      type: 'line',
+      source: ROUTE_SOURCE,
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      paint: {
+        'line-color': '#315efb',
+        'line-width': 6,
+        'line-opacity': 1
+      }
+    });
+
+    if (split) {
+      this.map.addSource(TRAVELED_SOURCE, {
+        type: 'geojson',
+        data: collection([lineFeature(split.traveled)])
+      });
+
+      this.map.addLayer({
+        id: 'atlas-route-traveled',
+        type: 'line',
+        source: TRAVELED_SOURCE,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round'
+        },
+        paint: {
+          'line-color': '#737b8c',
+          'line-width': 6,
+          'line-opacity': 0.9
+        }
+      });
     }
 
-    this.restoringStyleOverlays = true;
+    this.#raiseRouteLayers();
+  }
 
-    try {
-      // Remove any partial overlay left by an interrupted style transition.
-      for (const layerId of [
-        'atlas-route-traveled',
-        'atlas-route-remaining',
-        'atlas-route-casing'
-      ]) {
-        if (this.map.getLayer?.(layerId)) {
-          this.map.removeLayer(layerId);
-        }
+  #raiseRouteLayers() {
+    // addLayer() without beforeId already appends above the base style. Move
+    // explicitly as a defensive guarantee after style swaps and progress
+    // updates so the route can never sit underneath a raster/vector base.
+    for (const layerId of [
+      'atlas-route-casing',
+      'atlas-route-traveled',
+      'atlas-route-remaining'
+    ]) {
+      if (this.map.getLayer(layerId)) {
+        this.map.moveLayer(layerId);
       }
+    }
+  }
 
-      for (const sourceId of [
-        'atlas-route-traveled',
-        'atlas-route'
-      ]) {
-        if (this.map.getSource?.(sourceId)) {
-          this.map.removeSource(sourceId);
-        }
+  #removeRouteOverlay() {
+    for (const layerId of [
+      'atlas-route-traveled',
+      'atlas-route-remaining',
+      'atlas-route-casing'
+    ]) {
+      if (this.map.getLayer(layerId)) {
+        this.map.removeLayer(layerId);
       }
+    }
 
-      // Reuse the exact normal route renderer. fitRoute() is suppressed while
-      // restoring so pressing Start does not unexpectedly reset the camera.
-      super.showRoute(this.currentRoute);
-
-      if (this.currentRouteProgress) {
-        super.updateRouteProgress(
-          this.currentRoute,
-          this.currentRouteProgress
-        );
+    for (const sourceId of [
+      TRAVELED_SOURCE,
+      ROUTE_SOURCE
+    ]) {
+      if (this.map.getSource(sourceId)) {
+        this.map.removeSource(sourceId);
       }
-
-      if (this.currentManeuvers) {
-        super.showManeuvers(
-          this.currentManeuvers,
-          this.currentManeuverIndex
-        );
-      }
-    } finally {
-      this.restoringStyleOverlays = false;
     }
   }
 
