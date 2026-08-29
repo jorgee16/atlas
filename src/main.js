@@ -1,4 +1,5 @@
 import './styles.css';
+import './map/maplibre-navigation-ui.css';
 import "./ui/components/header/header.css";
 import "./ui/components/status-toast/status-toast.css";
 import "./ui/components/overflow-menu/overflow-menu.css";
