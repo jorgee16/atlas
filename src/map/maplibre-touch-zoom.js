@@ -2,6 +2,8 @@ import {
   MapLibrePmtilesMapAdapter
 } from './maplibre-pmtiles-map-adapter.js';
 
+const GESTURE_SETTLE_MS = 420;
+
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
@@ -16,6 +18,49 @@ export function installMapLibreTouchZoom(adapter) {
   map.touchZoomRotate?.disableRotation?.();
   map.touchPitch?.disable?.();
   map.dragRotate?.disable?.();
+
+  let settleTimer = null;
+
+  const startManualGesture = event => {
+    if ((event?.touches?.length ?? 0) < 2) return;
+
+    // Cancel any navigation easeTo immediately. Otherwise MapLibre is trying
+    // to interpolate the follow camera while the user's fingers are changing
+    // zoom, which feels like input latency / resistance.
+    map.stop?.();
+    adapter.__atlasManualMapGesture = true;
+
+    clearTimeout(settleTimer);
+    settleTimer = null;
+  };
+
+  const finishManualGesture = () => {
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => {
+      adapter.__atlasManualMapGesture = false;
+      settleTimer = null;
+    }, GESTURE_SETTLE_MS);
+  };
+
+  container.addEventListener('touchstart', startManualGesture, {
+    passive: true
+  });
+  container.addEventListener('touchend', finishManualGesture, {
+    passive: true
+  });
+  container.addEventListener('touchcancel', finishManualGesture, {
+    passive: true
+  });
+
+  map.on?.('zoomstart', event => {
+    if (event?.originalEvent) {
+      map.stop?.();
+      adapter.__atlasManualMapGesture = true;
+    }
+  });
+  map.on?.('zoomend', event => {
+    if (event?.originalEvent) finishManualGesture();
+  });
 
   container.classList.add('atlas-direct-touch-zoom');
   return adapter;
