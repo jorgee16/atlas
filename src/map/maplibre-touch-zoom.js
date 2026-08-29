@@ -7,6 +7,7 @@ const NAVIGATION_TOUCH_ZOOM_RATE = 1.7;
 const BROWSE_TOUCH_ZOOM_RATE = 2.15;
 const NAVIGATION_TOUCH_ZOOM_THRESHOLD = 0.008;
 const BROWSE_TOUCH_ZOOM_THRESHOLD = 0.004;
+const BROWSE_SYMBOL_RESTORE_MS = 90;
 
 function configureTouchZoom(adapter) {
   const map = adapter?.map;
@@ -30,15 +31,53 @@ function configureTouchZoom(adapter) {
   map.dragRotate?.disable?.();
 }
 
+function suspendBrowseSymbols(adapter) {
+  if (adapter.navigationTravelMode || adapter.__atlasBrowseSymbolsSuspended) return;
+
+  const map = adapter.map;
+  const layers = map?.getStyle?.()?.layers ?? [];
+  const previous = [];
+
+  for (const layer of layers) {
+    if (layer?.type !== 'symbol' || !layer?.id) continue;
+
+    let visibility = 'visible';
+    try {
+      visibility = map.getLayoutProperty?.(layer.id, 'visibility') ?? 'visible';
+      if (visibility === 'none') continue;
+      map.setLayoutProperty?.(layer.id, 'visibility', 'none');
+      previous.push([layer.id, visibility]);
+    } catch {
+      // Style can swap while a gesture is starting; skip unavailable layers.
+    }
+  }
+
+  adapter.__atlasBrowseSymbolsSuspended = previous;
+}
+
+function restoreBrowseSymbols(adapter) {
+  const previous = adapter.__atlasBrowseSymbolsSuspended;
+  if (!Array.isArray(previous)) return;
+
+  adapter.__atlasBrowseSymbolsSuspended = null;
+  const map = adapter.map;
+
+  for (const [layerId, visibility] of previous) {
+    try {
+      if (map.getLayer?.(layerId)) {
+        map.setLayoutProperty?.(layerId, 'visibility', visibility ?? 'visible');
+      }
+    } catch {
+      // Ignore layers removed during a style swap.
+    }
+  }
+}
+
 export function installMapLibreTouchZoom(adapter) {
   const map = adapter?.map;
   const container = map?.getContainer?.();
   if (!map || !container) return adapter;
 
-  // Always re-apply the interaction profile. Preview/explore do not have a
-  // navigationTravelMode, while active guidance does. Previously the tuned
-  // profile was effectively refreshed when navigation started, which made
-  // pinch feel noticeably more responsive there than while browsing.
   configureTouchZoom(adapter);
 
   if (adapter.__atlasTouchZoomInstalled) return adapter;
@@ -46,6 +85,7 @@ export function installMapLibreTouchZoom(adapter) {
   Object.defineProperty(adapter, '__atlasTouchZoomInstalled', { value: true });
 
   let settleTimer = null;
+  let symbolRestoreTimer = null;
 
   const beginManualGesture = event => {
     if (event?.touches && event.touches.length < 2) return;
@@ -53,6 +93,12 @@ export function installMapLibreTouchZoom(adapter) {
     adapter.__atlasManualMapGesture = true;
     clearTimeout(settleTimer);
     settleTimer = null;
+
+    if (!adapter.navigationTravelMode) {
+      clearTimeout(symbolRestoreTimer);
+      symbolRestoreTimer = null;
+      suspendBrowseSymbols(adapter);
+    }
   };
 
   const finishManualGesture = () => {
@@ -61,6 +107,12 @@ export function installMapLibreTouchZoom(adapter) {
       adapter.__atlasManualMapGesture = false;
       settleTimer = null;
     }, GESTURE_SETTLE_MS);
+
+    clearTimeout(symbolRestoreTimer);
+    symbolRestoreTimer = setTimeout(() => {
+      restoreBrowseSymbols(adapter);
+      symbolRestoreTimer = null;
+    }, BROWSE_SYMBOL_RESTORE_MS);
   };
 
   container.addEventListener('touchstart', beginManualGesture, {
@@ -83,10 +135,15 @@ export function installMapLibreTouchZoom(adapter) {
       adapter.__atlasManualMapGesture = true;
       clearTimeout(settleTimer);
       settleTimer = null;
+      if (!adapter.navigationTravelMode) suspendBrowseSymbols(adapter);
     }
   });
   map.on?.('zoomend', event => {
     if (event?.originalEvent) finishManualGesture();
+  });
+
+  map.on?.('style.load', () => {
+    adapter.__atlasBrowseSymbolsSuspended = null;
   });
 
   container.classList.add('atlas-direct-touch-zoom');
@@ -107,15 +164,12 @@ if (prototype && !prototype.__atlasDirectTouchZoomInstalled) {
 
   const originalSetNavigationTravelMode = prototype.setNavigationTravelMode;
   prototype.setNavigationTravelMode = function setNavigationTravelMode(mode = null) {
+    restoreBrowseSymbols(this);
     const result = originalSetNavigationTravelMode.call(this, mode);
     configureTouchZoom(this);
     return result;
   };
 
-  // Bootstrap registers move listeners immediately after constructing the map.
-  // Install the browse interaction profile at that point too, so Explore and
-  // route preview get the same direct native pinch setup even before a region
-  // or navigation mode has been selected.
   const originalOnMoveEnd = prototype.onMoveEnd;
   if (typeof originalOnMoveEnd === 'function') {
     prototype.onMoveEnd = function onMoveEnd(callback) {
