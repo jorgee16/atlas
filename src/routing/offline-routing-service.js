@@ -27,6 +27,162 @@ import {
 } from './route-road-summary.js';
 import { calibrateDriveEta } from './drive-eta.js';
 
+const DRIVE_ORIGIN_PROBE_RADII_METERS = [12, 24, 40];
+const DRIVE_ORIGIN_PROBE_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315];
+const DRIVE_ORIGIN_MAX_ALTERNATIVE_OFFSET_METERS = 65;
+
+function pointDistanceMeters(a, b) {
+  const earthRadius = 6371000;
+  const lat1 = a.lat * Math.PI / 180;
+  const lat2 = b.lat * Math.PI / 180;
+  const deltaLat = (b.lat - a.lat) * Math.PI / 180;
+  const deltaLon = (b.lon - a.lon) * Math.PI / 180;
+  const sinLat = Math.sin(deltaLat / 2);
+  const sinLon = Math.sin(deltaLon / 2);
+  const h =
+    sinLat * sinLat +
+    Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+
+  return earthRadius * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function offsetPoint(point, bearingDegrees, distanceMeters) {
+  const earthRadius = 6371000;
+  const angularDistance = distanceMeters / earthRadius;
+  const bearing = bearingDegrees * Math.PI / 180;
+  const lat1 = point.lat * Math.PI / 180;
+  const lon1 = point.lon * Math.PI / 180;
+
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(angularDistance) +
+    Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearing)
+  );
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat1),
+    Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2)
+  );
+
+  return {
+    lat: lat2 * 180 / Math.PI,
+    lon: lon2 * 180 / Math.PI
+  };
+}
+
+function driveNodeQuality(graph, nodeIndex) {
+  const outgoing = graph
+    .outgoingEdges(nodeIndex)
+    .filter(edge => edge.driveAllowed === true);
+  const targets = new Set(outgoing.map(edge => edge.to));
+  const roads = outgoing.map(edge => graph.road(edge.road, edge.geometryReversed));
+  const namedRoad = roads.some(road => Boolean(road.name || road.ref));
+  const allLinks = roads.length > 0 && roads.every(road => road.link === true);
+
+  return {
+    degree: targets.size,
+    namedRoad,
+    allLinks
+  };
+}
+
+function driveOriginScore(graph, origin, snap) {
+  const actualDistance = pointDistanceMeters(origin, snap.point);
+  const quality = driveNodeQuality(graph, snap.node);
+
+  // A pure nearest-node snap is often wrong when GPS sits beside a driveway,
+  // parking spur or dead-end access road. Prefer a slightly farther node when
+  // it belongs to a genuinely connected drivable road. Distance remains the
+  // dominant signal once candidates have comparable connectivity.
+  const deadEndPenalty = quality.degree <= 1 ? 45 : 0;
+  const weakJunctionPenalty = quality.degree === 2 ? 4 : 0;
+  const unnamedPenalty = quality.namedRoad ? 0 : 8;
+  const linkPenalty = quality.allLinks ? 8 : 0;
+
+  return {
+    score:
+      actualDistance +
+      deadEndPenalty +
+      weakJunctionPenalty +
+      unnamedPenalty +
+      linkPenalty,
+    actualDistance,
+    quality
+  };
+}
+
+function findDriveOriginSnap(
+  graph,
+  origin,
+  {
+    maxDistanceMeters,
+    destinationComponent = null
+  }
+) {
+  const direct = graph.findNearest(origin, {
+    maxDistanceMeters,
+    profile: 'drive'
+  });
+
+  if (!direct) return null;
+
+  const candidates = new Map([[direct.node, direct]]);
+
+  for (const radius of DRIVE_ORIGIN_PROBE_RADII_METERS) {
+    for (const bearing of DRIVE_ORIGIN_PROBE_BEARINGS) {
+      const probe = offsetPoint(origin, bearing, radius);
+      const snap = graph.findNearest(probe, {
+        maxDistanceMeters: 28,
+        profile: 'drive'
+      });
+
+      if (!snap || candidates.has(snap.node)) continue;
+
+      const actualDistance = pointDistanceMeters(origin, snap.point);
+      if (actualDistance > DRIVE_ORIGIN_MAX_ALTERNATIVE_OFFSET_METERS) continue;
+      if (
+        Number.isInteger(destinationComponent) &&
+        snap.point.component !== destinationComponent
+      ) {
+        continue;
+      }
+
+      candidates.set(snap.node, snap);
+    }
+  }
+
+  const directInfo = driveOriginScore(graph, origin, direct);
+  let best = direct;
+  let bestInfo = directInfo;
+
+  for (const candidate of candidates.values()) {
+    if (
+      Number.isInteger(destinationComponent) &&
+      candidate.point.component !== destinationComponent
+    ) {
+      continue;
+    }
+
+    const info = driveOriginScore(graph, origin, candidate);
+
+    // Never jump far away merely because another road has a nicer topology.
+    // The preference exists only to resolve ambiguous nearby road choices.
+    if (info.actualDistance > directInfo.actualDistance + 50) continue;
+
+    if (info.score < bestInfo.score) {
+      best = candidate;
+      bestInfo = info;
+    }
+  }
+
+  return {
+    ...best,
+    snapStrategy:
+      best.node === direct.node
+        ? 'nearest'
+        : 'connected-road',
+    snapScore: bestInfo.score
+  };
+}
+
 export class OfflineRoutingService {
   constructor({
     repository = new RoutingRepository(),
@@ -81,22 +237,6 @@ export class OfflineRoutingService {
       throw error;
     }
 
-    const originSnap =
-      dataset.graph.findNearest(
-        origin,
-        {
-          maxDistanceMeters:
-            this.maximumSnapDistanceMeters,
-          profile
-        }
-      );
-
-    if (!originSnap) {
-      throw new Error(
-        'No routable road was found near the starting point.'
-      );
-    }
-
     const destinationSnap =
       dataset.graph.findNearest(
         destination,
@@ -110,6 +250,33 @@ export class OfflineRoutingService {
     if (!destinationSnap) {
       throw new Error(
         'No routable road was found near the destination.'
+      );
+    }
+
+    const originSnap =
+      profile === 'drive'
+        ? findDriveOriginSnap(
+            dataset.graph,
+            origin,
+            {
+              maxDistanceMeters:
+                this.maximumSnapDistanceMeters,
+              destinationComponent:
+                destinationSnap.point.component
+            }
+          )
+        : dataset.graph.findNearest(
+            origin,
+            {
+              maxDistanceMeters:
+                this.maximumSnapDistanceMeters,
+              profile
+            }
+          );
+
+    if (!originSnap) {
+      throw new Error(
+        'No routable road was found near the starting point.'
       );
     }
 
