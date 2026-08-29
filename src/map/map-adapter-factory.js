@@ -5,6 +5,11 @@ import {
 import {
   installMapLibreGpsParity
 } from './maplibre-gps-parity.js';
+import {
+  installMapLibreRouteStability
+} from './maplibre-route-stability.js';
+
+installMapLibreRouteStability();
 
 export const MAP_RENDERER = Object.freeze({
   LEAFLET: 'leaflet',
