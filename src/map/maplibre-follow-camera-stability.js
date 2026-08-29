@@ -94,6 +94,7 @@ export function installMapLibreFollowCameraStability() {
       : Number.isFinite(this.routeBearing)
         ? normalizeBearing(this.routeBearing)
         : null;
+    const headingUp = options?.headingUp === true;
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return originalFollowPosition.call(this, position, options);
@@ -102,6 +103,7 @@ export function installMapLibreFollowCameraStability() {
     const nextPosition = { latitude, longitude };
     const previousPosition = this.__atlasStableCameraPosition ?? null;
     const previousHeading = this.__atlasStableCameraHeading ?? null;
+    const previousHeadingUp = this.__atlasStableCameraHeadingUp;
     const mode = this.navigationTravelMode;
     const stationary = speed < STATIONARY_SPEED_METERS_PER_SECOND;
 
@@ -115,16 +117,23 @@ export function installMapLibreFollowCameraStability() {
     const movedMeters = distanceMeters(previousPosition, nextPosition);
     const headingChanged = bearingDelta(previousHeading, heading);
     const outsideComfortArea = shouldRecenterForScreen(this, position);
+    const headingModeChanged =
+      typeof previousHeadingUp !== 'boolean' ||
+      previousHeadingUp !== headingUp;
 
     // Waze-like behaviour: the rendered user marker may continue moving
     // smoothly, but the camera does not chase every GPS fix or small heading
     // correction. Recenter only after meaningful movement, meaningful heading
-    // change, or when the user approaches the screen edge.
+    // change, or when the user approaches the screen edge. A direct compass
+    // toggle is different: north-up <-> heading-up must always be applied
+    // immediately, even if the user has not moved.
     const shouldUpdateCamera =
       !previousPosition ||
+      headingModeChanged ||
       outsideComfortArea ||
       movedMeters >= positionDeadband ||
       (
+        headingUp &&
         !stationary &&
         Number.isFinite(heading) &&
         headingChanged >= headingDeadband
@@ -138,6 +147,7 @@ export function installMapLibreFollowCameraStability() {
 
     const result = originalFollowPosition.call(this, position, options);
     this.__atlasStableCameraPosition = nextPosition;
+    this.__atlasStableCameraHeadingUp = headingUp;
     if (Number.isFinite(heading)) {
       this.__atlasStableCameraHeading = heading;
     }
@@ -149,6 +159,7 @@ export function installMapLibreFollowCameraStability() {
   prototype.setNavigationTravelMode = function setNavigationTravelMode(mode = null) {
     this.__atlasStableCameraPosition = null;
     this.__atlasStableCameraHeading = null;
+    this.__atlasStableCameraHeadingUp = undefined;
     return originalSetNavigationTravelMode.call(this, mode);
   };
 }
