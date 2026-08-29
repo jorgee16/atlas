@@ -152,6 +152,7 @@ export function installMapLibreFollowCameraStability() {
         : null;
     const headingUp = options?.headingUp === true;
     const forceCamera = options?.forceCamera === true;
+    const cameraRefinement = options?.cameraRefinement === true;
     const previousHeadingUp = this.__atlasStableCameraHeadingUp;
     const headingModeChanged =
       typeof previousHeadingUp !== 'boolean' ||
@@ -222,9 +223,6 @@ export function installMapLibreFollowCameraStability() {
     }
 
     if (forceCamera) {
-      // The PMTiles adapter has a second stationary deadband underneath this
-      // wrapper. Reset only its camera cache for explicit user/navigation
-      // transitions so the forced update reaches the base camera immediately.
       this.lastCameraFollowPosition = null;
       this.lastCameraFollowHeading = null;
       this.navigationCameraZoom = null;
@@ -240,6 +238,31 @@ export function installMapLibreFollowCameraStability() {
     this.__atlasStableCameraHeadingUp = headingUp;
     if (Number.isFinite(heading)) {
       this.__atlasStableCameraHeading = heading;
+    }
+
+    // startPlannedRoute currently activates Follow before it publishes the
+    // first route-progress sample. That means the first forced camera pass can
+    // run without distance-to-maneuver/route-bearing data; a later compass tap
+    // then looks "better" simply because those values exist by then. Refine
+    // once at the end of the same task, after updateRouteProgress has run.
+    if (
+      forceCamera &&
+      !cameraRefinement &&
+      this.navigationTravelMode &&
+      !this.navigationRouteProgress
+    ) {
+      queueMicrotask(() => {
+        if (!this.navigationTravelMode || !this.navigationRouteProgress) return;
+
+        this.followPosition(
+          this.lastUserPosition ?? position,
+          {
+            ...options,
+            forceCamera: true,
+            cameraRefinement: true
+          }
+        );
+      });
     }
 
     return result;
