@@ -49,3 +49,16 @@ html.atlas-map-gesture-active .navigation-planner--preview * {
   transition: none !important;
   animation: none !important;
 }
+
+/* Diagnostic fast path: active navigation proves the MapLibre gesture itself
+   can run smoothly on the same device. Remove the two state-specific chrome
+   trees from paint while a pinch is live. If Explore/Preview now match active
+   navigation, the remaining bottleneck is DOM/style/compositing rather than
+   MapLibre camera/tile work. `visibility` preserves layout and restores the
+   UI immediately when the gesture settles. */
+html.atlas-map-gesture-active .explore-workspace:not([hidden]),
+html.atlas-map-gesture-active .navigation-workspace:not([hidden]),
+html.atlas-map-gesture-active .landscape-explore-search,
+html.atlas-map-gesture-active .app-tabs:not([hidden]) {
+  visibility: hidden !important;
+}
