@@ -11,12 +11,10 @@ import {
   installMapLibreZoomControl
 } from './maplibre-zoom-control.js';
 
-// Use MapLibre's own public demo style as a controlled diagnostic baseline.
-// If this style fails inside the Android WebView, the problem is no longer our
-// PMTiles schema or OpenFreeMap style choice; the visible error panel below
-// will expose the actual MapLibre/WebView resource error.
+// Verified against both OpenFreeMap's quick start and MapLibre's own examples.
+// This is a full street-level vector style suitable for zoomed-in navigation.
 const ONLINE_VECTOR_STYLE =
-  'https://demotiles.maplibre.org/style.json';
+  'https://tiles.openfreemap.org/styles/liberty';
 
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
@@ -154,7 +152,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     this.currentRouteProgress = null;
     this.currentManeuvers = null;
     this.currentManeuverIndex = 0;
-    this.mapSourceMode = 'demo';
+    this.mapSourceMode = 'online';
     this.routeRenderPending = false;
     this.routeRenderRetryTimer = null;
 
@@ -205,7 +203,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     });
 
     this.map.on('style.load', () => {
-      this.mapSourceBadge.textContent = 'Demo style loaded';
+      this.mapSourceBadge.textContent = 'OpenFreeMap loaded';
       this.#scheduleRouteRender();
     });
 
@@ -222,10 +220,10 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       region?.assets?.map ??
       null;
 
-    // Do not call setStyle here during this diagnostic build. The constructor
-    // already owns the official MapLibre demo style, and a region change must
-    // not replace it with our still-unverified PMTiles style.
-    this.mapSourceMode = 'demo';
+    // During this validation pass, region changes must not replace the
+    // verified online street style with the still-unverified PMTiles style.
+    // Offline routing/search remain independent from the visual base map.
+    this.mapSourceMode = 'online';
     this.#renderMapSourceBadge();
     return Boolean(mapUrl);
   }
@@ -463,9 +461,9 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     if (!this.mapSourceBadge) return;
 
     this.mapSourceBadge.textContent =
-      'MapLibre demo';
+      'OpenFreeMap vector';
     this.mapSourceBadge.dataset.mode = 'online';
     this.mapSourceBadge.title =
-      'Official MapLibre demo vector style diagnostic build.';
+      'Verified OpenFreeMap Liberty vector street style.';
   }
 }
