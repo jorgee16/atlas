@@ -63,8 +63,6 @@ function viewportState(adapter, latitude) {
     Math.max(0.1, Math.cos(latitude * Math.PI / 180)) /
     (512 * Math.pow(2, zoom));
 
-  // Only count the useful forward map area. Guidance consumes the top and the
-  // journey summary consumes the bottom; landscape has less vertical space.
   const usableForwardPixels = height * (landscape ? 0.44 : 0.56);
 
   return {
@@ -144,6 +142,12 @@ export function installMapLibreFollowCameraStability() {
   );
 
   prototype.followPosition = function followPosition(position, options = {}) {
+    if (this.__atlasManualMapGesture) {
+      return Number.isFinite(this.map?.getBearing?.())
+        ? normalizeBearing(-this.map.getBearing())
+        : 0;
+    }
+
     const latitude = position?.latitude ?? position?.lat;
     const longitude = position?.longitude ?? position?.lon;
     const speed = Number.isFinite(position?.speed) ? position.speed : 0;
@@ -231,6 +235,7 @@ export function installMapLibreFollowCameraStability() {
     this.__atlasStableCameraPosition = null;
     this.__atlasStableCameraHeading = null;
     this.__atlasStableCameraHeadingUp = undefined;
+    this.__atlasManualMapGesture = false;
     return originalSetNavigationTravelMode.call(this, mode);
   };
 }
