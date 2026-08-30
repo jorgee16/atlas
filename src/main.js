@@ -5,6 +5,7 @@ import './map/maplibre-nearby-layer.js';
 import './features/tracks/tracks-shell-ui.css';
 import './features/tracks/tracks-active-isolation.css';
 import './features/tracks/tracks-follow-ui.css';
+import './features/tracks/tracks-detail-compact.css';
 import "./ui/components/header/header.css";
 import "./ui/components/status-toast/status-toast.css";
 import "./ui/components/overflow-menu/overflow-menu.css";
