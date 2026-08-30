@@ -51,3 +51,84 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
   border-color: rgba(255, 255, 255, .10);
   background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
 }
+
+/* Portrait Explore follows the active Atlas theme. The canonical responsive
+ * shell historically hard-coded dark glass here, which made the search and
+ * category rail stay navy even while the rest of the app was in light mode. */
+@media (orientation: portrait) and (max-width: 800px) {
+  body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .landscape-explore-search {
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
+    border-color: var(--line);
+    box-shadow: var(--shadow-md);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search svg {
+    stroke: var(--text-muted);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input {
+    color: var(--text);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input::placeholder {
+    color: var(--text-muted);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results {
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface-solid) 98%, transparent);
+    border-color: var(--line);
+    box-shadow: var(--shadow-lg);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button {
+    color: var(--text);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button:active {
+    background: var(--surface-muted);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results small,
+  body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-empty {
+    color: var(--text-muted);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar {
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
+    border-color: var(--line);
+    box-shadow: var(--shadow-md);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip {
+    color: var(--text-muted);
+    background: transparent;
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip:hover {
+    color: var(--text);
+    background: var(--surface-muted);
+  }
+
+  body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip.on {
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 7px 16px rgba(49, 94, 251, 0.24);
+  }
+}
