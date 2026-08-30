@@ -5,6 +5,8 @@ import {
   saveTrack
 } from './tracks-store.js';
 
+const TRACK_JOIN_THRESHOLD_METERS = 80;
+
 const EMPTY_LIBRARY_HTML = `
   <div class="tracks-empty">
     <span class="tracks-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c2.6-5.4 3.8-11 7-14 1.8-1.7 4.3-1.5 5.4.2 1.2 1.9-.2 4.1 5.1-2.4 1.4-4.1 2.8-3.6 5 .4 1.9 2.6 2.8 6.2 2.7"></path><circle cx="5" cy="19" r="1.7"></circle><circle cx="18" cy="18" r="1.7"></circle></svg></span>
@@ -190,6 +192,8 @@ export function installTracksShellUI(root) {
   let activeTrackId = null;
   let gpsWatchId = null;
   let lastTrackProgress = null;
+  let furthestTrackIndex = 0;
+  let hasJoinedTrack = false;
 
   const app = globalThis.roamApp;
   const atlasMap = app?.appContext?.map ?? null;
@@ -208,9 +212,6 @@ export function installTracksShellUI(root) {
     renderTracks();
   };
 
-  const activeTrack = () =>
-    tracks.find(track => track.id === activeTrackId) ?? null;
-
   const renderDetail = () => {
     const track = tracks.find(candidate => candidate.id === detailTrackId);
     if (!track) {
@@ -223,6 +224,11 @@ export function installTracksShellUI(root) {
     const tracking = activeTrackId === track.id;
     const progress = tracking ? lastTrackProgress : null;
     const duration = formatDuration(stats.durationMs);
+    const progressLabel = !progress
+      ? 'Waiting for GPS…'
+      : progress.offTrack
+        ? 'Off track'
+        : `${Math.round(progress.percent)}%`;
 
     detail.innerHTML = `
       <div class="tracks-detail-toolbar">
@@ -239,8 +245,8 @@ export function installTracksShellUI(root) {
         <div class="tracks-detail-section-title"><strong>Elevation</strong><span>${stats.pointCount ?? track.points.length} GPX points</span></div>
         ${elevationProfile(track.points)}
       </div>
-      <div class="tracks-live-progress" ${tracking ? '' : 'hidden'}>
-        <div class="tracks-live-progress-head"><strong>Following track</strong><span>${progress ? `${Math.round(progress.percent)}%` : 'Waiting for GPS…'}</span></div>
+      <div class="tracks-live-progress ${progress?.offTrack ? 'is-off-track' : ''}" ${tracking ? '' : 'hidden'}>
+        <div class="tracks-live-progress-head"><strong>Following track</strong><span>${progressLabel}</span></div>
         <div class="tracks-progress-bar"><i style="width:${progress ? Math.max(0, Math.min(100, progress.percent)) : 0}%"></i></div>
         <div class="tracks-live-metrics">
           <div><strong>${progress ? formatDistance(progress.remainingMeters) : '—'}</strong><span>Remaining</span></div>
@@ -283,6 +289,8 @@ export function installTracksShellUI(root) {
     gpsWatchId = null;
     activeTrackId = null;
     lastTrackProgress = null;
+    furthestTrackIndex = 0;
+    hasJoinedTrack = false;
     root.classList.remove('tracks-following');
     renderDetail();
     status('Track stopped', 'GPX remains available offline.');
@@ -300,6 +308,8 @@ export function installTracksShellUI(root) {
     const totalDistance = distances.at(-1) || track.stats?.distanceMeters || 0;
     activeTrackId = track.id;
     lastTrackProgress = null;
+    furthestTrackIndex = 0;
+    hasJoinedTrack = false;
     root.classList.add('tracks-following');
     renderDetail();
     status('Track started', 'Following the GPX without recalculating the route.');
@@ -313,7 +323,15 @@ export function installTracksShellUI(root) {
           lon: position.coords.longitude
         };
         const nearest = nearestTrackPoint(track.points, current);
-        const travelled = distances[nearest.index] ?? 0;
+        const onTrack = nearest.distanceMeters <= TRACK_JOIN_THRESHOLD_METERS;
+
+        if (onTrack) {
+          hasJoinedTrack = true;
+          furthestTrackIndex = Math.max(furthestTrackIndex, nearest.index);
+        }
+
+        const confirmedIndex = hasJoinedTrack ? furthestTrackIndex : 0;
+        const travelled = distances[confirmedIndex] ?? 0;
         const remaining = Math.max(0, totalDistance - travelled);
         const percent = totalDistance > 0
           ? travelled / totalDistance * 100
@@ -323,7 +341,9 @@ export function installTracksShellUI(root) {
           percent,
           remainingMeters: remaining,
           offTrackMeters: nearest.distanceMeters,
-          accuracy: position.coords.accuracy
+          accuracy: position.coords.accuracy,
+          offTrack: !onTrack,
+          joined: hasJoinedTrack
         };
 
         atlasMap?.followPosition?.({
