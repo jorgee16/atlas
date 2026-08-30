@@ -130,7 +130,7 @@ test(
 
     assert.equal(
       departure.nextManeuver.type,
-      'depart'
+      'turn-right'
     );
 
     const progress = findRouteProgress(
