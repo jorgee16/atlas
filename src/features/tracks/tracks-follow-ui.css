@@ -1,0 +1,117 @@
+/* Active GPX following should prioritize the map. The full Track Detail view is
+ * useful before starting, but once GPS tracking is active Atlas switches to a
+ * compact guidance HUD above the bottom navigation. */
+#app.tracks-following .tracks-workspace {
+  left: 14px;
+  right: 14px;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  align-items: flex-end;
+}
+
+#app.tracks-following .tracks-card,
+#app.tracks-following .tracks-card--detail {
+  width: min(560px, 100%);
+  max-height: none;
+  overflow: visible;
+  border-radius: 22px;
+}
+
+#app.tracks-following .tracks-detail {
+  padding: 10px 12px 12px;
+}
+
+#app.tracks-following .tracks-detail-toolbar,
+#app.tracks-following .tracks-detail-stats,
+#app.tracks-following .tracks-detail-section {
+  display: none;
+}
+
+#app.tracks-following .tracks-live-progress {
+  margin-top: 0;
+  padding: 10px 12px;
+  border-radius: 15px;
+}
+
+#app.tracks-following .tracks-live-progress-head {
+  min-height: 24px;
+}
+
+#app.tracks-following .tracks-live-progress-head strong {
+  font-size: 15px;
+}
+
+#app.tracks-following .tracks-live-progress-head span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#app.tracks-following .tracks-progress-bar {
+  height: 6px;
+  margin: 7px 0 9px;
+}
+
+#app.tracks-following .tracks-live-metrics {
+  gap: 6px;
+}
+
+#app.tracks-following .tracks-live-metrics > div {
+  padding: 7px 5px;
+  border-radius: 11px;
+}
+
+#app.tracks-following .tracks-live-metrics strong {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+#app.tracks-following .tracks-live-metrics span {
+  margin-top: 2px;
+  font-size: 9px;
+}
+
+#app.tracks-following .tracks-start-button {
+  min-height: 42px;
+  margin-top: 8px;
+  border-radius: 13px;
+  font-size: 14px;
+}
+
+@media (max-width: 430px) {
+  #app.tracks-following .tracks-workspace {
+    left: 10px;
+    right: 10px;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #app.tracks-following .tracks-detail {
+    padding: 8px 9px 9px;
+  }
+
+  #app.tracks-following .tracks-live-progress {
+    padding: 9px;
+  }
+
+  #app.tracks-following .tracks-live-metrics strong {
+    font-size: 13px;
+  }
+
+  #app.tracks-following .tracks-start-button {
+    min-height: 40px;
+    margin-top: 7px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  #app.tracks-following .tracks-workspace {
+    left: 14px;
+    right: auto;
+    top: auto;
+    bottom: 74px;
+    width: min(390px, 42vw);
+  }
+
+  #app.tracks-following .tracks-card,
+  #app.tracks-following .tracks-card--detail {
+    width: 100%;
+  }
+}
