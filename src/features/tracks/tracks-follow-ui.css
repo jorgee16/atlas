@@ -1,128 +1,220 @@
-/* Active GPX following should prioritize the map. The full Track Detail view is
- * useful before starting, but once GPS tracking is active Atlas switches to a
- * compact guidance HUD above the bottom navigation. */
+/* Active GPX following is map-first. The full detail sheet disappears and only
+ * essential floating information plus a stop action remain. */
+#app.tracks-following #appTabs {
+  display: none !important;
+}
+
 #app.tracks-following .tracks-workspace {
-  left: 14px;
-  right: 14px;
-  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  left: 12px;
+  right: 12px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
   align-items: flex-end;
 }
 
 #app.tracks-following .tracks-card,
 #app.tracks-following .tracks-card--detail {
-  width: min(560px, 100%);
+  width: min(520px, 100%);
   max-height: none;
   overflow: visible;
-  border-radius: 22px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 #app.tracks-following .tracks-detail {
-  padding: 10px 12px 12px;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 0;
 }
 
 #app.tracks-following .tracks-detail-toolbar,
 #app.tracks-following .tracks-detail-stats,
-#app.tracks-following .tracks-detail-section {
+#app.tracks-following .tracks-detail-section,
+#app.tracks-following .tracks-progress-bar {
   display: none;
 }
 
 #app.tracks-following .tracks-live-progress {
-  margin-top: 0;
-  padding: 10px 12px;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 0 10px;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
   border-radius: 15px;
+  background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+}
+
+#app.tracks-following .tracks-live-progress[hidden] {
+  display: none;
 }
 
 #app.tracks-following .tracks-live-progress-head {
-  min-height: 24px;
+  display: contents;
 }
 
 #app.tracks-following .tracks-live-progress-head strong {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 15px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  grid-column: 1;
+  grid-row: 1;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: transparent;
+  font-size: 0;
 }
 
 #app.tracks-following .tracks-live-progress-head strong::before {
   content: '🚶';
-  display: inline-grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 8px;
-  background: var(--accent-soft);
-  font-size: 14px;
+  color: var(--text);
+  font-size: 17px;
   line-height: 1;
 }
 
 #app.tracks-following .tracks-live-progress-head span {
-  font-size: 12px;
+  position: absolute;
+  top: -26px;
+  left: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  font-size: 10px;
   font-weight: 800;
+  line-height: 1;
 }
 
-#app.tracks-following .tracks-progress-bar {
-  height: 6px;
-  margin: 7px 0 9px;
+#app.tracks-following .tracks-live-progress {
+  position: relative;
+}
+
+#app.tracks-following .tracks-live-progress:not(.is-off-track) .tracks-live-progress-head span {
+  display: none;
 }
 
 #app.tracks-following .tracks-live-metrics {
-  gap: 6px;
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 #app.tracks-following .tracks-live-metrics > div {
-  padding: 7px 5px;
-  border-radius: 11px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+}
+
+#app.tracks-following .tracks-live-metrics > div:nth-child(3) {
+  display: none;
+}
+
+#app.tracks-following .tracks-live-metrics strong,
+#app.tracks-following .tracks-live-metrics span {
+  display: block;
+  white-space: nowrap;
 }
 
 #app.tracks-following .tracks-live-metrics strong {
-  font-size: 14px;
-  line-height: 1.1;
+  font-size: 13px;
+  line-height: 1.05;
 }
 
 #app.tracks-following .tracks-live-metrics span {
   margin-top: 2px;
-  font-size: 9px;
+  color: var(--text-muted);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
 }
 
 #app.tracks-following .tracks-start-button {
-  min-height: 42px;
-  margin-top: 8px;
-  border-radius: 13px;
-  font-size: 14px;
+  flex: 0 0 48px;
+  width: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 15px;
+  background: var(--danger, #d34848);
+  color: transparent;
+  box-shadow: var(--shadow-sm);
+  font-size: 0;
+}
+
+#app.tracks-following .tracks-start-button::before {
+  content: '×';
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 @media (max-width: 430px) {
   #app.tracks-following .tracks-workspace {
-    left: 10px;
-    right: 10px;
-    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    left: 9px;
+    right: 9px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
 
   #app.tracks-following .tracks-detail {
-    padding: 8px 9px 9px;
+    gap: 6px;
   }
 
   #app.tracks-following .tracks-live-progress {
-    padding: 9px;
+    padding: 6px 8px;
+    border-radius: 14px;
+  }
+
+  #app.tracks-following .tracks-live-metrics {
+    gap: 9px;
   }
 
   #app.tracks-following .tracks-live-metrics strong {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   #app.tracks-following .tracks-start-button {
-    min-height: 40px;
-    margin-top: 7px;
+    flex-basis: 46px;
+    width: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    border-radius: 14px;
   }
 }
 
 @media (orientation: landscape) and (max-height: 620px) {
   #app.tracks-following .tracks-workspace {
-    left: 14px;
+    left: 12px;
     right: auto;
-    top: auto;
-    bottom: 74px;
-    width: min(390px, 42vw);
+    bottom: 12px;
+    width: min(360px, 44vw);
   }
 
   #app.tracks-following .tracks-card,
