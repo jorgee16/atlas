@@ -216,13 +216,22 @@ html[data-atlas-theme="dark"] .atlas-maplibre-source-badge {
   background: rgba(24, 32, 47, 0.90);
 }
 
+/* On mobile Explore, the search/header occupies the top map band. Keep the
+ * MapLibre zoom stack below it instead of allowing +/- to sit over the search
+ * field. */
+@media (max-width: 800px) {
+  .atlas-maplibre-zoom-control {
+    top: max(142px, calc(env(safe-area-inset-top, 0px) + 128px));
+  }
+}
+
 @media (max-height: 560px) and (orientation: landscape) {
   .atlas-maplibre-source-badge {
     bottom: max(70px, calc(env(safe-area-inset-bottom, 0px) + 58px));
   }
 
   .atlas-maplibre-zoom-control {
-    top: max(56px, calc(env(safe-area-inset-top, 0px) + 48px));
+    top: max(112px, calc(env(safe-area-inset-top, 0px) + 96px));
   }
 
   .atlas-maplibre-zoom-control button {
