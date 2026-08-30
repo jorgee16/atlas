@@ -68,7 +68,7 @@ test(
     assert.equal(element.hidden, false);
     assert.equal(element.dataset.state, 'ready');
     assert.match(element.innerHTML, /250 m/);
-    assert.match(element.innerHTML, /maneuver-exit-number">2/);
+    assert.match(element.innerHTML, /maneuver-exit-number[^>]*>2/);
     assert.match(element.innerHTML, /Avenida da República · N1/);
     assert.doesNotMatch(element.innerHTML, /At the roundabout/);
     assert.doesNotMatch(element.innerHTML, />Then</);
