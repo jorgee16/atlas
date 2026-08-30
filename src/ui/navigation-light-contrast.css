@@ -1,0 +1,85 @@
+/* Light-mode contrast repair for the landscape Navigation search surface.
+ * Geometry stays owned by styles.css; this file only normalizes readable
+ * foreground/background values after the light-theme consistency overrides. */
+@media (orientation: landscape) and (max-height: 600px) {
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-card,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-card * {
+    opacity: 1;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-workspace .navigation-destination-search > div {
+    color: var(--text);
+    background: var(--surface-solid);
+    border-color: var(--line);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-workspace .navigation-destination-search input {
+    color: var(--text);
+    background: transparent;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-workspace .navigation-destination-search input::placeholder {
+    color: #667085;
+    opacity: 1;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-heading strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-result strong {
+    color: var(--text);
+    opacity: 1;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-heading span,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-result small {
+    color: #667085;
+    opacity: 1;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-workspace .navigation-search-results {
+    background: var(--surface-solid);
+    border-color: var(--line);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-workspace .navigation-search-result {
+    color: var(--text);
+    background: transparent;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-workspace .navigation-search-result + .navigation-search-result {
+    border-top-color: var(--line);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-result-icon {
+    color: var(--accent);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-result-icon--recent {
+    color: #586174;
+    background: var(--surface-muted);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-result-arrow {
+    color: #7b8495;
+    opacity: 1;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-section--flat .navigation-search-results--flat {
+    background: transparent;
+  }
+}
