@@ -37,7 +37,22 @@
 }
 
 #app.tracks-following .tracks-live-progress-head strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 15px;
+}
+
+#app.tracks-following .tracks-live-progress-head strong::before {
+  content: '🚶';
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  font-size: 14px;
+  line-height: 1;
 }
 
 #app.tracks-following .tracks-live-progress-head span {
