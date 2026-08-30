@@ -1,0 +1,123 @@
+/* Track Detail is a map companion, not a full-screen screen. Keep enough of
+ * the route visible above the sheet to understand the trail before starting. */
+#app.tracks-active:not(.tracks-following) .tracks-card--detail {
+  width: min(580px, 100%);
+}
+
+@media (max-width: 700px) {
+  #app.tracks-active:not(.tracks-following) .tracks-card--detail {
+    max-height: min(42dvh, 500px);
+    overflow: auto;
+    border-radius: 22px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail {
+    padding: 11px 12px 12px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-toolbar {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-back {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 27px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-toolbar small {
+    font-size: 9px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-toolbar h2 {
+    margin-top: 1px;
+    font-size: 18px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-stats > div {
+    padding: 7px 3px;
+    border-radius: 11px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-stats strong {
+    font-size: 13px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-stats span {
+    margin-top: 1px;
+    font-size: 8px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-section {
+    margin-top: 8px;
+    padding: 9px 10px 7px;
+    border-radius: 13px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-section-title strong {
+    font-size: 13px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-section-title span {
+    font-size: 9px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-elevation-chart {
+    margin-top: 4px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-elevation-chart svg {
+    height: 50px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-elevation-range {
+    font-size: 9px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-start-button {
+    min-height: 44px;
+    margin-top: 8px;
+    border-radius: 13px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 430px) {
+  #app.tracks-active:not(.tracks-following) .tracks-card--detail {
+    max-height: min(39dvh, 455px);
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail {
+    padding: 9px 10px 10px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-toolbar {
+    margin-bottom: 7px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-elevation-chart svg {
+    height: 42px;
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-start-button {
+    min-height: 42px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  #app.tracks-active:not(.tracks-following) .tracks-card--detail {
+    max-height: calc(100% - 4px);
+  }
+
+  #app.tracks-active:not(.tracks-following) .tracks-detail-section {
+    display: none;
+  }
+}
