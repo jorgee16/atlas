@@ -249,7 +249,7 @@ test(
     assert.equal(route.profile, 'drive');
     assert.deepEqual(
       route.nodeIndexes,
-      [0, 3, 2]
+      [3, 2]
     );
   }
 );
