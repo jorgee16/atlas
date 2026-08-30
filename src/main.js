@@ -10,6 +10,7 @@ import "./ui/components/header/header.css";
 import "./ui/components/status-toast/status-toast.css";
 import "./ui/components/overflow-menu/overflow-menu.css";
 import './ui/atlas-ui-consistency.css';
+import './ui/navigation-light-contrast.css';
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createApp } from './app.js';
