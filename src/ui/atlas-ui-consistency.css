@@ -52,9 +52,7 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
   background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
 }
 
-/* Portrait Explore follows the active Atlas theme. The canonical responsive
- * shell historically hard-coded dark glass here, which made the search and
- * category rail stay navy even while the rest of the app was in light mode. */
+/* Portrait Explore follows the active Atlas theme. */
 @media (orientation: portrait) and (max-width: 800px) {
   body:has(#exploreWorkspace:not([hidden]))
     .app:not(.navigation-active)
@@ -132,10 +130,112 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
     box-shadow: 0 7px 16px rgba(49, 94, 251, 0.24);
   }
 
-  /* Keep the floating area-search pill visually clear of the route-planner
-   * action that occupies the lower-right corner in portrait Explore. */
-  body:has(#exploreWorkspace:not([hidden]))
-    #searchAreaBtn {
+  body:has(#exploreWorkspace:not([hidden])) #searchAreaBtn {
     transform: translateY(-14px);
+  }
+}
+
+/* Landscape shells historically used permanent dark glass. In light mode,
+ * reuse the same Atlas surface/text tokens while preserving all geometry. */
+@media (orientation: landscape) and (max-height: 600px) {
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .landscape-explore-search,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .map-header-actions,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active)
+    .map-header-actions,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-card,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-card,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-controls {
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface-solid) 95%, transparent);
+    border-color: var(--line);
+    box-shadow: var(--shadow-md);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search svg {
+    stroke: var(--text-muted);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-copy > strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-main strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-metrics strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-title strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-duration {
+    color: var(--text);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input::placeholder,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-copy > span,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-main small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-roads,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-status small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-roads,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-price,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-foot small {
+    color: var(--text-muted);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip {
+    color: var(--text-muted);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip.on {
+    color: #fff;
+    background: var(--accent);
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-route,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-status,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-metrics,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-mode-selector,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-actions .navigation-secondary-action,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-destination-bookmark {
+    color: var(--text);
+    background: var(--surface-muted);
+    border-color: var(--line);
   }
 }
