@@ -13,6 +13,7 @@ import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createApp } from './app.js';
 import { installTracksShellUI } from './features/tracks/tracks-shell-ui.js';
+import { installTracksFollowStateBridge } from './features/tracks/tracks-follow-state-bridge.js';
 
 // MapLibre GL JS 6 requires bundler consumers to provide an emitted worker
 // URL explicitly. Without this Vite/Capacitor can mount the WebGL canvas and
@@ -26,6 +27,7 @@ const root = document.querySelector('#app');
 
 window.roamApp = await createApp(root);
 installTracksShellUI(root);
+installTracksFollowStateBridge(root, window.roamApp);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener(
