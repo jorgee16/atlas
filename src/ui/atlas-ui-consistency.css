@@ -1,0 +1,53 @@
+/* Shared Atlas interaction language across Explore, Navigation and Tracks. */
+:root {
+  --atlas-control-radius: 14px;
+  --atlas-control-shadow: 0 6px 18px rgba(24, 32, 47, 0.14);
+  --atlas-control-active: var(--accent);
+  --atlas-control-danger: var(--danger, #d34848);
+}
+
+.icon-btn,
+.map-action,
+.navigation-guidance-stop,
+#app.tracks-following .tracks-start-button {
+  border-radius: var(--atlas-control-radius);
+}
+
+.icon-btn.on,
+.map-action.on,
+.app-tab.on {
+  color: #fff;
+  background: var(--atlas-control-active);
+  border-color: var(--atlas-control-active);
+}
+
+.navigation-guidance-stop,
+#app.tracks-following .tracks-start-button {
+  transition:
+    transform var(--atlas-motion-fast, 140ms) ease,
+    opacity var(--atlas-motion-fast, 140ms) ease;
+}
+
+.navigation-guidance-stop:active,
+#app.tracks-following .tracks-start-button:active {
+  transform: scale(.96);
+}
+
+#app.tracks-following .tracks-live-progress,
+.navigation-guidance-banner,
+.maplibregl-popup-content {
+  border-color: var(--line);
+}
+
+@media (max-width: 900px) {
+  .icon-btn,
+  .map-action {
+    box-shadow: var(--atlas-control-shadow);
+  }
+}
+
+html[data-atlas-theme="dark"] #app.tracks-following .tracks-live-progress,
+html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
+  border-color: rgba(255, 255, 255, .10);
+  background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+}
