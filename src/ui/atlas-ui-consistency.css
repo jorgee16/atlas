@@ -131,4 +131,11 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
     background: var(--accent);
     box-shadow: 0 7px 16px rgba(49, 94, 251, 0.24);
   }
+
+  /* Keep the floating area-search pill visually clear of the route-planner
+   * action that occupies the lower-right corner in portrait Explore. */
+  body:has(#exploreWorkspace:not([hidden]))
+    #searchAreaBtn {
+    transform: translateY(-14px);
+  }
 }
