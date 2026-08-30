@@ -51,10 +51,10 @@ test(
     const profile = navigationCameraProfile('drive');
 
     assert.deepEqual(profile, {
-      forwardFraction: 0.20,
-      forwardMaxPixels: 260,
-      pitchMin: 36,
-      pitchMax: 52
+      forwardFraction: 0.23,
+      forwardMaxPixels: 290,
+      pitchMin: 46,
+      pitchMax: 60
     });
     assert.equal(
       navigationForwardOffset({
@@ -62,7 +62,7 @@ test(
         height: 1200,
         headingUp: true
       }),
-      240
+      276
     );
     assert.equal(
       navigationForwardOffset({
@@ -70,7 +70,7 @@ test(
         height: 2000,
         headingUp: true
       }),
-      260
+      290
     );
     assert.equal(
       navigationForwardOffset({
@@ -79,7 +79,7 @@ test(
         headingUp: true,
         speed: 30
       }),
-      250
+      280
     );
 
     assert.equal(
@@ -88,7 +88,7 @@ test(
         headingUp: true,
         speed: 0
       }),
-      36
+      46
     );
     assert.equal(
       navigationPitch({
@@ -96,7 +96,7 @@ test(
         headingUp: true,
         speed: 25
       }),
-      52
+      60
     );
     assert.ok(
       navigationPitch({
@@ -106,7 +106,7 @@ test(
         progress: {
           distanceToManeuverMeters: 30
         }
-      }) < 52
+      }) < 60
     );
   }
 );
@@ -257,7 +257,7 @@ test(
     );
     assert.deepEqual(
       calls.find(([name]) => name === 'follow'),
-      ['follow', { zoom: 18, headingUp: true }]
+      ['follow', { zoom: 18, headingUp: true, forceCamera: true }]
     );
 
     compassButton.click();
@@ -271,7 +271,7 @@ test(
     );
     assert.deepEqual(
       calls.at(-1),
-      ['follow', { zoom: 18, headingUp: false }]
+      ['follow', { zoom: 18, headingUp: false, forceCamera: true }]
     );
 
     const followCallsBeforePreview =
