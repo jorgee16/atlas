@@ -131,7 +131,7 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
   }
 
   body:has(#exploreWorkspace:not([hidden])) #searchAreaBtn {
-    transform: translateY(-14px);
+    transform: translate(-82px, -14px);
   }
 }
 
