@@ -319,7 +319,7 @@ export function prependDriveSegmentToRoute(route, segmentSnap) {
       routeDistanceStartMeters: leg.routeDistanceStartMeters + distanceShift,
       routeDistanceEndMeters: leg.routeDistanceEndMeters + distanceShift,
       routeDurationStartSeconds: leg.routeDurationStartSeconds + durationShift,
-      routeDurationEndSeconds: leg.routeDurationEndMeters + durationShift
+      routeDurationEndSeconds: leg.routeDurationEndSeconds + durationShift
     }))
   ];
 
