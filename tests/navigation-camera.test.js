@@ -6,6 +6,7 @@ import {
 } from '../src/features/follow/follow-mode-controller.js';
 
 import {
+  adaptiveNavigationZoom,
   navigationCameraProfile,
   navigationForwardOffset,
   navigationPitch
@@ -46,16 +47,17 @@ class FakeButton {
 }
 
 test(
-  'car navigation camera keeps a forward-looking adaptive profile',
+  'car navigation camera adapts from long-road cruise to maneuver focus',
   () => {
     const profile = navigationCameraProfile('drive');
 
     assert.deepEqual(profile, {
       forwardFraction: 0.23,
-      forwardMaxPixels: 290,
-      pitchMin: 46,
-      pitchMax: 60
+      forwardMaxPixels: 320,
+      pitchMin: 44,
+      pitchMax: 64
     });
+
     assert.equal(
       navigationForwardOffset({
         travelMode: 'drive',
@@ -64,22 +66,14 @@ test(
       }),
       276
     );
+
     assert.equal(
       navigationForwardOffset({
         travelMode: 'drive',
         height: 2000,
         headingUp: true
       }),
-      290
-    );
-    assert.equal(
-      navigationForwardOffset({
-        travelMode: 'drive',
-        height: 1000,
-        headingUp: true,
-        speed: 30
-      }),
-      280
+      320
     );
 
     assert.equal(
@@ -88,26 +82,72 @@ test(
         headingUp: true,
         speed: 0
       }),
-      46
+      44
     );
-    assert.equal(
-      navigationPitch({
-        travelMode: 'drive',
-        headingUp: true,
-        speed: 25
-      }),
-      60
-    );
-    assert.ok(
-      navigationPitch({
-        travelMode: 'drive',
-        headingUp: true,
-        speed: 25,
-        progress: {
-          distanceToManeuverMeters: 30
-        }
-      }) < 60
-    );
+
+    const cruiseProgress = {
+      distanceToManeuverMeters: 3000,
+      nextManeuver: {
+        type: 'turn'
+      }
+    };
+
+    const roundaboutProgress = {
+      distanceToManeuverMeters: 120,
+      nextManeuver: {
+        type: 'roundabout'
+      }
+    };
+
+    const cruiseOffset = navigationForwardOffset({
+      travelMode: 'drive',
+      height: 1000,
+      headingUp: true,
+      speed: 30,
+      progress: cruiseProgress
+    });
+
+    const roundaboutOffset = navigationForwardOffset({
+      travelMode: 'drive',
+      height: 1000,
+      headingUp: true,
+      speed: 30,
+      progress: roundaboutProgress
+    });
+
+    const cruisePitch = navigationPitch({
+      travelMode: 'drive',
+      headingUp: true,
+      speed: 30,
+      progress: cruiseProgress
+    });
+
+    const roundaboutPitch = navigationPitch({
+      travelMode: 'drive',
+      headingUp: true,
+      speed: 30,
+      progress: roundaboutProgress
+    });
+
+    const cruiseZoom = adaptiveNavigationZoom({
+      travelMode: 'drive',
+      speed: 30,
+      preferredZoom: 18,
+      progress: cruiseProgress
+    });
+
+    const roundaboutZoom = adaptiveNavigationZoom({
+      travelMode: 'drive',
+      speed: 30,
+      preferredZoom: 18,
+      progress: roundaboutProgress
+    });
+
+    assert.ok(cruiseOffset > roundaboutOffset);
+    assert.ok(cruisePitch > roundaboutPitch);
+    assert.ok(cruiseZoom < roundaboutZoom);
+    assert.ok(cruiseZoom < 17);
+    assert.ok(roundaboutZoom > 17.5);
   }
 );
 
