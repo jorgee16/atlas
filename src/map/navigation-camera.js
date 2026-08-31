@@ -4,9 +4,9 @@ const clamp = (value, min, max) =>
 const NAVIGATION_CAMERA_PROFILES = Object.freeze({
   drive: Object.freeze({
     forwardFraction: 0.23,
-    forwardMaxPixels: 290,
-    pitchMin: 46,
-    pitchMax: 60
+    forwardMaxPixels: 320,
+    pitchMin: 44,
+    pitchMax: 64
   }),
   walk: Object.freeze({
     forwardFraction: 0.16,
@@ -28,11 +28,88 @@ export function navigationCameraProfile(
     });
 }
 
+const maneuverText = maneuver =>
+  [
+    maneuver?.type,
+    maneuver?.modifier,
+    maneuver?.instruction,
+    maneuver?.name
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+function maneuverContext(progress) {
+  const maneuver = progress?.nextManeuver;
+  const distance = progress?.distanceToManeuverMeters;
+
+  if (!maneuver || !Number.isFinite(distance) || distance < 0) {
+    return {
+      distance: Infinity,
+      roundabout: false,
+      complex: false
+    };
+  }
+
+  const text = maneuverText(maneuver);
+  const roundabout = /roundabout|rotary/.test(text);
+  const complex =
+    roundabout ||
+    /fork|ramp|merge|exit|sharp|u-turn|uturn/.test(text);
+
+  return {
+    distance,
+    roundabout,
+    complex
+  };
+}
+
+function drivingCruiseFactor({
+  speed,
+  progress
+}) {
+  const speedMps = Number.isFinite(speed) ? Math.max(0, speed) : 0;
+  const speedKph = speedMps * 3.6;
+  const { distance } = maneuverContext(progress);
+
+  const speedFactor = clamp((speedKph - 55) / 55, 0, 1);
+  const distanceFactor = clamp((distance - 450) / 2200, 0, 1);
+
+  return speedFactor * distanceFactor;
+}
+
+function drivingManeuverFactor({
+  speed,
+  progress
+}) {
+  const { distance, complex, roundabout } = maneuverContext(progress);
+  if (!Number.isFinite(distance)) return 0;
+
+  const speedMps = Number.isFinite(speed) ? Math.max(speed, 4) : 4;
+  const secondsToManeuver = distance / speedMps;
+  const distanceWindow = roundabout
+    ? 300
+    : complex
+      ? 250
+      : 170;
+  const timeWindow = roundabout
+    ? 24
+    : complex
+      ? 20
+      : 14;
+
+  return Math.max(
+    clamp(1 - distance / distanceWindow, 0, 1),
+    clamp(1 - secondsToManeuver / timeWindow, 0, 1)
+  );
+}
+
 export function navigationForwardOffset({
   travelMode = null,
   height = 0,
   headingUp = false,
-  speed = null
+  speed = null,
+  progress = null
 } = {}) {
   if (!headingUp || !Number.isFinite(height) || height <= 0) {
     return 0;
@@ -43,12 +120,25 @@ export function navigationForwardOffset({
 
   const speedBoost =
     travelMode === 'drive'
-      ? clamp(speedMps / 30, 0, 1) * 0.05
+      ? clamp(speedMps / 30, 0, 1) * 0.045
       : 0;
+
+  let fraction = profile.forwardFraction + speedBoost;
+
+  if (travelMode === 'drive') {
+    const cruise = drivingCruiseFactor({ speed, progress });
+    const maneuver = drivingManeuverFactor({ speed, progress });
+
+    // On a long/simple road put more map ahead of the vehicle. As a junction
+    // approaches, pull the visual focus back toward the car so the maneuver
+    // itself remains inside the useful portion of the screen.
+    fraction += cruise * 0.035;
+    fraction -= maneuver * 0.055;
+  }
 
   return Math.min(
     profile.forwardMaxPixels,
-    height * (profile.forwardFraction + speedBoost)
+    height * Math.max(0, fraction)
   );
 }
 
@@ -68,31 +158,21 @@ export function navigationPitch({
 
   const speedMps = Number.isFinite(speed) ? Math.max(0, speed) : 0;
   const speedKph = speedMps * 3.6;
-  const speedFactor = clamp(speedKph / 90, 0, 1);
+  const speedFactor = clamp(speedKph / 95, 0, 1);
+  const cruise = drivingCruiseFactor({ speed, progress });
+  const maneuver = drivingManeuverFactor({ speed, progress });
 
   let pitch =
     profile.pitchMin +
     (profile.pitchMax - profile.pitchMin) * speedFactor;
 
-  const distanceToManeuver = progress?.distanceToManeuverMeters;
-  if (Number.isFinite(distanceToManeuver) && distanceToManeuver >= 0) {
-    const maneuverFocus = clamp(1 - distanceToManeuver / 120, 0, 1);
-    pitch -= maneuverFocus * 5;
-  }
+  // Cruise gets a slightly more road-like perspective and better horizon.
+  // Maneuver focus deliberately flattens the map again for junction geometry.
+  pitch += cruise * 3;
+  pitch -= maneuver * 11;
 
-  return clamp(pitch, 42, profile.pitchMax);
+  return clamp(pitch, 40, profile.pitchMax);
 }
-
-const maneuverText = maneuver =>
-  [
-    maneuver?.type,
-    maneuver?.modifier,
-    maneuver?.instruction,
-    maneuver?.name
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
 
 function drivingBaseZoom(
   speed,
@@ -196,15 +276,15 @@ function maneuverFocus({
         ? 100
         : 70
       : complex
-        ? 220
-        : 150;
+        ? 250
+        : 170;
 
   const timeWindow =
     walking
       ? 55
       : complex
-        ? 18
-        : 13;
+        ? 20
+        : 14;
 
   const distanceRelevance =
     clamp(
@@ -240,10 +320,10 @@ function maneuverFocus({
         ? 0.7
         : 0.4
       : roundabout
-        ? 0.75
+        ? 0.85
         : complex
-          ? 0.55
-          : 0.35;
+          ? 0.65
+          : 0.4;
 
   return maximumFocus * relevance;
 }
@@ -276,9 +356,14 @@ export function adaptiveNavigationZoom({
       progress
     });
 
+  const cruiseZoomOut =
+    travelMode === 'drive'
+      ? drivingCruiseFactor({ speed, progress }) * 0.7
+      : 0;
+
   return clamp(
-    baseZoom + focus,
-    16.5,
+    baseZoom - cruiseZoomOut + focus,
+    16.2,
     19
   );
 }
