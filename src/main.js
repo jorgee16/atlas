@@ -2,6 +2,7 @@ import './styles.css';
 import './map/maplibre-navigation-ui.css';
 import './map/maplibre-touch-zoom.js';
 import './map/maplibre-nearby-layer.js';
+import './map/maplibre-follow-continuity.js';
 import './features/tracks/tracks-shell-ui.css';
 import './features/tracks/tracks-active-isolation.css';
 import './features/tracks/tracks-follow-ui.css';
