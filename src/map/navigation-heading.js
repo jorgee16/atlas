@@ -1,6 +1,6 @@
 const DEFAULT_ROUTE_WEIGHT = 0.68;
 const MIN_ROUTE_WEIGHT = 0.12;
-const MAX_ROUTE_WEIGHT = 0.84;
+const MAX_ROUTE_WEIGHT = 0.96;
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
@@ -49,7 +49,8 @@ export function carRouteHeadingWeight({
   accuracy,
   distanceFromRouteMeters,
   gpsHeading,
-  routeHeading
+  routeHeading,
+  gpsOverrideAllowed = false
 } = {}) {
   if (!Number.isFinite(routeHeading)) {
     return 0;
@@ -64,9 +65,39 @@ export function carRouteHeadingWeight({
       ? Math.max(0, speed)
       : 0;
 
-  // At low car speeds GPS course is often noisy, so the route should
-  // dominate. At normal/high road speeds the GPS course becomes more
-  // trustworthy and receives more authority.
+  const routeDistance =
+    Number.isFinite(distanceFromRouteMeters)
+      ? Math.max(0, distanceFromRouteMeters)
+      : 0;
+
+  const routeCorridor = Math.max(
+    60,
+    Number.isFinite(accuracy)
+      ? accuracy * 1.8
+      : 0
+  );
+
+  // While the car still sits inside the planned-road corridor, keep the
+  // navigation camera tied strongly to route geometry. Android GPS course can
+  // briefly flip or lag after ramps, roundabouts and slow motorway sections;
+  // one bad heading sample must never rotate the map backwards.
+  if (!gpsOverrideAllowed && routeDistance <= routeCorridor) {
+    const speedProgress = clamp(
+      (speedMetersPerSecond - 4) / 18,
+      0,
+      1
+    );
+
+    return clamp(
+      0.94 - speedProgress * 0.04,
+      0.88,
+      MAX_ROUTE_WEIGHT
+    );
+  }
+
+  // Once the adapter has confirmed a sustained deviation, progressively hand
+  // camera authority back to GPS so Atlas can follow a genuine wrong exit or
+  // opposite-direction movement rather than visually forcing the old route.
   const speedProgress = clamp(
     (speedMetersPerSecond - 3) / 12,
     0,
@@ -74,44 +105,26 @@ export function carRouteHeadingWeight({
   );
 
   let routeWeight =
-    0.78 - speedProgress * 0.18;
+    0.72 - speedProgress * 0.20;
 
   if (Number.isFinite(accuracy)) {
     if (accuracy <= 12) {
-      routeWeight -= 0.04;
+      routeWeight -= 0.05;
     } else if (accuracy >= 25) {
-      routeWeight += 0.06;
+      routeWeight += 0.05;
     }
   }
 
-  const routeDistance =
-    Number.isFinite(distanceFromRouteMeters)
-      ? Math.max(0, distanceFromRouteMeters)
-      : 0;
-
-  const routeCorridor = Math.max(
-    50,
-    Number.isFinite(accuracy)
-      ? accuracy * 1.5
-      : 0
-  );
-
-  // As the vehicle moves toward or beyond the reroute corridor, stop
-  // visually forcing the camera down the planned road. This lets GPS
-  // course take over quickly during a real deviation.
   const deviationProgress = clamp(
-    (routeDistance - routeCorridor * 0.45) /
-      (routeCorridor * 0.7),
+    (routeDistance - routeCorridor * 0.65) /
+      (routeCorridor * 0.75),
     0,
     1
   );
 
   routeWeight *=
-    1 - deviationProgress * 0.78;
+    1 - deviationProgress * 0.82;
 
-  // A large, sustained direction disagreement is another useful signal
-  // that the car may have turned away from the route. Only trust this
-  // signal once the vehicle is moving and GPS accuracy is usable.
   const disagreement = Math.abs(
     headingDelta(gpsHeading, routeHeading)
   );
@@ -120,15 +133,15 @@ export function carRouteHeadingWeight({
     speedMetersPerSecond >= 4 &&
     (!Number.isFinite(accuracy) || accuracy <= 35);
 
-  if (gpsDirectionReliable && disagreement > 35) {
+  if (gpsOverrideAllowed && gpsDirectionReliable && disagreement > 45) {
     const disagreementProgress = clamp(
-      (disagreement - 35) / 70,
+      (disagreement - 45) / 80,
       0,
       1
     );
 
     routeWeight *=
-      1 - disagreementProgress * 0.55;
+      1 - disagreementProgress * 0.68;
   }
 
   return clamp(
@@ -143,14 +156,16 @@ export function carNavigationHeading({
   routeHeading,
   speed,
   accuracy,
-  distanceFromRouteMeters
+  distanceFromRouteMeters,
+  gpsOverrideAllowed = false
 } = {}) {
   const routeWeight = carRouteHeadingWeight({
     speed,
     accuracy,
     distanceFromRouteMeters,
     gpsHeading,
-    routeHeading
+    routeHeading,
+    gpsOverrideAllowed
   });
 
   return blendHeadings(
