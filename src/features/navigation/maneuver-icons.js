@@ -40,11 +40,9 @@ const ICON_PATHS = {
     <path d="m13.5 10 3.5 3.5 3.5-3.5"></path>
   `,
   roundabout: `
-    <circle cx="12" cy="12" r="6.4"></circle>
-    <path d="M12 5.6V2.4"></path>
-    <path d="M18.4 12H22"></path>
-    <path d="M7.5 7.5 5.2 5.2"></path>
-    <path d="m17.9 8.1.5-3.9 3.8.8"></path>
+    <path d="M12 4.2a7.8 7.8 0 1 1-6.6 3.6"></path>
+    <path d="M5.1 3.9 5 8.4l4.4-.4"></path>
+    <circle cx="12" cy="12" r="2.8"></circle>
   `,
   arrive: `
     <path d="M12 22s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"></path>
