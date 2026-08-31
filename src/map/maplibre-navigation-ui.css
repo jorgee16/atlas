@@ -67,6 +67,17 @@
     line-height: 1 !important;
   }
 
+  .navigation-maneuver-tile .maneuver-icon--roundabout .maneuver-exit-number {
+    right: 50% !important;
+    bottom: 50% !important;
+    width: 24px !important;
+    height: 24px !important;
+    border: 2px solid #ffffff !important;
+    background: #ffffff !important;
+    transform: translate(50%, 50%) !important;
+    font-size: 13px !important;
+  }
+
   .navigation-maneuver-copy {
     display: grid !important;
     min-width: 0 !important;
@@ -268,92 +279,135 @@ html[data-atlas-theme="dark"] .maplibregl-popup-content .map-selection-action--n
 
 @media (orientation: landscape) and (max-height: 620px) {
   .navigation-guidance-banner {
-    top: 8px !important;
-    left: 10px !important;
-    width: min(430px, 48vw) !important;
-    padding: 9px 11px !important;
-    border-radius: 19px !important;
+    top: max(10px, env(safe-area-inset-top)) !important;
+    left: max(14px, env(safe-area-inset-left)) !important;
+    width: min(500px, 54vw) !important;
+    padding: 12px 14px !important;
+    border-radius: 21px !important;
   }
 
   .navigation-guidance-primary {
-    grid-template-columns: 52px minmax(0, 1fr) 34px !important;
-    gap: 9px !important;
+    grid-template-columns: 66px minmax(0, 1fr) 38px !important;
+    gap: 12px !important;
   }
 
   .navigation-maneuver-tile {
-    width: 52px !important;
-    height: 52px !important;
-    min-width: 52px !important;
-    border-radius: 16px !important;
+    width: 66px !important;
+    height: 66px !important;
+    min-width: 66px !important;
+    border-radius: 19px !important;
   }
 
   .navigation-maneuver-tile .maneuver-icon {
-    width: 38px !important;
-    height: 38px !important;
+    width: 48px !important;
+    height: 48px !important;
   }
 
   .navigation-maneuver-tile svg {
-    width: 35px !important;
-    height: 35px !important;
+    width: 44px !important;
+    height: 44px !important;
+    stroke-width: 2.8 !important;
   }
 
-  .navigation-maneuver-distance {
-    font-size: 20px !important;
-  }
-
-  .navigation-maneuver-road {
+  .navigation-maneuver-tile .maneuver-icon--roundabout .maneuver-exit-number {
+    width: 26px !important;
+    height: 26px !important;
     font-size: 14px !important;
   }
 
+  .navigation-maneuver-distance {
+    font-size: 29px !important;
+    line-height: .98 !important;
+  }
+
+  .navigation-maneuver-road {
+    font-size: 18px !important;
+    line-height: 1.12 !important;
+  }
+
   .navigation-guidance-stop {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
   }
 
   .navigation-lane-guidance {
-    margin-top: 7px !important;
-    padding: 6px 8px !important;
+    margin-top: 8px !important;
+    padding: 7px 9px !important;
   }
 
   .navigation-lane {
-    min-width: 32px !important;
-    height: 32px !important;
-    font-size: 21px !important;
+    min-width: 35px !important;
+    height: 35px !important;
+    font-size: 23px !important;
+  }
+
+  .navigation-following-turn {
+    margin-top: 8px !important;
+    padding-top: 8px !important;
+    font-size: 15px !important;
+  }
+
+  .navigation-following-turn strong {
+    font-size: 15px !important;
   }
 
   .app.navigation-active .navigation-journey-summary {
     right: auto !important;
-    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
     left: 50% !important;
-    width: min(620px, calc(100vw - 120px)) !important;
+    width: min(700px, calc(100vw - 160px)) !important;
     max-width: none !important;
-    min-height: 56px !important;
+    min-height: 68px !important;
     transform: translateX(-50%) !important;
-    border-radius: 18px !important;
+    border-radius: 19px !important;
   }
 
   .app.navigation-active .navigation-journey-summary > div:not(.navigation-route-progress) {
-    padding: 7px 10px 9px !important;
+    padding: 8px 12px 10px !important;
   }
 
-  .navigation-eta-summary strong,
+  .navigation-eta-summary strong {
+    font-size: 25px !important;
+    line-height: 1 !important;
+  }
+
   .navigation-route-mode-copy strong {
-    font-size: 17px !important;
+    font-size: 23px !important;
+    line-height: 1 !important;
   }
 
   .navigation-eta-summary span,
   .navigation-route-mode-copy span {
-    font-size: 9px !important;
+    margin-top: 4px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: .03em !important;
   }
 
   .app.navigation-active .navigation-journey-summary .navigation-voice-button {
-    min-width: 72px !important;
-    min-height: 56px !important;
+    min-width: 82px !important;
+    min-height: 68px !important;
+    font-size: 12px !important;
   }
 
   .app.navigation-active .map-actions {
-    right: 10px !important;
-    bottom: 76px !important;
+    right: max(12px, env(safe-area-inset-right)) !important;
+    bottom: 88px !important;
+  }
+
+  .navigation-arrival-card,
+  .navigation-guidance-approaching {
+    font-size: 16px !important;
+  }
+
+  .navigation-arrival-heading strong,
+  .navigation-guidance-approaching-copy > strong {
+    font-size: 24px !important;
+  }
+
+  .navigation-guidance-approaching-copy > span {
+    font-size: 16px !important;
+    font-weight: 800 !important;
   }
 }
