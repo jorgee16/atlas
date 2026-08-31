@@ -40,6 +40,14 @@ function validPoint(point) {
   return Number.isFinite(point?.lat) && Number.isFinite(point?.lon);
 }
 
+function progressSegmentIndex(progress = {}) {
+  return Number.isInteger(progress.pointIndex)
+    ? progress.pointIndex
+    : Number.isInteger(progress.segmentIndex)
+      ? progress.segmentIndex
+      : 0;
+}
+
 function lineFeature(points) {
   return {
     type: 'Feature',
@@ -60,9 +68,7 @@ function splitRoute(points, progress = {}) {
     0,
     Math.min(
       points.length - 1,
-      Number.isInteger(progress.segmentIndex)
-        ? progress.segmentIndex
-        : 0
+      progressSegmentIndex(progress)
     )
   );
   const fraction = Number.isFinite(progress.segmentFraction)
@@ -86,9 +92,7 @@ function routeBearing(points, progress = {}) {
     0,
     Math.min(
       points.length - 2,
-      Number.isInteger(progress.segmentIndex)
-        ? progress.segmentIndex
-        : 0
+      progressSegmentIndex(progress)
     )
   );
   const from = points[index];
@@ -412,8 +416,18 @@ export class MapLibreMapAdapter {
     };
 
     const drive = this.navigationTravelMode === 'drive';
+    const markerHeading = drive
+      ? carNavigationHeading({
+          gpsHeading: heading,
+          routeHeading: this.routeBearing,
+          speed,
+          accuracy,
+          distanceFromRouteMeters:
+            this.navigationRouteProgress?.distanceFromRouteMeters
+        })
+      : heading;
     const showHeading =
-      Number.isFinite(heading) &&
+      Number.isFinite(markerHeading) &&
       Number.isFinite(speed) &&
       speed >= MIN_HEADING_SPEED_METERS_PER_SECOND;
 
@@ -421,7 +435,7 @@ export class MapLibreMapAdapter {
       this.userMarkerElement = createElement('maplibre-user-marker');
       setUserMarkerAppearance(this.userMarkerElement, {
         drive,
-        heading,
+        heading: markerHeading,
         showHeading
       });
       this.userMarker = new this.maplibre.Marker({
@@ -433,7 +447,7 @@ export class MapLibreMapAdapter {
     } else {
       setUserMarkerAppearance(this.userMarkerElement, {
         drive,
-        heading,
+        heading: markerHeading,
         showHeading
       });
       this.userMarker.setLngLat([longitude, latitude]);
@@ -465,11 +479,22 @@ export class MapLibreMapAdapter {
     );
 
     if (this.userMarkerElement && this.lastUserPosition) {
+      const markerHeading = mode === 'drive'
+        ? carNavigationHeading({
+            gpsHeading: this.lastUserPosition.heading,
+            routeHeading: this.routeBearing,
+            speed: this.lastUserPosition.speed,
+            accuracy: this.lastUserPosition.accuracy,
+            distanceFromRouteMeters:
+              this.navigationRouteProgress?.distanceFromRouteMeters
+          })
+        : this.lastUserPosition.heading;
+
       setUserMarkerAppearance(this.userMarkerElement, {
         drive: mode === 'drive',
-        heading: this.lastUserPosition.heading,
+        heading: markerHeading,
         showHeading:
-          Number.isFinite(this.lastUserPosition.heading) &&
+          Number.isFinite(markerHeading) &&
           Number.isFinite(this.lastUserPosition.speed) &&
           this.lastUserPosition.speed >= MIN_HEADING_SPEED_METERS_PER_SECOND
       });
@@ -669,11 +694,6 @@ export class MapLibreMapAdapter {
       throw new TypeError('onUserMoveStart requires a callback.');
     }
 
-    // A pinch-to-zoom should preserve Follow and the current north-up /
-    // heading-up mode. Only gestures that deliberately move/orient the map
-    // stop following. Treating zoomstart as a user move was forcing
-    // FollowModeController.stopFollowing(), which calls setBearing(0), so
-    // every pinch snapped the map back to north-up.
     for (const eventName of [
       'dragstart',
       'rotatestart',
