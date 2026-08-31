@@ -365,7 +365,8 @@ export class MapLibreMapAdapter {
       travelMode: this.navigationTravelMode,
       height: containerHeight,
       headingUp,
-      speed: position?.speed
+      speed: position?.speed,
+      progress: this.navigationRouteProgress
     });
     const pitch = navigationPitch({
       travelMode: this.navigationTravelMode,
@@ -391,11 +392,6 @@ export class MapLibreMapAdapter {
     ) {
       setUserMarkerAppearance(this.userMarkerElement, {
         drive: true,
-        // MapLibre HTML markers are viewport-aligned. When the map is already
-        // rotated heading-up, rotating the child by the absolute world heading
-        // applies the heading twice and can make the arrow point backwards.
-        // Keep the vehicle pointing up in heading-up mode; north-up still uses
-        // the fused world heading.
         heading: this.navigationHeadingUp ? 0 : heading,
         showHeading: true
       });
