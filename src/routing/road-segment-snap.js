@@ -156,10 +156,16 @@ export function findDriveRoadSegmentSnaps(
 ) {
   const directedEdges = new Set();
   const candidates = [];
+  const effectiveHeading = Number.isFinite(heading)
+    ? heading
+    : point?.heading;
+  const effectiveSpeed = Number.isFinite(speed)
+    ? speed
+    : point?.speed;
   const useHeading =
-    Number.isFinite(heading) &&
-    Number.isFinite(speed) &&
-    speed >= 2;
+    Number.isFinite(effectiveHeading) &&
+    Number.isFinite(effectiveSpeed) &&
+    effectiveSpeed >= 2;
 
   for (const nodeSnap of candidateNodes(graph, point, maxDistanceMeters)) {
     if (
@@ -221,7 +227,7 @@ export function findDriveRoadSegmentSnaps(
         ? bearingDegrees(remainingPoints[0], remainingPoints[1])
         : bearingDegrees(points[0], points[points.length - 1]);
       const headingMismatchDegrees = useHeading
-        ? headingDifference(heading, travelHeading)
+        ? headingDifference(effectiveHeading, travelHeading)
         : 0;
 
       candidates.push({
@@ -259,9 +265,16 @@ export function findDriveRoadSegmentSnaps(
     a.remainingDistanceMeters - b.remainingDistanceMeters
   );
 
+  const directionCompatible = useHeading
+    ? candidates.filter(candidate => candidate.headingMismatchDegrees <= 110)
+    : candidates;
+  const rankedCandidates = directionCompatible.length
+    ? directionCompatible
+    : candidates;
+
   const unique = [];
   const seen = new Set();
-  for (const candidate of candidates) {
+  for (const candidate of rankedCandidates) {
     const key = `${candidate.edgeIndex}:${candidate.point.lat.toFixed(6)}:${candidate.point.lon.toFixed(6)}`;
     if (seen.has(key)) continue;
     seen.add(key);
