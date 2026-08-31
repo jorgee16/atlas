@@ -34,6 +34,7 @@ import {
 const DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS = 50;
 const DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS = 8;
 const DRIVE_ORIGIN_LINK_PENALTY_SECONDS = 5;
+const DRIVE_ORIGIN_HEADING_PENALTY_SECONDS = 70;
 
 function routeSignature(route) {
   return (route?.edgeIndexes ?? []).join(',');
@@ -64,7 +65,9 @@ export class OfflineRoutingService {
       profile = 'drive',
       avoidTolls = false,
       tollPenaltyMinutesPerEuro = 0,
-      vehicleClass = 1
+      vehicleClass = 1,
+      heading = null,
+      speed = null
     } = {}
   ) {
     if (profile !== 'drive' && profile !== 'walk') {
@@ -138,7 +141,9 @@ export class OfflineRoutingService {
             ),
             maximumCandidates: 6,
             destinationComponent:
-              destinationSnap.point.component
+              destinationSnap.point.component,
+            heading,
+            speed
           }
         );
 
@@ -184,10 +189,19 @@ export class OfflineRoutingService {
             ? DRIVE_ORIGIN_LINK_PENALTY_SECONDS
             : 0);
 
+        const headingPenalty =
+          Number.isFinite(speed) && speed >= 2
+            ? Math.pow(
+                Math.min(180, segmentSnap.headingMismatchDegrees ?? 0) / 180,
+                1.5
+              ) * DRIVE_ORIGIN_HEADING_PENALTY_SECONDS
+            : 0;
+
         const score =
           withSegment.durationSeconds +
           segmentSnap.distanceMeters * 0.35 +
-          topologyPenalty;
+          topologyPenalty +
+          headingPenalty;
 
         if (!best || score < best.score) {
           best = {
@@ -210,7 +224,9 @@ export class OfflineRoutingService {
           roadIndex: best.snap.roadIndex,
           snapStrategy: 'road-segment',
           deadEnd: best.snap.deadEnd,
-          weaklyConnected: best.snap.weaklyConnected
+          weaklyConnected: best.snap.weaklyConnected,
+          headingMismatchDegrees:
+            best.snap.headingMismatchDegrees ?? null
         };
       }
     }
@@ -372,9 +388,6 @@ export class OfflineRoutingService {
       }
     }
 
-    // Keep only one geometry for ranking, but preserve which routing policies
-    // produced that geometry. A zero toll estimate alone must never turn a
-    // Fastest route into a "No tolls" route.
     const uniqueBySignature = new Map();
 
     for (const candidate of candidates) {
