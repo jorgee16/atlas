@@ -183,6 +183,7 @@ export class MapLibreMapAdapter {
     this.routeBearing = null;
     this.navigationRouteProgress = null;
     this.navigationTravelMode = null;
+    this.navigationHeadingUp = false;
     this.navigationCameraZoom = null;
     this.navigationCameraTimestamp = null;
     this.navigationCameraHeading = null;
@@ -326,6 +327,9 @@ export class MapLibreMapAdapter {
         ? normalizeBearing(heading)
         : 0;
 
+    this.navigationHeadingUp =
+      Boolean(headingUp && Number.isFinite(heading));
+
     const requestedZoom = this.navigationTravelMode
       ? adaptiveNavigationZoom({
           travelMode: this.navigationTravelMode,
@@ -381,11 +385,28 @@ export class MapLibreMapAdapter {
       essential: true
     });
 
+    if (
+      this.navigationTravelMode === 'drive' &&
+      this.userMarkerElement
+    ) {
+      setUserMarkerAppearance(this.userMarkerElement, {
+        drive: true,
+        // MapLibre HTML markers are viewport-aligned. When the map is already
+        // rotated heading-up, rotating the child by the absolute world heading
+        // applies the heading twice and can make the arrow point backwards.
+        // Keep the vehicle pointing up in heading-up mode; north-up still uses
+        // the fused world heading.
+        heading: this.navigationHeadingUp ? 0 : heading,
+        showHeading: true
+      });
+    }
+
     return headingUp ? normalizeBearing(-bearing) : 0;
   }
 
   setBearing(bearing = 0) {
     const normalized = normalizeBearing(bearing);
+    this.navigationHeadingUp = false;
     this.map.easeTo({
       bearing: normalized,
       pitch: normalized === 0 ? 0 : this.map.getPitch?.() ?? 0,
@@ -416,7 +437,7 @@ export class MapLibreMapAdapter {
     };
 
     const drive = this.navigationTravelMode === 'drive';
-    const markerHeading = drive
+    const markerWorldHeading = drive
       ? carNavigationHeading({
           gpsHeading: heading,
           routeHeading: this.routeBearing,
@@ -426,6 +447,10 @@ export class MapLibreMapAdapter {
             this.navigationRouteProgress?.distanceFromRouteMeters
         })
       : heading;
+    const markerHeading =
+      drive && this.navigationHeadingUp
+        ? 0
+        : markerWorldHeading;
     const showHeading =
       Number.isFinite(markerHeading) &&
       Number.isFinite(speed) &&
@@ -470,6 +495,7 @@ export class MapLibreMapAdapter {
       this.navigationCameraTimestamp = null;
       this.navigationCameraHeading = null;
       this.navigationHeadingTimestamp = null;
+      this.navigationHeadingUp = false;
     }
 
     this.navigationTravelMode = mode;
@@ -479,7 +505,7 @@ export class MapLibreMapAdapter {
     );
 
     if (this.userMarkerElement && this.lastUserPosition) {
-      const markerHeading = mode === 'drive'
+      const markerWorldHeading = mode === 'drive'
         ? carNavigationHeading({
             gpsHeading: this.lastUserPosition.heading,
             routeHeading: this.routeBearing,
@@ -489,6 +515,10 @@ export class MapLibreMapAdapter {
               this.navigationRouteProgress?.distanceFromRouteMeters
           })
         : this.lastUserPosition.heading;
+      const markerHeading =
+        mode === 'drive' && this.navigationHeadingUp
+          ? 0
+          : markerWorldHeading;
 
       setUserMarkerAppearance(this.userMarkerElement, {
         drive: mode === 'drive',
