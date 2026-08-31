@@ -20,11 +20,30 @@ function distanceMeters(a, b) {
   );
 }
 
-function offsetPoint(point, bearingDegrees, distance) {
+function normalizeBearing(value) {
+  return ((Number(value) % 360) + 360) % 360;
+}
+
+function bearingDegrees(from, to) {
+  const lat1 = from.lat * Math.PI / 180;
+  const lat2 = to.lat * Math.PI / 180;
+  const deltaLon = (to.lon - from.lon) * Math.PI / 180;
+  const y = Math.sin(deltaLon) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
+  return normalizeBearing(Math.atan2(y, x) * 180 / Math.PI);
+}
+
+function headingDifference(a, b) {
+  const delta = normalizeBearing(b) - normalizeBearing(a);
+  return Math.abs(((delta + 540) % 360) - 180);
+}
+
+function offsetPoint(point, bearingDegreesValue, distance) {
   if (distance === 0) return point;
 
   const angular = distance / EARTH_RADIUS_METERS;
-  const bearing = bearingDegrees * Math.PI / 180;
+  const bearing = bearingDegreesValue * Math.PI / 180;
   const lat1 = point.lat * Math.PI / 180;
   const lon1 = point.lon * Math.PI / 180;
 
@@ -130,11 +149,17 @@ export function findDriveRoadSegmentSnaps(
   {
     maxDistanceMeters = 45,
     maximumCandidates = 6,
-    destinationComponent = null
+    destinationComponent = null,
+    heading = null,
+    speed = null
   } = {}
 ) {
   const directedEdges = new Set();
   const candidates = [];
+  const useHeading =
+    Number.isFinite(heading) &&
+    Number.isFinite(speed) &&
+    speed >= 2;
 
   for (const nodeSnap of candidateNodes(graph, point, maxDistanceMeters)) {
     if (
@@ -192,6 +217,12 @@ export function findDriveRoadSegmentSnaps(
       const toDegree = driveDegree(graph, edge.to);
       const deadEnd = fromDegree <= 1 || toDegree <= 1;
       const weaklyConnected = fromDegree <= 2 && toDegree <= 2;
+      const travelHeading = remainingPoints.length >= 2
+        ? bearingDegrees(remainingPoints[0], remainingPoints[1])
+        : bearingDegrees(points[0], points[points.length - 1]);
+      const headingMismatchDegrees = useHeading
+        ? headingDifference(heading, travelHeading)
+        : 0;
 
       candidates.push({
         point: bestProjection.point,
@@ -212,13 +243,16 @@ export function findDriveRoadSegmentSnaps(
         remainingDistanceMeters,
         remainingDurationSeconds,
         component: nodeSnap.point.component,
-        snapStrategy: 'road-segment'
+        snapStrategy: 'road-segment',
+        travelHeading,
+        headingMismatchDegrees
       });
     }
   }
 
   candidates.sort((a, b) =>
     Number(a.deadEnd) - Number(b.deadEnd) ||
+    a.headingMismatchDegrees - b.headingMismatchDegrees ||
     a.distanceMeters - b.distanceMeters ||
     Number(a.road?.link === true) - Number(b.road?.link === true) ||
     b.roadClass - a.roadClass ||
@@ -285,7 +319,7 @@ export function prependDriveSegmentToRoute(route, segmentSnap) {
       routeDistanceStartMeters: leg.routeDistanceStartMeters + distanceShift,
       routeDistanceEndMeters: leg.routeDistanceEndMeters + distanceShift,
       routeDurationStartSeconds: leg.routeDurationStartSeconds + durationShift,
-      routeDurationEndSeconds: leg.routeDurationEndSeconds + durationShift
+      routeDurationEndSeconds: leg.routeDurationEndMeters + durationShift
     }))
   ];
 
