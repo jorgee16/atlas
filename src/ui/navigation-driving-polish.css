@@ -208,20 +208,40 @@
 }
 
 /* Motorway destinations are safety-critical guidance, not decorative labels.
- * Legacy rules clamp this text and can reduce a sign such as
- * "Frielas; Loures; A8" to "Frielas…". Let the HUD grow enough to show the
- * complete signed destination in both orientations. */
+ * Legacy rules clamp this text and force the compact card to only 220px. Give
+ * the sign text real horizontal space and let the card grow vertically when a
+ * destination contains several signed places. */
+#navigationGuidance .navigation-guidance-banner.navigation-guidance-compact {
+  width: min(390px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+}
+
 #navigationGuidance .navigation-maneuver-copy {
-  min-width: 0;
+  min-width: 0 !important;
 }
 
 #navigationGuidance .navigation-maneuver-road {
-  display: block;
-  overflow: visible;
-  max-width: none;
-  white-space: normal;
-  text-overflow: clip;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: initial;
-  -webkit-line-clamp: unset;
+  display: block !important;
+  overflow: visible !important;
+  max-width: none !important;
+  max-height: none !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  -webkit-box-orient: initial !important;
+  -webkit-line-clamp: none !important;
+}
+
+#navigationGuidance .navigation-guidance-compact .navigation-guidance-primary {
+  height: auto !important;
+  min-height: 76px;
+  align-items: center;
+}
+
+@media (orientation: landscape) {
+  #navigationGuidance .navigation-guidance-banner.navigation-guidance-compact {
+    width: min(420px, calc(100vw - 180px)) !important;
+    max-width: calc(100vw - 180px) !important;
+  }
 }
