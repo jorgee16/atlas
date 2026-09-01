@@ -231,7 +231,18 @@ function countRoundaboutExits(
         leg.toNode
       )
     ) {
-      const road = graph.road(edge.road);
+      // outgoingEdges() describes graph topology, not necessarily legal
+      // driving movement. A one-way road can therefore be present here in
+      // the forbidden direction. It must never increase the roundabout exit
+      // number shown to a driver.
+      if (!edge.driveAllowed) {
+        continue;
+      }
+
+      const road = graph.road(
+        edge.road,
+        edge.geometryReversed
+      );
 
       if (
         road.roundabout ||
@@ -357,6 +368,12 @@ export class ManeuverGenerator {
         const exitRoad =
           exitLeg?.road ?? outgoing.road;
 
+        const bearingBefore =
+          bearingFromLeg(points, incoming, true);
+        const bearingAfter = exitLeg
+          ? bearingFromLeg(points, exitLeg, false)
+          : bearingFromLeg(points, outgoing, false);
+
         maneuvers.push({
           type: 'roundabout',
           modifier: 'right',
@@ -366,6 +383,13 @@ export class ManeuverGenerator {
           roadName: exitRoad.name,
           roadRef: exitRoad.ref,
           destination: exitRoad.destination,
+          bearingBefore,
+          bearingAfter,
+          turnAngleDegrees:
+            normalizedTurnDelta(
+              bearingBefore,
+              bearingAfter
+            ),
           location:
             points[outgoing.pointStartIndex],
           routePointIndex:
