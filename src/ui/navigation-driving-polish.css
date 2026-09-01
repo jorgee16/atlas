@@ -206,3 +206,22 @@
   border-left: 11px solid transparent;
   filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #fff);
 }
+
+/* Motorway destinations are safety-critical guidance, not decorative labels.
+ * Legacy rules clamp this text and can reduce a sign such as
+ * "Frielas; Loures; A8" to "Frielas…". Let the HUD grow enough to show the
+ * complete signed destination in both orientations. */
+#navigationGuidance .navigation-maneuver-copy {
+  min-width: 0;
+}
+
+#navigationGuidance .navigation-maneuver-road {
+  display: block;
+  overflow: visible;
+  max-width: none;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: initial;
+  -webkit-line-clamp: unset;
+}
