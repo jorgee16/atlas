@@ -39,11 +39,6 @@ const ICON_PATHS = {
     <path d="M7 21V10a5 5 0 0 1 10 0v3"></path>
     <path d="m13.5 10 3.5 3.5 3.5-3.5"></path>
   `,
-  roundabout: `
-    <path d="M12 4.2a7.8 7.8 0 1 1-6.6 3.6"></path>
-    <path d="M5.1 3.9 5 8.4l4.4-.4"></path>
-    <circle cx="12" cy="12" r="2.8"></circle>
-  `,
   arrive: `
     <path d="M12 22s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"></path>
     <circle cx="12" cy="10" r="2.2"></circle>
@@ -95,6 +90,30 @@ function roundaboutExitNumber(maneuver) {
   return Number.isInteger(number) && number > 0 ? number : null;
 }
 
+function normalizedAngle(value) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(-150, Math.min(150, value));
+}
+
+function roundaboutPath(maneuver) {
+  const angle = normalizedAngle(
+    Number(maneuver?.turnAngleDegrees)
+  );
+
+  // Entry is always from the bottom of the symbol. The exit arm rotates by
+  // the real before/after route angle: positive = right, zero = straight,
+  // negative = left. This mirrors the quick-glance roundabout language used
+  // by dedicated driving navigation apps much better than a generic loop.
+  return `
+    <path class="maneuver-roundabout-entry" d="M12 22V18.3"></path>
+    <circle class="maneuver-roundabout-ring" cx="12" cy="11.5" r="6.8"></circle>
+    <g class="maneuver-roundabout-exit" transform="rotate(${angle} 12 11.5)">
+      <path d="M12 4.7V1.5"></path>
+      <path d="m8.9 4.2 3.1-3.1 3.1 3.1"></path>
+    </g>
+  `;
+}
+
 export function maneuverIconSvg(
   maneuver,
   {
@@ -103,7 +122,9 @@ export function maneuverIconSvg(
   } = {}
 ) {
   const type = normalizedType(maneuver);
-  const path = ICON_PATHS[type] ?? ICON_PATHS.continue;
+  const path = type === 'roundabout'
+    ? roundaboutPath(maneuver)
+    : ICON_PATHS[type] ?? ICON_PATHS.continue;
   const exitNumber = type === 'roundabout'
     ? roundaboutExitNumber(maneuver)
     : null;
