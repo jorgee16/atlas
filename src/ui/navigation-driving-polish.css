@@ -1,7 +1,8 @@
 /* Driving-navigation polish loaded after the legacy navigation stylesheet. */
 
-/* Landscape navigation should be a compact bottom dock, not a large floating
- * panel. Keep the key numerals readable while minimizing the dark surface. */
+/* Landscape navigation is a single compact dock. Do not shrink inherited
+ * blocks; replace their layout so text cannot clip and the dark surface stays
+ * small. */
 @media (orientation: landscape) {
   #navigationGuidance .navigation-journey-summary {
     position: fixed;
@@ -9,70 +10,112 @@
     left: 50%;
     right: auto;
     bottom: 0;
-    width: min(50vw, 560px);
-    min-width: 0;
-    height: auto;
+    display: grid;
+    grid-template-columns: minmax(132px, 1fr) minmax(150px, 1fr) 52px;
+    align-items: stretch;
+    width: min(44vw, 500px);
+    min-width: 410px;
+    height: 48px;
     margin: 0;
     transform: translateX(-50%);
-    border-radius: 12px 12px 0 0;
+    border-radius: 10px 10px 0 0;
     overflow: hidden;
   }
 
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
-    min-height: 46px;
-    height: 46px;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    height: 48px;
+    margin: 0;
   }
 
   #navigationGuidance .navigation-eta-summary,
   #navigationGuidance .navigation-route-mode-summary {
-    padding-inline: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 4px 10px 5px;
+  }
+
+  #navigationGuidance .navigation-eta-summary {
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  #navigationGuidance .navigation-route-mode-summary {
+    gap: 7px;
+  }
+
+  #navigationGuidance .navigation-route-mode-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
-    font-size: clamp(21px, 1.65vw, 25px);
-    line-height: .95;
+    display: block;
+    margin: 0;
+    color: inherit;
+    font-size: clamp(20px, 1.55vw, 24px);
+    font-weight: 850;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   #navigationGuidance .navigation-eta-summary span,
   #navigationGuidance .navigation-route-mode-copy span,
   #navigationGuidance .navigation-voice-button strong {
-    margin-top: 2px;
-    font-size: 10px;
+    display: block;
+    margin: 0;
+    font-size: 9px;
+    font-weight: 750;
     line-height: 1;
-  }
-
-  #navigationGuidance .navigation-route-mode-summary {
-    gap: 6px;
+    white-space: nowrap;
   }
 
   #navigationGuidance .navigation-active-mode--compact {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    min-height: 30px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     padding: 0;
-    border-radius: 9px;
+    border-radius: 8px;
   }
 
   #navigationGuidance .navigation-active-mode-icon {
-    font-size: 16px;
+    font-size: 15px;
+    line-height: 1;
   }
 
   #navigationGuidance .navigation-voice-button {
-    width: 70px;
-    min-width: 70px;
-    padding-inline: 6px;
-    gap: 1px;
+    display: grid;
+    width: 52px;
+    min-width: 52px;
+    place-items: center;
+    padding: 0;
+    gap: 0;
   }
 
   #navigationGuidance .navigation-voice-button > span {
-    font-size: 15px;
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  #navigationGuidance .navigation-voice-button strong {
+    display: none;
   }
 
   #navigationGuidance .navigation-route-progress {
+    position: absolute;
+    right: 0;
     bottom: 0;
+    left: 0;
     height: 3px;
     border-radius: 0;
   }
@@ -80,24 +123,32 @@
 
 @media (orientation: landscape) and (max-width: 1050px) {
   #navigationGuidance .navigation-journey-summary {
-    width: min(54vw, 520px);
+    width: min(48vw, 470px);
+    min-width: 390px;
   }
 }
 
 @media (orientation: landscape) and (max-height: 560px) {
   #navigationGuidance .navigation-journey-summary {
-    width: min(52vw, 500px);
+    grid-template-columns: minmax(124px, 1fr) minmax(142px, 1fr) 48px;
+    width: min(46vw, 450px);
+    min-width: 370px;
+    height: 44px;
   }
 
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
-    min-height: 44px;
     height: 44px;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
-    font-size: 22px;
+    font-size: 20px;
+  }
+
+  #navigationGuidance .navigation-voice-button {
+    width: 48px;
+    min-width: 48px;
   }
 }
 
@@ -146,25 +197,34 @@
   font-size: 14px;
 }
 
-/* Stable MapLibre drive cursor. */
+/* Active driving navigation uses a dedicated standalone chevron rather than a
+ * white circular GPS badge. */
 .maplibre-user-marker.drive {
+  display: grid;
   box-sizing: border-box;
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, .98);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .98);
-  box-shadow: 0 3px 12px rgba(20, 30, 48, .28);
+  width: 34px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 2px 3px rgba(20, 30, 48, .35));
 }
 
 .maplibre-user-marker.drive .maplibre-user-heading {
+  display: grid;
   width: 34px;
-  height: 34px;
+  height: 38px;
+  place-items: center;
   transition: transform 160ms linear;
 }
 
 .maplibre-user-marker.drive .maplibre-user-arrow {
-  border-right-width: 8px;
-  border-bottom-width: 21px;
-  border-left-width: 8px;
+  width: 0;
+  height: 0;
+  border-right: 11px solid transparent;
+  border-bottom: 29px solid #315efb;
+  border-left: 11px solid transparent;
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #fff);
 }
