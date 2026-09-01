@@ -1,0 +1,142 @@
+/* Driving-navigation polish loaded after the legacy navigation stylesheet. */
+
+/* The bottom journey summary should feel docked to the display rather than
+ * floating over the road. Keep the readable type sizes but use less horizontal
+ * space so more map remains visible on both sides. */
+@media (orientation: landscape) {
+  #navigationGuidance .navigation-journey-summary {
+    position: fixed;
+    z-index: 1450;
+    left: 50%;
+    right: auto;
+    bottom: env(safe-area-inset-bottom, 0px);
+    width: min(64vw, 760px);
+    min-width: 560px;
+    margin: 0;
+    transform: translateX(-50%);
+    border-radius: 18px 18px 0 0;
+    overflow: visible;
+  }
+
+  #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
+  #navigationGuidance .navigation-voice-button {
+    min-height: 74px;
+  }
+
+  #navigationGuidance .navigation-eta-summary,
+  #navigationGuidance .navigation-route-mode-summary {
+    padding-inline: 20px;
+  }
+
+  #navigationGuidance .navigation-eta-summary strong,
+  #navigationGuidance .navigation-route-mode-copy strong {
+    font-size: clamp(25px, 2.1vw, 31px);
+    line-height: 1;
+  }
+
+  #navigationGuidance .navigation-eta-summary span,
+  #navigationGuidance .navigation-route-mode-copy span,
+  #navigationGuidance .navigation-voice-button strong {
+    font-size: 13px;
+    line-height: 1.05;
+  }
+
+  #navigationGuidance .navigation-route-mode-summary {
+    gap: 12px;
+  }
+
+  #navigationGuidance .navigation-active-mode--compact {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+  }
+
+  #navigationGuidance .navigation-voice-button {
+    width: 112px;
+    min-width: 112px;
+    padding-inline: 12px;
+  }
+
+  #navigationGuidance .navigation-route-progress {
+    bottom: 0;
+    border-radius: 0;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 1050px) {
+  #navigationGuidance .navigation-journey-summary {
+    width: min(70vw, 700px);
+    min-width: 500px;
+  }
+}
+
+/* Waze-like quick-glance roundabout language: a bold circle, entry stem and a
+ * distinct selected exit arm. The exit number belongs in the centre, not as a
+ * detached badge beside the symbol. */
+.maneuver-icon--roundabout {
+  position: relative;
+}
+
+.maneuver-icon--roundabout svg {
+  overflow: visible;
+}
+
+.maneuver-icon--roundabout .maneuver-roundabout-ring,
+.maneuver-icon--roundabout .maneuver-roundabout-entry,
+.maneuver-icon--roundabout .maneuver-roundabout-exit path {
+  stroke-width: 2.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.maneuver-icon--roundabout .maneuver-exit-number {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  color: currentColor;
+  background: var(--surface-solid, #fff);
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.navigation-maneuver-tile .maneuver-icon--roundabout .maneuver-exit-number {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+}
+
+/* Keep the MapLibre drive cursor visually stable. All motion/heading happens
+ * inside the dedicated heading child; the outer marker is only the position. */
+.maplibre-user-marker.drive {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, .98);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 3px 12px rgba(20, 30, 48, .28);
+}
+
+.maplibre-user-marker.drive .maplibre-user-heading {
+  width: 34px;
+  height: 34px;
+  transition: transform 160ms linear;
+}
+
+.maplibre-user-marker.drive .maplibre-user-arrow {
+  border-right-width: 8px;
+  border-bottom-width: 21px;
+  border-left-width: 8px;
+}
