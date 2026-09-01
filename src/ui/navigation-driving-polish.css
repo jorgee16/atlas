@@ -1,7 +1,7 @@
 /* Driving-navigation polish loaded after the legacy navigation stylesheet. */
 
-/* Keep the journey summary readable but genuinely compact. It should be a
- * bottom dock, not a large floating black card. */
+/* Landscape navigation should be a compact bottom dock, not a large floating
+ * panel. Keep the key numerals readable while minimizing the dark surface. */
 @media (orientation: landscape) {
   #navigationGuidance .navigation-journey-summary {
     position: fixed;
@@ -9,102 +9,100 @@
     left: 50%;
     right: auto;
     bottom: 0;
-    width: min(58vw, 650px);
+    width: min(50vw, 560px);
     min-width: 0;
     height: auto;
     margin: 0;
     transform: translateX(-50%);
-    border-radius: 14px 14px 0 0;
-    overflow: visible;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
   }
 
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
-    min-height: 54px;
-    height: 54px;
+    min-height: 46px;
+    height: 46px;
   }
 
   #navigationGuidance .navigation-eta-summary,
   #navigationGuidance .navigation-route-mode-summary {
-    padding-inline: 13px;
+    padding-inline: 10px;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
-    font-size: clamp(22px, 1.8vw, 27px);
+    font-size: clamp(21px, 1.65vw, 25px);
     line-height: .95;
   }
 
   #navigationGuidance .navigation-eta-summary span,
   #navigationGuidance .navigation-route-mode-copy span,
   #navigationGuidance .navigation-voice-button strong {
-    margin-top: 3px;
-    font-size: 11px;
+    margin-top: 2px;
+    font-size: 10px;
     line-height: 1;
   }
 
   #navigationGuidance .navigation-route-mode-summary {
-    gap: 8px;
+    gap: 6px;
   }
 
   #navigationGuidance .navigation-active-mode--compact {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    min-height: 34px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
     padding: 0;
-    border-radius: 10px;
+    border-radius: 9px;
   }
 
   #navigationGuidance .navigation-active-mode-icon {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   #navigationGuidance .navigation-voice-button {
-    width: 82px;
-    min-width: 82px;
-    padding-inline: 8px;
-    gap: 2px;
+    width: 70px;
+    min-width: 70px;
+    padding-inline: 6px;
+    gap: 1px;
   }
 
   #navigationGuidance .navigation-voice-button > span {
-    font-size: 17px;
+    font-size: 15px;
   }
 
   #navigationGuidance .navigation-route-progress {
     bottom: 0;
-    height: 4px;
+    height: 3px;
     border-radius: 0;
   }
 }
 
 @media (orientation: landscape) and (max-width: 1050px) {
   #navigationGuidance .navigation-journey-summary {
-    width: min(62vw, 600px);
-    min-width: 0;
+    width: min(54vw, 520px);
   }
 }
 
 @media (orientation: landscape) and (max-height: 560px) {
   #navigationGuidance .navigation-journey-summary {
-    width: min(60vw, 570px);
+    width: min(52vw, 500px);
   }
 
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
-    min-height: 50px;
-    height: 50px;
+    min-height: 44px;
+    height: 44px;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
-    font-size: 23px;
+    font-size: 22px;
   }
 }
 
 /* Waze-like quick-glance roundabout language: a bold circle, entry stem and a
- * distinct selected exit arm. The exit number belongs in the centre, not as a
- * detached badge beside the symbol. */
+ * distinct selected exit arm. The exit number belongs in the centre. */
 .maneuver-icon--roundabout {
   position: relative;
 }
@@ -148,8 +146,7 @@
   font-size: 14px;
 }
 
-/* Keep the MapLibre drive cursor visually stable. All motion/heading happens
- * inside the dedicated heading child; the outer marker is only the position. */
+/* Stable MapLibre drive cursor. */
 .maplibre-user-marker.drive {
   box-sizing: border-box;
   width: 40px;
