@@ -239,9 +239,46 @@
   align-items: center;
 }
 
+/* Landscape must preserve the road ahead. Keep the card narrow and allow the
+ * destination to wrap instead of consuming half of the map horizontally. */
 @media (orientation: landscape) {
   #navigationGuidance .navigation-guidance-banner.navigation-guidance-compact {
-    width: min(420px, calc(100vw - 180px)) !important;
-    max-width: calc(100vw - 180px) !important;
+    width: min(320px, calc(100vw - 190px)) !important;
+    max-width: 320px !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .navigation-guidance-primary {
+    grid-template-columns: 50px minmax(0, 1fr) 30px !important;
+    gap: 8px !important;
+    min-height: 66px !important;
+    padding: 7px 8px !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .navigation-maneuver-tile {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 14px !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .maneuver-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .navigation-maneuver-distance {
+    margin-bottom: 2px !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .navigation-maneuver-road {
+    font-size: 13px !important;
+    line-height: 1.12 !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .navigation-guidance-stop {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 10px !important;
   }
 }
