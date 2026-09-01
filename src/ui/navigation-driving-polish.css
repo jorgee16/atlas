@@ -1,73 +1,104 @@
 /* Driving-navigation polish loaded after the legacy navigation stylesheet. */
 
-/* The bottom journey summary should feel docked to the display rather than
- * floating over the road. Keep the readable type sizes but use less horizontal
- * space so more map remains visible on both sides. */
+/* Keep the journey summary readable but genuinely compact. It should be a
+ * bottom dock, not a large floating black card. */
 @media (orientation: landscape) {
   #navigationGuidance .navigation-journey-summary {
     position: fixed;
     z-index: 1450;
     left: 50%;
     right: auto;
-    bottom: env(safe-area-inset-bottom, 0px);
-    width: min(64vw, 760px);
-    min-width: 560px;
+    bottom: 0;
+    width: min(58vw, 650px);
+    min-width: 0;
+    height: auto;
     margin: 0;
     transform: translateX(-50%);
-    border-radius: 18px 18px 0 0;
+    border-radius: 14px 14px 0 0;
     overflow: visible;
   }
 
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
-    min-height: 74px;
+    min-height: 54px;
+    height: 54px;
   }
 
   #navigationGuidance .navigation-eta-summary,
   #navigationGuidance .navigation-route-mode-summary {
-    padding-inline: 20px;
+    padding-inline: 13px;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
-    font-size: clamp(25px, 2.1vw, 31px);
-    line-height: 1;
+    font-size: clamp(22px, 1.8vw, 27px);
+    line-height: .95;
   }
 
   #navigationGuidance .navigation-eta-summary span,
   #navigationGuidance .navigation-route-mode-copy span,
   #navigationGuidance .navigation-voice-button strong {
-    font-size: 13px;
-    line-height: 1.05;
+    margin-top: 3px;
+    font-size: 11px;
+    line-height: 1;
   }
 
   #navigationGuidance .navigation-route-mode-summary {
-    gap: 12px;
+    gap: 8px;
   }
 
   #navigationGuidance .navigation-active-mode--compact {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    min-height: 42px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  #navigationGuidance .navigation-active-mode-icon {
+    font-size: 18px;
   }
 
   #navigationGuidance .navigation-voice-button {
-    width: 112px;
-    min-width: 112px;
-    padding-inline: 12px;
+    width: 82px;
+    min-width: 82px;
+    padding-inline: 8px;
+    gap: 2px;
+  }
+
+  #navigationGuidance .navigation-voice-button > span {
+    font-size: 17px;
   }
 
   #navigationGuidance .navigation-route-progress {
     bottom: 0;
+    height: 4px;
     border-radius: 0;
   }
 }
 
 @media (orientation: landscape) and (max-width: 1050px) {
   #navigationGuidance .navigation-journey-summary {
-    width: min(70vw, 700px);
-    min-width: 500px;
+    width: min(62vw, 600px);
+    min-width: 0;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  #navigationGuidance .navigation-journey-summary {
+    width: min(60vw, 570px);
+  }
+
+  #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
+  #navigationGuidance .navigation-voice-button {
+    min-height: 50px;
+    height: 50px;
+  }
+
+  #navigationGuidance .navigation-eta-summary strong,
+  #navigationGuidance .navigation-route-mode-copy strong {
+    font-size: 23px;
   }
 }
 
