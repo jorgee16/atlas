@@ -180,6 +180,65 @@ test(
   }
 );
 
+test(
+  'driving HUD shows signed motorway destination for a ramp even when it has no road label',
+  () => {
+    const element = new FakeElement();
+    const guidance = new NavigationGuidance({ element, onStop: () => {} });
+
+    guidance.showRoute({
+      route: { distanceMeters: 30_000 },
+      destinationName: 'Destination',
+      travelMode: 'drive',
+      progress: {
+        distanceToManeuverMeters: 6_500,
+        remainingDistanceMeters: 22_000,
+        remainingDurationSeconds: 1_140,
+        nextManeuver: {
+          type: 'turn-right',
+          instruction: 'Take the ramp on the right toward Lisboa; A1',
+          destination: 'Lisboa; A1',
+          roadName: '',
+          roadRef: ''
+        },
+        followingManeuver: null
+      }
+    });
+
+    assert.match(element.innerHTML, /6\.5 km/);
+    assert.match(element.innerHTML, /Toward Lisboa; A1/);
+  }
+);
+
+test(
+  'driving HUD prefers exit number when routing metadata provides it',
+  () => {
+    const element = new FakeElement();
+    const guidance = new NavigationGuidance({ element, onStop: () => {} });
+
+    guidance.showRoute({
+      route: { distanceMeters: 30_000 },
+      destinationName: 'Destination',
+      travelMode: 'drive',
+      progress: {
+        distanceToManeuverMeters: 1_200,
+        remainingDistanceMeters: 12_000,
+        remainingDurationSeconds: 720,
+        nextManeuver: {
+          type: 'exit',
+          instruction: 'Take the ramp on the right toward Coimbra',
+          exitRef: '8',
+          destination: 'Coimbra',
+          roadRef: 'IC2'
+        },
+        followingManeuver: null
+      }
+    });
+
+    assert.match(element.innerHTML, /Exit 8 · Coimbra/);
+  }
+);
+
 
 test(
   'voice guidance uses the installed speech engine and announces distance',
