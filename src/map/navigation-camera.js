@@ -129,17 +129,14 @@ export function navigationForwardOffset({
     const cruise = drivingCruiseFactor({ speed, progress });
     const maneuver = drivingManeuverFactor({ speed, progress });
 
-    // On a long/simple road put more map ahead of the vehicle. As a junction
-    // approaches, pull the visual focus back toward the car so the maneuver
-    // itself remains inside the useful portion of the screen.
     fraction += cruise * 0.035;
     fraction -= maneuver * 0.055;
 
-    // Short landscape displays have a docked bottom journey HUD. Reserve a
-    // clear strip above it so the live drive cursor cannot sit underneath the
-    // summary while still preserving useful look-ahead.
+    // Short landscape displays need a much higher vehicle position because
+    // the bottom journey HUD occupies the lower band. Pull the target toward
+    // screen centre while preserving adaptive zoom/pitch and route look-ahead.
     if (height <= 650) {
-      fraction -= 0.055;
+      fraction -= 0.12;
     }
   }
 
@@ -173,8 +170,6 @@ export function navigationPitch({
     profile.pitchMin +
     (profile.pitchMax - profile.pitchMin) * speedFactor;
 
-  // Cruise gets a slightly more road-like perspective and better horizon.
-  // Maneuver focus deliberately flattens the map again for junction geometry.
   pitch += cruise * 3;
   pitch -= maneuver * 11;
 
