@@ -142,6 +142,38 @@ function updateAccuracyOverlay(adapter, renderedPosition, accuracy) {
     });
 }
 
+function renderDrivingCursor(adapter, position) {
+  if (
+    adapter?.navigationTravelMode !== 'drive' ||
+    !adapter.userMarkerElement
+  ) {
+    return;
+  }
+
+  const heading = adapter.navigationHeadingUp
+    ? 0
+    : Number.isFinite(adapter.navigationCameraHeading)
+      ? normalizeBearing(adapter.navigationCameraHeading)
+      : Number.isFinite(position?.heading)
+        ? normalizeBearing(position.heading)
+        : Number.isFinite(adapter.routeBearing)
+          ? normalizeBearing(adapter.routeBearing)
+          : 0;
+
+  // MapLibrePmtilesMapAdapter still contains a legacy Leaflet-parity cursor
+  // that wraps the drive arrow in a white circular badge. It runs after the
+  // base MapLibre adapter, so always reassert the native MapLibre drive DOM
+  // here. This also clears inline dimensions left by the legacy cursor.
+  adapter.userMarkerElement.className = 'maplibre-user-marker drive';
+  adapter.userMarkerElement.style.removeProperty('width');
+  adapter.userMarkerElement.style.removeProperty('height');
+  adapter.userMarkerElement.innerHTML = `
+    <span class="maplibre-user-heading" style="transform:rotate(${heading}deg)">
+      <span class="maplibre-user-arrow"></span>
+    </span>
+  `;
+}
+
 function renderWalkingHeading(adapter, position) {
   if (
     adapter?.navigationTravelMode !== 'walk' ||
@@ -274,6 +306,7 @@ export function installMapLibreGpsParity(adapter) {
       state.rendered.lat
     ]);
     updateAccuracyOverlay(adapter, state.rendered, state.latestAccuracy);
+    renderDrivingCursor(adapter, state.lastPosition);
     renderWalkingHeading(adapter, state.lastPosition);
 
     const latDifference = Math.abs(predictedTarget.lat - state.rendered.lat);
@@ -332,6 +365,7 @@ export function installMapLibreGpsParity(adapter) {
     }
 
     updateAccuracyOverlay(adapter, state.rendered, state.latestAccuracy);
+    renderDrivingCursor(adapter, position);
     renderWalkingHeading(adapter, position);
 
     if (state.animationFrame === null) {
@@ -353,12 +387,14 @@ export function installMapLibreGpsParity(adapter) {
       : position;
 
     const result = originalFollowPosition(smoothedPosition, options);
+    renderDrivingCursor(adapter, state.lastPosition ?? position);
     renderWalkingHeading(adapter, state.lastPosition ?? position);
     return result;
   };
 
   adapter.setNavigationTravelMode = function setNavigationTravelMode(mode = null) {
     const result = originalSetNavigationTravelMode(mode);
+    renderDrivingCursor(adapter, state.lastPosition);
     renderWalkingHeading(adapter, state.lastPosition);
     return result;
   };
