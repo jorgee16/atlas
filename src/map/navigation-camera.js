@@ -131,18 +131,29 @@ export function navigationForwardOffset({
 
     fraction += cruise * 0.035;
     fraction -= maneuver * 0.055;
+  }
 
-    // Short landscape displays need a much higher vehicle position because
-    // the bottom journey HUD occupies the lower band. Pull the target toward
-    // screen centre while preserving adaptive zoom/pitch and route look-ahead.
-    if (height <= 650) {
-      fraction -= 0.12;
-    }
+  const rawOffset =
+    height * Math.max(0, fraction);
+
+  if (travelMode === 'drive' && height <= 650) {
+    // Phone landscape: the bottom HUD is intentionally compact and docked, so
+    // keep the vehicle visibly above it instead of placing it close to the
+    // lower edge. Preserve route-context changes but cap the displacement.
+    const maneuver = drivingManeuverFactor({ speed, progress });
+    const shortScreenCap =
+      54 + (1 - maneuver) * 18;
+
+    return Math.min(
+      profile.forwardMaxPixels,
+      rawOffset,
+      shortScreenCap
+    );
   }
 
   return Math.min(
     profile.forwardMaxPixels,
-    height * Math.max(0, fraction)
+    rawOffset
   );
 }
 
