@@ -49,6 +49,41 @@ function maneuverRoad(maneuver) {
     .join(' · ');
 }
 
+function drivingManeuverLabel(maneuver) {
+  if (!maneuver) return '';
+
+  const road = maneuverRoad(maneuver);
+  const destination = String(maneuver.destination ?? '').trim();
+  const exitRef = String(
+    maneuver.exitRef ?? maneuver.junctionRef ?? ''
+  ).trim();
+
+  if (exitRef) {
+    return [
+      `Exit ${exitRef}`,
+      destination || road
+    ].filter(Boolean).join(' · ');
+  }
+
+  if (destination) {
+    const rampLike =
+      maneuver.type === 'off-ramp' ||
+      maneuver.type === 'on-ramp' ||
+      maneuver.type === 'exit' ||
+      /^Take the ramp\b/i.test(maneuver.instruction ?? '');
+
+    if (rampLike) {
+      return `Toward ${destination}`;
+    }
+
+    return road
+      ? `${road} · ${destination}`
+      : `Toward ${destination}`;
+  }
+
+  return road;
+}
+
 function laneTokens(maneuver) {
   const source = maneuver?.lanes ?? maneuver?.turnLanes ?? maneuver?.turn_lanes;
   if (!source) return [];
@@ -239,6 +274,7 @@ export class NavigationGuidance {
     const maneuver = progress.nextManeuver;
     const following = progress.followingManeuver;
     const road = maneuverRoad(maneuver);
+    const drivingLabel = drivingManeuverLabel(maneuver);
     const notice = confidenceNotice(navigationState);
     const expanded = shouldExpandGuidance(
       maneuver,
@@ -277,9 +313,9 @@ export class NavigationGuidance {
             <strong class="navigation-maneuver-distance">
               ${formatManeuverDistance(progress.distanceToManeuverMeters)}
             </strong>
-            ${travelMode === 'drive' ? (road ? `
+            ${travelMode === 'drive' ? (drivingLabel ? `
               <span class="navigation-maneuver-road">
-                ${escapeHtml(road)}
+                ${escapeHtml(drivingLabel)}
               </span>
             ` : '') : `
               <span class="navigation-maneuver-road">
@@ -301,7 +337,7 @@ export class NavigationGuidance {
               className: 'maneuver-icon maneuver-icon-small'
             })}
             ${travelMode === 'drive'
-              ? (maneuverRoad(following) ? `<strong>${escapeHtml(maneuverRoad(following))}</strong>` : '')
+              ? (drivingManeuverLabel(following) ? `<strong>${escapeHtml(drivingManeuverLabel(following))}</strong>` : '')
               : `<strong>${escapeHtml(following.instruction)}</strong>`}
           </div>
         ` : ''}
