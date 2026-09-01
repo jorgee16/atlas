@@ -73,12 +73,12 @@ function drivingManeuverLabel(maneuver) {
       /^Take the ramp\b/i.test(maneuver.instruction ?? '');
 
     if (rampLike) {
-      return `Toward ${destination}`;
+      return destination;
     }
 
     return road
       ? `${road} · ${destination}`
-      : `Toward ${destination}`;
+      : destination;
   }
 
   return road;
