@@ -134,6 +134,13 @@ export function navigationForwardOffset({
     // itself remains inside the useful portion of the screen.
     fraction += cruise * 0.035;
     fraction -= maneuver * 0.055;
+
+    // Short landscape displays have a docked bottom journey HUD. Reserve a
+    // clear strip above it so the live drive cursor cannot sit underneath the
+    // summary while still preserving useful look-ahead.
+    if (height <= 650) {
+      fraction -= 0.055;
+    }
   }
 
   return Math.min(
