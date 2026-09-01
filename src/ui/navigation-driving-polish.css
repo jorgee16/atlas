@@ -1,8 +1,8 @@
 /* Driving-navigation polish loaded after the legacy navigation stylesheet. */
 
-/* Landscape navigation is a single compact dock. Do not shrink inherited
- * blocks; replace their layout so text cannot clip and the dark surface stays
- * small. */
+/* Landscape navigation uses a content-sized bottom dock. The important values
+ * stay readable, but the dark surface must never grow just because the screen
+ * is wide. */
 @media (orientation: landscape) {
   #navigationGuidance .navigation-journey-summary {
     position: fixed;
@@ -10,13 +10,14 @@
     left: 50%;
     right: auto;
     bottom: 0;
-    display: grid;
-    grid-template-columns: minmax(132px, 1fr) minmax(150px, 1fr) 52px;
-    align-items: stretch;
-    width: min(44vw, 500px);
-    min-width: 410px;
-    height: 48px;
-    margin: 0;
+    display: grid !important;
+    grid-template-columns: auto auto 42px;
+    align-items: center;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 28px);
+    height: 44px;
+    margin: 0 !important;
     transform: translateX(-50%);
     border-radius: 10px 10px 0 0;
     overflow: hidden;
@@ -25,81 +26,73 @@
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
     box-sizing: border-box;
-    min-width: 0;
-    min-height: 0;
-    height: 48px;
-    margin: 0;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 44px !important;
+    margin: 0 !important;
   }
 
   #navigationGuidance .navigation-eta-summary,
-  #navigationGuidance .navigation-route-mode-summary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    padding: 4px 10px 5px;
-  }
-
-  #navigationGuidance .navigation-eta-summary {
-    flex-direction: column;
-    gap: 1px;
-  }
-
-  #navigationGuidance .navigation-route-mode-summary {
-    gap: 7px;
+  #navigationGuidance .navigation-route-mode-summary,
+  #navigationGuidance .navigation-route-mode-copy {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    gap: 7px !important;
+    padding: 0 12px !important;
   }
 
   #navigationGuidance .navigation-route-mode-copy {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    justify-content: center;
-    gap: 1px;
+    padding: 0 !important;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
     display: block;
-    margin: 0;
-    color: inherit;
-    font-size: clamp(20px, 1.55vw, 24px);
+    margin: 0 !important;
+    font-size: 22px;
     font-weight: 850;
-    line-height: 1;
+    line-height: 1 !important;
     white-space: nowrap;
   }
 
   #navigationGuidance .navigation-eta-summary span,
-  #navigationGuidance .navigation-route-mode-copy span,
-  #navigationGuidance .navigation-voice-button strong {
+  #navigationGuidance .navigation-route-mode-copy span {
     display: block;
-    margin: 0;
-    font-size: 9px;
+    margin: 0 !important;
+    font-size: 11px;
     font-weight: 750;
-    line-height: 1;
+    line-height: 1 !important;
     white-space: nowrap;
   }
 
+  #navigationGuidance .navigation-route-mode-copy span {
+    display: none;
+  }
+
   #navigationGuidance .navigation-active-mode--compact {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 7px;
   }
 
   #navigationGuidance .navigation-active-mode-icon {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1;
   }
 
   #navigationGuidance .navigation-voice-button {
-    display: grid;
-    width: 52px;
-    min-width: 52px;
+    display: grid !important;
+    width: 42px !important;
+    min-width: 42px !important;
     place-items: center;
-    padding: 0;
-    gap: 0;
+    padding: 0 !important;
+    gap: 0 !important;
   }
 
   #navigationGuidance .navigation-voice-button > span {
@@ -108,7 +101,7 @@
   }
 
   #navigationGuidance .navigation-voice-button strong {
-    display: none;
+    display: none !important;
   }
 
   #navigationGuidance .navigation-route-progress {
@@ -121,34 +114,19 @@
   }
 }
 
-@media (orientation: landscape) and (max-width: 1050px) {
-  #navigationGuidance .navigation-journey-summary {
-    width: min(48vw, 470px);
-    min-width: 390px;
-  }
-}
-
 @media (orientation: landscape) and (max-height: 560px) {
   #navigationGuidance .navigation-journey-summary {
-    grid-template-columns: minmax(124px, 1fr) minmax(142px, 1fr) 48px;
-    width: min(46vw, 450px);
-    min-width: 370px;
-    height: 44px;
+    height: 42px;
   }
 
   #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
   #navigationGuidance .navigation-voice-button {
-    height: 44px;
+    height: 42px !important;
   }
 
   #navigationGuidance .navigation-eta-summary strong,
   #navigationGuidance .navigation-route-mode-copy strong {
-    font-size: 20px;
-  }
-
-  #navigationGuidance .navigation-voice-button {
-    width: 48px;
-    min-width: 48px;
+    font-size: 21px;
   }
 }
 
