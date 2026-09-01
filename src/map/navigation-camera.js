@@ -104,6 +104,15 @@ function drivingManeuverFactor({
   );
 }
 
+function landscapeViewport() {
+  const width = Number(globalThis.innerWidth);
+  const height = Number(globalThis.innerHeight);
+  return Number.isFinite(width) &&
+    Number.isFinite(height) &&
+    width > height &&
+    height <= 700;
+}
+
 export function navigationForwardOffset({
   travelMode = null,
   height = 0,
@@ -183,6 +192,14 @@ export function navigationPitch({
 
   pitch += cruise * 3;
   pitch -= maneuver * 11;
+
+  if (landscapeViewport()) {
+    // A flatter cruise camera exposes more of an interchange and surrounding
+    // road network on a short landscape screen. Fade this adjustment out as a
+    // maneuver becomes imminent so exits and roundabouts still receive the
+    // existing close-up treatment.
+    pitch -= 7 * cruise * Math.pow(1 - maneuver, 2);
+  }
 
   return clamp(pitch, 40, profile.pitchMax);
 }
@@ -369,14 +386,28 @@ export function adaptiveNavigationZoom({
       progress
     });
 
-  const cruiseZoomOut =
+  const cruise =
     travelMode === 'drive'
-      ? drivingCruiseFactor({ speed, progress }) * 0.7
+      ? drivingCruiseFactor({ speed, progress })
+      : 0;
+  const maneuver =
+    travelMode === 'drive'
+      ? drivingManeuverFactor({ speed, progress })
+      : 0;
+  const cruiseZoomOut = cruise * 0.7;
+
+  // Landscape needs more situational context during steady cruise, but that
+  // extra field of view must disappear before an exit/roundabout. Squaring the
+  // maneuver remainder makes the transition decisive near the decision point
+  // while remaining smooth several hundred metres beforehand.
+  const landscapeCruiseZoomOut =
+    travelMode === 'drive' && landscapeViewport()
+      ? (0.5 + cruise * 0.25) * Math.pow(1 - maneuver, 2)
       : 0;
 
   return clamp(
-    baseZoom - cruiseZoomOut + focus,
-    16.2,
+    baseZoom - cruiseZoomOut - landscapeCruiseZoomOut + focus,
+    landscapeViewport() && travelMode === 'drive' ? 15.6 : 16.2,
     19
   );
 }
