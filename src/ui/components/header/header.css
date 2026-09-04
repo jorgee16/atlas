@@ -117,3 +117,26 @@
     transform: translateY(10px);
   }
 }
+
+/* Full-screen overlays must stay below Android/iOS system chrome too. The
+ * regions dialog previously kept a hard 16px inset, which placed its close
+ * control under the status bar on edge-to-edge Capacitor builds. */
+.regions-overlay {
+  box-sizing: border-box;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important;
+  padding-right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-left: calc(16px + env(safe-area-inset-left, 0px)) !important;
+}
+
+.regions-overlay-header #closeRegionsBtn {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  box-sizing: border-box;
+  min-width: 48px;
+  min-height: 48px;
+  place-items: center;
+  padding: 0;
+  touch-action: manipulation;
+}
