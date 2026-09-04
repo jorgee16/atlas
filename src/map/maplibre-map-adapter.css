@@ -225,13 +225,26 @@ html[data-atlas-theme="dark"] .atlas-maplibre-source-badge {
   }
 }
 
+/* Landscape workspaces occupy the upper-left part of the map (navigation
+ * planner, tracks library, etc.). Keep +/- below the top-right action group
+ * instead of pinning it under those panels. */
+@media (orientation: landscape) {
+  .atlas-maplibre-zoom-control {
+    top: max(122px, calc(env(safe-area-inset-top, 0px) + 108px));
+    right: max(16px, calc(env(safe-area-inset-right, 0px) + 14px));
+    left: auto;
+  }
+}
+
 @media (max-height: 560px) and (orientation: landscape) {
   .atlas-maplibre-source-badge {
     bottom: max(70px, calc(env(safe-area-inset-bottom, 0px) + 58px));
   }
 
   .atlas-maplibre-zoom-control {
-    top: max(112px, calc(env(safe-area-inset-top, 0px) + 96px));
+    top: max(118px, calc(env(safe-area-inset-top, 0px) + 104px));
+    right: max(16px, calc(env(safe-area-inset-right, 0px) + 14px));
+    left: auto;
   }
 
   .atlas-maplibre-zoom-control button {
