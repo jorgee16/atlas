@@ -111,3 +111,9 @@
 .map-header-actions {
   position: relative;
 }
+
+@media (orientation: landscape) {
+  .map-header-actions {
+    transform: translateY(10px);
+  }
+}
