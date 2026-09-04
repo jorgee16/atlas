@@ -113,6 +113,14 @@ function landscapeViewport() {
     height <= 700;
 }
 
+function portraitViewport() {
+  const width = Number(globalThis.innerWidth);
+  const height = Number(globalThis.innerHeight);
+  return Number.isFinite(width) &&
+    Number.isFinite(height) &&
+    height >= width;
+}
+
 export function navigationForwardOffset({
   travelMode = null,
   height = 0,
@@ -405,9 +413,23 @@ export function adaptiveNavigationZoom({
       ? (0.5 + cruise * 0.25) * Math.pow(1 - maneuver, 2)
       : 0;
 
+  // Portrait also benefits from more look-ahead than the original camera gave
+  // it. Unlike the landscape adjustment, keep part of this context even close
+  // to a maneuver so a turn at ~50-100 m does not fill the entire viewport.
+  // The maneuver focus still wins progressively; this only prevents an
+  // excessively tight decision camera.
+  const portraitContextZoomOut =
+    travelMode === 'drive' && portraitViewport()
+      ? (0.3 + cruise * 0.25) * (1 - maneuver * 0.45)
+      : 0;
+
   return clamp(
-    baseZoom - cruiseZoomOut - landscapeCruiseZoomOut + focus,
-    landscapeViewport() && travelMode === 'drive' ? 15.6 : 16.2,
+    baseZoom - cruiseZoomOut - landscapeCruiseZoomOut - portraitContextZoomOut + focus,
+    landscapeViewport() && travelMode === 'drive'
+      ? 15.6
+      : portraitViewport() && travelMode === 'drive'
+        ? 15.9
+        : 16.2,
     19
   );
 }
