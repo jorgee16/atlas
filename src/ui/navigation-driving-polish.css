@@ -239,6 +239,15 @@
   align-items: center;
 }
 
+/* In portrait active navigation, the bottom journey HUD occupies the same edge
+ * as the map action stack. Keep compass/recenter entirely above that HUD so the
+ * lower recenter control never gets clipped or hidden behind the summary. */
+@media (orientation: portrait) {
+  .app.navigation-active .map-actions {
+    bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 /* In landscape only reduce the outer card width. Do not override the inner
  * grid: legacy navigation rules already size the icon/text/close columns for
  * this orientation, and changing those columns causes the maneuver tile to
