@@ -26,6 +26,19 @@ function normalizeHeading(heading) {
   return (heading % 360 + 360) % 360;
 }
 
+function syncGpsButton(hasFix) {
+  const button = globalThis.document?.querySelector?.('#gpsBtn');
+  if (!button) return;
+
+  const active = hasFix === true;
+  button.classList.toggle('on', active);
+  button.setAttribute('aria-pressed', String(active));
+  button.setAttribute(
+    'title',
+    active ? 'Disable GPS' : 'Enable GPS'
+  );
+}
+
 function distanceMeters(a, b) {
   const lat1 = toRadians(a.latitude);
   const lat2 = toRadians(b.latitude);
@@ -79,6 +92,7 @@ export class GpsController {
     this.motionConfirmed = false;
     this.motionSpeed = 0;
     this.lastConfirmedMoveAt = null;
+    this.hasFix = false;
 
     // Atlas should begin acquiring a location fix as soon as the actual app UI
     // exists. Node/test environments do not have window/document, so unit tests
@@ -123,6 +137,8 @@ export class GpsController {
     this.motionConfirmed = false;
     this.motionSpeed = 0;
     this.lastConfirmedMoveAt = null;
+    this.hasFix = false;
+    syncGpsButton(false);
 
     this.onStatus(
       'Requesting GPS…',
@@ -146,14 +162,12 @@ export class GpsController {
       }
     }
 
-    if (this.watchId === null) {
-      return;
-    }
-
-    if (this.native) {
-      await Geolocation.clearWatch({ id: this.watchId });
-    } else {
-      navigator.geolocation.clearWatch(this.watchId);
+    if (this.watchId !== null) {
+      if (this.native) {
+        await Geolocation.clearWatch({ id: this.watchId });
+      } else {
+        navigator.geolocation.clearWatch(this.watchId);
+      }
     }
 
     this.watchId = null;
@@ -163,6 +177,8 @@ export class GpsController {
     this.motionConfirmed = false;
     this.motionSpeed = 0;
     this.lastConfirmedMoveAt = null;
+    this.hasFix = false;
+    syncGpsButton(false);
   }
 
   async #startNative() {
@@ -170,6 +186,8 @@ export class GpsController {
       const permissions = await Geolocation.requestPermissions();
 
       if (permissions.location !== 'granted') {
+        this.hasFix = false;
+        syncGpsButton(false);
         this.onStatus(
           'Precise GPS required',
           'Enable precise location for navigation.'
@@ -206,6 +224,8 @@ export class GpsController {
       typeof navigator === 'undefined' ||
       !('geolocation' in navigator)
     ) {
+      this.hasFix = false;
+      syncGpsButton(false);
       this.onStatus(
         'GPS unavailable',
         'This browser does not provide geolocation.'
@@ -235,6 +255,11 @@ export class GpsController {
 
     if (![latitude, longitude, accuracy].every(Number.isFinite)) {
       return;
+    }
+
+    if (!this.hasFix) {
+      this.hasFix = true;
+      syncGpsButton(true);
     }
 
     if (accuracy > 150) {
@@ -348,6 +373,10 @@ export class GpsController {
       2: 'Your location could not be determined.',
       3: 'GPS request timed out.'
     };
+
+    if (!this.hasFix) {
+      syncGpsButton(false);
+    }
 
     this.onStatus(
       'GPS unavailable',
