@@ -206,7 +206,8 @@ test(
     });
 
     assert.match(element.innerHTML, /6\.5 km/);
-    assert.match(element.innerHTML, /Toward Lisboa; A1/);
+    assert.match(element.innerHTML, /Lisboa; A1/);
+    assert.doesNotMatch(element.innerHTML, /Toward Lisboa; A1/);
   }
 );
 
