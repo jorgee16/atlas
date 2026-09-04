@@ -114,7 +114,8 @@
 
 @media (orientation: landscape) {
   .map-header-actions {
-    transform: translateY(10px);
+    transform: none;
+    margin-top: 28px;
   }
 }
 
