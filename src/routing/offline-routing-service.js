@@ -30,14 +30,97 @@ import {
   findDriveRoadSegmentSnaps,
   prependDriveSegmentToRoute
 } from './road-segment-snap.js';
+import {
+  distanceMeters
+} from '../features/navigation/navigation-geometry.js';
 
 const DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS = 50;
 const DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS = 8;
 const DRIVE_ORIGIN_LINK_PENALTY_SECONDS = 5;
 const DRIVE_ORIGIN_HEADING_PENALTY_SECONDS = 70;
+const WALK_SPEED_METERS_PER_SECOND = 1.4;
+const ROUTE_POINT_EPSILON_METERS = 0.05;
 
 function routeSignature(route) {
   return (route?.edgeIndexes ?? []).join(',');
+}
+
+function appendDistinctRoutePoint(points, point) {
+  if (
+    !Number.isFinite(point?.lat) ||
+    !Number.isFinite(point?.lon)
+  ) {
+    return;
+  }
+
+  const previous = points.at(-1);
+  if (
+    !previous ||
+    distanceMeters(previous, point) > ROUTE_POINT_EPSILON_METERS
+  ) {
+    points.push({
+      lat: point.lat,
+      lon: point.lon
+    });
+  }
+}
+
+function expandZeroEdgeWalkRoute(
+  route,
+  {
+    origin,
+    destination,
+    originSnap,
+    destinationSnap
+  }
+) {
+  if (
+    (route?.edgeIndexes?.length ?? 0) > 0 ||
+    (route?.points?.length ?? 0) > 1
+  ) {
+    return route;
+  }
+
+  const points = [];
+
+  appendDistinctRoutePoint(points, origin);
+
+  appendDistinctRoutePoint(
+    points,
+    route?.points?.[0] ??
+      originSnap?.point ??
+      destinationSnap?.point
+  );
+
+  appendDistinctRoutePoint(points, destination);
+
+  // Extremely close but distinct planner points can collapse under the
+  // epsilon above. A drawable route still needs two coordinates.
+  if (points.length === 1) {
+    points.push({ ...points[0] });
+  }
+
+  let routeDistanceMeters = 0;
+
+  for (
+    let index = 1;
+    index < points.length;
+    index += 1
+  ) {
+    routeDistanceMeters += distanceMeters(
+      points[index - 1],
+      points[index]
+    );
+  }
+
+  return {
+    ...route,
+    points,
+    distanceMeters: routeDistanceMeters,
+    durationSeconds:
+      routeDistanceMeters /
+      WALK_SPEED_METERS_PER_SECOND
+  };
 }
 
 export class OfflineRoutingService {
@@ -278,10 +361,27 @@ export class OfflineRoutingService {
       );
     }
 
+    // Very short walks can snap both planner endpoints to the same graph node.
+    // A* correctly returns a zero-edge route in that case, but a one-point
+    // LineString cannot be rendered. Preserve the real planner endpoints and
+    // the shared road node so nearby walks remain drawable and startable.
+    const normalizedRoute =
+      profile === 'walk'
+        ? expandZeroEdgeWalkRoute(
+            route,
+            {
+              origin,
+              destination,
+              originSnap,
+              destinationSnap
+            }
+          )
+        : route;
+
     const calibratedRoute =
       profile === 'drive'
-        ? calibrateDriveEta(route)
-        : route;
+        ? calibrateDriveEta(normalizedRoute)
+        : normalizedRoute;
 
     calibratedRoute.cumulativeDistances =
       routeCumulativeDistances(
@@ -307,14 +407,14 @@ export class OfflineRoutingService {
         profile === 'drive'
           ? summarizeRouteRoadRefs(
               dataset.graph,
-              route
+              normalizedRoute
             )
           : [],
       tolls:
         profile === 'drive'
           ? estimateRouteTolls(
               dataset.graph,
-              route,
+              normalizedRoute,
               { vehicleClass }
             )
           : {
