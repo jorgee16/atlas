@@ -9,10 +9,10 @@ const NAVIGATION_CAMERA_PROFILES = Object.freeze({
     pitchMax: 64
   }),
   walk: Object.freeze({
-    forwardFraction: 0.16,
-    forwardMaxPixels: 140,
-    pitchMin: 0,
-    pitchMax: 18
+    forwardFraction: 0.24,
+    forwardMaxPixels: 220,
+    pitchMin: 30,
+    pitchMax: 38
   })
 });
 
@@ -154,9 +154,6 @@ export function navigationForwardOffset({
     height * Math.max(0, fraction);
 
   if (travelMode === 'drive' && height <= 650) {
-    // Phone landscape: the bottom HUD is intentionally compact and docked, so
-    // keep the vehicle visibly above it instead of placing it close to the
-    // lower edge. Preserve route-context changes but cap the displacement.
     const maneuver = drivingManeuverFactor({ speed, progress });
     const shortScreenCap =
       54 + (1 - maneuver) * 18;
@@ -184,6 +181,21 @@ export function navigationPitch({
 
   const profile = navigationCameraProfile(travelMode);
 
+  if (travelMode === 'walk') {
+    const distance = maneuverContext(progress).distance;
+    const closeTurn = Number.isFinite(distance)
+      ? clamp(1 - distance / 80, 0, 1)
+      : 0;
+
+    // Walking benefits from a clear look-ahead, but flatten slightly close to
+    // a turn so the immediate junction remains easy to read.
+    return clamp(
+      profile.pitchMax - closeTurn * 6,
+      profile.pitchMin,
+      profile.pitchMax
+    );
+  }
+
   if (travelMode !== 'drive') {
     return profile.pitchMin;
   }
@@ -202,10 +214,6 @@ export function navigationPitch({
   pitch -= maneuver * 11;
 
   if (landscapeViewport()) {
-    // A flatter cruise camera exposes more of an interchange and surrounding
-    // road network on a short landscape screen. Fade this adjustment out as a
-    // maneuver becomes imminent so exits and roundabouts still receive the
-    // existing close-up treatment.
     pitch -= 7 * cruise * Math.pow(1 - maneuver, 2);
   }
 
@@ -258,7 +266,9 @@ function drivingBaseZoom(
 function walkingBaseZoom(
   preferredZoom
 ) {
-  return preferredZoom + 0.35;
+  // Walking should expose several upcoming dotted-route segments rather than
+  // magnifying the immediate few metres around the user marker.
+  return preferredZoom - 0.3;
 }
 
 function maneuverFocus({
@@ -355,8 +365,8 @@ function maneuverFocus({
   const maximumFocus =
     walking
       ? complex
-        ? 0.7
-        : 0.4
+        ? 0.45
+        : 0.25
       : roundabout
         ? 0.85
         : complex
@@ -404,20 +414,11 @@ export function adaptiveNavigationZoom({
       : 0;
   const cruiseZoomOut = cruise * 0.7;
 
-  // Landscape needs more situational context during steady cruise, but that
-  // extra field of view must disappear before an exit/roundabout. Squaring the
-  // maneuver remainder makes the transition decisive near the decision point
-  // while remaining smooth several hundred metres beforehand.
   const landscapeCruiseZoomOut =
     travelMode === 'drive' && landscapeViewport()
       ? (0.5 + cruise * 0.25) * Math.pow(1 - maneuver, 2)
       : 0;
 
-  // Portrait also benefits from more look-ahead than the original camera gave
-  // it. Unlike the landscape adjustment, keep part of this context even close
-  // to a maneuver so a turn at ~50-100 m does not fill the entire viewport.
-  // The maneuver focus still wins progressively; this only prevents an
-  // excessively tight decision camera.
   const portraitContextZoomOut =
     travelMode === 'drive' && portraitViewport()
       ? (0.3 + cruise * 0.25) * (1 - maneuver * 0.45)
@@ -425,11 +426,13 @@ export function adaptiveNavigationZoom({
 
   return clamp(
     baseZoom - cruiseZoomOut - landscapeCruiseZoomOut - portraitContextZoomOut + focus,
-    landscapeViewport() && travelMode === 'drive'
-      ? 15.6
-      : portraitViewport() && travelMode === 'drive'
-        ? 15.9
-        : 16.2,
+    travelMode === 'walk'
+      ? 15.7
+      : landscapeViewport() && travelMode === 'drive'
+        ? 15.6
+        : portraitViewport() && travelMode === 'drive'
+          ? 15.9
+          : 16.2,
     19
   );
 }
