@@ -47,6 +47,7 @@ const DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS = 8;
 const DRIVE_ORIGIN_LINK_PENALTY_SECONDS = 5;
 const DRIVE_ORIGIN_HEADING_PENALTY_SECONDS = 70;
 const WALK_SPEED_METERS_PER_SECOND = 1.4;
+const WALK_DESTINATION_ACCESS_TOLERANCE_METERS = 12;
 
 function routeSignature(route) {
   return (route?.edgeIndexes ?? []).join(',');
@@ -390,35 +391,58 @@ export class OfflineRoutingService {
 
       let bestWalk = null;
 
-      for (const destinationSegmentSnap of destinationSegmentSnaps) {
-        const candidateRoute = await router.route(
-          originSnap.node,
-          destinationSegmentSnap.node,
-          {
-            signal,
-            profile
-          }
+      const nearestWalkAccessDistance =
+        destinationSegmentSnaps.length
+          ? destinationSegmentSnaps[0].distanceMeters
+          : Infinity;
+
+      const preferredDestinationSnaps =
+        destinationSegmentSnaps.filter(
+          snap =>
+            snap.distanceMeters <=
+            nearestWalkAccessDistance +
+              WALK_DESTINATION_ACCESS_TOLERANCE_METERS
         );
 
-        if (!candidateRoute) continue;
+      const destinationSnapGroups = [
+        preferredDestinationSnaps,
+        destinationSegmentSnaps
+      ];
 
-        const projectedRoute =
-          appendWalkSegmentToRoute(
-            candidateRoute,
-            destinationSegmentSnap
+      for (const snapGroup of destinationSnapGroups) {
+        if (bestWalk || !snapGroup.length) continue;
+
+        for (const destinationSegmentSnap of snapGroup) {
+          const candidateRoute = await router.route(
+            originSnap.node,
+            destinationSegmentSnap.node,
+            {
+              signal,
+              profile
+            }
           );
 
-        const score =
-          projectedRoute.durationSeconds +
-          destinationSegmentSnap.distanceMeters /
-            WALK_SPEED_METERS_PER_SECOND;
+          if (!candidateRoute) continue;
 
-        if (!bestWalk || score < bestWalk.score) {
-          bestWalk = {
-            score,
-            route: projectedRoute,
-            destinationSnap: destinationSegmentSnap
-          };
+          const projectedRoute =
+            appendWalkSegmentToRoute(
+              candidateRoute,
+              destinationSegmentSnap
+            );
+
+          // Once Atlas has limited the candidates to the closest legal access
+          // points, choose the quickest route among them. This prevents a
+          // visibly worse endpoint from winning merely because it saves a few
+          // seconds of walking before the destination.
+          const score = projectedRoute.durationSeconds;
+
+          if (!bestWalk || score < bestWalk.score) {
+            bestWalk = {
+              score,
+              route: projectedRoute,
+              destinationSnap: destinationSegmentSnap
+            };
+          }
         }
       }
 
