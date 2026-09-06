@@ -91,11 +91,48 @@
     width: auto !important;
   }
 
+  /* Treat Atlas + destination as one coordinated top row. The old planner
+   * assumed the destination card owned the whole left side, which made it
+   * stretch awkwardly once Atlas was restored. */
   body:has(#navigationWorkspace:not([hidden]))
     .navigation-planner--search .navigation-search-card,
   body:has(#navigationWorkspace:not([hidden]))
     .navigation-planner--preview .navigation-preview-topbar {
     left: calc(200px + env(safe-area-inset-left, 0px)) !important;
+    width: min(390px, 35vw) !important;
+    max-width: min(390px, 35vw) !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-confirm-main {
+    min-height: 48px !important;
+    padding: 7px 10px !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-confirm-copy {
+    min-width: 0 !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-confirm-copy > strong,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-confirm-copy > span {
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 1000px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--search .navigation-search-card,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-topbar {
+    left: calc(194px + env(safe-area-inset-left, 0px)) !important;
+    width: min(340px, 34vw) !important;
+    max-width: min(340px, 34vw) !important;
   }
 }
 
@@ -105,5 +142,7 @@
   body:has(#navigationWorkspace:not([hidden]))
     .navigation-planner--preview .navigation-preview-topbar {
     left: calc(184px + env(safe-area-inset-left, 0px)) !important;
+    width: min(300px, 33vw) !important;
+    max-width: min(300px, 33vw) !important;
   }
 }
