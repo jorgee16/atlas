@@ -103,12 +103,21 @@ function render(adapter, state, now = performance.now()) {
   const zoom = adapter.map?.getZoom?.();
   const pitch = adapter.map?.getPitch?.();
   const bearing = adapter.map?.getBearing?.();
+  const rawDelta = finite(state.rawProviderDeltaMs)
+    ? `${Math.round(state.rawProviderDeltaMs)} ms`
+    : '—';
+  const callbackDelta = finite(state.rawCallbackDeltaMs)
+    ? `${Math.round(state.rawCallbackDeltaMs)} ms`
+    : '—';
 
   element.innerHTML = `
     <strong>GPS diagnostics</strong>
     <span>Renderer MapLibre</span>
     <span>FPS ${state.fps.toFixed(0)}</span>
-    <span>GPS ${state.gpsHz.toFixed(1)} Hz</span>
+    <span>Raw GPS ${state.rawGpsHz.toFixed(2)} Hz · ${state.rawSource}</span>
+    <span>Raw Δ ${rawDelta}</span>
+    <span>Callback Δ ${callbackDelta}</span>
+    <span>Map updates ${state.mapUpdateHz.toFixed(2)} Hz</span>
     <span>Acc ${finite(position?.accuracy) ? `${position.accuracy.toFixed(1)} m` : '—'}</span>
     <span>Speed ${speedKmh === null ? '—' : `${speedKmh.toFixed(1)} km/h`}</span>
     <span>Head ${heading === null ? '—' : `${Math.round(heading)}°`}</span>
@@ -137,14 +146,67 @@ export function installMapLibreGpsDiagnostics(adapter) {
   const state = {
     latestPosition: null,
     latestFixTimestamp: null,
-    gpsWindowStart: null,
-    gpsFixCount: 0,
-    gpsHz: 0,
+    mapWindowStart: null,
+    mapUpdateCount: 0,
+    mapUpdateHz: 0,
+    rawWindowStart: null,
+    rawFixCount: 0,
+    rawGpsHz: 0,
+    rawSource: '—',
+    rawProviderTimestamp: null,
+    rawCallbackTimestamp: null,
+    rawProviderDeltaMs: null,
+    rawCallbackDeltaMs: null,
     frameWindowStart: null,
     frameCount: 0,
     fps: 0,
     animationFrame: null
   };
+
+  const onRawGpsFix = event => {
+    const detail = event?.detail ?? {};
+    const providerTimestamp = detail.providerTimestamp;
+    const callbackTimestamp = detail.callbackReceivedAt;
+
+    if (finite(providerTimestamp) && finite(state.rawProviderTimestamp)) {
+      const delta = providerTimestamp - state.rawProviderTimestamp;
+      state.rawProviderDeltaMs = delta > 0 ? delta : null;
+    }
+
+    if (finite(callbackTimestamp) && finite(state.rawCallbackTimestamp)) {
+      const delta = callbackTimestamp - state.rawCallbackTimestamp;
+      state.rawCallbackDeltaMs = delta > 0 ? delta : null;
+    }
+
+    if (finite(providerTimestamp)) {
+      state.rawProviderTimestamp = providerTimestamp;
+    }
+    if (finite(callbackTimestamp)) {
+      state.rawCallbackTimestamp = callbackTimestamp;
+    }
+
+    state.rawSource = detail.source ?? 'unknown';
+
+    const now = performance.now();
+    if (state.rawWindowStart === null) {
+      state.rawWindowStart = now;
+      state.rawFixCount = 0;
+    }
+
+    state.rawFixCount += 1;
+    const elapsed = now - state.rawWindowStart;
+    if (elapsed >= 1200) {
+      state.rawGpsHz = state.rawFixCount * 1000 / elapsed;
+      state.rawFixCount = 0;
+      state.rawWindowStart = now;
+    }
+
+    if (adapter.gpsDiagnosticsVisible) {
+      render(adapter, state, now);
+    }
+  };
+
+  globalThis.addEventListener?.('atlasrawgpsfix', onRawGpsFix);
 
   const frame = timestamp => {
     state.animationFrame = null;
@@ -189,17 +251,17 @@ export function installMapLibreGpsDiagnostics(adapter) {
     state.latestPosition = position ? { ...position } : null;
     state.latestFixTimestamp = now;
 
-    if (state.gpsWindowStart === null) {
-      state.gpsWindowStart = now;
-      state.gpsFixCount = 0;
+    if (state.mapWindowStart === null) {
+      state.mapWindowStart = now;
+      state.mapUpdateCount = 0;
     }
 
-    state.gpsFixCount += 1;
-    const elapsed = now - state.gpsWindowStart;
+    state.mapUpdateCount += 1;
+    const elapsed = now - state.mapWindowStart;
     if (elapsed >= 1200) {
-      state.gpsHz = state.gpsFixCount * 1000 / elapsed;
-      state.gpsFixCount = 0;
-      state.gpsWindowStart = now;
+      state.mapUpdateHz = state.mapUpdateCount * 1000 / elapsed;
+      state.mapUpdateCount = 0;
+      state.mapWindowStart = now;
     }
 
     const result = originalUpdateUserLocation(position, firstFix);
@@ -229,9 +291,16 @@ export function installMapLibreGpsDiagnostics(adapter) {
   };
 
   adapter.resetGpsDiagnostics = function resetGpsDiagnostics() {
-    state.gpsWindowStart = null;
-    state.gpsFixCount = 0;
-    state.gpsHz = 0;
+    state.mapWindowStart = null;
+    state.mapUpdateCount = 0;
+    state.mapUpdateHz = 0;
+    state.rawWindowStart = null;
+    state.rawFixCount = 0;
+    state.rawGpsHz = 0;
+    state.rawProviderTimestamp = null;
+    state.rawCallbackTimestamp = null;
+    state.rawProviderDeltaMs = null;
+    state.rawCallbackDeltaMs = null;
     state.frameWindowStart = null;
     state.frameCount = 0;
     state.fps = 0;
