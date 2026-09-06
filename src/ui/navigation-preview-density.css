@@ -1,0 +1,197 @@
+/* Portrait route-preview density pass.
+ *
+ * Route preview is planning chrome, not a bottom sheet. Keep destination,
+ * route summary, travel mode and Start/Search available, but return the rest
+ * of the viewport to the map. Landscape owns its separate dock layout in
+ * styles.css and is intentionally untouched here. */
+@media (orientation: portrait) and (max-width: 800px) {
+  .navigation-planner--preview .navigation-confirm-card--preview {
+    box-sizing: border-box;
+    gap: 5px !important;
+    max-height: min(37dvh, 350px);
+    padding: 8px !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 18px !important;
+  }
+
+  .navigation-planner--preview .navigation-confirm-kicker {
+    display: none !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-topbar {
+    min-height: 0 !important;
+  }
+
+  .navigation-planner--preview .navigation-confirm-main {
+    grid-template-columns: 26px minmax(0, 1fr) auto !important;
+    gap: 7px !important;
+    min-height: 40px !important;
+    padding: 0 2px !important;
+  }
+
+  .navigation-planner--preview .navigation-destination-pin {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+  }
+
+  .navigation-planner--preview .navigation-confirm-copy {
+    gap: 0 !important;
+  }
+
+  .navigation-planner--preview .navigation-confirm-copy > strong {
+    overflow: hidden;
+    font-size: 16px !important;
+    line-height: 1.08 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The POI type/address fragment is secondary during route selection. One
+   * short line is enough and avoids spending another row on metadata. */
+  .navigation-planner--preview .navigation-confirm-copy > span {
+    overflow: hidden;
+    max-height: 14px;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .navigation-planner--preview .navigation-destination-bookmark {
+    min-width: 40px !important;
+    min-height: 40px !important;
+    padding: 0 7px !important;
+    font-size: 10px !important;
+    border-radius: 11px !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-controls {
+    gap: 5px !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-status,
+  .navigation-planner--preview .navigation-preview-metrics,
+  .navigation-planner--preview .navigation-single-drive-route {
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 7px 9px !important;
+    border-radius: 12px !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-status {
+    gap: 8px !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-status strong {
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-status small {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-retry {
+    min-height: 36px !important;
+    margin-top: 5px !important;
+    padding: 0 12px !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-metrics {
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .navigation-planner--preview .navigation-preview-metrics strong,
+  .navigation-planner--preview .navigation-single-drive-main strong {
+    font-size: 17px !important;
+    line-height: 1 !important;
+  }
+
+  .navigation-planner--preview .navigation-preview-metrics small,
+  .navigation-planner--preview .navigation-single-drive-main small {
+    font-size: 9px !important;
+  }
+
+  .navigation-planner--preview .navigation-single-drive-route {
+    gap: 4px !important;
+  }
+
+  .navigation-planner--preview .navigation-single-drive-main {
+    gap: 7px !important;
+  }
+
+  .navigation-planner--preview .navigation-single-drive-roads {
+    display: none !important;
+  }
+
+  .navigation-planner--preview .navigation-single-drive-toll {
+    padding: 3px 7px !important;
+    font-size: 9px !important;
+  }
+
+  .navigation-planner--preview .navigation-mode-choice {
+    gap: 3px !important;
+    margin: 0 !important;
+  }
+
+  .navigation-planner--preview .navigation-mode-choice-label {
+    display: none !important;
+  }
+
+  .navigation-planner--preview .navigation-mode-selector {
+    box-sizing: border-box;
+    min-height: 44px !important;
+    padding: 3px !important;
+    border-radius: 12px !important;
+  }
+
+  .navigation-planner--preview .navigation-mode-selector button {
+    min-height: 38px !important;
+    padding-block: 4px !important;
+  }
+
+  .navigation-planner--preview .navigation-drive-options {
+    gap: 4px !important;
+    margin: 0 !important;
+  }
+
+  .navigation-planner--preview .navigation-drive-option {
+    min-height: 42px !important;
+    padding: 6px 8px !important;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions {
+    grid-template-columns: minmax(0, .75fr) minmax(0, 1.45fr) !important;
+    gap: 6px !important;
+    margin-top: 1px !important;
+  }
+
+  .navigation-planner--preview .navigation-confirm-actions button {
+    box-sizing: border-box;
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 0 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .navigation-planner--preview .navigation-start-button > small {
+    display: none !important;
+  }
+
+  .navigation-planner--preview .navigation-start-button > span,
+  .navigation-planner--preview .navigation-secondary-action {
+    font-size: 13px !important;
+  }
+
+  .navigation-planner--preview .navigation-planner-feedback,
+  .navigation-planner--preview .navigation-transit-availability {
+    margin: 0 !important;
+    padding: 5px 8px !important;
+    font-size: 9px !important;
+  }
+}
