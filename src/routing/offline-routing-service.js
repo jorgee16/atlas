@@ -31,6 +31,9 @@ import {
   prependDriveSegmentToRoute
 } from './road-segment-snap.js';
 import {
+  buildShortWalkGeometry
+} from './walk-segment-snap.js';
+import {
   distanceMeters
 } from '../features/navigation/navigation-geometry.js';
 
@@ -39,35 +42,15 @@ const DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS = 8;
 const DRIVE_ORIGIN_LINK_PENALTY_SECONDS = 5;
 const DRIVE_ORIGIN_HEADING_PENALTY_SECONDS = 70;
 const WALK_SPEED_METERS_PER_SECOND = 1.4;
-const ROUTE_POINT_EPSILON_METERS = 0.05;
 
 function routeSignature(route) {
   return (route?.edgeIndexes ?? []).join(',');
 }
 
-function appendDistinctRoutePoint(points, point) {
-  if (
-    !Number.isFinite(point?.lat) ||
-    !Number.isFinite(point?.lon)
-  ) {
-    return;
-  }
-
-  const previous = points.at(-1);
-  if (
-    !previous ||
-    distanceMeters(previous, point) > ROUTE_POINT_EPSILON_METERS
-  ) {
-    points.push({
-      lat: point.lat,
-      lon: point.lon
-    });
-  }
-}
-
 function expandZeroEdgeWalkRoute(
   route,
   {
+    graph,
     origin,
     destination,
     originSnap,
@@ -81,44 +64,41 @@ function expandZeroEdgeWalkRoute(
     return route;
   }
 
-  const points = [];
+  const sharedNode =
+    originSnap?.node ??
+    destinationSnap?.node ??
+    null;
 
-  appendDistinctRoutePoint(points, origin);
-
-  appendDistinctRoutePoint(
-    points,
-    route?.points?.[0] ??
-      originSnap?.point ??
-      destinationSnap?.point
-  );
-
-  appendDistinctRoutePoint(points, destination);
-
-  // Extremely close but distinct planner points can collapse under the
-  // epsilon above. A drawable route still needs two coordinates.
-  if (points.length === 1) {
-    points.push({ ...points[0] });
-  }
-
-  let routeDistanceMeters = 0;
-
-  for (
-    let index = 1;
-    index < points.length;
-    index += 1
-  ) {
-    routeDistanceMeters += distanceMeters(
-      points[index - 1],
-      points[index]
+  const roadGeometry =
+    buildShortWalkGeometry(
+      graph,
+      origin,
+      destination,
+      sharedNode
     );
+
+  if (roadGeometry) {
+    return {
+      ...route,
+      ...roadGeometry
+    };
   }
+
+  // Defensive fallback only. The normal zero-edge case is handled above from
+  // actual walkable road geometry; this prevents a renderer crash if an old or
+  // malformed routing package contains an isolated shared node.
+  const directDistance =
+    distanceMeters(origin, destination);
 
   return {
     ...route,
-    points,
-    distanceMeters: routeDistanceMeters,
+    points: [
+      { lat: origin.lat, lon: origin.lon },
+      { lat: destination.lat, lon: destination.lon }
+    ],
+    distanceMeters: directDistance,
     durationSeconds:
-      routeDistanceMeters /
+      directDistance /
       WALK_SPEED_METERS_PER_SECOND
   };
 }
@@ -362,14 +342,15 @@ export class OfflineRoutingService {
     }
 
     // Very short walks can snap both planner endpoints to the same graph node.
-    // A* correctly returns a zero-edge route in that case, but a one-point
-    // LineString cannot be rendered. Preserve the real planner endpoints and
-    // the shared road node so nearby walks remain drawable and startable.
+    // A* correctly returns a zero-edge route. Reconstruct that short section
+    // from real adjacent walkable road geometry instead of drawing a synthetic
+    // GPS -> node -> destination triangle across buildings.
     const normalizedRoute =
       profile === 'walk'
         ? expandZeroEdgeWalkRoute(
             route,
             {
+              graph: dataset.graph,
               origin,
               destination,
               originSnap,
