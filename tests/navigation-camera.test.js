@@ -152,15 +152,15 @@ test(
 );
 
 test(
-  'walking and north-up camera keep their restrained behavior',
+  'walking camera exposes more route ahead while north-up remains flat',
   () => {
     assert.deepEqual(
       navigationCameraProfile('walk'),
       {
-        forwardFraction: 0.16,
-        forwardMaxPixels: 140,
-        pitchMin: 0,
-        pitchMax: 18
+        forwardFraction: 0.24,
+        forwardMaxPixels: 220,
+        pitchMin: 30,
+        pitchMax: 38
       }
     );
     assert.equal(
@@ -169,7 +169,7 @@ test(
         height: 1000,
         headingUp: true
       }),
-      140
+      220
     );
     assert.equal(
       navigationForwardOffset({
@@ -185,7 +185,7 @@ test(
         headingUp: true,
         speed: 1.5
       }),
-      0
+      38
     );
     assert.equal(
       navigationPitch({
