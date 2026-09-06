@@ -287,6 +287,18 @@ export function appendWalkSegmentToRoute(route, segmentSnap) {
   const distanceShift = segmentSnap.leadingDistanceMeters;
   const durationShift = segmentSnap.leadingDurationSeconds;
 
+  // A projected destination can land exactly on the same routing node as the
+  // origin. In that case A* returns a valid zero-edge route with one point and
+  // the projected suffix is also zero length. Do not invent a partial edge:
+  // keeping the route zero-edge lets OfflineRoutingService rebuild the short
+  // walk from real adjacent walkable geometry before it reaches the renderer.
+  if (points.length < 2 && distanceShift <= EPSILON_METERS) {
+    return {
+      ...route,
+      destinationSegmentSnap: segmentSnap
+    };
+  }
+
   const lastLeg = {
     edgeIndex: segmentSnap.edgeIndex,
     fromNode: segmentSnap.fromNode,
