@@ -1,0 +1,20 @@
+/* GPS diagnostics is a developer/debug instrument and must remain visible in
+ * every map state when enabled. Planner/preview overlays can otherwise cover
+ * the map-local diagnostics element until navigation becomes active. */
+.atlas-gps-diagnostics:not([hidden]) {
+  position: fixed !important;
+  z-index: 3600 !important;
+  top: calc(env(safe-area-inset-top, 0px) + 82px) !important;
+  left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  pointer-events: none !important;
+}
+
+@media (orientation: landscape) {
+  .atlas-gps-diagnostics:not([hidden]) {
+    top: calc(env(safe-area-inset-top, 0px) + 74px) !important;
+    left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+    max-width: min(320px, 34vw) !important;
+  }
+}
