@@ -71,9 +71,24 @@
     stroke-width:2;
 }
 
+/* The action cluster is a viewport control, not part of the workspace layout.
+ * Keeping it relative to .map-header allowed planner/navigation state rules to
+ * move its containing block and occasionally left visible buttons underneath
+ * another hit layer. Anchor it directly to the viewport instead. */
 .map-header-actions{
+    position:fixed !important;
+    z-index:2400 !important;
+    top:calc(16px + env(safe-area-inset-top, 0px));
+    right:calc(16px + env(safe-area-inset-right, 0px));
+
     display:flex;
+    align-items:center;
     gap:6px;
+
+    margin:0 !important;
+    transform:none !important;
+    pointer-events:auto !important;
+    isolation:isolate;
 }
 
 .map-header .icon-btn{
@@ -92,6 +107,9 @@
 
     box-shadow:
         0 8px 24px rgba(0,0,0,.12);
+
+    pointer-events:auto !important;
+    touch-action:manipulation;
 }
 
 .map-header .icon-btn svg{
@@ -108,17 +126,29 @@
     color:white;
 }
 
-.map-header-actions {
-  position: relative;
-}
-
+/* Android edge-to-edge WebViews can report a zero CSS safe-area inset in
+ * landscape even while the system status icons still occupy the top strip.
+ * Reserve an explicit minimum clearance so Atlas controls never share that
+ * strip with Wi-Fi/battery/clock. */
 @media (orientation: landscape) {
   .map-header-actions {
-    position: absolute;
-    top: 36px;
-    right: 0;
-    margin-top: 0;
-    transform: none;
+    top:max(
+      46px,
+      calc(16px + env(safe-area-inset-top, 0px))
+    ) !important;
+  }
+}
+
+/* Portrait normally keeps the established compact top layout. Active driving
+ * navigation is the exception: the guidance state can put other overlays into
+ * the same upper stacking area, so give the action cluster a protected system
+ * bar clearance there as well. */
+@media (orientation: portrait) {
+  .app.navigation-active .map-header-actions {
+    top:max(
+      48px,
+      calc(16px + env(safe-area-inset-top, 0px))
+    ) !important;
   }
 }
 
