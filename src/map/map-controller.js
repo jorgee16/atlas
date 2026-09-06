@@ -144,6 +144,7 @@ export function assertMapAdapterContract(adapter) {
 export class MapController {
   #adapter;
   #mapLibreNavigationDisplay;
+  #navigationTravelMode = null;
   #navigationRoute = null;
   #navigationRouteProgress = null;
   #lastRawPosition = null;
@@ -161,6 +162,16 @@ export class MapController {
     this.#mapLibreNavigationDisplay = Boolean(adapter.maplibre);
   }
 
+  #usesRouteLockedCursor() {
+    // Driving benefits from a map-matched cursor. Walking does not: people can
+    // legitimately be on a pavement, path, forecourt or the opposite side of
+    // a road, so forcing the marker onto the route makes the map feel wrong.
+    return (
+      this.#mapLibreNavigationDisplay &&
+      this.#navigationTravelMode === 'drive'
+    );
+  }
+
   #resetNavigationDisplayMatch() {
     this.#navigationRoute = null;
     this.#navigationRouteProgress = null;
@@ -172,7 +183,7 @@ export class MapController {
 
   #displayPosition(position) {
     if (
-      !this.#mapLibreNavigationDisplay ||
+      !this.#usesRouteLockedCursor() ||
       !this.#navigationRouteProgress ||
       !this.#displayRouteLocked
     ) {
@@ -187,7 +198,7 @@ export class MapController {
   }
 
   #updateNavigationDisplayConfidence(progress) {
-    if (!this.#mapLibreNavigationDisplay || !this.#lastRawPosition) {
+    if (!this.#usesRouteLockedCursor() || !this.#lastRawPosition) {
       return;
     }
 
@@ -229,7 +240,6 @@ export class MapController {
     }
 
     if (reducedAccuracy || !Number.isFinite(distanceFromRoute)) {
-      // A poor GPS fix must never pull the cursor off the traced route.
       this.#offRouteDisplayEvidence = 0;
       return;
     }
@@ -315,6 +325,16 @@ export class MapController {
   }
 
   setNavigationTravelMode(mode = null) {
+    this.#navigationTravelMode = mode;
+    if (mode !== 'drive') {
+      this.#displayRouteLocked = false;
+      this.#offRouteDisplayEvidence = 0;
+      this.#wrongWayEvidence = 0;
+      this.#wrongWayConfirmed = false;
+    } else {
+      this.#displayRouteLocked = true;
+    }
+
     return this.#adapter.setNavigationTravelMode(
       mode
     );
@@ -352,7 +372,7 @@ export class MapController {
     if (this.#mapLibreNavigationDisplay) {
       this.#navigationRoute = route;
       this.#navigationRouteProgress = null;
-      this.#displayRouteLocked = true;
+      this.#displayRouteLocked = this.#navigationTravelMode === 'drive';
       this.#offRouteDisplayEvidence = 0;
       this.#wrongWayEvidence = 0;
       this.#wrongWayConfirmed = false;
@@ -383,11 +403,12 @@ export class MapController {
       progress
     );
 
-    // GPS arrives before NavigationFeature calculates the latest progress.
-    // Correct the marker after that calculation so the user never waits for
-    // the next GPS fix to see the cursor returned to the route line.
+    // Driving GPS arrives before NavigationFeature calculates the latest
+    // progress. Correct the map-matched car cursor immediately afterwards.
+    // Walking deliberately keeps the raw GPS position, so it gets no second
+    // route-correction write here.
     if (
-      this.#mapLibreNavigationDisplay &&
+      this.#usesRouteLockedCursor() &&
       this.#lastRawPosition &&
       this.#navigationRouteProgress
     ) {
