@@ -355,6 +355,29 @@
   }
 }
 
+/* Arrival is a visible, interactive card inside a guidance overlay that is
+ * otherwise deliberately click-through so the map remains usable. The legacy
+ * pointer-events rule covered maneuver/HUD controls but not this arrival state,
+ * leaving Parking / Save / Finish visible yet untappable on touch devices. */
+#navigationGuidance[data-state="arrival"] {
+  pointer-events: none !important;
+}
+
+#navigationGuidance[data-state="arrival"] .navigation-arrival-card {
+  z-index: 2600 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  isolation: isolate;
+}
+
+#navigationGuidance[data-state="arrival"] .navigation-arrival-actions,
+#navigationGuidance[data-state="arrival"] .navigation-arrival-actions button {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+}
+
 /* In landscape only reduce the outer card width. Do not override the inner
  * grid: legacy navigation rules already size the icon/text/close columns for
  * this orientation, and changing those columns causes the maneuver tile to
