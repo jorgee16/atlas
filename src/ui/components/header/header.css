@@ -126,15 +126,14 @@
     color:white;
 }
 
-/* Android edge-to-edge WebViews can report a zero CSS safe-area inset in
- * landscape even while the system status icons still occupy the top strip.
- * Reserve an explicit minimum clearance so Atlas controls never share that
- * strip with Wi-Fi/battery/clock. */
+/* Keep the cluster clear of Android's edge-to-edge status strip while staying
+ * optically aligned with the rest of the landscape map UI. The previous 46px
+ * floor was safe but visibly too low once the cluster became viewport-fixed. */
 @media (orientation: landscape) {
   .map-header-actions {
     top:max(
-      46px,
-      calc(16px + env(safe-area-inset-top, 0px))
+      30px,
+      calc(12px + env(safe-area-inset-top, 0px))
     ) !important;
   }
 }
