@@ -5,6 +5,9 @@ import {
 const WALK_SPEED_METERS_PER_SECOND = 1.4;
 const MAX_CONNECTOR_METERS = 28;
 const EPSILON_METERS = 0.05;
+const DESTINATION_PROBE_RADII_METERS = [0, 40, 90, 160, 260, 400, 600];
+const DESTINATION_PROBE_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315];
+const EARTH_RADIUS_METERS = 6_371_000;
 
 function projectOnSegment(point, from, to) {
   const referenceLat = point.lat * Math.PI / 180;
@@ -124,6 +127,29 @@ function pathStartToProjection(points, projection) {
   return output;
 }
 
+function offsetPoint(point, bearingDegrees, distance) {
+  if (distance === 0) return point;
+
+  const angular = distance / EARTH_RADIUS_METERS;
+  const bearing = bearingDegrees * Math.PI / 180;
+  const lat1 = point.lat * Math.PI / 180;
+  const lon1 = point.lon * Math.PI / 180;
+
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(angular) +
+    Math.cos(lat1) * Math.sin(angular) * Math.cos(bearing)
+  );
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(angular) * Math.cos(lat1),
+    Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2)
+  );
+
+  return {
+    lat: lat2 * 180 / Math.PI,
+    lon: lon2 * 180 / Math.PI
+  };
+}
+
 function walkablePathsFromNode(graph, nodeIndex) {
   const paths = [];
   const seen = new Set();
@@ -142,6 +168,156 @@ function walkablePathsFromNode(graph, nodeIndex) {
   }
 
   return paths;
+}
+
+function destinationCandidateNodes(graph, point, maxDistanceMeters) {
+  const nodes = new Map();
+  const maximumProbeRadius = Math.max(600, maxDistanceMeters * 12);
+
+  for (const radius of DESTINATION_PROBE_RADII_METERS) {
+    if (radius > maximumProbeRadius) continue;
+
+    const bearings = radius === 0 ? [0] : DESTINATION_PROBE_BEARINGS;
+    for (const bearing of bearings) {
+      const nearest = graph.findNearest(
+        offsetPoint(point, bearing, radius),
+        {
+          maxDistanceMeters: Math.max(160, radius + maxDistanceMeters),
+          profile: 'walk'
+        }
+      );
+
+      if (nearest) nodes.set(nearest.node, nearest);
+    }
+  }
+
+  return [...nodes.values()];
+}
+
+export function findWalkDestinationRoadSegmentSnaps(
+  graph,
+  destination,
+  {
+    maxDistanceMeters = 80,
+    maximumCandidates = 6,
+    component = null
+  } = {}
+) {
+  const candidates = [];
+  const seenEdges = new Set();
+
+  for (const nodeSnap of destinationCandidateNodes(
+    graph,
+    destination,
+    maxDistanceMeters
+  )) {
+    if (
+      Number.isInteger(component) &&
+      nodeSnap.point.component !== component
+    ) {
+      continue;
+    }
+
+    for (const { edge, points } of walkablePathsFromNode(graph, nodeSnap.node)) {
+      if (seenEdges.has(edge.edgeIndex)) continue;
+      seenEdges.add(edge.edgeIndex);
+
+      const projection = projectOnPath(destination, points);
+      if (
+        !projection ||
+        projection.distanceMeters > maxDistanceMeters
+      ) {
+        continue;
+      }
+
+      const leadingPoints = pathStartToProjection(points, projection);
+      const leadingDistanceMeters = geometryDistance(leadingPoints);
+      const fullDistanceMeters = Math.max(edge.distanceDecimeters / 10, 0.01);
+      const leadingFraction = Math.max(
+        0,
+        Math.min(1, leadingDistanceMeters / fullDistanceMeters)
+      );
+      const leadingDurationSeconds =
+        edge.durationCentiseconds / 100 * leadingFraction;
+      const road = graph.road(edge.road, edge.geometryReversed);
+
+      candidates.push({
+        node: nodeSnap.node,
+        point: projection.point,
+        distanceMeters: projection.distanceMeters,
+        component: nodeSnap.point.component,
+        edgeIndex: edge.edgeIndex,
+        roadIndex: edge.road,
+        road,
+        roadClass: edge.roadClass,
+        oneWay: edge.oneWay,
+        fromNode: nodeSnap.node,
+        toNode: edge.to,
+        leadingPoints,
+        leadingDistanceMeters,
+        leadingDurationSeconds,
+        snapStrategy: 'walk-road-segment-destination'
+      });
+    }
+  }
+
+  candidates.sort((a, b) =>
+    a.distanceMeters - b.distanceMeters ||
+    a.leadingDistanceMeters - b.leadingDistanceMeters ||
+    a.roadClass - b.roadClass
+  );
+
+  return candidates.slice(0, maximumCandidates);
+}
+
+export function appendWalkSegmentToRoute(route, segmentSnap) {
+  if (!route || !segmentSnap?.leadingPoints?.length) return route;
+
+  const points = Array.isArray(route.points)
+    ? route.points.map(point => ({ lat: point.lat, lon: point.lon }))
+    : [];
+
+  for (const point of segmentSnap.leadingPoints) {
+    appendDistinct(points, point);
+  }
+
+  const distanceStart = route.distanceMeters ?? 0;
+  const durationStart = route.durationSeconds ?? 0;
+  const pointStartIndex = Math.max(0, (route.points?.length ?? 1) - 1);
+  const distanceShift = segmentSnap.leadingDistanceMeters;
+  const durationShift = segmentSnap.leadingDurationSeconds;
+
+  const lastLeg = {
+    edgeIndex: segmentSnap.edgeIndex,
+    fromNode: segmentSnap.fromNode,
+    toNode: segmentSnap.toNode,
+    pointStartIndex,
+    pointEndIndex: points.length - 1,
+    distanceMeters: distanceShift,
+    durationSeconds: durationShift,
+    routeDistanceStartMeters: distanceStart,
+    routeDistanceEndMeters: distanceStart + distanceShift,
+    routeDurationStartSeconds: durationStart,
+    routeDurationEndSeconds: durationStart + durationShift,
+    roadIndex: segmentSnap.roadIndex,
+    road: segmentSnap.road,
+    roadClass: segmentSnap.roadClass,
+    oneWay: segmentSnap.oneWay,
+    partial: true
+  };
+
+  return {
+    ...route,
+    points,
+    edgeIndexes: [
+      ...(route.edgeIndexes ?? []),
+      segmentSnap.edgeIndex
+    ],
+    legs: [...(route.legs ?? []), lastLeg],
+    distanceMeters: distanceStart + distanceShift,
+    durationSeconds: durationStart + durationShift,
+    destinationSegmentSnap: segmentSnap
+  };
 }
 
 export function buildShortWalkGeometry(
