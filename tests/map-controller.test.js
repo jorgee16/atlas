@@ -77,10 +77,11 @@ test('map controller exposes maneuver and GPS diagnostic operations without adap
   assert.equal('adapter' in map, false);
 });
 
-test('MapLibre navigation cursor stays projected onto the active route during normal GPS drift', () => {
+test('MapLibre drive cursor stays projected onto the active route during normal GPS drift', () => {
   const { adapter, calls } = fakeAdapter({ maplibre: true });
   const map = new MapController({ adapter });
 
+  map.setNavigationTravelMode('drive');
   map.showRoute(ROUTE);
   map.updateUserLocation({
     latitude: 40.0002,
@@ -99,10 +100,11 @@ test('MapLibre navigation cursor stays projected onto the active route during no
   assert.equal(corrected.accuracy, 12);
 });
 
-test('MapLibre keeps the cursor route-locked through isolated off-route fixes', () => {
+test('MapLibre drive keeps the cursor route-locked through isolated off-route fixes', () => {
   const { adapter, calls } = fakeAdapter({ maplibre: true });
   const map = new MapController({ adapter });
 
+  map.setNavigationTravelMode('drive');
   map.showRoute(ROUTE);
 
   for (let index = 0; index < 2; index += 1) {
@@ -124,10 +126,11 @@ test('MapLibre keeps the cursor route-locked through isolated off-route fixes', 
   assert.equal(corrected.longitude, -7.995);
 });
 
-test('MapLibre releases the cursor after repeated confirmed off-route movement', () => {
+test('MapLibre drive releases the cursor after repeated confirmed off-route movement', () => {
   const { adapter, calls } = fakeAdapter({ maplibre: true });
   const map = new MapController({ adapter });
 
+  map.setNavigationTravelMode('drive');
   map.showRoute(ROUTE);
 
   const raw = {
@@ -151,10 +154,11 @@ test('MapLibre releases the cursor after repeated confirmed off-route movement',
   assert.equal(displayed.longitude, raw.longitude);
 });
 
-test('MapLibre releases the cursor after confirmed opposite-direction travel', () => {
+test('MapLibre drive releases the cursor after confirmed opposite-direction travel', () => {
   const { adapter, calls } = fakeAdapter({ maplibre: true });
   const map = new MapController({ adapter });
 
+  map.setNavigationTravelMode('drive');
   map.showRoute(ROUTE);
 
   const raw = {
@@ -173,6 +177,27 @@ test('MapLibre releases the cursor after confirmed opposite-direction travel', (
   const displayed = callsFor(calls, 'updateUserLocation').at(-1)[0];
   assert.equal(displayed.latitude, raw.latitude);
   assert.equal(displayed.longitude, raw.longitude);
+});
+
+test('MapLibre walk cursor keeps raw GPS coordinates instead of route-locking', () => {
+  const { adapter, calls } = fakeAdapter({ maplibre: true });
+  const map = new MapController({ adapter });
+  const raw = {
+    latitude: 40.0002,
+    longitude: -7.995,
+    accuracy: 12,
+    heading: 90,
+    speed: 1.5
+  };
+
+  map.setNavigationTravelMode('walk');
+  map.showRoute(ROUTE);
+  map.updateUserLocation(raw);
+  map.updateRouteProgress(ROUTE, progress());
+
+  const updates = callsFor(calls, 'updateUserLocation');
+  assert.equal(updates.length, 1);
+  assert.deepEqual(updates[0][0], raw);
 });
 
 test('Leaflet and other adapters continue receiving raw GPS coordinates', () => {
