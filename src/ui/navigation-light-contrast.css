@@ -90,17 +90,17 @@
 }
 
 /* ---------- Top map controls ----------
- * Light mode owns this surface in every app state. Legacy navigation/preview
- * rules add a dark outer slab to this cluster before navigation starts, so do
- * not scope this repair only to .navigation-active. */
+ * The wrapper is positioning-only. Individual icon buttons own their surfaces;
+ * painting the wrapper creates a rectangular white slab behind the floating
+ * controls, especially obvious in portrait light mode. */
 html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
   .map-header-actions {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.88) !important;
-  border-color: rgba(24, 32, 47, 0.10) !important;
-  box-shadow: 0 8px 24px rgba(24, 32, 47, 0.12) !important;
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
