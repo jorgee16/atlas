@@ -295,6 +295,11 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     if (this.lastUserPosition) {
       this.#restoreLeafletCursor(this.lastUserPosition);
     }
+
+    if (validRoute(this.currentRoute)) {
+      this.#scheduleRouteRender({ immediate: true });
+    }
+
     return result;
   }
 
@@ -479,6 +484,7 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
       const split = this.currentRouteProgress
         ? splitRoute(points, this.currentRouteProgress)
         : null;
+      const walking = this.navigationTravelMode === 'walk';
 
       this.map.addSource(ROUTE_SOURCE, {
         type: 'geojson',
@@ -493,11 +499,18 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
           'line-cap': 'round',
           'line-join': 'round'
         },
-        paint: {
-          'line-color': '#ffffff',
-          'line-width': 12,
-          'line-opacity': 0.98
-        }
+        paint: walking
+          ? {
+              'line-color': '#ffffff',
+              'line-width': 8,
+              'line-opacity': 0.98,
+              'line-dasharray': [0.12, 1.45]
+            }
+          : {
+              'line-color': '#ffffff',
+              'line-width': 12,
+              'line-opacity': 0.98
+            }
       });
 
       this.map.addLayer({
@@ -508,11 +521,18 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
           'line-cap': 'round',
           'line-join': 'round'
         },
-        paint: {
-          'line-color': '#2563eb',
-          'line-width': 7,
-          'line-opacity': 1
-        }
+        paint: walking
+          ? {
+              'line-color': '#2563eb',
+              'line-width': 5,
+              'line-opacity': 1,
+              'line-dasharray': [0.12, 2.05]
+            }
+          : {
+              'line-color': '#2563eb',
+              'line-width': 7,
+              'line-opacity': 1
+            }
       });
 
       if (split) {
@@ -529,11 +549,18 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
             'line-cap': 'round',
             'line-join': 'round'
           },
-          paint: {
-            'line-color': '#737b8c',
-            'line-width': 7,
-            'line-opacity': 0.9
-          }
+          paint: walking
+            ? {
+                'line-color': '#737b8c',
+                'line-width': 5,
+                'line-opacity': 0.68,
+                'line-dasharray': [0.12, 2.05]
+              }
+            : {
+                'line-color': '#737b8c',
+                'line-width': 7,
+                'line-opacity': 0.9
+              }
         });
       }
 
@@ -568,7 +595,6 @@ export class MapLibrePmtilesMapAdapter extends MapLibreMapAdapter {
     try {
       this.#removeRouteOverlay();
     } catch {
-      // Style transitions remove custom layers automatically.
     }
   }
 
