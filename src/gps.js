@@ -39,6 +39,29 @@ function syncGpsButton(hasFix) {
   );
 }
 
+function emitRawGpsTiming({
+  providerTimestamp,
+  callbackReceivedAt,
+  native
+}) {
+  if (
+    typeof globalThis.dispatchEvent !== 'function' ||
+    typeof globalThis.CustomEvent !== 'function'
+  ) {
+    return;
+  }
+
+  globalThis.dispatchEvent(
+    new CustomEvent('atlasrawgpsfix', {
+      detail: {
+        providerTimestamp,
+        callbackReceivedAt,
+        source: native ? 'native' : 'browser'
+      }
+    })
+  );
+}
+
 function distanceMeters(a, b) {
   const lat1 = toRadians(a.latitude);
   const lat2 = toRadians(b.latitude);
@@ -257,6 +280,21 @@ export class GpsController {
       return;
     }
 
+    const callbackReceivedAt = Date.now();
+    const providerTimestamp = Number.isFinite(position?.timestamp)
+      ? position.timestamp
+      : callbackReceivedAt;
+
+    // Emit timing directly at the provider callback boundary. This is kept
+    // separate from onUpdate/map rendering so diagnostics can prove whether a
+    // 2 Hz reading comes from the browser/native location provider or from an
+    // Atlas dispatch/render duplication.
+    emitRawGpsTiming({
+      providerTimestamp,
+      callbackReceivedAt,
+      native: this.native
+    });
+
     if (!this.hasFix) {
       this.hasFix = true;
       syncGpsButton(true);
@@ -271,9 +309,7 @@ export class GpsController {
 
     this.bestAccuracy = Math.min(this.bestAccuracy, accuracy);
 
-    const now = Number.isFinite(position?.timestamp)
-      ? position.timestamp
-      : Date.now();
+    const now = providerTimestamp;
 
     const fix = {
       latitude,
