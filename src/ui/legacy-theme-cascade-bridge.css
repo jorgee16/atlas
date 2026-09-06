@@ -70,4 +70,40 @@
     border-color: var(--line) !important;
     box-shadow: 0 12px 30px rgba(24, 32, 47, .14) !important;
   }
+
+  /* v25 hid Atlas entirely in the landscape planner to make room for the old
+   * search instrument. Keep the status card instead and reserve its horizontal
+   * lane. Active turn-by-turn guidance is intentionally excluded because the
+   * maneuver banner owns the upper-left corner in that state. */
+  body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active) .brand-inline {
+    display: flex !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .app:not(.navigation-active) .map-header {
+    top: calc(
+      max(env(safe-area-inset-top, 0px), var(--atlas-system-top-inset, 0px))
+      + 8px
+    ) !important;
+    left: calc(10px + env(safe-area-inset-left, 0px)) !important;
+    right: auto !important;
+    width: auto !important;
+  }
+
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--search .navigation-search-card,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-topbar {
+    left: calc(200px + env(safe-area-inset-left, 0px)) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 900px) {
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--search .navigation-search-card,
+  body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-topbar {
+    left: calc(184px + env(safe-area-inset-left, 0px)) !important;
+  }
 }
