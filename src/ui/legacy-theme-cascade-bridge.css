@@ -1,0 +1,73 @@
+/*
+ * Legacy theme cascade bridge.
+ *
+ * styles.css still contains state-specific rules from older navigation UI
+ * generations. Some of those selectors are more specific than the current
+ * component/theme layers and hard-code dark surfaces even in light mode.
+ *
+ * Keep this file intentionally small: no new layout system belongs here. It
+ * only reasserts the current component tokens at the exact legacy specificity
+ * boundaries until those old rules can be removed from styles.css.
+ */
+
+/* Active navigation used to restyle the header controls independently. Keep
+ * the same map-header-actions component geometry/palette in every app state. */
+.app.navigation-active .map-header-actions {
+  gap: 3px !important;
+  padding: 4px !important;
+  color: var(--map-actions-icon) !important;
+  background: var(--map-actions-shell-bg) !important;
+  border: 1px solid var(--map-actions-shell-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--map-actions-shell-shadow) !important;
+  backdrop-filter: blur(14px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+.app.navigation-active .map-header-actions .icon-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  color: var(--map-actions-icon) !important;
+  background: var(--map-actions-button-bg) !important;
+  border: 0 !important;
+  border-radius: 15px !important;
+  box-shadow: none !important;
+}
+
+.app.navigation-active .map-header-actions .icon-btn.on {
+  color: #fff !important;
+  background: #3b63f6 !important;
+  box-shadow: 0 3px 10px rgba(49, 94, 251, .22) !important;
+}
+
+@media (hover: hover) {
+  .app.navigation-active .map-header-actions .icon-btn:not(.on):hover {
+    background: var(--map-actions-button-hover) !important;
+  }
+}
+
+/* The route-preview dock has a body:has(...) + !important legacy selector.
+ * Match that state boundary in light mode so the current light palette wins
+ * without changing any of the established landscape geometry. */
+@media (orientation: landscape) and (max-height: 600px) {
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-controls {
+    color: var(--text) !important;
+    background: rgba(255, 255, 255, .96) !important;
+    border-color: var(--line) !important;
+    box-shadow: 0 12px 30px rgba(24, 32, 47, .14) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--preview .navigation-preview-bar {
+    color: var(--text) !important;
+    background: rgba(255, 255, 255, .96) !important;
+    border-color: var(--line) !important;
+    box-shadow: 0 12px 30px rgba(24, 32, 47, .14) !important;
+  }
+}
