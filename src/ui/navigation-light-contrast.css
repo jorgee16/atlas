@@ -90,11 +90,11 @@
 }
 
 /* ---------- Top map controls ----------
- * Active navigation used to add a translucent navy slab around otherwise
- * light buttons. In light mode the cluster should remain a light floating
- * control just like it is outside navigation. */
+ * Light mode owns this surface in every app state. Legacy navigation/preview
+ * rules add a dark outer slab to this cluster before navigation starts, so do
+ * not scope this repair only to .navigation-active. */
 html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
-  .app.navigation-active .map-header-actions {
+  .map-header-actions {
   color: var(--text);
   background: rgba(255, 255, 255, 0.88) !important;
   border-color: rgba(24, 32, 47, 0.10) !important;
@@ -149,6 +149,19 @@ html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
   .navigation-guidance-banner .navigation-guidance-stop {
   color: #687487;
   background: #f1f4f8 !important;
+}
+
+/* In portrait active navigation the top action cluster is fixed at ~48px and
+ * is 44px tall. Reserve its whole band plus a small gap for the maneuver card
+ * instead of letting legacy guidance offsets put both surfaces in the same
+ * hit/visual area. Landscape keeps its dedicated compact layout. */
+@media (orientation: portrait) {
+  .app.navigation-active .navigation-guidance-banner {
+    top: max(
+      108px,
+      calc(76px + env(safe-area-inset-top, 0px))
+    ) !important;
+  }
 }
 
 /* ---------- Persistent ETA / distance / voice HUD ---------- */
