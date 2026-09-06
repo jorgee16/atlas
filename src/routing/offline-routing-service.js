@@ -34,7 +34,9 @@ import {
   prependDriveSegmentToRoute
 } from './road-segment-snap.js';
 import {
-  buildShortWalkGeometry
+  appendWalkSegmentToRoute,
+  buildShortWalkGeometry,
+  findWalkDestinationRoadSegmentSnaps
 } from './walk-segment-snap.js';
 import {
   distanceMeters
@@ -356,8 +358,78 @@ export class OfflineRoutingService {
       }
     }
 
-    if (!route) {
+    if (profile === 'walk') {
       originSnap = dataset.graph.findNearest(
+        origin,
+        {
+          maxDistanceMeters:
+            this.maximumSnapDistanceMeters,
+          profile
+        }
+      );
+
+      if (!originSnap) {
+        throw new Error(
+          'No routable road was found near the starting point.'
+        );
+      }
+
+      const destinationSegmentSnaps =
+        findWalkDestinationRoadSegmentSnaps(
+          dataset.graph,
+          destination,
+          {
+            maxDistanceMeters: Math.min(
+              80,
+              this.maximumSnapDistanceMeters
+            ),
+            maximumCandidates: 6,
+            component: originSnap.point.component
+          }
+        );
+
+      let bestWalk = null;
+
+      for (const destinationSegmentSnap of destinationSegmentSnaps) {
+        const candidateRoute = await router.route(
+          originSnap.node,
+          destinationSegmentSnap.node,
+          {
+            signal,
+            profile
+          }
+        );
+
+        if (!candidateRoute) continue;
+
+        const projectedRoute =
+          appendWalkSegmentToRoute(
+            candidateRoute,
+            destinationSegmentSnap
+          );
+
+        const score =
+          projectedRoute.durationSeconds +
+          destinationSegmentSnap.distanceMeters /
+            WALK_SPEED_METERS_PER_SECOND;
+
+        if (!bestWalk || score < bestWalk.score) {
+          bestWalk = {
+            score,
+            route: projectedRoute,
+            destinationSnap: destinationSegmentSnap
+          };
+        }
+      }
+
+      if (bestWalk) {
+        route = bestWalk.route;
+        destinationSnap = publicSegmentSnap(bestWalk.destinationSnap);
+      }
+    }
+
+    if (!route) {
+      originSnap = originSnap ?? dataset.graph.findNearest(
         origin,
         {
           maxDistanceMeters:
