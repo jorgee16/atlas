@@ -146,34 +146,247 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
     body:has(#exploreWorkspace:not([hidden]))
     .explore-category-bar,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
-    body:has(#exploreWorkspace:not([hidden]))
-    .app:not(.navigation-active)
-    .map-header-actions,
-  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     body:has(#navigationWorkspace:not([hidden]))
-    .app:not(.navigation-active)
-    .map-header-actions,
-  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--search .navigation-search-card,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-confirm-card,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-preview-controls {
-    color: var(--text);
-    background: color-mix(in srgb, var(--surface-solid) 95%, transparent);
-    border-color: var(--line);
-    box-shadow: var(--shadow-md);
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--surface-solid) 96%, transparent) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  /* Explore: search, results, category rail and nearby peek all use the same
+   * light surface hierarchy rather than the old permanent navy glass. */
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search {
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--surface-solid) 96%, transparent) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--shadow-md) !important;
   }
 
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     body:has(#exploreWorkspace:not([hidden]))
     .landscape-explore-search svg {
-    stroke: var(--text-muted);
+    stroke: var(--text-muted) !important;
   }
 
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     body:has(#exploreWorkspace:not([hidden]))
-    .landscape-explore-search input,
+    .landscape-explore-search input {
+    color: var(--text) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search input::placeholder {
+    color: var(--text-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results {
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--surface-solid) 98%, transparent) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button {
+    color: var(--text) !important;
+    background: transparent !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button:hover,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results button:active {
+    background: var(--surface-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-results small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .landscape-explore-search-empty {
+    color: var(--text-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar {
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--surface-solid) 96%, transparent) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip {
+    color: var(--text-muted) !important;
+    background: transparent !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip:hover {
+    color: var(--text) !important;
+    background: var(--surface-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-category-bar .chip.on {
+    color: #fff !important;
+    background: var(--accent) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .explore-peek .nearby {
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--surface-solid) 98%, transparent) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .nearby-peek-header strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .nearby-card strong {
+    color: var(--text) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .nearby-peek-header small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#exploreWorkspace:not([hidden]))
+    .nearby-card small {
+    color: var(--text-muted) !important;
+  }
+
+  /* Navigation search: the shell was repaired before, but several nested rows
+   * still carried explicit navy/white values and therefore remained dark. */
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-planner--search .navigation-search-card {
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--surface-solid) 97%, transparent) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-endpoint-row--destination,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced
+    .navigation-endpoint-stack--advanced .navigation-endpoint-row {
+    color: var(--text) !important;
+    background: var(--surface-muted) !important;
+    border-color: var(--line) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-endpoint-row--origin {
+    color: var(--text-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-endpoint-row--origin strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced
+    .navigation-endpoint-copy > strong {
+    color: var(--text) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-endpoint-row--destination input,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced
+    .navigation-endpoint-copy > input {
+    color: var(--text) !important;
+    background: transparent !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-endpoint-row--destination input::placeholder,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced
+    .navigation-endpoint-copy > small {
+    color: var(--text-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-heading strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-result strong {
+    color: var(--text) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-heading span,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-result small {
+    color: var(--text-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-result {
+    color: var(--text) !important;
+    background: transparent !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-result:hover,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-result:active {
+    background: var(--surface-muted) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-result + .navigation-search-result {
+    border-top-color: var(--line) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced
+    .navigation-endpoint-stack--advanced .navigation-endpoint-row--origin,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced
+    .navigation-endpoint-stack--advanced .navigation-endpoint-row--destination {
+    border-color: var(--line) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced .navigation-endpoint-swap,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced .navigation-advanced-back,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-search-card--destination.is-advanced .navigation-advanced-origin-actions button,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-map-pick-button,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--search .navigation-search-clear {
+    color: var(--text) !important;
+    background: var(--surface-muted) !important;
+    border-color: var(--line) !important;
+  }
+
+  /* Preview content shares the same tokens. Keep selected/primary states blue,
+   * but never use navy surfaces simply because the viewport is landscape. */
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-confirm-copy > strong,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
@@ -184,12 +397,9 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
     .navigation-planner--preview .navigation-drive-option-title strong,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-drive-option-duration {
-    color: var(--text);
+    color: var(--text) !important;
   }
 
-  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
-    body:has(#exploreWorkspace:not([hidden]))
-    .landscape-explore-search input::placeholder,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-confirm-copy > span,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
@@ -204,20 +414,7 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
     .navigation-planner--preview .navigation-drive-option-price,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-drive-option-foot small {
-    color: var(--text-muted);
-  }
-
-  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
-    body:has(#exploreWorkspace:not([hidden]))
-    .explore-category-bar .chip {
-    color: var(--text-muted);
-  }
-
-  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
-    body:has(#exploreWorkspace:not([hidden]))
-    .explore-category-bar .chip.on {
-    color: #fff;
-    background: var(--accent);
+    color: var(--text-muted) !important;
   }
 
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
@@ -234,9 +431,9 @@ html[data-theme="dark"] #app.tracks-following .tracks-live-progress {
     .navigation-planner--preview .navigation-confirm-actions .navigation-secondary-action,
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--preview .navigation-destination-bookmark {
-    color: var(--text);
-    background: var(--surface-muted);
-    border-color: var(--line);
+    color: var(--text) !important;
+    background: var(--surface-muted) !important;
+    border-color: var(--line) !important;
   }
 }
 
