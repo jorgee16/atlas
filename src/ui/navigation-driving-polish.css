@@ -392,4 +392,92 @@
     font-size: 13px !important;
     line-height: 1.12 !important;
   }
+
+  /* Arrival is a completion control, not a route-planning sheet. Keep the map
+   * dominant in landscape: one compact row with destination at left and actions
+   * at right. This also leaves the right-side map controls and attribution free. */
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-card {
+    position: fixed !important;
+    left: calc(14px + env(safe-area-inset-left, 0px)) !important;
+    right: auto !important;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    display: grid !important;
+    grid-template-columns: minmax(240px, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    width: min(760px, calc(100vw - 330px)) !important;
+    max-width: calc(100vw - 330px) !important;
+    min-width: 620px !important;
+    min-height: 0 !important;
+    padding: 10px 12px !important;
+    margin: 0 !important;
+    transform: none !important;
+    border-radius: 18px !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-heading {
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-check {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    font-size: 24px !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-heading small {
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-heading strong {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    margin-top: 2px !important;
+    font-size: 17px !important;
+    line-height: 1.08 !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-context {
+    grid-column: 1 / -1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-actions {
+    display: grid !important;
+    grid-template-columns: 88px 88px 118px !important;
+    gap: 8px !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-actions button {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 12px !important;
+    border-radius: 13px !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 900px) {
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-card {
+    grid-template-columns: minmax(190px, 1fr) auto !important;
+    width: calc(100vw - 210px) !important;
+    max-width: calc(100vw - 210px) !important;
+    min-width: 0 !important;
+  }
+
+  #navigationGuidance[data-state="arrival"] .navigation-arrival-actions {
+    grid-template-columns: 76px 76px 100px !important;
+  }
 }
