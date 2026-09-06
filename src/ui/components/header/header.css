@@ -85,10 +85,17 @@
     --map-actions-icon: #263247;
     --map-actions-button-bg: rgba(255,255,255,.76);
     --map-actions-button-hover: rgba(255,255,255,.96);
+    --map-actions-top-gap: 10px;
+    --atlas-system-top-inset: 0px;
 
     position:fixed !important;
     z-index:2400 !important;
-    top:calc(16px + env(safe-area-inset-top, 0px));
+    top:calc(
+      max(
+        env(safe-area-inset-top, 0px),
+        var(--atlas-system-top-inset, 0px)
+      ) + var(--map-actions-top-gap)
+    ) !important;
     right:calc(16px + env(safe-area-inset-right, 0px));
 
     display:flex;
@@ -173,27 +180,12 @@ html[data-theme="dark"] .map-header-actions{
     box-shadow:0 3px 10px rgba(49,94,251,.22) !important;
 }
 
-/* Keep the cluster clear of Android's edge-to-edge status strip while staying
- * optically aligned with the rest of the landscape map UI. */
+/* Landscape uses the same real system-bar inset as portrait, with a slightly
+ * tighter optical gap because vertical space is more valuable. No hard-coded
+ * 30/48px floors: the device inset determines the actual clearance. */
 @media (orientation: landscape) {
   .map-header-actions {
-    top:max(
-      30px,
-      calc(12px + env(safe-area-inset-top, 0px))
-    ) !important;
-  }
-}
-
-/* Portrait normally keeps the established compact top layout. Active driving
- * navigation is the exception: the guidance state can put other overlays into
- * the same upper stacking area, so give the action cluster a protected system
- * bar clearance there as well. */
-@media (orientation: portrait) {
-  .app.navigation-active .map-header-actions {
-    top:max(
-      48px,
-      calc(16px + env(safe-area-inset-top, 0px))
-    ) !important;
+    --map-actions-top-gap: 8px;
   }
 }
 
