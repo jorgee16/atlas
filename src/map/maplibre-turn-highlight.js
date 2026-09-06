@@ -5,6 +5,11 @@ const TURN_ARROW_SOURCE = 'atlas-turn-highlight-arrow';
 const TURN_ARROW_CASING_LAYER = 'atlas-turn-highlight-arrow-casing';
 const TURN_ARROW_LAYER = 'atlas-turn-highlight-arrow-line';
 
+const TURN_HIGHLIGHT_BEFORE_METERS = 18;
+const TURN_HIGHLIGHT_AFTER_METERS = 22;
+const TURN_ARROW_TIP_METERS = 12;
+const TURN_ARROW_WING_METERS = 5;
+
 function validPoint(point) {
   return Number.isFinite(point?.lat) && Number.isFinite(point?.lon);
 }
@@ -47,6 +52,24 @@ function distanceSquared(a, b) {
   return dLat * dLat + dLon * dLon;
 }
 
+function distanceMeters(a, b) {
+  const earthRadius = 6371000;
+  const lat1 = a.lat * Math.PI / 180;
+  const lat2 = b.lat * Math.PI / 180;
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const h =
+    sinLat * sinLat +
+    Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+
+  return earthRadius * 2 * Math.atan2(
+    Math.sqrt(h),
+    Math.sqrt(Math.max(0, 1 - h))
+  );
+}
+
 function nearestRouteIndex(points, location) {
   let nearestIndex = 0;
   let nearestDistance = Number.POSITIVE_INFINITY;
@@ -77,9 +100,9 @@ function signedBearingDelta(fromBearing, toBearing) {
   return ((toBearing - fromBearing + 540) % 360) - 180;
 }
 
-function destinationPoint(point, bearingDegrees, distanceMeters) {
+function destinationPoint(point, bearingDegrees, distance) {
   const earthRadiusMeters = 6371000;
-  const angularDistance = distanceMeters / earthRadiusMeters;
+  const angularDistance = distance / earthRadiusMeters;
   const bearingRadians = bearingDegrees * Math.PI / 180;
   const latitude1 = point.lat * Math.PI / 180;
   const longitude1 = point.lon * Math.PI / 180;
@@ -103,6 +126,91 @@ function interpolatePoint(from, to, fraction) {
   return {
     lat: from.lat + (to.lat - from.lat) * fraction,
     lon: from.lon + (to.lon - from.lon) * fraction
+  };
+}
+
+function pointToward(from, to, distance) {
+  const segmentDistance = distanceMeters(from, to);
+  if (segmentDistance <= 0.01) return { ...from };
+  return interpolatePoint(
+    from,
+    to,
+    Math.max(0, Math.min(1, distance / segmentDistance))
+  );
+}
+
+function compactTurnSegment(points, turnIndex) {
+  const turn = points[turnIndex];
+  if (!turn) return null;
+
+  const incoming = [];
+  let remainingBefore = TURN_HIGHLIGHT_BEFORE_METERS;
+  let cursor = turn;
+
+  for (let index = turnIndex - 1; index >= 0 && remainingBefore > 0; index -= 1) {
+    const previous = points[index];
+    const length = distanceMeters(previous, cursor);
+
+    if (length >= remainingBefore) {
+      incoming.unshift(pointToward(cursor, previous, remainingBefore));
+      remainingBefore = 0;
+      break;
+    }
+
+    incoming.unshift(previous);
+    remainingBefore -= length;
+    cursor = previous;
+  }
+
+  const outgoing = [];
+  let remainingAfter = TURN_HIGHLIGHT_AFTER_METERS;
+  cursor = turn;
+
+  for (let index = turnIndex + 1; index < points.length && remainingAfter > 0; index += 1) {
+    const next = points[index];
+    const length = distanceMeters(cursor, next);
+
+    if (length >= remainingAfter) {
+      outgoing.push(pointToward(cursor, next, remainingAfter));
+      remainingAfter = 0;
+      break;
+    }
+
+    outgoing.push(next);
+    remainingAfter -= length;
+    cursor = next;
+  }
+
+  const segment = [...incoming, turn, ...outgoing];
+  return segment.length >= 2 ? segment : null;
+}
+
+function pointAlongOutgoing(points, turnIndex, distance) {
+  let remaining = distance;
+  let cursor = points[turnIndex];
+
+  for (let index = turnIndex + 1; index < points.length; index += 1) {
+    const next = points[index];
+    const length = distanceMeters(cursor, next);
+
+    if (length >= remaining) {
+      return {
+        point: pointToward(cursor, next, remaining),
+        routeBearing: bearing(cursor, next)
+      };
+    }
+
+    remaining -= length;
+    cursor = next;
+  }
+
+  const previous = points[Math.max(0, points.length - 2)];
+  const last = points.at(-1);
+  if (!previous || !last) return null;
+
+  return {
+    point: last,
+    routeBearing: bearing(previous, last)
   };
 }
 
@@ -149,20 +257,19 @@ function maneuverSignature(maneuver, activeIndex) {
 function routeArrowGeometry(points, turnIndex, direction) {
   if (direction === 'roundabout') return null;
 
-  const outgoingFromIndex = Math.min(turnIndex, points.length - 2);
-  const outgoingToIndex = Math.min(points.length - 1, outgoingFromIndex + 1);
-  const outgoingFrom = points[outgoingFromIndex];
-  const outgoingTo = points[outgoingToIndex];
+  const outgoing = pointAlongOutgoing(
+    points,
+    turnIndex,
+    TURN_ARROW_TIP_METERS
+  );
+  if (!outgoing) return null;
 
-  if (!outgoingFrom || !outgoingTo) return null;
-
-  const routeBearing = bearing(outgoingFrom, outgoingTo);
-  const tip = interpolatePoint(outgoingFrom, outgoingTo, 0.55);
-  const wingLengthMeters = 8;
+  const tip = outgoing.point;
+  const routeBearing = outgoing.routeBearing;
 
   return [
-    [tip, destinationPoint(tip, routeBearing + 150, wingLengthMeters)],
-    [tip, destinationPoint(tip, routeBearing - 150, wingLengthMeters)]
+    [tip, destinationPoint(tip, routeBearing + 150, TURN_ARROW_WING_METERS)],
+    [tip, destinationPoint(tip, routeBearing - 150, TURN_ARROW_WING_METERS)]
   ];
 }
 
@@ -171,11 +278,9 @@ function turnGeometry(route, maneuver) {
   if (points.length < 3 || !validPoint(maneuver?.location)) return null;
 
   const turnIndex = nearestRouteIndex(points, maneuver.location);
-  const startIndex = Math.max(0, turnIndex - 1);
-  const endIndex = Math.min(points.length - 1, turnIndex + 1);
-  const segment = points.slice(startIndex, endIndex + 1);
+  const segment = compactTurnSegment(points, turnIndex);
 
-  if (segment.length < 2) return null;
+  if (!segment) return null;
 
   const incomingFromIndex = Math.max(0, turnIndex - 1);
   const incomingToIndex = Math.max(
@@ -221,7 +326,6 @@ function removeTurnOverlay(adapter) {
       if (adapter.map.getSource?.(sourceId)) adapter.map.removeSource(sourceId);
     }
   } catch {
-    // A style swap can remove the overlay before Atlas gets here.
   }
 }
 
@@ -295,8 +399,8 @@ export function installMapLibreTurnHighlight(AdapterClass) {
         },
         paint: {
           'line-color': '#ffffff',
-          'line-width': 12,
-          'line-opacity': 0.98
+          'line-width': 10,
+          'line-opacity': 0.96
         }
       });
 
@@ -310,7 +414,7 @@ export function installMapLibreTurnHighlight(AdapterClass) {
         },
         paint: {
           'line-color': '#f59e0b',
-          'line-width': 7,
+          'line-width': 6,
           'line-opacity': 1
         }
       });
@@ -331,7 +435,7 @@ export function installMapLibreTurnHighlight(AdapterClass) {
           },
           paint: {
             'line-color': '#f59e0b',
-            'line-width': 8,
+            'line-width': 7,
             'line-opacity': 1
           }
         });
@@ -346,7 +450,7 @@ export function installMapLibreTurnHighlight(AdapterClass) {
           },
           paint: {
             'line-color': '#ffffff',
-            'line-width': 4,
+            'line-width': 3,
             'line-opacity': 1
           }
         });
