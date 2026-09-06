@@ -199,8 +199,7 @@ html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
   background: #f1f4f8 !important;
 }
 
-/* Route preview/select controls should also stay on the same light visual
- * language rather than inheriting any dark navigation shell colors. */
+/* ---------- Route preview / planner light surfaces ---------- */
 html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
   .navigation-preview-bar,
 html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
@@ -210,4 +209,153 @@ html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
   color: #18202f;
   background: rgba(255, 255, 255, 0.97);
   border-color: rgba(24, 32, 47, 0.10);
+}
+
+/* Legacy landscape planner rules deliberately used a Waze-like dark instrument
+ * dock. In light theme keep the exact same geometry and hierarchy, but swap the
+ * hard-coded dark palette for the same surface language used elsewhere. */
+@media (orientation: landscape) and (max-height: 600px) {
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-main {
+    color: #18202f !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(24, 32, 47, 0.10) !important;
+    box-shadow: 0 10px 26px rgba(24, 32, 47, 0.13) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-copy > strong {
+    color: #18202f !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-copy > span {
+    color: #727b8b !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-destination-bookmark {
+    color: #566174 !important;
+    background: #f3f5f9 !important;
+    border-color: rgba(24, 32, 47, 0.08) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-controls {
+    color: #18202f !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(24, 32, 47, 0.10) !important;
+    box-shadow: 0 12px 30px rgba(24, 32, 47, 0.14) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-route,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-status,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-metrics {
+    color: #18202f !important;
+    background: #f5f7fa !important;
+    border-color: rgba(24, 32, 47, 0.08) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-main strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-metrics strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-title strong,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-duration {
+    color: #18202f !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-main small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-single-drive-roads,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-preview-status small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-roads,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-price,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option-foot small {
+    color: #727b8b !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-mode-selector {
+    background: #eef2f7 !important;
+    border-color: rgba(24, 32, 47, 0.08) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-mode-selector button {
+    color: #6f798a;
+    background: transparent;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-mode-selector button.is-selected,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-mode-selector button[aria-pressed="true"] {
+    color: var(--accent) !important;
+    background: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(24, 32, 47, 0.10) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-confirm-actions .navigation-secondary-action {
+    color: #39445a !important;
+    background: #eef2f7 !important;
+    border-color: rgba(24, 32, 47, 0.10) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option {
+    color: #18202f !important;
+    background: #f6f8fb !important;
+    border-color: rgba(24, 32, 47, 0.09) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    .navigation-planner--preview .navigation-drive-option.is-selected {
+    border-color: rgba(49, 94, 251, 0.45) !important;
+    background: #eef2ff !important;
+    box-shadow: inset 2px 0 0 var(--accent) !important;
+  }
+
+  /* The collapsed map-preview bar has later high-specificity dark rules in the
+   * legacy stylesheet, so repair all of its colours here as well. */
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-workspace .navigation-preview-bar {
+    color: #18202f !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(24, 32, 47, 0.10) !important;
+    box-shadow: 0 12px 30px rgba(24, 32, 47, 0.14) !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar .navigation-preview-summary {
+    color: #18202f !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar .navigation-preview-summary strong {
+    color: #18202f !important;
+  }
+
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar .navigation-preview-summary small,
+  html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+    body:has(#navigationWorkspace:not([hidden]))
+    .navigation-preview-bar .navigation-preview-chevron {
+    color: #727b8b !important;
+  }
 }
