@@ -14,6 +14,7 @@ import "./ui/components/overflow-menu/overflow-menu.css";
 import './ui/atlas-ui-consistency.css';
 import './ui/navigation-light-contrast.css';
 import './ui/navigation-driving-polish.css';
+import './ui/navigation-preview-density.css';
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createApp } from './app.js';
