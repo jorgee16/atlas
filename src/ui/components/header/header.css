@@ -21,7 +21,9 @@
     align-items:center;
     gap:12px;
 
-    width:184px;
+    box-sizing:border-box;
+    width:min(222px, calc(100vw - 276px));
+    min-width:196px;
     padding:8px 12px;
 
     background:rgba(255,255,255,.94);
@@ -38,24 +40,34 @@
 }
 
 .brand-copy{
+    flex:1 1 auto;
     min-width:0;
+    overflow:hidden;
 }
 
 .brand-copy strong{
     display:block;
+    overflow:hidden;
     font-size:16px;
     line-height:1.1;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .brand-copy small{
     display:block;
+    overflow:hidden;
     margin-top:4px;
 
     color:#6f7683;
     font-size:11px;
+    line-height:1.15;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .brand-mark{
+    flex:0 0 36px;
     display:grid;
     place-items:center;
 
@@ -74,6 +86,24 @@
     fill:none;
     stroke:#315efb;
     stroke-width:2;
+}
+
+html[data-atlas-theme="dark"] .brand-inline,
+html[data-theme="dark"] .brand-inline{
+    color:#eef3ff;
+    background:rgba(24,33,50,.92);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 8px 22px rgba(0,0,0,.24);
+}
+
+html[data-atlas-theme="dark"] .brand-copy small,
+html[data-theme="dark"] .brand-copy small{
+    color:#aeb8c9;
+}
+
+html[data-atlas-theme="dark"] .brand-mark,
+html[data-theme="dark"] .brand-mark{
+    background:rgba(255,255,255,.06);
 }
 
 /* One component, one geometry, two palettes. Theme changes only these visual
@@ -181,11 +211,47 @@ html[data-theme="dark"] .map-header-actions{
 }
 
 /* Landscape uses the same real system-bar inset as portrait, with a slightly
- * tighter optical gap because vertical space is more valuable. No hard-coded
- * 30/48px floors: the device inset determines the actual clearance. */
+ * tighter optical gap because vertical space is more valuable. Keep the Atlas
+ * status card visible as a compact pill instead of deleting it from the UI. */
 @media (orientation: landscape) {
   .map-header-actions {
     --map-actions-top-gap: 8px;
+  }
+
+  .brand-inline {
+    width:178px;
+    min-width:178px;
+    gap:9px;
+    padding:6px 9px;
+    border-radius:17px;
+  }
+
+  .brand-mark {
+    flex-basis:32px;
+    width:32px;
+    height:32px;
+    border-radius:10px;
+  }
+
+  .brand-mark svg {
+    width:20px;
+    height:20px;
+  }
+
+  .brand-copy strong {
+    font-size:14px;
+  }
+
+  .brand-copy small {
+    margin-top:2px;
+    font-size:9px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 430px) {
+  .brand-inline {
+    width:min(210px, calc(100vw - 238px));
+    min-width:184px;
   }
 }
 
