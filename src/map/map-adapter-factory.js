@@ -6,6 +6,9 @@ import {
   installMapLibreGpsParity
 } from './maplibre-gps-parity.js';
 import {
+  installMapLibreGpsDiagnostics
+} from './maplibre-gps-diagnostics.js';
+import {
   installMapLibreRouteStability
 } from './maplibre-route-stability.js';
 import {
@@ -262,15 +265,17 @@ export function createMapAdapter({
   switch (renderer) {
     case MAP_RENDERER.LEAFLET:
       return new LeafletMapAdapter(adapterOptions);
-    case MAP_RENDERER.MAPLIBRE:
-      return installMapLibreGpsParity(
-        new MapLibrePmtilesMapAdapter({
-          ...adapterOptions,
-          style:
-            adapterOptions.style ??
-            MAPLIBRE_ANDROID_VECTOR_STYLE
-        })
-      );
+    case MAP_RENDERER.MAPLIBRE: {
+      const adapter = new MapLibrePmtilesMapAdapter({
+        ...adapterOptions,
+        style:
+          adapterOptions.style ??
+          MAPLIBRE_ANDROID_VECTOR_STYLE
+      });
+
+      installMapLibreGpsDiagnostics(adapter);
+      return installMapLibreGpsParity(adapter);
+    }
     default:
       throw new RangeError(`Unsupported map renderer: ${renderer}`);
   }
