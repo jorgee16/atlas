@@ -239,12 +239,119 @@
   align-items: center;
 }
 
-/* In portrait active navigation, the bottom journey HUD occupies the same edge
- * as the map action stack. Keep compass/recenter entirely above that HUD so the
- * lower recenter control never gets clipped or hidden behind the summary. */
+/* Portrait navigation should prioritize map context. Keep the maneuver distance
+ * prominent, but remove the oversized tile/card padding inherited from the
+ * older mobile layout. The card may still grow naturally for long motorway
+ * destinations instead of clipping them. */
 @media (orientation: portrait) {
+  #navigationGuidance .navigation-guidance-banner.navigation-guidance-compact {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    border-radius: 18px !important;
+  }
+
+  #navigationGuidance .navigation-guidance-compact .navigation-guidance-primary {
+    grid-template-columns: 56px minmax(0, 1fr) 44px !important;
+    gap: 10px !important;
+    min-height: 62px !important;
+    padding: 10px 12px !important;
+  }
+
+  #navigationGuidance .navigation-maneuver-tile {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    border-radius: 15px !important;
+  }
+
+  #navigationGuidance .navigation-maneuver-tile svg {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  #navigationGuidance .navigation-maneuver-distance {
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+  }
+
+  #navigationGuidance .navigation-maneuver-road {
+    margin-top: 3px !important;
+    font-size: 15px !important;
+    line-height: 1.15 !important;
+  }
+
+  #navigationGuidance .navigation-guidance-stop {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    font-size: 20px !important;
+  }
+
+  /* The persistent ETA HUD only needs to carry three glanceable values. Reduce
+   * its vertical footprint while retaining large enough text/touch targets. */
+  #navigationGuidance .navigation-journey-summary {
+    min-height: 52px !important;
+    border-radius: 16px !important;
+  }
+
+  #navigationGuidance .navigation-journey-summary > div:not(.navigation-route-progress),
+  #navigationGuidance .navigation-voice-button {
+    min-height: 52px !important;
+  }
+
+  #navigationGuidance .navigation-eta-summary,
+  #navigationGuidance .navigation-route-mode-summary,
+  #navigationGuidance .navigation-route-mode-copy {
+    padding-top: 5px !important;
+    padding-bottom: 6px !important;
+  }
+
+  #navigationGuidance .navigation-eta-summary strong,
+  #navigationGuidance .navigation-route-mode-copy strong {
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  #navigationGuidance .navigation-eta-summary span,
+  #navigationGuidance .navigation-route-mode-copy span {
+    margin-top: 3px !important;
+    font-size: 8px !important;
+  }
+
+  #navigationGuidance .navigation-active-mode--compact {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 8px !important;
+  }
+
+  #navigationGuidance .navigation-voice-button {
+    min-width: 66px !important;
+    padding: 5px 8px !important;
+  }
+
+  #navigationGuidance .navigation-voice-button > span {
+    font-size: 15px !important;
+  }
+
+  #navigationGuidance .navigation-voice-button > strong {
+    margin-top: 2px !important;
+    font-size: 9px !important;
+  }
+
+  #navigationGuidance .navigation-route-progress {
+    height: 3px !important;
+  }
+
+  /* Follow the smaller HUD instead of leaving the recovery controls suspended
+   * at the old 62px-HUD clearance. */
   .app.navigation-active .map-actions {
-    bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(128px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
