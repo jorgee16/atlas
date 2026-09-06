@@ -76,10 +76,16 @@
     stroke-width:2;
 }
 
-/* The action cluster is only a positioning container. Each action owns its
- * individual floating surface. Never paint a parent rectangle behind the
- * buttons when the theme changes. */
+/* One component, one geometry, two palettes. Theme changes only these visual
+ * tokens; spacing, radii, hit targets and transitions remain identical. */
 .map-header-actions{
+    --map-actions-shell-bg: rgba(248,250,253,.92);
+    --map-actions-shell-border: rgba(24,32,47,.10);
+    --map-actions-shell-shadow: 0 8px 22px rgba(24,32,47,.12);
+    --map-actions-icon: #263247;
+    --map-actions-button-bg: rgba(255,255,255,.76);
+    --map-actions-button-hover: rgba(255,255,255,.96);
+
     position:fixed !important;
     z-index:2400 !important;
     top:calc(16px + env(safe-area-inset-top, 0px));
@@ -87,24 +93,38 @@
 
     display:flex;
     align-items:center;
-    gap:6px;
+    gap:3px;
 
     margin:0 !important;
-    padding:0 !important;
+    padding:4px !important;
     transform:none !important;
     pointer-events:auto !important;
     isolation:isolate;
 
-    color:inherit;
-    background:transparent !important;
-    border:0 !important;
-    border-radius:0 !important;
-    box-shadow:none !important;
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
+    color:var(--map-actions-icon);
+    background:var(--map-actions-shell-bg) !important;
+    border:1px solid var(--map-actions-shell-border) !important;
+    border-radius:20px !important;
+    box-shadow:var(--map-actions-shell-shadow) !important;
+    backdrop-filter:blur(14px) saturate(135%) !important;
+    -webkit-backdrop-filter:blur(14px) saturate(135%) !important;
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
 }
 
-.map-header .icon-btn{
+html[data-atlas-theme="dark"] .map-header-actions,
+html[data-theme="dark"] .map-header-actions{
+    --map-actions-shell-bg: rgba(24,33,50,.92);
+    --map-actions-shell-border: rgba(255,255,255,.08);
+    --map-actions-shell-shadow: 0 8px 22px rgba(0,0,0,.24);
+    --map-actions-icon: #eef3ff;
+    --map-actions-button-bg: rgba(255,255,255,.045);
+    --map-actions-button-hover: rgba(255,255,255,.09);
+}
+
+.map-header-actions .icon-btn{
     width:44px;
     height:44px;
 
@@ -113,30 +133,32 @@
 
     padding:0;
 
-    color:var(--text, #18202f);
-    border:1px solid rgba(24,32,47,.06);
-    border-radius:16px;
-
-    background:rgba(255,255,255,.94);
-
-    box-shadow:
-        0 8px 24px rgba(0,0,0,.12);
+    color:var(--map-actions-icon);
+    border:0;
+    border-radius:15px;
+    background:var(--map-actions-button-bg);
+    box-shadow:none !important;
 
     pointer-events:auto !important;
     touch-action:manipulation;
     transition:
-        transform 140ms ease,
-        background 180ms ease,
-        color 180ms ease,
-        border-color 180ms ease,
-        box-shadow 180ms ease;
+        transform 120ms ease,
+        background-color 160ms ease,
+        color 160ms ease,
+        box-shadow 160ms ease;
 }
 
-.map-header .icon-btn:active{
+@media (hover:hover) {
+  .map-header-actions .icon-btn:hover{
+      background:var(--map-actions-button-hover);
+  }
+}
+
+.map-header-actions .icon-btn:active{
     transform:scale(.96);
 }
 
-.map-header .icon-btn svg{
+.map-header-actions .icon-btn svg{
     width:22px;
     height:22px;
 
@@ -145,24 +167,10 @@
     stroke-width:2;
 }
 
-.map-header .icon-btn.on{
-    background:#3b63f6;
-    border-color:#3b63f6;
-    color:white;
-}
-
-html[data-atlas-theme="dark"] .map-header .icon-btn,
-html[data-theme="dark"] .map-header .icon-btn{
-    color:var(--text, #eef3ff);
-    background:color-mix(in srgb, var(--surface-solid, #172033) 94%, transparent);
-    border-color:rgba(255,255,255,.08);
-}
-
-html[data-atlas-theme="dark"] .map-header .icon-btn.on,
-html[data-theme="dark"] .map-header .icon-btn.on{
+.map-header-actions .icon-btn.on{
     color:#fff;
     background:#3b63f6;
-    border-color:#3b63f6;
+    box-shadow:0 3px 10px rgba(49,94,251,.22) !important;
 }
 
 /* Keep the cluster clear of Android's edge-to-edge status strip while staying
