@@ -1,6 +1,11 @@
-/* Light-mode contrast repair for the landscape Navigation search surface.
- * Geometry stays owned by styles.css; this file only normalizes readable
- * foreground/background values after the light-theme consistency overrides. */
+/* Light-mode navigation theme repair.
+ *
+ * Several legacy navigation components use hard-coded dark surfaces in the
+ * base stylesheet. Those values pre-date the Settings theme switch and should
+ * not leak into light mode. Keep geometry/state behavior in styles.css and
+ * normalize only the visual theme here, after the shared/header styles load. */
+
+/* ---------- Navigation search ---------- */
 @media (orientation: landscape) and (max-height: 600px) {
   html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
     .navigation-planner--search .navigation-search-card,
@@ -82,4 +87,138 @@
     .navigation-search-section--flat .navigation-search-results--flat {
     background: transparent;
   }
+}
+
+/* ---------- Top map controls ----------
+ * Active navigation used to add a translucent navy slab around otherwise
+ * light buttons. In light mode the cluster should remain a light floating
+ * control just like it is outside navigation. */
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .app.navigation-active .map-header-actions {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(24, 32, 47, 0.10) !important;
+  box-shadow: 0 8px 24px rgba(24, 32, 47, 0.12) !important;
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .map-header-actions .icon-btn {
+  color: #263247;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(24, 32, 47, 0.08);
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .map-header-actions .icon-btn.on {
+  color: #ffffff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- Maneuver guidance card ---------- */
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-guidance-banner {
+  color: #18202f !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: rgba(24, 32, 47, 0.10) !important;
+  box-shadow: 0 14px 34px rgba(24, 32, 47, 0.16) !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-guidance-banner .navigation-maneuver-distance,
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-current-maneuver > div:last-child > small {
+  color: var(--accent) !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-guidance-banner .navigation-maneuver-road,
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-current-maneuver > div:last-child > strong {
+  color: #18202f !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-guidance-banner .navigation-maneuver-copy small {
+  color: #687487 !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-guidance-banner .navigation-guidance-stop {
+  color: #687487;
+  background: #f1f4f8 !important;
+}
+
+/* ---------- Persistent ETA / distance / voice HUD ---------- */
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary {
+  color: #18202f !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: rgba(24, 32, 47, 0.10) !important;
+  box-shadow: 0 12px 30px rgba(24, 32, 47, 0.16) !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-eta-summary strong,
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-route-mode-copy strong {
+  color: #18202f !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-eta-summary span,
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-route-mode-copy span {
+  color: #687487 !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary > div:not(.navigation-route-progress)
+  + div:not(.navigation-route-progress),
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-voice-button {
+  border-color: rgba(24, 32, 47, 0.10) !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-voice-button {
+  color: #586174;
+  background: transparent !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-journey-summary .navigation-voice-button.on {
+  color: #11875d;
+  background: rgba(17, 135, 93, 0.08) !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-route-progress {
+  background: #e3e7ee !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-route-progress > span {
+  background: var(--accent) !important;
+}
+
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-active-mode--compact {
+  color: #263247;
+  background: #f1f4f8 !important;
+}
+
+/* Route preview/select controls should also stay on the same light visual
+ * language rather than inheriting any dark navigation shell colors. */
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-preview-bar,
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-mode-bar,
+html:not([data-atlas-theme="dark"]):not([data-theme="dark"])
+  .navigation-route-controls {
+  color: #18202f;
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(24, 32, 47, 0.10);
 }
