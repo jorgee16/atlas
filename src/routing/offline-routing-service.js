@@ -27,6 +27,9 @@ import {
 } from './route-road-summary.js';
 import { calibrateDriveEta } from './drive-eta.js';
 import {
+  appendDriveSegmentToRoute,
+  buildDriveRouteBetweenSegmentSnaps,
+  findDriveDestinationRoadSegmentSnaps,
   findDriveRoadSegmentSnaps,
   prependDriveSegmentToRoute
 } from './road-segment-snap.js';
@@ -84,9 +87,6 @@ function expandZeroEdgeWalkRoute(
     };
   }
 
-  // Defensive fallback only. The normal zero-edge case is handled above from
-  // actual walkable road geometry; this prevents a renderer crash if an old or
-  // malformed routing package contains an isolated shared node.
   const directDistance =
     distanceMeters(origin, destination);
 
@@ -100,6 +100,24 @@ function expandZeroEdgeWalkRoute(
     durationSeconds:
       directDistance /
       WALK_SPEED_METERS_PER_SECOND
+  };
+}
+
+function publicSegmentSnap(segmentSnap) {
+  if (!segmentSnap) return null;
+
+  return {
+    node: segmentSnap.node,
+    point: segmentSnap.point,
+    distanceMeters: segmentSnap.distanceMeters,
+    component: segmentSnap.component,
+    edgeIndex: segmentSnap.edgeIndex,
+    roadIndex: segmentSnap.roadIndex,
+    snapStrategy: segmentSnap.snapStrategy,
+    deadEnd: segmentSnap.deadEnd,
+    weaklyConnected: segmentSnap.weaklyConnected,
+    headingMismatchDegrees:
+      segmentSnap.headingMismatchDegrees ?? null
   };
 }
 
@@ -159,7 +177,7 @@ export class OfflineRoutingService {
       throw error;
     }
 
-    const destinationSnap =
+    const nearestDestinationNode =
       dataset.graph.findNearest(
         destination,
         {
@@ -169,7 +187,7 @@ export class OfflineRoutingService {
         }
       );
 
-    if (!destinationSnap) {
+    if (!nearestDestinationNode) {
       throw new Error(
         'No routable road was found near the destination.'
       );
@@ -190,10 +208,26 @@ export class OfflineRoutingService {
     }
 
     let originSnap = null;
+    let destinationSnap = nearestDestinationNode;
     let route = null;
 
     if (profile === 'drive') {
-      const segmentSnaps =
+      const destinationSegmentSnaps =
+        findDriveDestinationRoadSegmentSnaps(
+          dataset.graph,
+          destination,
+          {
+            maxDistanceMeters: Math.min(
+              80,
+              this.maximumSnapDistanceMeters
+            ),
+            maximumCandidates: 6,
+            component:
+              nearestDestinationNode.point.component
+          }
+        );
+
+      const originSegmentSnaps =
         findDriveRoadSegmentSnaps(
           dataset.graph,
           origin,
@@ -204,7 +238,7 @@ export class OfflineRoutingService {
             ),
             maximumCandidates: 6,
             destinationComponent:
-              destinationSnap.point.component,
+              nearestDestinationNode.point.component,
             heading,
             speed
           }
@@ -212,85 +246,113 @@ export class OfflineRoutingService {
 
       let best = null;
 
-      for (const segmentSnap of segmentSnaps) {
-        if (signal?.aborted) {
-          const error = new Error(
-            'Route calculation was cancelled.'
-          );
-          error.name = 'AbortError';
-          throw error;
-        }
+      const effectiveDestinationSnaps =
+        destinationSegmentSnaps.length
+          ? destinationSegmentSnaps
+          : [null];
 
-        const candidateRoute = await router.route(
-          segmentSnap.node,
-          destinationSnap.node,
-          {
-            signal,
-            profile,
-            avoidTolls,
-            tollPenaltyMinutesPerEuro,
-            vehicleClass
+      for (const segmentSnap of originSegmentSnaps) {
+        for (const destinationSegmentSnap of effectiveDestinationSnaps) {
+          if (signal?.aborted) {
+            const error = new Error(
+              'Route calculation was cancelled.'
+            );
+            error.name = 'AbortError';
+            throw error;
           }
-        );
 
-        if (!candidateRoute) continue;
+          let candidateRoute = null;
 
-        const withSegment =
-          prependDriveSegmentToRoute(
-            candidateRoute,
-            segmentSnap
-          );
+          if (destinationSegmentSnap) {
+            candidateRoute =
+              buildDriveRouteBetweenSegmentSnaps(
+                segmentSnap,
+                destinationSegmentSnap
+              );
+          }
 
-        const topologyPenalty =
-          (segmentSnap.deadEnd
-            ? DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS
-            : 0) +
-          (segmentSnap.weaklyConnected
-            ? DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS
-            : 0) +
-          (segmentSnap.road?.link === true
-            ? DRIVE_ORIGIN_LINK_PENALTY_SECONDS
-            : 0);
+          if (!candidateRoute) {
+            const goalNode = destinationSegmentSnap
+              ? destinationSegmentSnap.node
+              : nearestDestinationNode.node;
 
-        const headingPenalty =
-          Number.isFinite(speed) && speed >= 2
-            ? Math.pow(
-                Math.min(180, segmentSnap.headingMismatchDegrees ?? 0) / 180,
-                1.5
-              ) * DRIVE_ORIGIN_HEADING_PENALTY_SECONDS
-            : 0;
+            candidateRoute = await router.route(
+              segmentSnap.node,
+              goalNode,
+              {
+                signal,
+                profile,
+                avoidTolls,
+                tollPenaltyMinutesPerEuro,
+                vehicleClass
+              }
+            );
 
-        const score =
-          withSegment.durationSeconds +
-          segmentSnap.distanceMeters * 0.35 +
-          topologyPenalty +
-          headingPenalty;
+            if (!candidateRoute) continue;
 
-        if (!best || score < best.score) {
-          best = {
-            score,
-            route: withSegment,
-            snap: segmentSnap
-          };
+            candidateRoute =
+              prependDriveSegmentToRoute(
+                candidateRoute,
+                segmentSnap
+              );
+
+            if (destinationSegmentSnap) {
+              candidateRoute =
+                appendDriveSegmentToRoute(
+                  candidateRoute,
+                  destinationSegmentSnap
+                );
+            }
+          }
+
+          const topologyPenalty =
+            (segmentSnap.deadEnd
+              ? DRIVE_ORIGIN_DEAD_END_PENALTY_SECONDS
+              : 0) +
+            (segmentSnap.weaklyConnected
+              ? DRIVE_ORIGIN_WEAK_CONNECTION_PENALTY_SECONDS
+              : 0) +
+            (segmentSnap.road?.link === true
+              ? DRIVE_ORIGIN_LINK_PENALTY_SECONDS
+              : 0);
+
+          const headingPenalty =
+            Number.isFinite(speed) && speed >= 2
+              ? Math.pow(
+                  Math.min(180, segmentSnap.headingMismatchDegrees ?? 0) / 180,
+                  1.5
+                ) * DRIVE_ORIGIN_HEADING_PENALTY_SECONDS
+              : 0;
+
+          const destinationDistance =
+            destinationSegmentSnap?.distanceMeters ??
+            nearestDestinationNode.distanceMeters ??
+            0;
+
+          const score =
+            candidateRoute.durationSeconds +
+            segmentSnap.distanceMeters * 0.35 +
+            destinationDistance * 0.2 +
+            topologyPenalty +
+            headingPenalty;
+
+          if (!best || score < best.score) {
+            best = {
+              score,
+              route: candidateRoute,
+              originSnap: segmentSnap,
+              destinationSnap: destinationSegmentSnap
+            };
+          }
         }
       }
 
       if (best) {
         route = best.route;
-        originSnap = {
-          node: best.snap.node,
-          point: best.snap.point,
-          distanceMeters:
-            best.snap.distanceMeters,
-          component: best.snap.component,
-          edgeIndex: best.snap.edgeIndex,
-          roadIndex: best.snap.roadIndex,
-          snapStrategy: 'road-segment',
-          deadEnd: best.snap.deadEnd,
-          weaklyConnected: best.snap.weaklyConnected,
-          headingMismatchDegrees:
-            best.snap.headingMismatchDegrees ?? null
-        };
+        originSnap = publicSegmentSnap(best.originSnap);
+        destinationSnap = best.destinationSnap
+          ? publicSegmentSnap(best.destinationSnap)
+          : nearestDestinationNode;
       }
     }
 
@@ -313,7 +375,7 @@ export class OfflineRoutingService {
       if (
         profile === 'drive' &&
         originSnap.point.component !==
-        destinationSnap.point.component
+        nearestDestinationNode.point.component
       ) {
         throw new Error(
           'No continuous road connection exists between these endpoints.'
@@ -322,7 +384,7 @@ export class OfflineRoutingService {
 
       route = await router.route(
         originSnap.node,
-        destinationSnap.node,
+        nearestDestinationNode.node,
         {
           signal,
           profile,
@@ -331,6 +393,7 @@ export class OfflineRoutingService {
           vehicleClass
         }
       );
+      destinationSnap = nearestDestinationNode;
     }
 
     if (!route) {
@@ -341,10 +404,6 @@ export class OfflineRoutingService {
       );
     }
 
-    // Very short walks can snap both planner endpoints to the same graph node.
-    // A* correctly returns a zero-edge route. Reconstruct that short section
-    // from real adjacent walkable road geometry instead of drawing a synthetic
-    // GPS -> node -> destination triangle across buildings.
     const normalizedRoute =
       profile === 'walk'
         ? expandZeroEdgeWalkRoute(
