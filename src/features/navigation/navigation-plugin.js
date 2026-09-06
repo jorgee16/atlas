@@ -64,6 +64,49 @@ export class NavigationPlugin {
         }
       });
 
+    /*
+     * "Stop" and "Finish" are intentionally different operations.
+     *
+     * A manual Stop may keep the selected destination so the user can inspect
+     * or restart that route. Finishing after arrival is terminal: the completed
+     * destination must not immediately reopen as a Route preview / Bookmark
+     * card. Keep that distinction at the plugin boundary without changing the
+     * long-established Stop semantics inside NavigationFeature.
+     */
+    const finishArrival =
+      this.feature.finishArrival.bind(
+        this.feature
+      );
+
+    this.feature.finishArrival = () => {
+      const travelMode =
+        this.feature.getPlannerState()
+          .travelMode;
+
+      const finished = finishArrival();
+
+      if (!finished) {
+        return false;
+      }
+
+      this.feature.clearPlannerDestination();
+
+      // clearPlannerDestination() intentionally starts a brand-new generic
+      // plan on Drive. A completed Walk route, however, should not silently
+      // change the user's preferred planner mode just because Finish was
+      // pressed. Restore the mode after clearing the stale destination.
+      if (
+        travelMode &&
+        travelMode !== 'drive'
+      ) {
+        this.feature.setTravelMode(
+          travelMode
+        );
+      }
+
+      return true;
+    };
+
     context.provide(
       'navigationFeature',
       this.feature
