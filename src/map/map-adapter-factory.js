@@ -14,10 +14,14 @@ import {
 import {
   installMapLibreUserGesturePolicy
 } from './maplibre-user-gesture-policy.js';
+import {
+  installMapLibreMapTheme
+} from './maplibre-map-theme.js';
 
 installMapLibreRouteStability();
 installMapLibreFollowCameraStability();
 installMapLibreUserGesturePolicy();
+installMapLibreMapTheme();
 
 export const MAP_RENDERER = Object.freeze({
   LEAFLET: 'leaflet',
