@@ -16,6 +16,7 @@ import './ui/navigation-light-contrast.css';
 import './ui/navigation-driving-polish.css';
 import './ui/navigation-preview-density.css';
 import './ui/legacy-theme-cascade-bridge.css';
+import './ui/gps-diagnostics-layer.css';
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { createApp } from './app.js';
