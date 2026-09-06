@@ -123,29 +123,19 @@ function render(adapter, state, now = performance.now()) {
   const rawDelta = finite(state.rawProviderDeltaMs)
     ? `${Math.round(state.rawProviderDeltaMs)} ms`
     : '—';
-  const callbackDelta = finite(state.rawCallbackDeltaMs)
-    ? `${Math.round(state.rawCallbackDeltaMs)} ms`
-    : '—';
-  const routeMatchWritesHz = Math.max(
-    0,
-    state.cursorWriteHz - state.rawGpsHz
-  );
 
   element.innerHTML = `
     <strong>GPS diagnostics</strong>
-    <span>Renderer MapLibre · FPS ${state.fps.toFixed(0)}</span>
-    <span>Device GPS ${state.rawGpsHz.toFixed(2)} Hz · ${state.rawSource}</span>
-    <span>Fix interval ${rawDelta}</span>
-    <span>Callback interval ${callbackDelta}</span>
-    <span>Cursor writes ${state.cursorWriteHz.toFixed(2)} Hz</span>
-    <span>Route-match writes ≈ ${routeMatchWritesHz.toFixed(2)} Hz</span>
-    <span>Cursor writes = GPS fixes + route-match correction</span>
-    <span>Accuracy ${finite(position?.accuracy) ? `${position.accuracy.toFixed(1)} m` : '—'}</span>
+    <span>Renderer MapLibre</span>
+    <span>FPS ${state.fps.toFixed(0)}</span>
+    <span>GPS ${state.rawGpsHz.toFixed(2)} Hz · ${rawDelta} · ${state.rawSource}</span>
+    <span>Cursor ${state.cursorWriteHz.toFixed(2)} Hz</span>
+    <span>Acc ${finite(position?.accuracy) ? `${position.accuracy.toFixed(1)} m` : '—'}</span>
     <span>Speed ${speedKmh === null ? '—' : `${speedKmh.toFixed(1)} km/h`}</span>
-    <span>Heading ${heading === null ? '—' : `${Math.round(heading)}°`}</span>
-    <span>Prediction ${prediction.toFixed(2)} s</span>
-    <span>Smoothing offset ${smoothingDistance === null ? '—' : `${smoothingDistance.toFixed(1)} m`}</span>
-    <span>Camera ${finite(zoom) ? `z${zoom.toFixed(1)}` : 'z—'} · ${finite(pitch) ? `p${Math.round(pitch)}°` : 'p—'} · ${finite(bearing) ? `b${Math.round(bearing)}°` : 'b—'}</span>
+    <span>Head ${heading === null ? '—' : `${Math.round(heading)}°`}</span>
+    <span>Pred ${prediction.toFixed(2)} s</span>
+    <span>Smooth ${smoothingDistance === null ? '—' : `${smoothingDistance.toFixed(1)} m`}</span>
+    <span>Cam ${finite(zoom) ? `z${zoom.toFixed(1)}` : 'z—'} · ${finite(pitch) ? `p${Math.round(pitch)}°` : 'p—'} · ${finite(bearing) ? `b${Math.round(bearing)}°` : 'b—'}</span>
   `;
 }
 
