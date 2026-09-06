@@ -30,6 +30,11 @@
 
     box-shadow:
         0 8px 24px rgba(0,0,0,.12);
+
+    transition:
+        background 180ms ease,
+        box-shadow 180ms ease,
+        color 180ms ease;
 }
 
 .brand-copy{
@@ -71,10 +76,9 @@
     stroke-width:2;
 }
 
-/* The action cluster is a viewport control, not part of the workspace layout.
- * Keeping it relative to .map-header allowed planner/navigation state rules to
- * move its containing block and occasionally left visible buttons underneath
- * another hit layer. Anchor it directly to the viewport instead. */
+/* The action cluster is only a positioning container. Each action owns its
+ * individual floating surface. Never paint a parent rectangle behind the
+ * buttons when the theme changes. */
 .map-header-actions{
     position:fixed !important;
     z-index:2400 !important;
@@ -86,9 +90,18 @@
     gap:6px;
 
     margin:0 !important;
+    padding:0 !important;
     transform:none !important;
     pointer-events:auto !important;
     isolation:isolate;
+
+    color:inherit;
+    background:transparent !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
 }
 
 .map-header .icon-btn{
@@ -100,7 +113,8 @@
 
     padding:0;
 
-    border:none;
+    color:var(--text, #18202f);
+    border:1px solid rgba(24,32,47,.06);
     border-radius:16px;
 
     background:rgba(255,255,255,.94);
@@ -110,6 +124,16 @@
 
     pointer-events:auto !important;
     touch-action:manipulation;
+    transition:
+        transform 140ms ease,
+        background 180ms ease,
+        color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.map-header .icon-btn:active{
+    transform:scale(.96);
 }
 
 .map-header .icon-btn svg{
@@ -123,12 +147,26 @@
 
 .map-header .icon-btn.on{
     background:#3b63f6;
+    border-color:#3b63f6;
     color:white;
 }
 
+html[data-atlas-theme="dark"] .map-header .icon-btn,
+html[data-theme="dark"] .map-header .icon-btn{
+    color:var(--text, #eef3ff);
+    background:color-mix(in srgb, var(--surface-solid, #172033) 94%, transparent);
+    border-color:rgba(255,255,255,.08);
+}
+
+html[data-atlas-theme="dark"] .map-header .icon-btn.on,
+html[data-theme="dark"] .map-header .icon-btn.on{
+    color:#fff;
+    background:#3b63f6;
+    border-color:#3b63f6;
+}
+
 /* Keep the cluster clear of Android's edge-to-edge status strip while staying
- * optically aligned with the rest of the landscape map UI. The previous 46px
- * floor was safe but visibly too low once the cluster became viewport-fixed. */
+ * optically aligned with the rest of the landscape map UI. */
 @media (orientation: landscape) {
   .map-header-actions {
     top:max(
