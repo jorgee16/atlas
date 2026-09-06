@@ -1,5 +1,6 @@
 const EARTH_RADIUS_METERS = 6_371_000;
 const PROBE_RADII_METERS = [0, 30, 70, 120];
+const DESTINATION_PROBE_RADII_METERS = [0, 40, 90, 160, 260, 400, 600];
 const PROBE_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315];
 
 // Origin snapping should be proximity-led, but not proximity-blind. A local
@@ -102,6 +103,25 @@ function projectOnSegment(point, from, to) {
   };
 }
 
+function leadingGeometry(points, segmentIndex, projectedPoint) {
+  const output = [];
+
+  for (let index = 0; index <= segmentIndex; index += 1) {
+    const point = points[index];
+    const previous = output[output.length - 1];
+    if (!previous || distanceMeters(previous, point) > 0.05) {
+      output.push(point);
+    }
+  }
+
+  const previous = output[output.length - 1];
+  if (!previous || distanceMeters(previous, projectedPoint) > 0.05) {
+    output.push(projectedPoint);
+  }
+
+  return output;
+}
+
 function remainingGeometry(points, segmentIndex, projectedPoint) {
   const output = [projectedPoint];
 
@@ -112,6 +132,44 @@ function remainingGeometry(points, segmentIndex, projectedPoint) {
     if (distanceMeters(previous, point) > 0.05) {
       output.push(point);
     }
+  }
+
+  return output;
+}
+
+function geometryBetweenSnaps(originSnap, destinationSnap) {
+  const points = originSnap.pathPoints ?? [];
+  if (
+    originSnap.edgeIndex !== destinationSnap.edgeIndex ||
+    points.length < 2 ||
+    originSnap.segmentIndex > destinationSnap.segmentIndex
+  ) {
+    return null;
+  }
+
+  if (originSnap.segmentIndex === destinationSnap.segmentIndex) {
+    if (originSnap.segmentFraction > destinationSnap.segmentFraction) {
+      return null;
+    }
+    return [originSnap.point, destinationSnap.point];
+  }
+
+  const output = [originSnap.point];
+  for (
+    let index = originSnap.segmentIndex + 1;
+    index <= destinationSnap.segmentIndex;
+    index += 1
+  ) {
+    const point = points[index];
+    const previous = output[output.length - 1];
+    if (distanceMeters(previous, point) > 0.05) {
+      output.push(point);
+    }
+  }
+
+  const previous = output[output.length - 1];
+  if (distanceMeters(previous, destinationSnap.point) > 0.05) {
+    output.push(destinationSnap.point);
   }
 
   return output;
@@ -133,11 +191,19 @@ function driveDegree(graph, nodeIndex) {
   ).size;
 }
 
-function candidateNodes(graph, point, maxDistanceMeters) {
+function candidateNodes(
+  graph,
+  point,
+  maxDistanceMeters,
+  {
+    probeRadii = PROBE_RADII_METERS,
+    maximumProbeRadiusMeters = Math.max(120, maxDistanceMeters * 4)
+  } = {}
+) {
   const nodes = new Map();
 
-  for (const radius of PROBE_RADII_METERS) {
-    if (radius > Math.max(120, maxDistanceMeters * 4)) continue;
+  for (const radius of probeRadii) {
+    if (radius > maximumProbeRadiusMeters) continue;
 
     const bearings = radius === 0 ? [0] : PROBE_BEARINGS;
     for (const bearing of bearings) {
@@ -187,34 +253,92 @@ function snapPreferenceScore(
   );
 }
 
-export function findDriveRoadSegmentSnaps(
+function rankCandidates(candidates, { useHeading = false, maximumCandidates = 6 } = {}) {
+  const directionCompatible = useHeading
+    ? candidates.filter(candidate => candidate.headingMismatchDegrees <= 110)
+    : candidates;
+
+  const rankedCandidates = directionCompatible.length
+    ? directionCompatible
+    : candidates;
+
+  const nearestDistance = rankedCandidates.reduce(
+    (best, candidate) => Math.min(best, candidate.distanceMeters),
+    Infinity
+  );
+
+  const bestRoadClass = rankedCandidates
+    .filter(candidate =>
+      candidate.distanceMeters <=
+        nearestDistance + ROAD_CLASS_COMPARISON_RADIUS_METERS
+    )
+    .reduce(
+      (best, candidate) =>
+        Math.min(best, Number(candidate.roadClass ?? Infinity)),
+      Infinity
+    );
+
+  rankedCandidates.sort((a, b) => {
+    const aScore = snapPreferenceScore(a, { bestRoadClass, useHeading });
+    const bScore = snapPreferenceScore(b, { bestRoadClass, useHeading });
+
+    return (
+      aScore - bScore ||
+      a.distanceMeters - b.distanceMeters ||
+      Number(a.deadEnd) - Number(b.deadEnd) ||
+      Number(a.weaklyConnected) - Number(b.weaklyConnected) ||
+      a.roadClass - b.roadClass ||
+      a.headingMismatchDegrees - b.headingMismatchDegrees ||
+      (a.remainingDistanceMeters ?? a.leadingDistanceMeters ?? 0) -
+        (b.remainingDistanceMeters ?? b.leadingDistanceMeters ?? 0)
+    );
+  });
+
+  const unique = [];
+  const seen = new Set();
+  for (const candidate of rankedCandidates) {
+    const key = `${candidate.edgeIndex}:${candidate.point.lat.toFixed(6)}:${candidate.point.lon.toFixed(6)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(candidate);
+    if (unique.length >= maximumCandidates) break;
+  }
+
+  return unique;
+}
+
+function segmentCandidates(
   graph,
   point,
   {
-    maxDistanceMeters = 45,
-    maximumCandidates = 6,
-    destinationComponent = null,
+    maxDistanceMeters,
+    component = null,
     heading = null,
-    speed = null
-  } = {}
+    speed = null,
+    destination = false
+  }
 ) {
   const directedEdges = new Set();
   const candidates = [];
-  const effectiveHeading = Number.isFinite(heading)
-    ? heading
-    : point?.heading;
-  const effectiveSpeed = Number.isFinite(speed)
-    ? speed
-    : point?.speed;
+  const effectiveHeading = Number.isFinite(heading) ? heading : point?.heading;
+  const effectiveSpeed = Number.isFinite(speed) ? speed : point?.speed;
   const useHeading =
+    !destination &&
     Number.isFinite(effectiveHeading) &&
     Number.isFinite(effectiveSpeed) &&
     effectiveSpeed >= 2;
 
-  for (const nodeSnap of candidateNodes(graph, point, maxDistanceMeters)) {
+  const probes = destination
+    ? {
+        probeRadii: DESTINATION_PROBE_RADII_METERS,
+        maximumProbeRadiusMeters: Math.max(600, maxDistanceMeters * 12)
+      }
+    : undefined;
+
+  for (const nodeSnap of candidateNodes(graph, point, maxDistanceMeters, probes)) {
     if (
-      Number.isInteger(destinationComponent) &&
-      nodeSnap.point.component !== destinationComponent
+      Number.isInteger(component) &&
+      nodeSnap.point.component !== component
     ) {
       continue;
     }
@@ -249,19 +373,23 @@ export function findDriveRoadSegmentSnaps(
         continue;
       }
 
+      const leadingPoints = leadingGeometry(
+        points,
+        bestProjection.segmentIndex,
+        bestProjection.point
+      );
       const remainingPoints = remainingGeometry(
         points,
         bestProjection.segmentIndex,
         bestProjection.point
       );
+      const leadingDistanceMeters = geometryDistance(leadingPoints);
       const remainingDistanceMeters = geometryDistance(remainingPoints);
       const fullDistanceMeters = Math.max(edge.distanceDecimeters / 10, 0.01);
-      const remainingFraction = Math.max(
-        0,
-        Math.min(1, remainingDistanceMeters / fullDistanceMeters)
-      );
-      const remainingDurationSeconds =
-        edge.durationCentiseconds / 100 * remainingFraction;
+      const leadingFraction = Math.max(0, Math.min(1, leadingDistanceMeters / fullDistanceMeters));
+      const remainingFraction = Math.max(0, Math.min(1, remainingDistanceMeters / fullDistanceMeters));
+      const leadingDurationSeconds = edge.durationCentiseconds / 100 * leadingFraction;
+      const remainingDurationSeconds = edge.durationCentiseconds / 100 * remainingFraction;
       const road = graph.road(edge.road, edge.geometryReversed);
       const fromDegree = driveDegree(graph, nodeSnap.node);
       const toDegree = driveDegree(graph, edge.to);
@@ -278,7 +406,7 @@ export function findDriveRoadSegmentSnaps(
         point: bestProjection.point,
         distanceMeters: bestProjection.distanceMeters,
         fromNode: nodeSnap.node,
-        node: edge.to,
+        node: destination ? nodeSnap.node : edge.to,
         toNode: edge.to,
         edgeIndex: edge.edgeIndex,
         roadIndex: edge.road,
@@ -289,77 +417,67 @@ export function findDriveRoadSegmentSnaps(
         toDegree,
         deadEnd,
         weaklyConnected,
+        pathPoints: points,
+        segmentIndex: bestProjection.segmentIndex,
+        segmentFraction: bestProjection.fraction,
+        leadingPoints,
+        leadingDistanceMeters,
+        leadingDurationSeconds,
         remainingPoints,
         remainingDistanceMeters,
         remainingDurationSeconds,
         component: nodeSnap.point.component,
-        snapStrategy: 'road-segment',
+        snapStrategy: destination ? 'road-segment-destination' : 'road-segment',
         travelHeading,
         headingMismatchDegrees
       });
     }
   }
 
-  const directionCompatible = useHeading
-    ? candidates.filter(candidate => candidate.headingMismatchDegrees <= 110)
-    : candidates;
+  return { candidates, useHeading };
+}
 
-  const rankedCandidates = directionCompatible.length
-    ? directionCompatible
-    : candidates;
-
-  const nearestDistance = rankedCandidates.reduce(
-    (best, candidate) =>
-      Math.min(best, candidate.distanceMeters),
-    Infinity
-  );
-
-  // Compare road hierarchy only amongst genuinely nearby alternatives. A
-  // motorway/high-class road 40 m farther away must not steal the snap from
-  // the street the user is actually standing on.
-  const bestRoadClass = rankedCandidates
-    .filter(candidate =>
-      candidate.distanceMeters <=
-        nearestDistance + ROAD_CLASS_COMPARISON_RADIUS_METERS
-    )
-    .reduce(
-      (best, candidate) =>
-        Math.min(best, Number(candidate.roadClass ?? Infinity)),
-      Infinity
-    );
-
-  rankedCandidates.sort((a, b) => {
-    const aScore = snapPreferenceScore(a, {
-      bestRoadClass,
-      useHeading
-    });
-    const bScore = snapPreferenceScore(b, {
-      bestRoadClass,
-      useHeading
-    });
-
-    return (
-      aScore - bScore ||
-      a.distanceMeters - b.distanceMeters ||
-      Number(a.deadEnd) - Number(b.deadEnd) ||
-      Number(a.weaklyConnected) - Number(b.weaklyConnected) ||
-      a.roadClass - b.roadClass ||
-      a.headingMismatchDegrees - b.headingMismatchDegrees ||
-      a.remainingDistanceMeters - b.remainingDistanceMeters
-    );
+export function findDriveRoadSegmentSnaps(
+  graph,
+  point,
+  {
+    maxDistanceMeters = 45,
+    maximumCandidates = 6,
+    destinationComponent = null,
+    heading = null,
+    speed = null
+  } = {}
+) {
+  const { candidates, useHeading } = segmentCandidates(graph, point, {
+    maxDistanceMeters,
+    component: destinationComponent,
+    heading,
+    speed,
+    destination: false
   });
 
-  const unique = [];
-  const seen = new Set();
-  for (const candidate of rankedCandidates) {
-    const key = `${candidate.edgeIndex}:${candidate.point.lat.toFixed(6)}:${candidate.point.lon.toFixed(6)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    unique.push(candidate);
-    if (unique.length >= maximumCandidates) break;
-  }
+  return rankCandidates(candidates, { useHeading, maximumCandidates });
+}
 
-  return unique;
+export function findDriveDestinationRoadSegmentSnaps(
+  graph,
+  point,
+  {
+    maxDistanceMeters = 55,
+    maximumCandidates = 6,
+    component = null
+  } = {}
+) {
+  const { candidates } = segmentCandidates(graph, point, {
+    maxDistanceMeters,
+    component,
+    destination: true
+  });
+
+  return rankCandidates(candidates, {
+    useHeading: false,
+    maximumCandidates
+  });
 }
 
 export function prependDriveSegmentToRoute(route, segmentSnap) {
@@ -420,5 +538,97 @@ export function prependDriveSegmentToRoute(route, segmentSnap) {
     distanceMeters: route.distanceMeters + distanceShift,
     durationSeconds: route.durationSeconds + durationShift,
     originSegmentSnap: segmentSnap
+  };
+}
+
+export function appendDriveSegmentToRoute(route, segmentSnap) {
+  if (!route || !segmentSnap?.leadingPoints?.length) return route;
+
+  const suffix = segmentSnap.leadingPoints;
+  const routePoints = Array.isArray(route.points) ? route.points : [];
+  const suffixStart =
+    routePoints.length &&
+    distanceMeters(routePoints[routePoints.length - 1], suffix[0]) < 0.1
+      ? 1
+      : 0;
+  const points = [
+    ...routePoints,
+    ...suffix.slice(suffixStart)
+  ];
+
+  const pointStartIndex = Math.max(0, routePoints.length - 1);
+  const distanceStart = route.distanceMeters;
+  const durationStart = route.durationSeconds;
+  const distanceShift = segmentSnap.leadingDistanceMeters;
+  const durationShift = segmentSnap.leadingDurationSeconds;
+
+  const lastLeg = {
+    edgeIndex: segmentSnap.edgeIndex,
+    fromNode: segmentSnap.fromNode,
+    toNode: segmentSnap.toNode,
+    pointStartIndex,
+    pointEndIndex: points.length - 1,
+    distanceMeters: distanceShift,
+    durationSeconds: durationShift,
+    routeDistanceStartMeters: distanceStart,
+    routeDistanceEndMeters: distanceStart + distanceShift,
+    routeDurationStartSeconds: durationStart,
+    routeDurationEndSeconds: durationStart + durationShift,
+    roadIndex: segmentSnap.roadIndex,
+    road: segmentSnap.road,
+    roadClass: segmentSnap.roadClass,
+    oneWay: segmentSnap.oneWay,
+    partial: true
+  };
+
+  return {
+    ...route,
+    points,
+    legs: [...(route.legs ?? []), lastLeg],
+    distanceMeters: distanceStart + distanceShift,
+    durationSeconds: durationStart + durationShift,
+    destinationSegmentSnap: segmentSnap
+  };
+}
+
+export function buildDriveRouteBetweenSegmentSnaps(originSnap, destinationSnap) {
+  const points = geometryBetweenSnaps(originSnap, destinationSnap);
+  if (!points?.length) return null;
+
+  const distance = geometryDistance(points);
+  const fullDistance = Math.max(
+    originSnap.remainingDistanceMeters + originSnap.leadingDistanceMeters,
+    0.01
+  );
+  const duration =
+    (originSnap.remainingDurationSeconds + originSnap.leadingDurationSeconds) *
+    Math.max(0, Math.min(1, distance / fullDistance));
+
+  return {
+    nodeIndexes: [],
+    edgeIndexes: [originSnap.edgeIndex],
+    points,
+    legs: [{
+      edgeIndex: originSnap.edgeIndex,
+      fromNode: originSnap.fromNode,
+      toNode: originSnap.toNode,
+      pointStartIndex: 0,
+      pointEndIndex: points.length - 1,
+      distanceMeters: distance,
+      durationSeconds: duration,
+      routeDistanceStartMeters: 0,
+      routeDistanceEndMeters: distance,
+      routeDurationStartSeconds: 0,
+      routeDurationEndSeconds: duration,
+      roadIndex: originSnap.roadIndex,
+      road: originSnap.road,
+      roadClass: originSnap.roadClass,
+      oneWay: originSnap.oneWay,
+      partial: true
+    }],
+    distanceMeters: distance,
+    durationSeconds: duration,
+    originSegmentSnap: originSnap,
+    destinationSegmentSnap: destinationSnap
   };
 }
