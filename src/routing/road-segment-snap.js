@@ -2,6 +2,17 @@ const EARTH_RADIUS_METERS = 6_371_000;
 const PROBE_RADII_METERS = [0, 30, 70, 120];
 const PROBE_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315];
 
+// Origin snapping should be proximity-led, but not proximity-blind. A local
+// spur / cul-de-sac only wins when it is materially closer to the GPS fix.
+// These values are expressed in "equivalent metres" and intentionally stay
+// small enough that a genuinely nearer road still wins.
+const DEAD_END_SNAP_PENALTY_METERS = 24;
+const WEAK_CONNECTION_SNAP_PENALTY_METERS = 10;
+const LINK_SNAP_PENALTY_METERS = 7;
+const ROAD_CLASS_SNAP_PENALTY_METERS = 3.5;
+const HEADING_SNAP_PENALTY_METERS_PER_DEGREE = 0.08;
+const ROAD_CLASS_COMPARISON_RADIUS_METERS = 24;
+
 function distanceMeters(a, b) {
   const radians = Math.PI / 180;
   const lat1 = a.lat * radians;
@@ -143,6 +154,39 @@ function candidateNodes(graph, point, maxDistanceMeters) {
   return [...nodes.values()];
 }
 
+function snapPreferenceScore(
+  candidate,
+  {
+    bestRoadClass,
+    useHeading
+  }
+) {
+  const hierarchyDifference = Math.max(
+    0,
+    Number(bestRoadClass ?? candidate.roadClass ?? 0) -
+      Number(candidate.roadClass ?? 0)
+  );
+
+  return (
+    candidate.distanceMeters +
+    (candidate.deadEnd
+      ? DEAD_END_SNAP_PENALTY_METERS
+      : 0) +
+    (candidate.weaklyConnected
+      ? WEAK_CONNECTION_SNAP_PENALTY_METERS
+      : 0) +
+    (candidate.road?.link === true
+      ? LINK_SNAP_PENALTY_METERS
+      : 0) +
+    hierarchyDifference *
+      ROAD_CLASS_SNAP_PENALTY_METERS +
+    (useHeading
+      ? candidate.headingMismatchDegrees *
+        HEADING_SNAP_PENALTY_METERS_PER_DEGREE
+      : 0)
+  );
+}
+
 export function findDriveRoadSegmentSnaps(
   graph,
   point,
@@ -256,21 +300,54 @@ export function findDriveRoadSegmentSnaps(
     }
   }
 
-  candidates.sort((a, b) =>
-    Number(a.deadEnd) - Number(b.deadEnd) ||
-    a.headingMismatchDegrees - b.headingMismatchDegrees ||
-    a.distanceMeters - b.distanceMeters ||
-    Number(a.road?.link === true) - Number(b.road?.link === true) ||
-    b.roadClass - a.roadClass ||
-    a.remainingDistanceMeters - b.remainingDistanceMeters
-  );
-
   const directionCompatible = useHeading
     ? candidates.filter(candidate => candidate.headingMismatchDegrees <= 110)
     : candidates;
+
   const rankedCandidates = directionCompatible.length
     ? directionCompatible
     : candidates;
+
+  const nearestDistance = rankedCandidates.reduce(
+    (best, candidate) =>
+      Math.min(best, candidate.distanceMeters),
+    Infinity
+  );
+
+  // Compare road hierarchy only amongst genuinely nearby alternatives. A
+  // motorway/high-class road 40 m farther away must not steal the snap from
+  // the street the user is actually standing on.
+  const bestRoadClass = rankedCandidates
+    .filter(candidate =>
+      candidate.distanceMeters <=
+        nearestDistance + ROAD_CLASS_COMPARISON_RADIUS_METERS
+    )
+    .reduce(
+      (best, candidate) =>
+        Math.max(best, Number(candidate.roadClass ?? 0)),
+      0
+    );
+
+  rankedCandidates.sort((a, b) => {
+    const aScore = snapPreferenceScore(a, {
+      bestRoadClass,
+      useHeading
+    });
+    const bScore = snapPreferenceScore(b, {
+      bestRoadClass,
+      useHeading
+    });
+
+    return (
+      aScore - bScore ||
+      a.distanceMeters - b.distanceMeters ||
+      Number(a.deadEnd) - Number(b.deadEnd) ||
+      Number(a.weaklyConnected) - Number(b.weaklyConnected) ||
+      b.roadClass - a.roadClass ||
+      a.headingMismatchDegrees - b.headingMismatchDegrees ||
+      a.remainingDistanceMeters - b.remainingDistanceMeters
+    );
+  });
 
   const unique = [];
   const seen = new Set();
