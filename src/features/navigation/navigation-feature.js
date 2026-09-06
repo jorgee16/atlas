@@ -57,6 +57,8 @@ const ROUTE_PREVIEW_COLLAPSE_MS = 4_500;
 const APPROACHING_DESTINATION_METERS = 100;
 const ARRIVAL_DISTANCE_METERS = 30;
 const ARRIVAL_DESTINATION_RADIUS_METERS = 50;
+const WALK_ARRIVAL_DISTANCE_METERS = 15;
+const WALK_ARRIVAL_DESTINATION_RADIUS_METERS = 20;
 
 import { TransitJourneyExecution } from '../../transit/transit-journey-execution.js';
 import { TransitJourneyExecutionView } from './transit-journey-execution-view.js';
@@ -416,9 +418,6 @@ export class NavigationFeature {
       return;
     }
 
-    // Treat the route as a corridor rather than a razor-thin line. GPS
-    // accuracy widens that corridor, so mediocre fixes do not make Atlas
-    // chatter between the current route and repeated reroutes.
     const offRouteThresholdMeters = Math.max(
       OFF_ROUTE_DISTANCE_METERS,
       Number.isFinite(normalizedPosition.accuracy)
@@ -489,8 +488,6 @@ export class NavigationFeature {
 
     this.map.clearRoute?.();
 
-    // Stopping navigation ends the route, not the selected transport mode.
-    // Keep the map marker synchronized with Drive / Walk in the planner.
     this.map.setNavigationTravelMode?.(
       this.travelMode === 'transit' ? null : this.travelMode
     );
@@ -522,7 +519,7 @@ export class NavigationFeature {
 
     const { origin, destination } = this.session.getState();
     this.routeProgress = route.maneuvers?.length
-      ? findRouteProgress(startOrigin, route)
+      ? findRouteProgress(origin, route)
       : null;
 
     this.map.showRoute?.(route, { origin, destination });
@@ -552,10 +549,19 @@ export class NavigationFeature {
 
     const remaining = this.routeProgress.remainingDistanceMeters;
     const direct = distanceMeters(position, destination);
+    const walking =
+      this.travelMode === 'walk' ||
+      this.#isTransitWalkingLeg();
+    const remainingThreshold = walking
+      ? WALK_ARRIVAL_DISTANCE_METERS
+      : ARRIVAL_DISTANCE_METERS;
+    const destinationRadius = walking
+      ? WALK_ARRIVAL_DESTINATION_RADIUS_METERS
+      : ARRIVAL_DESTINATION_RADIUS_METERS;
 
     return Number.isFinite(remaining) &&
-      remaining <= ARRIVAL_DISTANCE_METERS &&
-      direct <= ARRIVAL_DESTINATION_RADIUS_METERS;
+      remaining <= remainingThreshold &&
+      direct <= destinationRadius;
   }
 
   #isTransitWalkingLeg() {
@@ -575,8 +581,6 @@ export class NavigationFeature {
   }
 
   #confirmTransitWalkArrival(position) {
-    // Poor GPS cannot automatically advance a journey.
-    // The explicit Arrived button remains available as a fallback.
     if (
       !Number.isFinite(position.accuracy) ||
       position.accuracy > 35
@@ -601,9 +605,6 @@ export class NavigationFeature {
 
     this.transitArrivalEvidenceCount += 1;
 
-    // Require several good fixes AND some elapsed time.
-    // This deliberately prefers a slightly late transition over a
-    // false automatic transition.
     return (
       this.transitArrivalEvidenceCount >= 3 &&
       now - this.transitArrivalEvidenceSince >= 3000
@@ -616,9 +617,6 @@ export class NavigationFeature {
     }
 
     this.#resetTransitArrivalEvidence();
-
-    // Stop only the embedded Atlas walking-navigation session.
-    // Do not destroy the overall TransitJourneyExecution.
     this.#cancelRouteRequest();
 
     if (this.session.isActive()) {
@@ -761,9 +759,6 @@ export class NavigationFeature {
       this.#saveTravelMode();
     }
 
-    // The selected mode is authoritative immediately, including when
-    // internal state already had the same value but the visible planner
-    // was stale.
     this.map.setNavigationTravelMode?.(
       mode === 'transit' ? null : mode
     );
@@ -800,12 +795,9 @@ export class NavigationFeature {
       }
     }
 
-    // Cancel any Drive/Walk/transit preview and its collapse timer before
-    // repainting the newly selected mode.
     this.#resetPreview({ clearRoute: true });
     this.render();
 
-    // Rebuild exactly once for the selected mode.
     if (
       this.plannerDestination &&
       this.#plannerStart()
@@ -851,7 +843,6 @@ export class NavigationFeature {
         this.travelMode
       );
     } catch {
-      // Navigation remains usable when storage is unavailable.
     }
   }
 
@@ -996,10 +987,6 @@ export class NavigationFeature {
   updatePlannerQuery(query) {
     this.plannerQuery = String(query ?? '');
     clearTimeout(this.plannerSearchTimer);
-
-    // Every keystroke invalidates any search already running.
-    // An older result must never repaint the planner while the
-    // user is still typing a newer query.
     this.plannerRequest += 1;
 
     if (this.plannerQuery.trim().length < 2) {
@@ -1010,7 +997,6 @@ export class NavigationFeature {
       return;
     }
 
-    // Search only after the user has stopped typing for a moment.
     this.plannerSearchTimer = setTimeout(
       () => void this.searchPlanner(this.plannerQuery),
       275
@@ -1051,11 +1037,7 @@ export class NavigationFeature {
   clearPlannerDestination() {
     this.advancedPlannerOpen = false;
     this.plannerSearchTarget = 'destination';
-
-    // Atlas V3.1 planner default: each fresh From/To plan starts on Drive.
-
     this.travelMode = 'drive';
-
     this.map.setNavigationTravelMode?.('drive');
     this.#resetPreview({ clearRoute: true });
     this.plannerDestination = null;
@@ -1178,9 +1160,6 @@ export class NavigationFeature {
         'Destination'
     };
 
-    // Recent means recently selected destination, not recently started route.
-    // DestinationHistory.add() also removes an older occurrence and moves
-    // the destination back to the front.
     this.destinationHistory.add(
       this.plannerDestination
     );
@@ -1243,14 +1222,7 @@ export class NavigationFeature {
       return [];
     }
 
-    // Destination lookup is independent from route origin. When GPS is off,
-    // use the visible map area only for search ranking/region selection.
-    // Routing still requires #plannerStart() in previewPlannedRoute().
-    // updatePlannerQuery() already reserved this request generation.
-    // Do not rerender the planner just to show a loading state: replacing
-    // the input DOM while it is focused is what made typing feel hostile.
     const request = this.plannerRequest;
-
     this.plannerState = 'loading';
 
     try {
@@ -1291,7 +1263,6 @@ export class NavigationFeature {
       return [];
     }
   }
-
 
   async startTransitJourney(journey = this.getSelectedTransitJourney()) {
     if (!journey || this.transitJourneyStarting) {
@@ -1345,13 +1316,8 @@ export class NavigationFeature {
       return false;
     }
 
-    // Stop the transit execution state machine.
     this.transitJourneyExecution = null;
-
-    // Invalidate any walking-leg route still resolving asynchronously.
     this.transitWalkRequest += 1;
-
-    // Forget transit execution/selection state.
     this.transitJourneySession = null;
     this.transitJourneyOptions = [];
     this.selectedTransitJourneyIndex = 0;
@@ -1360,17 +1326,13 @@ export class NavigationFeature {
       this.expandedTransitJourneyIndex = null;
     }
 
-    // Cancel any active Atlas route computation.
     this.#cancelRouteRequest();
     this.#cancelPreviewRequest();
 
-    // Transit execution may coexist with a NavigationSession used by
-    // Atlas walking guidance. Make absolutely sure that session is stopped.
     if (this.session.isActive()) {
       this.session.stop();
     }
 
-    // Reset normal navigation state so stale guidance cannot reappear.
     this.routeState = 'idle';
     this.routeError = null;
     this.lastRouteAt = 0;
@@ -1384,25 +1346,17 @@ export class NavigationFeature {
     this.navigationContext = null;
     this.trackPosition = true;
 
-    // Reset transit/walking arrival confidence as well.
     this.transitArrivalEvidenceCount = 0;
     this.transitArrivalEvidenceSince = 0;
 
-    // Remove every navigation artifact from the map.
     this.map.clearRoute?.();
     this.map.clearManeuvers?.();
-
-    // Transit itself has no car/walk marker mode.
     this.map.setNavigationTravelMode?.(null);
 
-    // Remove normal guidance UI and speech.
     this.guidance?.hide();
     this.voice.stop();
-
-    // Tell the app shell that navigation is no longer active.
     this.onActiveChange(false);
 
-    // Return to planner while preserving the existing From/To endpoints.
     this.previewRoute = null;
     this.previewState = 'idle';
     this.previewError = null;
@@ -1513,7 +1467,6 @@ export class NavigationFeature {
           return;
         }
 
-        // A walking Transit leg is a real Atlas Navigation session.
         this.session.start({
           origin,
           destination,
@@ -1563,9 +1516,6 @@ export class NavigationFeature {
 
         console.error(error);
 
-        // Geometry fallback still gives the user a usable line and the
-        // explicit Arrived button, but automatic Atlas arrival detection
-        // requires a proper routed walking leg.
         this.map.showRoute?.({
           points,
           distanceMeters: leg.distanceMeters ?? 0,
@@ -1587,8 +1537,6 @@ export class NavigationFeature {
       this.transitWalkRequest += 1;
       this.#resetTransitArrivalEvidence();
 
-      // A transit vehicle leg must never inherit an Atlas walking
-      // NavigationSession from the previous leg.
       if (this.session.isActive()) {
         this.#cancelRouteRequest();
         this.session.stop();
@@ -1673,7 +1621,6 @@ export class NavigationFeature {
     this.listElement.replaceChildren(view);
   }
 
-
   #transitPreviewRoute(journey) {
     const points = [];
     for (const step of journey?.sequence ?? []) {
@@ -1750,10 +1697,6 @@ export class NavigationFeature {
     const sameOption =
       this.selectedTransitJourneyIndex === index;
 
-    /*
-     * Re-tapping the currently selected option toggles
-     * its detailed timeline without changing the route.
-     */
     if (
       sameOption &&
       this.expandedTransitJourneyIndex === index
@@ -1779,10 +1722,6 @@ export class NavigationFeature {
       selectedAt: this.now()
     };
 
-    /*
-     * Selecting an alternative immediately redraws the map,
-     * but the planner itself stays where it is.
-     */
     this.map.showRoute?.(
       this.previewRoute,
       { origin, destination }
@@ -1792,13 +1731,6 @@ export class NavigationFeature {
 
     this.render();
 
-    /*
-     * Do not make route planning wait for platform/live-arrival data.
-     * The journey is already usable at this point.
-     *
-     * Enrich only the journey the user actually expanded, then repaint
-     * the card when TfL operational data arrives.
-     */
     void this.#enrichTransitJourneyOption(
       index,
       journey
@@ -1836,10 +1768,6 @@ export class NavigationFeature {
       return;
     }
 
-    /*
-     * The user may have selected another option while the network
-     * request was in flight. Never repaint stale information.
-     */
     if (
       this.selectedTransitJourneyIndex !==
         index ||
@@ -1981,75 +1909,12 @@ export class NavigationFeature {
               }
             );
 
-          console.log(
-            '[Atlas Transit] provider journeys:',
-            journeys.map((journey, index) => ({
-              index,
-              durationMinutes:
-                journey.durationMinutes,
-
-              walkingMinutes:
-                journey.sequence
-                  .filter(step => step.kind === 'walk')
-                  .reduce(
-                    (total, step) =>
-                      total +
-                      Number(step.durationMinutes ?? 0),
-                    0
-                  ),
-
-              transitLegs:
-                journey.sequence
-                  .filter(step => step.kind === 'transit')
-                  .map(step => ({
-                    mode: step.mode,
-                    line: step.line,
-                    from: step.fromName,
-                    to: step.toName
-                  })),
-
-              score:
-                journey.score,
-
-              transferCount:
-                journey.metrics?.transferCount,
-
-              fastestDurationMinutes:
-                journey.fastestDurationMinutes,
-
-              isRecommended:
-                journey.isRecommended,
-
-              isFastest:
-                journey.isFastest,
-
-              providerIndex:
-                journey.providerIndex
-            }))
-          );
-
           if (!journeys.length) {
             throw new Error(
               'No transit journeys were returned.'
             );
           }
 
-          /*
-           * TfL can return a walking-only journey alongside public-transport
-           * journeys. Keep walking as a valid alternative, but in Transit
-           * mode prefer useful public-transport choices and route diversity.
-           *
-           * Example:
-           *   Circle
-           *   District
-           *   Walk
-           *
-           * instead of:
-           *   Circle
-           *   Walk
-           *
-           * when TfL supplied the District alternative as well.
-           */
           const scoredJourneys = journeys
             .map((journey, providerOrder) => {
               const sequence =
@@ -2114,23 +1979,6 @@ export class NavigationFeature {
                   )
                   .filter(Boolean);
 
-              /*
-               * Quality first.
-               *
-               * In Transit mode a minute spent walking is less attractive
-               * than a minute already spent on the vehicle, and a transfer
-               * has a meaningful convenience cost.
-               *
-               * This prevents:
-               *
-               *   28 min · 15 min walk · 1 change
-               *
-               * from beating:
-               *
-               *   29 min · direct · less walking
-               *
-               * merely because the raw ETA is one minute shorter.
-               */
               const rankingScore =
                 Number.isFinite(journey.score)
                   ? journey.score
@@ -2206,9 +2054,6 @@ export class NavigationFeature {
             return candidate.lines[0] ?? '';
           };
 
-          /*
-           * Always take the objectively best transit journey first.
-           */
           if (transitCandidates.length) {
             const best =
               transitCandidates[0];
@@ -2224,15 +2069,6 @@ export class NavigationFeature {
             }
           }
 
-          /*
-           * Look for another genuinely useful transit alternative.
-           *
-           * Diversity is only a preference now, NOT permission to promote
-           * a materially worse route.
-           *
-           * A candidate can be up to 8 effective-score minutes worse than
-           * the best route and still qualify as a useful alternative.
-           */
           const competitiveTransit =
             transitCandidates.filter(
               candidate =>
@@ -2275,10 +2111,6 @@ export class NavigationFeature {
             }
           }
 
-          /*
-           * Prefer a third competitive transit alternative before using
-           * the walking-only route.
-           */
           const remainingTransit =
             competitiveTransit.filter(
               candidate =>
@@ -2317,9 +2149,6 @@ export class NavigationFeature {
             );
           }
 
-          /*
-           * Walking remains valid, but it is the fallback in Transit mode.
-           */
           if (
             selectedCandidates.length < 3 &&
             walkingCandidates.length
@@ -2329,9 +2158,6 @@ export class NavigationFeature {
             );
           }
 
-          /*
-           * Defensive fallback for unusual TfL responses.
-           */
           for (const candidate of scoredJourneys) {
             if (selectedCandidates.length >= 3) {
               break;
@@ -2354,31 +2180,6 @@ export class NavigationFeature {
             selectedCandidates.map(
               candidate => candidate.journey
             );
-
-          console.log(
-            '[Atlas Transit] ranked journeys:',
-            selectedCandidates.map(
-              (candidate, index) => ({
-                index,
-                durationMinutes:
-                  candidate.durationMinutes,
-                walkingMinutes:
-                  candidate.walkingMinutes,
-                transferCount:
-                  candidate.transferCount,
-                walkingOnly:
-                  candidate.walkingOnly,
-                lines:
-                  candidate.lines,
-                modes:
-                  candidate.modes,
-                rankingScore:
-                  candidate.rankingScore,
-                providerIndex:
-                  candidate.journey.providerIndex
-              })
-            )
-          );
 
           route =
             this.#transitPreviewRoute(
@@ -2406,9 +2207,6 @@ export class NavigationFeature {
                 }
               );
           } else {
-            // Compatibility path for routing providers/tests that implement
-            // the original single-route service contract. The production
-            // OfflineRoutingService exposes driveOptions().
             const fallbackRoute =
               await this.routingService.route(
                 origin,
@@ -2494,8 +2292,7 @@ export class NavigationFeature {
           this.transitJourneyOptions = [];
           this.selectedTransitJourneyIndex =
             0;
-          this.expandedTransitJourneyIndex =
-            null;
+          this.expandedTransitJourneyIndex = null;
           this.transitJourneySession = null;
         }
 
@@ -2650,8 +2447,6 @@ export class NavigationFeature {
         await this.previewPromise;
       }
 
-      // The planner may have changed while an asynchronous
-      // TfL preview was resolving.
       if (this.travelMode !== 'transit') {
         return false;
       }
@@ -2665,8 +2460,6 @@ export class NavigationFeature {
         }
       }
 
-      // previewPlannedRoute() may itself have awaited network work.
-      // Validate the planner identity again before starting.
       if (this.travelMode !== 'transit') {
         return false;
       }
@@ -2696,8 +2489,6 @@ export class NavigationFeature {
         a.lat === b.lat &&
         a.lon === b.lon;
 
-      // A picked origin must still be the exact origin that was
-      // previewed. A GPS origin is allowed to move naturally.
       if (
         this.plannerOrigin &&
         !samePoint(
@@ -2745,11 +2536,6 @@ export class NavigationFeature {
       }
     }
 
-    /*
-     * "My location" is live. The GPS fix may have changed while the
-     * preview was being calculated (especially immediately after app
-     * startup). Never start navigation from a stale preview origin.
-     */
     if (this.plannerOrigin === null) {
       const latestOrigin = this.#plannerStart();
       const previewOrigin = this.previewOrigin;
@@ -2817,7 +2603,7 @@ export class NavigationFeature {
     this.lastRouteAt = this.now();
     this.lastVoiceAnnouncement = null;
     this.routeProgress = route.maneuvers?.length
-      ? findRouteProgress(origin, route)
+      ? findRouteProgress(startOrigin, route)
       : null;
 
     this.previewRoute = null;
@@ -2870,17 +2656,6 @@ export class NavigationFeature {
       return;
     }
 
-    /*
-     * Active road navigation is rendered by the dedicated
-     * guidance surface. The planner workspace must stay empty
-     * while the navigation session is active, otherwise the
-     * legacy navigation panel duplicates guidance and obscures
-     * the map.
-     *
-     * Transit execution is handled above before reaching here.
-     * When navigation stops, session.isActive() becomes false
-     * and the planner is rendered again normally.
-     */
     this.listElement.replaceChildren();
   }
 
@@ -3265,9 +3040,6 @@ export class NavigationFeature {
     this.driveRouteOptions = [];
     this.selectedDriveRouteIndex = 0;
 
-    // A preview belongs to one exact From/To/mode combination.
-    // Once that identity changes, no transit option from the previous
-    // preview may remain selectable or startable.
     this.transitJourneyOptions = [];
     this.selectedTransitJourneyIndex = 0;
     this.expandedTransitJourneyIndex = null;
