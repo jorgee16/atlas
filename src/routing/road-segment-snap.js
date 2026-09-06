@@ -4,8 +4,8 @@ const PROBE_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315];
 
 // Origin snapping should be proximity-led, but not proximity-blind. A local
 // spur / cul-de-sac only wins when it is materially closer to the GPS fix.
-// These values are expressed in "equivalent metres" and intentionally stay
-// small enough that a genuinely nearer road still wins.
+// RoadClass is ordered with smaller values representing more important roads
+// (motorway=1, trunk=2, primary=3 ...).
 const DEAD_END_SNAP_PENALTY_METERS = 24;
 const WEAK_CONNECTION_SNAP_PENALTY_METERS = 10;
 const LINK_SNAP_PENALTY_METERS = 7;
@@ -163,8 +163,8 @@ function snapPreferenceScore(
 ) {
   const hierarchyDifference = Math.max(
     0,
-    Number(bestRoadClass ?? candidate.roadClass ?? 0) -
-      Number(candidate.roadClass ?? 0)
+    Number(candidate.roadClass ?? bestRoadClass ?? 0) -
+      Number(bestRoadClass ?? candidate.roadClass ?? 0)
   );
 
   return (
@@ -324,8 +324,8 @@ export function findDriveRoadSegmentSnaps(
     )
     .reduce(
       (best, candidate) =>
-        Math.max(best, Number(candidate.roadClass ?? 0)),
-      0
+        Math.min(best, Number(candidate.roadClass ?? Infinity)),
+      Infinity
     );
 
   rankedCandidates.sort((a, b) => {
@@ -343,7 +343,7 @@ export function findDriveRoadSegmentSnaps(
       a.distanceMeters - b.distanceMeters ||
       Number(a.deadEnd) - Number(b.deadEnd) ||
       Number(a.weaklyConnected) - Number(b.weaklyConnected) ||
-      b.roadClass - a.roadClass ||
+      a.roadClass - b.roadClass ||
       a.headingMismatchDegrees - b.headingMismatchDegrees ||
       a.remainingDistanceMeters - b.remainingDistanceMeters
     );
