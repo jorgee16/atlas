@@ -249,7 +249,19 @@ test(
     assert.equal(route.profile, 'drive');
     assert.deepEqual(
       route.nodeIndexes,
-      [3, 2]
+      [3]
+    );
+    assert.equal(
+      Number(route.points.at(-1).lat.toFixed(4)),
+      40
+    );
+    assert.equal(
+      Number(route.points.at(-1).lon.toFixed(4)),
+      -7.998
+    );
+    assert.equal(
+      route.destinationSnap.snapStrategy,
+      'road-segment-destination'
     );
   }
 );
