@@ -197,22 +197,26 @@ export function installMapLibreRouteStability() {
       return originalShowRoute.call(this, route, ...args);
     }
 
-    const activeDriveReroute =
-      this.navigationTravelMode === 'drive' &&
+    // A real navigation route already has progress. Route previews do not.
+    // Use progress, rather than the selected travel-mode flag, to recognise
+    // an in-navigation route replacement. This keeps the old MapLibre source
+    // and layers alive even if the mode bridge is briefly unset while a
+    // reroute is accepted.
+    const activeNavigationReroute =
       validRoute(this.currentRoute) &&
+      Boolean(this.currentRouteProgress) &&
       Boolean(this.map.getSource?.(ROUTE_SOURCE));
 
-    if (!activeDriveReroute) {
+    if (!activeNavigationReroute) {
       return originalShowRoute.call(this, route, ...args);
     }
 
-    this.currentRoute = route;
-    this.currentRouteProgress = null;
-    this.navigationRouteProgress = null;
-    this.routeBearing = null;
-
     try {
       if (updateExistingRouteSources(this, route, null)) {
+        this.currentRoute = route;
+        this.currentRouteProgress = null;
+        this.navigationRouteProgress = null;
+        this.routeBearing = null;
         this.__atlasRenderedProgressRoute = route;
         this.__atlasRenderedProgressPoint = null;
         this.__atlasRenderedProgressSegmentIndex = undefined;
