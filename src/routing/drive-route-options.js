@@ -1,14 +1,7 @@
 export const DRIVE_TOLL_PENALTIES_MINUTES_PER_EURO = Object.freeze([
   0,
-  0.5,
-  1,
-  1.5,
-  2,
   3,
-  4,
-  5,
-  7,
-  10
+  7
 ]);
 
 export function selectBalancedDriveRoute(
