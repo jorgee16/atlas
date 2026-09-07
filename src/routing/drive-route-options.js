@@ -1,7 +1,5 @@
 export const DRIVE_TOLL_PENALTIES_MINUTES_PER_EURO = Object.freeze([
-  0,
-  3,
-  7
+  0
 ]);
 
 export function selectBalancedDriveRoute(
@@ -50,8 +48,6 @@ export function selectBalancedDriveRoute(
     fastestTolls - noTollsCost
   );
 
-  // Do not call a route Balanced when it is effectively
-  // the no-tolls route with only a few minutes shaved off.
   const minimumTimeSavedVsNoTolls = Math.max(
     8,
     timeRange * 0.15
@@ -75,8 +71,6 @@ export function selectBalancedDriveRoute(
     ? meaningful
     : pool;
 
-  // Pick the knee of the Pareto frontier: normalized
-  // distance from the ideal point (fastest time, zero tolls).
   return candidates.reduce(
     (best, route) => {
       const minutes = route.durationSeconds / 60;
