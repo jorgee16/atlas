@@ -4,6 +4,9 @@ import {
 
 const ROUTE_SOURCE = 'atlas-route';
 const TRAVELED_SOURCE = 'atlas-route-traveled';
+const STAGED_ROUTE_SOURCE = 'atlas-route-staged';
+const STAGED_ROUTE_CASING = 'atlas-route-staged-casing';
+const STAGED_ROUTE_LINE = 'atlas-route-staged-line';
 const WALK_PROGRESS_RENDER_DEADBAND_METERS = 2.5;
 const DRIVE_PROGRESS_RENDER_DEADBAND_METERS = 4;
 const EARTH_RADIUS_METERS = 6371000;
@@ -147,6 +150,12 @@ function ensureTraveledLayer(adapter, traveled) {
   }
 }
 
+function routeData(route, progress = null) {
+  if (!validRoute(route)) return collection([]);
+  const split = progress ? splitRoute(route.points, progress) : null;
+  return collection([lineFeature(split?.remaining ?? route.points)]);
+}
+
 function updateExistingRouteSources(adapter, route, progress = null) {
   const remainingSource = adapter.map.getSource?.(ROUTE_SOURCE);
   const styleReady = adapter.map.isStyleLoaded?.() ?? false;
@@ -155,12 +164,8 @@ function updateExistingRouteSources(adapter, route, progress = null) {
     return false;
   }
 
-  const points = route.points;
-  const split = progress ? splitRoute(points, progress) : null;
-
-  remainingSource.setData(
-    collection([lineFeature(split?.remaining ?? points)])
-  );
+  const split = progress ? splitRoute(route.points, progress) : null;
+  remainingSource.setData(routeData(route, progress));
 
   if (split) {
     ensureTraveledLayer(adapter, split.traveled);
@@ -171,6 +176,124 @@ function updateExistingRouteSources(adapter, route, progress = null) {
     adapter.map
       .getSource(TRAVELED_SOURCE)
       ?.setData(collection([]));
+  }
+
+  return true;
+}
+
+function removeStagedRoute(adapter) {
+  for (const layerId of [STAGED_ROUTE_LINE, STAGED_ROUTE_CASING]) {
+    if (adapter.map.getLayer?.(layerId)) {
+      adapter.map.removeLayer(layerId);
+    }
+  }
+
+  if (adapter.map.getSource?.(STAGED_ROUTE_SOURCE)) {
+    adapter.map.removeSource(STAGED_ROUTE_SOURCE);
+  }
+}
+
+function stageReroute(adapter, route) {
+  removeStagedRoute(adapter);
+
+  adapter.map.addSource(STAGED_ROUTE_SOURCE, {
+    type: 'geojson',
+    data: routeData(route)
+  });
+
+  adapter.map.addLayer({
+    id: STAGED_ROUTE_CASING,
+    type: 'line',
+    source: STAGED_ROUTE_SOURCE,
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    paint: {
+      'line-color': '#ffffff',
+      'line-width': 12,
+      'line-opacity': 0.98
+    }
+  });
+
+  adapter.map.addLayer({
+    id: STAGED_ROUTE_LINE,
+    type: 'line',
+    source: STAGED_ROUTE_SOURCE,
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    paint: {
+      'line-color': '#2563eb',
+      'line-width': 7,
+      'line-opacity': 1
+    }
+  });
+
+  adapter.__atlasPendingReroute = {
+    route,
+    progress: null,
+    promoted: false
+  };
+
+  const promote = () => {
+    const pending = adapter.__atlasPendingReroute;
+    if (!pending || pending.route !== route || pending.promoted) return;
+
+    pending.promoted = true;
+
+    try {
+      updateExistingRouteSources(
+        adapter,
+        pending.route,
+        pending.progress
+      );
+      adapter.currentRoute = pending.route;
+      adapter.currentRouteProgress = pending.progress;
+      adapter.navigationRouteProgress = pending.progress;
+      adapter.routeBearing = pending.progress
+        ? bearingFromProgress(pending.route.points, pending.progress)
+        : null;
+
+      adapter.__atlasRenderedProgressRoute = pending.route;
+      adapter.__atlasRenderedProgressPoint = pending.progress
+        ? progressPoint(pending.route.points, pending.progress)
+        : null;
+      adapter.__atlasRenderedProgressSegmentIndex = pending.progress
+        ? progressSegmentIndex(pending.route.points, pending.progress)
+        : undefined;
+
+      const cleanup = () => {
+        removeStagedRoute(adapter);
+        if (adapter.__atlasPendingReroute === pending) {
+          adapter.__atlasPendingReroute = null;
+        }
+      };
+
+      if (typeof globalThis.requestAnimationFrame === 'function') {
+        globalThis.requestAnimationFrame(() =>
+          globalThis.requestAnimationFrame(cleanup)
+        );
+      } else {
+        globalThis.setTimeout(cleanup, 34);
+      }
+    } catch (error) {
+      console.warn('Unable to promote staged MapLibre reroute.', error);
+      removeStagedRoute(adapter);
+      adapter.__atlasPendingReroute = null;
+    }
+  };
+
+  // `idle` fires only after MapLibre has rendered the staged GeoJSON. Until
+  // then the old route remains visible underneath, so there is never a frame
+  // with no blue route. The timeout is a defensive fallback for test doubles
+  // and unusual render loops.
+  if (typeof adapter.map.once === 'function') {
+    adapter.map.once('idle', promote);
+    globalThis.setTimeout?.(promote, 250);
+  } else {
+    globalThis.setTimeout?.(promote, 34);
   }
 
   return true;
@@ -197,11 +320,6 @@ export function installMapLibreRouteStability() {
       return originalShowRoute.call(this, route, ...args);
     }
 
-    // A real navigation route already has progress. Route previews do not.
-    // Use progress, rather than the selected travel-mode flag, to recognise
-    // an in-navigation route replacement. This keeps the old MapLibre source
-    // and layers alive even if the mode bridge is briefly unset while a
-    // reroute is accepted.
     const activeNavigationReroute =
       validRoute(this.currentRoute) &&
       Boolean(this.currentRouteProgress) &&
@@ -212,27 +330,48 @@ export function installMapLibreRouteStability() {
     }
 
     try {
+      return stageReroute(this, route);
+    } catch (error) {
+      console.warn(
+        'Double-buffered MapLibre reroute failed; falling back to direct swap.',
+        error
+      );
+
       if (updateExistingRouteSources(this, route, null)) {
         this.currentRoute = route;
         this.currentRouteProgress = null;
         this.navigationRouteProgress = null;
         this.routeBearing = null;
-        this.__atlasRenderedProgressRoute = route;
-        this.__atlasRenderedProgressPoint = null;
-        this.__atlasRenderedProgressSegmentIndex = undefined;
         return true;
       }
-    } catch (error) {
-      console.warn(
-        'Atomic MapLibre reroute swap failed; falling back to full render.',
-        error
-      );
     }
 
     return originalShowRoute.call(this, route, ...args);
   };
 
   prototype.updateRouteProgress = function updateRouteProgress(route, progress) {
+    const pending = this.__atlasPendingReroute;
+
+    if (
+      pending &&
+      !pending.promoted &&
+      route === pending.route
+    ) {
+      pending.progress = progress ?? null;
+      this.routeBearing = progress
+        ? bearingFromProgress(route.points, progress)
+        : null;
+
+      try {
+        this.map
+          .getSource?.(STAGED_ROUTE_SOURCE)
+          ?.setData(routeData(route, progress));
+      } catch (error) {
+        console.warn('Unable to update staged reroute progress.', error);
+      }
+      return;
+    }
+
     const routeChanged =
       validRoute(route) &&
       route !== this.currentRoute;
@@ -302,6 +441,8 @@ export function installMapLibreRouteStability() {
   };
 
   prototype.clearRoute = function clearRoute(...args) {
+    removeStagedRoute(this);
+    this.__atlasPendingReroute = null;
     this.__atlasRenderedProgressRoute = null;
     this.__atlasRenderedProgressPoint = null;
     this.__atlasRenderedProgressSegmentIndex = undefined;
