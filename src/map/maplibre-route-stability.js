@@ -147,12 +147,42 @@ function ensureTraveledLayer(adapter, traveled) {
   }
 }
 
+function updateExistingRouteSources(adapter, route, progress = null) {
+  const remainingSource = adapter.map.getSource?.(ROUTE_SOURCE);
+  const styleReady = adapter.map.isStyleLoaded?.() ?? false;
+
+  if (!remainingSource || !styleReady || !validRoute(route)) {
+    return false;
+  }
+
+  const points = route.points;
+  const split = progress ? splitRoute(points, progress) : null;
+
+  remainingSource.setData(
+    collection([lineFeature(split?.remaining ?? points)])
+  );
+
+  if (split) {
+    ensureTraveledLayer(adapter, split.traveled);
+    adapter.map
+      .getSource(TRAVELED_SOURCE)
+      ?.setData(collection([lineFeature(split.traveled)]));
+  } else {
+    adapter.map
+      .getSource(TRAVELED_SOURCE)
+      ?.setData(collection([]));
+  }
+
+  return true;
+}
+
 export function installMapLibreRouteStability() {
   const prototype = MapLibrePmtilesMapAdapter?.prototype;
   if (!prototype || prototype.__atlasStableRouteProgressInstalled) {
     return;
   }
 
+  const originalShowRoute = prototype.showRoute;
   const originalUpdateRouteProgress = prototype.updateRouteProgress;
   const originalClearRoute = prototype.clearRoute;
 
@@ -161,6 +191,42 @@ export function installMapLibreRouteStability() {
     '__atlasStableRouteProgressInstalled',
     { value: true }
   );
+
+  prototype.showRoute = function showRouteWithoutRerouteFlash(route, ...args) {
+    if (!validRoute(route)) {
+      return originalShowRoute.call(this, route, ...args);
+    }
+
+    const activeDriveReroute =
+      this.navigationTravelMode === 'drive' &&
+      validRoute(this.currentRoute) &&
+      Boolean(this.map.getSource?.(ROUTE_SOURCE));
+
+    if (!activeDriveReroute) {
+      return originalShowRoute.call(this, route, ...args);
+    }
+
+    this.currentRoute = route;
+    this.currentRouteProgress = null;
+    this.navigationRouteProgress = null;
+    this.routeBearing = null;
+
+    try {
+      if (updateExistingRouteSources(this, route, null)) {
+        this.__atlasRenderedProgressRoute = route;
+        this.__atlasRenderedProgressPoint = null;
+        this.__atlasRenderedProgressSegmentIndex = undefined;
+        return true;
+      }
+    } catch (error) {
+      console.warn(
+        'Atomic MapLibre reroute swap failed; falling back to full render.',
+        error
+      );
+    }
+
+    return originalShowRoute.call(this, route, ...args);
+  };
 
   prototype.updateRouteProgress = function updateRouteProgress(route, progress) {
     const routeChanged =
@@ -200,10 +266,6 @@ export function installMapLibreRouteStability() {
     const progressMovement =
       distanceMeters(previousPoint, renderedPoint);
 
-    // GPS and guidance can keep updating at their normal rate. The route
-    // geometry does not need to be pushed through MapLibre for every noisy
-    // fix. While progress remains on the same segment and moves less than a
-    // few metres, leave the already-rendered route completely untouched.
     if (
       sameRoute &&
       sameSegment &&
@@ -213,29 +275,13 @@ export function installMapLibreRouteStability() {
     }
 
     try {
-      const remainingSource = this.map.getSource?.(ROUTE_SOURCE);
-      const styleReady = this.map.isStyleLoaded?.() ?? false;
-
-      if (!remainingSource || !styleReady) {
+      if (!updateExistingRouteSources(this, this.currentRoute, progress)) {
         this.__atlasRenderedProgressRoute = this.currentRoute;
         this.__atlasRenderedProgressPoint = renderedPoint;
         this.__atlasRenderedProgressSegmentIndex = segmentIndex;
         return originalUpdateRouteProgress.call(this, route, progress);
       }
 
-      const split = splitRoute(points, progress);
-
-      remainingSource.setData(
-        collection([lineFeature(split.remaining)])
-      );
-
-      ensureTraveledLayer(this, split.traveled);
-      this.map
-        .getSource(TRAVELED_SOURCE)
-        ?.setData(collection([lineFeature(split.traveled)]));
-
-      // setData() schedules the MapLibre render itself. Do not force an extra
-      // repaint for every GPS fix, and do not reorder layers repeatedly.
       this.__atlasRenderedProgressRoute = this.currentRoute;
       this.__atlasRenderedProgressPoint = renderedPoint;
       this.__atlasRenderedProgressSegmentIndex = segmentIndex;
