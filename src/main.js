@@ -23,6 +23,8 @@ import { createApp } from './app.js';
 import { installTracksShellUI } from './features/tracks/tracks-shell-ui.js';
 import { installTracksFollowStateBridge } from './features/tracks/tracks-follow-state-bridge.js';
 import { installTracksAndroidFilePickerCompatibility } from './features/tracks/tracks-android-file-picker.js';
+import { installNavigationTunnelContinuity } from './features/navigation/navigation-tunnel-continuity.js';
+import { installNavigationPipStateBridge } from './platform/navigation-pip-state.js';
 
 // MapLibre GL JS 6 requires bundler consumers to provide an emitted worker
 // URL explicitly. Without this Vite/Capacitor can mount the WebGL canvas and
@@ -32,12 +34,15 @@ import { installTracksAndroidFilePickerCompatibility } from './features/tracks/t
 // self-contained asset that Capacitor copies into the Android web bundle.
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
+installNavigationTunnelContinuity();
+
 const root = document.querySelector('#app');
 
 window.roamApp = await createApp(root);
 installTracksShellUI(root);
 installTracksFollowStateBridge(root, window.roamApp);
 installTracksAndroidFilePickerCompatibility(root);
+installNavigationPipStateBridge(root);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener(
