@@ -150,29 +150,24 @@ function ensureTraveledLayer(adapter, traveled) {
   }
 }
 
-function fullRouteData(route) {
+function routeData(route, progress = null) {
   if (!validRoute(route)) return collection([]);
-  return collection([lineFeature(route.points)]);
+  const split = progress ? splitRoute(route.points, progress) : null;
+  return collection([lineFeature(split?.remaining ?? route.points)]);
 }
 
 function updateExistingRouteSources(adapter, route, progress = null) {
-  const routeSource = adapter.map.getSource?.(ROUTE_SOURCE);
+  const remainingSource = adapter.map.getSource?.(ROUTE_SOURCE);
   const styleReady = adapter.map.isStyleLoaded?.() ?? false;
 
-  if (!routeSource || !styleReady || !validRoute(route)) {
+  if (!remainingSource || !styleReady || !validRoute(route)) {
     return false;
   }
 
-  // The blue route is intentionally static while navigation progresses.
-  // Replacing its GeoJSON every few metres causes a visible MapLibre blink on
-  // Android/WebView. Only change it when the route itself changes.
-  if (adapter.__atlasStaticBlueRoute !== route) {
-    routeSource.setData(fullRouteData(route));
-    adapter.__atlasStaticBlueRoute = route;
-  }
+  const split = progress ? splitRoute(route.points, progress) : null;
+  remainingSource.setData(routeData(route, progress));
 
-  if (progress) {
-    const split = splitRoute(route.points, progress);
+  if (split) {
     ensureTraveledLayer(adapter, split.traveled);
     adapter.map
       .getSource(TRAVELED_SOURCE)
@@ -203,7 +198,7 @@ function stageReroute(adapter, route) {
 
   adapter.map.addSource(STAGED_ROUTE_SOURCE, {
     type: 'geojson',
-    data: fullRouteData(route)
+    data: routeData(route)
   });
 
   adapter.map.addLayer({
@@ -327,9 +322,7 @@ export function installMapLibreRouteStability() {
       Boolean(this.map.getSource?.(ROUTE_SOURCE));
 
     if (!activeNavigationReroute) {
-      const result = originalShowRoute.call(this, route, ...args);
-      this.__atlasStaticBlueRoute = route;
-      return result;
+      return originalShowRoute.call(this, route, ...args);
     }
 
     try {
@@ -360,13 +353,18 @@ export function installMapLibreRouteStability() {
       !pending.promoted &&
       route === pending.route
     ) {
-      // Keep staged blue geometry static too. Only remember the latest progress
-      // so the gray traveled overlay is correct when the staged route is
-      // promoted.
       pending.progress = progress ?? null;
       this.routeBearing = progress
         ? bearingFromProgress(route.points, progress)
         : null;
+
+      try {
+        this.map
+          .getSource?.(STAGED_ROUTE_SOURCE)
+          ?.setData(routeData(route, progress));
+      } catch (error) {
+        console.warn('Unable to update staged reroute progress.', error);
+      }
       return;
     }
 
@@ -441,7 +439,6 @@ export function installMapLibreRouteStability() {
   prototype.clearRoute = function clearRoute(...args) {
     removeStagedRoute(this);
     this.__atlasPendingReroute = null;
-    this.__atlasStaticBlueRoute = null;
     this.__atlasRenderedProgressRoute = null;
     this.__atlasRenderedProgressPoint = null;
     this.__atlasRenderedProgressSegmentIndex = undefined;
