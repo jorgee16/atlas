@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,17 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     private var searchJob: Job? = null
     private var downloadJob: Job? = null
     private var routeJob: Job? = null
-    private var progressJob: Job? = null
+    // Conflated channel retains the newest GPS fix instead of discarding it
+    // when JNI processing temporarily falls behind the Android location rate.
+    private val locationFixes = Channel<Fix>(Channel.CONFLATED)
+    private var lastQueuedFixTime = Double.NEGATIVE_INFINITY
+    private var navigationRevision = 0L
+    private val fixPump = viewModelScope.launch {
+        for (next in locationFixes) {
+            try { processLocationFix(next) }
+            catch (e: Throwable) { failure(e) }
+        }
+    }
     private var searchGeneration = 0L
     private var routeGeneration = 0L
     private var lastSpoken = -1
@@ -142,7 +153,9 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         val snapshot = state.value
         val destination = snapshot.destination ?: return status("Choose a destination first")
         val from = snapshot.origin ?: snapshot.fix?.point ?: return status("Use your location or choose a starting point on the map")
-        core.cancel(); routeJob?.cancel(); val generation = ++routeGeneration
+        core.cancel(); routeJob?.cancel()
+        val generation = ++routeGeneration
+        ++navigationRevision
         routeJob = viewModelScope.launch {
             state.update { it.copy(busy = true, arrived = false) }
             try {
@@ -177,22 +190,45 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
             finally { if (generation == routeGeneration) state.update { it.copy(busy = false) } }
         }
     }
-    fun chooseRoute(choice: JSONObject) { viewModelScope.launch {
-        try { withContext(worker) { core.activate(choice.getInt("key")) }; state.update { it.copy(route = choice, guidance = null, avoidTolls = choice.optString("label") == "Without tolls") } }
-        catch (e: Throwable) { failure(e) }
-    } }
+    fun chooseRoute(choice: JSONObject) {
+        if (state.value.navigating || state.value.busy ||
+            state.value.routeOptions.none { it === choice }) return
+        core.cancel()
+        routeJob?.cancel()
+        val generation = ++routeGeneration
+        ++navigationRevision
+        viewModelScope.launch {
+            try {
+                withContext(worker) {
+                    if (generation == routeGeneration) core.activate(choice.getInt("key"))
+                }
+                if (generation == routeGeneration) {
+                    lastSpoken = -1
+                    state.update {
+                        it.copy(route = choice, guidance = null,
+                            avoidTolls = choice.optString("label") == "Without tolls")
+                    }
+                }
+            } catch (e: Throwable) {
+                if (generation == routeGeneration) failure(e)
+            }
+        }
+    }
     fun start() {
         if (state.value.origin != null) return status("This is a fixed preview. Choose My location for live navigation.")
         if (state.value.route == null) calculate(true)
-        else { lastSpoken = -1; state.update { it.copy(navigating = true, arrived = false) } }
+        else if (!state.value.busy) {
+            ++navigationRevision
+            lastSpoken = -1
+            state.update { it.copy(navigating = true, arrived = false) }
+        }
     }
     private fun cancelCurrentRouteWork() {
         ++routeGeneration
+        ++navigationRevision
         core.cancel()
         routeJob?.cancel()
-        progressJob?.cancel()
         routeJob = null
-        progressJob = null
     }
 
     /** Internal stop preserves a prepared route for preview/edit workflows. */
@@ -219,27 +255,42 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         }
     }
     fun fix(fix: Fix) {
-        if (progressJob?.isActive == true) return
-        progressJob = viewModelScope.launch {
-            try {
-                val trusted = withContext(worker) { core.filter(fix) }
-                state.update { it.copy(fix = trusted) }
-                if (!state.value.navigating || state.value.busy) return@launch
-                val result = withContext(worker) { JSONObject(core.update(trusted)) }
-                state.update { it.copy(guidance = result) }
-                val maneuver = result.getInt("maneuver")
-                if (voice && maneuver != lastSpoken) {
-                    state.value.route?.getJSONArray("maneuvers")?.optJSONObject(maneuver)?.let { speak?.invoke(it.getString("instruction")) }
-                    lastSpoken = maneuver
-                }
-                when (result.getString("state")) {
-                    "reroute" -> calculate(true)
-                    "arrived" -> {
-                        state.value.destination?.optString("id")?.takeIf { it.startsWith("trip:") }?.let { visited(it, true) }
-                        stop(); state.update { it.copy(arrived = true) }
-                    }
-                }
-            } catch (e: Throwable) { failure(e) }
+        if (!fix.time.isFinite() || fix.time <= lastQueuedFixTime) return
+        lastQueuedFixTime = fix.time
+        locationFixes.trySend(fix)
+    }
+
+    private suspend fun processLocationFix(fix: Fix) {
+        val trusted = withContext(worker) { core.filter(fix) }
+        state.update { s ->
+            // Older asynchronous results must not overwrite newer positions.
+            if (s.fix != null && trusted.time <= s.fix.time) s else
+                s.copy(fix = trusted)
+        }
+        val initial = state.value
+        val route = initial.route ?: return
+        if (!initial.navigating || initial.busy) return
+        val revision = navigationRevision
+        val result = withContext(worker) { JSONObject(core.update(trusted)) }
+        val current = state.value
+        if (revision != navigationRevision || !current.navigating ||
+            current.busy || current.route !== route) return
+        state.update { it.copy(guidance = result) }
+        val maneuver = result.getInt("maneuver")
+        if (voice && maneuver != lastSpoken && result.getString("state") != "checking") {
+            route.optJSONArray("maneuvers")?.optJSONObject(maneuver)?.let {
+                speak?.invoke(it.optString("instruction"))
+            }
+            lastSpoken = maneuver
+        }
+        when (result.getString("state")) {
+            "reroute" -> calculate(true)
+            "arrived" -> {
+                current.destination?.optString("id")?.takeIf { it.startsWith("trip:") }
+                    ?.let { visited(it, true) }
+                stop()
+                state.update { it.copy(arrived = true) }
+            }
         }
     }
     fun download(region: Region) {
@@ -315,6 +366,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         if(execution.phase=="ready_to_board")enrichJourney()
     }
     override fun onCleared() {
+        locationFixes.close()
         speak = null
         kotlinx.coroutines.CoroutineScope(worker).launch { core.close(); worker.close() }
     }

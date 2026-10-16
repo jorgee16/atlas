@@ -129,6 +129,18 @@ The original `npm test` and `npm run build` remain available for regression
 checks against the retained web app. Passing these tests does not validate the
 native UI or establish equivalence on full production regional datasets.
 
+## Navigation stability hardening
+
+The Kotlin GPS pipeline now uses a conflated channel rather than dropping
+incoming fixes while native processing is in progress. Route/session generation
+checks protect against a late JNI result resurfacing guidance or TTS after
+stopping, changing a route or starting a reroute. Precise GPS is preferred to
+network fixes during a brief overlap, while missing provider speed is passed
+as missing data so the native motion filter can infer it from displacement.
+MapLibre does not draw annotations into a style still loading. These are
+implementation safeguards; road testing, Android background/foreground
+location continuity and tunnel sensor fusion remain separate acceptance gates.
+
 ## Remaining work before replacing the current app
 
 | Area | Implemented | Still required for full parity |

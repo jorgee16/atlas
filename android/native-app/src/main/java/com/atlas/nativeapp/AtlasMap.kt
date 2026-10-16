@@ -40,6 +40,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     val centerPoint: Coordinate get() = map?.cameraPosition?.target?.let { Coordinate(it.latitude,it.longitude) }
         ?: current?.fix?.point ?: Coordinate(38.7223,-9.1393)
     private var styleKey = ""
+    private var styleLoading = false
     private var onlineFailed = false
     private var current: AtlasState? = null
     private var route: JSONObject? = null
@@ -114,8 +115,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val file = regions.map(at)
         val navigating = current?.navigating == true
         val key = (file?.absolutePath ?: "online") + ":$dark:$navigating:$onlineFailed"
-        if (key == styleKey) return false
+        if (key == styleKey) return styleLoading
         styleKey = key
+        styleLoading = true
         // Annotation objects survive style switches in the legacy MapLibre API.
         // Remove them from the map, not just from our Kotlin references.
         map?.clear()
@@ -135,6 +137,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 "paint":{"raster-saturation":-0.35,"raster-contrast":0.05}}]}""")
         }
         map?.setStyle(builder) { style ->
+            if (key != styleKey) return@setStyle
             if (file == null && !onlineFailed) {
                 AtlasCartography.enhanceOnline(style, dark, navigating)
             }
@@ -145,6 +148,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             remaining = null; travelled = null; geometry = emptyList()
             lastSegment = -1; positionMarker = null
             route = null; destination = null; options = null; nearby = null
+            styleLoading = false
             current?.let { render(it) }
         }
         return true

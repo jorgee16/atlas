@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private val manager by lazy { getSystemService(LOCATION_SERVICE) as LocationManager }
     private val sensors by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
     private val rotationSensor by lazy { sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) }
+    private var lastReliableGpsTime = Double.NEGATIVE_INFINITY
     private val rotationMatrix = FloatArray(9)
     private val sensorAngles = FloatArray(3)
     private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startGps(); rebuildChrome() }
@@ -436,10 +437,18 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         for(provider in listOf(LocationManager.GPS_PROVIDER,LocationManager.NETWORK_PROVIDER))if(manager.isProviderEnabled(provider))manager.requestLocationUpdates(provider,1000L,0f,this)
     }catch(_:SecurityException){rebuildChrome()}}
     override fun onLocationChanged(location:Location){
-        val time=location.elapsedRealtimeNanos/1e9;val previous=model.updates.value.fix
-        if(previous!=null&&time<=previous.time)return
-        model.fix(Fix(Coordinate(location.latitude,location.longitude),if(location.hasAccuracy())location.accuracy.toDouble().coerceAtLeast(0.0)else 100.0,
-            if(location.hasSpeed())location.speed.toDouble().coerceAtLeast(0.0)else 0.0,if(location.hasBearing())location.bearing.toDouble()else null,time))
+        val time = location.elapsedRealtimeNanos / 1e9
+        val accuracy = if (location.hasAccuracy())
+            location.accuracy.toDouble().coerceAtLeast(0.0) else 100.0
+        if (location.provider == LocationManager.GPS_PROVIDER && accuracy <= 45.0) {
+            lastReliableGpsTime = time
+        }
+        // A less accurate network fix must not displace recent GPS guidance.
+        if (location.provider == LocationManager.NETWORK_PROVIDER &&
+            time - lastReliableGpsTime in 0.0..7.0) return
+        model.fix(Fix(Coordinate(location.latitude, location.longitude), accuracy,
+            if (location.hasSpeed()) location.speed.toDouble().coerceAtLeast(0.0) else -1.0,
+            if (location.hasBearing()) location.bearing.toDouble() else null, time))
     }
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return
