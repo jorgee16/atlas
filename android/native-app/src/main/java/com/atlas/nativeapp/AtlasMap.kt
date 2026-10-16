@@ -187,8 +187,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 lastFixTime = fix.time
                 val now = SystemClock.elapsedRealtime()
                 val camera = ready.cameraPosition
-                val latitudeMeters = (position.latitude - camera.target.latitude) * 111_320.0
-                val longitudeMeters = (position.longitude - camera.target.longitude) *
+                val cameraTarget = camera.target ?: position
+                val latitudeMeters = (position.latitude - cameraTarget.latitude) * 111_320.0
+                val longitudeMeters = (position.longitude - cameraTarget.longitude) *
                     111_320.0 * kotlin.math.cos(Math.toRadians(position.latitude))
                 val shiftMeters = kotlin.math.hypot(latitudeMeters, longitudeMeters)
                 val targetBearing = if (headingUp) heading else 0.0
