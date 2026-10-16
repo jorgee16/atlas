@@ -4,6 +4,8 @@ package com.atlas.nativeapp
 class NativeCore : AutoCloseable {
     companion object { init { System.loadLibrary("atlas_jni") } }
     private var handle = create()
+    private external fun remember(handle: Long, key: Int)
+    private external fun activate(handle: Long, key: Int)
     private external fun create(): Long
     external fun cancel()
     private external fun destroy(handle: Long)
@@ -13,6 +15,8 @@ class NativeCore : AutoCloseable {
     private external fun calculate(handle: Long, a: Double, b: Double, c: Double, d: Double, walk: Boolean, avoid: Boolean, penalty: Double, vehicle: Int): ByteArray
     private external fun filter(handle: Long, lat: Double, lon: Double, accuracy: Double, speed: Double, heading: Double, time: Double): ByteArray
     private external fun update(handle: Long, lat: Double, lon: Double, accuracy: Double, speed: Double, time: Double): ByteArray
+    fun remember(key: Int) = remember(handle, key)
+    fun activate(key: Int) = activate(handle, key)
     fun graph(directory: String) = openGraph(handle, directory)
     fun search(directory: String) = openSearch(handle, directory)
     fun find(query: String, anchor: Coordinate, nearby: Boolean = false, category: String = "") =

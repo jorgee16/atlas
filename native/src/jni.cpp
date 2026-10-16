@@ -10,6 +10,7 @@ struct Engine {
   std::unique_ptr<atlas::Graph> graph;
   std::unique_ptr<atlas::Search> search, addresses;
   std::optional<atlas::Route> route;
+  std::map<int, atlas::Route> savedRoutes;
   atlas::GuidanceSession guidance;
   atlas::MotionFilter motion;
   std::optional<double> motionHeading;
@@ -246,5 +247,32 @@ Java_com_atlas_nativeapp_NativeCore_filter(JNIEnv *env, jobject, jlong id,
   } catch (const std::exception &e) {
     error(env, e);
     return nullptr;
+  }
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_atlas_nativeapp_NativeCore_remember(
+    JNIEnv *env, jobject, jlong id, jint key) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);
+    auto &e = engine(id);
+    if (key < 0 || key > 3 || !e.route)
+      throw std::invalid_argument("Invalid route option");
+    e.savedRoutes.insert_or_assign(key, *e.route);
+  } catch (const std::exception &e) {
+    error(env, e);
+  }
+}
+extern "C" JNIEXPORT void JNICALL Java_com_atlas_nativeapp_NativeCore_activate(
+    JNIEnv *env, jobject, jlong id, jint key) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);
+    auto &e = engine(id);
+    auto found = e.savedRoutes.find(key);
+    if (found == e.savedRoutes.end())
+      throw std::invalid_argument("Route option is unavailable");
+    e.route = found->second;
+    e.guidance.reset();
+  } catch (const std::exception &e) {
+    error(env, e);
   }
 }
