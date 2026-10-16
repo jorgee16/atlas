@@ -181,6 +181,7 @@ void GuidanceSession::reset() {
   lastReroute_ = -1;
   lastTime_ = -1;
   offFixes_ = 0;
+  lastPosition_.reset();
 }
 Guidance GuidanceSession::update(Point p, double accuracy, double speed,
                                  double t, const Route &r) {
@@ -188,11 +189,14 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       !std::isfinite(speed) || speed < 0)
     throw std::invalid_argument("Invalid GPS fix");
   Guidance out;
-  out.position = progress(p, r);
   if (lastTime_ >= 0 && t <= lastTime_) {
+    // Delayed/out-of-order fixes must not jump the cursor backwards.
+    out.position = lastPosition_.value_or(progress(p, r));
     out.state = Guidance::State::reduced;
     return out;
   }
+  out.position = progress(p, r);
+  lastPosition_ = out.position;
   lastTime_ = t;
   if (accuracy > 50) {
     offSince_ = -1;
