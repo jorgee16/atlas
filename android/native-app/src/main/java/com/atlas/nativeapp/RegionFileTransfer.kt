@@ -72,7 +72,7 @@ internal object RegionFileTransfer {
                 hash = sha()
             } else if (existing > 0 && code == HttpURLConnection.HTTP_PARTIAL) {
                 val value = conn.getHeaderField("Content-Range") ?: ""
-                val match = Regex("""bytes (\\d+)-(\\d+)/(\\d+)""").matchEntire(value)
+                val match = Regex("""bytes (\d+)-(\d+)/(\d+)""").matchEntire(value)
                     ?: throw IOException("Missing or invalid HTTP Content-Range")
                 val (start, end, total) = match.destructured
                 if (start.toLong() != existing || end.toLong() < existing ||
