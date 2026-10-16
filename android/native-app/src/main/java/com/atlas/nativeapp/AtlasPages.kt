@@ -175,7 +175,7 @@ class AtlasPages(
         if(state.journeys.isEmpty())body.addView(empty("transit","Plan a journey","Choose a destination and calculate public transport routes. London is currently supported."))
         for(journey in state.journeys){
             body.addView(ui.card().apply{
-                addView(ui.badge("PUBLIC TRANSPORT"));addView(ui.space(12));addView(ui.text(provider.summary(journey),19f,bold=true));addView(ui.space(14))
+                addView(ui.badge(if(journey.optBoolean("isRecommended"))"RECOMMENDED" else if(journey.optBoolean("isFastest"))"EARLIEST ARRIVAL" else "PUBLIC TRANSPORT",journey.optBoolean("isRecommended")));addView(ui.space(12));addView(ui.text(provider.summary(journey),19f,bold=true));addView(ui.space(14))
                 provider.instructions(journey).forEachIndexed{i,step->addView(ui.text("${i+1}. $step",13f,ui.muted).apply{setLineSpacing(ui.dp(4).toFloat(),1f)},lp(12))}
                 addView(ui.action("Follow this journey","transit"){model.startJourney(journey);open("journey")},lp(18))
             },lp(14))
@@ -184,13 +184,18 @@ class AtlasPages(
     }
     fun journey(state: AtlasState): View {
         val body=ui.column();val journey=state.journey?:return journeys(state)
-        val legs=journey.getJSONArray("legs").objects();val provider=TransitProvider();val instructions=provider.instructions(journey)
+        val legs=TransitPolicy.sequence(journey);val provider=TransitProvider();val instructions=provider.instructions(journey)
         body.addView(ui.heading("Your journey",provider.summary(journey)),lp(12))
         legs.forEachIndexed{i,leg->body.addView(ui.card().apply{
             addView(ui.badge(if(i<state.journeyLeg)"Completed" else if(i==state.journeyLeg)"Current leg" else "Leg ${i+1}",i<=state.journeyLeg))
             addView(ui.space(13));addView(ui.text(instructions[i],15f,bold=i==state.journeyLeg).apply{setLineSpacing(ui.dp(5).toFloat(),1f)})
             val disruptions=leg.optJSONArray("disruptions")?.objects().orEmpty();for(d in disruptions)addView(ui.text(d.optString("description",d.optString("summary")),12f,ui.red),lp(12))
-            if(i==state.journeyLeg)addView(ui.action(if(i+1==legs.size)"Finish journey" else "Complete this leg","check"){model.journeyLeg(i+1)},lp(18))
+            if(i==state.journeyLeg){
+                val action=when(state.journeyPhase){"ready_to_board"->"boarded";"riding"->"get_off";else->"arrived"}
+                val label=when(state.journeyPhase){"ready_to_board"->"I have boarded";"riding"->"I have got off";else->"Arrived at this stop"}
+                addView(ui.action(label,"check"){model.journeyAction(action)},lp(18))
+                if(state.journeyPhase=="ready_to_board")addView(ui.action("Refresh live departures","transit",false){model.enrichJourney()},lp(9))
+            }
         },lp(14))}
         if(state.journeyLeg>=legs.size)body.addView(empty("check","You have arrived","Your public transport journey is complete."))
         return scroll(body)

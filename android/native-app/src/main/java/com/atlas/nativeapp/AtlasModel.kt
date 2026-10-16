@@ -46,7 +46,9 @@ data class AtlasState(
     val revision: Int = 0,
     val journeys: List<JSONObject> = emptyList(),
     val journey: JSONObject? = null,
-    val journeyLeg: Int = -1
+    val journeyLeg: Int = -1,
+    val journeyPhase: String = "",
+    val journeyHistory: JSONArray = JSONArray()
 )
 
 class AtlasModel(application: Application) : AndroidViewModel(application) {
@@ -63,6 +65,8 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     private var searchGeneration = 0L
     private var routeGeneration = 0L
     private var lastSpoken = -1
+    private var journeyExecution: TransitExecution? = null
+    private var enrichmentJob: Job? = null
     var speak: ((String) -> Unit)? = null
     var voice = prefs.getBoolean("voice", true)
         set(value) { field = value; prefs.edit().putBoolean("voice", value).apply(); refresh() }
@@ -127,6 +131,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
             try {
                 if (snapshot.mode == "transit") {
                     val journeys = TransitProvider().journeys(from, destination.coordinate())
+                    if(generation!=routeGeneration)return@launch
                     state.update { it.copy(journeys = journeys, journey = journeys.firstOrNull(), journeyLeg = -1) }
                     if (journeys.isEmpty()) status("No public transport journeys found")
                     return@launch
@@ -238,8 +243,29 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         return days.getJSONArray(day).objects().mapIndexed { index, item -> JSONObject(item.toString()).put("id", "trip:${tripId(trip)}:$day:$index") }
     }
     fun nextTripStop(): JSONObject? = tripPlaces().firstOrNull { !visited(it.getString("id")) }
-    fun startJourney(journey: JSONObject) { state.update { it.copy(journey = journey, journeyLeg = 0) } }
-    fun journeyLeg(index: Int) { state.update { it.copy(journeyLeg = index) } }
+    fun startJourney(journey: JSONObject) {
+        enrichmentJob?.cancel()
+        journeyExecution=TransitExecution(journey)
+        state.update { it.copy(journey=journey,journeyLeg=0,journeyPhase=journeyExecution!!.phase,journeyHistory=JSONArray(journeyExecution!!.history.toString())) }
+        enrichJourney()
+    }
+    fun enrichJourney() {
+        val journey=state.value.journey?:return
+        enrichmentJob?.cancel()
+        enrichmentJob=viewModelScope.launch {
+            try {
+                val enriched=TransitProvider().enrich(journey)
+                if(state.value.journey?.optString("id")==journey.optString("id"))state.update{it.copy(journey=enriched)}
+            }catch(e:CancellationException){throw e}catch(_:Exception){ /* Live information is optional; retain the planned journey. */ }
+        }
+    }
+    fun journeyAction(action:String) {
+        val execution=journeyExecution?:return
+        if(!execution.transition(action))return
+        state.update{it.copy(journeyLeg=if(execution.phase=="complete")TransitPolicy.sequence(execution.journey).size else execution.legIndex,
+            journeyPhase=execution.phase,journeyHistory=JSONArray(execution.history.toString()))}
+        if(execution.phase=="ready_to_board")enrichJourney()
+    }
     override fun onCleared() {
         speak = null
         kotlinx.coroutines.CoroutineScope(worker).launch { core.close(); worker.close() }

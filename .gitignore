@@ -65,3 +65,6 @@ android/.gradle/
 android/.kotlin/
 android/**/.cxx/
 android/local.properties
+
+# Differential expectations are generated from the original app during native CI.
+android/native-app/src/androidTest/assets/native-transit.json

@@ -40,6 +40,13 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - name: Install native Android toolchain
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate transit expectations from the original app
+        run: |
+          npm ci --ignore-scripts
+          node tools/generate-native-transit-fixtures.mjs
       - name: Build Kotlin and JNI APK
         working-directory: android
         run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:lintDebug :native-app:assembleDebugAndroidTest --stacktrace

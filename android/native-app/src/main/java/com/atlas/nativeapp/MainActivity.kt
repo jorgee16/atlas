@@ -377,7 +377,7 @@ class MainActivity : ComponentActivity(), LocationListener {
     private fun closePage(){hideKeyboard();val was=page;page=null;searchInput=null;pageKey=null;pageLayer.visibility=View.GONE;if(was=="trips"&&model.updates.value.tab=="Trip")model.tab("Explore");rebuildChrome()}
     private fun updatePage(s:AtlasState){
         val currentPage=page?:return
-        val key=listOf(currentPage,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journeyLeg,model.voice,model.vehicleClass)
+        val key=listOf(currentPage,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journey,s.journeyLeg,s.journeyPhase,model.voice,model.vehicleClass)
         if(key==pageKey)return;pageKey=key
         val content=when(currentPage){"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();else->pages.settings()}
         val oldScroll=if(currentPage!="search")pageBody.getChildAt(0)?.scrollY?:0 else 0
