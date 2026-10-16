@@ -53,17 +53,17 @@ class LaunchTest {
     @Test fun onlineMapModeIsSelectableAndPersistsThroughRecreation() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity {
-                ViewModelProvider(it)[AtlasModel::class.java].mapSourceMode=MapSourcePolicy.AUTO
+                (it.application as AtlasApplication).model.mapSourceMode=MapSourcePolicy.AUTO
             }
             onView(allOf(withContentDescription("Change map source"),isDisplayed())).perform(click())
             onView(withText(containsString("Online · use internet maps"))).perform(click())
             scenario.onActivity {
                 assertEquals(MapSourcePolicy.ONLINE,
-                    ViewModelProvider(it)[AtlasModel::class.java].mapSourceMode)
+                    (it.application as AtlasApplication).model.mapSourceMode)
             }
             scenario.recreate()
             scenario.onActivity {
-                val model=ViewModelProvider(it)[AtlasModel::class.java]
+                val model=(it.application as AtlasApplication).model
                 assertEquals(MapSourcePolicy.ONLINE,model.mapSourceMode)
                 model.mapSourceMode=MapSourcePolicy.AUTO
             }
