@@ -101,6 +101,16 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     var theme: String
         get() = prefs.getString("theme", "system") ?: "system"
         set(value) { prefs.edit().putString("theme", value).apply() }
+    var mapSourceMode: String
+        get() = prefs.getString("mapSourceMode", MapSourcePolicy.AUTO)
+            ?.takeIf(MapSourcePolicy::isValid) ?: MapSourcePolicy.AUTO
+        set(value) {
+            require(MapSourcePolicy.isValid(value))
+            if (mapSourceMode != value) {
+                prefs.edit().putString("mapSourceMode", value).apply()
+                refresh()
+            }
+        }
     val dark: Boolean get() = theme == "dark" || (theme == "system" &&
         (getApplication<Application>().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
     var vehicleClass: Int

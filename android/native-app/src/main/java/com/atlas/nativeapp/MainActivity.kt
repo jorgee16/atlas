@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private lateinit var pageBody: FrameLayout
     private lateinit var snackbar: TextView
     private lateinit var credit: TextView
+    private lateinit var mapSourceBadge: TextView
     private var page: String? = null
     private var pageKey: List<Any?>? = null
     private var lastChrome: List<Any?>? = null
@@ -130,6 +131,12 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         controls = ui.column(); root.addView(controls,FrameLayout.LayoutParams(ui.dp(48),-2,Gravity.END or Gravity.BOTTOM))
         navigation = ui.row(); root.addView(navigation,FrameLayout.LayoutParams(-1,ui.dp(68),Gravity.BOTTOM))
         guidance = ui.column(); root.addView(guidance,FrameLayout.LayoutParams(-1,-2,Gravity.TOP))
+        mapSourceBadge = ui.badge("MAP · LOADING").apply {
+            contentDescription = "Change map source"
+            setOnClickListener { showMapSourceOptions() }
+            elevation = ui.dp(3).toFloat()
+        }
+        root.addView(mapSourceBadge, FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM or Gravity.START))
         credit = ui.text("© OpenStreetMap · OpenFreeMap",9f,ui.muted).apply { setShadowLayer(2f,0f,0f,Color.WHITE); setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW,Uri.parse("https://www.openstreetmap.org/copyright"))) } }
         root.addView(credit,FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM or Gravity.START))
         pageLayer = ui.column().apply { setBackgroundColor(ui.canvas); visibility = View.GONE; elevation = ui.dp(12).toFloat(); isClickable = true }
@@ -137,6 +144,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(24).toFloat();visibility=View.GONE }
         root.addView(snackbar,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
         pages = AtlasPages(this,ui,model,::selectDestination,::openPage,{importTrip.launch(arrayOf("application/json","text/*"))}, { theme -> model.theme=theme; recreate() },::confirm,{atlasMap.center(it)})
+        atlasMap.onMapSourceChanged = { rebuildChrome() }
         atlasMap.onPan = { if(model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true}; rebuildChrome() }
         atlasMap.onPoint = { point ->
             if(pickingOrigin){pickingOrigin=false;model.origin(point);model.status("Starting point set");model.updates.value.destination?.let{model.calculate()}}
@@ -175,13 +183,25 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             bottomMargin=if(planning&&!landscape)0 else bottomInset+if(model.updates.value.navigating)ui.dp(178) else ui.dp(118)
         }.also{controls.layoutParams=it}
         (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(22);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(184)else ui.dp(88)}.also{credit.layoutParams=it}
+        (mapSourceBadge.layoutParams as FrameLayout.LayoutParams).apply {
+            leftMargin=left
+            bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(215)else ui.dp(116)
+        }.also{mapSourceBadge.layoutParams=it}
         (snackbar.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(24);rightMargin=rightInset+ui.dp(24);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(180) else ui.dp(100)}.also{snackbar.layoutParams=it}
         pageLayer.setPadding(leftInset,topInset,rightInset,if(page=="trips")bottomInset+ui.dp(91) else bottomInset)
     }
     private fun linear(top: Int = 0) = LinearLayout.LayoutParams(-1,-2).apply{topMargin=ui.dp(top)}
     private fun rebuildChrome(){lastChrome=null;render(model.updates.value)}
     private fun render(state: AtlasState) {
+        atlasMap.sourceMode = model.mapSourceMode
         atlasMap.render(state)
+        mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
+        mapSourceBadge.text=when(atlasMap.activeMapSource) {
+            MapSourcePolicy.OFFLINE -> "MAP · OFFLINE"
+            MapSourcePolicy.ONLINE -> "MAP · ONLINE"
+            MapSourcePolicy.UNAVAILABLE -> "OFFLINE MAP UNAVAILABLE"
+            else -> "MAP · LOADING"
+        }
         val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
         if(chrome!=lastChrome){lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
         if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
@@ -214,8 +234,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
         val info=ui.row().apply{setPadding(ui.dp(2),ui.dp(10),0,0)}
         val region=model.regions.regions.firstOrNull{model.regions.installed(it)&&it.contains(model.anchor)}
-        val label=when{ s.downloading!=null -> "Downloading ${s.downloadPercent}%";model.regions.map(model.anchor)!=null->"Offline map ready";region!=null&&model.regions.installedVersion(region)!=region.version->"Offline update available";region!=null->"Offline routes ready";else->"Online map" }
-        info.addView(ui.badge(label,region!=null).apply{setOnClickListener{openPage("regions")}})
+        val label=mapSourceLabel() +
+            (if(s.downloading!=null)" · Downloading ${s.downloadPercent}%"
+             else if(region!=null&&atlasMap.activeMapSource==MapSourcePolicy.ONLINE)" · Offline routes"
+             else "")
+        info.addView(ui.badge(label,atlasMap.activeMapSource==MapSourcePolicy.OFFLINE).apply{
+            contentDescription="Change map source"
+            setOnClickListener{showMapSourceOptions()}
+        })
         if(!hasLocation())info.addView(ui.chip("Enable location","locate"){enableLocation()},LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(9)})
         top.addView(info)
     }
@@ -223,6 +249,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         controls.removeAllViews();controls.visibility=if(page!=null)View.GONE else View.VISIBLE
         fun add(name:String,label:String,selected:Boolean=false,click:()->Unit){controls.addView(ui.iconButton(name,label,selected,click),LinearLayout.LayoutParams(ui.dp(48),ui.dp(48)).apply{topMargin=ui.dp(10)})}
         add("compass",if(atlasMap.headingUp)"Switch to north up" else "Switch to heading up"){atlasMap.compass();rebuildChrome()}
+        add("map","Map source: ${mapSourceLabel()}"){showMapSourceOptions()}
         add("locate","Recenter on my location",atlasMap.follow){if(hasLocation()){atlasMap.recenter();rebuildChrome()}else enableLocation()}
         if(!s.navigating)add("map",if(fullMap)"Show controls" else "Full map"){fullMap=!fullMap;rebuildChrome()}
     }
@@ -373,8 +400,36 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             0->{model.origin(null);model.calculate()};1->{searchTarget="origin";openPage("search")};2->{pickingOrigin=true;model.tab("Explore");closePage();model.status("Press and hold the starting point on the map")}
         }}
     }
+    private fun mapSourceLabel(): String = when(atlasMap.activeMapSource) {
+        MapSourcePolicy.OFFLINE -> "Offline map"
+        MapSourcePolicy.ONLINE -> "Online map"
+        MapSourcePolicy.UNAVAILABLE -> "Offline map unavailable"
+        else -> "Loading map"
+    }
+    private fun showMapSourceOptions() {
+        val choices=listOf(
+            Triple("Automatic · prefer downloaded map",MapSourcePolicy.AUTO,"map"),
+            Triple("Online · use internet maps",MapSourcePolicy.ONLINE,"map"),
+            Triple("Offline · downloaded maps only",MapSourcePolicy.OFFLINE,"download")
+        )
+        showChoices("Map source",choices.map { (title, mode, icon) ->
+            (if(model.mapSourceMode==mode)"✓  " else "")+title to icon
+        }) { selected ->
+            val mode=choices[selected].second
+            val state=model.updates.value
+            val point=if(state.navigating&&state.fix!=null)state.fix.point else atlasMap.centerPoint
+            if(mode==MapSourcePolicy.OFFLINE&&model.regions.map(point)==null) {
+                model.status("No offline map here. Download this region first.")
+                openPage("regions")
+            } else {
+                model.mapSourceMode=mode
+                rebuildChrome()
+            }
+        }
+    }
     private fun openSearch(){searchTarget="destination";model.clearSearch();openPage("search")}
     private fun openPage(name:String){
+        if(name=="mapSource"){showMapSourceOptions();return}
         if(name=="map"){closePage();return}
         if(name=="trips")model.tab("Trip")
         page=name;pageKey=null;pageLayer.removeAllViews();pageLayer.visibility=View.VISIBLE
@@ -403,7 +458,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun closePage(){hideKeyboard();val was=page;page=null;searchInput=null;pageKey=null;pageLayer.visibility=View.GONE;if(was=="trips"&&model.updates.value.tab=="Trip")model.tab("Explore");rebuildChrome()}
     private fun updatePage(s:AtlasState){
         val currentPage=page?:return
-        val key=listOf(currentPage,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journey,s.journeyLeg,s.journeyPhase,model.voice,model.vehicleClass)
+        val key=listOf(currentPage,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journey,s.journeyLeg,s.journeyPhase,model.voice,model.vehicleClass,model.mapSourceMode)
         if(key==pageKey)return;pageKey=key
         val content=when(currentPage){"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();else->pages.settings()}
         val oldScroll=if(currentPage!="search")pageBody.getChildAt(0)?.scrollY?:0 else 0

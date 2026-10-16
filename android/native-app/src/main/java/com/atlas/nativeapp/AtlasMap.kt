@@ -37,6 +37,18 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     var onRoute: ((JSONObject) -> Unit)? = null
     var follow = true
     var headingUp = true
+    /** Applied before each render; source switching does not alter active routes. */
+    var sourceMode: String = MapSourcePolicy.AUTO
+        set(value) {
+            require(MapSourcePolicy.isValid(value))
+            if (field != value) {
+                field = value
+                onlineFailed = false
+            }
+        }
+    var onMapSourceChanged: (() -> Unit)? = null
+    private var loadedSource = "loading"
+    val activeMapSource: String get() = if (styleLoading) "loading" else loadedSource
     val centerPoint: Coordinate get() = map?.cameraPosition?.target?.let { Coordinate(it.latitude,it.longitude) }
         ?: current?.fix?.point ?: Coordinate(38.7223,-9.1393)
     private var styleKey = ""
@@ -107,14 +119,19 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             loadStyle(Coordinate(38.7223, -9.1393))
         }
         view.addOnDidFailLoadingMapListener {
-            if (!onlineFailed && styleKey.startsWith("online")) { onlineFailed = true; styleKey = ""; loadStyle(current?.fix?.point ?: Coordinate(38.7223, -9.1393)) }
+            if (!onlineFailed && styleKey.startsWith("online:")) {
+                onlineFailed = true
+                styleKey = ""
+                loadStyle(current?.fix?.point ?: centerPoint)
+            }
         }
     }
     /** Return true if a new style is loading; rendering must wait for its callback. */
     private fun loadStyle(at: Coordinate): Boolean {
-        val file = regions.map(at)
+        val file = if (sourceMode == MapSourcePolicy.ONLINE) null else regions.map(at)
+        val selection = MapSourcePolicy.resolve(sourceMode, file != null)
         val navigating = current?.navigating == true
-        val key = (file?.absolutePath ?: "online") + ":$dark:$navigating:$onlineFailed"
+        val key = "$selection:$sourceMode:${file?.absolutePath ?: ""}:$dark:$navigating:$onlineFailed"
         if (key == styleKey) return styleLoading
         styleKey = key
         styleLoading = true
@@ -126,8 +143,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         remaining = null; travelled = null; geometry = emptyList()
         route = null; destination = null; options = null; nearby = null
         val builder = when {
-            file != null -> Style.Builder().fromJson(
-                AtlasCartography.offlineStyle("pmtiles://file://" + file.absolutePath, dark, navigating))
+            selection == MapSourcePolicy.OFFLINE -> Style.Builder().fromJson(
+                AtlasCartography.offlineStyle("pmtiles://file://" + file!!.absolutePath, dark, navigating))
+            selection == MapSourcePolicy.UNAVAILABLE -> Style.Builder().fromJson(
+                """{"version":8,"sources":{},"layers":[{"id":"atlas-no-offline-map","type":"background","paint":{"background-color":"${if (dark) "#1D2B38" else "#F0F2EF"}"}}]}""")
             !onlineFailed -> Style.Builder().fromUri(AtlasCartography.onlineUri(dark, navigating))
             else -> Style.Builder().fromJson("""{"version":8,
                 "sources":{"osm":{"type":"raster",
@@ -138,7 +157,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         map?.setStyle(builder) { style ->
             if (key != styleKey) return@setStyle
-            if (file == null && !onlineFailed) {
+            if (selection == MapSourcePolicy.ONLINE && !onlineFailed) {
                 AtlasCartography.enhanceOnline(style, dark, navigating)
             }
             // A render may have happened while style loading; purge any
@@ -149,7 +168,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             lastSegment = -1; positionMarker = null
             route = null; destination = null; options = null; nearby = null
             styleLoading = false
+            loadedSource = selection
             current?.let { render(it) }
+            onMapSourceChanged?.invoke()
         }
         return true
     }

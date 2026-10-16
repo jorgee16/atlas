@@ -97,8 +97,13 @@ Azores) in addition to the existing routing, POIs and search assets.
 The Android bundled catalog and `public/regions/catalog.json` are kept in
 sync. Portugal v8 installations must select **Update region** to download v9
 before the local map is actually available. The map-ready indicator must be
-based on the local PMTiles file, not merely the catalog declaration. Regions
-without a locally installed archive use online map tiles. Offline font glyphs
+based on the local PMTiles file, not merely the catalog declaration. The map source can be selected from the map badge, navigation controls, or Settings:
+**Automatic** (prefer local PMTiles), **Online** (force network cartography
+even if a local map is installed), or **Offline** (never fall back to network
+map tiles). The setting persists across launches and does not change the offline
+routing/search engine. Choosing Offline without a downloaded map directs users
+to region downloads; crossing outside offline coverage shows an unavailable
+basemap instead of silently using the internet. Offline font glyphs
 are not yet bundled, so labels may still depend on network access.
 MapLibre documentation: https://maplibre.org/maplibre-native/android/examples/data/PMTiles/
 
