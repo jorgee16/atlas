@@ -108,27 +108,34 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     private fun loadStyle(at: Coordinate) {
         val file = regions.map(at)
-        val key = file?.absolutePath ?: "online:$dark:$onlineFailed"
+        val navigating = current?.navigating == true
+        val key = (file?.absolutePath ?: "online") + ":$dark:$navigating:$onlineFailed"
         if (key == styleKey) return
         styleKey = key
-        val builder = if (file != null) {
-            val base = if (dark) "#14202C" else "#F1F2ED"
-            val water = if (dark) "#1E3A4D" else "#BDDCE8"
-            val land = if (dark) "#20382E" else "#DEEDD5"
-            Style.Builder().fromJson("""{"version":8,"sources":{"atlas":{"type":"vector","url":${JSONObject.quote("pmtiles://file://" + file.absolutePath)}}},"layers":[
-                {"id":"background","type":"background","paint":{"background-color":"$base"}},
-                {"id":"landcover","type":"fill","source":"atlas","source-layer":"landcover","paint":{"fill-color":"$land"}},
-                {"id":"water","type":"fill","source":"atlas","source-layer":"water","paint":{"fill-color":"$water"}},
-                {"id":"buildings","type":"fill","source":"atlas","source-layer":"building","paint":{"fill-color":"${if (dark) "#2A3541" else "#E0E2DF"}"}},
-                {"id":"roads","type":"line","source":"atlas","source-layer":"transportation","paint":{"line-color":"${if (dark) "#435465" else "#FFFFFF"}","line-width":3}}
-            ]}""")
-        } else if (!onlineFailed) Style.Builder().fromUri("https://tiles.openfreemap.org/styles/${if (dark) "dark" else "positron"}")
-        else Style.Builder().fromJson("""{"version":8,"sources":{"osm":{"type":"raster","tiles":["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],"tileSize":256,"attribution":"© OpenStreetMap contributors"}},"layers":[{"id":"osm","type":"raster","source":"osm","paint":{"raster-saturation":-0.65,"raster-contrast":-0.12}}]}""")
-        map?.setStyle(builder) {
-            route = null; destination = null; options = null; nearby = null; positionMarker = null
+        val builder = when {
+            file != null -> Style.Builder().fromJson(
+                AtlasCartography.offlineStyle("pmtiles://file://" + file.absolutePath, dark, navigating))
+            !onlineFailed -> Style.Builder().fromUri(AtlasCartography.onlineUri(dark, navigating))
+            else -> Style.Builder().fromJson("""{"version":8,
+                "sources":{"osm":{"type":"raster",
+                "tiles":["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+                "tileSize":256,"attribution":"© OpenStreetMap contributors"}},
+                "layers":[{"id":"osm","type":"raster","source":"osm",
+                "paint":{"raster-saturation":-0.35,"raster-contrast":0.05}}]}""")
+        }
+        map?.setStyle(builder) { style ->
+            if (file == null && !onlineFailed) {
+                AtlasCartography.enhanceOnline(style, dark, navigating)
+            }
+            // Annotation handles belonged to the previous style: recreate once.
+            lines.clear(); markers.clear(); places.clear()
+            remaining = null; travelled = null; geometry = emptyList()
+            lastSegment = -1; positionMarker = null
+            route = null; destination = null; options = null; nearby = null
             current?.let { render(it) }
         }
     }
+
     fun center(point: Coordinate, zoom: Double = 15.0) { map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat, point.lon), zoom)) }
     fun recenter() { follow = true; current?.fix?.point?.let { center(it, if (current?.navigating == true) 17.5 else 15.0) } }
     fun compass() { headingUp = !headingUp; if (!headingUp) map?.animateCamera(CameraUpdateFactory.bearingTo(0.0)) }
