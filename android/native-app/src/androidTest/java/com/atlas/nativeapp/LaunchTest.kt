@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.location.LocationManager
 import android.os.SystemClock
-import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.espresso.Espresso.onView
@@ -73,6 +72,7 @@ class LaunchTest {
 
     @Test fun nativeScreensAndRecreation() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { (it.application as AtlasApplication).model.endNavigation() }
             SystemClock.sleep(3500)
             onView(withContentDescription("Search places")).check(matches(isDisplayed()))
             capture("01-explore")
@@ -86,7 +86,7 @@ class LaunchTest {
             onView(withText("Every trip starts somewhere")).check(matches(isDisplayed()))
             capture("03-trips-empty")
             scenario.onActivity { activity ->
-                val model=ViewModelProvider(activity)[AtlasModel::class.java]
+                val model=(activity.application as AtlasApplication).model
                 model.importTrip("""{"trip":{"id":"ui-city-fixture","name":"Lisbon on foot","days":{"1":[{"name":"Praça do Comércio","lat":38.7078,"lon":-9.1366,"type":"Landmark","note":"Start the day by the waterfront"},{"name":"Chiado","lat":38.7107,"lon":-9.1422,"type":"Neighbourhood","note":"A walk through the historic centre"},{"name":"Jardim da Estrela","lat":38.7134,"lon":-9.1595,"type":"Park","note":"A quiet stop in the afternoon"}],"2":[{"name":"Belém","lat":38.6975,"lon":-9.2068,"type":"Neighbourhood"}]}}}""")
                 model.visited("trip:ui-city-fixture:1:0",true)
             }
@@ -99,7 +99,7 @@ class LaunchTest {
                 val pageField=MainActivity::class.java.getDeclaredField("page").apply{isAccessible=true}
                 val topField=MainActivity::class.java.getDeclaredField("top").apply{isAccessible=true}
                 val top=topField.get(activity) as android.view.View
-                android.util.Log.e("ATLAS_UI_REVIEW","page=${pageField.get(activity)} tab=${ViewModelProvider(activity)[AtlasModel::class.java].updates.value.tab} top=${top.visibility} size=${top.width}x${top.height}")
+                android.util.Log.e("ATLAS_UI_REVIEW","page=${pageField.get(activity)} tab=${(activity.application as AtlasApplication).model.updates.value.tab} top=${top.visibility} size=${top.width}x${top.height}")
             }
             onView(withContentDescription("Offline regions")).perform(click())
             onView(withText("AVAILABLE REGIONS")).check(matches(isDisplayed()))
@@ -111,7 +111,7 @@ class LaunchTest {
             capture("05-navigation")
             scenario.onActivity { activity ->
                 (activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(activity)
-                val model=ViewModelProvider(activity)[AtlasModel::class.java]
+                val model=(activity.application as AtlasApplication).model
                 model.stop()
                 val field=AtlasModel::class.java.getDeclaredField("state").apply{isAccessible=true}
                 @Suppress("UNCHECKED_CAST") val flow=field.get(model) as MutableStateFlow<AtlasState>
@@ -129,12 +129,13 @@ class LaunchTest {
             SystemClock.sleep(1200)
             capture("07-landscape")
             scenario.onActivity { activity ->
-                ViewModelProvider(activity)[AtlasModel::class.java].theme="dark"
+                (activity.application as AtlasApplication).model.theme="dark"
                 activity.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
             scenario.onActivity { activity -> (activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(activity) }
             SystemClock.sleep(1200)
             capture("08-dark")
+            scenario.onActivity { (it.application as AtlasApplication).model.endNavigation() }
         }
     }
 }

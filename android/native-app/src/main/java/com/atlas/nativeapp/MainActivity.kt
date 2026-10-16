@@ -37,7 +37,7 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -53,7 +53,9 @@ import java.util.Date
 import java.util.Locale
 
 class MainActivity : ComponentActivity(), LocationListener, SensorEventListener {
-    private val model: AtlasModel by viewModels()
+    private val model: AtlasModel by lazy { (application as AtlasApplication).model }
+    private var activityStarted = false
+    private var foregroundNavigationRunning = false
     private lateinit var ui: AtlasUi
     private lateinit var atlasMap: AtlasMap
     private lateinit var pages: AtlasPages
@@ -163,8 +165,8 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){override fun handleOnBackPressed(){
             when { page!=null -> backPage(); fullMap -> {fullMap=false;rebuildChrome()}; selectedPlace!=null -> {selectedPlace=null;rebuildChrome()}; model.updates.value.navigating -> confirm("End this navigation?"){endNavigation()}; model.updates.value.tab!="Explore" -> model.tab("Explore"); else -> {isEnabled=false;onBackPressedDispatcher.onBackPressed()} }
         }})
-        voice = TextToSpeech(this){code->voiceReady=code==TextToSpeech.SUCCESS;if(voiceReady)voice?.language=Locale.UK}
-        model.speak={text->if(voiceReady)voice?.speak(text,TextToSpeech.QUEUE_FLUSH,null,"atlas-turn")}
+        // Guidance TTS is owned by NavigationService, not by an Activity that
+        // Android can destroy while the user opens another application.
         page=savedInstanceState?.getString("page")
         selectedPlace=savedInstanceState?.getString("peek")?.let{JSONObject(it)}
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { model.updates.collect { render(it) } } }
@@ -196,6 +198,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun linear(top: Int = 0) = LinearLayout.LayoutParams(-1,-2).apply{topMargin=ui.dp(top)}
     private fun rebuildChrome(){lastChrome=null;render(model.updates.value)}
     private fun render(state: AtlasState) {
+        syncNavigationService(state.navigating)
         atlasMap.sourceMode = model.mapSourceMode
         atlasMap.render(state)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
@@ -389,7 +392,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         atlasMap.endNavigation()
         rebuildChrome()
     }
-    private fun startNavigation(){atlasMap.follow=true;previewCollapsed=false;selectedPlace=null;model.start()}
+    private fun startNavigation(){
+        if (!hasLocation()) { enableLocation(); return }
+        atlasMap.follow=true;previewCollapsed=false;selectedPlace=null;model.start()
+    }
     private fun selectDestination(place:JSONObject){
         if(searchTarget=="origin"){searchTarget="destination";model.origin(place.coordinate());closePage();model.updates.value.destination?.let{model.calculate()};return}
         selectedPlace=null;previewCollapsed=false;model.select(place);closePage();atlasMap.center(place.coordinate())
@@ -499,6 +505,26 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         dialog.setOnShowListener{dialog.window?.setBackgroundDrawableResource(android.R.color.transparent);dialog.window?.setLayout((resources.displayMetrics.widthPixels-ui.dp(40)).coerceAtMost(ui.dp(400)),-2)};dialog.show()
     }
     private fun hideKeyboard(){(getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(root.windowToken,0);searchInput?.clearFocus()}
+    private fun syncNavigationService(navigating: Boolean) {
+        if (navigating == foregroundNavigationRunning) return
+        foregroundNavigationRunning = navigating
+        val intent = Intent(this, NavigationService::class.java)
+        if (navigating) {
+            if (!hasLocation()) {
+                model.status("Enable location to keep guidance running in the background.")
+                return
+            }
+            manager.removeUpdates(this)
+            try {
+                ContextCompat.startForegroundService(this, intent.setAction(NavigationService.ACTION_START))
+            } catch (e: RuntimeException) {
+                model.status("Could not start background navigation: ${e.message ?: "Android restriction"}")
+            }
+        } else {
+            stopService(intent)
+            if (activityStarted) startGps()
+        }
+    }
     private fun hasLocation()=checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED||checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
     private fun enableLocation(){
         val prefs=getSharedPreferences("atlas-ui",0)
@@ -506,7 +532,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             confirm("Enable location for Atlas in Android settings?"){startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:$packageName")))}
         }else{prefs.edit().putBoolean("locationAsked",true).apply();requestPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION))}
     }
-    private fun startGps(){if(!hasLocation())return;try{
+    private fun startGps(){if(!hasLocation()||foregroundNavigationRunning)return;try{
         for(provider in listOf(LocationManager.GPS_PROVIDER,LocationManager.NETWORK_PROVIDER))if(manager.isProviderEnabled(provider))manager.requestLocationUpdates(provider,1000L,0f,this)
     }catch(_:SecurityException){rebuildChrome()}}
     override fun onLocationChanged(location:Location){
@@ -547,6 +573,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     @Deprecated("Deprecated in Android") override fun onStatusChanged(provider:String?,status:Int,extras:Bundle?){}
     override fun onStart(){
         super.onStart()
+        activityStarted=true
         atlasMap.onStart()
         startGps()
         rotationSensor?.let { sensors.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
@@ -555,6 +582,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     override fun onResume(){super.onResume();atlasMap.onResume();rebuildChrome()}
     override fun onPause(){atlasMap.onPause();super.onPause()}
     override fun onStop(){
+        activityStarted=false
         handler.removeCallbacks(gapTick)
         sensors.unregisterListener(this)
         manager.removeUpdates(this)
@@ -563,5 +591,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     }
     override fun onLowMemory(){super.onLowMemory();atlasMap.onLowMemory()}
     override fun onSaveInstanceState(outState:Bundle){super.onSaveInstanceState(outState);val map=Bundle();atlasMap.onSaveInstanceState(map);outState.putBundle("map",map);outState.putString("page",page);outState.putString("peek",selectedPlace?.toString())}
-    override fun onDestroy(){handler.removeCallbacksAndMessages(null);model.speak=null;voice?.stop();voice?.shutdown();atlasMap.onDestroy();super.onDestroy()}
+    override fun onDestroy(){
+        handler.removeCallbacksAndMessages(null)
+        atlasMap.onDestroy()
+        super.onDestroy()
+    }
 }

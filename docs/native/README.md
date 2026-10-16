@@ -142,6 +142,15 @@ native UI or establish equivalence on full production regional datasets.
 
 ## Navigation stability hardening
 
+Navigation GPS and voice guidance now run in a location foreground service
+with a persistent notification and an explicit End navigation action. An
+Application-scoped native ViewModel keeps guidance state across activity
+recreation and when other apps are in the foreground. The screen may stop
+registering GPS while the service is active, avoiding competing listeners.
+Force-stop, OS process death, device restart and post-reboot route restoration
+are **not yet** handled; they remain acceptance gates. Android 14+ requires
+location permission before starting the service.
+
 The Kotlin GPS pipeline now uses a conflated channel rather than dropping
 incoming fixes while native processing is in progress. Route/session generation
 checks protect against a late JNI result resurfacing guidance or TTS after
@@ -158,7 +167,7 @@ location continuity and tunnel sensor fusion remain separate acceptance gates.
 | --- | --- | --- |
 | Offline routing | C++ graph v6, fastest car/walk paths, turn restrictions, geometry, toll avoidance | Production dataset benchmarks and broader route-alternative coverage |
 | Search | C++ indexed POI/address lookup, accent folding, final-token prefix, nearby categories | Match the full existing ranking/postcode/alias policy, spatial nearby index and routing-road compatibility fallback |
-| Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; Kotlin TTS | Match lane guidance, advanced junction rendering, driving-camera details, full GPS replay parity and route-undo behavior |
+| Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; background foreground-service GPS and TTS | Process-death restore, road-tested tunnel continuity, match lane guidance, advanced junction rendering, driving-camera details, full GPS replay parity and route-undo behavior |
 | Maps | Native MapLibre, styled online vector/raster and local PMTiles, travelled-route styling, native map controls and map alternative selection | Offline labels/fonts/sprites, full-size data performance and additional junction-map detail |
 | Trips | JSON import, day/place selection, visited-state progression, optional thumbnails and next-stop actions | Full transit handoff and advanced itinerary scheduling parity |
 | Transit | Kotlin TfL journey requests, alternatives, leg-by-leg execution and disruptions | Port advanced journey ranking, live arrivals and sibling-stop filtering |
