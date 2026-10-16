@@ -91,7 +91,7 @@ class AtlasUi(val context: Context, val dark: Boolean = false) {
     }
     fun stat(value: String, label: String) = column().apply {
         gravity = Gravity.CENTER
-        addView(text(value, 23f, bold = true)); addView(space(5)); addView(text(label, 11f, muted))
+        addView(text(value, 23f, bold = true).apply { gravity = Gravity.CENTER }); addView(space(5)); addView(text(label, 11f, muted).apply { gravity = Gravity.CENTER })
     }
     fun tileIcon(name: String, tint: Int = blue) = FrameLayout(context).apply {
         background = shape(if (tint == green) greenSoft else soft, 15)

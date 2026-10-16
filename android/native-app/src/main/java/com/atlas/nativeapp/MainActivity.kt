@@ -73,6 +73,8 @@ class MainActivity : ComponentActivity(), LocationListener {
     private var fullMap = false
     private var topInset = 0
     private var bottomInset = 0
+    private var leftInset = 0
+    private var rightInset = 0
     private var lastNotice = 0L
     private var lastTouch = 0L
     private var lastRoute: JSONObject? = null
@@ -98,6 +100,7 @@ class MainActivity : ComponentActivity(), LocationListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ui = AtlasUi(this, model.dark)
+        if(savedInstanceState!=null)lastNotice=model.updates.value.notice
         WindowCompat.setDecorFitsSystemWindows(window,false)
         window.statusBarColor=Color.TRANSPARENT
         window.navigationBarColor=Color.TRANSPARENT
@@ -127,7 +130,7 @@ class MainActivity : ComponentActivity(), LocationListener {
         atlasMap.onRoute = { model.chooseRoute(it) }
         setContentView(root)
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
-            val system=insets.getInsets(WindowInsetsCompat.Type.systemBars());topInset=system.top;bottomInset=system.bottom
+            val system=insets.getInsets(WindowInsetsCompat.Type.systemBars());topInset=system.top;bottomInset=system.bottom;leftInset=system.left;rightInset=system.right
             layoutChrome();insets
         }
         onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){override fun handleOnBackPressed(){
@@ -144,14 +147,20 @@ class MainActivity : ComponentActivity(), LocationListener {
     override fun dispatchTouchEvent(event: MotionEvent): Boolean { if(event.actionMasked==MotionEvent.ACTION_DOWN)lastTouch=System.currentTimeMillis();return super.dispatchTouchEvent(event) }
     private fun layoutChrome() {
         val pad=ui.dp(16)
-        (top.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(350) else -1;leftMargin=pad;rightMargin=pad;topMargin=topInset+ui.dp(12) }.also{top.layoutParams=it}
-        (bottom.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(340) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.START else Gravity.CENTER_HORIZONTAL;leftMargin=pad;rightMargin=pad;bottomMargin=bottomInset+if(landscape||model.updates.value.navigating)ui.dp(16) else ui.dp(100) }.also{bottom.layoutParams=it}
-        (navigation.layoutParams as FrameLayout.LayoutParams).apply {width=if(landscape)ui.dp(300) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.CENTER_HORIZONTAL;leftMargin=pad;rightMargin=pad;bottomMargin=bottomInset+ui.dp(14)}.also{navigation.layoutParams=it}
-        (guidance.layoutParams as FrameLayout.LayoutParams).apply{width=if(landscape)ui.dp(360) else -1;leftMargin=pad;rightMargin=pad;topMargin=topInset+ui.dp(12)}.also{guidance.layoutParams=it}
-        (controls.layoutParams as FrameLayout.LayoutParams).apply {rightMargin=pad;bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(178) else if(model.updates.value.tab=="Navigation"&&model.updates.value.destination!=null&&!landscape)ui.dp(355) else ui.dp(118)}.also{controls.layoutParams=it}
-        (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=ui.dp(22);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(184)else ui.dp(88)}.also{credit.layoutParams=it}
-        (snackbar.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=ui.dp(24);rightMargin=ui.dp(24);bottomMargin=bottomInset+ui.dp(100)}.also{snackbar.layoutParams=it}
-        pageLayer.setPadding(0,topInset,0,if(page=="trips")bottomInset+ui.dp(91) else bottomInset)
+        val left=pad+leftInset;val right=pad+rightInset
+        (top.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(350) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12) }.also{top.layoutParams=it}
+        (bottom.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(340) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.START else Gravity.CENTER_HORIZONTAL;leftMargin=left;rightMargin=right;bottomMargin=bottomInset+if(landscape||model.updates.value.navigating)ui.dp(16) else ui.dp(100) }.also{bottom.layoutParams=it}
+        (navigation.layoutParams as FrameLayout.LayoutParams).apply {width=if(landscape)ui.dp(300) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.CENTER_HORIZONTAL;leftMargin=left;rightMargin=right;bottomMargin=bottomInset+ui.dp(14)}.also{navigation.layoutParams=it}
+        (guidance.layoutParams as FrameLayout.LayoutParams).apply{width=if(landscape)ui.dp(360) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12)}.also{guidance.layoutParams=it}
+        (controls.layoutParams as FrameLayout.LayoutParams).apply {
+            val planning=model.updates.value.tab=="Navigation"&&!model.updates.value.navigating&&!fullMap
+            gravity=Gravity.END or if(planning&&!landscape)Gravity.TOP else Gravity.BOTTOM
+            rightMargin=right;topMargin=if(planning&&!landscape)topInset+ui.dp(165) else 0
+            bottomMargin=if(planning&&!landscape)0 else bottomInset+if(model.updates.value.navigating)ui.dp(178) else ui.dp(118)
+        }.also{controls.layoutParams=it}
+        (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(22);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(184)else ui.dp(88)}.also{credit.layoutParams=it}
+        (snackbar.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(24);rightMargin=rightInset+ui.dp(24);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(180) else ui.dp(100)}.also{snackbar.layoutParams=it}
+        pageLayer.setPadding(leftInset,topInset,rightInset,if(page=="trips")bottomInset+ui.dp(91) else bottomInset)
     }
     private fun linear(top: Int = 0) = LinearLayout.LayoutParams(-1,-2).apply{topMargin=ui.dp(top)}
     private fun rebuildChrome(){lastChrome=null;render(model.updates.value)}
@@ -207,7 +216,7 @@ class MainActivity : ComponentActivity(), LocationListener {
         listOf(Triple("Explore","explore","Explore"),Triple("Trip","trip","Trip"),Triple("Navigation","navigate","Navigate")).forEach{(tab,icon,label)->
             val active=s.tab==tab;val item=ui.column().apply{
                 gravity=Gravity.CENTER;ui.ripple(this,if(active)ui.soft else ui.surface,19);contentDescription="$label tab"
-                addView(ui.icon(icon,if(active)ui.blue else ui.muted,22));addView(ui.space(4));addView(ui.text(label,11f,if(active)ui.blue else ui.muted,active))
+                addView(ui.icon(icon,if(active)ui.blue else ui.muted,22));addView(ui.space(4));addView(ui.text(label,11f,if(active)ui.blue else ui.muted,active).apply{gravity=Gravity.CENTER},LinearLayout.LayoutParams(-1,-2))
                 setOnClickListener{fullMap=false;selectedPlace=null;model.tab(tab);if(tab=="Trip")openPage("trips")else closePage();rebuildChrome()}
             };navigation.addView(item,LinearLayout.LayoutParams(0,-1,1f).apply{leftMargin=ui.dp(2);rightMargin=ui.dp(2)})
         }
