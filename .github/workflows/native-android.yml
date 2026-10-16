@@ -1,0 +1,44 @@
+name: Native C++ and Kotlin Android
+on:
+  workflow_dispatch:
+  push:
+    branches: ['migration/native-core-kotlin']
+  pull_request:
+    paths: ['native/**', 'android/native-app/**', 'android/build.gradle', 'android/settings.gradle', '.github/workflows/native-android.yml']
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate fixtures with the existing Atlas packager
+        run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
+      - name: Build native C++ core
+        run: cmake -S native -B /tmp/atlas-build -DCMAKE_BUILD_TYPE=Debug && cmake --build /tmp/atlas-build -j2
+      - name: Native tests
+        run: ctest --test-dir /tmp/atlas-build --output-on-failure
+      - name: Compare with JavaScript routing
+        run: python3 native/tests/compare-routes.py /tmp/atlas-native-fixtures /tmp/atlas-build/atlas_route
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install native Android toolchain
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: Build Kotlin and JNI APK
+        working-directory: android
+        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:lintDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-native-debug-apk
+          path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
+          if-no-files-found: error

@@ -57,3 +57,11 @@ public/**/search-index.bin
 public/**/search-records.bin
 public/**/address-index.bin
 public/**/address-records.bin
+
+# Native runtime / Android build outputs
+native/build/
+android/**/build/
+android/.gradle/
+android/.kotlin/
+android/**/.cxx/
+android/local.properties
