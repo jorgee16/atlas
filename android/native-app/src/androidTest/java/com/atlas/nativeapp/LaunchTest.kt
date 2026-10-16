@@ -20,6 +20,7 @@ import androidx.test.rule.GrantPermissionRule
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
+import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.containsString
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -55,7 +56,7 @@ class LaunchTest {
             scenario.onActivity {
                 ViewModelProvider(it)[AtlasModel::class.java].mapSourceMode=MapSourcePolicy.AUTO
             }
-            onView(withContentDescription("Change map source")).perform(click())
+            onView(allOf(withContentDescription("Change map source"),isDisplayed())).perform(click())
             onView(withText(containsString("Online · use internet maps"))).perform(click())
             scenario.onActivity {
                 assertEquals(MapSourcePolicy.ONLINE,
