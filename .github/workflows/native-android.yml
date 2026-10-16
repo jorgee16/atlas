@@ -60,12 +60,7 @@ jobs:
           arch: x86_64
           profile: pixel_2
           disable-animations: true
-          script: |
-            adb emu geo fix -9.1393 38.7223
-            cd android && bash gradlew -PnativeOnly :native-app:connectedDebugAndroidTest --stacktrace
-      - name: Collect UI previews and test reports
-        if: always()
-        run: adb pull /sdcard/Android/data/com.atlas.nativeapp/files/ui-preview ui-preview || true
+          script: bash tools/native-android-smoke.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
