@@ -1,0 +1,165 @@
+name: Publish Portugal vector PMTiles to Cloudflare R2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [migration/native-core-kotlin]
+    paths:
+      - '.github/workflows/publish-portugal-pmtiles.yml'
+      - 'tools/region-builder/publish-portugal-map.mjs'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portugal-pmtiles-publish
+  cancel-in-progress: false
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: atlas-regions
+      PUBLIC_ORIGIN: https://pub-75539028275a4826aa383fdb89292ed7.r2.dev
+      RCLONE_CONFIG_ATLASR2_TYPE: s3
+      RCLONE_CONFIG_ATLASR2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_ATLASR2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_ATLASR2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: migration/native-core-kotlin
+          persist-credentials: true
+      - name: Require R2 upload credentials before expensive generation
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for key in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error title=Missing R2 credential::$key must be configured in GitHub Actions secrets"
+              missing=1
+            fi
+          done
+          [[ "$missing" -eq 0 ]] || exit 1
+          echo "RCLONE_CONFIG_ATLASR2_ENDPOINT=https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" >> "$GITHUB_ENV"
+      - name: Install vector tile builder and R2 client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq osmium-tool tilemaker rclone
+          tilemaker --help | head -35
+          osmium --version
+          rclone version | head -1
+          df -h .
+      - name: Verify live R2 catalog version before publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/live-catalog.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const live=JSON.parse(fs.readFileSync('work/live-catalog.json','utf8'));
+          const local=JSON.parse(fs.readFileSync('public/regions/catalog.json','utf8'));
+          const l=live.regions.find(r=>r.id==='portugal');
+          const p=local.regions.find(r=>r.id==='portugal');
+          if (!l||!p||l.version!==p.version||l.version!==8) {
+            throw new Error('Portugal catalogue changed: resolve versions before replacing remote catalog');
+          }
+          console.log('Portugal catalog version verified:',l.version);
+          JS
+      - name: Download OSM extracts for mainland, Madeira and Azores
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/source
+          for region in portugal madeira azores; do
+            url="https://download.geofabrik.de/europe/$region-latest.osm.pbf"
+            curl --fail --location --retry 5 --retry-delay 10 \
+              --connect-timeout 30 --speed-limit 1024 --speed-time 120 \
+              "$url" -o "work/source/$region.osm.pbf"
+            osmium fileinfo "work/source/$region.osm.pbf" | head -15
+          done
+          echo 'Combining the three non-contiguous Portuguese OSM extracts'
+          osmium merge work/source/portugal.osm.pbf \
+            work/source/madeira.osm.pbf work/source/azores.osm.pbf \
+            --overwrite -o work/portugal-complete.osm.pbf
+          test "$(stat -c%s work/portugal-complete.osm.pbf)" -gt 300000000
+          df -h .
+      - name: Generate OpenMapTiles compatible PMTiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/tilemaker-store work/output
+          # The approved existing vector profile includes buildings, roads,
+          # names, place labels, parks and land use; z14 overzooms on mobile.
+          tilemaker \
+            --input work/portugal-complete.osm.pbf \
+            --output work/output/map.pmtiles \
+            --config tools/region-builder/tile-profiles/openmaptiles-z16/config.json \
+            --process tools/region-builder/tile-profiles/openmaptiles-z16/process.lua \
+            --store work/tilemaker-store \
+            --bbox=-31.5,32.4,-6.0,42.3
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('work/output/map.pmtiles')
+          assert p.is_file() and p.stat().st_size > 1024*1024, 'PMTiles missing or too small'
+          with p.open('rb') as f:
+              header = f.read(8)
+          assert header[:7] == b'PMTiles' and header[7] == 3, 'Not a valid PMTiles v3 header'
+          print('Validated PMTiles v3:', p.stat().st_size, 'bytes')
+          PY
+          sha256sum work/output/map.pmtiles
+      - name: Upload map only, without touching routing or POI files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copyto work/output/map.pmtiles \
+            atlasr2:"$R2_BUCKET"/region-packages/portugal/map.pmtiles \
+            --s3-chunk-size 32M --s3-upload-concurrency 2 --retries 4 --stats 30s
+          local_bytes="$(stat -c%s work/output/map.pmtiles)"
+          remote_bytes="$(rclone lsl atlasr2:"$R2_BUCKET"/region-packages/portugal/map.pmtiles | awk '{print $1}')"
+          test "$local_bytes" = "$remote_bytes"
+          echo "Map uploaded and size verified: $remote_bytes bytes"
+      - name: Prepare new catalog with map and updated size/hash
+        run: node tools/region-builder/publish-portugal-map.mjs \
+          --map work/output/map.pmtiles \
+          --output work/new-catalog.json
+      - name: Commit updated website and Android catalogs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp work/new-catalog.json public/regions/catalog.json
+          cp work/new-catalog.json android/native-app/src/main/assets/regions.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/regions/catalog.json android/native-app/src/main/assets/regions.json
+          git commit -m "Register Portugal PMTiles v9 in Atlas region catalogs"
+          git push origin HEAD:migration/native-core-kotlin
+      - name: Publish catalog LAST to R2, after map upload and repository commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copyto work/new-catalog.json atlasr2:"$R2_BUCKET"/regions/catalog.json --retries 4
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/confirmed-catalog.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const catalog=JSON.parse(fs.readFileSync('work/confirmed-catalog.json','utf8'));
+          const pt=catalog.regions.find(r=>r.id==='portugal');
+          if(pt?.version!==9 || pt?.assets?.map!=='/region-packages/portugal/map.pmtiles') {
+            throw new Error('Remote catalog did not publish Portugal PMTiles v9');
+          }
+          console.log('Portugal v9 catalog confirmed in Cloudflare R2');
+          JS
+          {
+            echo '## Portugal PMTiles published'
+            echo
+            echo '- Map: `region-packages/portugal/map.pmtiles`'
+            echo '- Catalog: `regions/catalog.json`'
+            echo '- Routing and POI objects: unchanged'
+            echo '- Package version: 9'
+          } >> "$GITHUB_STEP_SUMMARY"
