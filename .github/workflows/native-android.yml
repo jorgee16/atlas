@@ -72,6 +72,10 @@ jobs:
           api-level: 35
           arch: x86_64
           profile: pixel_2
+          # Emulator 37.x defaults to deprecated swiftshader_indirect, which
+          # crashes at GL2Encoder::s_glDrawElements under MapLibre's renderer.
+          # Try Google's supported software GPU backend for headless CI.
+          emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: bash tools/native-android-smoke.sh
       - uses: actions/upload-artifact@v4
