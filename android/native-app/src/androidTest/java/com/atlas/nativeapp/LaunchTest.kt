@@ -32,11 +32,13 @@ class LaunchTest {
     )
     private fun capture(name: String) {
         SystemClock.sleep(800)
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val output = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-preview").apply { mkdirs() }
-        val bitmap=instrumentation.uiAutomation.takeScreenshot()
-        File(output, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }
-        bitmap.recycle()
+        val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
+        automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use { descriptor ->
+            java.io.FileInputStream(descriptor.fileDescriptor).use { it.readBytes() }
+        }
+        automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/$name.png").use { descriptor ->
+            java.io.FileInputStream(descriptor.fileDescriptor).use { it.readBytes() }
+        }
     }
     @Test fun jniMotionFilterRoundTrip() {
         NativeCore().use { core ->
@@ -69,6 +71,13 @@ class LaunchTest {
             capture("03-trips")
             onView(withContentDescription("Explore tab")).perform(click())
             SystemClock.sleep(450)
+            capture("04-explore-return")
+            scenario.onActivity { activity ->
+                val pageField=MainActivity::class.java.getDeclaredField("page").apply{isAccessible=true}
+                val topField=MainActivity::class.java.getDeclaredField("top").apply{isAccessible=true}
+                val top=topField.get(activity) as android.view.View
+                android.util.Log.e("ATLAS_UI_REVIEW","page=${pageField.get(activity)} tab=${ViewModelProvider(activity)[AtlasModel::class.java].updates.value.tab} top=${top.visibility} size=${top.width}x${top.height}")
+            }
             onView(withContentDescription("Offline regions")).perform(click())
             onView(withText("AVAILABLE REGIONS")).check(matches(isDisplayed()))
             capture("04-regions")
