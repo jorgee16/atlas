@@ -70,6 +70,12 @@ int main(int argc, char **argv) {
     auto a = session.update(drive->points.back(), 5, 0, 1, *drive);
     check(a.state == Guidance::State::arrived, "arrival");
     session.reset();
+    auto fresh = session.update(drive->points.front(), 5, 0, 10, *drive);
+    auto stale = session.update(drive->points.back(), 5, 0, 9, *drive);
+    check(stale.state == Guidance::State::reduced &&
+              std::abs(stale.position.along - fresh.position.along) < .01,
+          "stale fix cannot jump route progress");
+    session.reset();
     check(session.update({40.01, -8}, 100, 0, 1, *drive).state ==
               Guidance::State::reduced,
           "poor GPS does not reroute");
