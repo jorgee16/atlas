@@ -51,6 +51,23 @@ data class AtlasState(
     val journeyHistory: JSONArray = JSONArray()
 )
 
+/** End means discard the active itinerary; cancelling a calculation does not. */
+internal fun AtlasState.afterEndingNavigation(): AtlasState = copy(
+    destination = null,
+    origin = null,
+    route = null,
+    routeOptions = emptyList(),
+    guidance = null,
+    navigating = false,
+    arrived = false,
+    busy = false,
+    journeys = emptyList(),
+    journey = null,
+    journeyLeg = -1,
+    journeyPhase = "",
+    tab = "Explore"
+)
+
 class AtlasModel(application: Application) : AndroidViewModel(application) {
     val regions = RegionStore(application)
     private val worker = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -169,7 +186,27 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         if (state.value.route == null) calculate(true)
         else { lastSpoken = -1; state.update { it.copy(navigating = true, arrived = false) } }
     }
-    fun stop() { ++routeGeneration; core.cancel(); routeJob?.cancel(); progressJob?.cancel(); state.update { it.copy(navigating = false, guidance = null, busy = false) } }
+    private fun cancelCurrentRouteWork() {
+        ++routeGeneration
+        core.cancel()
+        routeJob?.cancel()
+        progressJob?.cancel()
+        routeJob = null
+        progressJob = null
+    }
+
+    /** Internal stop preserves a prepared route for preview/edit workflows. */
+    fun stop() {
+        cancelCurrentRouteWork()
+        state.update { it.copy(navigating = false, guidance = null, busy = false) }
+    }
+
+    /** Explicitly ending navigation removes its route and destination atomically. */
+    fun endNavigation() {
+        cancelCurrentRouteWork()
+        lastSpoken = -1
+        state.update { it.afterEndingNavigation() }
+    }
     // Visual extrapolation only; real GPS fixes still own routing decisions.
     fun predictSignalGap(now: Double) {
         state.update { s ->

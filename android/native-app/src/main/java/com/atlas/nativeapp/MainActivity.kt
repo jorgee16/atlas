@@ -149,7 +149,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             layoutChrome();insets
         }
         onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){override fun handleOnBackPressed(){
-            when { page!=null -> backPage(); fullMap -> {fullMap=false;rebuildChrome()}; selectedPlace!=null -> {selectedPlace=null;rebuildChrome()}; model.updates.value.navigating -> confirm("End this navigation?"){model.stop()}; model.updates.value.tab!="Explore" -> model.tab("Explore"); else -> {isEnabled=false;onBackPressedDispatcher.onBackPressed()} }
+            when { page!=null -> backPage(); fullMap -> {fullMap=false;rebuildChrome()}; selectedPlace!=null -> {selectedPlace=null;rebuildChrome()}; model.updates.value.navigating -> confirm("End this navigation?"){endNavigation()}; model.updates.value.tab!="Explore" -> model.tab("Explore"); else -> {isEnabled=false;onBackPressedDispatcher.onBackPressed()} }
         }})
         voice = TextToSpeech(this){code->voiceReady=code==TextToSpeech.SUCCESS;if(voiceReady)voice?.language=Locale.UK}
         model.speak={text->if(voiceReady)voice?.speak(text,TextToSpeech.QUEUE_FLUSH,null,"atlas-turn")}
@@ -327,7 +327,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         addView(ui.row().apply{
             addView(ui.chip("Overview","route"){atlasMap.overview()},LinearLayout.LayoutParams(0,-2,1f))
             addView(ui.iconButton(if(model.voice)"volume" else "mute","Toggle voice guidance"){model.voice=!model.voice},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)).apply{leftMargin=ui.dp(7)})
-            addView(ui.text("End",13f,ui.red,true).apply{gravity=Gravity.CENTER;setPadding(ui.dp(18),ui.dp(12),ui.dp(5),ui.dp(12));contentDescription="End navigation";setOnClickListener{confirm("End this navigation?"){model.stop()}}})
+            addView(ui.text("End",13f,ui.red,true).apply{gravity=Gravity.CENTER;setPadding(ui.dp(18),ui.dp(12),ui.dp(5),ui.dp(12));contentDescription="End navigation";setOnClickListener{confirm("End this navigation?"){endNavigation()}}})
         },linear(14))
     }
     private fun renderGuidance(s: AtlasState) {
@@ -350,6 +350,16 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         };guidance.addView(banner)
         val confidence=s.guidance?.optString("state")
         if(confidence=="reduced"||confidence=="checking")guidance.addView(ui.text(if(confidence=="reduced")"GPS accuracy reduced · Keeping your route" else "Checking your route…",12f,ui.ink,true).apply{background=ui.shape(ui.surface,14);setPadding(ui.dp(14),ui.dp(11),ui.dp(14),ui.dp(11))},linear(9))
+    }
+    private fun endNavigation() {
+        selectedPlace = null
+        previewCollapsed = false
+        fullMap = false
+        model.endNavigation()
+        // Restore normal exploration framing and prevent stale navigation
+        // camera state from persisting after leaving turn-by-turn guidance.
+        atlasMap.endNavigation()
+        rebuildChrome()
     }
     private fun startNavigation(){atlasMap.follow=true;previewCollapsed=false;selectedPlace=null;model.start()}
     private fun selectDestination(place:JSONObject){

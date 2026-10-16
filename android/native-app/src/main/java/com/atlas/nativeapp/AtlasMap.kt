@@ -109,11 +109,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             if (!onlineFailed && styleKey.startsWith("online")) { onlineFailed = true; styleKey = ""; loadStyle(current?.fix?.point ?: Coordinate(38.7223, -9.1393)) }
         }
     }
-    private fun loadStyle(at: Coordinate) {
+    /** Return true if a new style is loading; rendering must wait for its callback. */
+    private fun loadStyle(at: Coordinate): Boolean {
         val file = regions.map(at)
         val navigating = current?.navigating == true
         val key = (file?.absolutePath ?: "online") + ":$dark:$navigating:$onlineFailed"
-        if (key == styleKey) return
+        if (key == styleKey) return false
         styleKey = key
         // Annotation objects survive style switches in the legacy MapLibre API.
         // Remove them from the map, not just from our Kotlin references.
@@ -146,6 +147,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             route = null; destination = null; options = null; nearby = null
             current?.let { render(it) }
         }
+        return true
     }
 
     fun center(point: Coordinate, zoom: Double = 15.0) { map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat, point.lon), zoom)) }
@@ -200,6 +202,19 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         map?.animateCamera(CameraUpdateFactory.bearingTo(target), 300)
         if (follow && state != null) render(state)
     }
+    /** Drop navigation-only camera settings when End is confirmed. */
+    fun endNavigation() {
+        follow = true
+        lastFixTime = -1.0
+        lastCameraMoveMs = 0L
+        map?.setPadding(0, 0, 0, 0)
+        val target = current?.fix?.point ?: return
+        val bearing = if (headingUp) deviceHeading ?: 0.0 else 0.0
+        map?.animateCamera(CameraUpdateFactory.newCameraPosition(
+            CameraPosition.Builder().target(LatLng(target.lat, target.lon))
+                .zoom(15.0).bearing(bearing).tilt(0.0).build()), 400)
+    }
+
     fun overview() {
         if (geometry.size < 2) return
         follow = false
@@ -212,7 +227,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val ready = map ?: return
         if (ready.style == null) return
         val anchor = if(s.navigating && s.fix!=null)s.fix.point else centerPoint
-        loadStyle(anchor)
+        // Do not draw route annotations into the old style while the new
+        // exploration/navigation style is being installed asynchronously.
+        if (loadStyle(anchor)) return
         if (s.route !== route || s.routeOptions !== options) {
             lines.forEach { ready.removePolyline(it) }; lines.clear(); remaining = null; travelled = null; lastSegment = -1
             route = s.route; options = s.routeOptions
