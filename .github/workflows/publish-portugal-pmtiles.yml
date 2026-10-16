@@ -42,23 +42,19 @@ jobs:
           osmium --version
           rclone version | head -1
           df -h .
-      - name: Download OSM extracts for mainland, Madeira and Azores
+      - name: Download complete Geofabrik Portugal extract
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p work/source
-          for region in portugal madeira azores; do
-            url="https://download.geofabrik.de/europe/$region-latest.osm.pbf"
-            curl --fail --location --retry 5 --retry-delay 10 \
-              --connect-timeout 30 --speed-limit 1024 --speed-time 120 \
-              "$url" -o "work/source/$region.osm.pbf"
-            osmium fileinfo "work/source/$region.osm.pbf" | head -15
-          done
-          echo 'Combining the three non-contiguous Portuguese OSM extracts'
-          osmium merge work/source/portugal.osm.pbf \
-            work/source/madeira.osm.pbf work/source/azores.osm.pbf \
-            --overwrite -o work/portugal-complete.osm.pbf
-          test "$(stat -c%s work/portugal-complete.osm.pbf)" -gt 300000000
+          # The Geofabrik Portugal extract already includes the archipelagos:
+          # its PBF bounding box spans the Atlantic islands and mainland.
+          curl --fail --location --retry 5 --retry-delay 10 \
+            --connect-timeout 30 --speed-limit 1024 --speed-time 120 \
+            https://download.geofabrik.de/europe/portugal-latest.osm.pbf \
+            -o work/source/portugal.osm.pbf
+          osmium fileinfo work/source/portugal.osm.pbf
+          test "$(stat -c%s work/source/portugal.osm.pbf)" -gt 300000000
           df -h .
       - name: Generate OpenMapTiles compatible PMTiles
         shell: bash
@@ -68,7 +64,7 @@ jobs:
           # The approved existing vector profile includes buildings, roads,
           # names, place labels, parks and land use; z14 overzooms on mobile.
           tilemaker \
-            --input work/portugal-complete.osm.pbf \
+            --input work/source/portugal.osm.pbf \
             --output work/output/map.pmtiles \
             --config tools/region-builder/tile-profiles/openmaptiles-z16/config.json \
             --process tools/region-builder/tile-profiles/openmaptiles-z16/process.lua \
