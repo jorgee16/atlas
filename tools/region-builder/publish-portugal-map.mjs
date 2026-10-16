@@ -11,9 +11,10 @@ function value(flag) {
 }
 const path = value('--map');
 const target = value('--output');
+const sourceCatalog = value('--source');
 const [buffer, source, android] = await Promise.all([
   fs.readFile(path),
-  fs.readFile('public/regions/catalog.json', 'utf8'),
+  fs.readFile(sourceCatalog, 'utf8'),
   fs.readFile('android/native-app/src/main/assets/regions.json', 'utf8')
 ]);
 const catalog = JSON.parse(source);

@@ -1,0 +1,153 @@
+name: Publish already-generated Portugal PMTiles
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [migration/native-core-kotlin]
+    paths:
+      - '.github/workflows/publish-portugal-existing-pmtiles.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: portugal-pmtiles-publish
+  cancel-in-progress: false
+
+jobs:
+  publish-existing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: atlas-regions
+      RCLONE_CONFIG_ATLASR2_TYPE: s3
+      RCLONE_CONFIG_ATLASR2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_ATLASR2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_ATLASR2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: migration/native-core-kotlin
+          persist-credentials: true
+
+      - name: Validate Cloudflare R2 configuration before downloading
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error title=Missing R2 secret::$key is empty; check GitHub repository Actions secrets"
+              exit 1
+            fi
+          done
+          echo "RCLONE_CONFIG_ATLASR2_ENDPOINT=https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" >> "$GITHUB_ENV"
+
+      - name: Retrieve previously validated Portugal PMTiles artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Atlas-portugal-vector-pmtiles
+          run-id: 38975091297
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: work/output
+
+      - name: Verify original PMTiles size and SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(stat -c%s work/output/map.pmtiles)" -eq 343766325
+          printf '%s  %s\n' \
+            ba79df72201d0ad97bc1f2abbfc0470c02ee23f88c80d658166af428ca0127b4 \
+            work/output/map.pmtiles | sha256sum --check
+          python3 - <<'PY'
+          from pathlib import Path
+          with Path('work/output/map.pmtiles').open('rb') as f:
+              assert f.read(8) == b'PMTiles' + bytes([3])
+          print('Verified PMTiles v3 header.')
+          PY
+
+      - name: Install R2 upload client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq rclone
+
+      - name: Verify R2 catalog and prevent accidental overwrite
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/live-catalog.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const live=JSON.parse(fs.readFileSync('work/live-catalog.json','utf8'));
+          const local=JSON.parse(fs.readFileSync('public/regions/catalog.json','utf8'));
+          const pt=live.regions.find(r=>r.id==='portugal');
+          const baseline=local.regions.find(r=>r.id==='portugal');
+          if (pt?.version!==8 || baseline?.version!==8 || pt?.assets?.map ||
+              JSON.stringify(pt)!==JSON.stringify(baseline)) {
+            throw new Error('R2 Portugal v8 differs from the expected local catalog; refusing overwrite');
+          }
+          console.log('R2 catalog Portugal v8 verified, other regions will be preserved.');
+          JS
+
+      - name: Upload map to Portugal region package without changing routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copyto work/output/map.pmtiles \
+            atlasr2:"$R2_BUCKET"/region-packages/portugal/map.pmtiles \
+            --s3-chunk-size 32M --s3-upload-concurrency 2 \
+            --retries 4 --stats 30s
+          remote_bytes="$(rclone lsl atlasr2:"$R2_BUCKET"/region-packages/portugal/map.pmtiles | awk '{print $1}')"
+          test "$remote_bytes" = "343766325"
+          curl -fsSI --retry 3 --max-time 30 \
+            'https://pub-75539028275a4826aa383fdb89292ed7.r2.dev/region-packages/portugal/map.pmtiles'
+          echo 'Map uploaded to R2, confirmed full size and public HTTP 200.'
+
+      - name: Build Portugal v9 catalog preserving other regions
+        run: |
+          node tools/region-builder/publish-portugal-map.mjs \
+            --map work/output/map.pmtiles \
+            --source work/live-catalog.json \
+            --output work/new-catalog.json
+
+      - name: Commit v9 to website and Android app catalogs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp work/new-catalog.json public/regions/catalog.json
+          cp work/new-catalog.json android/native-app/src/main/assets/regions.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/regions/catalog.json android/native-app/src/main/assets/regions.json
+          git commit -m "Register published Portugal PMTiles v9"
+          git push origin HEAD:migration/native-core-kotlin
+
+      - name: Publish R2 catalog last and verify v9
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copyto work/new-catalog.json atlasr2:"$R2_BUCKET"/regions/catalog.json --retries 4
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/confirmed-catalog.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const saved=JSON.parse(fs.readFileSync('work/confirmed-catalog.json','utf8'));
+          const pt=saved.regions.find(r=>r.id==='portugal');
+          if(pt?.version!==9 ||
+             pt?.assets?.map!=='/region-packages/portugal/map.pmtiles' ||
+             !pt.package.files.some(x=>x.group==='map'&&x.sizeBytes===343766325)) {
+            throw new Error('Portugal map missing from published v9 catalog');
+          }
+          console.log('Portugal v9 R2 catalog confirmed.');
+          JS
+          {
+            echo '## Portugal offline PMTiles — published'
+            echo
+            echo '- 343766325-byte vector PMTiles verified by SHA-256.'
+            echo '- Map: region-packages/portugal/map.pmtiles'
+            echo '- Catalog: regions/catalog.json (Portugal v9)'
+            echo '- Existing routing, POIs, and other region entries preserved.'
+          } >> "$GITHUB_STEP_SUMMARY"
