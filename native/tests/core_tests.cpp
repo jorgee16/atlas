@@ -93,6 +93,13 @@ int main(int argc, char **argv) {
     auto stopped = motion.update({{40.0001, -8}, 5, 9, 3., 0.});
     check(!stopped.moving && stopped.speed == 0,
           "stationary jitter stops prediction");
+    MotionFilter noSpeed;
+    auto initial = noSpeed.update({{40, -8}, 5, 1, std::nullopt, std::nullopt});
+    check(!initial.moving && initial.speed == 0, "no initial movement");
+    auto estimated = noSpeed.update({{40.0001, -8}, 5, 4,
+                                     std::nullopt, std::nullopt});
+    check(estimated.moving && estimated.speed > 1,
+          "infer speed when provider has no speed");
     auto originalSeconds = drive->seconds;
     calibrateDriveEta(*drive, graph);
     check(drive->seconds > originalSeconds,
