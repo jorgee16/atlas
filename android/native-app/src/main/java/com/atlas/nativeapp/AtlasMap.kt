@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Gravity
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,6 +55,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var geometry = emptyList<LatLng>()
     private var lastSegment = -1
     private var lastFixTime = -1.0
+    private var lastCameraMoveMs = 0L
     init {
         MapLibre.getInstance(context)
         view = MapView(context)
@@ -183,10 +185,30 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             else { positionMarker?.position = position; positionMarker?.icon = positionIcon(heading) }
             if (fix.time != lastFixTime && follow) {
                 lastFixTime = fix.time
-                ready.setPadding(0, if (s.navigating && headingUp) (view.height * .25).toInt() else 0, 0, 0)
-                val zoom = if (!s.navigating) 15.0 else if (s.walking) 18.0 else (18.0 - ((fix.speed * 3.6 - 40) / 85).coerceIn(0.0, .8))
-                ready.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(position).zoom(zoom)
-                    .bearing(if (headingUp) heading else 0.0).tilt(if (s.navigating && !s.walking) 42.0 else 0.0).build()), 600)
+                val now = SystemClock.elapsedRealtime()
+                val camera = ready.cameraPosition
+                val latitudeMeters = (position.latitude - camera.target.latitude) * 111_320.0
+                val longitudeMeters = (position.longitude - camera.target.longitude) *
+                    111_320.0 * kotlin.math.cos(Math.toRadians(position.latitude))
+                val shiftMeters = kotlin.math.hypot(latitudeMeters, longitudeMeters)
+                val targetBearing = if (headingUp) heading else 0.0
+                val bearingChange = abs(((targetBearing - camera.bearing + 540.0) % 360.0) - 180.0)
+                val zoom = if (!s.navigating) 15.0 else if (s.walking) 18.0 else
+                    (18.0 - ((fix.speed * 3.6 - 40) / 85).coerceIn(0.0, .8))
+                val needsCamera = shiftMeters > (if (s.navigating) 5.0 else 10.0) ||
+                    bearingChange > 6.0 || abs(camera.zoom - zoom) > 0.15 ||
+                    abs(camera.tilt - if (s.navigating && !s.walking) 42.0 else 0.0) > 2.0
+                // GPS is typically sampled every second. Avoid cancelling an ongoing
+                // camera animation for jitter or duplicate fixes.
+                if (needsCamera && now - lastCameraMoveMs >= 850L) {
+                    lastCameraMoveMs = now
+                    ready.setPadding(0, if (s.navigating && headingUp) (view.height * .25).toInt() else 0, 0, 0)
+                    ready.animateCamera(CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.Builder().target(position).zoom(zoom)
+                            .bearing(targetBearing)
+                            .tilt(if (s.navigating && !s.walking) 42.0 else 0.0).build()
+                    ), 700)
+                }
             }
         }
     }
