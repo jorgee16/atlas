@@ -86,9 +86,15 @@ search packages must be rebuilt or updated; they are rejected, not misread.
 The bundled public region catalog is copied from `public/regions/catalog.json`.
 After changing the catalog, update the copy in the native module. Data is
 fetched from the same asset origin as the current native Capacitor app.
-Downloads are user initiated, streamed to staging, checked against declared
-sizes and SHA-256, and activated with a version marker only after success.
-Failed or cancelled downloads preserve the previously installed version.
+Downloads are user initiated, streamed to versioned staging, checked against
+declared sizes and SHA-256, and activated with a version marker only after
+success. Interrupted downloads retain the staged files and continue with
+HTTP Range on retry. Existing partial bytes are re-hashed before resumption;
+servers ignoring Range trigger a safe restart. Failed downloads preserve
+both already downloaded files and the previously installed region version.
+Staging is removed on explicit region deletion or after the successful update.
+Automated small-file Range tests exercise resume, restart and verified cache
+reuse; the 960 MB Portugal production download still needs real-device tests.
 
 MapLibre Native reads local `pmtiles://file://` vector sources. The
 Portugal v9 region catalog now includes the 343,766,325-byte PMTiles v3

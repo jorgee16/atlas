@@ -11,10 +11,8 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
-import java.security.MessageDigest
 
 fun JSONArray.objects(): List<JSONObject> = (0 until length()).map { getJSONObject(it) }
 fun JSONObject.coordinate() = Coordinate(getDouble("lat"), getDouble("lon"))
@@ -72,46 +70,40 @@ class RegionStore(context: Context) {
     suspend fun install(region: Region, progress: (Long, Long) -> Unit) = mutex.withLock {
         withContext(Dispatchers.IO) {
             if (installedVersion(region) == region.version) return@withContext
-            require(StatFs(root.path).availableBytes > region.bytes + 32L * 1024 * 1024) { "Not enough storage for ${region.name}" }
-            val staging = File(root, "${region.id}/staging-${region.version}")
-            staging.deleteRecursively(); staging.mkdirs()
+            // Do not delete the staging directory on retry/cancellation: a 960 MB
+            // region must continue from verified partial files after interruption.
+            val staging = File(root, "${region.id}/staging-${region.version}").apply { mkdirs() }
+            val stagedBytes = region.files.sumOf { entry ->
+                val partial = asset(staging, entry.getString("url"))
+                partial.length().coerceAtMost(entry.getLong("sizeBytes")).coerceAtLeast(0L)
+            }
+            val remainingBytes = (region.bytes - stagedBytes).coerceAtLeast(0L)
+            require(StatFs(root.path).availableBytes > remainingBytes + 32L * 1024 * 1024) {
+                "Not enough storage for ${region.name}"
+            }
             var downloaded = 0L
-            try {
-                for (entry in region.files) {
-                    currentCoroutineContext().ensureActive()
-                    val path = entry.getString("url")
-                    val target = asset(staging, path).apply { parentFile!!.mkdirs() }
-                    val digest = MessageDigest.getInstance("SHA-256")
-                    val connection = URL(ORIGIN + "/" + path.trimStart('/')).openConnection() as HttpURLConnection
-                    connection.connectTimeout = 20000; connection.readTimeout = 30000
-                    try {
-                        check(connection.responseCode in 200..299) { "Download failed: HTTP ${connection.responseCode}" }
-                        var count = 0L
-                        connection.inputStream.use { input -> target.outputStream().use { output ->
-                            val buffer = ByteArray(128 * 1024)
-                            while (true) {
-                                currentCoroutineContext().ensureActive()
-                                val n = input.read(buffer); if (n < 0) break
-                                output.write(buffer, 0, n); digest.update(buffer, 0, n); count += n; downloaded += n
-                                check(count <= entry.getLong("sizeBytes")) { "Package file exceeds declared size" }
-                                progress(downloaded, region.bytes)
-                            }
-                            output.fd.sync()
-                        } }
-                        check(count == entry.getLong("sizeBytes")) { "Package file size mismatch" }
-                        val hash = digest.digest().joinToString("") { "%02x".format(it) }
-                        check(hash.equals(entry.getString("sha256"), true)) { "Package checksum mismatch" }
-                    } finally { connection.disconnect() }
+            for (entry in region.files) {
+                currentCoroutineContext().ensureActive()
+                val path = entry.getString("url")
+                val target = asset(staging, path).apply { parentFile!!.mkdirs() }
+                RegionFileTransfer.fetch(
+                    URL(ORIGIN + "/" + path.trimStart('/')),
+                    target,
+                    entry.getLong("sizeBytes"),
+                    entry.getString("sha256")
+                ) { delta ->
+                    downloaded += delta
+                    progress(downloaded.coerceIn(0L, region.bytes), region.bytes)
                 }
-                val dest = File(root, "${region.id}/${region.version}")
-                // There is no current marker for this new version; a crash leftover is disposable.
-                dest.deleteRecursively()
-                check(staging.renameTo(dest)) { "Could not commit downloaded package" }
-                val next = File(root, "${region.id}.next")
-                next.outputStream().use { it.write(region.version.toString().toByteArray()); it.fd.sync() }
-                check(next.renameTo(marker(region))) { "Could not activate downloaded package" }
-                File(root, region.id).listFiles()?.filter { it != dest }?.forEach { it.deleteRecursively() }
-            } finally { staging.deleteRecursively() }
+            }
+            val dest = File(root, "${region.id}/${region.version}")
+            // The old installed marker stays untouched until every file checks out.
+            dest.deleteRecursively()
+            check(staging.renameTo(dest)) { "Could not commit downloaded package" }
+            val next = File(root, "${region.id}.next")
+            next.outputStream().use { it.write(region.version.toString().toByteArray()); it.fd.sync() }
+            check(next.renameTo(marker(region))) { "Could not activate downloaded package" }
+            File(root, region.id).listFiles()?.filter { it != dest }?.forEach { it.deleteRecursively() }
         }
     }
     suspend fun remove(region: Region) = mutex.withLock { withContext(Dispatchers.IO) {
