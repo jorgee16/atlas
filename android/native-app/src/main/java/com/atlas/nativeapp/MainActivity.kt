@@ -9,6 +9,11 @@ import android.graphics.Typeface
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.view.Surface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -47,7 +52,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MainActivity : ComponentActivity(), LocationListener {
+class MainActivity : ComponentActivity(), LocationListener, SensorEventListener {
     private val model: AtlasModel by viewModels()
     private lateinit var ui: AtlasUi
     private lateinit var atlasMap: AtlasMap
@@ -89,6 +94,10 @@ class MainActivity : ComponentActivity(), LocationListener {
     private var voiceReady = false
     private val landscape get() = resources.configuration.screenWidthDp > resources.configuration.screenHeightDp
     private val manager by lazy { getSystemService(LOCATION_SERVICE) as LocationManager }
+    private val sensors by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
+    private val rotationSensor by lazy { sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) }
+    private val rotationMatrix = FloatArray(9)
+    private val sensorAngles = FloatArray(3)
     private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startGps(); rebuildChrome() }
     private val importTrip = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) lifecycleScope.launch {
@@ -422,13 +431,40 @@ class MainActivity : ComponentActivity(), LocationListener {
         model.fix(Fix(Coordinate(location.latitude,location.longitude),if(location.hasAccuracy())location.accuracy.toDouble().coerceAtLeast(0.0)else 100.0,
             if(location.hasSpeed())location.speed.toDouble().coerceAtLeast(0.0)else 0.0,if(location.hasBearing())location.bearing.toDouble()else null,time))
     }
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+        SensorManager.getOrientation(rotationMatrix, sensorAngles)
+        // Orientation is relative to true device top; compensate screen rotation.
+        val rotation = display?.rotation ?: Surface.ROTATION_0
+        val screenOffset = when (rotation) {
+            Surface.ROTATION_90 -> 90.0
+            Surface.ROTATION_180 -> 180.0
+            Surface.ROTATION_270 -> 270.0
+            else -> 0.0
+        }
+        atlasMap.setDeviceHeading(Math.toDegrees(sensorAngles[0].toDouble()) + screenOffset)
+    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     override fun onProviderEnabled(provider:String){}
     override fun onProviderDisabled(provider:String){}
     @Deprecated("Deprecated in Android") override fun onStatusChanged(provider:String?,status:Int,extras:Bundle?){}
-    override fun onStart(){super.onStart();atlasMap.onStart();startGps();handler.post(gapTick)}
+    override fun onStart(){
+        super.onStart()
+        atlasMap.onStart()
+        startGps()
+        rotationSensor?.let { sensors.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+        handler.post(gapTick)
+    }
     override fun onResume(){super.onResume();atlasMap.onResume();rebuildChrome()}
     override fun onPause(){atlasMap.onPause();super.onPause()}
-    override fun onStop(){handler.removeCallbacks(gapTick);manager.removeUpdates(this);atlasMap.onStop();super.onStop()}
+    override fun onStop(){
+        handler.removeCallbacks(gapTick)
+        sensors.unregisterListener(this)
+        manager.removeUpdates(this)
+        atlasMap.onStop()
+        super.onStop()
+    }
     override fun onLowMemory(){super.onLowMemory();atlasMap.onLowMemory()}
     override fun onSaveInstanceState(outState:Bundle){super.onSaveInstanceState(outState);val map=Bundle();atlasMap.onSaveInstanceState(map);outState.putBundle("map",map);outState.putString("page",page);outState.putString("peek",selectedPlace?.toString())}
     override fun onDestroy(){handler.removeCallbacksAndMessages(null);model.speak=null;voice?.stop();voice?.shutdown();atlasMap.onDestroy();super.onDestroy()}

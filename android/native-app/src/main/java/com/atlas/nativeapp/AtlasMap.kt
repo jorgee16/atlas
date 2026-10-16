@@ -56,6 +56,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastSegment = -1
     private var lastFixTime = -1.0
     private var lastCameraMoveMs = 0L
+    private var lastCompassMoveMs = 0L
+    private var deviceHeading: Double? = null
+    private var lastTravelHeading: Double? = null
     init {
         MapLibre.getInstance(context)
         view = MapView(context)
@@ -112,6 +115,13 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val key = (file?.absolutePath ?: "online") + ":$dark:$navigating:$onlineFailed"
         if (key == styleKey) return
         styleKey = key
+        // Annotation objects survive style switches in the legacy MapLibre API.
+        // Remove them from the map, not just from our Kotlin references.
+        map?.clear()
+        lines.clear(); markers.clear(); places.clear()
+        positionMarker = null
+        remaining = null; travelled = null; geometry = emptyList()
+        route = null; destination = null; options = null; nearby = null
         val builder = when {
             file != null -> Style.Builder().fromJson(
                 AtlasCartography.offlineStyle("pmtiles://file://" + file.absolutePath, dark, navigating))
@@ -127,7 +137,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             if (file == null && !onlineFailed) {
                 AtlasCartography.enhanceOnline(style, dark, navigating)
             }
-            // Annotation handles belonged to the previous style: recreate once.
+            // A render may have happened while style loading; purge any
+            // transient annotations before restoring exactly one live cursor.
+            map?.clear()
             lines.clear(); markers.clear(); places.clear()
             remaining = null; travelled = null; geometry = emptyList()
             lastSegment = -1; positionMarker = null
@@ -137,8 +149,57 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
 
     fun center(point: Coordinate, zoom: Double = 15.0) { map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat, point.lon), zoom)) }
-    fun recenter() { follow = true; current?.fix?.point?.let { center(it, if (current?.navigating == true) 17.5 else 15.0) } }
-    fun compass() { headingUp = !headingUp; if (!headingUp) map?.animateCamera(CameraUpdateFactory.bearingTo(0.0)) }
+    fun recenter() {
+        follow = true
+        lastFixTime = -1.0
+        lastCameraMoveMs = 0L
+        current?.let { render(it) }
+    }
+
+    /** The phone azimuth is used when exploring or when GPS cannot infer travel. */
+    fun setDeviceHeading(heading: Double) {
+        if (!heading.isFinite()) return
+        val clean = AtlasHeading.normalize(heading)
+        val previous = deviceHeading
+        deviceHeading = if (previous == null) clean else
+            AtlasHeading.normalize(previous +
+                AtlasHeading.signedDelta(previous, clean) * 0.22)
+        val state = current ?: return
+        val fix = state.fix ?: return
+        if (!headingUp || !follow || (state.navigating && fix.speed >= 1.2)) return
+        val ready = map ?: return
+        val target = deviceHeading ?: return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastCompassMoveMs < 450L ||
+            AtlasHeading.angleDifference(ready.cameraPosition.bearing, target) < 7.0) return
+        lastCompassMoveMs = now
+        ready.animateCamera(CameraUpdateFactory.bearingTo(target), 320)
+        positionMarker?.icon = positionIcon(0.0)
+    }
+
+    private fun travelHeading(s: AtlasState, fix: Fix): Double {
+        val routeBearing = if (s.navigating) s.guidance?.optDouble("bearing")
+            ?.takeIf { it.isFinite() && it >= 0.0 } else null
+        val course = if (fix.speed >= 1.2)
+            (routeBearing ?: fix.bearing?.takeIf { it.isFinite() }) else null
+        if (course != null) lastTravelHeading = AtlasHeading.normalize(course)
+        return AtlasHeading.choose(s.navigating, fix.speed,
+            routeBearing, fix.bearing, deviceHeading, lastTravelHeading)
+    }
+
+    fun compass() {
+        headingUp = !headingUp
+        lastFixTime = -1.0
+        lastCameraMoveMs = 0L
+        val state = current
+        val fix = state?.fix
+        val target = if (headingUp && state != null && fix != null)
+            travelHeading(state, fix) else 0.0
+        // A compass tap must work immediately, even while GPS is stationary
+        // or following has been disabled by a map gesture.
+        map?.animateCamera(CameraUpdateFactory.bearingTo(target), 300)
+        if (follow && state != null) render(state)
+    }
     fun overview() {
         if (geometry.size < 2) return
         follow = false
@@ -186,10 +247,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         s.fix?.let { fix ->
             val display = if (s.navigating && s.guidance != null && s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point
-            val heading = s.guidance?.takeUnless { it.isNull("bearing") }?.optDouble("bearing") ?: fix.bearing ?: 0.0
+            val heading = travelHeading(s, fix)
             val position = LatLng(display.lat, display.lon)
-            if (positionMarker == null) positionMarker = ready.addMarker(MarkerOptions().position(position).icon(positionIcon(heading)).title("Your location"))
-            else { positionMarker?.position = position; positionMarker?.icon = positionIcon(heading) }
+            if (positionMarker == null) positionMarker = ready.addMarker(MarkerOptions().position(position).icon(positionIcon(AtlasHeading.normalize(heading - ready.cameraPosition.bearing))).title("Your location"))
+            else { positionMarker?.position = position; positionMarker?.icon = positionIcon(AtlasHeading.normalize(heading - ready.cameraPosition.bearing)) }
             val displayTime = s.guidance?.optDouble("predictedAt", fix.time) ?: fix.time
             if (displayTime != lastFixTime && follow) {
                 lastFixTime = displayTime
@@ -201,7 +262,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     111_320.0 * kotlin.math.cos(Math.toRadians(position.latitude))
                 val shiftMeters = kotlin.math.hypot(latitudeMeters, longitudeMeters)
                 val targetBearing = if (headingUp) heading else 0.0
-                val bearingChange = abs(((targetBearing - camera.bearing + 540.0) % 360.0) - 180.0)
+                val bearingChange = AtlasHeading.angleDifference(camera.bearing, targetBearing)
                 val zoom = if (!s.navigating) 15.0 else if (s.walking) 18.0 else
                     (18.0 - ((fix.speed * 3.6 - 40) / 85).coerceIn(0.0, .8))
                 val needsCamera = shiftMeters > (if (s.navigating) 5.0 else 10.0) ||
