@@ -15,4 +15,5 @@ for case in expected:
         assert actual['edgeIndexes'] == case['edges'], (case, actual)
         assert abs(actual['distanceMeters'] - case['distance']) < .01, (case, actual)
         assert abs(actual['durationSeconds'] - case['duration']) < .01, (case, actual)
+        assert [{k: m[k] for k in ['type', 'instruction', 'at']} for m in actual['maneuvers']] == case['maneuvers'], (case, actual)
 print(f'{len(expected)} native/JavaScript route comparisons passed')

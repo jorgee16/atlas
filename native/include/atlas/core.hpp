@@ -60,6 +60,7 @@ struct Maneuver {
   std::string type, instruction, road;
   double at = 0;
   std::size_t point = 0;
+  std::string turnLanes;
 };
 struct Route {
   std::vector<uint32_t> nodes, edges;

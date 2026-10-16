@@ -177,7 +177,13 @@ class MainActivity : ComponentActivity(), LocationListener {
                 (if (s.walking) "Walking" else "Driving") + (if (s.avoidTolls) " · Avoid tolls" else " · Estimated tolls €${"%.2f".format(route.getDouble("tollEuros"))}")
             val index = guidance?.optInt("maneuver") ?: 0
             val m = route.getJSONArray("maneuvers").optJSONObject(index)
-            banner.text = "${m?.optString("instruction") ?: "Continue"}\n${guidance?.optDouble("toManeuver")?.toInt() ?: 0} m"
+            val laneText = if ((guidance?.optDouble("toManeuver") ?: 1000.0) <= 350) {
+                val lanes = m?.optString("turnLanes").orEmpty().split('|')
+                if (lanes.size > 1) "\n" + lanes.joinToString("   ") { lane -> when {
+                    lane.contains("left") -> "←"; lane.contains("right") -> "→"; else -> "↑"
+                } } else ""
+            } else ""
+            banner.text = "${m?.optString("instruction") ?: "Continue"}\n${guidance?.optDouble("toManeuver")?.toInt() ?: 0} m$laneText"
         } else summary.text = (s.destination?.optString("name") ?: "Choose a destination") + "\n" +
             (if (s.walking) "Walking" else "Driving") + (if (s.origin == null) " · My location" else " · Fixed origin") + (if (s.avoidTolls) " · Avoid tolls" else "")
         if (s.navigating) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

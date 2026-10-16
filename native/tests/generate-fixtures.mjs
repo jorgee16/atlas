@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { createRoutingBuffers } from '../../tests/helpers/routing-fixture.js';
 import { normalizeRegion } from '../../tools/region-builder/normalizer.mjs';
 import { RoutingGraph } from '../../src/routing/routing-graph.js';
+import { ManeuverGenerator } from '../../src/routing/maneuver-generator.js';
 import { AStarRouter } from '../../src/routing/astar-router.js';
 const root=process.argv[2]??'/tmp/atlas-native-fixtures';
 await fs.mkdir(root,{recursive:true});
@@ -24,7 +25,7 @@ for(const variant of ['basic','restricted','only','toll','profile','uturn']) {
  const graph=new RoutingGraph(buffers);
  for(const profile of ['drive','walk'])for(const avoidTolls of [false,true]) {
   const r=await new AStarRouter(graph).route(0,2,{profile,avoidTolls,yieldEvery:0});
-  expected.push({directory,profile,avoidTolls,edges:r?.edgeIndexes??null,distance:r?.distanceMeters??null,duration:r?.durationSeconds??null});
+  expected.push({directory,profile,avoidTolls,edges:r?.edgeIndexes??null,distance:r?.distanceMeters??null,duration:r?.durationSeconds??null,maneuvers:r?new ManeuverGenerator().generate({graph,route:r}).map(m=>({type:m.type,instruction:m.instruction,at:m.routeDistanceMeters})):null});
  }
 }
 await fs.writeFile(`${root}/expected.json`,JSON.stringify(expected));

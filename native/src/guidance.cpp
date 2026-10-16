@@ -5,8 +5,23 @@
 namespace atlas {
 namespace {
 std::string label(const Road &road) {
+  if (!road.name.empty() && !road.ref.empty())
+    return road.name + " · " + road.ref;
   return road.name.empty() ? (road.ref.empty() ? "Unnamed road" : road.ref)
                            : road.name;
+}
+std::string ordinal(unsigned n) {
+  auto rem = n % 100;
+  std::string suffix = "th";
+  if (rem < 11 || rem > 13) {
+    if (n % 10 == 1)
+      suffix = "st";
+    else if (n % 10 == 2)
+      suffix = "nd";
+    else if (n % 10 == 3)
+      suffix = "rd";
+  }
+  return std::to_string(n) + suffix;
 }
 double legBearing(const Route &r, const Leg &leg, bool end) {
   if (end) {
@@ -24,73 +39,97 @@ double legBearing(const Route &r, const Leg &leg, bool end) {
 void makeManeuvers(Route &r, const Graph &g) {
   r.maneuvers.clear();
   if (r.legs.empty()) {
-    r.maneuvers.push_back({"arrive", "You have arrived", "", 0, 0});
+    r.maneuvers.push_back({"arrive", "You have arrived", "", 0, 0, {}});
     return;
   }
-  r.maneuvers.push_back({"depart", "Continue on " + label(r.legs.front().road),
-                         label(r.legs.front().road), 0, 0});
-  bool inRoundabout = false;
-  unsigned exits = 0;
-  for (std::size_t i = 0; i < r.legs.size(); ++i) {
-    auto &next = r.legs[i];
-    bool round = next.road.flags & 1;
-    if (round) {
-      if (!inRoundabout) {
-        inRoundabout = true;
-        exits = 0;
+  const char *cardinals[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+  auto firstBearing = legBearing(r, r.legs.front(), false);
+  auto direction = cardinals[int(std::floor((firstBearing + 22.5) / 45)) % 8];
+  r.maneuvers.push_back(
+      {"depart",
+       std::string("Head ") + direction + " on " + label(r.legs.front().road),
+       label(r.legs.front().road),
+       0,
+       0,
+       {}});
+  for (std::size_t i = 1; i < r.legs.size(); ++i) {
+    auto &incoming = r.legs[i - 1];
+    auto &outgoing = r.legs[i];
+    if (outgoing.road.flags & 1) {
+      if (incoming.road.flags & 1)
+        continue;
+      auto last = i;
+      while (last + 1 < r.legs.size() && (r.legs[last + 1].road.flags & 1))
+        ++last;
+      unsigned exits = 0;
+      for (auto legIndex = i; legIndex <= last; ++legIndex) {
+        auto &leg = r.legs[legIndex];
+        for (auto edgeIndex = g.offset(leg.to);
+             edgeIndex < g.offset(leg.to + 1); ++edgeIndex) {
+          auto edge = g.edge(edgeIndex);
+          if (!(g.roadFlags(edge.road) & 1) &&
+              g.turnAllowed(leg.to, g.edge(leg.edge).road, edge.road, -1,
+                            edge.target))
+            ++exits;
+        }
       }
-      bool exit = false;
-      for (auto j = g.offset(next.to); j < g.offset(next.to + 1); ++j) {
-        auto ed = g.edge(j);
-        if (ed.allows(Profile::drive) && ed.target != next.from &&
-            !(g.road(ed.road).flags & 1) &&
-            g.turnAllowed(next.to, g.edge(next.edge).road, ed.road, next.from,
-                          ed.target))
-          exit = true;
-      }
-      if (exit)
-        ++exits;
-      continue;
-    }
-    if (inRoundabout) {
+      exits = std::max(1u, exits);
+      const auto &exitRoad =
+          last + 1 < r.legs.size() ? r.legs[last + 1].road : outgoing.road;
       r.maneuvers.push_back({"roundabout",
-                             "Take exit " +
-                                 std::to_string(std::max(1u, exits)) +
-                                 " onto " + label(next.road),
-                             label(next.road), next.startDistance, next.first});
-      inRoundabout = false;
+                             "At the roundabout, take the " + ordinal(exits) +
+                                 " exit onto " + label(exitRoad),
+                             label(exitRoad),
+                             outgoing.startDistance,
+                             outgoing.first,
+                             {}});
+      i = last + 1;
       continue;
     }
-    if (!i)
+    bool same = g.edge(incoming.edge).road == g.edge(outgoing.edge).road ||
+                ((!incoming.road.name.empty() || !incoming.road.ref.empty()) &&
+                 normalize(incoming.road.name + " " + incoming.road.ref) ==
+                     normalize(outgoing.road.name + " " + outgoing.road.ref));
+    if ((incoming.road.flags & 1) || same)
       continue;
-    auto &prev = r.legs[i - 1];
-    double delta =
-        std::fmod(legBearing(r, next, false) - legBearing(r, prev, true) + 540,
-                  360) -
-        180;
-    bool same =
-        prev.road.name == next.road.name && prev.road.ref == next.road.ref;
-    if (std::abs(delta) < 18 && same)
-      continue;
-    std::string side = delta < 0 ? "left" : "right", type, action;
-    if (std::abs(delta) < 18) {
+    double angle = std::fmod(legBearing(r, outgoing, false) -
+                                 legBearing(r, incoming, true) + 540,
+                             360) -
+                   180;
+    auto magnitude = std::abs(angle);
+    std::string side = angle < 0 ? "left" : "right", type, verb;
+    if (magnitude < 18) {
       type = "continue";
-      action = "Continue";
-    } else if (std::abs(delta) < 45) {
+      verb = "Continue";
+    } else if (magnitude < 45) {
       type = "slight-" + side;
-      action = "Keep " + side;
-    } else if (std::abs(delta) < 135) {
+      verb = "Keep " + side;
+    } else if (magnitude < 135) {
       type = "turn-" + side;
-      action = "Turn " + side;
+      verb = "Turn " + side;
     } else {
       type = "sharp-" + side;
-      action = "Turn sharply " + side;
+      verb = "Make a sharp " + side;
     }
-    r.maneuvers.push_back({type, action + " onto " + label(next.road),
-                           label(next.road), next.startDistance, next.first});
+    if (type == "continue" && label(outgoing.road) == "Unnamed road")
+      continue;
+    std::string instruction;
+    if (outgoing.road.flags & 2) {
+      instruction = "Take the ramp";
+      if (type != "continue")
+        instruction += " on the " + side;
+      if (!outgoing.road.destination.empty())
+        instruction += " toward " + outgoing.road.destination;
+      else if (label(outgoing.road) != "Unnamed road")
+        instruction += " onto " + label(outgoing.road);
+    } else
+      instruction = verb + " onto " + label(outgoing.road);
+    r.maneuvers.push_back({type, instruction, label(outgoing.road),
+                           outgoing.startDistance, outgoing.first,
+                           incoming.road.lanes});
   }
   r.maneuvers.push_back(
-      {"arrive", "You have arrived", "", r.meters, r.points.size() - 1});
+      {"arrive", "You have arrived", "", r.meters, r.points.size() - 1, {}});
 }
 Progress progress(Point p, const Route &r) {
   if (!valid(p) || r.points.empty())
