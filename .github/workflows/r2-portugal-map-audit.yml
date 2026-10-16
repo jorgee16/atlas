@@ -1,0 +1,62 @@
+name: Cloudflare R2 Portugal map audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['migration/native-core-kotlin']
+    paths:
+      - '.github/workflows/r2-portugal-map-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  public-r2-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Probe published R2 object keys (read-only)
+        shell: bash
+        env:
+          ORIGIN: https://pub-75539028275a4826aa383fdb89292ed7.r2.dev
+        run: |
+          set -euo pipefail
+          echo '## Cloudflare R2 public-object audit' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This probes known public paths only; it cannot enumerate private bucket objects.' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo '| Key | HTTP | Content length | Content type |' >> "$GITHUB_STEP_SUMMARY"
+          echo '| --- | ---: | ---: | --- |' >> "$GITHUB_STEP_SUMMARY"
+
+          keys=(
+            'regions/catalog.json'
+            'region-packages/portugal/routing/manifest.json'
+            'region-packages/portugal/poi-index.json'
+            'regions/london/map.pmtiles'
+            'regions/portugal/map.pmtiles'
+            'region-packages/portugal/map.pmtiles'
+            'regions/portugal/mainland/map.pmtiles'
+            'region-packages/portugal/mainland/map.pmtiles'
+          )
+          for key in "${keys[@]}"; do
+            echo "::group::Checking $key"
+            headers="$(mktemp)"
+            status="$(curl --location --silent --show-error --head \
+              --retry 2 --retry-delay 1 --connect-timeout 12 --max-time 35 \
+              --output "$headers" --write-out '%{http_code}' \
+              "$ORIGIN/$key")" || status='connection-failed'
+            length="$(grep -i '^content-length:' "$headers" | tail -1 | tr -d '\r' | cut -d: -f2- | xargs || true)"
+            type="$(grep -i '^content-type:' "$headers" | tail -1 | tr -d '\r' | cut -d: -f2- | xargs || true)"
+            echo "$key => HTTP $status size=${length:-unknown} type=${type:-unknown}"
+            printf '| `%s` | %s | %s | %s |\n' "$key" "$status" "${length:-—}" "${type:-—}" >> "$GITHUB_STEP_SUMMARY"
+            if [[ "$status" == "200" && "$key" == *.pmtiles ]]; then
+              echo 'A PMTiles candidate responds successfully at this public URL.'
+              magic="$(curl --location --silent --show-error \
+                --range 0-6 --max-filesize 64 --connect-timeout 12 --max-time 25 \
+                "$ORIGIN/$key" 2>/dev/null || true)"
+              if [[ "$magic" == PMTiles* ]]; then echo 'Header magic: PMTiles (valid archive signature)'
+              else echo 'Header magic unverified (server may not honor range or returned non-PMTiles bytes)'; fi
+            fi
+            rm -f "$headers"
+            echo '::endgroup::'
+          done
