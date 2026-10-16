@@ -20,12 +20,16 @@ jobs:
           node-version: 22
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
+      - name: Generate search expectations from the original app
+        run: node native/tests/generate-search-fixtures.mjs /tmp/atlas-search-parity
       - name: Build native C++ core
         run: cmake -S native -B /tmp/atlas-build -DCMAKE_BUILD_TYPE=Debug && cmake --build /tmp/atlas-build -j2
       - name: Native tests
         run: ctest --test-dir /tmp/atlas-build --output-on-failure
       - name: Compare with JavaScript routing
         run: python3 native/tests/compare-routes.py /tmp/atlas-native-fixtures /tmp/atlas-build/atlas_route
+      - name: Compare with original POI and address search
+        run: python3 native/tests/compare-search.py /tmp/atlas-search-parity /tmp/atlas-build/atlas_search
   android:
     runs-on: ubuntu-latest
     steps:

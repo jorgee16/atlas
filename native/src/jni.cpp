@@ -1,8 +1,10 @@
 #include "atlas/core.hpp"
+#include <algorithm>
 #include <cmath>
 #include <jni.h>
 #include <map>
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 namespace {
@@ -127,8 +129,27 @@ Java_com_atlas_nativeapp_NativeCore_find(JNIEnv *env, jobject, jlong id,
         nearby ? e.search->nearby({lat, lon}, 3000, string(env, category))
                : e.search->query(q, {lat, lon});
     if (!nearby && e.addresses) {
-      auto more = e.addresses->query(q, {lat, lon}, 10);
+      auto more = e.addresses->addresses(q, {lat, lon}, 12);
       results.insert(results.end(), more.begin(), more.end());
+      std::stable_sort(results.begin(), results.end(),
+                       [](const atlas::Place &a, const atlas::Place &b) {
+                         return a.score != b.score ? a.score < b.score
+                                                   : a.meters < b.meters;
+                       });
+      std::set<std::string> seen;
+      results.erase(
+          std::remove_if(
+              results.begin(), results.end(),
+              [&](const atlas::Place &p) {
+                auto key =
+                    atlas::normalize(p.name()) + '|' +
+                    std::to_string(std::floor(p.point.lat * 10000 + .5)) + '|' +
+                    std::to_string(std::floor(p.point.lon * 10000 + .5));
+                return !seen.insert(key).second;
+              }),
+          results.end());
+      if (results.size() > 12)
+        results.resize(12);
     }
     return bytes(env, atlas::placesJson(results));
   } catch (const std::exception &e) {

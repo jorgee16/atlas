@@ -3,6 +3,8 @@
 #include <cctype>
 #include <cmath>
 #include <iterator>
+#include <map>
+#include <regex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -159,7 +161,19 @@ std::string Place::name() const {
 }
 bool Place::visitable() const {
   return fields[23] != "true" && fields[1] != "address" &&
-         fields[1] != "street" && fields[22].empty() && fields[3].empty();
+         fields[1] != "street" && normalize(fields[22]) != "administrative" &&
+         !std::set<std::string>{"administrative", "borough",       "city",
+                                "district",       "hamlet",        "locality",
+                                "municipality",   "neighbourhood", "parish",
+                                "quarter",        "region",        "suburb",
+                                "town",           "village"}
+              .count(normalize(fields[1])) &&
+         !std::set<std::string>{"administrative", "borough",       "city",
+                                "district",       "hamlet",        "locality",
+                                "municipality",   "neighbourhood", "parish",
+                                "quarter",        "region",        "suburb",
+                                "town",           "village"}
+              .count(normalize(fields[3]));
 }
 std::vector<uint32_t> Search::postings(std::string_view query,
                                        bool prefix) const {
@@ -211,32 +225,237 @@ std::vector<uint32_t> Search::postings(std::string_view query,
   out.erase(std::unique(out.begin(), out.end()), out.end());
   return out;
 }
+namespace {
+std::string foldSearch(std::string_view input) {
+  std::string result;
+  for (std::size_t i = 0; i < input.size();) {
+    unsigned char c = input[i];
+    if (c < 128) {
+      result += char(std::tolower(c));
+      ++i;
+      continue;
+    }
+    auto count = (c & 0xe0) == 0xc0   ? 2u
+                 : (c & 0xf0) == 0xe0 ? 3u
+                 : (c & 0xf8) == 0xf0 ? 4u
+                                      : 1u;
+    if (i + count > input.size())
+      throw std::runtime_error("Invalid UTF-8 query");
+    auto character = input.substr(i, count);
+    auto folded = normalize(character);
+    if (!folded.empty())
+      result += folded;
+    else if (!(count == 2 && c == 0xcc) && !(count == 2 && c == 0xcd))
+      result += character;
+    i += count;
+  }
+  auto begin = result.find_first_not_of(" \t\r\n");
+  if (begin == std::string::npos)
+    return {};
+  return result.substr(begin, result.find_last_not_of(" \t\r\n") - begin + 1);
+}
+std::vector<std::string> splitWords(const std::string &text) {
+  std::istringstream stream(text);
+  std::vector<std::string> out;
+  std::string word;
+  while (stream >> word)
+    out.push_back(word);
+  return out;
+}
+std::string compactPostcode(std::string_view value) {
+  std::string out;
+  for (unsigned char c : value)
+    if (c < 128 && std::isalnum(c))
+      out += char(std::tolower(c));
+  return out;
+}
+bool oneEdit(const std::string &a, const std::string &b) {
+  if (a.size() > b.size() + 1 || b.size() > a.size() + 1)
+    return false;
+  std::size_t i = 0, j = 0;
+  int edits = 0;
+  while (i < a.size() && j < b.size()) {
+    if (a[i] == b[j]) {
+      ++i;
+      ++j;
+      continue;
+    }
+    if (++edits > 1)
+      return false;
+    if (a.size() > b.size())
+      ++i;
+    else if (b.size() > a.size())
+      ++j;
+    else {
+      ++i;
+      ++j;
+    }
+  }
+  return true;
+}
+const std::set<std::string> geographic = {
+    "administrative", "borough",      "city",          "district", "hamlet",
+    "locality",       "municipality", "neighbourhood", "parish",   "quarter",
+    "region",         "suburb",       "town",          "village"};
+bool isGeographic(const Place &p) {
+  return geographic.count(normalize(p.fields[1])) ||
+         geographic.count(normalize(p.fields[3]));
+}
+std::string address(const Place &p) {
+  return p.fields[4] + (p.fields[4].empty() || p.fields[5].empty() ? "" : " ") +
+         p.fields[5];
+}
+std::string city(const Place &p) {
+  return !p.fields[7].empty()    ? p.fields[7]
+         : !p.fields[16].empty() ? p.fields[16]
+                                 : p.fields[17];
+}
+int quality(const Place &p) {
+  if (!isGeographic(p))
+    return address(p).empty() ? 0 : -1;
+  const auto type = normalize(p.fields[1]);
+  return (geographic.count(normalize(p.fields[3])) ? 0 : 10) +
+         ((type == "administrative" || type == "district" ||
+           type == "municipality" || type == "parish" || type == "region")
+              ? 5
+              : 0);
+}
+bool sameLocation(const Place &a, const Place &b) {
+  if (foldSearch(a.name()) != foldSearch(b.name()))
+    return false;
+  if (a.id == b.id)
+    return true;
+  if (isGeographic(a) != isGeographic(b))
+    return false;
+  if (isGeographic(a)) {
+    auto ac = normalize(city(a)), bc = normalize(city(b));
+    return (ac.empty() || bc.empty() || ac == bc) &&
+           distance(a.point, b.point) <= 3000;
+  }
+  auto ak = normalize(a.fields[2].empty() ? a.fields[1] : a.fields[2]),
+       bk = normalize(b.fields[2].empty() ? b.fields[1] : b.fields[2]);
+  if (!ak.empty() && !bk.empty() && ak != bk)
+    return false;
+  auto aa = normalize(address(a)), ba = normalize(address(b));
+  return (aa.empty() || ba.empty() || aa == ba) &&
+         distance(a.point, b.point) <= 40;
+}
+std::optional<double> matchScore(const Place &p, const std::string &query,
+                                 const std::vector<std::string> &tokens,
+                                 bool postcodeQuery) {
+  static const std::map<std::string, std::string> aliases = {
+      {"cafe", "cafe coffee espresso"},
+      {"restaurant", "restaurant food eat dinner lunch"},
+      {"pub", "pub bar drinks nightlife"},
+      {"hotel", "hotel accommodation lodging stay"},
+      {"museum", "museum culture attraction"},
+      {"hospital", "hospital health emergency"},
+      {"pharmacy", "pharmacy chemist medicine"},
+      {"fuel", "fuel petrol gas station"},
+      {"parking", "parking car park"},
+      {"viewpoint", "viewpoint miradouro vista attraction"}};
+  std::vector<std::string> fields(5);
+  fields[0] = foldSearch(p.fields[0]);
+  for (int i = 8; i <= 15; ++i)
+    fields[1] += " " + foldSearch(p.fields[i]);
+  for (int i : {3, 7, 16, 17})
+    fields[2] += " " + foldSearch(p.fields[i]);
+  for (int i : {4, 5, 6, 7})
+    fields[3] += " " + foldSearch(p.fields[i]);
+  for (int i : {2, 1, 3})
+    fields[4] += " " + foldSearch(p.fields[i]);
+  for (int i : {2, 1}) {
+    auto it = aliases.find(p.fields[i]);
+    if (it != aliases.end())
+      fields[4] += " " + it->second;
+  }
+  std::vector<std::vector<std::string>> words;
+  for (auto &f : fields)
+    words.push_back(splitWords(f));
+  auto code = compactPostcode(p.fields[6]), wanted = compactPostcode(query);
+  bool exactPost = postcodeQuery && !code.empty() && code == wanted,
+       prefixPost = postcodeQuery && !code.empty() &&
+                    code.compare(0, wanted.size(), wanted) == 0;
+  std::smatch parsed;
+  bool exactAddress = false, prefixAddress = false, partialAddress = false;
+  if (std::regex_match(
+          query, parsed,
+          std::regex("^([0-9]+[a-z]?(?:[-/][0-9]+[a-z]?)?)\\s+(.+)$"))) {
+    auto street = foldSearch(p.fields[5]);
+    bool house = foldSearch(p.fields[4]) == parsed[1].str();
+    auto wantedStreet = parsed[2].str();
+    exactAddress = house && street == wantedStreet;
+    prefixAddress =
+        house && street.compare(0, wantedStreet.size(), wantedStreet) == 0;
+    partialAddress = house && street.find(wantedStreet) != std::string::npos;
+  }
+  double score = 0;
+  for (auto &token : tokens) {
+    int best = 100000;
+    for (std::size_t f = 0; f < words.size(); ++f)
+      for (auto &word : words[f]) {
+        int match = word == token                               ? 0
+                    : word.compare(0, token.size(), token) == 0 ? 1
+                    : word.find(token) != std::string::npos     ? 2
+                    : token.size() >= 4 && oneEdit(token, word) ? 3
+                                                                : 10000;
+        best = std::min(best, match * 10 + int(f));
+      }
+    if (best >= 100000) {
+      if (exactPost || prefixPost || exactAddress || prefixAddress ||
+          partialAddress)
+        continue;
+      return std::nullopt;
+    }
+    score += best;
+  }
+  auto name = foldSearch(p.fields[0]);
+  score -= name == query                               ? 40
+           : name.compare(0, query.size(), query) == 0 ? 20
+           : name.find(query) != std::string::npos     ? 8
+                                                       : 0;
+  score -= exactPost ? 120 : prefixPost ? 70 : 0;
+  score -= exactAddress ? 140 : prefixAddress ? 110 : partialAddress ? 80 : 0;
+  return score;
+}
+} // namespace
 std::vector<Place> Search::query(std::string_view input, Point anchor,
                                  std::size_t limit) const {
   if (!valid(anchor) || limit > 1000)
     throw std::invalid_argument("Invalid search options");
-  auto text = normalize(input);
+  auto text = foldSearch(input);
   if (text.size() < 2 || text.size() > 256 || !limit)
     return {};
-  std::istringstream stream(text);
-  std::vector<std::string> words;
-  std::string w;
-  static const std::set<std::string> stop = {"a",  "as",  "da", "das", "de",
-                                             "do", "dos", "e",  "of",  "the"};
-  while (stream >> w)
-    if (!stop.count(w))
-      words.push_back(w);
-  if (words.empty())
-    return {};
+  auto compact = compactPostcode(input);
+  const bool postcode =
+      std::regex_match(
+          compact, std::regex("[a-z]{1,2}[0-9][a-z0-9]?(?:[0-9][a-z]{2})?")) ||
+      std::regex_match(std::string(input),
+                       std::regex("[0-9]{4}(?:-?[0-9]{0,3})?"));
+  auto words = postcode ? std::vector<std::string>{compact} : splitWords(text);
   std::vector<std::vector<uint32_t>> lists;
-  for (std::size_t i = 0; i < words.size(); ++i) {
-    auto ids = postings(words[i], i + 1 == words.size());
-    if (ids.empty())
-      return {};
-    lists.push_back(std::move(ids));
+  for (auto &word : words) {
+    auto ids = postings(word, false);
+    if (!ids.empty())
+      lists.push_back(std::move(ids));
   }
+  // Preserve useful prefix lookup when the package has no exact query token.
+  if (lists.empty() && !words.empty()) {
+    auto ids = postings(words.back(), true);
+    if (!ids.empty())
+      lists.push_back(std::move(ids));
+  }
+  if (lists.empty())
+    return {};
   std::sort(lists.begin(), lists.end(),
             [](const auto &a, const auto &b) { return a.size() < b.size(); });
+  auto useful = std::max<std::size_t>(100000, lists[0].size() * 100);
+  lists.erase(
+      std::remove_if(lists.begin() + 1, lists.end(),
+                     [&](const auto &list) { return list.size() > useful; }),
+      lists.end());
+  if (lists.size() > 4)
+    lists.resize(4);
   auto ids = std::move(lists[0]);
   for (std::size_t i = 1; i < lists.size(); ++i) {
     std::vector<uint32_t> next;
@@ -244,41 +463,165 @@ std::vector<Place> Search::query(std::string_view input, Point anchor,
                           lists[i].end(), std::back_inserter(next));
     ids = std::move(next);
   }
-  std::vector<Place> out;
-  auto less = [](const Place &a, const Place &b) {
-    return a.score != b.score ? a.score < b.score : a.meters < b.meters;
-  };
+  std::vector<Place> matches;
   for (auto id : ids) {
     auto p = record(id);
-    std::string hay;
-    for (auto &f : p.fields)
-      hay += ' ' + normalize(f);
+    auto score = matchScore(p, text, words, postcode);
+    if (!score || p.fields[0].empty())
+      continue;
+    p.score = *score;
+    p.meters = distance(anchor, p.point);
+    matches.push_back(std::move(p));
+  }
+  std::stable_sort(matches.begin(), matches.end(),
+                   [](const Place &a, const Place &b) {
+                     if (a.score != b.score)
+                       return a.score < b.score;
+                     if (a.meters != b.meters)
+                       return a.meters < b.meters;
+                     return a.name() < b.name();
+                   });
+  std::vector<Place> unique;
+  for (auto &candidate : matches) {
+    auto existing =
+        std::find_if(unique.begin(), unique.end(), [&](const Place &p) {
+          return sameLocation(p, candidate);
+        });
+    if (existing != unique.end()) {
+      if (quality(candidate) < quality(*existing)) {
+        auto score = std::min(existing->score, candidate.score);
+        *existing = std::move(candidate);
+        existing->score = score;
+      }
+    } else if (unique.size() < limit)
+      unique.push_back(std::move(candidate));
+  }
+  return unique;
+}
+std::vector<Place> Search::addresses(std::string_view input, Point anchor,
+                                     std::size_t limit) const {
+  if (!valid(anchor) || limit > 1000)
+    throw std::invalid_argument("Invalid address options");
+  auto text = normalize(input), compact = compactPostcode(input);
+  auto raw = splitWords(text);
+  if (text.empty() || !limit)
+    return {};
+  std::string house, postcode;
+  for (auto &word : raw) {
+    if (house.empty() &&
+        std::regex_match(word, std::regex("[0-9]+[a-z]?(?:[-/][0-9]+[a-z]?)?")))
+      house = word;
+    if (postcode.empty() &&
+        std::regex_match(word, std::regex("[0-9]{4}-?[0-9]{0,3}")))
+      postcode = compactPostcode(word);
+  }
+  if (postcode.empty() &&
+      std::regex_match(compact,
+                       std::regex("[a-z]{1,2}[0-9][a-z0-9]?[0-9][a-z]{2}")))
+    postcode = compact;
+  std::vector<std::string> tokens;
+  auto add = [&](const std::string &w) {
+    if ((w.size() >= 2 ||
+         (!w.empty() && std::isdigit(static_cast<unsigned char>(w[0])))) &&
+        std::find(tokens.begin(), tokens.end(), w) == tokens.end())
+      tokens.push_back(w);
+  };
+  if (!house.empty())
+    add(house);
+  for (auto &word : raw)
+    if (word != house && word != postcode)
+      add(word);
+  if (!postcode.empty())
+    add(postcode);
+  static const std::set<std::string> generic = {
+      "a",     "as",    "da",        "das",    "de",      "do",
+      "dos",   "e",     "of",        "the",    "alameda", "avenida",
+      "av",    "beco",  "boulevard", "blvd",   "calcada", "close",
+      "court", "ct",    "drive",     "dr",     "estrada", "lane",
+      "ln",    "largo", "place",     "pl",     "praca",   "praceta",
+      "road",  "rd",    "rua",       "street", "st",      "travessa",
+      "way"};
+  std::vector<std::vector<uint32_t>> lists;
+  for (auto &word : tokens) {
+    if (!std::isdigit(static_cast<unsigned char>(word[0])) &&
+        (word.size() < 3 || generic.count(word)))
+      continue;
+    auto ids = postings(word, false);
+    if (ids.empty())
+      return {};
+    lists.push_back(std::move(ids));
+  }
+  if (lists.empty())
+    return {};
+  std::sort(lists.begin(), lists.end(),
+            [](const auto &a, const auto &b) { return a.size() < b.size(); });
+  if (lists.size() > 4)
+    lists.resize(4);
+  auto ids = std::move(lists[0]);
+  for (std::size_t i = 1; i < lists.size(); ++i) {
+    std::vector<uint32_t> next;
+    std::set_intersection(ids.begin(), ids.end(), lists[i].begin(),
+                          lists[i].end(), std::back_inserter(next));
+    ids = std::move(next);
+  }
+  std::string streetQuery;
+  for (auto &word : tokens)
+    if (word != house && word != postcode) {
+      if (!streetQuery.empty())
+        streetQuery += ' ';
+      streetQuery += word;
+    }
+  std::vector<Place> matches;
+  std::set<std::string> seen;
+  for (auto id : ids) {
+    auto p = record(id);
+    auto kind = normalize(p.fields[1].empty() ? p.fields[2] : p.fields[1]);
+    auto name = normalize(p.fields[0]);
+    auto street = normalize(p.fields[5].empty() ? p.fields[0] : p.fields[5]);
+    auto number = normalize(p.fields[4]);
+    auto code = compactPostcode(p.fields[6]);
+    auto context = normalize(city(p));
+    auto hay = name + ' ' + street + ' ' + number + ' ' + code + ' ' + context;
     bool all = true;
-    for (auto &word : words)
+    for (auto &word : tokens)
       if (hay.find(word) == std::string::npos) {
         all = false;
         break;
       }
     if (!all)
       continue;
-    auto name = normalize(p.name());
-    p.score = name == text                              ? 0
-              : name.compare(0, text.size(), text) == 0 ? 1
-              : name.find(text) != std::string::npos    ? 2
-                                                        : 3;
+    double score = kind == "address" ? 0 : 18;
+    if (!house.empty())
+      score += number == house ? -45 : kind == "address" ? 30 : 0;
+    if (!postcode.empty())
+      score += code == postcode ? -35 : !code.empty() ? 20 : 0;
+    if (!streetQuery.empty())
+      score -= street == streetQuery || name == streetQuery ? 30
+               : street.compare(0, streetQuery.size(), streetQuery) == 0 ||
+                       name.compare(0, streetQuery.size(), streetQuery) == 0
+                   ? 18
+               : street.find(streetQuery) != std::string::npos ||
+                       name.find(streetQuery) != std::string::npos
+                   ? 8
+                   : 0;
     p.meters = distance(anchor, p.point);
-    out.push_back(std::move(p));
-    if (out.size() > limit * 2) {
-      std::partial_sort(out.begin(), out.begin() + std::ptrdiff_t(limit),
-                        out.end(), less);
-      out.resize(limit);
-    }
+    p.score = score + std::min(p.meters / 50000, 8.0);
+    auto key = normalize(p.name()) + '|' + normalize(p.fields[7]) + '|' +
+               std::to_string(std::floor(p.point.lat * 1000 + .5)) + '|' +
+               std::to_string(std::floor(p.point.lon * 1000 + .5));
+    if (!seen.insert(key).second)
+      continue;
+    matches.push_back(std::move(p));
   }
-  std::sort(out.begin(), out.end(), less);
-  if (out.size() > limit)
-    out.resize(limit);
-  return out;
+  std::stable_sort(
+      matches.begin(), matches.end(), [](const Place &a, const Place &b) {
+        return a.score != b.score ? a.score < b.score : a.meters < b.meters;
+      });
+  if (matches.size() > limit)
+    matches.resize(limit);
+  return matches;
 }
+
 std::vector<Place> Search::nearby(Point anchor, double radius,
                                   std::string_view category,
                                   std::size_t limit) const {
@@ -333,7 +676,11 @@ std::string placesJson(const std::vector<Place> &places) {
     auto &p = places[i];
     s << "{\"id\":" << jsonString(p.id) << ",\"name\":" << jsonString(p.name())
       << ",\"lat\":" << p.point.lat << ",\"lon\":" << p.point.lon
-      << ",\"distanceMeters\":" << p.meters
+      << ",\"distanceMeters\":" << p.meters << ",\"matchScore\":" << p.score
+      << ",\"address\":" << jsonString(address(p))
+      << ",\"city\":" << jsonString(city(p))
+      << ",\"amenity\":" << jsonString(p.fields[2])
+      << ",\"place\":" << jsonString(p.fields[3])
       << ",\"type\":" << jsonString(p.fields[1]) << '}';
   }
   return s.str() + ']';

@@ -165,6 +165,8 @@ public:
   Place record(uint32_t id) const;
   std::vector<Place> query(std::string_view text, Point anchor,
                            std::size_t limit = 20) const;
+  std::vector<Place> addresses(std::string_view text, Point anchor,
+                               std::size_t limit = 12) const;
   std::vector<Place> nearby(Point anchor, double radius,
                             std::string_view category,
                             std::size_t limit = 30) const;
