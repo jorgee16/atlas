@@ -21,6 +21,8 @@ Motion MotionFilter::update(const MotionFix &fix) {
   double providerSpeed =
       fix.speed && std::isfinite(*fix.speed) && *fix.speed >= 0 ? *fix.speed
                                                                 : 0;
+  double inferredSpeed = 0;
+  bool inferredSpeedValid = false;
   if (!anchor_)
     anchor_ = fix;
   else {
@@ -44,6 +46,8 @@ Motion MotionFilter::update(const MotionFix &fix) {
                 ? normalizeHeading(*heading_ + delta(*heading_, course) * .35)
                 : course;
         moving_ = true;
+        inferredSpeed = observed;
+        inferredSpeedValid = true;
         lastMove_ = fix.timestamp;
         anchor_ = fix;
       } else if (moving_ && lastMove_ && fix.timestamp - *lastMove_ >= 4) {
@@ -53,8 +57,14 @@ Motion MotionFilter::update(const MotionFix &fix) {
       }
     }
   }
-  speed_ = moving_ ? (speed_ > 0 ? speed_ * .65 + providerSpeed * .35
-                                 : providerSpeed)
+  // Location providers may omit speed (e.g. coarse fixes or GPS recovery).
+  // Fall back to displacement-derived speed only after motion was confirmed.
+  const double measuredSpeed = fix.speed && std::isfinite(*fix.speed) &&
+                                       *fix.speed >= 0
+                                   ? providerSpeed
+                                   : (inferredSpeedValid ? inferredSpeed : speed_);
+  speed_ = moving_ ? (speed_ > 0 ? speed_ * .65 + measuredSpeed * .35
+                                 : measuredSpeed)
                    : 0;
   auto heading = heading_;
   if (!heading && fix.heading && std::isfinite(*fix.heading))
