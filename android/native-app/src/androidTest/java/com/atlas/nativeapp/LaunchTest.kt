@@ -20,6 +20,8 @@ import androidx.test.rule.GrantPermissionRule
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
+import org.hamcrest.Matchers.containsString
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +50,26 @@ class LaunchTest {
             org.junit.Assert.assertEquals(3.0, second.speed, 0.001)
         }
     }
+    @Test fun onlineMapModeIsSelectableAndPersistsThroughRecreation() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity {
+                ViewModelProvider(it)[AtlasModel::class.java].mapSourceMode=MapSourcePolicy.AUTO
+            }
+            onView(withContentDescription("Change map source")).perform(click())
+            onView(withText(containsString("Online · use internet maps"))).perform(click())
+            scenario.onActivity {
+                assertEquals(MapSourcePolicy.ONLINE,
+                    ViewModelProvider(it)[AtlasModel::class.java].mapSourceMode)
+            }
+            scenario.recreate()
+            scenario.onActivity {
+                val model=ViewModelProvider(it)[AtlasModel::class.java]
+                assertEquals(MapSourcePolicy.ONLINE,model.mapSourceMode)
+                model.mapSourceMode=MapSourcePolicy.AUTO
+            }
+        }
+    }
+
     @Test fun nativeScreensAndRecreation() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             SystemClock.sleep(3500)

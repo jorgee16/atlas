@@ -55,7 +55,7 @@ jobs:
           node tools/generate-native-transit-fixtures.mjs
       - name: Build Kotlin and JNI APK
         working-directory: android
-        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:lintDebug :native-app:assembleDebugAndroidTest --stacktrace
+        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:testDebugUnitTest :native-app:lintDebug :native-app:assembleDebugAndroidTest --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: Atlas-native-debug-apk

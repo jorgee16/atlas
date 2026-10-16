@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private lateinit var snackbar: TextView
     private lateinit var credit: TextView
     private lateinit var mapSourceBadge: TextView
+    private var topSourceBadge: TextView? = null
     private var page: String? = null
     private var pageKey: List<Any?>? = null
     private var lastChrome: List<Any?>? = null
@@ -144,7 +145,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(24).toFloat();visibility=View.GONE }
         root.addView(snackbar,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
         pages = AtlasPages(this,ui,model,::selectDestination,::openPage,{importTrip.launch(arrayOf("application/json","text/*"))}, { theme -> model.theme=theme; recreate() },::confirm,{atlasMap.center(it)})
-        atlasMap.onMapSourceChanged = { rebuildChrome() }
+        // A map style callback must not rebuild interactive chrome: doing so
+        // can detach a search button between Android touch down and click.
+        atlasMap.onMapSourceChanged = { updateMapSourceIndicators() }
         atlasMap.onPan = { if(model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true}; rebuildChrome() }
         atlasMap.onPoint = { point ->
             if(pickingOrigin){pickingOrigin=false;model.origin(point);model.status("Starting point set");model.updates.value.destination?.let{model.calculate()}}
@@ -196,12 +199,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         atlasMap.sourceMode = model.mapSourceMode
         atlasMap.render(state)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
-        mapSourceBadge.text=when(atlasMap.activeMapSource) {
-            MapSourcePolicy.OFFLINE -> "MAP · OFFLINE"
-            MapSourcePolicy.ONLINE -> "MAP · ONLINE"
-            MapSourcePolicy.UNAVAILABLE -> "OFFLINE MAP UNAVAILABLE"
-            else -> "MAP · LOADING"
-        }
+        updateMapSourceIndicators()
         val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
         if(chrome!=lastChrome){lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
         if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
@@ -211,7 +209,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     }
     private val hideNotice=Runnable{snackbar.visibility=View.GONE}
     private fun renderTop(s: AtlasState) {
-        top.removeAllViews();top.visibility=if(s.navigating||fullMap||page!=null)View.GONE else View.VISIBLE
+        top.removeAllViews();topSourceBadge=null;top.visibility=if(s.navigating||fullMap||page!=null)View.GONE else View.VISIBLE
         val header=ui.row()
         val brand=ui.row().apply {background=ui.shape(ui.surface,17);setPadding(ui.dp(13),ui.dp(11),ui.dp(14),ui.dp(11));elevation=ui.dp(3).toFloat();addView(ui.icon("explore",ui.blue,23));addView(ui.text("ATLAS",16f,bold=true).apply{letterSpacing=.14f},LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(9)});contentDescription="Atlas"}
         header.addView(brand)
@@ -238,10 +236,12 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             (if(s.downloading!=null)" · Downloading ${s.downloadPercent}%"
              else if(region!=null&&atlasMap.activeMapSource==MapSourcePolicy.ONLINE)" · Offline routes"
              else "")
-        info.addView(ui.badge(label,atlasMap.activeMapSource==MapSourcePolicy.OFFLINE).apply{
+        val badge=ui.badge(label,atlasMap.activeMapSource==MapSourcePolicy.OFFLINE).apply{
             contentDescription="Change map source"
             setOnClickListener{showMapSourceOptions()}
-        })
+        }
+        topSourceBadge=badge
+        info.addView(badge)
         if(!hasLocation())info.addView(ui.chip("Enable location","locate"){enableLocation()},LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(9)})
         top.addView(info)
     }
@@ -399,6 +399,24 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         showChoices("Starting point",listOf("My location" to "locate","Search for a place" to "search","Choose on the map" to "map")){index->when(index){
             0->{model.origin(null);model.calculate()};1->{searchTarget="origin";openPage("search")};2->{pickingOrigin=true;model.tab("Explore");closePage();model.status("Press and hold the starting point on the map")}
         }}
+    }
+    /** Passive refresh on MapLibre callbacks: preserve views being touched. */
+    private fun updateMapSourceIndicators() {
+        if (!::mapSourceBadge.isInitialized) return
+        mapSourceBadge.text=when(atlasMap.activeMapSource) {
+            MapSourcePolicy.OFFLINE -> "MAP · OFFLINE"
+            MapSourcePolicy.ONLINE -> "MAP · ONLINE"
+            MapSourcePolicy.UNAVAILABLE -> "OFFLINE MAP UNAVAILABLE"
+            else -> "MAP · LOADING"
+        }
+        val state=model.updates.value
+        val region=model.regions.regions.firstOrNull {
+            model.regions.installed(it)&&it.contains(model.anchor)
+        }
+        topSourceBadge?.text=mapSourceLabel() +
+            (if(state.downloading!=null)" · Downloading ${state.downloadPercent}%"
+             else if(region!=null&&atlasMap.activeMapSource==MapSourcePolicy.ONLINE)" · Offline routes"
+             else "")
     }
     private fun mapSourceLabel(): String = when(atlasMap.activeMapSource) {
         MapSourcePolicy.OFFLINE -> "Offline map"
