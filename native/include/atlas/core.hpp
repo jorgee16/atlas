@@ -105,6 +105,29 @@ double tollRate(std::string reference, int vehicleClass);
 std::optional<Route> route(const Graph &graph, uint32_t start, uint32_t goal,
                            const RouteOptions &options = {});
 void makeManeuvers(Route &route, const Graph &graph);
+void calibrateDriveEta(Route &route, const Graph &graph);
+struct MotionFix {
+  Point point;
+  double accuracy = 0, timestamp = 0;
+  std::optional<double> speed, heading;
+};
+struct Motion {
+  double speed = 0;
+  std::optional<double> heading;
+  bool moving = false;
+};
+class MotionFilter {
+public:
+  Motion update(const MotionFix &fix);
+
+private:
+  std::optional<MotionFix> anchor_;
+  std::optional<double> heading_, lastMove_;
+  bool moving_ = false;
+  double speed_ = 0, lastTimestamp_ = -1;
+};
+double carHeading(double gps, double route, double speed, double accuracy,
+                  double offRoute);
 struct Progress {
   Point snapped;
   std::size_t segment = 0, maneuver = 0;

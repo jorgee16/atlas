@@ -199,7 +199,7 @@ class MainActivity : ComponentActivity(), LocationListener {
             loadStyle(fix.point)
             val display = if (s.navigating && s.guidance != null && s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point
             if (follow) {
-                fix.bearing?.let { next -> val delta = (next - lastBearing + 540) % 360 - 180; lastBearing = (lastBearing + .35 * delta + 360) % 360 }
+                (s.guidance?.takeUnless { it.isNull("bearing") }?.optDouble("bearing") ?: fix.bearing)?.let { next -> val delta = (next - lastBearing + 540) % 360 - 180; lastBearing = (lastBearing + .35 * delta + 360) % 360 }
                 val camera = CameraPosition.Builder().target(LatLng(display.lat, display.lon)).zoom(if (s.navigating) 16.5 else 14.0)
                     .bearing(if (headingUp) lastBearing else 0.0).tilt(if (s.navigating) 40.0 else 0.0).build()
                 map?.animateCamera(CameraUpdateFactory.newCameraPosition(camera), 500)

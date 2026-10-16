@@ -94,11 +94,13 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     }
     fun stop() { core.cancel(); routeJob?.cancel(); progressJob?.cancel(); state.value = state.value.copy(navigating = false, guidance = null, busy = false) }
     fun fix(fix: Fix) {
-        state.value = state.value.copy(fix = fix)
-        if (!state.value.navigating || progressJob?.isActive == true || state.value.busy) return
+        if (progressJob?.isActive == true) return
         progressJob = viewModelScope.launch {
             try {
-                val result = withContext(worker) { JSONObject(core.update(fix)) }
+                val trusted = withContext(worker) { core.filter(fix) }
+                state.value = state.value.copy(fix = trusted)
+                if (!state.value.navigating || state.value.busy) return@launch
+                val result = withContext(worker) { JSONObject(core.update(trusted)) }
                 state.value = state.value.copy(guidance = result)
                 val maneuver = result.getInt("maneuver")
                 if (voice && maneuver != lastSpoken) {

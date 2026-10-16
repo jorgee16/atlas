@@ -17,6 +17,14 @@ class LaunchTest {
     @get:Rule val location: GrantPermissionRule = GrantPermissionRule.grant(
         Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION
     )
+    @Test fun jniMotionFilterRoundTrip() {
+        NativeCore().use { core ->
+            val first = core.filter(Fix(Coordinate(40.0, -8.0), 5.0, 3.0, 0.0, 1.0))
+            org.junit.Assert.assertEquals(0.0, first.speed, 0.001)
+            val second = core.filter(Fix(Coordinate(40.0001, -8.0), 5.0, 3.0, 0.0, 4.0))
+            org.junit.Assert.assertEquals(3.0, second.speed, 0.001)
+        }
+    }
     @Test fun nativeAppStartsAndSurvivesRecreation() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             onView(withText("Search")).check(matches(isDisplayed()))

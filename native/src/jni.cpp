@@ -1,4 +1,5 @@
 #include "atlas/core.hpp"
+#include <cmath>
 #include <jni.h>
 #include <map>
 #include <mutex>
@@ -10,6 +11,8 @@ struct Engine {
   std::unique_ptr<atlas::Search> search, addresses;
   std::optional<atlas::Route> route;
   atlas::GuidanceSession guidance;
+  atlas::MotionFilter motion;
+  std::optional<double> motionHeading;
   std::string graphPath, searchPath;
 };
 std::mutex gate;
@@ -159,6 +162,8 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     auto next = atlas::route(*e.graph, *start, *goal, op);
     if (!next)
       throw std::runtime_error("No route connects these points");
+    if (!walk)
+      atlas::calibrateDriveEta(*next, *e.graph);
     e.route = std::move(next);
     e.guidance.reset();
     return bytes(env, atlas::routeJson(*e.route));
@@ -179,6 +184,13 @@ Java_com_atlas_nativeapp_NativeCore_update(JNIEnv *env, jobject, jlong id,
       throw std::runtime_error("No active native route");
     auto g = e.guidance.update({lat, lon}, accuracy, speed, time, *e.route);
     auto &p = g.position;
+    double heading = std::numeric_limits<double>::quiet_NaN();
+    if (e.route->points.size() > p.segment + 1)
+      heading =
+          atlas::carHeading(e.motionHeading.value_or(heading),
+                            atlas::bearing(e.route->points[p.segment],
+                                           e.route->points[p.segment + 1]),
+                            speed, accuracy, p.offRoute);
     const char *states[] = {"normal", "reduced", "checking", "reroute",
                             "arrived"};
     std::ostringstream s;
@@ -188,7 +200,12 @@ Java_com_atlas_nativeapp_NativeCore_update(JNIEnv *env, jobject, jlong id,
       << ",\"along\":" << p.along << ",\"remaining\":" << p.remaining
       << ",\"seconds\":" << p.seconds << ",\"maneuver\":" << p.maneuver
       << ",\"toManeuver\":" << p.toManeuver << ",\"segment\":" << p.segment
-      << ",\"offRoute\":" << p.offRoute << '}';
+      << ",\"offRoute\":" << p.offRoute << ",\"bearing\":";
+    if (std::isfinite(heading))
+      s << heading;
+    else
+      s << "null";
+    s << '}';
     return bytes(env, s.str());
   } catch (const std::exception &e) {
     error(env, e);
@@ -199,4 +216,35 @@ Java_com_atlas_nativeapp_NativeCore_update(JNIEnv *env, jobject, jlong id,
 extern "C" JNIEXPORT void JNICALL
 Java_com_atlas_nativeapp_NativeCore_cancel(JNIEnv *, jobject) {
   ++cancellationGeneration;
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_atlas_nativeapp_NativeCore_filter(JNIEnv *env, jobject, jlong id,
+                                           jdouble lat, jdouble lon,
+                                           jdouble accuracy, jdouble speed,
+                                           jdouble heading, jdouble time) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);
+    auto &e = engine(id);
+    atlas::MotionFix fix{
+        {lat, lon},
+        accuracy,
+        time,
+        speed >= 0 ? std::optional<double>(speed) : std::nullopt,
+        heading >= 0 ? std::optional<double>(heading) : std::nullopt};
+    auto result = e.motion.update(fix);
+    e.motionHeading = result.heading;
+    std::ostringstream s;
+    s.precision(12);
+    s << "{\"speed\":" << result.speed << ",\"heading\":";
+    if (result.heading)
+      s << *result.heading;
+    else
+      s << "null";
+    s << ",\"moving\":" << (result.moving ? "true" : "false") << '}';
+    return bytes(env, s.str());
+  } catch (const std::exception &e) {
+    error(env, e);
+    return nullptr;
+  }
 }

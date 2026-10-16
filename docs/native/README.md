@@ -37,6 +37,8 @@ engine, checks it against JavaScript fixtures, builds/lints the APK, and uploads
   search, prefix completion, address-index support, and nearby/category search.
 - `native/src/guidance.cpp`: maneuvers, roundabout exit counting, projection,
   route progress, arrival, GPS confidence and sustained-deviation rerouting.
+- `native/src/motion.cpp`: displacement-confirmed motion/speed, circular heading
+  fusion and conservative drive ETA calibration.
 - `native/src/jni.cpp`: guarded engine handles, exception translation, UTF-8
   result byte arrays, and atomic route cancellation.
 - `android/native-app`: Kotlin UI, Android lifecycle, native worker, platform
@@ -87,7 +89,8 @@ the comparison obtains expected paths directly from the existing JS router.
 There are 24 drive/walk/toll/access/restriction path comparisons. Native tests
 also exercise snapping, directed/disconnected topology, cancellation, invalid
 binary offsets, accent folding, prefix matching, nearby geography exclusion,
-route projection, GPS uncertainty, sustained off-route confidence and arrival.
+route projection, GPS uncertainty, sustained off-route confidence, arrival,
+motion-noise filtering, heading wraparound and ETA calibration.
 
 The desktop CLI can inspect an installed graph:
 
@@ -105,7 +108,7 @@ native UI or establish equivalence on full production regional datasets.
 | --- | --- | --- |
 | Offline routing | C++ graph v6, fastest car/walk paths, turn restrictions, geometry, toll avoidance | Production dataset benchmarks, route alternatives and vehicle/toll preference UI |
 | Search | C++ indexed POI/address lookup, accent folding, final-token prefix, nearby categories | Match the full existing ranking/postcode/alias policy, spatial nearby index and routing-road compatibility fallback |
-| Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; Kotlin TTS | Match lane guidance, advanced junction rendering, driving-camera details, GPS motion-noise model and route-undo behavior |
+| Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; Kotlin TTS | Match lane guidance, advanced junction rendering, driving-camera details, full GPS replay parity and route-undo behavior |
 | Maps | Native MapLibre, online raster and local PMTiles, route and destination overlays | Full existing visual design, offline labels/fonts/sprites, travelled-route styling and map-native alternative selection |
 | Trips | JSON import, validation, persistent trip list, day/place selection | Complete itinerary execution, visited-state progression, thumbnails and transit handoffs |
 | Transit | Kotlin TfL journey requests, alternatives and leg instructions | Port journey ranking, detailed execution state, live arrivals and sibling-stop filtering |

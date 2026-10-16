@@ -83,6 +83,23 @@ int main(int argc, char **argv) {
               Guidance::State::reroute,
           "sustained offroute reroutes");
     check(jsonString("a\"\nb") == "\"a\\\"\\u000ab\"", "JSON escaping");
+    MotionFilter motion;
+    auto resting = motion.update({{40, -8}, 10, 1, 3., 0.});
+    check(resting.speed == 0 && !resting.moving,
+          "raw speed cannot establish motion");
+    auto moving = motion.update({{40.0001, -8}, 5, 4, 3., 0.});
+    check(moving.moving && moving.speed == 3,
+          "displacement corroborates speed");
+    auto stopped = motion.update({{40.0001, -8}, 5, 9, 3., 0.});
+    check(!stopped.moving && stopped.speed == 0,
+          "stationary jitter stops prediction");
+    auto originalSeconds = drive->seconds;
+    calibrateDriveEta(*drive, graph);
+    check(drive->seconds > originalSeconds,
+          "drive ETA conservatively calibrated");
+    check(carHeading(359, 1, 10, 5, 0) > 350 ||
+              carHeading(359, 1, 10, 5, 0) < 10,
+          "heading blends across north");
     auto bad = std::filesystem::path(root) / "bad";
     std::filesystem::remove_all(bad);
     std::filesystem::copy(root + "/basic", bad,
