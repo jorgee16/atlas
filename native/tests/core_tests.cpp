@@ -66,6 +66,20 @@ int main(int argc, char **argv) {
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);
     check(end.remaining < 1, "route progress destination");
+    // Nearby parallel road/route-loop projections must not teleport progress.
+    GuidanceSession continuity;
+    auto established = continuity.update(drive->points.front(), 5, 1, 100, *drive);
+    auto impossible = continuity.update(drive->points.back(), 5, 1, 101, *drive);
+    check(impossible.state == Guidance::State::reduced &&
+              std::abs(impossible.position.along - established.position.along) < .01,
+          "first implausible projection holds the cursor");
+    auto repeated = continuity.update(drive->points.back(), 5, 1, 102, *drive);
+    check(repeated.state == Guidance::State::reduced &&
+              std::abs(repeated.position.along - established.position.along) < .01,
+          "second implausible projection still holds the cursor");
+    auto confirmed = continuity.update(drive->points.back(), 5, 1, 103, *drive);
+    check(confirmed.state == Guidance::State::arrived,
+          "repeated stable destination fixes eventually allow arrival");
     GuidanceSession session;
     auto a = session.update(drive->points.back(), 5, 0, 1, *drive);
     check(a.state == Guidance::State::arrived, "arrival");

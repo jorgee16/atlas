@@ -181,6 +181,8 @@ void GuidanceSession::reset() {
   lastReroute_ = -1;
   lastTime_ = -1;
   offFixes_ = 0;
+  implausibleFixes_ = 0;
+  implausibleCandidate_.reset();
   lastPosition_.reset();
   lastGoodPosition_.reset();
 }
@@ -196,6 +198,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     out.state = Guidance::State::reduced;
     return out;
   }
+  const double elapsed = lastTime_ < 0 ? 0 : t - lastTime_;
   out.position = progress(p, r);
   lastTime_ = t;
   if (accuracy > 50) {
@@ -205,9 +208,36 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       out.position = *lastPosition_;
     offSince_ = -1;
     offFixes_ = 0;
+    implausibleCandidate_.reset();
+    implausibleFixes_ = 0;
     out.state = Guidance::State::reduced;
     return out;
   }
+  // A global nearest-segment projection may snap onto a distant section of
+  // the same route at a loop, parallel street or overpass. Require sustained
+  // positional evidence before accepting an impossible instantaneous leap.
+  if (lastGoodPosition_ && elapsed > 0 && elapsed < 20 &&
+      out.position.offRoute <= std::max(45., accuracy * 2)) {
+    const double travelBudget =
+        std::max(45., speed * elapsed * 2.5 + accuracy * 2 + 15);
+    const double jump = out.position.along - lastGoodPosition_->along;
+    if (std::abs(jump) > travelBudget) {
+      if (implausibleCandidate_ &&
+          distance(*implausibleCandidate_, p) <= std::max(25., accuracy * 2))
+        ++implausibleFixes_;
+      else {
+        implausibleCandidate_ = p;
+        implausibleFixes_ = 1;
+      }
+      if (implausibleFixes_ < 3) {
+        out.position = *lastGoodPosition_;
+        out.state = Guidance::State::reduced;
+        return out;
+      }
+    }
+  }
+  implausibleCandidate_.reset();
+  implausibleFixes_ = 0;
   if (out.position.remaining < 25 &&
       distance(p, r.points.back()) < std::max(25., accuracy) && speed < 4) {
     out.state = Guidance::State::arrived;
