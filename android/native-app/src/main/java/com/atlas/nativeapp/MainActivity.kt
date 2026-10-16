@@ -455,7 +455,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
         SensorManager.getOrientation(rotationMatrix, sensorAngles)
         // Orientation is relative to true device top; compensate screen rotation.
-        val rotation = display?.rotation ?: Surface.ROTATION_0
+        // Activity.getDisplay() requires API 30; Atlas supports API 26.
+        // WindowManager's legacy display rotation is supported on API 26+
+        // and remains sufficient for orientation compensation.
+        @Suppress("DEPRECATION")
+        val rotation = windowManager.defaultDisplay.rotation
         val screenOffset = when (rotation) {
             Surface.ROTATION_90 -> 90.0
             Surface.ROTATION_180 -> 180.0
