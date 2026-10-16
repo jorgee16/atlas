@@ -82,6 +82,12 @@ int main(int argc, char **argv) {
           std::abs(uncertain.position.along - reliable.position.along) < .01,
           "poor GPS holds reliable route progress");
     session.reset();
+    auto onRoute = session.update(drive->points.front(), 5, 0, 1, *drive);
+    auto dubious = session.update({40.01, -8}, 5, 12, 2, *drive);
+    check(dubious.state == Guidance::State::checking &&
+          std::abs(dubious.position.along - onRoute.position.along) < .01,
+          "off-route candidate keeps last confirmed marker position");
+    session.reset();
     check(session.update({40.01, -8}, 100, 0, 1, *drive).state ==
               Guidance::State::reduced,
           "poor GPS does not reroute");

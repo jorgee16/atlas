@@ -149,7 +149,7 @@ public:
 private:
   double offSince_ = -1, lastReroute_ = -1, lastTime_ = -1;
   uint32_t offFixes_ = 0;
-  std::optional<Progress> lastPosition_;
+  std::optional<Progress> lastPosition_, lastGoodPosition_;
 };
 struct Place {
   std::string id;
