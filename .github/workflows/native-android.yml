@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install existing Atlas dependencies for parity fixtures
+        run: npm ci --ignore-scripts
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
       - name: Generate search expectations from the original app
