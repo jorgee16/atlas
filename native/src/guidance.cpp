@@ -220,7 +220,6 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       out.position.along < lastPosition_->along &&
       lastPosition_->along - out.position.along <= std::max(20., accuracy * 2))
     out.position = *lastPosition_;
-  lastPosition_ = out.position;
   double threshold = std::max(80., accuracy * 2);
   if (out.position.offRoute > threshold) {
     // A distant fix must not teleport the navigation marker onto an
@@ -228,6 +227,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     // Keep evaluating the raw off-route distance for reroute decisions.
     if (lastGoodPosition_)
       out.position = *lastGoodPosition_;
+    lastPosition_ = out.position;
     if (offSince_ < 0)
       offSince_ = t;
     ++offFixes_;
@@ -243,6 +243,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     offSince_ = -1;
     offFixes_ = 0;
     lastGoodPosition_ = out.position;
+    lastPosition_ = out.position;
   }
   return out;
 }

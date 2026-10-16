@@ -87,6 +87,13 @@ int main(int argc, char **argv) {
     check(dubious.state == Guidance::State::checking &&
           std::abs(dubious.position.along - onRoute.position.along) < .01,
           "off-route candidate keeps last confirmed marker position");
+    auto delayed = session.update(drive->points.back(), 5, 0, 1.5, *drive);
+    check(delayed.state == Guidance::State::reduced &&
+          std::abs(delayed.position.along - onRoute.position.along) < .01,
+          "delayed fix cannot recover unconfirmed off-route candidate");
+    auto recovered = session.update(drive->points.front(), 5, 0, 3, *drive);
+    check(recovered.state == Guidance::State::normal,
+          "valid on-route fix recovers from checking");
     session.reset();
     check(session.update({40.01, -8}, 100, 0, 1, *drive).state ==
               Guidance::State::reduced,
