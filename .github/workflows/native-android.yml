@@ -39,9 +39,17 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Build Kotlin and JNI APK
         working-directory: android
-        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:lintDebug --stacktrace
+        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:lintDebug :native-app:assembleDebugAndroidTest --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: Atlas-native-debug-apk
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
+      - name: Native app launch and recreation smoke test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: cd android && bash gradlew -PnativeOnly :native-app:connectedDebugAndroidTest --stacktrace

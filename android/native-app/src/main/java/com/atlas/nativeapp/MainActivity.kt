@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity(), LocationListener {
     private var currentTab = ""
     private var lastFixTime = -1.0
     private var lastBearing = 0.0
+    private var vehicle: org.maplibre.android.annotations.Marker? = null
     private val manager by lazy { getSystemService(LOCATION_SERVICE) as LocationManager }
     private val permission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startGps() }
     private val importTrip = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -187,6 +188,12 @@ class MainActivity : ComponentActivity(), LocationListener {
         }
         if (lastRoute !== s.route || lastDestination !== s.destination) { lastRoute = s.route; lastDestination = s.destination; drawRoute(s); if (s.destination !== null && !s.navigating && s.route == null) center(s.destination.coordinate()) }
         val fix = s.fix
+        if (fix != null) {
+            val display = if (s.navigating && s.guidance != null && s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point
+            val position = LatLng(display.lat, display.lon)
+            if (vehicle == null) vehicle = map?.addMarker(MarkerOptions().position(position).title("Your location"))
+            else vehicle?.position = position
+        }
         if (fix != null && fix.time != lastFixTime) {
             lastFixTime = fix.time
             loadStyle(fix.point)
@@ -204,6 +211,7 @@ class MainActivity : ComponentActivity(), LocationListener {
     private fun drawRoute(s: AtlasState) {
         val ready = map ?: return
         ready.clear()
+        vehicle = null
         s.destination?.let { ready.addMarker(MarkerOptions().position(LatLng(it.getDouble("lat"), it.getDouble("lon"))).title(it.optString("name"))) }
         s.route?.getJSONArray("points")?.let { points ->
             val line = PolylineOptions().color(Color.rgb(37, 99, 235)).width(6f)

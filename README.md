@@ -9,3 +9,8 @@ Hardens startup without changing routing logic.
 - Installer is guarded against unexpected source shapes and creates `.v36-backup` files.
 
 Apply from the Atlas repository root, then run tests/build/dev.
+
+## Native C++ / Kotlin migration
+
+The `migration/native-core-kotlin` branch contains the native engine and Android frontend.
+See [build instructions, validation and parity status](docs/native/README.md).

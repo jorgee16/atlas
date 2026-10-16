@@ -5,6 +5,7 @@ class NativeCore : AutoCloseable {
     companion object { init { System.loadLibrary("atlas_jni") } }
     private var handle = create()
     private external fun create(): Long
+    external fun cancel()
     private external fun destroy(handle: Long)
     private external fun openGraph(handle: Long, directory: String)
     private external fun openSearch(handle: Long, directory: String)

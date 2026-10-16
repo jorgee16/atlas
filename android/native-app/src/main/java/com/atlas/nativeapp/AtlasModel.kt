@@ -72,7 +72,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         val destination = state.value.destination ?: return status("Choose a destination")
         val from = state.value.origin ?: state.value.fix?.point ?: return status("Wait for GPS, or choose an origin on the map")
         val walking = state.value.walking; val avoid = state.value.avoidTolls
-        routeJob?.cancel()
+        core.cancel(); routeJob?.cancel()
         routeJob = viewModelScope.launch {
             state.value = state.value.copy(busy = true, status = "Calculating offline route…")
             try {
@@ -92,7 +92,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         if (state.value.route == null) calculate(true)
         else state.value = state.value.copy(navigating = true, status = "Navigation started")
     }
-    fun stop() { routeJob?.cancel(); progressJob?.cancel(); state.value = state.value.copy(navigating = false, guidance = null, busy = false) }
+    fun stop() { core.cancel(); routeJob?.cancel(); progressJob?.cancel(); state.value = state.value.copy(navigating = false, guidance = null, busy = false) }
     fun fix(fix: Fix) {
         state.value = state.value.copy(fix = fix)
         if (!state.value.navigating || progressJob?.isActive == true || state.value.busy) return
