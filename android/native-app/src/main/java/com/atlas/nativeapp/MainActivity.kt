@@ -214,7 +214,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
         val info=ui.row().apply{setPadding(ui.dp(2),ui.dp(10),0,0)}
         val region=model.regions.regions.firstOrNull{model.regions.installed(it)&&it.contains(model.anchor)}
-        val label=when{ s.downloading!=null -> "Downloading ${s.downloadPercent}%";region!=null&&region.assets.has("map")->"Offline map ready";region!=null->"Offline routes ready";else->"Online map" }
+        val label=when{ s.downloading!=null -> "Downloading ${s.downloadPercent}%";model.regions.map(model.anchor)!=null->"Offline map ready";region!=null&&model.regions.installedVersion(region)!=region.version->"Offline update available";region!=null->"Offline routes ready";else->"Online map" }
         info.addView(ui.badge(label,region!=null).apply{setOnClickListener{openPage("regions")}})
         if(!hasLocation())info.addView(ui.chip("Enable location","locate"){enableLocation()},LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(9)})
         top.addView(info)

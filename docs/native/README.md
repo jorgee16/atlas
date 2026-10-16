@@ -90,10 +90,16 @@ Downloads are user initiated, streamed to staging, checked against declared
 sizes and SHA-256, and activated with a version marker only after success.
 Failed or cancelled downloads preserve the previously installed version.
 
-MapLibre Native reads local `pmtiles://file://` vector sources. The current
-catalog contains a London PMTiles asset; Portugal currently has routing/search
-assets but no declared map archive. Regions without a local archive use online
-OpenStreetMap tiles. This does not imply offline basemap coverage for Portugal.
+MapLibre Native reads local `pmtiles://file://` vector sources. The
+Portugal v9 region catalog now includes the 343,766,325-byte PMTiles v3
+archive at `/region-packages/portugal/map.pmtiles` (mainland, Madeira and
+Azores) in addition to the existing routing, POIs and search assets.
+The Android bundled catalog and `public/regions/catalog.json` are kept in
+sync. Portugal v8 installations must select **Update region** to download v9
+before the local map is actually available. The map-ready indicator must be
+based on the local PMTiles file, not merely the catalog declaration. Regions
+without a locally installed archive use online map tiles. Offline font glyphs
+are not yet bundled, so labels may still depend on network access.
 MapLibre documentation: https://maplibre.org/maplibre-native/android/examples/data/PMTiles/
 
 Personal itineraries are imported through Android's document picker. No travel

@@ -118,7 +118,7 @@ class AtlasPages(
                 addView(ui.badge(if(downloading)"${state.downloadPercent}%" else if(version==region.version)"Ready" else if(version!=null)"Update" else "Offline",version==region.version))
             })
             card.addView(ui.space(17));card.addView(ui.text("${region.bytes/1024/1024} MB   ·   Places & navigation",12f,ui.muted))
-            if(!region.assets.has("map")){card.addView(ui.space(6));card.addView(ui.text("Basemap requires a connection in this region",11f,ui.muted))}
+            if(!region.assets.has("map")){card.addView(ui.space(6));card.addView(ui.text("Basemap requires a connection in this region",11f,ui.muted))}else{card.addView(ui.space(6));card.addView(ui.text(if(version==region.version)"Vector map available offline" else "Vector map included after download or update",11f,ui.muted))}
             card.addView(ui.space(16))
             if(downloading){
                 card.addView(ProgressBar(context,null,android.R.attr.progressBarStyleHorizontal).apply{max=100;progress=state.downloadPercent;progressTintList=android.content.res.ColorStateList.valueOf(ui.blue)},LinearLayout.LayoutParams(-1,ui.dp(5)))
