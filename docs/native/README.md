@@ -49,6 +49,33 @@ library inside the APK. Offline search and road routing run on the device.
 Kotlin adapters own Android I/O and system APIs. The native module has no
 Capacitor, Leaflet, JavaScript runtime, or WebView dependency.
 
+## Native interface
+
+The native app uses a shared design system in `AtlasUi.kt`, map/layer lifecycle
+in `AtlasMap.kt`, screen content in `AtlasPages.kt`, and activity composition in
+`MainActivity.kt`. All product controls are native Android views with consistent
+spacing, typography, stroke icons, rounded surfaces, selected states and touch
+targets. No WebView is used.
+
+- Explore: floating search, nearby categories, compact two-result peek, saved
+  places, map controls and a dedicated full results page.
+- Navigation: compact origin/destination planning, drive/walk/transit modes,
+  toll preferences, computed toll-free alternatives, map selection, progressive
+  route-preview collapse and an always-reachable Start action.
+- Guidance: maneuver banner, conditional lane hints, GPS-confidence notices,
+  ETA/duration/distance summary, route overview, voice and confirmed End action.
+- Trips: JSON imports, multiple itineraries, day selection, optional thumbnails,
+  persistent visited-state tracking, next-stop navigation and trip deletion.
+- Regions: installed/update states, package sizes, progress, cancellation,
+  retry/error presentation and confirmed removal.
+- Settings: light/dark/system appearance, voice and vehicle class.
+- Transit: journey options and per-leg execution with disruption descriptions.
+
+Android instrumented tests capture representative portrait, landscape and dark
+screens into the `Atlas-native-ui-review` CI artifact. The itinerary and route
+used by these visual tests are synthetic fixtures confined to `androidTest`;
+they are not bundled in the application APK.
+
 ## Data compatibility
 
 Native routing reads the same seven graph v6 files as the web app. Native
@@ -106,13 +133,13 @@ native UI or establish equivalence on full production regional datasets.
 
 | Area | Implemented | Still required for full parity |
 | --- | --- | --- |
-| Offline routing | C++ graph v6, fastest car/walk paths, turn restrictions, geometry, toll avoidance | Production dataset benchmarks, route alternatives and vehicle/toll preference UI |
+| Offline routing | C++ graph v6, fastest car/walk paths, turn restrictions, geometry, toll avoidance | Production dataset benchmarks and broader route-alternative coverage |
 | Search | C++ indexed POI/address lookup, accent folding, final-token prefix, nearby categories | Match the full existing ranking/postcode/alias policy, spatial nearby index and routing-road compatibility fallback |
 | Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; Kotlin TTS | Match lane guidance, advanced junction rendering, driving-camera details, full GPS replay parity and route-undo behavior |
-| Maps | Native MapLibre, online raster and local PMTiles, route and destination overlays | Full existing visual design, offline labels/fonts/sprites, travelled-route styling and map-native alternative selection |
-| Trips | JSON import, validation, persistent trip list, day/place selection | Complete itinerary execution, visited-state progression, thumbnails and transit handoffs |
-| Transit | Kotlin TfL journey requests, alternatives and leg instructions | Port journey ranking, detailed execution state, live arrivals and sibling-stop filtering |
-| Regions | Download/update/remove/cancel, versioned activation, checksums | Restart-resumable background work, richer storage UI, automatic catalog refresh, full-size package tests |
+| Maps | Native MapLibre, styled online vector/raster and local PMTiles, travelled-route styling, native map controls and map alternative selection | Offline labels/fonts/sprites, full-size data performance and additional junction-map detail |
+| Trips | JSON import, day/place selection, visited-state progression, optional thumbnails and next-stop actions | Full transit handoff and advanced itinerary scheduling parity |
+| Transit | Kotlin TfL journey requests, alternatives, leg-by-leg execution and disruptions | Port advanced journey ranking, live arrivals and sibling-stop filtering |
+| Regions | Download/update/remove/cancel, versioned activation, checksums | Restart-resumable background work, automatic catalog refresh and full-size package tests |
 | User data | Native bookmarks, trips and preferences | Explicit migration/export/import of existing WebView storage |
 | Platforms | Android arm64/x86_64 native app; portable C++ engine | Kotlin desktop frontend if desktop is required; browser frontend remains JavaScript |
 | Tooling | Existing C++ OSM packager retained; native CI added | Region normalization/index-building scripts remain Node.js and have not been ported |

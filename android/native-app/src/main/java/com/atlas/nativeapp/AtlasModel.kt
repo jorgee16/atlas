@@ -156,7 +156,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         }
     }
     fun chooseRoute(choice: JSONObject) { viewModelScope.launch {
-        try { withContext(worker) { core.activate(choice.getInt("key")) }; state.update { it.copy(route = choice, guidance = null) } }
+        try { withContext(worker) { core.activate(choice.getInt("key")) }; state.update { it.copy(route = choice, guidance = null, avoidTolls = choice.optString("label") == "Without tolls") } }
         catch (e: Throwable) { failure(e) }
     } }
     fun start() {

@@ -59,6 +59,13 @@ class LaunchTest {
             onView(withContentDescription("Back")).perform(click())
             onView(withContentDescription("Trip tab")).perform(click())
             onView(withText("Every trip starts somewhere")).check(matches(isDisplayed()))
+            capture("03-trips-empty")
+            scenario.onActivity { activity ->
+                val model=ViewModelProvider(activity)[AtlasModel::class.java]
+                model.importTrip("""{"trip":{"id":"ui-city-fixture","name":"Lisbon on foot","days":{"1":[{"name":"Praça do Comércio","lat":38.7078,"lon":-9.1366,"type":"Landmark","note":"Start the day by the waterfront"},{"name":"Chiado","lat":38.7107,"lon":-9.1422,"type":"Neighbourhood","note":"A walk through the historic centre"},{"name":"Jardim da Estrela","lat":38.7134,"lon":-9.1595,"type":"Park","note":"A quiet stop in the afternoon"}],"2":[{"name":"Belém","lat":38.6975,"lon":-9.2068,"type":"Neighbourhood"}]}}}""")
+                model.visited("trip:ui-city-fixture:1:0",true)
+            }
+            SystemClock.sleep(4800)
             capture("03-trips")
             onView(withContentDescription("Explore tab")).perform(click())
             onView(withContentDescription("Offline regions")).perform(click())
@@ -71,6 +78,7 @@ class LaunchTest {
             scenario.onActivity { activity ->
                 (activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(activity)
                 val model=ViewModelProvider(activity)[AtlasModel::class.java]
+                model.stop()
                 val field=AtlasModel::class.java.getDeclaredField("state").apply{isAccessible=true}
                 @Suppress("UNCHECKED_CAST") val flow=field.get(model) as MutableStateFlow<AtlasState>
                 val points=JSONArray("[[-9.1393,38.7223],[-9.137,38.725],[-9.134,38.727]]")
@@ -83,8 +91,16 @@ class LaunchTest {
             onView(withContentDescription("End navigation")).check(matches(isDisplayed()))
             capture("06-guidance")
             scenario.onActivity { it.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
-            SystemClock.sleep(1500)
+            scenario.onActivity { activity -> (activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(activity) }
+            SystemClock.sleep(1200)
             capture("07-landscape")
+            scenario.onActivity { activity ->
+                ViewModelProvider(activity)[AtlasModel::class.java].theme="dark"
+                activity.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
+            scenario.onActivity { activity -> (activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(activity) }
+            SystemClock.sleep(1200)
+            capture("08-dark")
         }
     }
 }

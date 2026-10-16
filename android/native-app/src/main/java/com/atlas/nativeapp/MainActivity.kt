@@ -131,7 +131,7 @@ class MainActivity : ComponentActivity(), LocationListener {
             layoutChrome();insets
         }
         onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){override fun handleOnBackPressed(){
-            when { page!=null -> closePage(); fullMap -> {fullMap=false;rebuildChrome()}; selectedPlace!=null -> {selectedPlace=null;rebuildChrome()}; model.updates.value.navigating -> confirm("End this navigation?"){model.stop()}; model.updates.value.tab!="Explore" -> model.tab("Explore"); else -> {isEnabled=false;onBackPressedDispatcher.onBackPressed()} }
+            when { page!=null -> backPage(); fullMap -> {fullMap=false;rebuildChrome()}; selectedPlace!=null -> {selectedPlace=null;rebuildChrome()}; model.updates.value.navigating -> confirm("End this navigation?"){model.stop()}; model.updates.value.tab!="Explore" -> model.tab("Explore"); else -> {isEnabled=false;onBackPressedDispatcher.onBackPressed()} }
         }})
         voice = TextToSpeech(this){code->voiceReady=code==TextToSpeech.SUCCESS;if(voiceReady)voice?.language=Locale.UK}
         model.speak={text->if(voiceReady)voice?.speak(text,TextToSpeech.QUEUE_FLUSH,null,"atlas-turn")}
@@ -338,12 +338,13 @@ class MainActivity : ComponentActivity(), LocationListener {
             0->{model.origin(null);model.calculate()};1->{searchTarget="origin";openPage("search")};2->{pickingOrigin=true;model.tab("Explore");closePage();model.status("Press and hold the starting point on the map")}
         }}
     }
-    private fun openSearch(){searchTarget="destination";openPage("search")}
+    private fun openSearch(){searchTarget="destination";model.clearSearch();openPage("search")}
     private fun openPage(name:String){
         if(name=="map"){closePage();return}
+        if(name=="trips")model.tab("Trip")
         page=name;pageKey=null;pageLayer.removeAllViews();pageLayer.visibility=View.VISIBLE
         val header=ui.row().apply{setPadding(ui.dp(16),ui.dp(14),ui.dp(20),ui.dp(14));setBackgroundColor(ui.canvas)}
-        header.addView(ui.iconButton("back","Back"){closePage()},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
+        header.addView(ui.iconButton("back","Back"){backPage()},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
         val title=when(name){"search"->if(searchTarget=="origin")"Starting point" else "Find a place";"regions"->"Offline regions";"trips"->"Your trips";"bookmarks"->"Saved places";"nearby"->"Around you";"journeys"->"Public transport";"journey"->"Your journey";"appearance"->"Appearance";"vehicle"->"Vehicle class";else->"Settings"}
         header.addView(ui.text(title,21f,bold=true),LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(14)})
         if(name=="trips")header.addView(ui.iconButton("upload","Import trip"){importTrip.launch(arrayOf("application/json","text/*"))},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
@@ -363,6 +364,7 @@ class MainActivity : ComponentActivity(), LocationListener {
         pageBody=FrameLayout(this);pageLayer.addView(pageBody,LinearLayout.LayoutParams(-1,0,1f))
         rebuildChrome();updatePage(model.updates.value)
     }
+    private fun backPage(){when(page){"appearance","vehicle"->openPage("settings");"journey"->openPage("journeys");else->closePage()}}
     private fun closePage(){hideKeyboard();val was=page;page=null;searchInput=null;pageKey=null;pageLayer.visibility=View.GONE;if(was=="trips"&&model.updates.value.tab=="Trip")model.tab("Explore");rebuildChrome()}
     private fun updatePage(s:AtlasState){
         val currentPage=page?:return

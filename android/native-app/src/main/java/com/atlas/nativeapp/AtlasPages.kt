@@ -46,10 +46,11 @@ class AtlasPages(
         val icon=when { type.contains("cafe") -> "cafe"; type.contains("food")||type.contains("restaurant") -> "food"; visited -> "check"; else -> "pin" }
         val tile=ui.tileIcon(icon,if(visited)ui.green else ui.blue).apply{clipToOutline=true}
         val image=place.optString("image")
-        if(image.isNotBlank()&&context is androidx.lifecycle.LifecycleOwner){
+        val imageOwner=this@AtlasPages.context as? androidx.lifecycle.LifecycleOwner
+        if(image.isNotBlank()&&imageOwner!=null){
             val photo=android.widget.ImageView(context).apply{scaleType=android.widget.ImageView.ScaleType.CENTER_CROP;background=null}
             tile.addView(photo,android.widget.FrameLayout.LayoutParams(-1,-1))
-            PlaceImages.load(context,image,photo)
+            PlaceImages.load(imageOwner,image,photo)
         }
         addView(tile,LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))
         val details=ui.column();details.addView(ui.text(place.optString("name","Selected location"),15f,bold=true).apply { maxLines=2 })
