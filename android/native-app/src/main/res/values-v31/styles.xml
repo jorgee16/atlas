@@ -1,0 +1,9 @@
+<resources>
+    <style name="AtlasTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#315EFB</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowSplashScreenBackground">#315EFB</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/atlas_launcher_foreground</item>
+    </style>
+</resources>

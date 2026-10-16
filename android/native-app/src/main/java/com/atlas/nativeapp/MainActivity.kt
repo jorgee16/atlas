@@ -184,7 +184,7 @@ class MainActivity : ComponentActivity(), LocationListener {
             val categories=HorizontalScrollView(this).apply{isHorizontalScrollBarEnabled=false;clipToPadding=false}
             val row=ui.row()
             listOf(Triple("cafe","Coffee","cafe"),Triple("restaurant","Food","food"),Triple("museum","Culture","explore"),Triple("park","Outdoors","map")).forEach{(category,label,icon)->
-                row.addView(ui.chip(label,icon,s.category==category&&s.nearby){selectedPlace=null;model.search("",true,category)},LinearLayout.LayoutParams(-2,-2).apply{rightMargin=ui.dp(8)})
+                row.addView(ui.chip(label,icon,s.category==category&&s.nearby){selectedPlace=null;model.search("",true,category,atlasMap.centerPoint)},LinearLayout.LayoutParams(-2,-2).apply{rightMargin=ui.dp(8)})
             };categories.addView(row);top.addView(categories,linear(12))
         }
         val info=ui.row().apply{setPadding(ui.dp(2),ui.dp(10),0,0)}

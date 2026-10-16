@@ -36,6 +36,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     var onRoute: ((JSONObject) -> Unit)? = null
     var follow = true
     var headingUp = true
+    val centerPoint: Coordinate get() = map?.cameraPosition?.target?.let { Coordinate(it.latitude,it.longitude) }
+        ?: current?.fix?.point ?: Coordinate(38.7223,-9.1393)
     private var styleKey = ""
     private var onlineFailed = false
     private var current: AtlasState? = null
@@ -69,11 +71,21 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     var nearest: JSONObject? = null; var best = 24 * context.resources.displayMetrics.density
                     for (choice in state!!.routeOptions) {
                         val points = choice.getJSONArray("points")
-                        for (i in 0 until points.length() step maxOf(1, points.length() / 150)) {
-                            val a = points.getJSONArray(i)
-                            val pixel = projection.toScreenLocation(LatLng(a.getDouble(1), a.getDouble(0)))
-                            val distance = kotlin.math.hypot(pixel.x - touch.x, pixel.y - touch.y)
-                            if (distance < best) { nearest = choice; best = distance }
+                        var previous: android.graphics.PointF? = null
+                        val indices=(0 until points.length() step maxOf(1,points.length()/1500)).toMutableList()
+                        if(points.length()>0 && indices.lastOrNull()!=points.length()-1)indices.add(points.length()-1)
+                        for (i in indices) {
+                            val a=points.getJSONArray(i)
+                            val pixel=projection.toScreenLocation(LatLng(a.getDouble(1),a.getDouble(0)))
+                            val before=previous
+                            if(before!=null){
+                                val dx=pixel.x-before.x;val dy=pixel.y-before.y;val length=dx*dx+dy*dy
+                                val fraction=if(length>0)((touch.x-before.x)*dx+(touch.y-before.y)*dy)/length else 0f
+                                val t=fraction.coerceIn(0f,1f)
+                                val distance=kotlin.math.hypot(touch.x-before.x-t*dx,touch.y-before.y-t*dy)
+                                if(distance<best){nearest=choice;best=distance}
+                            }
+                            previous=pixel
                         }
                     }
                     nearest?.let { onRoute?.invoke(it) }
@@ -81,6 +93,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 false
             }
             ready.setOnMarkerClickListener { marker: Marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
+            ready.addOnCameraIdleListener { loadStyle(centerPoint) }
             ready.addOnCameraMoveStartedListener { reason ->
                 if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) { follow = false; onPan?.invoke() }
             }
@@ -128,7 +141,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         current = s
         val ready = map ?: return
         if (ready.style == null) return
-        val anchor = s.origin ?: s.fix?.point ?: s.destination?.coordinate() ?: Coordinate(38.7223, -9.1393)
+        val anchor = if(s.navigating && s.fix!=null)s.fix.point else centerPoint
         loadStyle(anchor)
         if (s.route !== route || s.routeOptions !== options) {
             lines.forEach { ready.removePolyline(it) }; lines.clear(); remaining = null; travelled = null; lastSegment = -1
