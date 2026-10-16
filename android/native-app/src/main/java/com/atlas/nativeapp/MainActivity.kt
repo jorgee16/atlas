@@ -79,6 +79,12 @@ class MainActivity : ComponentActivity(), LocationListener {
     private var lastTouch = 0L
     private var lastRoute: JSONObject? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val gapTick = object : Runnable {
+        override fun run() {
+            model.predictSignalGap(android.os.SystemClock.elapsedRealtimeNanos() / 1e9)
+            handler.postDelayed(this, 1000L)
+        }
+    }
     private var voice: TextToSpeech? = null
     private var voiceReady = false
     private val landscape get() = resources.configuration.screenWidthDp > resources.configuration.screenHeightDp
@@ -419,10 +425,10 @@ class MainActivity : ComponentActivity(), LocationListener {
     override fun onProviderEnabled(provider:String){}
     override fun onProviderDisabled(provider:String){}
     @Deprecated("Deprecated in Android") override fun onStatusChanged(provider:String?,status:Int,extras:Bundle?){}
-    override fun onStart(){super.onStart();atlasMap.onStart();startGps()}
+    override fun onStart(){super.onStart();atlasMap.onStart();startGps();handler.post(gapTick)}
     override fun onResume(){super.onResume();atlasMap.onResume();rebuildChrome()}
     override fun onPause(){atlasMap.onPause();super.onPause()}
-    override fun onStop(){manager.removeUpdates(this);atlasMap.onStop();super.onStop()}
+    override fun onStop(){handler.removeCallbacks(gapTick);manager.removeUpdates(this);atlasMap.onStop();super.onStop()}
     override fun onLowMemory(){super.onLowMemory();atlasMap.onLowMemory()}
     override fun onSaveInstanceState(outState:Bundle){super.onSaveInstanceState(outState);val map=Bundle();atlasMap.onSaveInstanceState(map);outState.putBundle("map",map);outState.putString("page",page);outState.putString("peek",selectedPlace?.toString())}
     override fun onDestroy(){handler.removeCallbacksAndMessages(null);model.speak=null;voice?.stop();voice?.shutdown();atlasMap.onDestroy();super.onDestroy()}

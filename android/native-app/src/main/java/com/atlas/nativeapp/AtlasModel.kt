@@ -170,6 +170,17 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         else { lastSpoken = -1; state.update { it.copy(navigating = true, arrived = false) } }
     }
     fun stop() { ++routeGeneration; core.cancel(); routeJob?.cancel(); progressJob?.cancel(); state.update { it.copy(navigating = false, guidance = null, busy = false) } }
+    // Visual extrapolation only; real GPS fixes still own routing decisions.
+    fun predictSignalGap(now: Double) {
+        state.update { s ->
+            val fix = s.fix ?: return@update s
+            val guidance = s.guidance ?: return@update s
+            val route = s.route ?: return@update s
+            if (!s.navigating || s.busy || s.walking) return@update s
+            val predicted = RouteGapPrediction.predict(route, guidance, fix, now) ?: return@update s
+            s.copy(guidance = predicted)
+        }
+    }
     fun fix(fix: Fix) {
         if (progressJob?.isActive == true) return
         progressJob = viewModelScope.launch {

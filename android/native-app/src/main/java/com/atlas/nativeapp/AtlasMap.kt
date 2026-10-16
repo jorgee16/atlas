@@ -183,8 +183,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             val position = LatLng(display.lat, display.lon)
             if (positionMarker == null) positionMarker = ready.addMarker(MarkerOptions().position(position).icon(positionIcon(heading)).title("Your location"))
             else { positionMarker?.position = position; positionMarker?.icon = positionIcon(heading) }
-            if (fix.time != lastFixTime && follow) {
-                lastFixTime = fix.time
+            val displayTime = s.guidance?.optDouble("predictedAt", fix.time) ?: fix.time
+            if (displayTime != lastFixTime && follow) {
+                lastFixTime = displayTime
                 val now = SystemClock.elapsedRealtime()
                 val camera = ready.cameraPosition
                 val cameraTarget = camera.target ?: position
