@@ -80,7 +80,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 }
                 false
             }
-            ready.addOnMarkerClickListener { marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
+            ready.setOnMarkerClickListener { marker: Marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
             ready.addOnCameraMoveStartedListener { reason ->
                 if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) { follow = false; onPan?.invoke() }
             }

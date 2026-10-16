@@ -99,6 +99,8 @@ class MainActivity : ComponentActivity(), LocationListener {
         super.onCreate(savedInstanceState)
         ui = AtlasUi(this, model.dark)
         WindowCompat.setDecorFitsSystemWindows(window,false)
+        window.statusBarColor=Color.TRANSPARENT
+        window.navigationBarColor=Color.TRANSPARENT
         WindowCompat.getInsetsController(window,window.decorView).apply { isAppearanceLightStatusBars = !ui.dark; isAppearanceLightNavigationBars = !ui.dark }
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         root = FrameLayout(this).apply { setBackgroundColor(ui.canvas) }
@@ -143,11 +145,11 @@ class MainActivity : ComponentActivity(), LocationListener {
     private fun layoutChrome() {
         val pad=ui.dp(16)
         (top.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(350) else -1;leftMargin=pad;rightMargin=pad;topMargin=topInset+ui.dp(12) }.also{top.layoutParams=it}
-        (bottom.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(340) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.START else Gravity.CENTER_HORIZONTAL;leftMargin=pad;rightMargin=pad;bottomMargin=bottomInset+if(landscape)ui.dp(16) else ui.dp(100) }.also{bottom.layoutParams=it}
+        (bottom.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(340) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.START else Gravity.CENTER_HORIZONTAL;leftMargin=pad;rightMargin=pad;bottomMargin=bottomInset+if(landscape||model.updates.value.navigating)ui.dp(16) else ui.dp(100) }.also{bottom.layoutParams=it}
         (navigation.layoutParams as FrameLayout.LayoutParams).apply {width=if(landscape)ui.dp(300) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.CENTER_HORIZONTAL;leftMargin=pad;rightMargin=pad;bottomMargin=bottomInset+ui.dp(14)}.also{navigation.layoutParams=it}
         (guidance.layoutParams as FrameLayout.LayoutParams).apply{width=if(landscape)ui.dp(360) else -1;leftMargin=pad;rightMargin=pad;topMargin=topInset+ui.dp(12)}.also{guidance.layoutParams=it}
         (controls.layoutParams as FrameLayout.LayoutParams).apply {rightMargin=pad;bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(178) else if(model.updates.value.tab=="Navigation"&&model.updates.value.destination!=null&&!landscape)ui.dp(355) else ui.dp(118)}.also{controls.layoutParams=it}
-        (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=ui.dp(22);bottomMargin=bottomInset+ui.dp(88)}.also{credit.layoutParams=it}
+        (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=ui.dp(22);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(184)else ui.dp(88)}.also{credit.layoutParams=it}
         (snackbar.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=ui.dp(24);rightMargin=ui.dp(24);bottomMargin=bottomInset+ui.dp(100)}.also{snackbar.layoutParams=it}
         pageLayer.setPadding(0,topInset,0,if(page=="trips")bottomInset+ui.dp(91) else bottomInset)
     }
@@ -367,7 +369,9 @@ class MainActivity : ComponentActivity(), LocationListener {
         val key=listOf(currentPage,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journeyLeg,model.voice,model.vehicleClass)
         if(key==pageKey)return;pageKey=key
         val content=when(currentPage){"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();else->pages.settings()}
+        val oldScroll=if(currentPage!="search")pageBody.getChildAt(0)?.scrollY?:0 else 0
         pageBody.removeAllViews();pageBody.addView(content,FrameLayout.LayoutParams(-1,-1))
+        if(oldScroll>0)content.post{content.scrollTo(0,oldScroll)}
         layoutChrome()
         if(currentPage=="trips"){navigation.bringToFront();snackbar.bringToFront()}
     }

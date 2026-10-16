@@ -44,7 +44,14 @@ class AtlasPages(
         ui.ripple(this,ui.surface,18); setPadding(ui.dp(14),ui.dp(13),ui.dp(14),ui.dp(13))
         val type=place.optString("type").ifBlank { "Place" }
         val icon=when { type.contains("cafe") -> "cafe"; type.contains("food")||type.contains("restaurant") -> "food"; visited -> "check"; else -> "pin" }
-        addView(ui.tileIcon(icon,if(visited)ui.green else ui.blue),LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))
+        val tile=ui.tileIcon(icon,if(visited)ui.green else ui.blue).apply{clipToOutline=true}
+        val image=place.optString("image")
+        if(image.isNotBlank()&&context is androidx.lifecycle.LifecycleOwner){
+            val photo=android.widget.ImageView(context).apply{scaleType=android.widget.ImageView.ScaleType.CENTER_CROP;background=null}
+            tile.addView(photo,android.widget.FrameLayout.LayoutParams(-1,-1))
+            PlaceImages.load(context,image,photo)
+        }
+        addView(tile,LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))
         val details=ui.column();details.addView(ui.text(place.optString("name","Selected location"),15f,bold=true).apply { maxLines=2 })
         details.addView(ui.space(5))
         val distance=place.optDouble("distanceMeters",Double.NaN).takeIf { it.isFinite() }?.let { formatDistance(it)+" · " }.orEmpty()
