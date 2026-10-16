@@ -12,7 +12,9 @@ internal object RouteGapPrediction {
         if (!age.isFinite() || age < 2.0 || age > 9.0 ||
             fix.speed < 2.0 || fix.accuracy > 35.0 ||
             guidance.optString("state") == "arrived" ||
-            guidance.optString("state") == "reroute") return null
+            guidance.optString("state") == "reroute" ||
+            guidance.optString("state") == "checking" ||
+            guidance.optDouble("offRoute", 0.0) > 60.0) return null
         if (guidance.optDouble("predictedAt", fix.time) >= now) return null
         val points = route.optJSONArray("points") ?: return null
         val total = route.optDouble("distanceMeters")
