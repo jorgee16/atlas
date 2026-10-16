@@ -34,13 +34,23 @@ jobs:
         with:
           ref: migration/native-core-kotlin
           persist-credentials: true
-      - name: Install vector tile builder and R2 client
+      - name: Install tools and build compatible Tilemaker 3.2.0
+        shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq osmium-tool tilemaker rclone
-          tilemaker --help | head -35
+          sudo apt-get install -y -qq osmium-tool rclone cmake build-essential \
+            libboost-dev libboost-filesystem-dev libboost-program-options-dev \
+            libboost-system-dev liblua5.3-dev libshp-dev libsqlite3-dev \
+            rapidjson-dev unzip
+          # Ubuntu's tilemaker 2.4 is incompatible with this repo's Tilemaker 3 Lua.
+          git clone --quiet --depth 1 --branch v3.2.0 \
+            https://github.com/systemed/tilemaker.git work/tilemaker-src
+          cmake -S work/tilemaker-src -B work/tilemaker-build \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build work/tilemaker-build --target tilemaker --parallel 2
+          work/tilemaker-build/tilemaker --help | head -30
           osmium --version
-          rclone version | head -1
           df -h .
       - name: Download complete Geofabrik Portugal extract
         shell: bash
@@ -63,7 +73,7 @@ jobs:
           mkdir -p work/tilemaker-store work/output
           # The approved existing vector profile includes buildings, roads,
           # names, place labels, parks and land use; z14 overzooms on mobile.
-          tilemaker \
+          work/tilemaker-build/tilemaker \
             --input work/source/portugal.osm.pbf \
             --output work/output/map.pmtiles \
             --config tools/region-builder/tile-profiles/openmaptiles-z16/config.json \
