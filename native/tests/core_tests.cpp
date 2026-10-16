@@ -76,6 +76,12 @@ int main(int argc, char **argv) {
               std::abs(stale.position.along - fresh.position.along) < .01,
           "stale fix cannot jump route progress");
     session.reset();
+    auto reliable = session.update(drive->points.front(), 5, 0, 1, *drive);
+    auto uncertain = session.update({40.01, -8}, 100, 0, 2, *drive);
+    check(uncertain.state == Guidance::State::reduced &&
+          std::abs(uncertain.position.along - reliable.position.along) < .01,
+          "poor GPS holds reliable route progress");
+    session.reset();
     check(session.update({40.01, -8}, 100, 0, 1, *drive).state ==
               Guidance::State::reduced,
           "poor GPS does not reroute");

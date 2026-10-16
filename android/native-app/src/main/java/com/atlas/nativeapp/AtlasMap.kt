@@ -168,14 +168,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         if (s.navigating && s.guidance != null && geometry.size > 1) {
             val segment = s.guidance.optInt("segment").coerceIn(0, geometry.size - 2)
-            if (segment != lastSegment) {
-                lastSegment = segment
-                val snapped = s.guidance.coordinate().let { LatLng(it.lat, it.lon) }
-                remaining?.points = listOf(snapped) + geometry.drop(segment + 1)
-                val done = geometry.take(segment + 1) + snapped
-                if (travelled == null) travelled = ready.addPolyline(PolylineOptions().addAll(done).color(Color.parseColor("#9EA9BA")).width(5f)).also { lines.add(it) }
-                else travelled?.points = done
-            }
+            // Update at every accepted progress fix, not only on segment
+            // changes: otherwise travelled/remaining lines appear frozen.
+            val snapped = s.guidance.coordinate().let { LatLng(it.lat, it.lon) }
+            remaining?.points = listOf(snapped) + geometry.drop(segment + 1)
+            val done = geometry.take(segment + 1) + snapped
+            if (travelled == null) travelled = ready.addPolyline(PolylineOptions().addAll(done).color(Color.parseColor("#9EA9BA")).width(5f)).also { lines.add(it) }
+            else travelled?.points = done
+            lastSegment = segment
         }
         s.fix?.let { fix ->
             val display = if (s.navigating && s.guidance != null && s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point

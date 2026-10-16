@@ -196,9 +196,12 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     return out;
   }
   out.position = progress(p, r);
-  lastPosition_ = out.position;
   lastTime_ = t;
   if (accuracy > 50) {
+    // Ignore unreliable projections while retaining the last reliable
+    // along-route position. Never infer new travel from a poor GPS fix.
+    if (lastPosition_ && lastPosition_->offRoute <= 80)
+      out.position = *lastPosition_;
     offSince_ = -1;
     offFixes_ = 0;
     out.state = Guidance::State::reduced;
@@ -209,6 +212,14 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     out.state = Guidance::State::arrived;
     return out;
   }
+  // Small backward GPS projections are jitter, not reverse travel.
+  // Preserve forward guidance progress while remaining within the corridor.
+  if (lastPosition_ && out.position.offRoute <= std::max(25., accuracy * 2) &&
+      lastPosition_->offRoute <= std::max(25., accuracy * 2) &&
+      out.position.along < lastPosition_->along &&
+      lastPosition_->along - out.position.along <= std::max(20., accuracy * 2))
+    out.position = *lastPosition_;
+  lastPosition_ = out.position;
   double threshold = std::max(80., accuracy * 2);
   if (out.position.offRoute > threshold) {
     if (offSince_ < 0)
