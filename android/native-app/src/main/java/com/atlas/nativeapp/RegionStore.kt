@@ -93,6 +93,7 @@ class RegionStore(context: Context) {
                                 currentCoroutineContext().ensureActive()
                                 val n = input.read(buffer); if (n < 0) break
                                 output.write(buffer, 0, n); digest.update(buffer, 0, n); count += n; downloaded += n
+                                check(count <= entry.getLong("sizeBytes")) { "Package file exceeds declared size" }
                                 progress(downloaded, region.bytes)
                             }
                             output.fd.sync()

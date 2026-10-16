@@ -9,6 +9,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -122,7 +123,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                 var lastPercent = -1
                 regions.install(region) { current, total ->
                     val percent = if (total > 0) (current * 100 / total).toInt() else 0
-                    if (percent != lastPercent) { lastPercent = percent; state.value = state.value.copy(downloadPercent = percent) }
+                    if (percent != lastPercent) { lastPercent = percent; state.update { it.copy(downloadPercent = percent) } }
                 }
                 status("${region.name} ready offline")
             } catch (e: Throwable) { failure(e) }

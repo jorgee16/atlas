@@ -227,13 +227,30 @@ class MainActivity : ComponentActivity(), LocationListener {
     }
     private fun showPlaces(places: List<JSONObject>) { AlertDialog.Builder(this).setTitle("Places").setItems(places.map { it.optString("name") }.toTypedArray()) { _, i -> model.select(places[i]); center(places[i].coordinate()) }.setNegativeButton("Close", null).show() }
     private fun showMenu() {
-        val items = arrayOf("Offline regions", "Saved places", "Trips", if (model.voice) "Mute voice" else "Enable voice", "Nearby categories")
+        val items = arrayOf("Offline regions", "Saved places", "Trips", "Public transport", if (model.voice) "Mute voice" else "Enable voice", "Nearby categories")
         AlertDialog.Builder(this).setItems(items) { _, which -> when (which) {
-            0 -> showRegions(); 1 -> showBookmarks(); 2 -> showTrips(); 3 -> { model.voice = !model.voice }; 4 -> {
+            0 -> showRegions(); 1 -> showBookmarks(); 2 -> showTrips(); 3 -> showTransit(); 4 -> { model.voice = !model.voice }; 5 -> {
                 val cats = arrayOf("cafe", "restaurant", "pub", "museum", "park", "shop")
                 AlertDialog.Builder(this).setTitle("Nearby").setItems(cats) { _, i -> model.search("", true, cats[i]) }.show()
             }
         } }.show()
+    }
+    private fun showTransit() {
+        val destination = model.updates.value.destination ?: return model.status("Choose a destination first")
+        lifecycleScope.launch {
+            model.status("Loading public transport journeys…")
+            try {
+                val provider = TransitProvider()
+                val journeys = provider.journeys(model.anchor, destination.coordinate())
+                AlertDialog.Builder(this@MainActivity).setTitle("Public transport · London")
+                    .setItems(journeys.map(provider::summary).toTypedArray()) { _, index ->
+                        AlertDialog.Builder(this@MainActivity).setTitle(provider.summary(journeys[index]))
+                            .setMessage(provider.instructions(journeys[index]).joinToString("\n\n"))
+                            .setPositiveButton("Close", null).show()
+                    }.setNegativeButton("Close", null).show()
+                model.status("${journeys.size} public transport journeys")
+            } catch (e: Exception) { model.status(e.message ?: "Public transport unavailable") }
+        }
     }
     private fun showRegions() {
         val regions = model.regions.regions
