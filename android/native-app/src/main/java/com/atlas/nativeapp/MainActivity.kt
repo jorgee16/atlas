@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity(), LocationListener {
         root.addView(credit,FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM or Gravity.START))
         pageLayer = ui.column().apply { setBackgroundColor(ui.canvas); visibility = View.GONE; elevation = ui.dp(12).toFloat(); isClickable = true }
         root.addView(pageLayer,FrameLayout.LayoutParams(-1,-1))
-        snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(18).toFloat();visibility=View.GONE }
+        snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(24).toFloat();visibility=View.GONE }
         root.addView(snackbar,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
         pages = AtlasPages(this,ui,model,::selectDestination,::openPage,{importTrip.launch(arrayOf("application/json","text/*"))}, { theme -> model.theme=theme; recreate() },::confirm,{atlasMap.center(it)})
         atlasMap.onPan = { if(model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true}; rebuildChrome() }
@@ -203,7 +203,7 @@ class MainActivity : ComponentActivity(), LocationListener {
     }
     private fun renderTabs(s: AtlasState) {
         navigation.removeAllViews();navigation.visibility=if(s.navigating||fullMap||(page!=null&&page!="trips"))View.GONE else View.VISIBLE
-        navigation.background=ui.shape(ui.surface,25);navigation.elevation=ui.dp(8).toFloat();navigation.setPadding(ui.dp(7),ui.dp(6),ui.dp(7),ui.dp(6))
+        navigation.background=ui.shape(ui.surface,25);navigation.elevation=ui.dp(if(page=="trips")20 else 8).toFloat();navigation.setPadding(ui.dp(7),ui.dp(6),ui.dp(7),ui.dp(6))
         listOf(Triple("Explore","explore","Explore"),Triple("Trip","trip","Trip"),Triple("Navigation","navigate","Navigate")).forEach{(tab,icon,label)->
             val active=s.tab==tab;val item=ui.column().apply{
                 gravity=Gravity.CENTER;ui.ripple(this,if(active)ui.soft else ui.surface,19);contentDescription="$label tab"
