@@ -34,19 +34,6 @@ jobs:
         with:
           ref: migration/native-core-kotlin
           persist-credentials: true
-      - name: Require R2 upload credentials before expensive generation
-        shell: bash
-        run: |
-          set -euo pipefail
-          missing=0
-          for key in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
-            if [[ -z "${!key:-}" ]]; then
-              echo "::error title=Missing R2 credential::$key must be configured in GitHub Actions secrets"
-              missing=1
-            fi
-          done
-          [[ "$missing" -eq 0 ]] || exit 1
-          echo "RCLONE_CONFIG_ATLASR2_ENDPOINT=https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" >> "$GITHUB_ENV"
       - name: Install vector tile builder and R2 client
         run: |
           sudo apt-get update -qq
@@ -55,23 +42,6 @@ jobs:
           osmium --version
           rclone version | head -1
           df -h .
-      - name: Verify live R2 catalog version before publishing
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p work
-          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/live-catalog.json
-          node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          const live=JSON.parse(fs.readFileSync('work/live-catalog.json','utf8'));
-          const local=JSON.parse(fs.readFileSync('public/regions/catalog.json','utf8'));
-          const l=live.regions.find(r=>r.id==='portugal');
-          const p=local.regions.find(r=>r.id==='portugal');
-          if (!l||!p||l.version!==p.version||l.version!==8) {
-            throw new Error('Portugal catalogue changed: resolve versions before replacing remote catalog');
-          }
-          console.log('Portugal catalog version verified:',l.version);
-          JS
       - name: Download OSM extracts for mainland, Madeira and Azores
         shell: bash
         run: |
@@ -103,7 +73,7 @@ jobs:
             --config tools/region-builder/tile-profiles/openmaptiles-z16/config.json \
             --process tools/region-builder/tile-profiles/openmaptiles-z16/process.lua \
             --store work/tilemaker-store \
-            --bbox=-31.5,32.4,-6.0,42.3
+            --bbox -31.5,32.4,-6.0,42.3
           python3 - <<'PY'
           from pathlib import Path
           p = Path('work/output/map.pmtiles')
@@ -114,6 +84,44 @@ jobs:
           print('Validated PMTiles v3:', p.stat().st_size, 'bytes')
           PY
           sha256sum work/output/map.pmtiles
+      - name: Preserve generated Portugal map even without R2 credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-portugal-vector-pmtiles
+          path: work/output/map.pmtiles
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - name: Require R2 upload credentials before publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for key in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error title=Missing R2 credential::$key must be configured in GitHub Actions secrets"
+              missing=1
+            fi
+          done
+          [[ "$missing" -eq 0 ]] || exit 1
+          echo "RCLONE_CONFIG_ATLASR2_ENDPOINT=https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" >> "$GITHUB_ENV"
+      - name: Verify live R2 catalog version before publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/live-catalog.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const live=JSON.parse(fs.readFileSync('work/live-catalog.json','utf8'));
+          const local=JSON.parse(fs.readFileSync('public/regions/catalog.json','utf8'));
+          const l=live.regions.find(r=>r.id==='portugal');
+          const p=local.regions.find(r=>r.id==='portugal');
+          if (!l||!p||l.version!==p.version||l.version!==8) {
+            throw new Error('Portugal catalogue changed: resolve versions before replacing remote catalog');
+          }
+          console.log('Portugal catalog version verified:',l.version);
+          JS
       - name: Upload map only, without touching routing or POI files
         shell: bash
         run: |
