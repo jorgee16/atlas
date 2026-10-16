@@ -26,7 +26,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
-    implementation 'org.maplibre.gl:android-sdk:11.8.2'
+    // 11.8.4 includes the Android emulator rendering fix (maplibre issue #3308).
+    // Keep >=11.7.0 for built-in pmtiles://file:// source support.
+    implementation 'org.maplibre.gl:android-sdk:11.8.4'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.7.0'
     androidTestImplementation 'androidx.test:rules:1.7.0'
