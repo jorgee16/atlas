@@ -211,6 +211,11 @@ class AtlasPages(
             addView(rowAction("volume","Voice guidance",if(model.voice)"On · Speak upcoming turns" else "Off · Quiet navigation"){model.voice=!model.voice})
             addView(ui.rule());addView(rowAction("sun","Appearance",model.theme.replaceFirstChar{it.titlecase()}){open("appearance")})
             addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Toll estimates"){open("vehicle")})
+            addView(ui.rule());addView(rowAction("layers","Map layers",when(model.mapVisualStyle){
+                MapVisualStyle.SATELLITE -> "Satellite · Online imagery"
+                MapVisualStyle.HYBRID -> "Hybrid · Imagery with labels"
+                else -> "Streets · Atlas cartography"
+            }){open("mapLayers")})
             addView(ui.rule());addView(rowAction("map","Map source",when(model.mapSourceMode){
                 MapSourcePolicy.ONLINE -> "Online · internet maps"
                 MapSourcePolicy.OFFLINE -> "Offline · downloaded maps only"

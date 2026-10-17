@@ -254,3 +254,24 @@ The original C++ drive/walk routing engine is unchanged. GPX active-follow
 progress, off-track alerts and elevation profile are future Trail increments;
 this first version restores the library and map preview without pretending
 that it already includes a GPX follower.
+
+### Native MapLibre Satellite and Hybrid layers
+
+The MapLibre map supports **Streets**, **Satellite** (network Esri World
+Imagery), and **Hybrid** (imagery plus reference labels). Choose via the floating
+Layers control or Settings. The choice is persistent and independent from
+Auto/Online/Offline source mode; selecting Satellite with Auto deliberately
+loads imagery online even if a local PMTiles street map exists. Explicit
+Offline-only mode never uses network satellite tiles; it renders local streets.
+If the imagery server fails, Atlas keeps a streets raster fallback. The native
+routing, regions, search and Trail/Trip data are unchanged.
+
+Esri World Imagery and reference layers are licensed third-party content:
+check provider terms, service access, limits and eligibility before wider or
+commercial distribution. Imagery attribution is included in map styles and is
+visible in the UI, linking to the provider. Offline satellite image packs are
+**not** bundled with Portugal v9 and must not be scraped from Esri services.
+
+The screen chrome was consolidated: smaller Atlas badge and search bar,
+differentiated Layers versus Full map controls, and a compact Navigate
+empty-state panel with the same destination action.

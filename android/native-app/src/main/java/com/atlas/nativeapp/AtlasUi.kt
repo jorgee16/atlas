@@ -124,6 +124,8 @@ class AtlasIcon(context: Context, var name: String, var tint: Int) : View(contex
             "upload" -> { line(12f, 16f, 12f, 3f); line(7f, 8f, 12f, 3f, 17f, 8f); line(4f, 16f, 4f, 21f, 20f, 21f, 20f, 16f) }
             "check" -> line(5f, 12f, 10f, 17f, 20f, 6f)
             "plus" -> { line(4f, 12f, 20f, 12f); line(12f, 4f, 12f, 20f) }
+            "layers" -> { rect(5f, 5f, 19f, 9f, 2f); rect(3f, 10f, 21f, 14f, 2f); rect(5f, 16f, 19f, 20f, 2f) }
+            "expand" -> { line(9f,3f,3f,3f,3f,9f);line(15f,3f,21f,3f,21f,9f);line(3f,15f,3f,21f,9f,21f);line(15f,21f,21f,21f,21f,15f) }
             "map" -> { line(3f, 5f, 9f, 3f, 15f, 6f, 21f, 3f, 21f, 19f, 15f, 22f, 9f, 19f, 3f, 22f, 3f, 5f); line(9f, 3f, 9f, 19f); line(15f, 6f, 15f, 22f) }
             "trail" -> { line(3f, 19f, 8f, 9f, 13f, 15f, 19f, 4f, 22f, 10f); line(3f, 19f, 8f, 21f, 14f, 16f, 19f, 18f, 22f, 10f) }
             "trip", "route" -> { circle(6f, 5f, 2f); circle(18f, 19f, 2f); val path = Path(); path.moveTo(8f, 5f); path.lineTo(17f, 5f); path.cubicTo(24f, 5f, 23f, 12f, 17f, 12f); path.lineTo(7f, 12f); path.cubicTo(0f, 12f, 1f, 19f, 6f, 19f); path.lineTo(16f, 19f); canvas.drawPath(path, p) }

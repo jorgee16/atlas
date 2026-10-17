@@ -286,11 +286,12 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun render(state: AtlasState) {
         syncNavigationService(state.navigating)
         atlasMap.sourceMode = model.mapSourceMode
+        atlasMap.visualStyle = model.mapVisualStyle
         atlasMap.render(state)
         atlasMap.previewTrail(if(state.tab=="Trail")trailList.firstOrNull{it.id==selectedTrailId} else null)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
         updateMapSourceIndicators()
-        val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
+        val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,model.mapVisualStyle,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
         if(chrome!=lastChrome){lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
         if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
         if(state.navigating)window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -301,14 +302,22 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun renderTop(s: AtlasState) {
         top.removeAllViews();topSourceBadge=null;top.visibility=if(s.navigating||fullMap||page!=null)View.GONE else View.VISIBLE
         val header=ui.row()
-        val brand=ui.row().apply {background=ui.shape(ui.surface,17);setPadding(ui.dp(13),ui.dp(11),ui.dp(14),ui.dp(11));elevation=ui.dp(3).toFloat();addView(ui.icon("explore",ui.blue,23));addView(ui.text("ATLAS",16f,bold=true).apply{letterSpacing=.14f},LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(9)});contentDescription="Atlas"}
+        val brand=ui.row().apply {
+            background=ui.shape(ui.surface,16)
+            setPadding(ui.dp(11),ui.dp(9),ui.dp(13),ui.dp(9))
+            elevation=ui.dp(2).toFloat()
+            addView(ui.icon("explore",ui.blue,19))
+            addView(ui.text("ATLAS",13f,bold=true).apply{letterSpacing=.11f},
+                LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(8)})
+            contentDescription="Atlas"
+        }
         header.addView(brand)
         header.addView(View(this),LinearLayout.LayoutParams(0,1,1f))
         header.addView(ui.iconButton("download","Offline regions"){openPage("regions")},LinearLayout.LayoutParams(ui.dp(46),ui.dp(46)).apply{rightMargin=ui.dp(9)})
         header.addView(ui.iconButton("menu","Open menu"){showMenu()},LinearLayout.LayoutParams(ui.dp(46),ui.dp(46)))
         top.addView(header)
         val search=ui.row().apply {
-            ui.ripple(this,ui.surface,20);setPadding(ui.dp(17),ui.dp(15),ui.dp(15),ui.dp(15));elevation=ui.dp(5).toFloat();contentDescription="Search places"
+            ui.ripple(this,ui.surface,18);setPadding(ui.dp(15),ui.dp(12),ui.dp(13),ui.dp(12));elevation=ui.dp(3).toFloat();contentDescription="Search places"
             addView(ui.icon("search",ui.blue,23));addView(ui.text(if(s.tab=="Navigation")"Where to?" else "Search places or addresses",15f,ui.muted),LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(12)})
             addView(ui.icon("chevron",ui.muted,18));setOnClickListener{openSearch()}
         }
@@ -339,9 +348,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         controls.removeAllViews();controls.visibility=if(page!=null)View.GONE else View.VISIBLE
         fun add(name:String,label:String,selected:Boolean=false,click:()->Unit){controls.addView(ui.iconButton(name,label,selected,click),LinearLayout.LayoutParams(ui.dp(48),ui.dp(48)).apply{topMargin=ui.dp(10)})}
         add("compass",if(atlasMap.headingUp)"Switch to north up" else "Switch to heading up"){atlasMap.compass();rebuildChrome()}
-        add("map","Map source: ${mapSourceLabel()}"){showMapSourceOptions()}
+        add("layers","Map layers: ${mapVisualLabel()}"){showMapLayersOptions()}
         add("locate","Recenter on my location",atlasMap.follow){if(hasLocation()){atlasMap.recenter();rebuildChrome()}else enableLocation()}
-        if(!s.navigating)add("map",if(fullMap)"Show controls" else "Full map"){fullMap=!fullMap;rebuildChrome()}
+        if(!s.navigating)add("expand",if(fullMap)"Show controls" else "Full map"){fullMap=!fullMap;rebuildChrome()}
     }
     private fun renderTabs(s: AtlasState) {
         navigation.removeAllViews();navigation.visibility=if(s.navigating||fullMap||(page!=null&&page!="trips"))View.GONE else View.VISIBLE
@@ -478,8 +487,18 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun planner(s: AtlasState): View {
         val card=ui.card(if(landscape)14 else 18,true)
         if(s.destination==null){
-            card.addView(ui.text("Where are you heading?",21f,bold=true));card.addView(ui.space(8));card.addView(ui.text("Find a place. Let Atlas take you there.",13f,ui.muted))
-            card.addView(ui.action("Choose destination","search"){openSearch()},linear(17));return card
+            card.setPadding(ui.dp(13),ui.dp(13),ui.dp(13),ui.dp(13))
+            card.addView(ui.row().apply {
+                addView(ui.tileIcon("pin"),LinearLayout.LayoutParams(ui.dp(38),ui.dp(38)))
+                addView(ui.column().apply {
+                    addView(ui.text("Where are you heading?",16f,bold=true))
+                    addView(ui.space(4))
+                    addView(ui.text("Search a destination",12f,ui.muted))
+                },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(11)})
+                addView(ui.iconButton("search","Choose destination"){openSearch()},
+                    LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))
+            })
+            return card
         }
         val compact=(previewCollapsed||landscape)&&s.route!=null
         val title=ui.row().apply{
@@ -592,10 +611,23 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun updateMapSourceIndicators() {
         if (!::mapSourceBadge.isInitialized) return
         mapSourceBadge.text=when(atlasMap.activeMapSource) {
-            MapSourcePolicy.OFFLINE -> "MAP · OFFLINE"
-            MapSourcePolicy.ONLINE -> "MAP · ONLINE"
+            MapSourcePolicy.OFFLINE -> "OFFLINE · STREETS"
+            MapSourcePolicy.ONLINE -> when(atlasMap.activeVisualStyle) {
+                MapVisualStyle.SATELLITE -> "SATELLITE · ONLINE"
+                MapVisualStyle.HYBRID -> "HYBRID · ONLINE"
+                else -> "STREETS · ONLINE"
+            }
             MapSourcePolicy.UNAVAILABLE -> "OFFLINE MAP UNAVAILABLE"
             else -> "MAP · LOADING"
+        }
+        val imagery=atlasMap.activeVisualStyle!=MapVisualStyle.STREETS
+        credit.text=if(imagery)"© Esri · Imagery contributors"
+            else "© OpenStreetMap · OpenFreeMap"
+        credit.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(
+                if(imagery)"https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9"
+                else "https://www.openstreetmap.org/copyright"
+            )))
         }
         val state=model.updates.value
         val region=model.regions.regions.firstOrNull {
@@ -607,10 +639,37 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
              else "")
     }
     private fun mapSourceLabel(): String = when(atlasMap.activeMapSource) {
-        MapSourcePolicy.OFFLINE -> "Offline map"
-        MapSourcePolicy.ONLINE -> "Online map"
+        MapSourcePolicy.OFFLINE -> "Offline streets"
+        MapSourcePolicy.ONLINE -> when(atlasMap.activeVisualStyle) {
+            MapVisualStyle.SATELLITE -> "Satellite · Online"
+            MapVisualStyle.HYBRID -> "Hybrid · Online"
+            else -> "Streets · Online"
+        }
         MapSourcePolicy.UNAVAILABLE -> "Offline map unavailable"
         else -> "Loading map"
+    }
+    private fun mapVisualLabel():String = when(atlasMap.activeVisualStyle) {
+        MapVisualStyle.SATELLITE -> "Satellite"
+        MapVisualStyle.HYBRID -> "Hybrid"
+        else -> "Streets"
+    }
+    private fun showMapLayersOptions() {
+        val choices=listOf(
+            Triple("Streets · Atlas cartography",MapVisualStyle.STREETS,"map"),
+            Triple("Satellite · aerial imagery (online)",MapVisualStyle.SATELLITE,"layers"),
+            Triple("Hybrid · aerial imagery with labels (online)",MapVisualStyle.HYBRID,"layers")
+        )
+        showChoices("Map layers",choices.map{(label,style,icon)->
+            (if(model.mapVisualStyle==style)"✓  " else "")+label to icon
+        }) { selected ->
+            val chosen=choices[selected].second
+            if(chosen!=MapVisualStyle.STREETS && model.mapSourceMode==MapSourcePolicy.OFFLINE) {
+                model.status("Satellite needs internet. Switch the map source to Auto or Online.")
+                return@showChoices
+            }
+            model.mapVisualStyle=chosen
+            rebuildChrome()
+        }
     }
     private fun showMapSourceOptions() {
         val choices=listOf(
@@ -636,6 +695,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun openSearch(){searchTarget="destination";model.clearSearch();openPage("search")}
     private fun openPage(name:String){
         if(name=="mapSource"){showMapSourceOptions();return}
+        if(name=="mapLayers"){showMapLayersOptions();return}
         if(name=="map"){closePage();return}
         if(name=="trips")model.tab("Trip")
         page=name;pageKey=null;pageLayer.removeAllViews();pageLayer.visibility=View.VISIBLE

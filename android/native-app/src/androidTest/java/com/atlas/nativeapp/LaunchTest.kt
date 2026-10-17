@@ -75,6 +75,11 @@ class LaunchTest {
             scenario.onActivity { (it.application as AtlasApplication).model.endNavigation() }
             SystemClock.sleep(3500)
             onView(withContentDescription("Search places")).check(matches(isDisplayed()))
+            onView(withContentDescription(org.hamcrest.Matchers.containsString("Map layers:")))
+                .perform(click())
+            onView(withText(org.hamcrest.Matchers.containsString("Hybrid · aerial imagery")))
+                .check(matches(isDisplayed()))
+            androidx.test.espresso.Espresso.pressBack()
             capture("01-explore")
             scenario.recreate()
             onView(withContentDescription("Search places")).check(matches(isDisplayed()))
