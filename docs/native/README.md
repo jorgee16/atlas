@@ -227,3 +227,17 @@ projection jitter at low speeds; it reanchors after consistent fresh fixes or
 immediately when actual movement resumes. Walking remains unaffected.
 Neither compass movement nor visual stabilisation triggers rerouting. The
 physical-device compass and tunnel tests remain required.
+
+### Continuous GPS visual interpolation in native MapLibre
+
+`NavigationRenderInterpolator` restores the older 1 Hz GPS -> smooth visual
+rendering pipeline. The visual position follows the route polyline (including
+corners), extrapolates for at most **1.2 s for driving** or **0.55 s walking**,
+and eases corrections using an accuracy-weighted exponential filter.
+`AtlasMap` drives the cursor and follow-camera on one `Choreographer`
+frame clock, throttled to roughly 30 FPS and suspended with the Activity.
+The C++ motor still consumes only genuine GPS fixes for rerouting, arrival,
+maneuvers and route progress. The long-gap predictor (2–9 s) passes visual
+measurements that are **not extrapolated again**. Stopped-car stabilization
+and compass control are preserved. CI includes pure trajectory tests; actual
+road/device performance and battery usage remain to be verified.
