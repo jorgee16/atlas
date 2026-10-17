@@ -70,6 +70,34 @@ class LaunchTest {
         }
     }
 
+    @Test fun trailImportSheetAndMapControlsDoNotOverlapPanel() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { (it.application as AtlasApplication).model.endNavigation() }
+            onView(withContentDescription("Trail tab")).perform(click())
+            onView(withText("Your Trails")).check(matches(isDisplayed()))
+            scenario.onActivity { activity ->
+                fun field(name: String): android.view.View {
+                    val f=MainActivity::class.java.getDeclaredField(name).apply { isAccessible=true }
+                    return f.get(activity) as android.view.View
+                }
+                val controls=field("controls")
+                val panel=field("bottom")
+                val toolbarRect=android.graphics.Rect()
+                val panelRect=android.graphics.Rect()
+                controls.getGlobalVisibleRect(toolbarRect)
+                panel.getGlobalVisibleRect(panelRect)
+                org.junit.Assert.assertFalse("Trail toolbar overlaps the sheet: $toolbarRect / $panelRect",
+                    android.graphics.Rect.intersects(toolbarRect,panelRect))
+            }
+            capture("03-trail-empty")
+            onView(withContentDescription("Import GPX KML KMZ or GeoJSON")).perform(click())
+            onView(withText("Import a trail")).check(matches(isDisplayed()))
+            onView(withText("Choose a route file")).check(matches(isDisplayed()))
+            onView(withText("GPX  ·  KML  ·  KMZ  ·  GeoJSON")).check(matches(isDisplayed()))
+            capture("03-trail-import")
+        }
+    }
+
     @Test fun nativeScreensAndRecreation() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { (it.application as AtlasApplication).model.endNavigation() }

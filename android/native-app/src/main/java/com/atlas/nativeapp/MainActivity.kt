@@ -154,6 +154,48 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         importTrail.launch(arrayOf("*/*"))
     }
 
+    /** Native light/dark bottom sheet, matching the announced import design. */
+    private fun openTrailImportSheet() {
+        val sheet = trailSheet("Import a trail",
+            "Import routes from your device and explore them on the map.")
+        val zone = ui.column().apply {
+            gravity = Gravity.CENTER
+            val stroke = android.graphics.drawable.GradientDrawable().apply {
+                setColor(ui.canvas)
+                cornerRadius = ui.dp(20).toFloat()
+                setStroke(ui.dp(1), ui.line, ui.dp(7).toFloat(), ui.dp(5).toFloat())
+            }
+            background = stroke
+            minimumHeight = ui.dp(148)
+            setPadding(ui.dp(16), ui.dp(22), ui.dp(16), ui.dp(22))
+            addView(ui.icon("upload", ui.blue, 30))
+            addView(ui.space(13))
+            addView(ui.text("Choose a route file", 17f, ui.ink, true).apply {
+                gravity = Gravity.CENTER
+            })
+            addView(ui.space(9))
+            addView(ui.text("GPX  ·  KML  ·  KMZ  ·  GeoJSON", 12f, ui.muted).apply {
+                gravity = Gravity.CENTER
+            })
+            contentDescription = "Choose a route file"
+            isFocusable = true
+        }
+        sheet.addView(zone, linear(3))
+        sheet.addView(ui.row().apply {
+            addView(ui.icon("check", ui.muted, 18))
+            addView(ui.text("Files are imported and stored locally on your device.",
+                12f, ui.muted), LinearLayout.LayoutParams(0, -2, 1f).apply {
+                leftMargin = ui.dp(11)
+            })
+            setPadding(0, ui.dp(16), 0, ui.dp(4))
+        })
+        val dialog = showTrailSheet(sheet)
+        zone.setOnClickListener {
+            dialog.dismiss()
+            chooseTrailFile()
+        }
+    }
+
     private val importTrail = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) lifecycleScope.launch {
             try {
@@ -359,10 +401,18 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         (navigation.layoutParams as FrameLayout.LayoutParams).apply {width=if(landscape)ui.dp(300) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.CENTER_HORIZONTAL;leftMargin=left;rightMargin=right;bottomMargin=bottomInset+ui.dp(14)}.also{navigation.layoutParams=it}
         (guidance.layoutParams as FrameLayout.LayoutParams).apply{width=if(landscape)ui.dp(360) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12)}.also{guidance.layoutParams=it}
         (controls.layoutParams as FrameLayout.LayoutParams).apply {
-            val planning=model.updates.value.tab=="Navigation"&&!model.updates.value.navigating&&!fullMap
-            gravity=Gravity.END or if(planning&&!landscape)Gravity.TOP else Gravity.BOTTOM
-            rightMargin=right;topMargin=if(planning&&!landscape)topInset+ui.dp(165) else 0
-            bottomMargin=if(planning&&!landscape)0 else bottomInset+if(model.updates.value.navigating)ui.dp(178) else ui.dp(118)
+            val state=model.updates.value
+            val planning=state.tab=="Navigation"&&!state.navigating&&!fullMap
+            // Trail is a bottom sheet, not a surface for map controls.
+            // Anchor the map toolbar beside the exposed map, never the sheet.
+            val trailMap=state.tab=="Trail"&&!state.navigating&&!landscape&&!fullMap
+            val fromTop=(planning||trailMap)&&!landscape
+            gravity=Gravity.END or if(fromTop)Gravity.TOP else Gravity.BOTTOM
+            rightMargin=right
+            topMargin=if(trailMap)topInset+ui.dp(145)
+                else if(planning&&!landscape)topInset+ui.dp(165) else 0
+            bottomMargin=if(fromTop)0 else bottomInset+
+                if(state.navigating)ui.dp(178) else ui.dp(118)
         }.also{controls.layoutParams=it}
         (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(22);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(184)else ui.dp(88)}.also{credit.layoutParams=it}
         (mapSourceBadge.layoutParams as FrameLayout.LayoutParams).apply {
@@ -382,7 +432,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         atlasMap.previewTrail(if(state.tab=="Trail") pendingTrail ?: trailList.firstOrNull{it.id==selectedTrailId} else null)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
         updateMapSourceIndicators()
-        val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,model.mapVisualStyle,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
+        val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,pendingTrail?.id,model.mapVisualStyle,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
         if(chrome!=lastChrome){lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
         if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
         if(state.navigating)window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -436,7 +486,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         top.addView(info)
     }
     private fun renderControls(s: AtlasState) {
-        controls.removeAllViews();controls.visibility=if(page!=null)View.GONE else View.VISIBLE
+        controls.removeAllViews()
+        // Expanding Trail prioritises the library: map controls remain available
+        // again on collapse and cannot overlap the expanded sheet.
+        controls.visibility=if(page!=null || (s.tab=="Trail" && trailExpanded && !landscape))
+            View.GONE else View.VISIBLE
         fun add(name:String,label:String,selected:Boolean=false,click:()->Unit){controls.addView(ui.iconButton(name,label,selected,click),LinearLayout.LayoutParams(ui.dp(48),ui.dp(48)).apply{topMargin=ui.dp(10)})}
         add("compass",if(atlasMap.headingUp)"Switch to north up" else "Switch to heading up"){atlasMap.compass();rebuildChrome()}
         add("layers","Map layers: ${mapVisualLabel()}"){showMapLayersOptions()}
@@ -498,19 +552,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 addView(ui.text("${trailList.size} saved · On this device", 12f, ui.muted))
             }, LinearLayout.LayoutParams(0, -2, 1f))
             addView(ui.iconButton("plus", "Import GPX KML KMZ or GeoJSON") {
-                chooseTrailFile()
+                openTrailImportSheet()
             }, LinearLayout.LayoutParams(ui.dp(48), ui.dp(48)))
         })
         if (trailList.isEmpty()) {
-            panel.addView(ui.space(18))
-            panel.addView(ui.text("Bring your favourite routes into Atlas.",
-                14f, ui.ink, true))
-            panel.addView(ui.space(5))
-            panel.addView(ui.text("Import GPX, KML, KMZ or GeoJSON. Preview routes before saving.",
-                12f, ui.muted))
+            panel.addView(ui.text("GPX · KML · KMZ · GeoJSON", 12f, ui.muted), linear(13))
             panel.addView(ui.action("Import a trail", "upload") {
-                chooseTrailFile()
-            }, linear(16))
+                openTrailImportSheet()
+            }, linear(12))
         } else {
             val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
             val list = ui.column()
