@@ -1,15 +1,15 @@
 package com.atlas.nativeapp
 
-import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Test
 import java.io.File
-import java.net.InetSocketAddress
+import java.net.InetAddress
+import java.net.ServerSocket
 import java.net.URL
 import java.security.MessageDigest
+import kotlin.concurrent.thread
 import kotlin.io.path.createTempDirectory
 
 class RegionFileTransferTest {
@@ -18,21 +18,40 @@ class RegionFileTransferTest {
         .joinToString("") { "%02x".format(it) }
 
     private fun withServer(rangeSupported: Boolean, action: (URL) -> Unit) {
-        val server = HttpServer.create(InetSocketAddress("127.0.0.1",0),0)
-        server.createContext("/map") { exchange ->
-            val header = exchange.requestHeaders.getFirst("Range")
-            val offset = if (rangeSupported && header?.startsWith("bytes=") == true)
-                header.removePrefix("bytes=").removeSuffix("-").toInt() else 0
-            val count = bytes.size - offset
-            if (offset != 0) {
-                exchange.responseHeaders.add("Content-Range","bytes $offset-${bytes.size-1}/${bytes.size}")
+        // ServerSocket is part of the ordinary JVM/Android boot classpath,
+        // unlike the optional jdk.httpserver module.
+        val socket = ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"))
+        val worker = thread(isDaemon=true) {
+            socket.accept().use { client ->
+                client.soTimeout = 10_000
+                val input = client.getInputStream().bufferedReader(Charsets.ISO_8859_1)
+                var offset = 0
+                var requested: String? = null
+                while (true) {
+                    val line = input.readLine() ?: break
+                    if (line.isEmpty()) break
+                    if (line.startsWith("Range:", true)) requested=line.substringAfter(':').trim()
+                }
+                if (rangeSupported && requested?.startsWith("bytes=") == true) {
+                    offset=requested.removePrefix("bytes=").removeSuffix("-").toInt()
+                }
+                val count = bytes.size - offset
+                val code = if(offset>0) "206 Partial Content" else "200 OK"
+                val extra = if(offset>0)
+                    "Content-Range: bytes $offset-${bytes.size-1}/${bytes.size}\\r\\n" else ""
+                val headers = "HTTP/1.1 $code\\r\\n" +
+                    "Content-Type: application/octet-stream\\r\\n" +
+                    "Content-Length: $count\\r\\n" +
+                    extra + "Connection: close\\r\\n\\r\\n"
+                client.getOutputStream().use { out ->
+                    out.write(headers.toByteArray(Charsets.ISO_8859_1))
+                    out.write(bytes, offset, count)
+                    out.flush()
+                }
             }
-            exchange.sendResponseHeaders(if(offset == 0) 200 else 206,count.toLong())
-            exchange.responseBody.use { it.write(bytes, offset, count) }
         }
-        server.start()
-        try { action(URL("http://127.0.0.1:${server.address.port}/map")) }
-        finally { server.stop(0) }
+        try { action(URL("http://127.0.0.1:${socket.localPort}/map")) }
+        finally { socket.close(); worker.join(1_000) }
     }
 
     @Test fun continueFromExistingBytesWithHttpRange() = withServer(true) { url ->
