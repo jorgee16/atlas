@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private var selectedTrailId: String? = null
     private var trailExpanded = false
     private var trailCoverTargetId: String? = null
+    private var pendingTrail: Trail? = null
     private lateinit var root: FrameLayout
     private lateinit var top: LinearLayout
     private lateinit var bottom: LinearLayout
@@ -147,26 +148,116 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
     }
     private var resumeDialogShown=false
+    private fun chooseTrailFile() {
+        // Providers label KMZ and GPX with inconsistent MIME types. Validate
+        // the extension and contents ourselves rather than hiding usable files.
+        importTrail.launch(arrayOf("*/*"))
+    }
+
     private val importTrail = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if(uri!=null)lifecycleScope.launch {
+        if (uri != null) lifecycleScope.launch {
             try {
-                val name=contentResolver.query(uri,null,null,null,null)?.use{cursor->
-                    val col=cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                    if(col>=0 && cursor.moveToFirst())cursor.getString(col) else null
-                } ?: "Imported Trail.gpx"
-                val trail=withContext(Dispatchers.IO) {
-                    contentResolver.openInputStream(uri)!!.use{trails.importGpx(it,name)}
+                val name = contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    val column = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (column >= 0 && cursor.moveToFirst()) cursor.getString(column) else null
+                } ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Imported trail"
+                val trail = withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)!!.use { trails.preview(it, name) }
                 }
-                trailList=trails.all()
-                selectedTrailId=trail.id
-                trailExpanded=false
-                model.tab("Trail")
-                atlasMap.previewTrail(trail)
-                model.status("Imported ${trail.name}")
-                rebuildChrome()
-            }catch(e:Exception){model.status(e.message?:"Could not import GPX")}
+                showTrailImportPreview(trail)
+            } catch (e: Exception) {
+                model.status(e.message ?: "Could not read trail file")
+            }
         }
     }
+
+    private fun trailSheet(title: String, subtitle: String): LinearLayout =
+        ui.column().apply {
+            setPadding(ui.dp(22), ui.dp(12), ui.dp(22), ui.dp(24))
+            background = ui.shape(ui.surface, 26)
+            addView(ui.text("━━━━", 18f, ui.muted).apply {
+                gravity = Gravity.CENTER
+            })
+            addView(ui.space(12))
+            addView(ui.text(title, 22f, ui.ink, true))
+            addView(ui.space(7))
+            addView(ui.text(subtitle, 13f, ui.muted))
+            addView(ui.space(18))
+        }
+
+    private fun showTrailSheet(content: View): AlertDialog =
+        AlertDialog.Builder(this).setView(content).create().apply {
+            show()
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            window?.setGravity(Gravity.BOTTOM)
+            window?.setLayout(resources.displayMetrics.widthPixels - ui.dp(20), -2)
+        }
+
+    private fun showTrailImportPreview(trail: Trail) {
+        pendingTrail = trail
+        model.tab("Trail")
+        rebuildChrome()
+        atlasMap.previewTrail(trail)
+        var saved = false
+        val panel = trailSheet("Import this trail?",
+            "Review the route on the map before adding it to your library.")
+        panel.addView(ui.row().apply {
+            addView(ui.text(trail.name, 17f, ui.ink, true),
+                LinearLayout.LayoutParams(0, -2, 1f))
+            addView(ui.badge(trail.format))
+        })
+        panel.addView(ui.space(18))
+        panel.addView(ui.row().apply {
+            val duration = trail.durationMillis?.let {
+                AtlasPages.formatTime(it / 1000.0)
+            } ?: "—"
+            for ((value, label) in listOf(
+                AtlasPages.formatDistance(trail.distanceMeters) to "Distance",
+                "+${trail.ascentMeters.toInt()} m" to "Ascent",
+                duration to "Duration"
+            )) {
+                addView(ui.stat(value, label), LinearLayout.LayoutParams(0, -2, 1f))
+            }
+        })
+        panel.addView(ui.space(20))
+        val actions = ui.row()
+        val cancel = ui.action("Cancel", null, false) { }
+        val confirm = ui.action("Save trail", "check") { }
+        actions.addView(cancel, LinearLayout.LayoutParams(0, -2, 1f).apply {
+            rightMargin = ui.dp(8)
+        })
+        actions.addView(confirm, LinearLayout.LayoutParams(0, -2, 1.35f))
+        panel.addView(actions)
+        val dialog = showTrailSheet(panel)
+        cancel.setOnClickListener { dialog.dismiss() }
+        confirm.setOnClickListener {
+            confirm.isEnabled = false
+            lifecycleScope.launch {
+                try {
+                    withContext(Dispatchers.IO) { trails.save(trail) }
+                    saved = true
+                    pendingTrail = null
+                    trailList = trails.all()
+                    selectedTrailId = trail.id
+                    trailExpanded = false
+                    dialog.dismiss()
+                    model.status("Imported ${trail.name}")
+                    rebuildChrome()
+                } catch (e: Exception) {
+                    confirm.isEnabled = true
+                    model.status(e.message ?: "Could not save trail")
+                }
+            }
+        }
+        dialog.setOnDismissListener {
+            if (!saved) {
+                pendingTrail = null
+                atlasMap.previewTrail(trailList.firstOrNull { it.id == selectedTrailId })
+                rebuildChrome()
+            }
+        }
+    }
+
     private val pickTrailCover = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         val id=trailCoverTargetId
         trailCoverTargetId=null
@@ -288,7 +379,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         atlasMap.sourceMode = model.mapSourceMode
         atlasMap.visualStyle = model.mapVisualStyle
         atlasMap.render(state)
-        atlasMap.previewTrail(if(state.tab=="Trail")trailList.firstOrNull{it.id==selectedTrailId} else null)
+        atlasMap.previewTrail(if(state.tab=="Trail") pendingTrail ?: trailList.firstOrNull{it.id==selectedTrailId} else null)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
         updateMapSourceIndicators()
         val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,model.mapVisualStyle,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
@@ -379,99 +470,163 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         else if(s.tab=="Explore"&&s.searchError!=null&&s.nearby){bottom.addView(ui.card(16,true).apply{addView(ui.text("Explore offline",17f,bold=true));addView(ui.space(7));addView(ui.text("Download a region to discover nearby places.",13f,ui.muted));addView(ui.action("Browse regions","download",false){openPage("regions")},linear(12))})}
     }
     private fun trailPanel(): View {
-        val panel=ui.card(14,true)
-        val grip=ui.text("━━━━",18f,ui.muted,true).apply {
-            gravity=Gravity.CENTER
-            contentDescription=if(trailExpanded)"Collapse trails" else "Expand trails"
-            setPadding(0,0,0,ui.dp(6))
-            setOnClickListener{trailExpanded=!trailExpanded;rebuildChrome()}
-            var touchY=0f
-            setOnTouchListener{_,event->
-                when(event.actionMasked) {
-                    MotionEvent.ACTION_DOWN->{touchY=event.rawY;true}
-                    MotionEvent.ACTION_UP->{
-                        if(kotlin.math.abs(event.rawY-touchY)>ui.dp(26))
-                            trailExpanded=event.rawY<touchY
-                        else trailExpanded=!trailExpanded
-                        rebuildChrome();true
+        val panel = ui.card(18, true)
+        val grip = ui.text("━━━━", 18f, ui.muted, true).apply {
+            gravity = Gravity.CENTER
+            contentDescription = if (trailExpanded) "Collapse trails" else "Expand trails"
+            setPadding(0, 0, 0, ui.dp(12))
+            setOnClickListener { trailExpanded = !trailExpanded; rebuildChrome() }
+            var touchY = 0f
+            setOnTouchListener { _, event ->
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> { touchY = event.rawY; true }
+                    MotionEvent.ACTION_UP -> {
+                        trailExpanded = if (kotlin.math.abs(event.rawY - touchY) > ui.dp(26))
+                            event.rawY < touchY else !trailExpanded
+                        rebuildChrome()
+                        true
                     }
-                    else->true
+                    else -> true
                 }
             }
         }
         panel.addView(grip)
-        panel.addView(ui.row().apply{
-            addView(ui.column().apply{
-                addView(ui.text("Your Trails",18f,bold=true))
-                addView(ui.text("${trailList.size} saved · Stored on this phone",11f,ui.muted))
-            },LinearLayout.LayoutParams(0,-2,1f))
-            addView(ui.iconButton("upload","Import GPX"){importTrail.launch(arrayOf("application/gpx+xml","application/xml","text/xml","application/octet-stream"))},
-                LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))
+        panel.addView(ui.row().apply {
+            addView(ui.column().apply {
+                addView(ui.text("Your Trails", 20f, ui.ink, true))
+                addView(ui.space(5))
+                addView(ui.text("${trailList.size} saved · On this device", 12f, ui.muted))
+            }, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(ui.iconButton("plus", "Import GPX KML KMZ or GeoJSON") {
+                chooseTrailFile()
+            }, LinearLayout.LayoutParams(ui.dp(48), ui.dp(48)))
         })
-        if(trailList.isEmpty()){
-            panel.addView(ui.text("Import a GPX to preview the route on the map.",13f,ui.muted),linear(13))
-            panel.addView(ui.action("Import GPX","plus"){importTrail.launch(arrayOf("application/gpx+xml","application/xml","text/xml","application/octet-stream"))},linear(12))
-        }else{
-            val scroll=ScrollView(this).apply{isVerticalScrollBarEnabled=false}
-            val list=ui.column()
-            trailList.take(if(trailExpanded)40 else 2).forEach{trail->
-                list.addView(trailCard(trail),linear(6))
+        if (trailList.isEmpty()) {
+            panel.addView(ui.space(18))
+            panel.addView(ui.text("Bring your favourite routes into Atlas.",
+                14f, ui.ink, true))
+            panel.addView(ui.space(5))
+            panel.addView(ui.text("Import GPX, KML, KMZ or GeoJSON. Preview routes before saving.",
+                12f, ui.muted))
+            panel.addView(ui.action("Import a trail", "upload") {
+                chooseTrailFile()
+            }, linear(16))
+        } else {
+            val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
+            val list = ui.column()
+            trailList.take(if (trailExpanded) 40 else 2).forEach { trail ->
+                list.addView(trailCard(trail), linear(8))
             }
-            if(!trailExpanded && trailList.size>2) {
-                list.addView(ui.action("Show all Trails","down",false){trailExpanded=true;rebuildChrome()},linear(9))
+            if (!trailExpanded && trailList.size > 2) {
+                list.addView(ui.action("Show all ${trailList.size} trails", "down", false) {
+                    trailExpanded = true
+                    rebuildChrome()
+                }, linear(10))
             }
             scroll.addView(list)
-            panel.addView(scroll,LinearLayout.LayoutParams(-1,
-                if(trailExpanded)(resources.displayMetrics.heightPixels*.55).toInt() else -2
-            ).apply{topMargin=ui.dp(8)})
-            trailList.firstOrNull{it.id==selectedTrailId}?.let{trail->
-                panel.addView(ui.row().apply{
+            panel.addView(scroll, LinearLayout.LayoutParams(-1,
+                if (trailExpanded) (resources.displayMetrics.heightPixels * .53).toInt() else -2
+            ).apply { topMargin = ui.dp(12) })
+            trailList.firstOrNull { it.id == selectedTrailId }?.let { trail ->
+                panel.addView(ui.rule().apply {
+                    layoutParams = linear(12)
+                })
+                panel.addView(ui.row().apply {
                     addView(ui.text("${AtlasPages.formatDistance(trail.distanceMeters)} · +${trail.ascentMeters.toInt()} m",
-                        13f,ui.green,true),LinearLayout.LayoutParams(0,-2,1f))
-                    addView(ui.text("Photo",12f,ui.blue,true).apply{
-                        contentDescription="Change trail cover"
-                        setPadding(ui.dp(8),ui.dp(9),0,ui.dp(9))
-                        setOnClickListener{trailCoverTargetId=trail.id;pickTrailCover.launch(arrayOf("image/*"))}
+                        13f, ui.muted, true), LinearLayout.LayoutParams(0, -2, 1f))
+                    addView(ui.text("Details", 13f, ui.blue, true).apply {
+                        contentDescription = "Trail details and actions"
+                        setPadding(ui.dp(12), ui.dp(8), 0, ui.dp(8))
+                        setOnClickListener { showTrailDetails(trail) }
                     })
-                },linear(7))
+                })
             }
         }
         return panel
     }
-    private fun trailCard(trail:Trail):View {
-        return ui.row().apply{
-            ui.ripple(this,if(selectedTrailId==trail.id)ui.soft else ui.surface,15)
-            setPadding(ui.dp(8),ui.dp(8),ui.dp(8),ui.dp(8))
-            val photo=ImageView(this@MainActivity).apply{
-                scaleType=ImageView.ScaleType.CENTER_CROP
-                setImageBitmap(trails.thumbnail(trail))
-                background=ui.shape(ui.soft,12)
-                clipToOutline=true
-                contentDescription="Trail photo or map thumbnail"
-            }
-            addView(photo,LinearLayout.LayoutParams(ui.dp(82),ui.dp(74)))
-            addView(ui.column().apply{
-                addView(ui.text(trail.name,14f,ui.ink,true).apply{
-                    maxLines=1;ellipsize=TextUtils.TruncateAt.END
-                })
-                addView(ui.space(7))
-                addView(ui.text("${AtlasPages.formatDistance(trail.distanceMeters)} · ↗ ${trail.ascentMeters.toInt()} m",
-                    12f,ui.muted))
-                trail.durationMillis?.let{t->
-                    addView(ui.text("${AtlasPages.formatTime(t/1000.0)} · GPX",
-                        11f,ui.muted),linear(6))
+
+    private fun trailCard(trail: Trail): View = ui.row().apply {
+        ui.ripple(this, if (selectedTrailId == trail.id) ui.soft else ui.surface, 17)
+        setPadding(ui.dp(9), ui.dp(9), ui.dp(9), ui.dp(9))
+        val photo = ImageView(this@MainActivity).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setImageBitmap(trails.thumbnail(trail))
+            background = ui.shape(ui.soft, 13)
+            clipToOutline = true
+            contentDescription = "Trail photo or route thumbnail"
+        }
+        addView(photo, LinearLayout.LayoutParams(ui.dp(92), ui.dp(78)))
+        addView(ui.column().apply {
+            addView(ui.text(trail.name, 15f, ui.ink, true).apply {
+                maxLines = 1
+                ellipsize = TextUtils.TruncateAt.END
+            })
+            addView(ui.space(7))
+            addView(ui.text("${AtlasPages.formatDistance(trail.distanceMeters)} · ↗ ${trail.ascentMeters.toInt()} m",
+                12f, ui.muted))
+            addView(ui.space(7))
+            addView(ui.row().apply {
+                addView(ui.badge(trail.format))
+                trail.durationMillis?.let {
+                    addView(ui.text(AtlasPages.formatTime(it / 1000.0),
+                        11f, ui.muted).apply {
+                        setPadding(ui.dp(9), ui.dp(5), 0, 0)
+                    })
                 }
-            },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(12)})
-            addView(ui.icon("chevron",ui.muted,16))
-            contentDescription="Trail ${trail.name}"
-            setOnClickListener{
-                selectedTrailId=trail.id
-                trailExpanded=false
-                atlasMap.previewTrail(trail)
-                rebuildChrome()
-            }
+            })
+        }, LinearLayout.LayoutParams(0, -2, 1f).apply {
+            leftMargin = ui.dp(12)
+        })
+        addView(ui.icon("chevron", ui.muted, 16))
+        contentDescription = "Preview trail ${trail.name}"
+        setOnClickListener {
+            selectedTrailId = trail.id
+            trailExpanded = false
+            atlasMap.previewTrail(trail)
+            rebuildChrome()
         }
     }
+
+    private fun showTrailDetails(trail: Trail) {
+        val panel = trailSheet(trail.name, "${trail.format} · Stored privately on your device")
+        panel.addView(ui.row().apply {
+            for ((value, label) in listOf(
+                AtlasPages.formatDistance(trail.distanceMeters) to "Distance",
+                "+${trail.ascentMeters.toInt()} m" to "Ascent",
+                "-${trail.descentMeters.toInt()} m" to "Descent"
+            )) addView(ui.stat(value, label), LinearLayout.LayoutParams(0, -2, 1f))
+        })
+        panel.addView(ui.space(18))
+        val photo = ui.action("Change cover photo", "upload", false) { }
+        val remove = ui.action("Remove from library", "trash", false) { }
+        val close = ui.action("Back to map", "map") { }
+        panel.addView(photo, linear(6))
+        panel.addView(remove, linear(8))
+        panel.addView(close, linear(12))
+        val dialog = showTrailSheet(panel)
+        photo.setOnClickListener {
+            dialog.dismiss()
+            trailCoverTargetId = trail.id
+            pickTrailCover.launch(arrayOf("image/*"))
+        }
+        remove.setOnClickListener {
+            dialog.dismiss()
+            AlertDialog.Builder(this)
+                .setTitle("Remove trail?")
+                .setMessage("Remove ${trail.name} from this device? This cannot be undone.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Remove") { _, _ ->
+                    trails.remove(trail.id)
+                    trailList = trails.all()
+                    if (selectedTrailId == trail.id) selectedTrailId = null
+                    atlasMap.previewTrail(trailList.firstOrNull { it.id == selectedTrailId })
+                    rebuildChrome()
+                }
+                .show()
+        }
+        close.setOnClickListener { dialog.dismiss() }
+    }
+
     private fun placePeek(place: JSONObject): View = ui.card(18,true).apply {
         addView(ui.row().apply{
             addView(ui.tileIcon("pin"),LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))

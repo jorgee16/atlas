@@ -18,12 +18,12 @@ import android.widget.TextView
 /** Shared native design tokens and controls. No platform-default button chrome. */
 class AtlasUi(val context: Context, val dark: Boolean = false) {
     val ink = Color.parseColor(if (dark) "#F0F3FA" else "#18202F")
-    val muted = Color.parseColor(if (dark) "#A1AEC2" else "#778397")
+    val muted = Color.parseColor(if (dark) "#A1AEC2" else "#728095")
     val surface = Color.parseColor(if (dark) "#182231" else "#FFFFFF")
-    val canvas = Color.parseColor(if (dark) "#101824" else "#F5F7FB")
-    val line = Color.parseColor(if (dark) "#2A384A" else "#E9EDF4")
-    val blue = Color.parseColor("#315EFB")
-    val soft = Color.parseColor(if (dark) "#24345B" else "#EDF1FF")
+    val canvas = Color.parseColor(if (dark) "#101824" else "#F6F8FA")
+    val line = Color.parseColor(if (dark) "#2A384A" else "#E5EAF2")
+    val blue = Color.parseColor(if (dark) "#6686FF" else "#4668C9")
+    val soft = Color.parseColor(if (dark) "#24345B" else "#E8EDF9")
     val green = Color.parseColor(if (dark) "#50D6AC" else "#11875D")
     val greenSoft = Color.parseColor(if (dark) "#193B35" else "#EAF7F0")
     val red = Color.parseColor(if (dark) "#FF9393" else "#CB414B")
@@ -33,7 +33,7 @@ class AtlasUi(val context: Context, val dark: Boolean = false) {
         if (stroke) setStroke(dp(1), line)
     }
     fun ripple(view: View, color: Int = surface, radius: Int = 18) {
-        view.background = RippleDrawable(ColorStateList.valueOf(Color.argb(24, 49, 94, 251)), shape(color, radius), shape(Color.WHITE, radius))
+        view.background = RippleDrawable(ColorStateList.valueOf(Color.argb(24, Color.red(blue), Color.green(blue), Color.blue(blue))), shape(color, radius), shape(Color.WHITE, radius))
         view.isClickable = true; view.isFocusable = true
     }
     fun column() = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
@@ -48,7 +48,7 @@ class AtlasUi(val context: Context, val dark: Boolean = false) {
     fun card(padding: Int = 18, floating: Boolean = false) = column().apply {
         setPadding(dp(padding), dp(padding), dp(padding), dp(padding))
         background = shape(stroke = !floating)
-        if (floating) elevation = dp(7).toFloat()
+        if (floating) elevation = dp(5).toFloat()
         clipToOutline = true
     }
     fun icon(name: String, color: Int = ink, size: Int = 22) = AtlasIcon(context, name, color).apply {
