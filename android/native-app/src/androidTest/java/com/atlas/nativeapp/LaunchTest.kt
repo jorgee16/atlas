@@ -82,7 +82,11 @@ class LaunchTest {
             onView(withText("Find a place")).check(matches(isDisplayed()))
             capture("02-search")
             onView(withContentDescription("Back")).perform(click())
-            onView(withContentDescription("Trip tab")).perform(click())
+            onView(withContentDescription("Trail tab")).perform(click())
+            onView(withText("Your Trails")).check(matches(isDisplayed()))
+            capture("03-trail-empty")
+            onView(withContentDescription("Open menu")).perform(click())
+            onView(withText("Your trips")).perform(click())
             onView(withText("Every trip starts somewhere")).check(matches(isDisplayed()))
             capture("03-trips-empty")
             scenario.onActivity { activity ->

@@ -241,3 +241,16 @@ maneuvers and route progress. The long-gap predictor (2–9 s) passes visual
 measurements that are **not extrapolated again**. Stopped-car stabilization
 and compass control are preserved. CI includes pure trajectory tests; actual
 road/device performance and battery usage remain to be verified.
+
+### Incremental Trail restoration · stage 1
+
+The native bottom navigation now reads **Explore · Trail · Navigate**.
+The original **Trips** itineraries remain in the overflow menu. The new
+map-first Trail workspace uses a collapsible bottom panel with photo cards,
+on-device Android document-picker GPX imports, private file persistence and
+separate MapLibre GPX preview polylines. Users can choose a photo from the
+phone; without a photo a locally rendered route-map thumbnail is shown.
+The original C++ drive/walk routing engine is unchanged. GPX active-follow
+progress, off-track alerts and elevation profile are future Trail increments;
+this first version restores the library and map preview without pretending
+that it already includes a GPX follower.

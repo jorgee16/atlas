@@ -67,6 +67,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var remaining: Polyline? = null
     private var travelled: Polyline? = null
     private var geometry = emptyList<LatLng>()
+    private var trailOverlay: Polyline? = null
+    private var trailPath: List<LatLng> = emptyList()
+    private var trailId: String? = null
     private var lastSegment = -1
     private var lastFixTime = -1.0
     private var lastCameraMoveMs = 0L
@@ -220,6 +223,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         // Annotation objects survive style switches in the legacy MapLibre API.
         // Remove them from the map, not just from our Kotlin references.
         map?.clear()
+        trailOverlay=null
         lines.clear(); markers.clear(); places.clear()
         positionMarker = null
         remaining = null; travelled = null; geometry = emptyList()
@@ -245,6 +249,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // A render may have happened while style loading; purge any
             // transient annotations before restoring exactly one live cursor.
             map?.clear()
+            trailOverlay=null
             lines.clear(); markers.clear(); places.clear()
             remaining = null; travelled = null; geometry = emptyList()
             lastSegment = -1; positionMarker = null
@@ -252,11 +257,32 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             styleLoading = false
             loadedSource = selection
             current?.let { render(it) }
+            addTrailOverlay()
             onMapSourceChanged?.invoke()
         }
         return true
     }
 
+    /** Trails are visual overlays, never inputs to the route planner. */
+    fun previewTrail(trail: Trail?) {
+        if(trailId==trail?.id && (trail==null || trailOverlay!=null))return
+        trailOverlay?.let{map?.removePolyline(it)}
+        trailOverlay=null
+        trailId=trail?.id
+        trailPath=trail?.polyline?.map{LatLng(it.lat,it.lon)}.orEmpty()
+        addTrailOverlay()
+        if(trail!=null && trailPath.size>=2 && map!=null) {
+            follow=false
+            val bounds=LatLngBounds.Builder().includes(trailPath).build()
+            map?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,
+                (view.resources.displayMetrics.density*44).toInt()),450)
+        }
+    }
+    private fun addTrailOverlay() {
+        if(trailOverlay!=null || trailPath.size<2 || styleLoading || map?.style==null)return
+        trailOverlay=map?.addPolyline(PolylineOptions().addAll(trailPath)
+            .color(Color.rgb(49,94,251)).width(7f))
+    }
     fun center(point: Coordinate, zoom: Double = 15.0) { map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat, point.lon), zoom)) }
     fun recenter() {
         follow = true

@@ -5,6 +5,8 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.widget.ImageView
+import android.text.TextUtils
 import android.graphics.Typeface
 import android.location.Location
 import android.location.LocationListener
@@ -58,6 +60,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private lateinit var ui: AtlasUi
     private lateinit var atlasMap: AtlasMap
     private lateinit var pages: AtlasPages
+    private val trails by lazy { TrailStore(this) }
+    private var trailList: List<Trail> = emptyList()
+    private var selectedTrailId: String? = null
+    private var trailExpanded = false
+    private var trailCoverTargetId: String? = null
     private lateinit var root: FrameLayout
     private lateinit var top: LinearLayout
     private lateinit var bottom: LinearLayout
@@ -140,6 +147,36 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
     }
     private var resumeDialogShown=false
+    private val importTrail = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if(uri!=null)lifecycleScope.launch {
+            try {
+                val name=contentResolver.query(uri,null,null,null,null)?.use{cursor->
+                    val col=cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if(col>=0 && cursor.moveToFirst())cursor.getString(col) else null
+                } ?: "Imported Trail.gpx"
+                val trail=withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)!!.use{trails.importGpx(it,name)}
+                }
+                trailList=trails.all()
+                selectedTrailId=trail.id
+                trailExpanded=false
+                model.tab("Trail")
+                atlasMap.previewTrail(trail)
+                model.status("Imported ${trail.name}")
+                rebuildChrome()
+            }catch(e:Exception){model.status(e.message?:"Could not import GPX")}
+        }
+    }
+    private val pickTrailCover = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        val id=trailCoverTargetId
+        trailCoverTargetId=null
+        if(uri!=null && id!=null)lifecycleScope.launch{
+            try {
+                withContext(Dispatchers.IO){contentResolver.openInputStream(uri)!!.use{trails.setCover(id,it)}}
+                rebuildChrome()
+            }catch(e:Exception){model.status(e.message?:"Could not save cover")}
+        }
+    }
     private val importTrip = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) lifecycleScope.launch {
             try {
@@ -182,6 +219,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         root.addView(pageLayer,FrameLayout.LayoutParams(-1,-1))
         snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(24).toFloat();visibility=View.GONE }
         root.addView(snackbar,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
+        trailList=trails.all()
         pages = AtlasPages(this,ui,model,::selectDestination,::openPage,{importTrip.launch(arrayOf("application/json","text/*"))}, { theme -> model.theme=theme; recreate() },::confirm,{atlasMap.center(it)},
             { importBackup.launch(arrayOf("application/json","text/*")) },
             { exportBackup.launch("atlas-backup.json") })
@@ -249,9 +287,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         syncNavigationService(state.navigating)
         atlasMap.sourceMode = model.mapSourceMode
         atlasMap.render(state)
+        atlasMap.previewTrail(if(state.tab=="Trail")trailList.firstOrNull{it.id==selectedTrailId} else null)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
         updateMapSourceIndicators()
-        val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
+        val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
         if(chrome!=lastChrome){lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
         if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
         if(state.navigating)window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -273,7 +312,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             addView(ui.icon("search",ui.blue,23));addView(ui.text(if(s.tab=="Navigation")"Where to?" else "Search places or addresses",15f,ui.muted),LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(12)})
             addView(ui.icon("chevron",ui.muted,18));setOnClickListener{openSearch()}
         }
-        top.addView(search,linear(12))
+        if(s.tab!="Trail")top.addView(search,linear(12))
         if(s.tab=="Explore"&&!landscape){
             val categories=HorizontalScrollView(this).apply{isHorizontalScrollBarEnabled=false;clipToPadding=false}
             val row=ui.row()
@@ -307,11 +346,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun renderTabs(s: AtlasState) {
         navigation.removeAllViews();navigation.visibility=if(s.navigating||fullMap||(page!=null&&page!="trips"))View.GONE else View.VISIBLE
         navigation.background=ui.shape(ui.surface,25);navigation.elevation=ui.dp(if(page=="trips")20 else 8).toFloat();navigation.setPadding(ui.dp(7),ui.dp(6),ui.dp(7),ui.dp(6))
-        listOf(Triple("Explore","explore","Explore"),Triple("Trip","trip","Trip"),Triple("Navigation","navigate","Navigate")).forEach{(tab,icon,label)->
+        listOf(Triple("Explore","explore","Explore"),Triple("Trail","trail","Trail"),Triple("Navigation","navigate","Navigate")).forEach{(tab,icon,label)->
             val active=s.tab==tab;val item=ui.column().apply{
                 gravity=Gravity.CENTER;ui.ripple(this,if(active)ui.soft else ui.surface,19);contentDescription="$label tab"
                 addView(ui.icon(icon,if(active)ui.blue else ui.muted,22));addView(ui.space(4));addView(ui.text(label,11f,if(active)ui.blue else ui.muted,active).apply{gravity=Gravity.CENTER},LinearLayout.LayoutParams(-1,-2))
-                setOnClickListener{fullMap=false;selectedPlace=null;model.tab(tab);if(tab=="Trip")openPage("trips")else closePage();rebuildChrome()}
+                setOnClickListener{fullMap=false;selectedPlace=null;model.tab(tab);if(page!=null)closePage();rebuildChrome()}
             };navigation.addView(item,LinearLayout.LayoutParams(0,-1,1f).apply{leftMargin=ui.dp(2);rightMargin=ui.dp(2)})
         }
     }
@@ -320,6 +359,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         if(s.navigating){bottom.addView(journeySummary(s));return}
         selectedPlace?.let{place->bottom.addView(placePeek(place));return}
         if(s.tab=="Navigation"){bottom.addView(planner(s));return}
+        if(s.tab=="Trail"){bottom.addView(trailPanel());return}
         if(s.tab=="Explore"&&s.exploreResults.isNotEmpty()){
             val card=ui.card(14,true)
             card.addView(ui.row().apply{addView(ui.text("Nearby ${s.category.ifBlank{"places"}}",16f,bold=true),LinearLayout.LayoutParams(0,-2,1f));addView(ui.text("See all",12f,ui.blue,true).apply{setPadding(ui.dp(12),ui.dp(8),0,ui.dp(8));setOnClickListener{openPage("nearby")}})})
@@ -328,6 +368,100 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }else if(pickingOrigin){bottom.addView(ui.card(16,true).apply{addView(ui.text("Choose your starting point",17f,bold=true));addView(ui.space(6));addView(ui.text("Press and hold a point on the map",13f,ui.muted))})}
         else if(s.tab=="Explore"&&s.searching){bottom.addView(ui.card(15,true).apply{addView(ui.row().apply{addView(ProgressBar(this@MainActivity),LinearLayout.LayoutParams(ui.dp(22),ui.dp(22)));addView(ui.text("Finding nearby places…",13f,ui.muted),LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(13)})})})}
         else if(s.tab=="Explore"&&s.searchError!=null&&s.nearby){bottom.addView(ui.card(16,true).apply{addView(ui.text("Explore offline",17f,bold=true));addView(ui.space(7));addView(ui.text("Download a region to discover nearby places.",13f,ui.muted));addView(ui.action("Browse regions","download",false){openPage("regions")},linear(12))})}
+    }
+    private fun trailPanel(): View {
+        val panel=ui.card(14,true)
+        val grip=ui.text("━━━━",18f,ui.muted,true).apply {
+            gravity=Gravity.CENTER
+            contentDescription=if(trailExpanded)"Collapse trails" else "Expand trails"
+            setPadding(0,0,0,ui.dp(6))
+            setOnClickListener{trailExpanded=!trailExpanded;rebuildChrome()}
+            var touchY=0f
+            setOnTouchListener{_,event->
+                when(event.actionMasked) {
+                    MotionEvent.ACTION_DOWN->{touchY=event.rawY;true}
+                    MotionEvent.ACTION_UP->{
+                        if(kotlin.math.abs(event.rawY-touchY)>ui.dp(26))
+                            trailExpanded=event.rawY<touchY
+                        else trailExpanded=!trailExpanded
+                        rebuildChrome();true
+                    }
+                    else->true
+                }
+            }
+        }
+        panel.addView(grip)
+        panel.addView(ui.row().apply{
+            addView(ui.column().apply{
+                addView(ui.text("Your Trails",18f,bold=true))
+                addView(ui.text("${trailList.size} saved · Stored on this phone",11f,ui.muted))
+            },LinearLayout.LayoutParams(0,-2,1f))
+            addView(ui.iconButton("upload","Import GPX"){importTrail.launch(arrayOf("application/gpx+xml","application/xml","text/xml","application/octet-stream"))},
+                LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))
+        })
+        if(trailList.isEmpty()){
+            panel.addView(ui.text("Import a GPX to preview the route on the map.",13f,ui.muted),linear(13))
+            panel.addView(ui.action("Import GPX","plus"){importTrail.launch(arrayOf("application/gpx+xml","application/xml","text/xml","application/octet-stream"))},linear(12))
+        }else{
+            val scroll=ScrollView(this).apply{isVerticalScrollBarEnabled=false}
+            val list=ui.column()
+            trailList.take(if(trailExpanded)40 else 2).forEach{trail->
+                list.addView(trailCard(trail),linear(6))
+            }
+            if(!trailExpanded && trailList.size>2) {
+                list.addView(ui.action("Show all Trails","down",false){trailExpanded=true;rebuildChrome()},linear(9))
+            }
+            scroll.addView(list)
+            panel.addView(scroll,LinearLayout.LayoutParams(-1,
+                if(trailExpanded)(resources.displayMetrics.heightPixels*.55).toInt() else -2
+            ).apply{topMargin=ui.dp(8)})
+            trailList.firstOrNull{it.id==selectedTrailId}?.let{trail->
+                panel.addView(ui.row().apply{
+                    addView(ui.text("${AtlasPages.formatDistance(trail.distanceMeters)} · +${trail.ascentMeters.toInt()} m",
+                        13f,ui.green,true),LinearLayout.LayoutParams(0,-2,1f))
+                    addView(ui.text("Photo",12f,ui.blue,true).apply{
+                        contentDescription="Change trail cover"
+                        setPadding(ui.dp(8),ui.dp(9),0,ui.dp(9))
+                        setOnClickListener{trailCoverTargetId=trail.id;pickTrailCover.launch(arrayOf("image/*"))}
+                    })
+                },linear(7))
+            }
+        }
+        return panel
+    }
+    private fun trailCard(trail:Trail):View {
+        return ui.row().apply{
+            ui.ripple(this,if(selectedTrailId==trail.id)ui.soft else ui.surface,15)
+            setPadding(ui.dp(8),ui.dp(8),ui.dp(8),ui.dp(8))
+            val photo=ImageView(this@MainActivity).apply{
+                scaleType=ImageView.ScaleType.CENTER_CROP
+                setImageBitmap(trails.thumbnail(trail))
+                background=ui.shape(ui.soft,12)
+                clipToOutline=true
+                contentDescription="Trail photo or map thumbnail"
+            }
+            addView(photo,LinearLayout.LayoutParams(ui.dp(82),ui.dp(74)))
+            addView(ui.column().apply{
+                addView(ui.text(trail.name,14f,ui.ink,true).apply{
+                    maxLines=1;ellipsize=TextUtils.TruncateAt.END
+                })
+                addView(ui.space(7))
+                addView(ui.text("${AtlasPages.formatDistance(trail.distanceMeters)} · ↗ ${trail.ascentMeters.toInt()} m",
+                    12f,ui.muted))
+                trail.durationMillis?.let{t->
+                    addView(ui.text("${AtlasPages.formatTime(t/1000.0)} · GPX",
+                        11f,ui.muted),linear(6))
+                }
+            },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(12)})
+            addView(ui.icon("chevron",ui.muted,16))
+            contentDescription="Trail ${trail.name}"
+            setOnClickListener{
+                selectedTrailId=trail.id
+                trailExpanded=false
+                atlasMap.previewTrail(trail)
+                rebuildChrome()
+            }
+        }
     }
     private fun placePeek(place: JSONObject): View = ui.card(18,true).apply {
         addView(ui.row().apply{
