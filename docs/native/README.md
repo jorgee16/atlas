@@ -93,6 +93,10 @@ HTTP Range on retry. Existing partial bytes are re-hashed before resumption;
 servers ignoring Range trigger a safe restart. Failed downloads preserve
 both already downloaded files and the previously installed region version.
 Staging is removed on explicit region deletion or after the successful update.
+The app checks a bounded HTTPS R2 catalog on foreground entry (rate-limited
+to once per 15 minutes), caches it atomically, and exposes a manual refresh.
+The remote catalog must preserve all previously advertised regions and cannot
+downgrade package versions. A cache failure falls back to the bundled catalog.
 Automated small-file Range tests exercise resume, restart and verified cache
 reuse; the 960 MB Portugal production download still needs real-device tests.
 
@@ -177,7 +181,7 @@ location continuity and tunnel sensor fusion remain separate acceptance gates.
 | Maps | Native MapLibre, styled online vector/raster and local PMTiles, travelled-route styling, native map controls and map alternative selection | Offline labels/fonts/sprites, full-size data performance and additional junction-map detail |
 | Trips | JSON import, day/place selection, visited-state progression, optional thumbnails and next-stop actions | Full transit handoff and advanced itinerary scheduling parity |
 | Transit | Kotlin TfL journey requests, alternatives, leg-by-leg execution and disruptions | Port advanced journey ranking, live arrivals and sibling-stop filtering |
-| Regions | Download/update/remove/cancel, versioned activation, checksums | Restart-resumable background work, automatic catalog refresh and full-size package tests |
+| Regions | Download/update/remove/cancel, versioned activation, checksums, staged HTTP Range resumption and remote catalog refresh | WorkManager background transfers, full-size Portugal package tests and reliable storage-space reporting |
 | User data | Native bookmarks, trips and preferences | Explicit migration/export/import of existing WebView storage |
 | Platforms | Android arm64/x86_64 native app; portable C++ engine | Kotlin desktop frontend if desktop is required; browser frontend remains JavaScript |
 | Tooling | Existing C++ OSM packager retained; native CI added | Region normalization/index-building scripts remain Node.js and have not been ported |

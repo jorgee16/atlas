@@ -76,6 +76,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     private val state = MutableStateFlow(AtlasState())
     val updates = state.asStateFlow()
     private val prefs = application.getSharedPreferences("atlas-native", 0)
+    private var lastCatalogCheckMs = 0L
     private var searchJob: Job? = null
     private var downloadJob: Job? = null
     private var routeJob: Job? = null
@@ -124,6 +125,20 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         set(value) { prefs.edit().putString("activeDay", value).apply(); refresh() }
     val anchor: Coordinate get() = state.value.origin ?: state.value.fix?.point ?: Coordinate(38.7223, -9.1393)
     fun refresh() { state.update { it.copy(revision = it.revision + 1) } }
+    fun refreshRegionCatalog(force: Boolean = false) {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (!force && now-lastCatalogCheckMs < 15L*60*1000) return
+        lastCatalogCheckMs=now
+        viewModelScope.launch {
+            try {
+                val updated=regions.refreshCatalog()
+                if (updated) refresh()
+                if (force) status(if (updated) "Region catalog updated" else "Regions already up to date")
+            } catch (e: Exception) {
+                if (force) failure(e)
+            }
+        }
+    }
     fun tab(tab: String) { state.update { it.copy(tab = tab) } }
     fun status(message: String) { state.update { it.copy(status = message, notice = it.notice + 1) } }
     private fun failure(error: Throwable) { if (error !is CancellationException) status(error.message ?: "Something went wrong. Try again.") }

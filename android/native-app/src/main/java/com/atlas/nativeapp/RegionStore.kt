@@ -11,6 +11,8 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 
@@ -36,8 +38,73 @@ class RegionStore(context: Context) {
     companion object { const val ORIGIN = "https://pub-75539028275a4826aa383fdb89292ed7.r2.dev" }
     private val root = File(context.filesDir, "offline").apply { mkdirs() }
     private val mutex = Mutex()
-    val regions = JSONObject(context.assets.open("regions.json").bufferedReader().use { it.readText() })
-        .getJSONArray("regions").objects().map(::Region)
+    private val catalogFile = File(root, "catalog.json")
+    private val bundled = readCatalog(context.assets.open("regions.json").bufferedReader().use { it.readText() })
+    @Volatile var regions: List<Region> = try {
+        readCatalog(catalogFile.readText()).takeIf { acceptable(it, bundled) } ?: bundled
+    } catch (_: Exception) { bundled }
+        private set
+
+    private fun readCatalog(text: String): List<Region> {
+        require(text.length < 3 * 1024 * 1024) { "Catalog too large" }
+        val all = JSONObject(text).getJSONArray("regions").objects().map(::Region)
+        require(all.size in 1..100 && all.map { it.id }.toSet().size == all.size)
+        for (region in all) {
+            require(region.id.matches(Regex("[a-z0-9-]{1,64}")))
+            require(region.version > 0 && region.bytes >= 0)
+            require(region.files.size in 1..10000 &&
+                region.files.sumOf { it.getLong("sizeBytes") } == region.bytes)
+            for (item in region.files) {
+                val path = item.getString("url")
+                require(path.startsWith("/") && !path.startsWith("//"))
+                asset(File(root,"catalog-verification"),path)
+                require(item.getLong("sizeBytes") >= 0)
+                require(item.getString("sha256").matches(Regex("[0-9a-fA-F]{64}")))
+            }
+        }
+        return all
+    }
+    private fun acceptable(next: List<Region>, previous: List<Region>): Boolean {
+        val byId = next.associateBy { it.id }
+        return previous.all { (byId[it.id]?.version ?: 0) >= it.version }
+    }
+
+    /** Fetch a newer catalog without changing an in-progress installed package. */
+    suspend fun refreshCatalog(): Boolean = withContext(Dispatchers.IO) {
+        val connection = URL("$ORIGIN/regions/catalog.json").openConnection() as HttpURLConnection
+        connection.connectTimeout = 12_000
+        connection.readTimeout = 12_000
+        try {
+            check(connection.responseCode == 200) { "Catalog unavailable: HTTP ${connection.responseCode}" }
+            val out = ByteArrayOutputStream()
+            connection.inputStream.use { input ->
+                val buffer=ByteArray(16 * 1024)
+                while (true) {
+                    currentCoroutineContext().ensureActive()
+                    val n=input.read(buffer)
+                    if (n < 0) break
+                    check(out.size() + n <= 2 * 1024 * 1024) { "Catalog too large" }
+                    out.write(buffer,0,n)
+                }
+            }
+            val text=out.toString("UTF-8")
+            val next=readCatalog(text)
+            val old=regions
+            require(acceptable(next,old)) { "Catalog would remove or downgrade installed regions" }
+            if (next.all { candidate ->
+                val before=old.firstOrNull { it.id==candidate.id }
+                before!=null && before.version==candidate.version
+            } && next.size==old.size) return@withContext false
+            val pending=File(root,"catalog.next")
+            pending.outputStream().use { output ->
+                output.write(text.toByteArray(Charsets.UTF_8))
+                output.fd.sync()
+            }
+            check(pending.renameTo(catalogFile)) { "Cannot activate region catalog" }
+            regions=next
+            true
+        } finally { connection.disconnect() }
+    }
     private fun marker(region: Region) = File(root, "${region.id}.installed")
     fun installedVersion(region: Region): Int? = marker(region).takeIf { it.isFile }?.readText()?.trim()?.toIntOrNull()
     fun installed(region: Region) = installedVersion(region) != null

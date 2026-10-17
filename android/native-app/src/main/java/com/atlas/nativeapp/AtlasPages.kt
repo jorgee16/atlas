@@ -131,6 +131,9 @@ class AtlasPages(
             }else card.addView(ui.action(if(version==null)"Download region" else "Update region","download",true){model.download(region)}.apply{isEnabled=state.downloading==null;alpha=if(isEnabled)1f else .45f})
             body.addView(card,lp(13))
         }
+        body.addView(ui.action("Check for region updates","download",false) {
+            model.refreshRegionCatalog(true)
+        },lp(17))
         body.addView(ui.text("${stored/1024/1024} MB of offline data on this device",12f,ui.muted).apply{gravity=Gravity.CENTER},lp(24))
         return scroll(body)
     }

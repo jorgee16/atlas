@@ -574,6 +574,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     override fun onStart(){
         super.onStart()
         activityStarted=true
+        model.refreshRegionCatalog()
         atlasMap.onStart()
         startGps()
         rotationSensor?.let { sensors.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
