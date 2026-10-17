@@ -22,7 +22,9 @@ class AtlasPages(
     val importTrip: () -> Unit,
     val changeTheme: (String) -> Unit,
     val confirm: (String, () -> Unit) -> Unit,
-    val center: (Coordinate) -> Unit
+    val center: (Coordinate) -> Unit,
+    val importBackup: () -> Unit,
+    val exportBackup: () -> Unit
 ) {
     private fun lp(top: Int = 0) = LinearLayout.LayoutParams(-1, -2).apply { topMargin = ui.dp(top) }
     private fun scroll(content: View) = ScrollView(context).apply { isFillViewport = false; clipToPadding = false; setPadding(ui.dp(20), ui.dp(8), ui.dp(20), ui.dp(28)); addView(content) }
@@ -219,6 +221,17 @@ class AtlasPages(
             addView(rowAction("download","Offline regions","Manage downloads and storage"){open("regions")})
             addView(ui.rule());addView(rowAction("bookmark","Saved places","Your favourite places"){open("bookmarks")})
             addView(ui.rule());addView(rowAction("trip","Your trips","Import and organise itineraries"){open("trips")})
+            if (model.canResumePreviousNavigation) {
+                addView(ui.rule());addView(rowAction("navigate","Resume interrupted trip",
+                    "Recalculate the route from current GPS"){model.resumePreviousNavigation()})
+            }
+        },lp(16))
+        body.addView(ui.card(padding=5).apply {
+            addView(rowAction("download","Import Atlas backup",
+                "Merge saved places, trips and preferences from a JSON export"){importBackup()})
+            addView(ui.rule())
+            addView(rowAction("upload","Export Atlas backup",
+                "Save a private JSON copy of your Atlas data"){exportBackup()})
         },lp(16))
         body.addView(ui.text("ATLAS",14f,ui.muted,true).apply{letterSpacing=.18f;gravity=Gravity.CENTER},lp(40))
         body.addView(ui.text("Explore with a little more freedom.",12f,ui.muted).apply{gravity=Gravity.CENTER},lp(8))

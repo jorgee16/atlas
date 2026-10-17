@@ -19,7 +19,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.speech.tts.TextToSpeech
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -94,8 +93,6 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             handler.postDelayed(this, 1000L)
         }
     }
-    private var voice: TextToSpeech? = null
-    private var voiceReady = false
     private val landscape get() = resources.configuration.screenWidthDp > resources.configuration.screenHeightDp
     private val manager by lazy { getSystemService(LOCATION_SERVICE) as LocationManager }
     private val sensors by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
@@ -104,6 +101,45 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private val rotationMatrix = FloatArray(9)
     private val sensorAngles = FloatArray(3)
     private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startGps(); rebuildChrome() }
+    private val importBackup = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if(uri!=null) lifecycleScope.launch {
+            try {
+                val data=withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)!!.use { input ->
+                        val bytes=java.io.ByteArrayOutputStream()
+                        val buf=ByteArray(8192)
+                        while(true) {
+                            val n=input.read(buf);if(n<0)break
+                            require(bytes.size()+n<=10*1024*1024) { "Backup exceeds 10 MB" }
+                            bytes.write(buf,0,n)
+                        }
+                        bytes.toString("UTF-8")
+                    }
+                }
+                model.importUserBackup(data)
+                recreate()
+            } catch (e:Exception) {
+                model.status(e.message ?: "Unable to import Atlas backup")
+            }
+        }
+    }
+    private val exportBackup = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri!=null) lifecycleScope.launch {
+            try {
+                val text=model.exportUserBackup()
+                withContext(Dispatchers.IO) {
+                    contentResolver.openOutputStream(uri,"w")!!.use {
+                        it.write(text.toByteArray(Charsets.UTF_8))
+                    }
+                }
+                model.status("Atlas backup exported")
+            } catch(e:Exception) {
+                model.status(e.message ?: "Could not export backup")
+            }
+        }
+    }
+    private var resumeDialogShown=false
     private val importTrip = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) lifecycleScope.launch {
             try {
@@ -146,7 +182,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         root.addView(pageLayer,FrameLayout.LayoutParams(-1,-1))
         snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(24).toFloat();visibility=View.GONE }
         root.addView(snackbar,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
-        pages = AtlasPages(this,ui,model,::selectDestination,::openPage,{importTrip.launch(arrayOf("application/json","text/*"))}, { theme -> model.theme=theme; recreate() },::confirm,{atlasMap.center(it)})
+        pages = AtlasPages(this,ui,model,::selectDestination,::openPage,{importTrip.launch(arrayOf("application/json","text/*"))}, { theme -> model.theme=theme; recreate() },::confirm,{atlasMap.center(it)},
+            { importBackup.launch(arrayOf("application/json","text/*")) },
+            { exportBackup.launch("atlas-backup.json") })
         // A map style callback must not rebuild interactive chrome: doing so
         // can detach a search button between Android touch down and click.
         atlasMap.onMapSourceChanged = { updateMapSourceIndicators() }
@@ -172,6 +210,16 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { model.updates.collect { render(it) } } }
         val initialPage=page;page=null;if(initialPage!=null)openPage(initialPage)
         rebuildChrome()
+        if(savedInstanceState==null && model.canResumePreviousNavigation && !resumeDialogShown) {
+            resumeDialogShown=true
+            root.post {
+                if(!isFinishing && model.canResumePreviousNavigation) {
+                    confirm("A previous trip was interrupted. Recalculate and resume from your current GPS location?") {
+                        model.resumePreviousNavigation()
+                    }
+                }
+            }
+        }
     }
     override fun dispatchTouchEvent(event: MotionEvent): Boolean { if(event.actionMasked==MotionEvent.ACTION_DOWN)lastTouch=System.currentTimeMillis();return super.dispatchTouchEvent(event) }
     private fun layoutChrome() {

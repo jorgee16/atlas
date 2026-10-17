@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -76,9 +77,57 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     private val state = MutableStateFlow(AtlasState())
     val updates = state.asStateFlow()
     private val prefs = application.getSharedPreferences("atlas-native", 0)
+    private val workManager = androidx.work.WorkManager.getInstance(application)
+    private var workMonitor: Job? = null
+    private val navigationSnapshotKey = "active-navigation-snapshot"
+    /** A saved target is never treated as an active route until C++ replans it. */
+    val canResumePreviousNavigation: Boolean
+        get() = !state.value.navigating && prefs.contains(navigationSnapshotKey)
+    fun discardPreviousNavigation() {
+        prefs.edit().remove(navigationSnapshotKey).commit()
+        refresh()
+    }
+    private fun recordNavigation() {
+        val s=state.value
+        val destination=s.destination ?: return
+        if (!s.navigating || s.mode=="transit") return
+        val snapshot=JSONObject()
+            .put("version",1)
+            .put("destination",JSONObject(destination.toString()))
+            .put("mode",s.mode)
+            .put("avoidTolls",s.avoidTolls)
+            .put("timestamp",System.currentTimeMillis())
+        prefs.edit().putString(navigationSnapshotKey,snapshot.toString()).commit()
+    }
+    fun resumePreviousNavigation() {
+        val snapshot=try { JSONObject(prefs.getString(navigationSnapshotKey,"") ?: "") }
+            catch (_:Exception) { discardPreviousNavigation();return status("Previous trip is invalid") }
+        val destination=try { snapshot.getJSONObject("destination") }
+            catch (_:Exception) { discardPreviousNavigation();return status("Previous trip is invalid") }
+        if (!destination.has("lat") || !destination.has("lon") ||
+            !destination.getDouble("lat").isFinite() || !destination.getDouble("lon").isFinite()) {
+            discardPreviousNavigation()
+            return status("Saved destination has invalid coordinates")
+        }
+        val now=android.os.SystemClock.elapsedRealtimeNanos()/1e9
+        val fix=state.value.fix
+        if (fix==null || now-fix.time !in 0.0..15.0 || fix.accuracy>70.0) {
+            return status("Waiting for a recent GPS fix. Try Resume again shortly.")
+        }
+        val requestedMode=snapshot.optString("mode","drive").takeIf { it in listOf("drive","walk") }?:"drive"
+        stop()
+        state.update { it.copy(
+            destination=destination, origin=null, mode=requestedMode,
+            walking=requestedMode=="walk", avoidTolls=snapshot.optBoolean("avoidTolls",false),
+            route=null, routeOptions=emptyList(), guidance=null,
+            navigating=false, tab="Navigation", arrived=false
+        ) }
+        calculate(true) // graph and guidance are rebuilt; never reuse stale JNI state.
+    }
     private var lastCatalogCheckMs = 0L
     private var searchJob: Job? = null
     private var downloadJob: Job? = null
+    init { observeRegionWork() }
     private var routeJob: Job? = null
     // Conflated channel retains the newest GPS fix instead of discarding it
     // when JNI processing temporarily falls behind the Android location rate.
@@ -210,6 +259,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                 if (generation == routeGeneration) {
                     lastSpoken = -1
                     state.update { it.copy(route = choices.first(), routeOptions = choices, guidance = null, navigating = startAfter && snapshot.origin == null) }
+                    if (startAfter && snapshot.origin == null) recordNavigation()
                 }
             } catch (e: Throwable) { failure(e) }
             finally { if (generation == routeGeneration) state.update { it.copy(busy = false) } }
@@ -246,6 +296,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
             ++navigationRevision
             lastSpoken = -1
             state.update { it.copy(navigating = true, arrived = false) }
+            recordNavigation()
         }
     }
     private fun cancelCurrentRouteWork() {
@@ -260,6 +311,8 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     fun stop() {
         cancelCurrentRouteWork()
         state.update { it.copy(navigating = false, guidance = null, busy = false) }
+        // A paused/ended live route must not auto-resume after process death.
+        prefs.edit().remove(navigationSnapshotKey).commit()
     }
 
     /** Explicitly ending navigation removes its route and destination atomically. */
@@ -267,6 +320,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         cancelCurrentRouteWork()
         lastSpoken = -1
         state.update { it.afterEndingNavigation() }
+        prefs.edit().remove(navigationSnapshotKey).commit()
     }
     // Visual extrapolation only; real GPS fixes still own routing decisions.
     fun predictSignalGap(now: Double) {
@@ -318,28 +372,178 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    /**
+     * Durable WorkManager job. Network interruptions retain staged bytes; work may
+     * resume after the app process is removed from memory.
+     */
     fun download(region: Region) {
-        if (downloadJob?.isActive == true) return
-        downloadJob = viewModelScope.launch {
-            state.update { it.copy(downloading = region.id, downloadPercent = 0, downloadError = null) }
+        if (state.value.downloading != null) return
+        val request=androidx.work.OneTimeWorkRequestBuilder<RegionDownloadWorker>()
+            .setInputData(androidx.work.workDataOf(
+                RegionDownloadWorker.KEY_REGION to region.id,
+                RegionDownloadWorker.KEY_VERSION to region.version))
+            .setConstraints(androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED).build())
+            .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL,30,java.util.concurrent.TimeUnit.SECONDS)
+            .addTag(RegionDownloadWorker.uniqueName(region.id))
+            .build()
+        state.update { it.copy(downloading=region.id,downloadPercent=0,downloadError=null) }
+        val operation=workManager.enqueueUniqueWork(RegionDownloadWorker.uniqueName(region.id),
+            androidx.work.ExistingWorkPolicy.REPLACE,request)
+        viewModelScope.launch {
             try {
-                var lastPercent = -1
-                regions.install(region) { current, total ->
-                    val percent = if (total > 0) (current * 100 / total).toInt().coerceIn(0, 100) else 0
-                    if (percent != lastPercent) { lastPercent = percent; state.update { it.copy(downloadPercent = percent) } }
-                }
-                status("${region.name} is ready offline")
-            } catch (e: Throwable) {
-                if (e !is CancellationException) state.update { it.copy(downloadError = e.message ?: "Download failed. Try again.") }
-            } finally { state.update { it.copy(downloading = null, revision = it.revision + 1) } }
+                // A query before the enqueue transaction finishes can miss the
+                // work and incorrectly display a completed download.
+                withContext(Dispatchers.IO) { operation.result.get() }
+                observeRegionWork()
+            } catch (e:Exception) {
+                state.update { it.copy(downloading=null,
+                    downloadError=e.message ?: "Could not schedule region download",
+                    revision=it.revision+1) }
+            }
         }
     }
-    fun cancelDownload() { downloadJob?.cancel() }
+    private fun observeRegionWork() {
+        workMonitor?.cancel()
+        workMonitor=viewModelScope.launch {
+            // WorkInfo lives in WorkManager's database, not in an Activity.
+            while (true) {
+                val infos=withContext(Dispatchers.IO) {
+                    regions.regions.flatMap { region ->
+                        workManager.getWorkInfosForUniqueWork(
+                            RegionDownloadWorker.uniqueName(region.id)).get()
+                    }
+                }
+                val active=infos.firstOrNull {
+                    it.state==androidx.work.WorkInfo.State.RUNNING ||
+                    it.state==androidx.work.WorkInfo.State.ENQUEUED ||
+                    it.state==androidx.work.WorkInfo.State.BLOCKED
+                }
+                if (active!=null) {
+                    val id=active.tags.firstOrNull { it.startsWith("atlas-region:") }
+                        ?.removePrefix("atlas-region:")
+                    val progress=active.progress.getInt(RegionDownloadWorker.KEY_PERCENT,0)
+                    if (id!=null) state.update {
+                        it.copy(downloading=id,downloadPercent=progress,downloadError=null)
+                    }
+                } else {
+                    val current=state.value.downloading
+                    if (current!=null) {
+                        val last=infos.lastOrNull {
+                            it.tags.contains(RegionDownloadWorker.uniqueName(current))
+                        }
+                        if (last?.state==androidx.work.WorkInfo.State.SUCCEEDED)
+                            status("${current.replaceFirstChar{it.uppercase()}} is ready offline")
+                        if (last?.state==androidx.work.WorkInfo.State.FAILED)
+                            state.update { it.copy(downloadError=last.outputData.getString("error")
+                                ?: "Download failed. Try again.") }
+                        state.update { it.copy(downloading=null,revision=it.revision+1) }
+                    }
+                    break
+                }
+                kotlinx.coroutines.delay(900)
+            }
+        }
+    }
+    fun cancelDownload() {
+        state.value.downloading?.let { workManager.cancelUniqueWork(RegionDownloadWorker.uniqueName(it)) }
+        downloadJob?.cancel()
+        state.update { it.copy(downloading=null,revision=it.revision+1) }
+    }
     fun remove(region: Region) { viewModelScope.launch { try {
-        stop(); withContext(worker) { regions.remove(region) }; refresh(); status("${region.name} removed")
+        stop()
+        withContext(Dispatchers.IO) {
+            workManager.cancelUniqueWork(RegionDownloadWorker.uniqueName(region.id)).result.get()
+            regions.remove(region)
+        }
+        refresh(); status("${region.name} removed")
     } catch (e: Throwable) { failure(e) } } }
     private fun storedArray(key: String): List<JSONObject> = try { JSONArray(prefs.getString(key, "[]")).objects() } catch (_: Exception) { emptyList() }
     fun bookmarks(): List<JSONObject> = storedArray("bookmarks")
+    fun exportUserBackup(): String {
+        val completed=JSONObject()
+        prefs.all.forEach { (key,value) ->
+            if (key.startsWith("visited:") && value == true)
+                completed.put(key.removePrefix("visited:"),true)
+        }
+        return JSONObject()
+            .put("format","atlas-native-backup")
+            .put("schemaVersion",1)
+            .put("bookmarks",JSONArray(bookmarks()))
+            .put("recents",JSONArray(recents()))
+            .put("trips",JSONArray(trips()))
+            .put("visited",completed)
+            .put("voice",voice)
+            .put("theme",theme)
+            .put("mapSourceMode",mapSourceMode)
+            .put("vehicle",vehicleClass)
+            .toString(2)
+    }
+    /**
+     * Import a user-provided Atlas JSON backup. Merge by stable place/trip ID;
+     * never read another app's private WebView storage or erase current data.
+     */
+    fun importUserBackup(text: String) {
+        require(text.toByteArray(Charsets.UTF_8).size <= 10*1024*1024) { "Backup too large" }
+        val data=JSONObject(text)
+        require(data.optString("format")=="atlas-native-backup" &&
+            data.optInt("schemaVersion")==1) { "Unsupported Atlas backup format" }
+        fun places(array:JSONArray,limit:Int):List<JSONObject> {
+            require(array.length()<=limit) { "Backup contains too many places" }
+            return array.objects().map { place ->
+                require(place.optString("name").isNotBlank() && place.has("lat") && place.has("lon"))
+                val point=place.coordinate()
+                require(point.lat.isFinite() && point.lon.isFinite() &&
+                    point.lat in -90.0..90.0 && point.lon in -180.0..180.0)
+                JSONObject(place.toString())
+            }
+        }
+        fun docs(array:JSONArray):List<JSONObject> {
+            require(array.length()<=200) { "Backup contains too many trips" }
+            return array.objects().map { doc ->
+                val trip=doc.getJSONObject("trip")
+                val days=trip.getJSONObject("days")
+                require(trip.optString("name").isNotBlank() &&
+                    days.length() in 1..100)
+                for (key in days.keys()) places(days.getJSONArray(key),1000)
+                JSONObject(doc.toString())
+            }
+        }
+        val saved=places(data.optJSONArray("bookmarks")?:JSONArray(),3000)
+        val recent=places(data.optJSONArray("recents")?:JSONArray(),1000)
+        val importedTrips=docs(data.optJSONArray("trips")?:JSONArray())
+        val marks=data.optJSONObject("visited")?:JSONObject()
+        require(marks.length()<=100000) { "Backup contains too many visited entries" }
+        val importedVisited=marks.keys().asSequence().toList()
+        require(importedVisited.all { it.length in 1..255 &&
+            !it.contains('\n') && !it.contains('\r') })
+        fun combine(old:List<JSONObject>,new:List<JSONObject>,key:(JSONObject)->String)=
+            (old+new).associateBy(key).values.toList()
+        val mergedSaved=combine(bookmarks(),saved){ it.optString("id")
+            .ifBlank { "${it.optString("name")}:${it.optDouble("lat")}:${it.optDouble("lon")}" } }
+        val mergedRecent=combine(recents(),recent){ it.optString("id")
+            .ifBlank { "${it.optString("name")}:${it.optDouble("lat")}:${it.optDouble("lon")}" } }.takeLast(20)
+        val mergedTrips=combine(trips(),importedTrips) {
+            tripId(it.getJSONObject("trip"))
+        }
+        val edit=prefs.edit()
+            .putString("bookmarks",JSONArray(mergedSaved).toString())
+            .putString("recents",JSONArray(mergedRecent).toString())
+            .putString("trips",JSONArray(mergedTrips).toString())
+        for (id in importedVisited) if (marks.optBoolean(id))
+            edit.putBoolean("visited:$id",true)
+        val mode=data.optString("mapSourceMode","")
+        if (MapSourcePolicy.isValid(mode)) edit.putString("mapSourceMode",mode)
+        val appearance=data.optString("theme","")
+        if (appearance in listOf("system","light","dark")) edit.putString("theme",appearance)
+        if (data.has("voice")) edit.putBoolean("voice",data.optBoolean("voice",true))
+        val vehicle=data.optInt("vehicle",vehicleClass)
+        if(vehicle in 1..4) edit.putInt("vehicle",vehicle)
+        check(edit.commit()) { "Could not save imported Atlas data" }
+        voice=prefs.getBoolean("voice",true)
+        refresh()
+        status("Atlas data imported · ${saved.size} places · ${importedTrips.size} trips")
+    }
     fun isSaved(place: JSONObject) = bookmarks().any { it.optString("id") == place.optString("id") }
     fun bookmark(place: JSONObject) {
         val wasSaved = isSaved(place)
@@ -391,6 +595,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         if(execution.phase=="ready_to_board")enrichJourney()
     }
     override fun onCleared() {
+        workMonitor?.cancel()
         locationFixes.close()
         speak = null
         kotlinx.coroutines.CoroutineScope(worker).launch { core.close(); worker.close() }

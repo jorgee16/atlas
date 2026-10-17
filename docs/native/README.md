@@ -177,15 +177,42 @@ location continuity and tunnel sensor fusion remain separate acceptance gates.
 | --- | --- | --- |
 | Offline routing | C++ graph v6, fastest car/walk paths, turn restrictions, geometry, toll avoidance | Production dataset benchmarks and broader route-alternative coverage |
 | Search | C++ indexed POI/address lookup, accent folding, final-token prefix, nearby categories | Match the full existing ranking/postcode/alias policy, spatial nearby index and routing-road compatibility fallback |
-| Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; background foreground-service GPS and TTS | Process-death restore, road-tested tunnel continuity, match lane guidance, advanced junction rendering, driving-camera details, full GPS replay parity and route-undo behavior |
+| Guidance | Native maneuvers, progress, confidence, arrival and reroute decisions; background GPS/TTS, persistent interrupted destination and explicit replan on reopening | Road-tested tunnel continuity, match lane guidance, advanced junction rendering, driving-camera details, full GPS replay parity and route-undo behavior |
 | Maps | Native MapLibre, styled online vector/raster and local PMTiles, travelled-route styling, native map controls and map alternative selection | Offline labels/fonts/sprites, full-size data performance and additional junction-map detail |
 | Trips | JSON import, day/place selection, visited-state progression, optional thumbnails and next-stop actions | Full transit handoff and advanced itinerary scheduling parity |
 | Transit | Kotlin TfL journey requests, alternatives, leg-by-leg execution and disruptions | Port advanced journey ranking, live arrivals and sibling-stop filtering |
-| Regions | Download/update/remove/cancel, versioned activation, checksums, staged HTTP Range resumption and remote catalog refresh | WorkManager background transfers, full-size Portugal package tests and reliable storage-space reporting |
-| User data | Native bookmarks, trips and preferences | Explicit migration/export/import of existing WebView storage |
+| Regions | Download/update/remove/cancel, checksums, staged HTTP Range resumption, WorkManager background transfers, and remote catalog refresh | Full-size Portugal device tests, Android download foreground-service acceptance, and reliable storage-space reporting |
+| User data | Native bookmarks, trips, preferences, JSON backup export and merge-import | Legacy WebView must first export an equivalent JSON file; direct access to another Android app's private storage is not available |
 | Platforms | Android arm64/x86_64 native app; portable C++ engine | Kotlin desktop frontend if desktop is required; browser frontend remains JavaScript |
 | Tooling | Existing C++ OSM packager retained; native CI added | Region normalization/index-building scripts remain Node.js and have not been ported |
 
 No real-device or emulator visual/navigation acceptance testing has yet been
 performed in this environment. Complete those checks before promoting this
 branch or replacing the current Android application.
+
+
+### One-commit parity work and remaining acceptance blockers
+
+The new Navigation snapshot records the destination and driving preferences while
+guidance is active. After a process restart the user is asked whether to
+**recalculate from a fresh GPS fix**. Atlas never pretends the old JNI route,
+position or progress has survived; it reconstructs routing from an installed
+region. Android force-stop cannot be bypassed or auto-started.
+
+Region transfers are scheduled as a user-initiated **WorkManager CoroutineWorker**
+with network constraints, a persistent database work request and a data-sync
+foreground notification. Transfers can resume after the process is reclaimed
+using previously verified HTTP Range files. Device/OS-specific background
+limits, notification behavior and one-gigabyte transfers still need testing.
+
+Settings offer **Import Atlas backup** / **Export Atlas backup**. The import
+merges rather than overwrites saved places and trips; it validates its JSON
+schema. Existing WebView storage from a different app is sandboxed and cannot
+be read automatically: export an Atlas-compatible backup from the old app first.
+Direct legacy WebView-to-native migration is **not yet complete**.
+
+Features **not complete in this batch**: full MapLibre offline glyph/sprite
+assets, lane guidance/junction graphics, full legacy search ranking,
+complex alternative routes, transport arrival parity, porting all Node-based
+region-builder scripts, and road/Portugal-scale validation. Do not mark the
+overall migration 100% until these have testable parity.
