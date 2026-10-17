@@ -38,11 +38,11 @@ class RegionFileTransferTest {
                 val count = bytes.size - offset
                 val code = if(offset>0) "206 Partial Content" else "200 OK"
                 val extra = if(offset>0)
-                    "Content-Range: bytes $offset-${bytes.size-1}/${bytes.size}\\r\\n" else ""
-                val headers = "HTTP/1.1 $code\\r\\n" +
-                    "Content-Type: application/octet-stream\\r\\n" +
-                    "Content-Length: $count\\r\\n" +
-                    extra + "Connection: close\\r\\n\\r\\n"
+                    "Content-Range: bytes $offset-${bytes.size-1}/${bytes.size}\r\n" else ""
+                val headers = "HTTP/1.1 $code\r\n" +
+                    "Content-Type: application/octet-stream\r\n" +
+                    "Content-Length: $count\r\n" +
+                    extra + "Connection: close\r\n\r\n"
                 client.getOutputStream().use { out ->
                     out.write(headers.toByteArray(Charsets.ISO_8859_1))
                     out.write(bytes, offset, count)
