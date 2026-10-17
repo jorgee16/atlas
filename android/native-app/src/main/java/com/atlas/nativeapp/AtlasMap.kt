@@ -81,12 +81,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastRenderedFrameAt = 0.0
     private var compassAnimationUntil = 0L
     private var lastRenderedMarker: Coordinate? = null
-    private val navigationFrame = Choreographer.FrameCallback { frameTimeNanos ->
+    private val navigationFrame = Choreographer.FrameCallback { _ ->
         frameScheduled = false
         if (!framesEnabled || styleLoading) return@FrameCallback
         val s = current ?: return@FrameCallback
         if (!s.navigating || s.fix == null || map == null) return@FrameCallback
-        val time = frameTimeNanos / 1e9
+        // Choreographer's frame clock may exclude deep sleep, while GPS fix
+        // timestamps include it. Use the same elapsed-realtime clock for both.
+        val time = SystemClock.elapsedRealtimeNanos() / 1e9
         // Throttle expensive MapLibre annotation updates to ~30 FPS.
         if (time - lastRenderedFrameAt < 0.032) {
             scheduleNavigationFrame()
