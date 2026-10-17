@@ -28,7 +28,7 @@ data class TrailPoint(val point: Coordinate, val elevation: Double?, val time: L
 data class Trail(
     val id: String, val name: String, val points: List<TrailPoint>,
     val distanceMeters: Double, val ascentMeters: Double, val descentMeters: Double,
-    val durationMillis: Long?, val importedAt: Long
+    val durationMillis: Long?, val importedAt: Long, val format: String = "GPX"
 ) {
     val polyline: List<Coordinate> get() {
         if (points.size <= 3500) return points.map { it.point }
@@ -45,24 +45,71 @@ class TrailStore(context: Context) {
         ?.mapNotNull { runCatching { deserialize(it.readText()) }.getOrNull() }
         ?.sortedByDescending { it.importedAt }?.toList().orEmpty()
 
-    fun importGpx(input: InputStream, fileName: String): Trail {
-        val out=java.io.ByteArrayOutputStream()
-        val block=ByteArray(8192)
-        input.use { stream -> while(true) {
-            val n=stream.read(block);if(n<0)break
-            require(out.size()+n<=10*1024*1024) { "GPX exceeds 10 MB" }
-            out.write(block,0,n)
-        }}
-        val xml=out.toString("UTF-8")
-        require(!xml.contains("<!DOCTYPE",true)&&!xml.contains("<!ENTITY",true)){
-            "GPX entities are unsupported"
+    /** Parsing is deliberately separate from saving: users review a trail first. */
+    fun preview(input: InputStream, fileName: String): Trail {
+        val format = TrailFileParser.formatOf(fileName)
+        val output = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(8192)
+        val maxBytes = if (format == "KMZ") 20 * 1024 * 1024 else 10 * 1024 * 1024
+        input.use { stream ->
+            while (true) {
+                val count = stream.read(buffer)
+                if (count < 0) break
+                require(output.size() + count <= maxBytes) { "Trail file is too large" }
+                output.write(buffer, 0, count)
+            }
         }
-        val track=parse(xml,fileName)
-        val temp=File(root,"${track.id}.tmp")
-        val dest=File(root,"${track.id}.json")
-        temp.writeText(serialize(track))
-        check(temp.renameTo(dest)) { "Unable to save GPX" }
+        val bytes = output.toByteArray()
+        if (format == "GPX") {
+            val xml = bytes.toString(Charsets.UTF_8)
+            require(!xml.contains("<!DOCTYPE", true) && !xml.contains("<!ENTITY", true)) {
+                "External XML entities are not supported"
+            }
+            return parse(xml, fileName)
+        }
+        val parsed = TrailFileParser.parse(bytes, fileName, format)
+        return build(parsed)
+    }
+
+    fun save(track: Trail): Trail {
+        require(track.id.matches(Regex("[0-9a-f-]{36}")))
+        val temporary = File(root, "${track.id}.tmp")
+        val destination = File(root, "${track.id}.json")
+        require(!destination.exists()) { "Trail is already saved" }
+        try {
+            temporary.writeText(serialize(track))
+            check(temporary.renameTo(destination)) { "Unable to save trail" }
+        } finally { temporary.delete() }
         return track
+    }
+
+    /** Kept for any existing call sites importing GPX directly. */
+    fun importGpx(input: InputStream, fileName: String): Trail {
+        require(TrailFileParser.formatOf(fileName) == "GPX")
+        return save(preview(input, fileName))
+    }
+
+    fun importFile(input: InputStream, fileName: String): Trail = save(preview(input, fileName))
+
+    private fun build(file: ParsedTrailFile): Trail {
+        val points = file.points
+        require(points.size in 2..100_000) { "No usable trail points" }
+        var distance = 0.0
+        var ascent = 0.0
+        var descent = 0.0
+        points.zipWithNext().forEach { (a, b) ->
+            distance += meters(a.point, b.point)
+            if (a.elevation != null && b.elevation != null) {
+                val delta = b.elevation - a.elevation
+                if (delta >= 0) ascent += delta else descent -= delta
+            }
+        }
+        val timestamps = points.mapNotNull { it.time }
+        val duration = if (timestamps.size >= 2)
+            (timestamps.last() - timestamps.first()).coerceAtLeast(0L) else null
+        return Trail(UUID.randomUUID().toString(), file.name.take(120),
+            points, distance, ascent, descent, duration,
+            System.currentTimeMillis(), file.format)
     }
 
     fun setCover(id:String,input:InputStream) {
@@ -186,6 +233,7 @@ class TrailStore(context: Context) {
         .put("id",t.id).put("name",t.name)
         .put("distance",t.distanceMeters).put("ascent",t.ascentMeters)
         .put("descent",t.descentMeters).put("duration",t.durationMillis)
+        .put("format",t.format)
         .put("imported",t.importedAt)
         .put("points",JSONArray().apply { t.points.forEach{p->
             put(JSONArray().put(p.point.lon).put(p.point.lat).put(p.elevation).put(p.time))
@@ -205,7 +253,7 @@ class TrailStore(context: Context) {
         return Trail(id,o.getString("name"),points,o.getDouble("distance"),
             o.optDouble("ascent"),o.optDouble("descent"),
             if(o.isNull("duration"))null else o.getLong("duration"),
-            o.getLong("imported"))
+            o.getLong("imported"),o.optString("format","GPX"))
     }
     private fun meters(a:Coordinate,b:Coordinate):Double {
         val x=Math.toRadians(b.lat-a.lat)
