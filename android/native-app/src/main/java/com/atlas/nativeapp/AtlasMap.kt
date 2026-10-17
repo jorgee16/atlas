@@ -405,7 +405,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 val predictedAt=guidance.optDouble("predictedAt",Double.NaN)
                 if (predictedAt.isFinite()) {
                     renderInterpolator.acceptGapPrediction(along,predictedAt,fix.accuracy,s.walking)
-                } else {
+                } else if (!guidance.has("gpsFixTime") ||
+                    kotlin.math.abs(guidance.optDouble("gpsFixTime") - fix.time)<0.000001) {
+                    // Ignore the intermediate StateFlow update where the new
+                    // GPS fix arrives before its JNI guidance projection.
                     renderInterpolator.acceptGps(along,display,fix.speed,fix.accuracy,fix.time,s.walking)
                 }
             } else if (s.navigating) {

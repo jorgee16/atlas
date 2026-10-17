@@ -354,6 +354,10 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         val current = state.value
         if (revision != navigationRevision || !current.navigating ||
             current.busy || current.route !== route) return
+        // Pair this projection with the GPS fix that produced it. JNI
+        // runs asynchronously; otherwise the UI can receive a fresh fix
+        // with the previous guidance and skip the actual new projection.
+        result.put("gpsFixTime",trusted.time)
         state.update { it.copy(guidance = result) }
         val maneuver = result.getInt("maneuver")
         if (voice && maneuver != lastSpoken && result.getString("state") != "checking") {
