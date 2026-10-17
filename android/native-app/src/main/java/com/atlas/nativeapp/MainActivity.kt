@@ -409,7 +409,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             val fromTop=(planning||trailMap)&&!landscape
             gravity=Gravity.END or if(fromTop)Gravity.TOP else Gravity.BOTTOM
             rightMargin=right
-            topMargin=if(trailMap)topInset+ui.dp(145)
+            topMargin=if(trailMap)topInset+ui.dp(85)
                 else if(planning&&!landscape)topInset+ui.dp(165) else 0
             bottomMargin=if(fromTop)0 else bottomInset+
                 if(state.navigating)ui.dp(178) else ui.dp(118)
