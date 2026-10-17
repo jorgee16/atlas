@@ -72,6 +72,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastCompassMoveMs = 0L
     private var deviceHeading: Double? = null
     private var lastTravelHeading: Double? = null
+    private val stationaryPosition = StationaryMapPosition()
     init {
         MapLibre.getInstance(context)
         view = MapView(context)
@@ -190,17 +191,21 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val previous = deviceHeading
         deviceHeading = if (previous == null) clean else
             AtlasHeading.normalize(previous +
-                AtlasHeading.signedDelta(previous, clean) * 0.22)
+                AtlasHeading.signedDelta(previous, clean) * 0.18)
         val state = current ?: return
+        // In guidance mode the route / confirmed motion owns camera heading.
+        // Previously the sensor rotated the camera while every GPS fix
+        // rotated it back, making the view swing when the driver was stopped.
+        if (state.navigating) return
         val fix = state.fix ?: return
-        if (!headingUp || !follow || (state.navigating && fix.speed >= 1.2)) return
+        if (!headingUp || !follow) return
         val ready = map ?: return
         val target = deviceHeading ?: return
         val now = SystemClock.elapsedRealtime()
-        if (now - lastCompassMoveMs < 450L ||
-            AtlasHeading.angleDifference(ready.cameraPosition.bearing, target) < 7.0) return
+        if (now - lastCompassMoveMs < 550L ||
+            AtlasHeading.angleDifference(ready.cameraPosition.bearing, target) < 9.0) return
         lastCompassMoveMs = now
-        ready.animateCamera(CameraUpdateFactory.bearingTo(target), 320)
+        ready.animateCamera(CameraUpdateFactory.bearingTo(target), 450)
         positionMarker?.icon = positionIcon(0.0)
     }
 
@@ -216,19 +221,22 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
 
     fun compass() {
         headingUp = !headingUp
-        lastFixTime = -1.0
-        lastCameraMoveMs = 0L
         val state = current
         val fix = state?.fix
         val target = if (headingUp && state != null && fix != null)
             travelHeading(state, fix) else 0.0
-        // A compass tap must work immediately, even while GPS is stationary
-        // or following has been disabled by a map gesture.
-        map?.animateCamera(CameraUpdateFactory.bearingTo(target), 300)
+        // One animation owns a compass tap. The next render from the same
+        // fix must not immediately launch another, conflicting animation.
+        lastFixTime = fix?.time ?: -1.0
+        lastCameraMoveMs = SystemClock.elapsedRealtime()
+        map?.setPadding(0, if (state?.navigating == true && headingUp)
+            (view.height * .25).toInt() else 0, 0, 0)
+        map?.animateCamera(CameraUpdateFactory.bearingTo(target), 350)
         if (follow && state != null) render(state)
     }
     /** Drop navigation-only camera settings when End is confirmed. */
     fun endNavigation() {
+        stationaryPosition.reset()
         follow = true
         lastFixTime = -1.0
         lastCameraMoveMs = 0L
@@ -288,7 +296,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             lastSegment = segment
         }
         s.fix?.let { fix ->
-            val display = if (s.navigating && s.guidance != null && s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point
+            val candidate = if (s.navigating && s.guidance != null &&
+                s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point
+            // Visual-only: retain the map-matched road position during
+            // stationary GPS jitter; native guidance keeps receiving fixes.
+            val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
             val heading = travelHeading(s, fix)
             val position = LatLng(display.lat, display.lon)
             if (positionMarker == null) positionMarker = ready.addMarker(MarkerOptions().position(position).icon(positionIcon(AtlasHeading.normalize(heading - ready.cameraPosition.bearing))).title("Your location"))

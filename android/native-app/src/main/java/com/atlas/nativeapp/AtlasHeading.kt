@@ -19,8 +19,11 @@ internal object AtlasHeading {
     ): Double {
         fun valid(v: Double?): Double? = v?.takeIf { it.isFinite() && it >= 0.0 }
         val travel = if (speed >= 1.2) valid(routeBearing) ?: valid(gpsBearing) else null
+        // While stopped, retain the last confirmed direction of movement.
+        // If navigation starts at rest, the route is a more reliable heading
+        // than phone magnetometer noise. Never derive travel from compass turns.
         val result = if (navigating)
-            travel ?: valid(lastTravelBearing) ?: valid(deviceBearing)
+            travel ?: valid(lastTravelBearing) ?: valid(routeBearing) ?: valid(deviceBearing)
         else
             valid(deviceBearing) ?: travel ?: valid(lastTravelBearing)
         return normalize(result ?: 0.0)

@@ -216,3 +216,14 @@ assets, lane guidance/junction graphics, full legacy search ranking,
 complex alternative routes, transport arrival parity, porting all Node-based
 region-builder scripts, and road/Portugal-scale validation. Do not mark the
 overall migration 100% until these have testable parity.
+
+### Stationary compass/GPS stability
+
+During driving guidance the camera bearing follows the last confirmed travel
+heading (or route bearing if no travel is known), not changes in the device's
+magnetometer while parked. A single compass tap no longer starts competing
+camera animations. A visual-only road-position stabilizer ignores small GPS
+projection jitter at low speeds; it reanchors after consistent fresh fixes or
+immediately when actual movement resumes. Walking remains unaffected.
+Neither compass movement nor visual stabilisation triggers rerouting. The
+physical-device compass and tunnel tests remain required.
