@@ -47,6 +47,16 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 onlineFailed = false
             }
         }
+    var visualStyle: String=MapVisualStyle.STREETS
+        set(value){
+            require(MapVisualStyle.valid(value))
+            if(field!=value){field=value;onlineFailed=false}
+        }
+    val activeVisualStyle:String
+        get()=if(styleLoading)"loading"
+            else if(loadedSource==MapSourcePolicy.ONLINE &&
+                MapVisualStyle.usesImagery(visualStyle,sourceMode) && !onlineFailed)
+                    visualStyle else MapVisualStyle.STREETS
     var onMapSourceChanged: (() -> Unit)? = null
     private var loadedSource = "loading"
     val activeMapSource: String get() = if (styleLoading) "loading" else loadedSource
@@ -210,10 +220,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     /** Return true if a new style is loading; rendering must wait for its callback. */
     private fun loadStyle(at: Coordinate): Boolean {
-        val file = if (sourceMode == MapSourcePolicy.ONLINE) null else regions.map(at)
-        val selection = MapSourcePolicy.resolve(sourceMode, file != null)
-        val navigating = current?.navigating == true
-        val key = "$selection:$sourceMode:${file?.absolutePath ?: ""}:$dark:$navigating:$onlineFailed"
+        val imagery=MapVisualStyle.usesImagery(visualStyle,sourceMode)
+        val file=if(sourceMode==MapSourcePolicy.ONLINE || imagery)null else regions.map(at)
+        val selection=if(imagery)MapSourcePolicy.ONLINE
+            else MapSourcePolicy.resolve(sourceMode,file!=null)
+        val navigating=current?.navigating==true
+        val key="$selection:$sourceMode:$visualStyle:${file?.absolutePath ?: ""}:$dark:$navigating:$onlineFailed"
         if (key == styleKey) return styleLoading
         styleKey = key
         styleLoading = true
@@ -233,6 +245,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 AtlasCartography.offlineStyle("pmtiles://file://" + file!!.absolutePath, dark, navigating))
             selection == MapSourcePolicy.UNAVAILABLE -> Style.Builder().fromJson(
                 """{"version":8,"sources":{},"layers":[{"id":"atlas-no-offline-map","type":"background","paint":{"background-color":"${if (dark) "#1D2B38" else "#F0F2EF"}"}}]}""")
+            imagery && !onlineFailed -> Style.Builder().fromJson(
+                AtlasCartography.satelliteStyle(visualStyle==MapVisualStyle.HYBRID))
             !onlineFailed -> Style.Builder().fromUri(AtlasCartography.onlineUri(dark, navigating))
             else -> Style.Builder().fromJson("""{"version":8,
                 "sources":{"osm":{"type":"raster",
@@ -243,7 +257,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         map?.setStyle(builder) { style ->
             if (key != styleKey) return@setStyle
-            if (selection == MapSourcePolicy.ONLINE && !onlineFailed) {
+            if (selection == MapSourcePolicy.ONLINE && !onlineFailed && !imagery) {
                 AtlasCartography.enhanceOnline(style, dark, navigating)
             }
             // A render may have happened while style loading; purge any

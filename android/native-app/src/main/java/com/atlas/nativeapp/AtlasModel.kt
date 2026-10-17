@@ -161,6 +161,16 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                 refresh()
             }
         }
+    var mapVisualStyle: String
+        get()=prefs.getString("mapVisualStyle",MapVisualStyle.STREETS)
+            ?.takeIf(MapVisualStyle::valid)?:MapVisualStyle.STREETS
+        set(value){
+            require(MapVisualStyle.valid(value))
+            if(mapVisualStyle!=value){
+                prefs.edit().putString("mapVisualStyle",value).apply()
+                refresh()
+            }
+        }
     val dark: Boolean get() = theme == "dark" || (theme == "system" &&
         (getApplication<Application>().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
     var vehicleClass: Int

@@ -14,6 +14,40 @@ import org.maplibre.android.style.sources.VectorSource
  * building/POI detail while exploring. Rendering stays in MapLibre Native.
  */
 internal object AtlasCartography {
+
+    /** Third-party Esri imagery is online-only; do not repackage offline. */
+    private const val IMAGE_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    private const val LABEL_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+    const val SATELLITE_CREDIT = "© Esri, Maxar, Earthstar Geographics, GIS User Community and imagery contributors"
+
+    fun satelliteStyle(hybrid:Boolean):String {
+        val labels=if(hybrid) """,
+          "satellite-references":{"type":"raster","tiles":[${JSONObject.quote(LABEL_URL)}],
+            "tileSize":256,"maxzoom":19,"attribution":"© Esri and contributors"}
+        """.trimIndent() else ""
+        val labelsLayer=if(hybrid) """,
+          {"id":"satellite-reference-layer","type":"raster","source":"satellite-references",
+            "paint":{"raster-opacity":1}}
+        """.trimIndent() else ""
+        return """
+        {
+          "version":8,
+          "sources":{
+            "satellite-imagery":{"type":"raster","tiles":[${JSONObject.quote(IMAGE_URL)}],
+              "tileSize":256,"maxzoom":19,"attribution":${JSONObject.quote(SATELLITE_CREDIT)}}
+            $labels
+          },
+          "layers":[
+            {"id":"satellite-background","type":"background",
+             "paint":{"background-color":"#1F2B35"}},
+            {"id":"satellite-raster","type":"raster","source":"satellite-imagery",
+              "paint":{"raster-opacity":1}}
+            $labelsLayer
+          ]
+        }
+        """.trimIndent()
+    }
+
     fun onlineUri(dark: Boolean, navigating: Boolean): String =
         "https://tiles.openfreemap.org/styles/" +
             (if (dark) "dark" else if (navigating) "positron" else "liberty")
