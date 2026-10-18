@@ -345,7 +345,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val s = current
         val fix = s?.fix
         val ready = map
-        if (ready == null || ready.style == null || styleLoading || fix == null) {
+        if (ready == null || ready.style == null || styleLoading || s == null || fix == null) {
             recenterPending = true
             return
         }
@@ -459,6 +459,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     fun render(s: AtlasState) {
         current = s
+        if (recenterPending && s.fix != null && !styleLoading && map?.style != null) {
+            // A delayed first GPS fix must also satisfy a recenter request.
+            recenter()
+        }
         if (!s.navigating) {
             stopNavigationFrames()
             renderInterpolator.reset()

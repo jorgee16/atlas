@@ -29,24 +29,27 @@ internal class MotionHeadingStabilizer {
         observe(fix)
         val fallback = compass?.takeIf { it.isFinite() && it >= 0.0 }
         val route = routeBearing?.takeIf { it.isFinite() && it >= 0.0 }
+        // Copy mutable filter state into a local immutable snapshot for
+        // one coherent reading of movement and guidance.
+        val stableCourse = course
         if (navigating && onRoute && route != null) {
             // A fresh reroute can select an opposite-direction segment on
             // dual carriageways or roundabouts. Do not flip the camera 180°
             // from one projected segment while actual travel says otherwise.
-            if (course != null && fix.speed >= 2.0 &&
-                abs(AtlasHeading.signedDelta(course,route)) > 110.0) {
+            if (stableCourse != null && fix.speed >= 2.0 &&
+                abs(AtlasHeading.signedDelta(stableCourse,route)) > 110.0) {
                 val repeat = routeCandidate != null &&
                     abs(AtlasHeading.signedDelta(routeCandidate!!,route)) < 25.0
                 routeCandidateCount = if (repeat) routeCandidateCount + 1 else 1
                 routeCandidate = route
                 // Rerouting geometry alone is not enough evidence to reverse
                 // travel direction; confirmed course catches up after a U-turn.
-                return course
+                return stableCourse
             }
             routeCandidate = null
             routeCandidateCount = 0
             val weight = if (usable(fix)) 0.70 else 0.90
-            return if (course == null) route else mix(course, route, weight)
+            return if (stableCourse == null) route else mix(stableCourse, route, weight)
         }
         routeCandidate = null
         routeCandidateCount = 0
