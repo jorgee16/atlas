@@ -15,6 +15,11 @@ class MotionHeadingStabilizerTest {
         assertTrue(filter.ownsMovingHeading(fix(1.0)))
         assertEquals(10.0,filter.resolve(fix(1.0),80.0,false),0.001)
     }
+    @Test fun preciseProviderHeadingOverridesNoisyNativeDisplacementCourse() {
+        val filter = MotionHeadingStabilizer()
+        val nativeCourse=fix(1.0,bearing=172.0).copy(providerBearing=7.0)
+        assertEquals(7.0,filter.resolve(nativeCourse,240.0,false),0.001)
+    }
     @Test fun noisySingleFixDoesNotReverseDirection() {
         val filter = MotionHeadingStabilizer()
         filter.resolve(fix(1.0),250.0,false)

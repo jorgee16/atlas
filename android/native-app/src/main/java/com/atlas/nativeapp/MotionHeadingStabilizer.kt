@@ -77,7 +77,14 @@ internal class MotionHeadingStabilizer {
             }
         }
         val good = usable(f)
-        val candidate = if (good) f.bearing else displacementHeading
+        // C++'s heading may be calculated from successive coordinates.
+        // When Android reports a credible *bearing accuracy*, prefer the
+        // raw GNSS course to a direction estimated from noisy positions.
+        val providerCourse = f.providerBearing?.takeIf {
+            it.isFinite() && it >= 0.0 && f.bearingAccuracy != null &&
+                f.bearingAccuracy.isFinite() && f.bearingAccuracy <= 35.0
+        }
+        val candidate = if (good) providerCourse ?: f.bearing else displacementHeading
         if (candidate == null) return
         val normalized = AtlasHeading.normalize(candidate)
         val old = course
