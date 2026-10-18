@@ -93,6 +93,37 @@ class NavigationRenderInterpolatorTest {
         assertEquals(0.0,a.sample(101.2)!!.along,0.00001)
     }
 
+    @Test fun predictionWeightFallsContinuouslyWithAccuracyInDriving() {
+        fun predicted(accuracy: Double): Double {
+            val a=route()
+            a.acceptGps(10.0,first,12.0,accuracy,100.0,false)
+            a.sample(100.0)
+            // A 100ms frame interval after a full second is intentionally
+            // smaller than GPS sampling; compare different confidence classes.
+            return a.sample(101.0)!!.along
+        }
+        val good=predicted(8.0)
+        val medium=predicted(45.0)
+        val poor=predicted(70.0)
+        assertTrue(good > medium)
+        assertTrue(medium > poor)
+        assertEquals(10.0,poor,0.00001)
+    }
+
+    @Test fun reroutingSeedsVisibleCursorOnNearbyNewRoute() {
+        val a=route()
+        a.acceptGps(35.0,first,10.0,5.0,100.0,false)
+        a.sample(100.0)
+        val drawn=a.sample(100.6)!!
+        val newRoute=listOf(first,turn,last)
+        a.setRoute(newRoute,200.0,drawn.position)
+        val seeded=a.sample(101.0)!!
+        assertTrue(kotlin.math.abs(seeded.along - drawn.along) < 1.0)
+        // A route farther away must not steal the old visual position.
+        a.setRoute(listOf(Coordinate(42.0,-8.0),Coordinate(42.001,-8.0)),100.0,drawn.position)
+        assertEquals(null,a.sample(101.0))
+    }
+
     @Test fun veryInaccurateGpsCanCorrectButCannotPredict() {
         val a=route()
         a.acceptGps(30.0,first,12.0,70.0,100.0,false)

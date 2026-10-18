@@ -34,6 +34,15 @@ class MotionHeadingStabilizerTest {
         assertTrue(next > 20.0 && next < 55.0)
         assertTrue(filter.resolve(fix(4.0,95.0),180.0,false) > next)
     }
+    @Test fun reverseProjectionFromRerouteDoesNotFlipCar() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,10.0),90.0,false)
+        val reversed=filter.resolve(fix(2.0,11.0),90.0,true,190.0,true)
+        assertTrue(reversed < 40.0 || reversed > 340.0)
+        // Actual movement and route in agreement can still turn.
+        val accepted=filter.resolve(fix(3.0,12.0),90.0,true,35.0,true)
+        assertTrue(accepted in 10.0..40.0)
+    }
     @Test fun weakGpsTrustsRouteOnlyIfOnRoute() {
         val filter = MotionHeadingStabilizer()
         filter.resolve(fix(1.0,55.0),200.0,false)
