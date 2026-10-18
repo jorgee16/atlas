@@ -33,4 +33,4 @@ class NativeCore : AutoCloseable {
 data class Coordinate(val lat: Double, val lon: Double) {
     init { require(lat.isFinite() && lon.isFinite() && lat in -90.0..90.0 && lon in -180.0..180.0) }
 }
-data class Fix(val point: Coordinate, val accuracy: Double, val speed: Double, val bearing: Double?, val time: Double)
+data class Fix(val point: Coordinate, val accuracy: Double, val speed: Double, val bearing: Double?, val time: Double, val bearingAccuracy: Double? = null)

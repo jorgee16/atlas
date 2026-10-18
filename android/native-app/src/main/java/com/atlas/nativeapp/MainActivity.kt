@@ -993,7 +993,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             time - lastReliableGpsTime in 0.0..7.0) return
         model.fix(Fix(Coordinate(location.latitude, location.longitude), accuracy,
             if (location.hasSpeed()) location.speed.toDouble().coerceAtLeast(0.0) else -1.0,
-            if (location.hasBearing()) location.bearing.toDouble() else null, time))
+            if (location.hasBearing()) location.bearing.toDouble() else null, time,
+            if (location.hasBearing() && location.hasBearingAccuracy())
+                location.bearingAccuracyDegrees.toDouble() else null))
     }
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return

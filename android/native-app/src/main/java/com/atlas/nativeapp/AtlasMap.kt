@@ -85,7 +85,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastCameraMoveMs = 0L
     private var lastCompassMoveMs = 0L
     private var deviceHeading: Double? = null
-    private var lastTravelHeading: Double? = null
+    private val headingStabilizer = MotionHeadingStabilizer()
     private val stationaryPosition = StationaryMapPosition()
     private val renderInterpolator = NavigationRenderInterpolator()
     private val choreographer by lazy { Choreographer.getInstance() }
@@ -334,8 +334,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         if (state.navigating) return
         val fix = state.fix ?: return
         val freshGps = SystemClock.elapsedRealtimeNanos() / 1e9 - fix.time in 0.0..5.0
-        if (freshGps && AtlasHeading.hasTravelHeading(
-                fix.speed, fix.bearing, lastTravelHeading)) return
+        if (freshGps && headingStabilizer.ownsMovingHeading(fix)) return
         if (!headingUp || !follow) return
         val ready = map ?: return
         val target = deviceHeading ?: return
@@ -348,13 +347,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
 
     private fun travelHeading(s: AtlasState, fix: Fix): Double {
-        val routeBearing = if (s.navigating) s.guidance?.optDouble("bearing")
-            ?.takeIf { it.isFinite() && it >= 0.0 } else null
-        val course = if (fix.speed >= AtlasHeading.MIN_GPS_COURSE_SPEED_MPS)
-            (routeBearing ?: fix.bearing?.takeIf { it.isFinite() && it >= 0.0 }) else null
-        if (course != null) lastTravelHeading = AtlasHeading.normalize(course)
-        return AtlasHeading.choose(s.navigating, fix.speed,
-            routeBearing, fix.bearing, deviceHeading, lastTravelHeading)
+        val guidance = s.guidance
+        val distance = guidance?.optDouble("offRoute",Double.POSITIVE_INFINITY)
+            ?: Double.POSITIVE_INFINITY
+        val onRoute = s.navigating && guidance != null &&
+            distance.isFinite() && distance < maxOf(30.0, fix.accuracy * 1.5) &&
+            guidance.optString("state") !in listOf("checking","reroute","changed")
+        val routeBearing = if (onRoute) guidance
+            ?.optDouble("bearing")?.takeIf { it.isFinite() && it >= 0.0 } else null
+        return headingStabilizer.resolve(fix,deviceHeading,s.navigating,routeBearing,onRoute)
     }
 
     fun compass() {
