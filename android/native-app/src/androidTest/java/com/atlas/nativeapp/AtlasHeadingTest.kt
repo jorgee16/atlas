@@ -18,6 +18,12 @@ class AtlasHeadingTest {
         assertEquals(89.0, AtlasHeading.choose(true, 0.0, 92.0, 95.0, 12.0, 89.0), 0.001)
     }
 
+    @Test fun exploringInMotionFollowsGpsNotHandset() {
+        assertEquals(89.0, AtlasHeading.choose(false, 11.0, null, 89.0, 270.0, 85.0), 0.001)
+        assertTrue(AtlasHeading.hasTravelHeading(11.0, 89.0, null))
+        assertEquals(87.0, AtlasHeading.choose(false, 11.0, null, null, 270.0, 87.0), 0.001)
+    }
+
     @Test fun explorationFollowsPhoneCompassAndIgnoresGpsNoise() {
         assertEquals(35.0, AtlasHeading.choose(false, 0.0, null, 190.0, 35.0, 94.0), 0.001)
         assertEquals(0.0, AtlasHeading.choose(false, 0.0, null, null, null, null), 0.001)

@@ -203,7 +203,19 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 false
             }
             ready.setOnMarkerClickListener { marker: Marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
-            ready.addOnCameraIdleListener { loadStyle(centerPoint) }
+            ready.addOnCameraIdleListener {
+                loadStyle(centerPoint)
+                // The marker bitmap is screen-oriented. After a camera bearing
+                // animation, re-express its angle in the *new* map reference.
+                // Otherwise the marker keeps the bearing of the previous frame.
+                val state = current
+                if (!styleLoading && state != null && !state.navigating) {
+                    state.fix?.let { fix ->
+                        positionMarker?.icon = positionIcon(
+                            AtlasHeading.normalize(travelHeading(state, fix) - ready.cameraPosition.bearing))
+                    }
+                }
+            }
             ready.addOnCameraMoveStartedListener { reason ->
                 if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) { follow = false; onPan?.invoke() }
             }
@@ -315,11 +327,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             AtlasHeading.normalize(previous +
                 AtlasHeading.signedDelta(previous, clean) * 0.18)
         val state = current ?: return
-        // In guidance mode the route / confirmed motion owns camera heading.
-        // Previously the sensor rotated the camera while every GPS fix
-        // rotated it back, making the view swing when the driver was stopped.
+        // Never let the phone compass override a confirmed GPS course
+        // during driving, even if the user is only exploring the map.
+        // The same conflict used to make the camera and arrow disagree
+        // several times per second between 1 Hz GPS fixes.
         if (state.navigating) return
         val fix = state.fix ?: return
+        val freshGps = SystemClock.elapsedRealtimeNanos() / 1e9 - fix.time in 0.0..5.0
+        if (freshGps && AtlasHeading.hasTravelHeading(
+                fix.speed, fix.bearing, lastTravelHeading)) return
         if (!headingUp || !follow) return
         val ready = map ?: return
         val target = deviceHeading ?: return
@@ -334,8 +350,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private fun travelHeading(s: AtlasState, fix: Fix): Double {
         val routeBearing = if (s.navigating) s.guidance?.optDouble("bearing")
             ?.takeIf { it.isFinite() && it >= 0.0 } else null
-        val course = if (fix.speed >= 1.2)
-            (routeBearing ?: fix.bearing?.takeIf { it.isFinite() }) else null
+        val course = if (fix.speed >= AtlasHeading.MIN_GPS_COURSE_SPEED_MPS)
+            (routeBearing ?: fix.bearing?.takeIf { it.isFinite() && it >= 0.0 }) else null
         if (course != null) lastTravelHeading = AtlasHeading.normalize(course)
         return AtlasHeading.choose(s.navigating, fix.speed,
             routeBearing, fix.bearing, deviceHeading, lastTravelHeading)
@@ -368,7 +384,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         lastCameraMoveMs = 0L
         map?.setPadding(0, 0, 0, 0)
         val target = current?.fix?.point ?: return
-        val bearing = if (headingUp) deviceHeading ?: 0.0 else 0.0
+        val bearing = if (headingUp) current?.fix?.let {
+            travelHeading(current!!, it)
+        } ?: deviceHeading ?: 0.0 else 0.0
         map?.animateCamera(CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder().target(LatLng(target.lat, target.lon))
                 .zoom(15.0).bearing(bearing).tilt(0.0).build()), 400)
