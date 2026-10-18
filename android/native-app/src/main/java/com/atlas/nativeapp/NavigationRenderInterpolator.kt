@@ -53,6 +53,7 @@ internal class NavigationRenderInterpolator {
     }
 
     fun setRoute(points: List<Coordinate>, distanceMeters: Double, previousPosition: Coordinate? = null) {
+        val previousMeasurementAt = measuredAt
         reset()
         if (points.size < 2 || !distanceMeters.isFinite() || distanceMeters <= 0.0) return
         vertices = points
@@ -73,6 +74,10 @@ internal class NavigationRenderInterpolator {
         if (seed != null && seed.second <= 55.0) {
             measuredAlong = seed.first
             renderedAlong = seed.first
+            // Display the carried position immediately. The first native
+            // projection on the new route will replace this measurement.
+            measuredAt = previousMeasurementAt
+            lastFrameAt = Double.NaN
         }
     }
 
