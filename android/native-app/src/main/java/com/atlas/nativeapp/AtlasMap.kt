@@ -1,5 +1,6 @@
 package com.atlas.nativeapp
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -9,6 +10,8 @@ import android.graphics.Path
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.Choreographer
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -16,6 +19,10 @@ import android.widget.ImageView
 import org.json.JSONArray
 import org.json.JSONObject
 import org.maplibre.android.MapLibre
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.gestures.RotateGestureDetector
+import org.maplibre.android.gestures.ShoveGestureDetector
+import org.maplibre.android.gestures.StandardScaleGestureDetector
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
@@ -199,6 +206,23 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             positionCursor.rotation = degrees.toFloat()
         }
     }
+    private fun releaseFollowForGesture() {
+        if (!follow) return
+        follow = false
+        compassAnimationUntil = 0L
+        // Do not re-enter MapLibre rendering from inside its gesture dispatch.
+        view.post { onPan?.invoke() }
+    }
+    @SuppressLint("ClickableViewAccessibility") // Observer only: MapView retains touch/click handling.
+    private fun observeDoubleTap() {
+        val taps = GestureDetector(context,object: GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(event: MotionEvent): Boolean {
+                releaseFollowForGesture()
+                return false
+            }
+        })
+        view.setOnTouchListener { _,event -> taps.onTouchEvent(event);false }
+    }
     private fun setPosition(point: Coordinate) {
         positionCoordinate = point
         updatePositionPlacement()
@@ -235,6 +259,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     init {
         MapLibre.getInstance(context)
         view = MapView(context)
+        observeDoubleTap()
         val cursorSize = (44*context.resources.displayMetrics.density).toInt()
         positionCursor.setImageBitmap(cursorBitmap)
         view.addView(positionCursor,FrameLayout.LayoutParams(cursorSize,cursorSize,Gravity.TOP or Gravity.START))
@@ -301,8 +326,33 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     }
                 }
             }
+            // CameraChangeDispatcher coalesces started/idle notifications while
+            // our navigation camera is moving. A gesture can therefore lose its
+            // REASON_API_GESTURE to the next render frame. Yield synchronously
+            // at the recognized gesture boundary instead of waiting for that event.
+            ready.addOnMoveListener(object: MapLibreMap.OnMoveListener {
+                override fun onMoveBegin(detector: MoveGestureDetector) = releaseFollowForGesture()
+                override fun onMove(detector: MoveGestureDetector) {}
+                override fun onMoveEnd(detector: MoveGestureDetector) {}
+            })
+            ready.addOnScaleListener(object: MapLibreMap.OnScaleListener {
+                override fun onScaleBegin(detector: StandardScaleGestureDetector) = releaseFollowForGesture()
+                override fun onScale(detector: StandardScaleGestureDetector) {}
+                override fun onScaleEnd(detector: StandardScaleGestureDetector) {}
+            })
+            ready.addOnRotateListener(object: MapLibreMap.OnRotateListener {
+                override fun onRotateBegin(detector: RotateGestureDetector) = releaseFollowForGesture()
+                override fun onRotate(detector: RotateGestureDetector) {}
+                override fun onRotateEnd(detector: RotateGestureDetector) {}
+            })
+            ready.addOnShoveListener(object: MapLibreMap.OnShoveListener {
+                override fun onShoveBegin(detector: ShoveGestureDetector) = releaseFollowForGesture()
+                override fun onShove(detector: ShoveGestureDetector) {}
+                override fun onShoveEnd(detector: ShoveGestureDetector) {}
+            })
             ready.addOnCameraMoveStartedListener { reason ->
-                if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) { follow = false; onPan?.invoke() }
+                if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE)
+                    releaseFollowForGesture()
             }
             if (!restoreCamera) ready.cameraPosition = CameraPosition.Builder().target(LatLng(38.7223, -9.1393)).zoom(13.0).build()
             loadStyle(Coordinate(38.7223, -9.1393))
