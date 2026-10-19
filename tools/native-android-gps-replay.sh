@@ -23,8 +23,10 @@ cleanup() {
   kill "$record_pid" 2>/dev/null || true
   adb shell pkill -2 screenrecord || true
   wait "$record_pid" 2>/dev/null || true
-  adb pull /sdcard/Android/data/com.atlas.nativeapp/files/gps-replay ui-preview/ || true
   adb pull /sdcard/Download/atlas-gps-replay ui-preview/ || true
+  if [[ -d ui-preview/atlas-gps-replay/metrics ]]; then
+    cp -R ui-preview/atlas-gps-replay/metrics/. ui-preview/gps-replay/
+  fi
   adb logcat -d -v threadtime > ui-preview/gps-replay/logcat.txt || true
 }
 trap cleanup EXIT

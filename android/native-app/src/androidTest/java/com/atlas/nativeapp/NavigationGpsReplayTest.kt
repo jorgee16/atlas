@@ -287,6 +287,15 @@ class NavigationGpsReplayTest {
             locations.removeTestProvider(LocationManager.GPS_PROVIDER)
             File(output,"frames.ndjson").writeText(synchronized(frames){frames.joinToString("\n")})
             File(output,"fixes.ndjson").writeText(fixes.joinToString("\n"))
+            // AGP may uninstall the target APK immediately after instrumentation,
+            // deleting getExternalFilesDir. Export with shell identity before
+            // returning the test result, just like the existing UI screenshots.
+            val command="mkdir -p /sdcard/Download/atlas-gps-replay/metrics && " +
+                "cp -R ${output.absolutePath}/. /sdcard/Download/atlas-gps-replay/metrics/ && echo ATLAS_EXPORT_OK"
+            val exported=instrumentation.uiAutomation.executeShellCommand(command).use { fd ->
+                java.io.FileInputStream(fd.fileDescriptor).use { it.readBytes().toString(Charsets.UTF_8) }
+            }
+            assertTrue("replay evidence must survive APK uninstall: $exported",exported.contains("ATLAS_EXPORT_OK"))
             Log.i("ATLAS_GPS_REPLAY","evidence=${output.path} frames=${frames.size} fixes=${fixes.size}")
         }
     }
