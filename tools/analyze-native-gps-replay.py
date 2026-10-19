@@ -44,6 +44,7 @@ angles=[]
 intervals=[]
 good_steps=[]
 observations=[]
+camera_observations=[]
 for a,b in zip(frames,frames[1:]):
     dt=b['time']-a['time']
     if 0<dt<.15 and a.get('renderLat') is not None and b.get('renderLat') is not None:
@@ -52,10 +53,14 @@ for a,b in zip(frames,frames[1:]):
         observations.append((step,a,b))
         if a.get('phase','').startswith('drive-accuracy-') and a.get('accuracy',100)<=20 and a.get('speed',0)>=2:
             good_steps.append(step)
-        angles.append(abs((b.get('mapBearing',0)-a.get('mapBearing',0)+180)%360-180))
+        angle=abs((b.get('mapBearing',0)-a.get('mapBearing',0)+180)%360-180)
+        angles.append(angle)
+        camera_observations.append((angle,a,b))
         intervals.append(dt)
 for step,a,b in sorted(observations,key=lambda item:item[0],reverse=True)[:5]:
     print('ATLAS_LARGEST_RENDER_STEP '+json.dumps({'meters':step,'before':a,'after':b}),flush=True)
+for angle,a,b in sorted(camera_observations,key=lambda item:item[0],reverse=True)[:3]:
+    print('ATLAS_LARGEST_CAMERA_ROTATION '+json.dumps({'degrees':angle,'before':a,'after':b}),flush=True)
 guided=[f for f in frames if f.get('follow') and f.get('headingUp')]
 # Check actual camera course against replay truth. A shared erroneous route
 # heading can make cursor/map agree while both point backwards. Allow four

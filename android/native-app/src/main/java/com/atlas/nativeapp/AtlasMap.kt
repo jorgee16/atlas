@@ -607,6 +607,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun overview() = requestCamera(NavigationCameraState.Mode.OVERVIEW)
     fun render(s: AtlasState) {
         current = s
+        // Recalculating a route keeps confirmed motion; starting a different
+        // trip must not inherit the previous journey's opposite course.
+        if(s.navigating && !wasNavigating)headingStabilizer.reset()
         if (!s.navigating) {
             stopNavigationFrames()
             renderInterpolator.reset()

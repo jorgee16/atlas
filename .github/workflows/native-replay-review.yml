@@ -32,7 +32,7 @@ jobs:
           fi
       - name: Inspect camera and driving images
         run: python3 tools/emit-native-replay-previews.py /tmp/atlas-evidence/ui-preview/camera-smoke /tmp/atlas-evidence/ui-preview/atlas-camera-smoke && python3 tools/emit-native-replay-previews.py /tmp/atlas-evidence/ui-preview/gps-replay /tmp/atlas-evidence/ui-preview/atlas-gps-replay
-      - name: Diagnose all recorded motion metrics
+      - name: Diagnose recorded motion metrics and camera transition context
         continue-on-error: true
         working-directory: /tmp/atlas-evidence
         run: python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full

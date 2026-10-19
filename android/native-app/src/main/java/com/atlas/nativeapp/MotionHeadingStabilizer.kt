@@ -21,6 +21,14 @@ internal class MotionHeadingStabilizer {
     private var routeCandidate: Double? = null
     private var routeCandidateCount = 0
 
+    fun reset() {
+        lastTime=Double.NEGATIVE_INFINITY
+        lastPoint=null
+        lastAccuracy=Double.POSITIVE_INFINITY
+        course=null
+        turnCandidate=null;turnCount=0
+        routeCandidate=null;routeCandidateCount=0
+    }
     fun ownsMovingHeading(fix: Fix) =
         fix.speed.isFinite() && fix.speed >= 2.0 && course != null
 

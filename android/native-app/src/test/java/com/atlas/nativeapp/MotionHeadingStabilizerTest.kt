@@ -72,5 +72,11 @@ class MotionHeadingStabilizerTest {
         val turn=f.resolve(fix(4.0,180.0),null,true)
         assertTrue(AtlasHeading.angleDifference(turn,0.0) > 20.0)
     }
+    @Test fun newTripDoesNotInheritAnOppositeCourseFromThePreviousJourney() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,120.0),null,true,120.0,true)
+        filter.reset()
+        assertEquals(325.0,filter.resolve(fix(2.0,325.0).copy(providerBearing=325.0),
+            null,true,325.0,true),.001)
+    }
 }
-
