@@ -633,6 +633,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             }
         }
     }
+    internal fun debugCursorBitmap(): Bitmap? = positionMarker?.icon?.bitmap
     internal fun debugSnapshot(): JSONObject {
         val camera = map?.cameraPosition
         val s = current

@@ -17,15 +17,20 @@ steps=[]
 angles=[]
 intervals=[]
 good_steps=[]
+observations=[]
 for a,b in zip(frames,frames[1:]):
     dt=b['time']-a['time']
     if 0<dt<.15 and a.get('renderLat') is not None and b.get('renderLat') is not None:
         step=distance(a,b)
         steps.append(step)
+        observations.append((step,a,b))
         if a.get('phase','').startswith('drive-accuracy-') and a.get('accuracy',100)<=20 and a.get('speed',0)>=2:
             good_steps.append(step)
+        observations.append((step,a,b))
         angles.append(abs((b.get('mapBearing',0)-a.get('mapBearing',0)+180)%360-180))
         intervals.append(dt)
+for step,a,b in sorted(observations,key=lambda item:item[0],reverse=True)[:5]:
+    print('ATLAS_LARGEST_RENDER_STEP '+json.dumps({'meters':step,'before':a,'after':b}),flush=True)
 assert steps and max(steps)<6.0, f'Excessive cursor step: {max(steps,default=0):.2f} m'
 assert max(angles)<60, f'Instantaneous camera reversal: {max(angles):.2f} degrees'
 guided=[f for f in frames if f.get('follow') and f.get('headingUp')]

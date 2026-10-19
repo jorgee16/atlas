@@ -124,6 +124,13 @@ class NavigationGpsReplayTest {
             assertTrue(screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it))
         }
         File(output,"$name.json").writeText(snapshot(s).toString(2))
+        if(name=="manual-zoom")s.onActivity { a ->
+            map(a).debugCursorBitmap()?.let { bitmap ->
+                File(output,"cursor-bitmap.png").outputStream().use {
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)
+                }
+            }
+        }
     }
     private fun pan(s:ActivityScenario<MainActivity>) {
         var x=0f;var y=0f
