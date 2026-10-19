@@ -10,6 +10,9 @@ import android.util.Log
 import android.view.InputDevice
 import android.view.MotionEvent
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -37,6 +40,8 @@ class NavigationGpsReplayTest {
     private val output get()=File(context.getExternalFilesDir(null),"gps-replay").apply { mkdirs() }
     private val frames=Collections.synchronizedList(mutableListOf<String>())
     private val fixes=mutableListOf<String>()
+    private val events=mutableListOf<String>()
+    private var stateObserver:Job?=null
     private var model: AtlasModel?=null
     private var phase="setup"
     private var lastLogged=0.0
@@ -48,6 +53,19 @@ class NavigationGpsReplayTest {
     private fun attach(s: ActivityScenario<MainActivity>) {
         s.onActivity { a ->
             model=(a.application as AtlasApplication).model
+            stateObserver?.cancel()
+            stateObserver=a.lifecycleScope.launch {
+                model!!.updates.collect { state ->
+                    if(state.navigating && state.busy) {
+                        val before=state.fix?.time
+                        map(a).recenter()
+                        val evidence=map(a).debugSnapshot().put("event","recenter-during-reroute")
+                        assertTrue(evidence.getBoolean("follow"))
+                        assertEquals(before,model!!.updates.value.fix?.time)
+                        events.add(evidence.toString())
+                    }
+                }
+            }
             map(a).onDebugFrame={ frame ->
                 frame.put("phase",phase)
                 frames.add(frame.toString())
@@ -249,6 +267,8 @@ class NavigationGpsReplayTest {
                 replay(s,detour,8.0,false,false)
                 await("sustained deviation must cause native rerouting",30){
                     model!!.updates.value.route!==original && !model!!.updates.value.busy }
+                assertTrue("recenter must also be exercised during the busy reroute state",
+                    events.any { JSONObject(it).optString("event")=="recenter-during-reroute" })
                 recenter(s,"reroute-recenter")
                 File(output,"rerouted-route.json").writeText(model!!.updates.value.route!!.toString(2))
                 val resumed=model!!.updates.value.route!!
@@ -283,10 +303,11 @@ class NavigationGpsReplayTest {
                 s.onActivity { map(it).onDebugFrame=null;model!!.endNavigation() }
             }
         } finally {
-            instrumentation.runOnMainSync { model?.endNavigation() }
+            instrumentation.runOnMainSync { stateObserver?.cancel();model?.endNavigation() }
             locations.removeTestProvider(LocationManager.GPS_PROVIDER)
             File(output,"frames.ndjson").writeText(synchronized(frames){frames.joinToString("\n")})
             File(output,"fixes.ndjson").writeText(fixes.joinToString("\n"))
+            File(output,"events.ndjson").writeText(events.joinToString("\n"))
             // AGP may uninstall the target APK immediately after instrumentation,
             // deleting getExternalFilesDir. Export with shell identity before
             // returning the test result, just like the existing UI screenshots.

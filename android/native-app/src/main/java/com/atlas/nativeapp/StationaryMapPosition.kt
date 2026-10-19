@@ -11,21 +11,28 @@ import kotlin.math.max
  */
 internal class StationaryMapPosition {
     private var stable: Coordinate? = null
+    private var previousWalking: Boolean? = null
     private var candidateGroup: Coordinate? = null
     private var candidateFixes = 0
     private var previousFixTime = Double.NEGATIVE_INFINITY
 
     fun reset() {
         stable = null
+        previousWalking = null
         candidateGroup = null
         candidateFixes = 0
         previousFixTime = Double.NEGATIVE_INFINITY
     }
 
     fun select(position: Coordinate, fix: Fix, navigating: Boolean, walking: Boolean): Coordinate {
+        if (previousWalking != walking) {
+            reset()
+            previousWalking = walking
+        }
         val movingThreshold = if(walking) 0.45 else 1.2
         if (!navigating || !fix.speed.isFinite() || fix.speed >= movingThreshold) {
             reset()
+            previousWalking = walking
             if (navigating) stable = position
             return position
         }
