@@ -10,6 +10,8 @@ import subprocess
 import textwrap
 
 root=Path('ui-preview/gps-replay')
+for checkpoint in sorted(root.glob('*.json')):
+    print('ATLAS_CHECKPOINT '+checkpoint.name+' '+checkpoint.read_text().replace('\n',' '),flush=True)
 if not shutil.which('ffmpeg'):
     print('Visual previews unavailable: ffmpeg not installed; see original artifact PNGs.')
     raise SystemExit(0)

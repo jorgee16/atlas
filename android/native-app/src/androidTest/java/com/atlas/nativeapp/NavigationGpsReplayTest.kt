@@ -152,18 +152,18 @@ class NavigationGpsReplayTest {
             } }
             val event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,count,
                 properties,coordinates,0,0,1f,1f,0,0,InputDevice.SOURCE_TOUCHSCREEN,0)
-            instrumentation.uiAutomation.injectInputEvent(event,true);event.recycle()
-            SystemClock.sleep(40)
+            assertTrue("Android must accept pinch event $action",instrumentation.uiAutomation.injectInputEvent(event,true));event.recycle()
+            SystemClock.sleep(80)
         }
-        send(MotionEvent.ACTION_DOWN,width*.15f,1)
-        send(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.15f)
-        for(i in 1..12)send(MotionEvent.ACTION_MOVE,width*(.15f+.15f*i/12))
-        send(MotionEvent.ACTION_POINTER_UP or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.30f)
-        send(MotionEvent.ACTION_UP,width*.30f,1)
+        send(MotionEvent.ACTION_DOWN,width*.28f,1)
+        send(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.28f)
+        for(i in 1..12)send(MotionEvent.ACTION_MOVE,width*(.28f-.20f*i/12))
+        send(MotionEvent.ACTION_POINTER_UP or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.08f)
+        send(MotionEvent.ACTION_UP,width*.08f,1)
         SystemClock.sleep(500)
         capture(s,"manual-zoom")
         val after=snapshot(s).getDouble("mapZoom")
-        assertTrue("manual pinch must actually zoom MapLibre: $before -> $after",after>before+.2)
+        assertTrue("manual pinch must actually zoom MapLibre: $before -> $after",after<before-.2)
         assertFalse("manual zoom must not restore follow",snapshot(s).getBoolean("follow"))
     }
     private fun recenter(s:ActivityScenario<MainActivity>,name:String) {
