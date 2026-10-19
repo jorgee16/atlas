@@ -112,7 +112,7 @@ internal class NavigationRenderInterpolator {
      */
     fun acceptGps(
         along: Double, snapped: Coordinate, speed: Double,
-        gpsAccuracy: Double, fixTime: Double, walking: Boolean
+        gpsAccuracy: Double, fixTime: Double, walking: Boolean, bearingAccuracy: Double? = null
     ): Boolean {
         if (vertices.isEmpty() || !along.isFinite() || !fixTime.isFinite() ||
             fixTime <= lastGpsAt) return false
@@ -129,6 +129,12 @@ internal class NavigationRenderInterpolator {
         }
         lastAcceptedPosition = snapped
         applyMeasurement(along, speed, gpsAccuracy, fixTime, walking, true)
+        // Route-constrained prediction still depends on evidence of movement.
+        // Weak GNSS course reduces the horizon; it never changes native progress.
+        if (bearingAccuracy != null) {
+            predictionQuality *= if (bearingAccuracy.isFinite() && bearingAccuracy >= 0.0)
+                ((90.0-bearingAccuracy)/55.0).coerceIn(0.0,1.0) else 0.0
+        }
         return true
     }
 
@@ -179,7 +185,9 @@ internal class NavigationRenderInterpolator {
         // Poor accuracy lowers the correction rate rather than causing jumps.
         val confidence = (30.0 / max(accuracy, 10.0)).coerceIn(0.12, 1.0)
         val rate = (if (walking) 3.2 else 2.8) * confidence
-        val next = prev + (target - prev) * (1 - exp(-rate * dt))
+        val correction = (target - prev) * (1 - exp(-rate * dt))
+        val budget = max(4.0,measuredSpeed*1.7+3.0)*dt
+        val next = prev + correction.coerceIn(-budget,budget)
         renderedAlong = next.coerceIn(0.0, routeMeters)
         val continuing = predict && age < limit &&
             measuredAlong + measuredSpeed * predictionQuality * limit < routeMeters
@@ -209,3 +217,4 @@ internal class NavigationRenderInterpolator {
             (b.lon - a.lon) * 111_320.0 * cos(mid))
     }
 }
+

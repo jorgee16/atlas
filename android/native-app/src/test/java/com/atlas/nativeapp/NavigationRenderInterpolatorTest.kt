@@ -131,4 +131,16 @@ class NavigationRenderInterpolatorTest {
         val later=a.sample(101.0)!!
         assertEquals(start.along,later.along,1e-6)
     }
+    @Test fun poorBearingAccuracyReducesPredictionWithoutChangingMeasurement() {
+        fun advance(error: Double): Double {
+            val a=route()
+            a.acceptGps(20.0,first,12.0,5.0,100.0,false,error)
+            a.sample(100.0)
+            repeat(30) { a.sample(100.0+(it+1)/30.0) }
+            return a.sample(101.0)!!.along
+        }
+        assertTrue(advance(5.0) > advance(60.0))
+        assertEquals(20.0,advance(100.0),1e-6)
+    }
 }
+

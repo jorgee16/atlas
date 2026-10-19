@@ -63,4 +63,14 @@ class MotionHeadingStabilizerTest {
         assertEquals(20.0,filter.resolve(fix(1.0,180.0),90.0,false),0.001)
         assertEquals(20.0,filter.resolve(fix(0.1,180.0),90.0,false),0.001)
     }
+    @Test fun twoOppositeGnssFixesCannotStartAFalseUTurn() {
+        val f=MotionHeadingStabilizer()
+        f.resolve(fix(1.0,0.0),null,true)
+        assertEquals(0.0,f.resolve(fix(2.0,180.0),null,true),.001)
+        assertEquals(0.0,f.resolve(fix(3.0,180.0),null,true),.001)
+        // No positional corroboration: a third consistent fix permits a real turn.
+        val turn=f.resolve(fix(4.0,180.0),null,true)
+        assertTrue(AtlasHeading.angleDifference(turn,0.0) > 20.0)
+    }
 }
+

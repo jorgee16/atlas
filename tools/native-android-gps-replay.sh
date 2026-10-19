@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -uo pipefail
+cd "$(dirname "$0")/.."
+mkdir -p ui-preview/gps-replay
+adb install -r android/native-app/build/outputs/apk/debug/native-app-debug.apk || exit 1
+adb install -r android/native-app/build/outputs/apk/androidTest/debug/native-app-debug-androidTest.apk || exit 1
+adb shell appops set com.atlas.nativeapp android:mock_location allow || exit 1
+adb push atlas-portugal-routing.tar /data/local/tmp/atlas-portugal-routing.tar || exit 1
+adb shell 'run-as com.atlas.nativeapp sh -c "mkdir -p files && cd files && tar -xf /data/local/tmp/atlas-portugal-routing.tar"' || exit 1
+adb shell mkdir -p /sdcard/Download/atlas-gps-replay
+adb logcat -c
+# Screenrecord has a three-minute limit. Rotate segments throughout the test.
+record() {
+  local number=1
+  while true; do
+    adb shell screenrecord --bit-rate 2000000 --time-limit 180 "/sdcard/Download/atlas-gps-replay/segment-$number.mp4" || return
+    number=$((number+1))
+  done
+}
+record > ui-preview/gps-replay/screenrecord.log 2>&1 &
+record_pid=$!
+cleanup() {
+  kill "$record_pid" 2>/dev/null || true
+  adb shell pkill -2 screenrecord || true
+  wait "$record_pid" 2>/dev/null || true
+  adb pull /sdcard/Android/data/com.atlas.nativeapp/files/gps-replay ui-preview/ || true
+  adb pull /sdcard/Download/atlas-gps-replay ui-preview/ || true
+  adb logcat -d -v threadtime > ui-preview/gps-replay/logcat.txt || true
+}
+trap cleanup EXIT
+result=0
+bash android/gradlew -p android -PnativeOnly :native-app:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.atlas.nativeapp.NavigationGpsReplayTest \
+  --stacktrace || result=$?
+cleanup
+trap - EXIT
+if [[ "$result" -eq 0 ]]; then
+  python3 tools/analyze-native-gps-replay.py || result=$?
+fi
+exit "$result"

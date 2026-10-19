@@ -118,7 +118,10 @@ class NavigationService : Service(), LocationListener {
             accuracy,
             if (location.hasSpeed()) location.speed.toDouble().coerceAtLeast(0.0) else -1.0,
             if (location.hasBearing()) location.bearing.toDouble() else null,
-            now
+            now,
+            if (location.hasBearing() && location.hasBearingAccuracy())
+                location.bearingAccuracyDegrees.toDouble() else null,
+            if (location.hasBearing()) location.bearing.toDouble() else null
         ))
     }
 
@@ -158,3 +161,4 @@ class NavigationService : Service(), LocationListener {
         super.onDestroy()
     }
 }
+

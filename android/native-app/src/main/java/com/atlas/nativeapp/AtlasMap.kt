@@ -62,6 +62,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     val activeMapSource: String get() = if (styleLoading) "loading" else loadedSource
     val centerPoint: Coordinate get() = map?.cameraPosition?.target?.let { Coordinate(it.latitude,it.longitude) }
         ?: current?.fix?.point ?: Coordinate(38.7223,-9.1393)
+    private var restoreCamera = false
     private var styleKey = ""
     private var styleLoading = false
     private var onlineFailed = false
@@ -96,6 +97,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastRenderedMarker: Coordinate? = null
     private var lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
     private var recenterPending = false
+    private var routeRendering = false
+    private val freePosition = NavigationPositionInterpolator()
+    /** Installed only by instrumented debug replay; no JSON work in production frames. */
+    internal var onDebugFrame: ((JSONObject) -> Unit)? = null
+    private var debugFrameCount = 0L
     private var lastMarkerAngle = Double.NaN
     private val navigationFrame = Choreographer.FrameCallback { _ ->
         frameScheduled = false
@@ -112,8 +118,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         val deltaTime = (time - lastRenderedFrameAt).coerceIn(0.0,0.1)
         lastRenderedFrameAt = time
-        val frame = renderInterpolator.sample(time) ?: return@FrameCallback
-        val position = frame.position
+        // A scheduled route frame must never overwrite a newer off-route fix.
+        val routeFrame = if (routeRendering) renderInterpolator.sample(time) else null
+        val freeFrame = if (routeFrame == null) freePosition.sample(time) else null
+        val position = routeFrame?.position ?: freeFrame?.first ?: lastRenderedMarker
+            ?: return@FrameCallback
+        val markerActive = routeFrame?.active ?: freeFrame?.second ?: false
         val last = lastRenderedMarker
         if (last == null || distanceMeters(last,position) > 0.08) {
             positionMarker?.position = LatLng(position.lat,position.lon)
@@ -162,7 +172,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val expected = if (headingUp) travelHeading(s,s.fix) else 0.0
         val zoom = if (s.walking) 18.0 else
             18.0-((s.fix.speed*3.6-40)/85).coerceIn(0.0,.8)
-        if (NavigationCameraBehavior.shouldContinueFrame(follow,frame.active,
+        debugFrameCount++
+        onDebugFrame?.invoke(debugSnapshot())
+        if (NavigationCameraBehavior.shouldContinueFrame(follow,markerActive,
                 error,AtlasHeading.signedDelta(camera.bearing,expected),
                 camera.zoom-zoom,camera.tilt-(if(s.walking)0.0 else 42.0)))
             scheduleNavigationFrame()
@@ -244,7 +256,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             ready.addOnCameraMoveStartedListener { reason ->
                 if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) { follow = false; onPan?.invoke() }
             }
-            ready.cameraPosition = CameraPosition.Builder().target(LatLng(38.7223, -9.1393)).zoom(13.0).build()
+            if (!restoreCamera) ready.cameraPosition = CameraPosition.Builder().target(LatLng(38.7223, -9.1393)).zoom(13.0).build()
             loadStyle(Coordinate(38.7223, -9.1393))
         }
         view.addOnDidFailLoadingMapListener {
@@ -353,10 +365,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val now = SystemClock.elapsedRealtimeNanos()/1e9
         // Recenter MUST work even with no new 1Hz fix. Do not wait for the
         // interpolator to generate another target before restoring follow.
-        val target = if (s.navigating) renderInterpolator.sample(now)?.position
+        val target = if (s.navigating) (if (routeRendering) renderInterpolator.sample(now)?.position
+            else freePosition.sample(now)?.first)
             ?: lastRenderedMarker ?: s.guidance?.coordinate() ?: fix.point
             else fix.point
-        val bearing = if (headingUp) travelHeading(s,fix) else 0.0
+        val travel = travelHeading(s,fix)
+        val bearing = if (headingUp) travel else 0.0
         val zoom = if (!s.navigating) 15.0 else if(s.walking) 18.0 else
             18.0 - ((fix.speed*3.6-40)/85).coerceIn(0.0,.8)
         ready.setPadding(0,
@@ -364,13 +378,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             0,0)
         // A single immediate camera transaction prevents the old 700ms
         // animation from fighting the 30fps navigation camera.
+        ready.cancelTransitions()
+        compassAnimationUntil = 0L
         ready.moveCamera(CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder().target(LatLng(target.lat,target.lon))
                 .zoom(zoom).bearing(bearing)
                 .tilt(if (s.navigating && !s.walking) 42.0 else 0.0)
                 .build()))
         val cursor = NavigationCameraBehavior.cursorAngle(
-            s.navigating,follow,headingUp,bearing,bearing)
+            s.navigating,follow,headingUp,travel,bearing)
         updatePositionIcon(cursor)
         if (s.navigating) scheduleNavigationFrame()
     }
@@ -467,6 +483,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             stopNavigationFrames()
             renderInterpolator.reset()
             lastRenderedMarker=null
+            routeRendering=false
+            freePosition.reset()
         }
         val ready = map ?: return
         if (ready.style == null) return
@@ -514,19 +532,27 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             lastSegment = segment
         }
         s.fix?.let { fix ->
-            val candidate = if (s.navigating && s.guidance != null &&
-                s.guidance.optDouble("offRoute") < 100) s.guidance.coordinate() else fix.point
+            val candidate = if (s.navigating && !s.busy && s.guidance != null &&
+                s.guidance.optString("state") !in listOf("checking","reroute","changed") &&
+                s.guidance.optDouble("offRoute") < 60) s.guidance.coordinate() else fix.point
             // Visual-only: retain the map-matched road position during
             // stationary GPS jitter; native guidance keeps receiving fixes.
             val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
             val nowSeconds=SystemClock.elapsedRealtimeNanos()/1e9
-            val trusted = s.navigating && geometry.size>=2 && s.guidance != null &&
+            val trusted = s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
                 s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY)<60.0 &&
                 s.guidance.optString("state") !in listOf("checking","reroute","arrived")
-            if (trusted) lastTrustedGuidanceAt = nowSeconds
+            if (trusted) lastTrustedGuidanceAt = s.guidance!!
+                .optDouble("predictedAt",s.guidance.optDouble("gpsFixTime",fix.time))
             val hold = NavigationCameraBehavior.useHeldRouteFix(s.navigating,
                 trusted,nowSeconds-lastTrustedGuidanceAt)
             val smooth = trusted || hold
+            val wasRouteRendering = routeRendering
+            routeRendering = smooth
+            if (s.navigating && !smooth) {
+                freePosition.accept(display,fix.time,fix.accuracy,nowSeconds,
+                    if (wasRouteRendering) lastRenderedMarker else null)
+            }
             if (trusted) {
                 val guidance=s.guidance!!
                 val along=guidance.optDouble("along",Double.NaN)
@@ -537,14 +563,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     kotlin.math.abs(guidance.optDouble("gpsFixTime") - fix.time)<0.000001) {
                     // Ignore the intermediate StateFlow update where the new
                     // GPS fix arrives before its JNI guidance projection.
-                    renderInterpolator.acceptGps(along,display,fix.speed,fix.accuracy,fix.time,s.walking)
+                    renderInterpolator.acceptGps(along,display,fix.speed,fix.accuracy,fix.time,s.walking,fix.bearingAccuracy)
                 }
             }
             // During checking/rerouting retain the last filtered position
             // briefly instead of dropping into raw GPS every second.
             // After the hold expires, raw fixes can show a real deviation.
             val displayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
-                ?: lastRenderedMarker ?: display else display
+                ?: lastRenderedMarker ?: display else if(s.navigating)
+                    freePosition.sample(nowSeconds)?.first ?: display else display
             val heading = travelHeading(s, fix)
             val position = LatLng(displayed.lat, displayed.lon)
             val markerAngle = NavigationCameraBehavior.cursorAngle(
@@ -558,12 +585,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 updatePositionIcon(markerAngle)
             }
             lastRenderedMarker=displayed
-            if (smooth) {
+            if (s.navigating) {
                 // The camera keeps rotating and moving independently of 1Hz fixes.
                 scheduleNavigationFrame()
             }
             val displayTime = s.guidance?.optDouble("predictedAt", fix.time) ?: fix.time
-            if (displayTime != lastFixTime && follow && !smooth) {
+            if (displayTime != lastFixTime && follow && !s.navigating) {
                 lastFixTime = displayTime
                 val now = SystemClock.elapsedRealtime()
                 val camera = ready.cameraPosition
@@ -591,6 +618,27 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     ), 700)
                 }
             }
+        }
+    }
+    internal fun debugSnapshot(): JSONObject {
+        val camera = map?.cameraPosition
+        val s = current
+        val f = s?.fix
+        val g = s?.guidance
+        return JSONObject().apply {
+            put("time",SystemClock.elapsedRealtimeNanos()/1e9)
+            put("frames",debugFrameCount)
+            put("fixTime",f?.time); put("accuracy",f?.accuracy)
+            put("bearingAccuracy",f?.bearingAccuracy); put("speed",f?.speed)
+            put("rawBearing",f?.providerBearing); put("filteredBearing",f?.bearing)
+            put("guidance",g?.optString("state")); put("along",g?.optDouble("along"))
+            put("offRoute",g?.optDouble("offRoute")); put("segment",g?.optInt("segment"))
+            put("predictedAt",g?.optDouble("predictedAt")?.takeIf { it.isFinite() })
+            put("routeRendering",routeRendering); put("follow",follow); put("headingUp",headingUp)
+            put("styleLoading",styleLoading); put("mapBearing",camera?.bearing)
+            put("cameraLat",camera?.target?.latitude); put("cameraLon",camera?.target?.longitude)
+            put("renderLat",lastRenderedMarker?.lat); put("renderLon",lastRenderedMarker?.lon)
+            put("cursorBearing",lastMarkerAngle.takeIf { it.isFinite() })
         }
     }
     private fun points(array: JSONArray): List<LatLng> = (0 until array.length()).map { array.getJSONArray(it).let { p -> LatLng(p.getDouble(1), p.getDouble(0)) } }
@@ -621,7 +669,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         canvas.drawPath(path,paint)
         return IconFactory.getInstance(context).fromBitmap(bitmap)
     }
-    fun onCreate(bundle: Bundle?) = view.onCreate(bundle)
+    fun onCreate(bundle: Bundle?) {
+        restoreCamera = bundle != null
+        follow = bundle?.getBoolean("atlas.follow",true) ?: true
+        headingUp = bundle?.getBoolean("atlas.headingUp",true) ?: true
+        view.onCreate(bundle)
+    }
     fun onStart() = view.onStart()
     fun onResume() {
         view.onResume()
@@ -645,5 +698,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         view.onDestroy()
     }
     fun onLowMemory() = view.onLowMemory()
-    fun onSaveInstanceState(bundle: Bundle) = view.onSaveInstanceState(bundle)
+    fun onSaveInstanceState(bundle: Bundle) {
+        bundle.putBoolean("atlas.follow",follow)
+        bundle.putBoolean("atlas.headingUp",headingUp)
+        view.onSaveInstanceState(bundle)
+    }
 }
+

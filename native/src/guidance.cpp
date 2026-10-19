@@ -131,7 +131,8 @@ void makeManeuvers(Route &r, const Graph &g) {
   r.maneuvers.push_back(
       {"arrive", "You have arrived", "", r.meters, r.points.size() - 1, {}});
 }
-Progress progress(Point p, const Route &r) {
+namespace {
+Progress project(Point p, const Route &r, double low, double high) {
   if (!valid(p) || r.points.empty())
     throw std::invalid_argument("Invalid guidance position or route");
   Progress out;
@@ -146,7 +147,9 @@ Progress progress(Point p, const Route &r) {
     double den = dx * dx + dy * dy,
            t = den > 0 ? std::clamp(-(x * dx + y * dy) / den, 0., 1.) : 0,
            d = std::hypot(x + t * dx, y + t * dy), len = distance(a, b);
-    if (d < out.offRoute) {
+    const double along = cumulative + t * len;
+    // Contextual projection is used only to resolve spatially ambiguous roads.
+    if (along >= low && along <= high && d < out.offRoute) {
       out.offRoute = d;
       out.segment = i - 1;
       bestAlong = cumulative + t * len;
@@ -176,6 +179,11 @@ Progress progress(Point p, const Route &r) {
   }
   return out;
 }
+} // namespace
+Progress progress(Point p, const Route &r) {
+  return project(p,r,-std::numeric_limits<double>::infinity(),
+                 std::numeric_limits<double>::infinity());
+}
 void GuidanceSession::reset() {
   offSince_ = -1;
   lastReroute_ = -1;
@@ -200,6 +208,26 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
   }
   const double elapsed = lastTime_ < 0 ? 0 : t - lastTime_;
   out.position = progress(p, r);
+  // At a roundabout entrance/exit or an overpass, two route segments can be
+  // equally close. Prefer physically reachable progress only within the GPS
+  // uncertainty corridor. A clearly different road still takes the normal
+  // deviation/confirmation path below; never lock matching to an old segment.
+  if (lastGoodPosition_ && elapsed > 0 && elapsed <= 5 && accuracy <= 50) {
+    const double total = [&] {
+      double n = 0;
+      for (std::size_t i=1;i<r.points.size();++i)
+        n += distance(r.points[i-1],r.points[i]);
+      return n;
+    }();
+    const double scale = r.meters > 0 ? total/r.meters : 1;
+    const double budget = std::max(20.,speed*elapsed*1.8+accuracy);
+    const auto local = project(p,r,
+        (lastGoodPosition_->along-std::max(12.,accuracy))*scale,
+        (lastGoodPosition_->along+budget)*scale);
+    if (std::isfinite(local.offRoute) &&
+        local.offRoute <= out.position.offRoute + std::min(8.,accuracy*.4))
+      out.position=local;
+  }
   lastTime_ = t;
   if (accuracy > 50) {
     // Ignore unreliable projections while retaining the last reliable
@@ -278,3 +306,4 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
   return out;
 }
 } // namespace atlas
+

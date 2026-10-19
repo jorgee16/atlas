@@ -123,7 +123,11 @@ internal class MotionHeadingStabilizer {
             abs(AtlasHeading.signedDelta(turnCandidate!!, normalized)) <= 30.0
         turnCount = if (repeat) turnCount + 1 else 1
         turnCandidate = normalized
-        if (corroborated || turnCount >= 2) {
+        // Two reversed GNSS fixes are common after rerouting. A true U-turn
+        // can commit immediately with displacement evidence, or after three
+        // consistent fixes; ordinary bends retain the shorter confirmation.
+        val confirmations = if (change > 110.0) 3 else 2
+        if (corroborated || turnCount >= confirmations) {
             val maximumStep = AtlasHeading.signedDelta(old, normalized).coerceIn(-55.0,55.0)
             course = AtlasHeading.normalize(old + maximumStep * (if (corroborated) 0.75 else 0.58))
         }
@@ -132,3 +136,4 @@ internal class MotionHeadingStabilizer {
     private fun mix(a: Double, b: Double, weight: Double) =
         AtlasHeading.normalize(a + AtlasHeading.signedDelta(a,b) * weight)
 }
+
