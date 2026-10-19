@@ -116,6 +116,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastRenderedMarker: Coordinate? = null
     private var lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
     private var recenterPending = false
+    // Style reloads clear route geometry asynchronously. Keep the user's
+    // requested overview until the new route annotations have been restored.
+    private var overviewPending = false
     private var routeRendering = false
     private val freePosition = NavigationPositionInterpolator()
     /** Installed only by instrumented debug replay; no JSON work in production frames. */
@@ -421,6 +424,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             loadedSource = selection
             current?.let { render(it) }
             if (recenterPending) recenter()
+            else if (overviewPending) overview()
             addTrailOverlay()
             onMapSourceChanged?.invoke()
         }
@@ -449,6 +453,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     fun center(point: Coordinate, zoom: Double = 15.0) { map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat, point.lon), zoom)) }
     fun recenter() {
+        overviewPending = false
         follow = true
         lastFixTime = -1.0
         lastCameraMoveMs = 0L
@@ -549,6 +554,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     /** Drop navigation-only camera settings when End is confirmed. */
     fun endNavigation() {
+        overviewPending = false
+        recenterPending = false
         stopNavigationFrames()
         renderInterpolator.reset()
         stationaryPosition.reset()
@@ -566,11 +573,27 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
 
     fun overview() {
-        if (geometry.size < 2) return
+        // A style change (including the initial navigation style) temporarily
+        // removes route geometry. Never silently discard a button press.
+        overviewPending = true
+        recenterPending = false
         follow = false
+        compassAnimationUntil = 0L
+        val ready = map ?: return
+        if (styleLoading || ready.style == null || geometry.size < 2 ||
+            view.width == 0 || view.height == 0) return
+        overviewPending = false
+        // Guided follow uses top padding and a tilted camera. Both must be
+        // removed BEFORE calculating route bounds or the route gets cropped.
+        ready.cancelTransitions()
+        ready.setPadding(0, 0, 0, 0)
+        ready.moveCamera(CameraUpdateFactory.newCameraPosition(
+            CameraPosition.Builder(ready.cameraPosition)
+                .bearing(0.0).tilt(0.0).build()))
         val bounds = LatLngBounds.Builder().includes(geometry).build()
         val d = context.resources.displayMetrics.density
-        map?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, (40*d).toInt(), (140*d).toInt(), (40*d).toInt(), (260*d).toInt()))
+        ready.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,
+            (40*d).toInt(), (140*d).toInt(), (40*d).toInt(), (260*d).toInt()), 450)
     }
     fun render(s: AtlasState) {
         current = s
@@ -579,6 +602,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             recenter()
         }
         if (!s.navigating) {
+            overviewPending = false
             stopNavigationFrames()
             renderInterpolator.reset()
             lastRenderedMarker=null
@@ -610,6 +634,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 lines.add(ready.addPolyline(PolylineOptions().addAll(geometry).color(Color.WHITE).width(9f)))
                 remaining = ready.addPolyline(PolylineOptions().addAll(geometry).color(Color.rgb(49,94,251)).width(6f)).also { lines.add(it) }
                 if (!s.navigating) overview()
+                else if (overviewPending && !styleLoading) overview()
             }
         }
         if (s.destination !== destination || s.exploreResults !== nearby) {
