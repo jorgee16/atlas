@@ -8,8 +8,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import textwrap
+import sys
 
-root=Path('ui-preview/gps-replay')
+root=Path(sys.argv[1] if len(sys.argv)>1 else 'ui-preview/gps-replay')
+movies_root=Path(sys.argv[2] if len(sys.argv)>2 else 'ui-preview/atlas-gps-replay')
 for checkpoint in sorted(root.glob('*.json')):
     print('ATLAS_CHECKPOINT '+checkpoint.name+' '+checkpoint.read_text().replace('\n',' '),flush=True)
 if not shutil.which('ffmpeg'):
@@ -17,6 +19,7 @@ if not shutil.which('ffmpeg'):
     raise SystemExit(0)
 preferred=['cursor-bitmap','drive-0','pan-before','pan-after','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
            'reroute-recenter','walking-compass-recenter','walking-stop','walk-15','walk-arrived']
+preferred += sorted(p.stem for p in root.glob('camera-*.png'))
 def emit(name,target):
     print('ATLAS_PREVIEW_BEGIN '+name,flush=True)
     for line in textwrap.wrap(base64.b64encode(target.read_bytes()).decode(),16000):
@@ -32,7 +35,7 @@ for name in preferred:
         '-vf','scale=480:-1','-q:v','7',str(target)],check=True)
     emit(name,target)
 # Sample the actual driving recording, including approach/circulation/exit.
-movies=sorted(Path('ui-preview/atlas-gps-replay').glob('segment-*.mp4'))
+movies=sorted(movies_root.glob('segment-*.mp4'))
 for number,movie in enumerate(movies,1):
     result=subprocess.run(['ffmpeg','-loglevel','error','-y','-i',str(movie),
         '-vf','fps=1/30,scale=480:-1','-frames:v','6','-q:v','7',str(root/f'video-{number}-%02d.jpg')])

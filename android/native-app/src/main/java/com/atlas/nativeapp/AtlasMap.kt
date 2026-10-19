@@ -46,7 +46,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     var onPoint: ((Coordinate) -> Unit)? = null
     var onPlace: ((JSONObject) -> Unit)? = null
     var onRoute: ((JSONObject) -> Unit)? = null
-    var follow = true
+    private val cameraState = NavigationCameraState()
+    var follow: Boolean
+        get() = cameraState.mode == NavigationCameraState.Mode.FOLLOWING
+        set(value) { requestCamera(if(value) NavigationCameraState.Mode.FOLLOWING else NavigationCameraState.Mode.FREE) }
     var headingUp = true
     /** Applied before each render; source switching does not alter active routes. */
     var sourceMode: String = MapSourcePolicy.AUTO
@@ -75,6 +78,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var restoreCamera = false
     private var styleKey = ""
     private var styleLoading = false
+    private var styleGeneration = 0L
     private var onlineFailed = false
     private var current: AtlasState? = null
     private var route: JSONObject? = null
@@ -112,13 +116,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var frameScheduled = false
     private var framesEnabled = false
     private var lastRenderedFrameAt = 0.0
-    private var compassAnimationUntil = 0L
     private var lastRenderedMarker: Coordinate? = null
     private var lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
-    private var recenterPending = false
-    // Style reloads clear route geometry asynchronously. Keep the user's
-    // requested overview until the new route annotations have been restored.
-    private var overviewPending = false
+    private var interpolatedRoute: JSONObject? = null
+    private var cameraRoute: JSONObject? = null
+    private var wasNavigating = false
     private var routeRendering = false
     private val freePosition = NavigationPositionInterpolator()
     /** Installed only by instrumented debug replay; no JSON work in production frames. */
@@ -153,7 +155,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         val ready = map ?: return@FrameCallback
         var followingAngle = ready.cameraPosition.bearing
-        if (follow && SystemClock.elapsedRealtime() >= compassAnimationUntil) {
+        if (follow && !cameraState.pending) {
             val camera = ready.cameraPosition
             val desiredHeading = if (headingUp) travelHeading(s,s.fix) else 0.0
             val easing = 1-kotlin.math.exp(-2.8*deltaTime)
@@ -178,7 +180,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 kotlin.math.abs(camera.tilt-tilt)>0.1) {
                 ready.moveCamera(CameraUpdateFactory.newCameraPosition(
                     CameraPosition.Builder().target(LatLng(cameraPos.lat,cameraPos.lon))
-                        .bearing(angle).zoom(zoom).tilt(tilt).build()
+                        .bearing(angle).zoom(zoom).tilt(tilt).padding(followPadding(s)).build()
                 ))
             }
         }
@@ -210,11 +212,69 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
     }
     private fun releaseFollowForGesture() {
-        if (!follow) return
-        follow = false
-        compassAnimationUntil = 0L
-        // Do not re-enter MapLibre rendering from inside its gesture dispatch.
+        if (cameraState.mode == NavigationCameraState.Mode.FREE) return
+        requestCamera(NavigationCameraState.Mode.FREE)
+        // Keep the pressed control alive until the input gesture is complete.
         view.post { onPan?.invoke() }
+    }
+    private fun requestCamera(mode: NavigationCameraState.Mode) {
+        cameraState.request(mode)
+        map?.cancelTransitions()
+        applyCameraMode()
+    }
+    private fun followPadding(s: AtlasState): DoubleArray = doubleArrayOf(0.0,
+        if(s.navigating && headingUp)view.height*.25 else 0.0,0.0,0.0)
+    private fun overviewPoints(): List<LatLng> {
+        if(geometry.size<2)return emptyList()
+        val s=current
+        if(s?.navigating!=true)return geometry
+        val segment=s.guidance?.optInt("segment",0)?.coerceIn(0,geometry.size-2) ?: 0
+        val cursor=lastRenderedMarker?.let { LatLng(it.lat,it.lon) }
+        return listOf(cursor ?: geometry[segment])+geometry.drop(segment+1)
+    }
+    private fun applyCameraMode() {
+        if(!cameraState.pending || styleLoading || view.width==0 || view.height==0)return
+        val ready=map ?: return
+        if(ready.style==null)return
+        val request=cameraState.revision
+        val s=current ?: return
+        when(cameraState.mode) {
+            NavigationCameraState.Mode.FOLLOWING -> {
+                val fix=s.fix ?: return
+                val target=lastRenderedMarker ?: fix.point
+                val bearing=if(headingUp)travelHeading(s,fix) else 0.0
+                val zoom=if(!s.navigating)15.0 else if(s.walking)18.0 else
+                    18.0-((fix.speed*3.6-40)/85).coerceIn(0.0,.8)
+                ready.cancelTransitions()
+                ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
+                    .target(LatLng(target.lat,target.lon)).zoom(zoom).bearing(bearing)
+                    .tilt(if(s.navigating && !s.walking)42.0 else 0.0)
+                    .padding(followPadding(s)).build()))
+                lastFixTime=fix.time
+                updatePositionIcon(NavigationCameraBehavior.cursorAngle(s.navigating,true,headingUp,
+                    travelHeading(s,fix),bearing))
+                cameraState.applied(request)
+                if(s.navigating)scheduleNavigationFrame()
+            }
+            NavigationCameraState.Mode.OVERVIEW -> {
+                val points=overviewPoints()
+                if(points.size<2)return
+                ready.cancelTransitions()
+                // Padding is part of every transaction, never MapLibre's deprecated
+                // cached setPadding. Normalize before measuring the route bounds.
+                ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(ready.cameraPosition)
+                    .bearing(0.0).tilt(0.0).padding(0.0,0.0,0.0,0.0).build()))
+                val d=context.resources.displayMetrics.density
+                val insets=intArrayOf((40*d).toInt(),(140*d).toInt(),(40*d).toInt(),(260*d).toInt())
+                val fitted=ready.getCameraForLatLngBounds(LatLngBounds.Builder().includes(points).build(),insets,0.0,0.0)
+                    ?: return
+                ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(fitted)
+                    .bearing(0.0).tilt(0.0).padding(0.0,0.0,0.0,0.0).build()))
+                cameraState.applied(request)
+            }
+            NavigationCameraState.Mode.FREE -> cameraState.applied(request)
+        }
+        updatePositionPlacement()
     }
     @SuppressLint("ClickableViewAccessibility") // Observer only: MapView retains touch/click handling.
     private fun observeDoubleTap() {
@@ -263,6 +323,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         MapLibre.getInstance(context)
         view = MapView(context)
         observeDoubleTap()
+        view.addOnLayoutChangeListener { _,l,t,r,b,ol,ot,or,ob ->
+            if(r-l!=or-ol || b-t!=ob-ot) { cameraState.viewportChanged();applyCameraMode() }
+        }
         val cursorSize = (44*context.resources.displayMetrics.density).toInt()
         positionCursor.setImageBitmap(cursorBitmap)
         view.addView(positionCursor,FrameLayout.LayoutParams(cursorSize,cursorSize,Gravity.TOP or Gravity.START))
@@ -304,7 +367,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             ready.setOnMarkerClickListener { marker: Marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
             ready.addOnCameraIdleListener {
                 updatePositionPlacement()
-                loadStyle(centerPoint)
+                loadStyle(current?.takeIf { it.navigating }?.fix?.point ?: centerPoint)
                 // The marker bitmap is screen-oriented. After a camera bearing
                 // animation, re-express its angle in the *new* map reference.
                 // Otherwise the marker keeps the bearing of the previous frame.
@@ -353,10 +416,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 override fun onShove(detector: ShoveGestureDetector) {}
                 override fun onShoveEnd(detector: ShoveGestureDetector) {}
             })
-            ready.addOnCameraMoveStartedListener { reason ->
-                if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE)
-                    releaseFollowForGesture()
-            }
+            // Do not consume queued camera-start reasons: a stale gesture event
+            // arriving after Recenter must not switch FOLLOWING back to FREE.
             if (!restoreCamera) ready.cameraPosition = CameraPosition.Builder().target(LatLng(38.7223, -9.1393)).zoom(13.0).build()
             loadStyle(Coordinate(38.7223, -9.1393))
         }
@@ -378,10 +439,13 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val key="$selection:$sourceMode:$visualStyle:${file?.absolutePath ?: ""}:$dark:$navigating:$onlineFailed"
         if (key == styleKey) return styleLoading
         styleKey = key
+        val generation=++styleGeneration
         styleLoading = true
+        cameraState.viewportChanged()
+        map?.cancelTransitions()
         stopNavigationFrames()
-        renderInterpolator.reset()
-        lastRenderedMarker=null
+        // Styling does not reset route progress, the stationary anchor or the
+        // visible/predicted point. Only annotations are rebuilt below.
         // Annotation objects survive style switches in the legacy MapLibre API.
         // Remove them from the map, not just from our Kotlin references.
         map?.clear()
@@ -407,7 +471,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 "paint":{"raster-saturation":-0.35,"raster-contrast":0.05}}]}""")
         }
         map?.setStyle(builder) { style ->
-            if (key != styleKey) return@setStyle
+            if (generation!=styleGeneration || key!=styleKey) return@setStyle
             if (selection == MapSourcePolicy.ONLINE && !onlineFailed && !imagery) {
                 AtlasCartography.enhanceOnline(style, dark, navigating)
             }
@@ -423,8 +487,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             styleLoading = false
             loadedSource = selection
             current?.let { render(it) }
-            if (recenterPending) recenter()
-            else if (overviewPending) overview()
+            applyCameraMode()
             addTrailOverlay()
             onMapSourceChanged?.invoke()
         }
@@ -439,7 +502,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         trailId=trail?.id
         trailPath=trail?.polyline?.map{LatLng(it.lat,it.lon)}.orEmpty()
         addTrailOverlay()
-        if(trail!=null && trailPath.size>=2 && map!=null) {
+        if(trail!=null && trailPath.size>=2 && map!=null && current?.navigating!=true) {
             follow=false
             val bounds=LatLngBounds.Builder().includes(trailPath).build()
             map?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,
@@ -451,49 +514,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         trailOverlay=map?.addPolyline(PolylineOptions().addAll(trailPath)
             .color(Color.rgb(49,94,251)).width(7f))
     }
-    fun center(point: Coordinate, zoom: Double = 15.0) { map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat, point.lon), zoom)) }
-    fun recenter() {
-        overviewPending = false
-        follow = true
-        lastFixTime = -1.0
-        lastCameraMoveMs = 0L
-        val s = current
-        val fix = s?.fix
-        val ready = map
-        if (ready == null || ready.style == null || styleLoading || s == null || fix == null) {
-            recenterPending = true
-            return
-        }
-        recenterPending = false
-        val now = SystemClock.elapsedRealtimeNanos()/1e9
-        // Recenter MUST work even with no new 1Hz fix. Do not wait for the
-        // interpolator to generate another target before restoring follow.
-        val target = if (s.navigating) lastRenderedMarker
-            ?: (if (routeRendering) renderInterpolator.sample(now)?.position
-                else freePosition.sample(now)?.first)
-            ?: s.guidance?.coordinate() ?: fix.point
-            else fix.point
-        val travel = travelHeading(s,fix)
-        val bearing = if (headingUp) travel else 0.0
-        val zoom = if (!s.navigating) 15.0 else if(s.walking) 18.0 else
-            18.0 - ((fix.speed*3.6-40)/85).coerceIn(0.0,.8)
-        ready.setPadding(0,
-            if (s.navigating && headingUp) (view.height*.25).toInt() else 0,
-            0,0)
-        // A single immediate camera transaction prevents the old 700ms
-        // animation from fighting the 30fps navigation camera.
-        ready.cancelTransitions()
-        compassAnimationUntil = 0L
-        ready.moveCamera(CameraUpdateFactory.newCameraPosition(
-            CameraPosition.Builder().target(LatLng(target.lat,target.lon))
-                .zoom(zoom).bearing(bearing)
-                .tilt(if (s.navigating && !s.walking) 42.0 else 0.0)
-                .build()))
-        val cursor = NavigationCameraBehavior.cursorAngle(
-            s.navigating,follow,headingUp,travel,bearing)
-        updatePositionIcon(cursor)
-        if (s.navigating) scheduleNavigationFrame()
+    fun center(point: Coordinate, zoom: Double = 15.0) {
+        requestCamera(NavigationCameraState.Mode.FREE)
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(point.lat,point.lon),zoom))
     }
+    fun recenter() = requestCamera(NavigationCameraState.Mode.FOLLOWING)
 
     /** The phone azimuth is used when exploring or when GPS cannot infer travel. */
     fun setDeviceHeading(heading: Double) {
@@ -537,78 +562,44 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
 
     fun compass() {
         headingUp = !headingUp
-        val state = current
-        val fix = state?.fix
-        val target = if (headingUp && state != null && fix != null)
-            travelHeading(state, fix) else 0.0
-        // One animation owns a compass tap. The next render from the same
-        // fix must not immediately launch another, conflicting animation.
-        lastFixTime = fix?.time ?: -1.0
-        lastCameraMoveMs = SystemClock.elapsedRealtime()
-        map?.setPadding(0, if (state?.navigating == true && headingUp)
-            (view.height * .25).toInt() else 0, 0, 0)
-        compassAnimationUntil = SystemClock.elapsedRealtime() + 400L
-        map?.animateCamera(CameraUpdateFactory.bearingTo(target), 350)
-        if (follow && state != null) render(state)
-        scheduleNavigationFrame()
+        val s=current
+        when(cameraState.mode) {
+            NavigationCameraState.Mode.FOLLOWING -> requestCamera(NavigationCameraState.Mode.FOLLOWING)
+            NavigationCameraState.Mode.OVERVIEW -> requestCamera(NavigationCameraState.Mode.OVERVIEW)
+            NavigationCameraState.Mode.FREE -> {
+                val ready=map ?: return
+                val bearing=if(headingUp && s?.fix!=null)travelHeading(s,s.fix) else 0.0
+                ready.cancelTransitions()
+                ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(ready.cameraPosition)
+                    .bearing(bearing).build()))
+                s?.fix?.let { updatePositionIcon(NavigationCameraBehavior.cursorAngle(s.navigating,false,
+                    headingUp,travelHeading(s,it),bearing)) }
+            }
+        }
     }
-    /** Drop navigation-only camera settings when End is confirmed. */
     fun endNavigation() {
-        overviewPending = false
-        recenterPending = false
+        map?.cancelTransitions()
         stopNavigationFrames()
         renderInterpolator.reset()
+        interpolatedRoute=null
         stationaryPosition.reset()
-        follow = true
-        lastFixTime = -1.0
-        lastCameraMoveMs = 0L
-        map?.setPadding(0, 0, 0, 0)
-        val target = current?.fix?.point ?: return
-        val bearing = if (headingUp) current?.fix?.let {
-            travelHeading(current!!, it)
-        } ?: deviceHeading ?: 0.0 else 0.0
-        map?.animateCamera(CameraUpdateFactory.newCameraPosition(
-            CameraPosition.Builder().target(LatLng(target.lat, target.lon))
-                .zoom(15.0).bearing(bearing).tilt(0.0).build()), 400)
+        freePosition.reset()
+        cameraState.request(NavigationCameraState.Mode.FOLLOWING)
+        current=current?.copy(navigating=false)
+        applyCameraMode()
     }
-
-    fun overview() {
-        // A style change (including the initial navigation style) temporarily
-        // removes route geometry. Never silently discard a button press.
-        overviewPending = true
-        recenterPending = false
-        follow = false
-        compassAnimationUntil = 0L
-        val ready = map ?: return
-        if (styleLoading || ready.style == null || geometry.size < 2 ||
-            view.width == 0 || view.height == 0) return
-        overviewPending = false
-        // Guided follow uses top padding and a tilted camera. Both must be
-        // removed BEFORE calculating route bounds or the route gets cropped.
-        ready.cancelTransitions()
-        ready.setPadding(0, 0, 0, 0)
-        ready.moveCamera(CameraUpdateFactory.newCameraPosition(
-            CameraPosition.Builder(ready.cameraPosition)
-                .bearing(0.0).tilt(0.0).build()))
-        val bounds = LatLngBounds.Builder().includes(geometry).build()
-        val d = context.resources.displayMetrics.density
-        ready.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,
-            (40*d).toInt(), (140*d).toInt(), (40*d).toInt(), (260*d).toInt()), 450)
-    }
+    fun overview() = requestCamera(NavigationCameraState.Mode.OVERVIEW)
     fun render(s: AtlasState) {
         current = s
-        if (recenterPending && s.fix != null && !styleLoading && map?.style != null) {
-            // A delayed first GPS fix must also satisfy a recenter request.
-            recenter()
-        }
         if (!s.navigating) {
-            overviewPending = false
             stopNavigationFrames()
             renderInterpolator.reset()
-            lastRenderedMarker=null
+            interpolatedRoute=null
             routeRendering=false
             freePosition.reset()
+            if(wasNavigating) { stationaryPosition.reset();lastRenderedMarker=null }
         }
+        wasNavigating=s.navigating
         val ready = map ?: return
         if (ready.style == null) return
         val anchor = if(s.navigating && s.fix!=null)s.fix.point else centerPoint
@@ -617,6 +608,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         if (loadStyle(anchor)) return
         if (s.route !== route || s.routeOptions !== options) {
             val previousVisible = lastRenderedMarker
+            val previousCameraRoute=cameraRoute
+            val newCameraRoute=s.route!==cameraRoute
+            cameraRoute=s.route
             lines.forEach { ready.removePolyline(it) }; lines.clear(); remaining = null; travelled = null; lastSegment = -1
             route = s.route; options = s.routeOptions
             for (choice in s.routeOptions.filter { it !== s.route }) {
@@ -624,7 +618,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 lines.add(ready.addPolyline(PolylineOptions().addAll(points).color(Color.parseColor(if (dark) "#667385" else "#AAB5C7")).width(4f)))
             }
             geometry = s.route?.let { points(it.getJSONArray("points")) } ?: emptyList()
-            if (s.navigating && geometry.size >= 2) {
+            if (s.navigating && geometry.size >= 2 && s.route !== interpolatedRoute) {
+                interpolatedRoute=s.route
                 renderInterpolator.setRoute(geometry.map { Coordinate(it.latitude,it.longitude) },
                     s.route!!.optDouble("distanceMeters",0.0),previousVisible)
                 // Do not flash/reset a visible cursor during a reroute.
@@ -633,8 +628,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             if (geometry.size >= 2) {
                 lines.add(ready.addPolyline(PolylineOptions().addAll(geometry).color(Color.WHITE).width(9f)))
                 remaining = ready.addPolyline(PolylineOptions().addAll(geometry).color(Color.rgb(49,94,251)).width(6f)).also { lines.add(it) }
-                if (!s.navigating) overview()
-                else if (overviewPending && !styleLoading) overview()
+                if (!s.navigating && newCameraRoute && (!restoreCamera || previousCameraRoute!=null)) overview()
+                else if(cameraState.mode==NavigationCameraState.Mode.OVERVIEW)cameraState.viewportChanged()
             }
         }
         if (s.destination !== destination || s.exploreResults !== nearby) {
@@ -687,7 +682,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     kotlin.math.abs(guidance.optDouble("gpsFixTime") - fix.time)<0.000001) {
                     // Ignore the intermediate StateFlow update where the new
                     // GPS fix arrives before its JNI guidance projection.
-                    renderInterpolator.acceptGps(along,display,fix.speed,fix.accuracy,fix.time,s.walking,fix.bearingAccuracy)
+                    renderInterpolator.acceptGps(along,display,StationaryMapPosition.visualSpeed(fix),fix.accuracy,fix.time,s.walking,fix.bearingAccuracy)
                 }
             }
             // During checking/rerouting retain the last filtered position
@@ -728,15 +723,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // camera animation for jitter or duplicate fixes.
                 if (needsCamera && now - lastCameraMoveMs >= 850L) {
                     lastCameraMoveMs = now
-                    ready.setPadding(0, if (s.navigating && headingUp) (view.height * .25).toInt() else 0, 0, 0)
                     ready.animateCamera(CameraUpdateFactory.newCameraPosition(
                         CameraPosition.Builder().target(position).zoom(zoom)
                             .bearing(targetBearing)
-                            .tilt(if (s.navigating && !s.walking) 42.0 else 0.0).build()
+                            .tilt(0.0).padding(0.0,0.0,0.0,0.0).build()
                     ), 700)
                 }
             }
         }
+        applyCameraMode()
     }
     internal fun debugCursorBitmap(): Bitmap? = if(positionCoordinate!=null)cursorBitmap else null
     internal fun debugCursorScreenCenter(): android.graphics.PointF? {
@@ -763,6 +758,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("offRoute",g?.optDouble("offRoute")); put("segment",g?.optInt("segment"))
             put("predictedAt",g?.optDouble("predictedAt")?.takeIf { it.isFinite() })
             put("routeRendering",routeRendering); put("follow",follow); put("headingUp",headingUp)
+            put("cameraMode",cameraState.mode.name);put("cameraPending",cameraState.pending)
+            put("cameraRevision",cameraState.revision);put("mapTilt",camera?.tilt)
+            put("cameraPadding",camera?.padding?.let { JSONArray(it.toList()) })
+            put("viewportWidth",view.width);put("viewportHeight",view.height)
+            if(cameraState.mode==NavigationCameraState.Mode.OVERVIEW) {
+                val pixels=overviewPoints().mapNotNull { map?.projection?.toScreenLocation(it) }
+                put("remainingPointCount",pixels.size)
+                put("remainingOutsideViewport",pixels.count { it.x<0 || it.y<0 || it.x>view.width || it.y>view.height })
+            }
             put("styleLoading",styleLoading); put("mapBearing",camera?.bearing)
             put("mapZoom",camera?.zoom)
             put("zoomGesturesEnabled",map?.uiSettings?.isZoomGesturesEnabled)
@@ -805,7 +809,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     fun onCreate(bundle: Bundle?) {
         restoreCamera = bundle != null
-        follow = bundle?.getBoolean("atlas.follow",true) ?: true
+        val restored=bundle?.getString("atlas.cameraMode")?.let { name ->
+            NavigationCameraState.Mode.values().find { it.name==name }
+        } ?: if(bundle?.getBoolean("atlas.follow",true)!=false) NavigationCameraState.Mode.FOLLOWING
+            else NavigationCameraState.Mode.FREE
+        cameraState.request(restored)
         headingUp = bundle?.getBoolean("atlas.headingUp",true) ?: true
         view.onCreate(bundle)
     }
@@ -833,6 +841,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     fun onLowMemory() = view.onLowMemory()
     fun onSaveInstanceState(bundle: Bundle) {
+        bundle.putString("atlas.cameraMode",cameraState.mode.name)
         bundle.putBoolean("atlas.follow",follow)
         bundle.putBoolean("atlas.headingUp",headingUp)
         view.onSaveInstanceState(bundle)

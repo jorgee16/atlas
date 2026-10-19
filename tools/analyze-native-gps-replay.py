@@ -3,13 +3,13 @@
 import json
 import math
 import subprocess
+import sys
 from pathlib import Path
-root=Path('ui-preview/gps-replay')
+mode=sys.argv[1] if len(sys.argv)>1 else 'full'
+root=Path('ui-preview/camera-smoke' if mode=='camera' else 'ui-preview/gps-replay')
 frames=[json.loads(s) for s in (root/'frames.ndjson').read_text().splitlines() if s.strip()]
 fixes=[json.loads(s) for s in (root/'fixes.ndjson').read_text().splitlines() if s.strip()]
-assert len(frames)>300, 'No sustained MapLibre rendering evidence'
-assert len(fixes)>80, 'No complete dynamic GPS replay'
-movies=list(Path('ui-preview/atlas-gps-replay').glob('*.mp4'))
+movies=list(Path('ui-preview/atlas-camera-smoke' if mode=='camera' else 'ui-preview/atlas-gps-replay').glob('*.mp4'))
 assert movies, 'Missing emulator screen recording'
 video_seconds=0.0
 for movie in movies:
@@ -19,6 +19,22 @@ for movie in movies:
     assert duration>0, f'Empty video: {movie}'
     video_seconds+=duration
 assert video_seconds>=(fixes[-1]['time']-fixes[0]['time'])*.9, 'Video does not cover the GPS replay' 
+
+if mode=='camera':
+    events=[json.loads(line) for line in (root/'events.ndjson').read_text().splitlines() if line.strip()]
+    modes={e.get('cameraMode') for e in events if e.get('event','').startswith('camera-')}
+    stationary=[e['driftMeters'] for e in events if e.get('event')=='stationary-walking']
+    assert modes=={'FOLLOWING','OVERVIEW','FREE'}, f'Missing camera mode evidence: {modes}'
+    assert stationary and max(stationary)<1.0, 'Stationary walking drift'
+    assert len(frames)>100 and len(fixes)>10, 'Missing dynamic camera replay'
+    summary={'scope':'Real Portugal route, Android Location, JNI, MainActivity UI touches and MapLibre camera transitions',
+        'cameraModes':sorted(modes),'frames':len(frames),'fixes':len(fixes),
+        'stationaryWalkingDriftMeters':max(stationary),'videoDurationSeconds':video_seconds}
+    (root/'summary.json').write_text(json.dumps(summary,indent=2))
+    print(json.dumps(summary,indent=2))
+    raise SystemExit(0)
+assert len(frames)>300, 'No sustained MapLibre rendering evidence'
+assert len(fixes)>80, 'No complete dynamic GPS replay'
 
 def distance(a,b):
     return math.hypot((a['renderLat']-b['renderLat'])*111320,

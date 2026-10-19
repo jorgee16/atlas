@@ -37,6 +37,7 @@ class NavigationGpsReplayTest {
     private val instrumentation=InstrumentationRegistry.getInstrumentation()
     private val context get()=instrumentation.targetContext
     private val locations get()=context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    private val evidenceDirectory get()=InstrumentationRegistry.getArguments().getString("evidenceDirectory","atlas-gps-replay")!!
     private val output get()=File(context.getExternalFilesDir(null),"gps-replay").apply { mkdirs() }
     private val frames=Collections.synchronizedList(mutableListOf<String>())
     private val fixes=mutableListOf<String>()
@@ -304,6 +305,131 @@ class NavigationGpsReplayTest {
             await("native guidance must confirm arrival",15){model!!.updates.value.arrived}
         }
     }
+    private fun verifyStationaryWalker(s:ActivityScenario<MainActivity>,walk:JSONObject) {
+        val start=points(walk).first()
+        phase="walking-stop"
+        val stopped=snapshot(s)
+        capture(s,"camera-walking-stop-before")
+        repeat(5){fix(Coordinate(start.lat+sin(it*1.3)*.000025,start.lon),0.0,180.0,20.0,60.0);SystemClock.sleep(1020)}
+        val still=snapshot(s)
+        capture(s,"camera-walking-stop-after")
+        val drift=distance(Coordinate(stopped.getDouble("renderLat"),stopped.getDouble("renderLon")),
+            Coordinate(still.getDouble("renderLat"),still.getDouble("renderLon")))
+        events.add(JSONObject().put("event","stationary-walking").put("driftMeters",drift).toString())
+        assertTrue("stationary pedestrian jitter must not creep: $drift m; before=$stopped; after=$still",drift<1.0)
+        capture(s,"walking-stop")
+    }
+    /** Actual UI touch; a GPS update can arrive between DOWN and UP. */
+    private fun tap(s:ActivityScenario<MainActivity>,label:String,during:()->Unit={}) {
+        var x=0f;var y=0f
+        s.onActivity { a ->
+            fun find(v:android.view.View):android.view.View? {
+                if(v.contentDescription==label || v is android.widget.TextView && v.text.toString()==label)return v
+                if(v is android.view.ViewGroup)for(i in 0 until v.childCount)find(v.getChildAt(i))?.let{return it}
+                return null
+            }
+            val v=checkNotNull(find(a.window.decorView)){"Missing UI action $label"}
+            val at=IntArray(2);v.getLocationOnScreen(at);x=at[0]+v.width*.5f;y=at[1]+v.height*.5f
+        }
+        val down=SystemClock.uptimeMillis()
+        fun send(action:Int) {
+            val event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,x,y,0)
+            event.source=InputDevice.SOURCE_TOUCHSCREEN
+            assertTrue(instrumentation.uiAutomation.injectInputEvent(event,false));event.recycle()
+        }
+        send(MotionEvent.ACTION_DOWN);instrumentation.waitForIdleSync()
+        during();SystemClock.sleep(120)
+        send(MotionEvent.ACTION_UP);SystemClock.sleep(180)
+    }
+    private fun assertMode(s:ActivityScenario<MainActivity>,mode:String) {
+        await("camera must apply $mode after a single action",15) {
+            val f=snapshot(s);f.optString("cameraMode")==mode && !f.optBoolean("cameraPending",true) && !f.optBoolean("styleLoading",true)
+        }
+        val f=snapshot(s)
+        assertEquals(mode=="FOLLOWING",f.getBoolean("follow"))
+        if(mode=="OVERVIEW") {
+            assertTrue("remaining route must be measured",f.getInt("remainingPointCount")>=2)
+            assertEquals("remaining route must fit the viewport",0,f.getInt("remainingOutsideViewport"))
+            assertTrue(AtlasHeading.angleDifference(0.0,f.getDouble("mapBearing"))<.1)
+            assertEquals(0.0,f.getDouble("mapTilt"),.1)
+        }
+        if(mode=="FOLLOWING") {
+            assertEquals(18.0,f.getDouble("mapZoom"),.1)
+            assertEquals(if(model!!.updates.value.walking)0.0 else 42.0,f.getDouble("mapTilt"),.2)
+            val p=f.getJSONArray("cameraPadding")
+            assertEquals(if(f.getBoolean("headingUp"))f.getDouble("viewportHeight")*.25 else 0.0,p.getDouble(1),1.0)
+        }
+        events.add(JSONObject(f.toString()).put("event","camera-$mode").toString())
+    }
+    private fun assertSameCamera(a:JSONObject,b:JSONObject) {
+        assertTrue("GPS must not move a detached camera",distance(
+            Coordinate(a.getDouble("cameraLat"),a.getDouble("cameraLon")),
+            Coordinate(b.getDouble("cameraLat"),b.getDouble("cameraLon")))<.2)
+        assertEquals(a.getDouble("mapZoom"),b.getDouble("mapZoom"),.001)
+        assertTrue(AtlasHeading.angleDifference(a.getDouble("mapBearing"),b.getDouble("mapBearing"))<.1)
+    }
+    private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
+        phase="camera-smoke"
+        val path=points(route)
+        var along=0.0
+        fun movingFix(accuracy:Double=5.0) {
+            along+=8.0;val p=at(path,along)
+            fix(p,8.0,bearing(p,at(path,along+3)),accuracy,8.0)
+        }
+        repeat(3){movingFix();SystemClock.sleep(1020)}
+        tap(s,"Overview") { movingFix();SystemClock.sleep(250) }
+        assertMode(s,"OVERVIEW");capture(s,"camera-overview-first-tap")
+        val overview=snapshot(s)
+        repeat(3){movingFix();SystemClock.sleep(1020)}
+        assertSameCamera(overview,snapshot(s))
+        val before=snapshot(s).getDouble("fixTime")
+        tap(s,"Recenter on my location")
+        assertMode(s,"FOLLOWING")
+        assertEquals(before,snapshot(s).getDouble("fixTime"),0.0)
+        capture(s,"camera-recenter-no-new-fix")
+        repeat(3) {
+            tap(s,"Overview");assertMode(s,"OVERVIEW")
+            tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
+        }
+        fun style(source:String,visual:String,next:(MainActivity)->Unit) {
+            s.onActivity { a ->
+                model!!.mapSourceMode=source;model!!.mapVisualStyle=visual
+                map(a).sourceMode=source;map(a).visualStyle=visual
+                map(a).render(model!!.updates.value)
+                next(a)
+            }
+            await("style/source reload must complete",45){!snapshot(s).optBoolean("styleLoading",true)}
+        }
+        tap(s,"Overview");assertMode(s,"OVERVIEW")
+        style(MapSourcePolicy.ONLINE,MapVisualStyle.SATELLITE) { }
+        assertMode(s,"OVERVIEW");capture(s,"camera-overview-satellite")
+        tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
+        // Request Overview while a new style is being installed.
+        style(MapSourcePolicy.ONLINE,MapVisualStyle.HYBRID) { map(it).overview() }
+        assertMode(s,"OVERVIEW");capture(s,"camera-overview-during-hybrid-load")
+        // Latest request wins even when two earlier requests were pending.
+        style(MapSourcePolicy.OFFLINE,MapVisualStyle.STREETS) {
+            map(it).overview();map(it).recenter();map(it).overview();map(it).recenter()
+        }
+        assertMode(s,"FOLLOWING");capture(s,"camera-recenter-during-offline-load")
+        pan(s);assertMode(s,"FREE")
+        val free=snapshot(s)
+        repeat(3){movingFix(35.0);SystemClock.sleep(1020)}
+        assertSameCamera(free,snapshot(s))
+        style(MapSourcePolicy.ONLINE,MapVisualStyle.HYBRID) { }
+        assertMode(s,"FREE");assertSameCamera(free,snapshot(s))
+        style(MapSourcePolicy.OFFLINE,MapVisualStyle.STREETS) { map(it).recenter() }
+        assertMode(s,"FOLLOWING")
+        manualZoom(s);assertMode(s,"FREE")
+        tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
+        movingFix(60.0);SystemClock.sleep(1020)
+        tap(s,"Overview");assertMode(s,"OVERVIEW")
+        tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
+        capture(s,"camera-degraded-recenter")
+        tap(s,"Overview");s.recreate();attach(s)
+        assertMode(s,"OVERVIEW");capture(s,"camera-overview-recreated")
+        tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
+    }
     private fun exportEvidence() {
         if(android.os.Build.VERSION.SDK_INT<29) {
             throw IllegalStateException("GPS replay export requires API 29+ (CI uses 35)")
@@ -314,7 +440,7 @@ class NavigationGpsReplayTest {
                 put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME,file.name)
                 put(android.provider.MediaStore.MediaColumns.MIME_TYPE,
                     if(file.extension=="png")"image/png" else "application/octet-stream")
-                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH,"Download/atlas-gps-replay/metrics")
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH,"Download/$evidenceDirectory/metrics")
                 put(android.provider.MediaStore.MediaColumns.IS_PENDING,1)
             }
             val uri=checkNotNull(resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,values))
@@ -330,8 +456,10 @@ class NavigationGpsReplayTest {
         File(output,"export-probe.txt").writeText("ATLAS_EXPORT_PROBE")
         exportEvidence()
     }
+    @Test fun cameraModesAndStationaryWalkingThroughAndroidLocation() = runReplay(true)
+    @Test fun portugalTripThroughAndroidLocationServiceJniAndMapLibre() = runReplay(false)
     @Suppress("DEPRECATION")
-    @Test fun portugalTripThroughAndroidLocationServiceJniAndMapLibre() {
+    private fun runReplay(cameraOnly:Boolean) {
         output.listFiles()?.forEach{it.delete()}
         // run-as-installed package contains hash-verified routing only, not a
         // fake graph or a claim to have tested the full offline map package.
@@ -348,6 +476,20 @@ class NavigationGpsReplayTest {
                 val drive=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.728,-9.152),false)
                 assertTrue("Portugal drive must include a roundabout",drive.getJSONArray("maneuvers").objects()
                     .any{it.optString("type")=="roundabout"})
+                if(cameraOnly) {
+                    cameraSmoke(s,drive)
+                    val walk=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.7224,-9.1475),true)
+                    verifyStationaryWalker(s,walk)
+                    repeat(5) { i ->
+                        val p=points(walk);val point=at(p,(i+1)*1.5)
+                        fix(point,1.5,bearing(point,at(p,(i+1)*1.5+3)))
+                        SystemClock.sleep(1020)
+                    }
+                    capture(s,"camera-walking-resumed")
+                    assertTrue("walking must resume after stationary filtering",snapshot(s).getDouble("along")>1.0)
+                    s.onActivity { map(it).onDebugFrame=null;model!!.endNavigation() }
+                    return@use
+                }
                 replay(s,drive,8.0,true)
                 capture(s,"drive-arrived")
                 // Deliberate deviation follows a second real C++ route, not a
@@ -372,15 +514,7 @@ class NavigationGpsReplayTest {
                     ?: 0.0)/resumed.getDouble("distanceMeters")*pathLength)
                 // A short real walking route, with stops and bearing noise.
                 val walk=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.7224,-9.1475),true)
-                val start=points(walk).first()
-                phase="walking-stop"
-                val stopped=snapshot(s)
-                repeat(5){fix(Coordinate(start.lat+sin(it*1.3)*.000025,start.lon),0.0,180.0,20.0,60.0);SystemClock.sleep(1020)}
-                val still=snapshot(s)
-                assertTrue("stationary pedestrian jitter must not creep",distance(
-                    Coordinate(stopped.getDouble("renderLat"),stopped.getDouble("renderLon")),
-                    Coordinate(still.getDouble("renderLat"),still.getDouble("renderLon")))<1.0)
-                capture(s,"walking-stop")
+                verifyStationaryWalker(s,walk)
                 pan(s)
                 s.onActivity { if(map(it).headingUp)map(it).compass() }
                 SystemClock.sleep(650)

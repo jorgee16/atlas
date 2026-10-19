@@ -46,5 +46,16 @@ class StationaryMapPositionTest {
         assertEquals(base,policy.select(drift,fix(3.0),true,true))
         assertEquals(drift,policy.select(drift,fix(4.0,0.6),true,true))
     }
+    @Test fun providerStopWinsOverResidualNativeSpeedWithoutFreezingWalking() {
+        val policy=StationaryMapPosition()
+        policy.select(base,fix(1.0,4.0).copy(providerSpeed=4.0),true,true)
+        val jitter=Coordinate(base.lat+.000025,base.lon)
+        for(i in 2..7) assertEquals(base,policy.select(jitter,
+            fix(i.toDouble(),2.5,20.0).copy(providerSpeed=0.0),true,true))
+        assertEquals(jitter,policy.select(jitter,fix(8.0,1.1).copy(providerSpeed=.6),true,true))
+    }
+    @Test fun unavailableProviderSpeedKeepsDisplacementFallback() {
+        assertEquals(.8,StationaryMapPosition.visualSpeed(fix(1.0,.8).copy(providerSpeed=-1.0)),0.0)
+    }
 }
 

@@ -30,7 +30,7 @@ internal class StationaryMapPosition {
             previousWalking = walking
         }
         val movingThreshold = if(walking) 0.45 else 1.2
-        if (!navigating || !fix.speed.isFinite() || fix.speed >= movingThreshold) {
+        if (!navigating || !visualSpeed(fix).isFinite() || visualSpeed(fix) >= movingThreshold) {
             reset()
             previousWalking = walking
             if (navigating) stable = position
@@ -75,6 +75,9 @@ internal class StationaryMapPosition {
         return anchor
     }
 
+    companion object {
+        fun visualSpeed(fix: Fix): Double = fix.providerSpeed?.takeIf { it.isFinite() && it>=0.0 } ?: fix.speed
+    }
     private fun distance(a: Coordinate, b: Coordinate): Double {
         val mid = Math.toRadians((a.lat + b.lat) * 0.5)
         return hypot((b.lat - a.lat) * 111_320.0,

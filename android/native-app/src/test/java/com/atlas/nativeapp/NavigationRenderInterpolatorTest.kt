@@ -152,5 +152,18 @@ class NavigationRenderInterpolatorTest {
         a.acceptGps(25.0,turn,0.6,5.0,103.0,true)
         assertTrue(a.sample(103.033)!!.along>20.0)
     }
+    @Test fun stoppingFreezesTheDrawnPredictionInsteadOfDriftingBackToOldFix() {
+        val a=route()
+        a.acceptGps(20.0,first,1.5,5.0,100.0,true)
+        a.sample(100.0)
+        repeat(24) { a.sample(100.0+(it+1)/30.0) }
+        val stopped=a.sample(100.85)!!
+        assertTrue(stopped.along>20.0)
+        a.acceptGps(25.0,first,0.0,20.0,101.0,true)
+        repeat(150) { a.sample(101.0+it/30.0) }
+        assertEquals(stopped.along,a.sample(106.0)!!.along,1e-6)
+        a.acceptGps(26.0,turn,.6,5.0,107.0,true)
+        assertTrue(a.sample(107.03)!!.along>stopped.along)
+    }
 }
 

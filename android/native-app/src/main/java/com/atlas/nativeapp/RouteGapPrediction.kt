@@ -10,7 +10,7 @@ internal object RouteGapPrediction {
     fun predict(route: JSONObject, guidance: JSONObject, fix: Fix, now: Double): JSONObject? {
         val age = now - fix.time
         if (!age.isFinite() || age < 2.0 || age > 9.0 ||
-            fix.speed < 2.0 || fix.accuracy > 35.0 ||
+            StationaryMapPosition.visualSpeed(fix) < 2.0 || fix.accuracy > 35.0 ||
             guidance.optString("state") == "arrived" ||
             guidance.optString("state") == "reroute" ||
             guidance.optString("state") == "checking" ||

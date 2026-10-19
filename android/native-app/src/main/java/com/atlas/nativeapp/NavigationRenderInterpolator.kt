@@ -122,6 +122,10 @@ internal class NavigationRenderInterpolator {
             } == true) {
             // StationaryMapPosition already rejected the GPS jitter. Do not
             // make the cursor creep based on a different noisy along value.
+            // Freeze what was actually drawn, including the last short-horizon
+            // prediction. Retaining the old measuredAlong slowly pulled a
+            // stopped cursor backwards even after rejecting subsequent jitter.
+            measuredAlong = renderedAlong ?: measuredAlong
             measuredAt = fixTime
             measuredSpeed = 0.0
             predict = false

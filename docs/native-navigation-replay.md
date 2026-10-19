@@ -1,60 +1,54 @@
-# Android navigation replay
+# Android camera and GPS validation
 
-The migration branch runs `Native C++ and Kotlin Android` on every push.
-The Android job builds with Java 21, SDK/Build Tools 36, NDK 27.2.12479018
-and CMake 3.22.1, then uses an API 35 x86_64 Pixel 2 emulator with software GPU.
+Every push to `migration/native-core-kotlin` runs Kotlin/C++ unit tests, lint,
+builds an installable APK and executes existing Android tests plus the focused
+`cameraModesAndStationaryWalkingThroughAndroidLocation` emulator test.
+The focused test uses the real Portugal graph/PMTiles and Android mock Location,
+JNI and MapLibre; it is not a fake routing fixture. It checks actual Overview and
+Recenter UI touches with a guidance update between touch down/up, rapid mode
+alternation, source/style reloads, pan/zoom, detached GPS updates, Activity
+recreation, degraded accuracy, stationary pedestrian jitter and walking resumption.
+Camera state and screenshots prove bounds, zero overview bearing/tilt, follow
+padding, and restoration without another GPS fix.
 
-`tools/prepare-native-gps-replay.py` downloads the real mainland Portugal
-routing and PMTiles assets named in the bundled catalog and verifies both length and SHA-256.
-A missing asset or a changed hash fails setup. Test installation includes routing and offline PMTiles; it must not be described
-as validation of the complete POI or address package. Public HTTP failures are
-recorded. If configured, the existing repository R2 identity reads the same
-objects using S3 GET, with the same length and hash checks; it performs no writes. The generated manifest is saved with the evidence.
+The complete `portugalTripThroughAndroidLocationServiceJniAndMapLibre` replay is
+retained for release validation. Run the workflow manually with `full_gps_replay`
+selected, or push a validation commit containing `[full-gps-replay]`. Ordinary
+minor UI commits do not run the 12-minute trip. A validation run executes both
+focused and full tests for the same commit. Full mode covers roundabouts,
+intentional deviation/rerouting, 1 Hz driving/walking, GNSS inversions, GPS gaps
+of 2/5/9 seconds and native arrival.
 
-The existing UI and recreation tests run first. `NavigationGpsReplayTest` then
-replaces only the Android GPS provider, using `LocationManager.setTestProviderLocation`.
-It calls the public destination/calculation controls on the real model, without
-replacing StateFlow, routes, guidance, matching or rerouting. Real C++/JNI routes
-must contain graph edges. The driving route must contain a roundabout maneuver.
-The background navigation service receives the mock Android Location callbacks,
-which cross Kotlin, JNI motion/guidance, the production model and MapLibre.
+CI uses Java 21, SDK/Build Tools 36, NDK 27.2.12479018, CMake 3.22.1 and an API 35
+x86_64 Pixel 2 emulator with software GPU. `prepare-native-gps-replay.py` verifies
+real mainland Portugal routing and PMTiles length/SHA-256. The repository's
+existing R2 identity may read the same assets if public HTTP fails. No writes
+are performed. POI/address package installation is outside this replay's scope.
 
-The trip covers driving at approximately 1 Hz, noisy GNSS bearings, accuracy
-5/20/35/60/100 m, 2/5/9 second GPS gaps, gesture pan and pinch zoom, each starting with follow active, and immediate recenter,
-heading-up and north-up, Activity recreation and background GPS reception.
-A deliberate deviation follows a separate route calculated from the same real
-graph; Atlas must reroute to its unchanged destination. Walking uses another
-real route and includes a stationary period with jitter and a compass animation without a new fix. Native arrival is required.
+Evidence in `Atlas-native-ui-review`:
 
-The test installs a debug-frame callback only for the replay. Production frames
-perform no diagnostic serialization, logging or disk writes. The callback
-records render cadence, GPS timestamp/quality, speed, provider/native heading and independent replay-truth heading,
-guidance state/progress/segment, tunnel prediction, rendered position, camera
-center/bearing, cursor bearing, raw/filtered speed and follow state.
+- `camera-smoke/`: focused frame/fix/event logs, screenshots and summary.
+- `atlas-camera-smoke/segment-*.mp4`: focused camera transition recordings.
+- `gps-replay/` and `atlas-gps-replay/`: full-trip metrics/screenshots and videos
+  when full validation is selected.
+- `gps-replay-input/routing-manifest.json`: actual installed asset hashes.
+- Android/JVM reports, lint and device logcat.
 
-Evidence is uploaded in `Atlas-native-ui-review`:
+`Atlas-native-debug-apk` is the APK for that exact workflow SHA. Check job
+results and numerical/visual evidence before describing it as validated.
+The full analyzer checks bounded cursor/camera steps, continuous rendering,
+heading-up cursor alignment and camera heading against independent replay truth.
+The stationary assertion remains under one metre. Both modes require decodable
+video covering the test. Original recordings and full-resolution PNGs remain in
+artifacts; small preview JPEGs are also emitted in logs for connector-only review.
 
-- `gps-replay/frames.ndjson` and `fixes.ndjson`: actual observed monotonic times.
-- `gps-replay/*route.json`: real native routes, including the recalculation.
-- `gps-replay/*.png` and matching JSON: visual checkpoints and camera state.
-- `gps-replay/logcat.txt`: Android and native diagnostics, including failures.
-- `atlas-gps-replay/segment-*.mp4`: continuous rotating three-minute recordings.
-- `gps-replay/summary.json`: automated analysis, emitted only after the test passes.
-- `gps-replay-input/routing-manifest.json`: input asset sizes and SHA-256 values.
-- Android instrumented-test reports and the existing UI review evidence.
+Camera ownership is explicit: FOLLOWING, OVERVIEW or FREE. A versioned pending
+request survives style/layout readiness and only the newest request can be
+acknowledged. Style changes rebuild annotations without resetting motion filters.
+Navigation mode transitions use immediate camera transactions with explicit
+padding; the render loop moves the camera only in FOLLOWING. Gesture callbacks
+enter FREE directly, without delayed camera-start notifications. Navigation UI
+updates defer rebuilding pressed controls until touch up/cancel.
 
-`Atlas-native-debug-apk` contains the APK for the exact workflow commit. The analyzer also compares camera heading with independent replay truth under stable, fresh, good GPS, and decodes every MP4 to verify recording coverage. A build
-artifact alone is not navigation acceptance. Inspect instrumented results,
-summary, the movement-frame fraction and recordings before describing a run as end-to-end validated.
-
-Limitations of this replay: mock Android GPS is not radio/GNSS hardware; the offline PMTiles source is selected explicitly; POI/address downloads are
-not exercised; extreme multipath and all real-world intersections are not exhaustive.
-Search, backup, imports, cartography and other regressions remain covered by the
-existing tests. Real-device and full offline package checks are separate evidence.
-
-The cursor retains the same bitmap/design but is now an Android ImageView
-positioned through MapLibre projection. Software-GPU recordings exposed a white
-silhouette in the legacy annotation-icon path despite a correct source bitmap.
-Recenter checkpoints test the blue arrow in actual screenshots. Gesture begin
-callbacks release follow synchronously; the coalesced camera-move-start event
-can lose its gesture reason during the continuous navigation render loop.
+Mock GPS tests do not replace real-device/GNSS hardware validation or exhaustive
+intersection and multipath coverage. Online imagery needs its external provider.

@@ -93,6 +93,8 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private var rightInset = 0
     private var lastNotice = 0L
     private var lastTouch = 0L
+    private var navigationTouch = false
+    private var deferredChrome = false
     private var lastRoute: JSONObject? = null
     private val handler = Handler(Looper.getMainLooper())
     private val gapTick = object : Runnable {
@@ -392,7 +394,18 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             }
         }
     }
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean { if(event.actionMasked==MotionEvent.ACTION_DOWN)lastTouch=System.currentTimeMillis();return super.dispatchTouchEvent(event) }
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if(event.actionMasked==MotionEvent.ACTION_DOWN) {
+            lastTouch=System.currentTimeMillis()
+            navigationTouch=model.updates.value.navigating && page==null
+        }
+        val handled=super.dispatchTouchEvent(event)
+        if(event.actionMasked==MotionEvent.ACTION_UP || event.actionMasked==MotionEvent.ACTION_CANCEL) {
+            navigationTouch=false
+            if(deferredChrome) { deferredChrome=false;root.post { render(model.updates.value) } }
+        }
+        return handled
+    }
     private fun layoutChrome() {
         val pad=ui.dp(16)
         val left=pad+leftInset;val right=pad+rightInset
@@ -433,7 +446,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
         updateMapSourceIndicators()
         val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,pendingTrail?.id,model.mapVisualStyle,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
-        if(chrome!=lastChrome){lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
+        if(chrome!=lastChrome) {
+            if(navigationTouch)deferredChrome=true
+            else {lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
+        }
         if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
         if(state.navigating)window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         updatePage(state)
@@ -761,7 +777,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             addView(ui.stat(AtlasPages.formatDistance(meters),"DISTANCE"),LinearLayout.LayoutParams(0,-2,1f))
         })
         addView(ui.row().apply{
-            addView(ui.chip("Overview","route"){atlasMap.overview()},LinearLayout.LayoutParams(0,-2,1f))
+            addView(ui.chip("Overview","route"){atlasMap.overview();rebuildChrome()},LinearLayout.LayoutParams(0,-2,1f))
             addView(ui.iconButton(if(model.voice)"volume" else "mute","Toggle voice guidance"){model.voice=!model.voice},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)).apply{leftMargin=ui.dp(7)})
             addView(ui.text("End",13f,ui.red,true).apply{gravity=Gravity.CENTER;setPadding(ui.dp(18),ui.dp(12),ui.dp(5),ui.dp(12));contentDescription="End navigation";setOnClickListener{confirm("End this navigation?"){endNavigation()}}})
         },linear(14))
