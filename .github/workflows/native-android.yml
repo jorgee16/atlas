@@ -62,7 +62,11 @@ jobs:
           name: Atlas-native-debug-apk
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
-      - name: Download and verify real Portugal mainland routing for GPS replay
+      - name: Download and verify real Portugal routing and offline map for GPS replay
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
         run: python3 tools/prepare-native-gps-replay.py
       - name: Enable hardware acceleration
         run: |

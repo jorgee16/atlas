@@ -215,6 +215,7 @@ class NavigationGpsReplayTest {
         try {
             ActivityScenario.launch(MainActivity::class.java).use { s ->
                 attach(s)
+                s.onActivity { model!!.mapSourceMode=MapSourcePolicy.OFFLINE }
                 val drive=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.728,-9.152),false)
                 assertTrue("Portugal drive must include a roundabout",drive.getJSONArray("maneuvers").objects()
                     .any{it.optString("type")=="roundabout"})

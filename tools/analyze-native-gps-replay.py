@@ -34,6 +34,6 @@ assert {5,20,35,60,100}.issubset({f['accuracy'] for f in fixes}), 'Missing accur
 summary={'frames':len(frames),'fixes':len(fixes),'phases':phases,
     'maxConsecutiveCursorStepMeters':max(steps),'maxConsecutiveCameraRotationDegrees':max(angles),
     'medianRenderIntervalSeconds':sorted(intervals)[len(intervals)//2],
-    'scope':'Actual mainland Portugal C++ routing, mock Android GPS provider, NavigationService, JNI, MapLibre and UI; full offline map/search package not installed.'}
+    'scope':'Actual mainland Portugal C++ routing, mock Android GPS provider, NavigationService, JNI, MapLibre and UI; offline PMTiles installed; POI/address search package not installed.'}
 (root/'summary.json').write_text(json.dumps(summary,indent=2))
 print(json.dumps(summary,indent=2))
