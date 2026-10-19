@@ -94,7 +94,7 @@ class NavigationGpsReplayTest {
         }
         fail("$message; state=${model?.updates?.value?.status}")
     }
-    private fun fix(point:Coordinate,speed:Double,heading:Double,accuracy:Double=5.0,bearingAccuracy:Double=5.0,truthHeading:Double=heading) {
+    private fun fix(point:Coordinate,speed:Double,heading:Double,accuracy:Double=5.0,bearingAccuracy:Double=5.0,truthHeading:Double=heading):Double {
         val l=Location(LocationManager.GPS_PROVIDER).apply {
             latitude=point.lat; longitude=point.lon; this.accuracy=accuracy.toFloat()
             this.speed=speed.toFloat(); bearing=heading.toFloat()
@@ -111,6 +111,24 @@ class NavigationGpsReplayTest {
         fixes.add(JSONObject().put("time",l.elapsedRealtimeNanos/1e9).put("lat",point.lat)
             .put("lon",point.lon).put("speed",speed).put("accuracy",accuracy)
             .put("heading",heading).put("truthHeading",truthHeading).put("bearingAccuracy",bearingAccuracy).put("phase",phase).toString())
+        return fixTime
+    }
+    private fun confirmedStartFix(point:Coordinate,guidance:Boolean=false) {
+        // Android can drop the first mock fix during Activity/Service handoff.
+        // Confirm delivery and JNI pairing rather than sleeping and sampling
+        // a baseline that still belongs to the previous position/travel mode.
+        repeat(6) {
+            val sent=fix(point,0.0,0.0)
+            val until=SystemClock.elapsedRealtime()+2200
+            while(SystemClock.elapsedRealtime()<until) {
+                val state=model!!.updates.value
+                val actual=state.fix
+                if(actual!=null && actual.time>=sent && distance(actual.point,point)<.2 &&
+                    (!guidance || state.guidance?.optDouble("gpsFixTime",-1.0)==actual.time))return
+                SystemClock.sleep(100)
+            }
+        }
+        fail("Android GPS/JNI did not acknowledge the route-start fix")
     }
     private fun distance(a:Coordinate,b:Coordinate)=hypot((a.lat-b.lat)*111320.0,
         (a.lon-b.lon)*111320.0*cos(Math.toRadians((a.lat+b.lat)/2)))
@@ -131,6 +149,9 @@ class NavigationGpsReplayTest {
         return p.last()
     }
     private fun capture(s: ActivityScenario<MainActivity>,name:String) {
+        // Assertions execute before capture. Give Android/MapLibre a frame to
+        // present a just-installed style before collecting visual evidence.
+        if(name.startsWith("camera-"))SystemClock.sleep(750)
         var cursor:android.graphics.PointF?=null
         s.onActivity { cursor=map(it).debugCursorScreenCenter() }
         val screenshot=instrumentation.uiAutomation.takeScreenshot()
@@ -231,7 +252,7 @@ class NavigationGpsReplayTest {
     private fun plan(s: ActivityScenario<MainActivity>,from:Coordinate,to:Coordinate,walking:Boolean):JSONObject {
         phase=if(walking)"walk-plan" else "drive-plan"
         s.onActivity { model!!.endNavigation();model!!.voice=false;model!!.mode(if(walking)"walk" else "drive") }
-        fix(from,0.0,0.0);SystemClock.sleep(1100)
+        confirmedStartFix(from)
         s.onActivity {
             model!!.select(JSONObject().put("id","replay-destination").put("name","GPS replay destination")
                 .put("lat",to.lat).put("lon",to.lon))
@@ -241,7 +262,7 @@ class NavigationGpsReplayTest {
         val route=model!!.updates.value.route!!
         assertTrue("route must contain native graph edges",route.getJSONArray("edgeIndexes").length()>0)
         File(output,if(walking)"walk-route.json" else "drive-route.json").writeText(route.toString(2))
-        fix(points(route).first(),0.0,0.0);SystemClock.sleep(1200)
+        confirmedStartFix(points(route).first(),true)
         await("MapLibre must finish loading",45){!snapshot(s).optBoolean("styleLoading",true)}
         s.onActivity { map(it).recenter() }
         return route

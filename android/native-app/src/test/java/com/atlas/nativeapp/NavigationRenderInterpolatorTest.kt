@@ -165,5 +165,15 @@ class NavigationRenderInterpolatorTest {
         a.acceptGps(26.0,turn,.6,5.0,107.0,true)
         assertTrue(a.sample(107.03)!!.along>stopped.along)
     }
+    @Test fun stationaryRoadMatchingHandoffKeepsItsDrawnAnchor() {
+        val a=route()
+        val raw=Coordinate(first.lat-.0002,first.lon)
+        a.acceptGps(0.0,raw,0.0,5.0,100.0,true)
+        val drawn=a.sample(100.0)!!
+        a.holdStationary(drawn.position)
+        a.acceptGps(3.0,drawn.position,0.0,20.0,101.0,true)
+        repeat(150){a.sample(101.0+it/30.0)}
+        assertEquals(drawn.position,a.sample(106.0)!!.position)
+    }
 }
 

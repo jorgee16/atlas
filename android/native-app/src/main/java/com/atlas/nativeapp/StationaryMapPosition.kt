@@ -24,6 +24,13 @@ internal class StationaryMapPosition {
         previousFixTime = Double.NEGATIVE_INFINITY
     }
 
+    /** A first route projection establishes the visual coordinate reference. */
+    fun rebase(position: Coordinate,fix:Fix,walking:Boolean) {
+        reset()
+        previousWalking=walking
+        stable=position
+        previousFixTime=fix.time
+    }
     fun select(position: Coordinate, fix: Fix, navigating: Boolean, walking: Boolean): Coordinate {
         if (previousWalking != walking) {
             reset()

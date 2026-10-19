@@ -142,6 +142,13 @@ internal class NavigationRenderInterpolator {
         return true
     }
 
+    /** Align a stopped filter with the point the route renderer actually drew. */
+    fun holdStationary(position: Coordinate) {
+        measuredAlong=renderedAlong ?: measuredAlong
+        measuredSpeed=0.0
+        predict=false
+        lastAcceptedPosition=position
+    }
     /** Tunnel predictor output is a visual target, not a fresh GPS fix. */
     fun acceptGapPrediction(
         along: Double, predictedAt: Double, gpsAccuracy: Double,

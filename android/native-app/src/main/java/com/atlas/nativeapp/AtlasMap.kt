@@ -596,6 +596,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             renderInterpolator.reset()
             interpolatedRoute=null
             routeRendering=false
+            lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
             freePosition.reset()
             if(wasNavigating) { stationaryPosition.reset();lastRenderedMarker=null }
         }
@@ -691,6 +692,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             val displayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
                 ?: lastRenderedMarker ?: display else if(s.navigating)
                     freePosition.sample(nowSeconds)?.first ?: display else display
+            if(trusted && !wasRouteRendering &&
+                StationaryMapPosition.visualSpeed(fix)<(if(s.walking).45 else 1.2)) {
+                // Initial road matching may snap an unprojected fix to a nearby
+                // footpath. Both stationary filters must then use the same
+                // coordinate reference; raw-origin anchors caused later creep.
+                stationaryPosition.rebase(displayed,fix,s.walking)
+                renderInterpolator.holdStationary(displayed)
+            }
             val heading = travelHeading(s, fix)
             val position = LatLng(displayed.lat, displayed.lon)
             val markerAngle = NavigationCameraBehavior.cursorAngle(
@@ -768,6 +777,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 put("remainingOutsideViewport",pixels.count { it.x<0 || it.y<0 || it.x>view.width || it.y>view.height })
             }
             put("styleLoading",styleLoading); put("mapBearing",camera?.bearing)
+            put("mapSource",activeMapSource);put("mapVisualStyle",activeVisualStyle)
             put("mapZoom",camera?.zoom)
             put("zoomGesturesEnabled",map?.uiSettings?.isZoomGesturesEnabled)
             put("minZoom",map?.minZoomLevel)

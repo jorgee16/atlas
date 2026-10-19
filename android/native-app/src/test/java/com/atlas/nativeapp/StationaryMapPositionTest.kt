@@ -57,5 +57,13 @@ class StationaryMapPositionTest {
     @Test fun unavailableProviderSpeedKeepsDisplacementFallback() {
         assertEquals(.8,StationaryMapPosition.visualSpeed(fix(1.0,.8).copy(providerSpeed=-1.0)),0.0)
     }
+    @Test fun firstRoadMatchRebasesTheAnchorWithoutAcceptingLaterJitter() {
+        val a=StationaryMapPosition()
+        a.select(base,fix(1.0),true,true)
+        val road=Coordinate(base.lat+.00025,base.lon)
+        a.rebase(road,fix(2.0),true)
+        repeat(5){assertEquals(road,a.select(Coordinate(road.lat+.000025,road.lon),
+            fix(3.0+it,0.0,20.0),true,true))}
+    }
 }
 
