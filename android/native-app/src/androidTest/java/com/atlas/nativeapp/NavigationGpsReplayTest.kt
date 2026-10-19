@@ -255,7 +255,9 @@ class NavigationGpsReplayTest {
         }
     }
     private fun exportEvidence() {
-        check(android.os.Build.VERSION.SDK_INT>=29) { "GPS replay export requires API 29+ (CI uses 35)" }
+        if(android.os.Build.VERSION.SDK_INT<29) {
+            throw IllegalStateException("GPS replay export requires API 29+ (CI uses 35)")
+        }
         val resolver=context.contentResolver
         for(file in output.listFiles().orEmpty().filter { it.isFile }) {
             val values=android.content.ContentValues().apply {
