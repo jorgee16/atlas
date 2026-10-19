@@ -119,7 +119,18 @@ class NavigationGpsReplayTest {
         return p.last()
     }
     private fun capture(s: ActivityScenario<MainActivity>,name:String) {
+        var cursor:android.graphics.PointF?=null
+        s.onActivity { cursor=map(it).debugCursorScreenCenter() }
         val screenshot=instrumentation.uiAutomation.takeScreenshot()
+        if(name in listOf("drive-recenter","walking-compass-recenter")) {
+            val c=checkNotNull(cursor) { "Rendered cursor must be visible" }
+            val x=c.x.toInt().coerceIn(0,screenshot.width-1)
+            val y=c.y.toInt().coerceIn(0,screenshot.height-1)
+            val color=screenshot.getPixel(x,y)
+            assertTrue("Cursor must contain its blue arrow in the actual screenshot: $name ($x,$y)=$color",
+                android.graphics.Color.blue(color)>180 && android.graphics.Color.red(color)<120 &&
+                    android.graphics.Color.green(color)<170)
+        }
         File(output,"$name.png").outputStream().use {
             assertTrue(screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it))
         }
@@ -159,12 +170,14 @@ class NavigationGpsReplayTest {
             } }
             val event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,count,
                 properties,coordinates,0,0,1f,1f,0,0,InputDevice.SOURCE_TOUCHSCREEN,0)
-            assertTrue("Android must accept pinch event $action",instrumentation.uiAutomation.injectInputEvent(event,true));event.recycle()
-            SystemClock.sleep(80)
+            assertTrue("Android must accept pinch event $action",instrumentation.uiAutomation.injectInputEvent(event,false));event.recycle()
+            SystemClock.sleep(16)
         }
         send(MotionEvent.ACTION_DOWN,width*.28f,1)
         send(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.28f)
-        for(i in 1..12)send(MotionEvent.ACTION_MOVE,width*(.28f-.20f*i/12))
+        // MapLibre rejects scales below 0.6dp/ms. Synchronous injection
+        // plus slow sleeps made the old synthetic pinch fall below that gate.
+        for(i in 1..8)send(MotionEvent.ACTION_MOVE,width*(.28f-.20f*i/8))
         send(MotionEvent.ACTION_POINTER_UP or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.08f)
         send(MotionEvent.ACTION_UP,width*.08f,1)
         SystemClock.sleep(500)

@@ -10,6 +10,9 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.view.Choreographer
 import android.view.Gravity
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
 import org.json.JSONArray
 import org.json.JSONObject
 import org.maplibre.android.MapLibre
@@ -71,7 +74,16 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var options: List<JSONObject>? = null
     private var destination: JSONObject? = null
     private var nearby: List<JSONObject>? = null
-    private var positionMarker: Marker? = null
+    // A screen-space Android view avoids the legacy annotation texture path,
+    // which renders custom cursor bitmaps as white silhouettes on software GPUs.
+    // Geometry still comes from MapLibre projection, including camera padding/tilt.
+    private val cursorBitmap by lazy { createPositionBitmap() }
+    private val positionCursor = ImageView(context).apply {
+        visibility = View.GONE
+        isClickable = false
+        contentDescription = "Your location"
+    }
+    private var positionCoordinate: Coordinate? = null
     private val markers = mutableListOf<Marker>()
     private val places = mutableMapOf<Long, JSONObject>()
     private val lines = mutableListOf<Polyline>()
@@ -126,7 +138,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val markerActive = routeFrame?.active ?: freeFrame?.second ?: false
         val last = lastRenderedMarker
         if (last == null || distanceMeters(last,position) > 0.08) {
-            positionMarker?.position = LatLng(position.lat,position.lon)
+            setPosition(position)
             lastRenderedMarker=position
         }
         val ready = map ?: return@FrameCallback
@@ -180,12 +192,31 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             scheduleNavigationFrame()
     }
     private fun updatePositionIcon(degrees: Double) {
-        if (positionMarker == null) return
+        if (positionCoordinate == null || !degrees.isFinite()) return
         if (!lastMarkerAngle.isFinite() ||
             AtlasHeading.angleDifference(lastMarkerAngle,degrees) > 1.2) {
             lastMarkerAngle = degrees
-            positionMarker?.icon = positionIcon(degrees)
+            positionCursor.rotation = degrees.toFloat()
         }
+    }
+    private fun setPosition(point: Coordinate) {
+        positionCoordinate = point
+        updatePositionPlacement()
+    }
+    private fun updatePositionPlacement() {
+        val coordinate = positionCoordinate ?: return
+        val ready = map ?: return
+        if (styleLoading) return
+        val screen = ready.projection.toScreenLocation(LatLng(coordinate.lat,coordinate.lon))
+        val size = positionCursor.layoutParams.width
+        positionCursor.translationX = screen.x-size*.5f
+        positionCursor.translationY = screen.y-size*.5f
+        positionCursor.visibility = View.VISIBLE
+        if(view.indexOfChild(positionCursor)!=view.childCount-1)positionCursor.bringToFront()
+    }
+    private fun clearPosition() {
+        positionCoordinate = null
+        positionCursor.visibility = View.GONE
     }
     private fun distanceMeters(a: Coordinate,b: Coordinate): Double {
         val mid=Math.toRadians((a.lat+b.lat)/2)
@@ -204,6 +235,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     init {
         MapLibre.getInstance(context)
         view = MapView(context)
+        val cursorSize = (44*context.resources.displayMetrics.density).toInt()
+        positionCursor.setImageBitmap(cursorBitmap)
+        view.addView(positionCursor,FrameLayout.LayoutParams(cursorSize,cursorSize,Gravity.TOP or Gravity.START))
         view.getMapAsync { ready ->
             map = ready
             ready.uiSettings.isCompassEnabled = false
@@ -241,6 +275,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             }
             ready.setOnMarkerClickListener { marker: Marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
             ready.addOnCameraIdleListener {
+                updatePositionPlacement()
                 loadStyle(centerPoint)
                 // The marker bitmap is screen-oriented. After a camera bearing
                 // animation, re-express its angle in the *new* map reference.
@@ -257,6 +292,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // stopped. Re-express a screen-oriented cursor against the actual
             // camera even when no navigation frame is currently scheduled.
             ready.addOnCameraMoveListener {
+                updatePositionPlacement()
                 val state=current
                 if (!styleLoading && state != null && (!follow || !headingUp)) {
                     state.fix?.let { fix ->
@@ -298,7 +334,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         map?.clear()
         trailOverlay=null
         lines.clear(); markers.clear(); places.clear()
-        positionMarker = null
+        clearPosition()
         lastMarkerAngle = Double.NaN
         remaining = null; travelled = null; geometry = emptyList()
         route = null; destination = null; options = null; nearby = null
@@ -328,7 +364,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             trailOverlay=null
             lines.clear(); markers.clear(); places.clear()
             remaining = null; travelled = null; geometry = emptyList()
-            lastSegment = -1; positionMarker = null
+            lastSegment = -1; clearPosition()
             lastMarkerAngle = Double.NaN
             route = null; destination = null; options = null; nearby = null
             styleLoading = false
@@ -429,7 +465,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             AtlasHeading.angleDifference(ready.cameraPosition.bearing, target) < 9.0) return
         lastCompassMoveMs = now
         ready.animateCamera(CameraUpdateFactory.bearingTo(target), 450)
-        positionMarker?.icon = positionIcon(0.0)
+        updatePositionIcon(0.0)
     }
 
     private fun travelHeading(s: AtlasState, fix: Fix): Double {
@@ -589,14 +625,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             val position = LatLng(displayed.lat, displayed.lon)
             val markerAngle = NavigationCameraBehavior.cursorAngle(
                 s.navigating,follow,headingUp,heading,ready.cameraPosition.bearing)
-            if (positionMarker == null) {
-                positionMarker = ready.addMarker(MarkerOptions().position(position)
-                    .icon(positionIcon(markerAngle)).title("Your location"))
-                lastMarkerAngle = markerAngle
-            } else {
-                positionMarker?.position = position
-                updatePositionIcon(markerAngle)
-            }
+            setPosition(displayed)
+            updatePositionIcon(markerAngle)
             lastRenderedMarker=displayed
             if (s.navigating) {
                 // The camera keeps rotating and moving independently of 1Hz fixes.
@@ -633,7 +663,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             }
         }
     }
-    internal fun debugCursorBitmap(): Bitmap? = positionMarker?.icon?.bitmap
+    internal fun debugCursorBitmap(): Bitmap? = if(positionCoordinate!=null)cursorBitmap else null
+    internal fun debugCursorScreenCenter(): android.graphics.PointF? {
+        if(positionCursor.visibility!=View.VISIBLE)return null
+        val location=IntArray(2)
+        view.getLocationOnScreen(location)
+        return android.graphics.PointF(location[0]+positionCursor.translationX+positionCursor.width*.5f,
+            location[1]+positionCursor.translationY+positionCursor.height*.5f)
+    }
     internal fun debugSnapshot(): JSONObject {
         val camera = map?.cameraPosition
         val s = current
@@ -659,6 +696,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("cameraLat",camera?.target?.latitude); put("cameraLon",camera?.target?.longitude)
             put("renderLat",lastRenderedMarker?.lat); put("renderLon",lastRenderedMarker?.lon)
             put("cursorBearing",lastMarkerAngle.takeIf { it.isFinite() })
+            put("cursorVisible",positionCursor.visibility==View.VISIBLE)
+            put("cursorScreenX",debugCursorScreenCenter()?.x)
+            put("cursorScreenY",debugCursorScreenCenter()?.y)
         }
     }
     private fun points(array: JSONArray): List<LatLng> = (0 until array.length()).map { array.getJSONArray(it).let { p -> LatLng(p.getDouble(1), p.getDouble(0)) } }
@@ -677,17 +717,16 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         paint.color = Color.WHITE; canvas.drawCircle(size/2f,size/2f,size*.11f,paint)
         return IconFactory.getInstance(context).fromBitmap(bitmap)
     }
-    private fun positionIcon(heading: Double): org.maplibre.android.annotations.Icon {
+    private fun createPositionBitmap(): Bitmap {
         val size = (44 * context.resources.displayMetrics.density).toInt()
         val bitmap = Bitmap.createBitmap(size,size,Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap); val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = Color.argb(36,49,94,251); canvas.drawCircle(size/2f,size/2f,size*.49f,paint)
         paint.color = Color.WHITE; canvas.drawCircle(size/2f,size/2f,size*.34f,paint)
-        canvas.rotate(heading.toFloat(),size/2f,size/2f)
         paint.color = Color.rgb(49,94,251)
         val path=Path().apply { moveTo(size*.5f,size*.22f); lineTo(size*.72f,size*.72f); lineTo(size*.5f,size*.61f); lineTo(size*.28f,size*.72f); close() }
         canvas.drawPath(path,paint)
-        return IconFactory.getInstance(context).fromBitmap(bitmap)
+        return bitmap
     }
     fun onCreate(bundle: Bundle?) {
         restoreCamera = bundle != null
