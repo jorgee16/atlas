@@ -137,6 +137,24 @@ class NavigationGpsReplayTest {
         }
         await("gesture must disable follow",5){!snapshot(s).optBoolean("follow",true)}
     }
+    private fun manualZoom(s:ActivityScenario<MainActivity>) {
+        val before=snapshot(s).getDouble("mapZoom")
+        var x=0f;var y=0f
+        s.onActivity { x=it.window.decorView.width*.5f;y=it.window.decorView.height*.45f }
+        repeat(2) {
+            val down=SystemClock.uptimeMillis()
+            for(action in listOf(MotionEvent.ACTION_DOWN,MotionEvent.ACTION_UP)) {
+                val e=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,x,y,0)
+                e.source=InputDevice.SOURCE_TOUCHSCREEN
+                instrumentation.uiAutomation.injectInputEvent(e,true);e.recycle()
+                SystemClock.sleep(25)
+            }
+            SystemClock.sleep(60)
+        }
+        SystemClock.sleep(500)
+        assertTrue("manual double-tap must actually zoom MapLibre",snapshot(s).getDouble("mapZoom")>before+.2)
+        assertFalse("manual zoom must not restore follow",snapshot(s).getBoolean("follow"))
+    }
     private fun recenter(s:ActivityScenario<MainActivity>,name:String) {
         val previousFix=model!!.updates.value.fix!!.time
         s.onActivity { a ->
@@ -199,7 +217,7 @@ class NavigationGpsReplayTest {
             if(!tests && !checkingRecentered && model!!.updates.value.guidance?.optString("state")=="checking") {
                 phase="checking-recenter";recenter(s,"checking-recenter");checkingRecentered=true
             }
-            if(tests && tick==5) { pan(s);val d=snapshot(s);SystemClock.sleep(400)
+            if(tests && tick==5) { pan(s);manualZoom(s);SystemClock.sleep(400)
                 assertFalse(snapshot(s).getBoolean("follow"));recenter(s,"drive-recenter") }
             if(tests && tick==10) { s.onActivity { map(it).compass() };SystemClock.sleep(600)
                 assertTrue(AtlasHeading.angleDifference(0.0,snapshot(s).getDouble("mapBearing"))<1.0)

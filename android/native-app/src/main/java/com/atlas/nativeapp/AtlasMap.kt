@@ -651,6 +651,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("predictedAt",g?.optDouble("predictedAt")?.takeIf { it.isFinite() })
             put("routeRendering",routeRendering); put("follow",follow); put("headingUp",headingUp)
             put("styleLoading",styleLoading); put("mapBearing",camera?.bearing)
+            put("mapZoom",camera?.zoom)
             put("cameraLat",camera?.target?.latitude); put("cameraLon",camera?.target?.longitude)
             put("renderLat",lastRenderedMarker?.lat); put("renderLon",lastRenderedMarker?.lon)
             put("cursorBearing",lastMarkerAngle.takeIf { it.isFinite() })
