@@ -34,6 +34,7 @@ bash android/gradlew -p android -PnativeOnly :native-app:connectedDebugAndroidTe
   --stacktrace || result=$?
 cleanup
 trap - EXIT
+python3 tools/emit-native-replay-previews.py || true
 if [[ "$result" -eq 0 ]]; then
   python3 tools/analyze-native-gps-replay.py || result=$?
 fi

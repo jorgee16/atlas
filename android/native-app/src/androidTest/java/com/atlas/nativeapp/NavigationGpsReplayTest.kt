@@ -121,7 +121,18 @@ class NavigationGpsReplayTest {
     }
     private fun recenter(s:ActivityScenario<MainActivity>,name:String) {
         val previousFix=model!!.updates.value.fix!!.time
-        s.onActivity { map(it).recenter() }
+        s.onActivity { a ->
+            fun find(v:android.view.View):android.view.View? {
+                if(v.contentDescription=="Recenter on my location")return v
+                if(v is android.view.ViewGroup) for(i in 0 until v.childCount) {
+                    val child=find(v.getChildAt(i));if(child!=null)return child
+                }
+                return null
+            }
+            val control=find(a.window.decorView)
+            assertNotNull("Recenter control must remain available",control)
+            assertTrue(control!!.performClick())
+        }
         val d=snapshot(s)
         assertTrue("recenter must restore follow immediately",d.getBoolean("follow"))
         assertEquals("recenter cannot require a new fix",previousFix,model!!.updates.value.fix!!.time,1e-6)
@@ -151,11 +162,12 @@ class NavigationGpsReplayTest {
     private fun replay(s:ActivityScenario<MainActivity>,route:JSONObject,speed:Double,tests:Boolean,allowArrival:Boolean=true,startAlong:Double=0.0) {
         val p=points(route)
         val length=(1 until p.size).sumOf { distance(p[it-1],p[it]) }
-        var along=startAlong;var tick=0
+        var along=startAlong;var tick=0;var checkingRecentered=false
         while(along<length && tick<360 && model!!.updates.value.navigating) {
             val truth=at(p,along)
             var heading=bearing(truth,at(p,(along+3).coerceAtMost(length)))
             val accuracy=if(tests) listOf(5.0,20.0,35.0,60.0,100.0)[(tick/8)%5] else 5.0
+            val trueHeading=heading
             val bad=tests && tick in 12..13
             if(bad)heading=AtlasHeading.normalize(heading+180)
             phase=if(tests)"drive-accuracy-$accuracy" else if(speed<3)"walking" else "reroute-replay"
@@ -164,13 +176,18 @@ class NavigationGpsReplayTest {
             val measured=Coordinate(truth.lat+jitter/111320.0,truth.lon)
             fix(measured,speed,heading,accuracy,if(bad)5.0 else if(accuracy>=60)60.0 else 8.0)
             SystemClock.sleep(1020)
+            if(bad) assertTrue("two inverted GNSS fixes must not reverse the camera",
+                AtlasHeading.angleDifference(trueHeading,snapshot(s).getDouble("mapBearing"))<100.0)
+            if(!tests && !checkingRecentered && model!!.updates.value.guidance?.optString("state")=="checking") {
+                phase="checking-recenter";recenter(s,"checking-recenter");checkingRecentered=true
+            }
             if(tests && tick==5) { pan(s);val d=snapshot(s);SystemClock.sleep(400)
                 assertFalse(snapshot(s).getBoolean("follow"));recenter(s,"drive-recenter") }
             if(tests && tick==10) { s.onActivity { map(it).compass() };SystemClock.sleep(600)
                 assertTrue(AtlasHeading.angleDifference(0.0,snapshot(s).getDouble("mapBearing"))<1.0)
                 recenter(s,"north-up-recenter");s.onActivity { map(it).compass() } }
-            if(tests && tick in listOf(18,35,55)) {
-                val gap=when(tick){18->2;35->5;else->9}
+            if(tests && tick in listOf(18,42,55)) {
+                val gap=when(tick){18->2;42->5;else->9}
                 phase="gps-gap-$gap";capture(s,"gap-$gap-start")
                 SystemClock.sleep(gap*1000L)
                 recenter(s,"gap-$gap-recenter")
@@ -243,13 +260,30 @@ class NavigationGpsReplayTest {
                 val walk=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.7224,-9.1475),true)
                 val start=points(walk).first()
                 phase="walking-stop"
-                repeat(5){fix(start,0.0,180.0,20.0,60.0);SystemClock.sleep(1020)}
+                val stopped=snapshot(s)
+                repeat(5){fix(Coordinate(start.lat+sin(it*1.3)*.000025,start.lon),0.0,180.0,20.0,60.0);SystemClock.sleep(1020)}
+                val still=snapshot(s)
+                assertTrue("stationary pedestrian jitter must not creep",distance(
+                    Coordinate(stopped.getDouble("renderLat"),stopped.getDouble("renderLon")),
+                    Coordinate(still.getDouble("renderLat"),still.getDouble("renderLon")))<1.0)
                 capture(s,"walking-stop")
+                pan(s)
+                s.onActivity { if(map(it).headingUp)map(it).compass() }
+                SystemClock.sleep(650)
+                val north=snapshot(s)
+                assertTrue("north-up compass must complete without a new GPS fix",
+                    AtlasHeading.angleDifference(0.0,north.getDouble("mapBearing"))<1.0)
+                assertTrue("manual/compass animation must keep the stationary cursor aligned",
+                    AtlasHeading.angleDifference(north.getDouble("cursorBearing"),
+                        AtlasHeading.normalize(north.getDouble("travelBearing")-north.getDouble("mapBearing")))<1.5)
+                recenter(s,"walking-compass-recenter")
+                s.onActivity { if(!map(it).headingUp)map(it).compass() }
                 replay(s,walk,1.5,false)
                 capture(s,"walk-arrived")
                 s.onActivity { map(it).onDebugFrame=null;model!!.endNavigation() }
             }
         } finally {
+            instrumentation.runOnMainSync { model?.endNavigation() }
             locations.removeTestProvider(LocationManager.GPS_PROVIDER)
             File(output,"frames.ndjson").writeText(synchronized(frames){frames.joinToString("\n")})
             File(output,"fixes.ndjson").writeText(fixes.joinToString("\n"))

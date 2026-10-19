@@ -24,13 +24,13 @@ The trip covers driving at approximately 1 Hz, noisy GNSS bearings, accuracy
 heading-up and north-up, Activity recreation and background GPS reception.
 A deliberate deviation follows a separate route calculated from the same real
 graph; Atlas must reroute to its unchanged destination. Walking uses another
-real route and includes a stationary period. Native arrival is required.
+real route and includes a stationary period with jitter and a compass animation without a new fix. Native arrival is required.
 
 The test installs a debug-frame callback only for the replay. Production frames
 perform no diagnostic serialization, logging or disk writes. The callback
 records render cadence, GPS timestamp/quality, speed, provider/native heading,
 guidance state/progress/segment, tunnel prediction, rendered position, camera
-center/bearing, cursor bearing and follow state.
+center/bearing, cursor bearing, raw/filtered speed and follow state.
 
 Evidence is uploaded in `Atlas-native-ui-review`:
 
@@ -45,7 +45,7 @@ Evidence is uploaded in `Atlas-native-ui-review`:
 
 `Atlas-native-debug-apk` contains the APK for the exact workflow commit. A build
 artifact alone is not navigation acceptance. Inspect instrumented results,
-summary and recordings before describing a run as end-to-end validated.
+summary, the movement-frame fraction and recordings before describing a run as end-to-end validated.
 
 Limitations of this replay: mock Android GPS is not radio/GNSS hardware; the offline PMTiles source is selected explicitly; POI/address downloads are
 not exercised; extreme multipath and all real-world intersections are not exhaustive.

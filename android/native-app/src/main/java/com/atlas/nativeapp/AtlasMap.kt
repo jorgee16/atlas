@@ -246,10 +246,22 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // animation, re-express its angle in the *new* map reference.
                 // Otherwise the marker keeps the bearing of the previous frame.
                 val state = current
-                if (!styleLoading && state != null && !state.navigating) {
+                if (!styleLoading && state != null) {
                     state.fix?.let { fix ->
-                        positionMarker?.icon = positionIcon(
-                            AtlasHeading.normalize(travelHeading(state, fix) - ready.cameraPosition.bearing))
+                        updatePositionIcon(NavigationCameraBehavior.cursorAngle(
+                            state.navigating,follow,headingUp,travelHeading(state,fix),ready.cameraPosition.bearing))
+                    }
+                }
+            }
+            // Compass/gesture animations can continue after GPS prediction has
+            // stopped. Re-express a screen-oriented cursor against the actual
+            // camera even when no navigation frame is currently scheduled.
+            ready.addOnCameraMoveListener {
+                val state=current
+                if (!styleLoading && state != null && (!follow || !headingUp)) {
+                    state.fix?.let { fix ->
+                        updatePositionIcon(NavigationCameraBehavior.cursorAngle(
+                            state.navigating,follow,headingUp,travelHeading(state,fix),ready.cameraPosition.bearing))
                     }
                 }
             }
@@ -365,9 +377,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val now = SystemClock.elapsedRealtimeNanos()/1e9
         // Recenter MUST work even with no new 1Hz fix. Do not wait for the
         // interpolator to generate another target before restoring follow.
-        val target = if (s.navigating) (if (routeRendering) renderInterpolator.sample(now)?.position
-            else freePosition.sample(now)?.first)
-            ?: lastRenderedMarker ?: s.guidance?.coordinate() ?: fix.point
+        val target = if (s.navigating) lastRenderedMarker
+            ?: (if (routeRendering) renderInterpolator.sample(now)?.position
+                else freePosition.sample(now)?.first)
+            ?: s.guidance?.coordinate() ?: fix.point
             else fix.point
         val travel = travelHeading(s,fix)
         val bearing = if (headingUp) travel else 0.0
@@ -630,7 +643,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("frames",debugFrameCount)
             put("fixTime",f?.time); put("accuracy",f?.accuracy)
             put("bearingAccuracy",f?.bearingAccuracy); put("speed",f?.speed)
+            put("rawSpeed",f?.providerSpeed); put("busy",s?.busy)
             put("rawBearing",f?.providerBearing); put("filteredBearing",f?.bearing)
+            put("travelBearing",if(s!=null && f!=null)travelHeading(s,f) else null)
             put("guidance",g?.optString("state")); put("along",g?.optDouble("along"))
             put("offRoute",g?.optDouble("offRoute")); put("segment",g?.optInt("segment"))
             put("predictedAt",g?.optDouble("predictedAt")?.takeIf { it.isFinite() })

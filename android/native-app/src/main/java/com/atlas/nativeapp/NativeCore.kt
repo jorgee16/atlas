@@ -25,7 +25,8 @@ class NativeCore : AutoCloseable {
         calculate(handle, from.lat, from.lon, to.lat, to.lon, walking, avoid, penalty, vehicle).toString(Charsets.UTF_8)
     fun filter(fix: Fix): Fix {
         val result = org.json.JSONObject(filter(handle, fix.point.lat, fix.point.lon, fix.accuracy, fix.speed, fix.bearing ?: -1.0, fix.time).toString(Charsets.UTF_8))
-        return fix.copy(speed = result.getDouble("speed"), bearing = if (result.isNull("heading")) null else result.getDouble("heading"))
+        return fix.copy(speed = result.getDouble("speed"), bearing = if (result.isNull("heading")) null else result.getDouble("heading"),
+            providerSpeed = fix.providerSpeed ?: fix.speed)
     }
     fun update(fix: Fix) = update(handle, fix.point.lat, fix.point.lon, fix.accuracy, fix.speed, fix.time).toString(Charsets.UTF_8)
     override fun close() { if (handle != 0L) { destroy(handle); handle = 0 } }
@@ -33,4 +34,5 @@ class NativeCore : AutoCloseable {
 data class Coordinate(val lat: Double, val lon: Double) {
     init { require(lat.isFinite() && lon.isFinite() && lat in -90.0..90.0 && lon in -180.0..180.0) }
 }
-data class Fix(val point: Coordinate, val accuracy: Double, val speed: Double, val bearing: Double?, val time: Double, val bearingAccuracy: Double? = null, val providerBearing: Double? = null)
+data class Fix(val point: Coordinate, val accuracy: Double, val speed: Double, val bearing: Double?, val time: Double, val bearingAccuracy: Double? = null, val providerBearing: Double? = null, val providerSpeed: Double? = null)
+

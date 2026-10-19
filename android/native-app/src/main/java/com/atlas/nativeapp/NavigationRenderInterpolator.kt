@@ -117,7 +117,7 @@ internal class NavigationRenderInterpolator {
         if (vertices.isEmpty() || !along.isFinite() || !fixTime.isFinite() ||
             fixTime <= lastGpsAt) return false
         lastGpsAt = fixTime
-        if (speed < 1.2 && !walking && lastAcceptedPosition?.let {
+        if (speed < (if(walking) 0.45 else 1.2) && lastAcceptedPosition?.let {
                 distance(it, snapped) < 0.4
             } == true) {
             // StationaryMapPosition already rejected the GPS jitter. Do not

@@ -5,7 +5,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 
 /**
- * Visual-only position stabilizer for a stopped car. Navigation decisions,
+ * Visual-only position stabilizer with distinct stopped-car and pedestrian thresholds. Navigation decisions,
  * off-route checks and voice guidance still use real GPS fixes in C++.
  * Every candidate must come from the current guidance's route projection.
  */
@@ -23,9 +23,10 @@ internal class StationaryMapPosition {
     }
 
     fun select(position: Coordinate, fix: Fix, navigating: Boolean, walking: Boolean): Coordinate {
-        if (!navigating || walking || !fix.speed.isFinite() || fix.speed >= 1.2) {
+        val movingThreshold = if(walking) 0.45 else 1.2
+        if (!navigating || !fix.speed.isFinite() || fix.speed >= movingThreshold) {
             reset()
-            if (navigating && !walking) stable = position
+            if (navigating) stable = position
             return position
         }
         val anchor = stable
@@ -36,7 +37,8 @@ internal class StationaryMapPosition {
         }
         // Inaccurate stationary fixes can shift road projections by tens
         // of metres. Camera and cursor must not chase each fluctuation.
-        val noiseRadius = max(10.0, fix.accuracy.coerceIn(0.0, 30.0) * 1.2)
+        val noiseRadius = if(walking) max(4.0,fix.accuracy.coerceIn(0.0,20.0)*0.6)
+            else max(10.0, fix.accuracy.coerceIn(0.0, 30.0) * 1.2)
         if (distance(anchor, position) <= noiseRadius) {
             candidateGroup = null
             candidateFixes = 0
@@ -72,3 +74,4 @@ internal class StationaryMapPosition {
             (b.lon - a.lon) * 111_320.0 * cos(mid))
     }
 }
+

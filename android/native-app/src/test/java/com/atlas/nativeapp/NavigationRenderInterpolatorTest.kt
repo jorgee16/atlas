@@ -142,5 +142,15 @@ class NavigationRenderInterpolatorTest {
         assertTrue(advance(5.0) > advance(60.0))
         assertEquals(20.0,advance(100.0),1e-6)
     }
+    @Test fun stoppedPedestrianDoesNotCreepFromNoisyGuidanceAlong() {
+        val a=route()
+        a.acceptGps(20.0,first,0.0,20.0,100.0,true)
+        a.sample(100.0)
+        a.acceptGps(25.0,first,0.0,20.0,101.0,true)
+        repeat(30) { a.sample(101.0+it/30.0) }
+        assertEquals(20.0,a.sample(102.0)!!.along,1e-6)
+        a.acceptGps(25.0,turn,0.6,5.0,103.0,true)
+        assertTrue(a.sample(103.033)!!.along>20.0)
+    }
 }
 

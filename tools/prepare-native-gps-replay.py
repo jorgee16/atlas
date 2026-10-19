@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Install routing from the real Portugal manifest, never a fabricated test graph.
-Only routing is installed: this is not evidence of full offline PMTiles/search.
+Routing and offline PMTiles are installed; POI/address downloads are not tested.
 """
 import concurrent.futures
 import hashlib

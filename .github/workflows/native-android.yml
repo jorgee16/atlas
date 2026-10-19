@@ -92,6 +92,8 @@ jobs:
           path: |
             ui-preview/
             android/native-app/build/reports/androidTests/
+            android/native-app/build/reports/tests/
+            android/native-app/build/reports/lint-results-debug.*
             android/native-app/build/outputs/androidTest-results/
           if-no-files-found: warn
 
