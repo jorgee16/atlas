@@ -4,6 +4,14 @@ cd "$(dirname "$0")/.."
 mkdir -p ui-preview/gps-replay
 adb install -r android/native-app/build/outputs/apk/debug/native-app-debug.apk || exit 1
 adb install -r android/native-app/build/outputs/apk/androidTest/debug/native-app-debug-androidTest.apk || exit 1
+# Prove public export survives AGP uninstall before spending 12 minutes on GPS.
+bash android/gradlew -p android -PnativeOnly :native-app:connectedDebugAndroidTest \
+  '-Pandroid.testInstrumentationRunnerArguments.class=com.atlas.nativeapp.NavigationGpsReplayTest#artifactExportProbe' \
+  --stacktrace || exit 1
+probe="$(adb shell cat /sdcard/Download/atlas-gps-replay/metrics/export-probe.txt)" || exit 1
+[[ "$probe" == "ATLAS_EXPORT_PROBE" ]] || exit 1
+adb install -r android/native-app/build/outputs/apk/debug/native-app-debug.apk || exit 1
+adb install -r android/native-app/build/outputs/apk/androidTest/debug/native-app-debug-androidTest.apk || exit 1
 adb shell appops set com.atlas.nativeapp android:mock_location allow || exit 1
 adb push atlas-portugal-routing.tar /data/local/tmp/atlas-portugal-routing.tar || exit 1
 adb shell 'run-as com.atlas.nativeapp sh -c "mkdir -p files && cd files && tar -xf /data/local/tmp/atlas-portugal-routing.tar"' || exit 1
@@ -32,7 +40,7 @@ cleanup() {
 trap cleanup EXIT
 result=0
 bash android/gradlew -p android -PnativeOnly :native-app:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.atlas.nativeapp.NavigationGpsReplayTest \
+  '-Pandroid.testInstrumentationRunnerArguments.class=com.atlas.nativeapp.NavigationGpsReplayTest#portugalTripThroughAndroidLocationServiceJniAndMapLibre' \
   --stacktrace || result=$?
 cleanup
 trap - EXIT

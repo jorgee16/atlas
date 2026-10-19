@@ -254,6 +254,30 @@ class NavigationGpsReplayTest {
             await("native guidance must confirm arrival",15){model!!.updates.value.arrived}
         }
     }
+    private fun exportEvidence() {
+        check(android.os.Build.VERSION.SDK_INT>=29) { "GPS replay export requires API 29+ (CI uses 35)" }
+        val resolver=context.contentResolver
+        for(file in output.listFiles().orEmpty().filter { it.isFile }) {
+            val values=android.content.ContentValues().apply {
+                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME,file.name)
+                put(android.provider.MediaStore.MediaColumns.MIME_TYPE,
+                    if(file.extension=="png")"image/png" else "application/octet-stream")
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH,"Download/atlas-gps-replay/metrics")
+                put(android.provider.MediaStore.MediaColumns.IS_PENDING,1)
+            }
+            val uri=checkNotNull(resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,values))
+            checkNotNull(resolver.openOutputStream(uri)).use { target ->
+                file.inputStream().use { it.copyTo(target) }
+            }
+            values.clear();values.put(android.provider.MediaStore.MediaColumns.IS_PENDING,0)
+            check(resolver.update(uri,values,null,null)==1)
+        }
+    }
+    @Test fun artifactExportProbe() {
+        output.listFiles()?.forEach { it.delete() }
+        File(output,"export-probe.txt").writeText("ATLAS_EXPORT_PROBE")
+        exportEvidence()
+    }
     @Suppress("DEPRECATION")
     @Test fun portugalTripThroughAndroidLocationServiceJniAndMapLibre() {
         output.listFiles()?.forEach{it.delete()}
@@ -326,15 +350,11 @@ class NavigationGpsReplayTest {
             File(output,"frames.ndjson").writeText(synchronized(frames){frames.joinToString("\n")})
             File(output,"fixes.ndjson").writeText(fixes.joinToString("\n"))
             File(output,"events.ndjson").writeText(events.joinToString("\n"))
-            // AGP may uninstall the target APK immediately after instrumentation,
-            // deleting getExternalFilesDir. Export with shell identity before
-            // returning the test result, just like the existing UI screenshots.
-            val command="mkdir -p /sdcard/Download/atlas-gps-replay/metrics && " +
-                "cp -R ${output.absolutePath}/. /sdcard/Download/atlas-gps-replay/metrics/ && echo ATLAS_EXPORT_OK"
-            val exported=instrumentation.uiAutomation.executeShellCommand(command).use { fd ->
-                java.io.FileInputStream(fd.fileDescriptor).use { it.readBytes().toString(Charsets.UTF_8) }
+            // Public MediaStore downloads survive AGP's APK uninstall. Preserve
+            // the functional test's original exception if evidence export fails.
+            runCatching { exportEvidence() }.onFailure {
+                Log.e("ATLAS_GPS_REPLAY","Evidence export failed",it)
             }
-            assertTrue("replay evidence must survive APK uninstall: $exported",exported.contains("ATLAS_EXPORT_OK"))
             Log.i("ATLAS_GPS_REPLAY","evidence=${output.path} frames=${frames.size} fixes=${fixes.size}")
         }
     }
