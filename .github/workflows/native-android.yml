@@ -70,7 +70,14 @@ jobs:
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
       - name: Install video tools for visual evidence review
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            # ffmpeg needs only Ubuntu. An unrelated Microsoft apt feed can
+            # reject CI IPs and must not block Android emulator validation.
+            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
+            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version | head -1
       - name: Download and verify real Portugal routing and offline map for GPS replay
         env:
           R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}

@@ -371,6 +371,7 @@ class NavigationGpsReplayTest {
         if(mode=="OVERVIEW") {
             assertTrue("remaining route must be measured",f.getInt("remainingPointCount")>=2)
             assertEquals("remaining route must fit the viewport",0,f.getInt("remainingOutsideViewport"))
+            assertEquals("remaining route must clear guidance and bottom controls",0,f.getInt("remainingOutsideFraming"))
             assertTrue(AtlasHeading.angleDifference(0.0,f.getDouble("mapBearing"))<.1)
             assertEquals(0.0,f.getDouble("mapTilt"),.1)
         }

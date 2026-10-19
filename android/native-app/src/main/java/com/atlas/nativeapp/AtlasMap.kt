@@ -71,6 +71,16 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 MapVisualStyle.usesImagery(visualStyle,sourceMode) && !onlineFailed)
                     visualStyle else MapVisualStyle.STREETS
     var onMapSourceChanged: (() -> Unit)? = null
+    internal var overviewInsets: (() -> IntArray)? = null
+    internal fun onChromeLayout() {
+        if(cameraState.mode==NavigationCameraState.Mode.OVERVIEW) {
+            val expected=overviewInsets?.invoke()
+            val actual=map?.cameraPosition?.padding
+            if(expected!=null && actual!=null && expected.indices.all { abs(expected[it]-actual[it])<1.0 })return
+            cameraState.viewportChanged()
+            applyCameraMode()
+        }
+    }
     private var loadedSource = "loading"
     val activeMapSource: String get() = if (styleLoading) "loading" else loadedSource
     val centerPoint: Coordinate get() = map?.cameraPosition?.target?.let { Coordinate(it.latitude,it.longitude) }
@@ -265,11 +275,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(ready.cameraPosition)
                     .bearing(0.0).tilt(0.0).padding(0.0,0.0,0.0,0.0).build()))
                 val d=context.resources.displayMetrics.density
-                val insets=intArrayOf((40*d).toInt(),(140*d).toInt(),(40*d).toInt(),(260*d).toInt())
+                val insets=overviewInsets?.invoke() ?: intArrayOf((40*d).toInt(),(220*d).toInt(),(80*d).toInt(),(280*d).toInt())
+                // Bounds calculation and its camera must share the same
+                // insets. Clearing fitted padding shifts the whole route by
+                // half the top/bottom difference, underneath the UI panels.
                 val fitted=ready.getCameraForLatLngBounds(LatLngBounds.Builder().includes(points).build(),insets,0.0,0.0)
                     ?: return
                 ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(fitted)
-                    .bearing(0.0).tilt(0.0).padding(0.0,0.0,0.0,0.0).build()))
+                    .bearing(0.0).tilt(0.0).padding(insets.map { it.toDouble() }.toDoubleArray()).build()))
                 cameraState.applied(request)
             }
             NavigationCameraState.Mode.FREE -> cameraState.applied(request)
@@ -775,6 +788,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 val pixels=overviewPoints().mapNotNull { map?.projection?.toScreenLocation(it) }
                 put("remainingPointCount",pixels.size)
                 put("remainingOutsideViewport",pixels.count { it.x<0 || it.y<0 || it.x>view.width || it.y>view.height })
+                val padding=camera?.padding ?: doubleArrayOf(0.0,0.0,0.0,0.0)
+                put("remainingOutsideFraming",pixels.count {
+                    it.x<padding[0]-2 || it.y<padding[1]-2 ||
+                        it.x>view.width-padding[2]+2 || it.y>view.height-padding[3]+2
+                })
             }
             put("styleLoading",styleLoading); put("mapBearing",camera?.bearing)
             put("mapSource",activeMapSource);put("mapVisualStyle",activeVisualStyle)

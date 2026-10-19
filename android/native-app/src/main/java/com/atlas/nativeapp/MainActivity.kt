@@ -361,6 +361,19 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         // A map style callback must not rebuild interactive chrome: doing so
         // can detach a search button between Android touch down and click.
         atlasMap.onMapSourceChanged = { updateMapSourceIndicators() }
+        atlasMap.overviewInsets = {
+            if(landscape)intArrayOf(
+                maxOf(if(guidance.visibility==View.VISIBLE)guidance.right else 0,
+                    if(bottom.visibility==View.VISIBLE)bottom.right else 0)+ui.dp(20),
+                topInset+ui.dp(24),rightInset+ui.dp(80),bottomInset+ui.dp(24))
+            else intArrayOf(leftInset+ui.dp(32),
+                maxOf(topInset+ui.dp(if(model.updates.value.navigating)220 else 40),
+                    if(guidance.visibility==View.VISIBLE)guidance.bottom+ui.dp(20) else 0),
+                rightInset+ui.dp(80),
+                maxOf(bottomInset+ui.dp(40),if(bottom.visibility==View.VISIBLE)root.height-bottom.top+ui.dp(24) else 0))
+        }
+        guidance.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_ -> atlasMap.onChromeLayout() }
+        bottom.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_ -> atlasMap.onChromeLayout() }
         atlasMap.onPan = { if(model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true}; rebuildChrome() }
         atlasMap.onPoint = { point ->
             if(pickingOrigin){pickingOrigin=false;model.origin(point);model.status("Starting point set");model.updates.value.destination?.let{model.calculate()}}
