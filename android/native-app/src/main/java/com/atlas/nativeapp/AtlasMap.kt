@@ -133,6 +133,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var wasNavigating = false
     private var routeRendering = false
     private val freePosition = NavigationPositionInterpolator()
+    private val presentedPosition = NavigationPositionLimiter()
     /** Installed only by instrumented debug replay; no JSON work in production frames. */
     internal var onDebugFrame: ((JSONObject) -> Unit)? = null
     private var debugFrameCount = 0L
@@ -155,11 +156,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         // A scheduled route frame must never overwrite a newer off-route fix.
         val routeFrame = if (routeRendering) renderInterpolator.sample(time) else null
         val freeFrame = if (routeFrame == null) freePosition.sample(time) else null
-        val position = routeFrame?.position ?: freeFrame?.first ?: lastRenderedMarker
+        val desiredPosition = routeFrame?.position ?: freeFrame?.first ?: lastRenderedMarker
             ?: return@FrameCallback
-        val markerActive = routeFrame?.active ?: freeFrame?.second ?: false
+        val position=presentedPosition.commit(desiredPosition,time,StationaryMapPosition.visualSpeed(s.fix))
+        val markerActive = (routeFrame?.active ?: freeFrame?.second ?: false) || presentedPosition.active
         val last = lastRenderedMarker
-        if (last == null || distanceMeters(last,position) > 0.08) {
+        if (last == null || distanceMeters(last,position) > 0.001) {
             setPosition(position)
             lastRenderedMarker=position
         }
@@ -597,6 +599,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         interpolatedRoute=null
         stationaryPosition.reset()
         freePosition.reset()
+        presentedPosition.reset()
         cameraState.request(NavigationCameraState.Mode.FOLLOWING)
         current=current?.copy(navigating=false)
         applyCameraMode()
@@ -611,6 +614,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             routeRendering=false
             lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
             freePosition.reset()
+            presentedPosition.reset()
             if(wasNavigating) { stationaryPosition.reset();lastRenderedMarker=null }
         }
         wasNavigating=s.navigating
@@ -702,7 +706,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // During checking/rerouting retain the last filtered position
             // briefly instead of dropping into raw GPS every second.
             // After the hold expires, raw fixes can show a real deviation.
-            val displayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
+            val desiredDisplayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
                 ?: lastRenderedMarker ?: display else if(s.navigating)
                     freePosition.sample(nowSeconds)?.first ?: display else display
             if(trusted && !wasRouteRendering &&
@@ -710,9 +714,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // Initial road matching may snap an unprojected fix to a nearby
                 // footpath. Both stationary filters must then use the same
                 // coordinate reference; raw-origin anchors caused later creep.
-                stationaryPosition.rebase(displayed,fix,s.walking)
-                renderInterpolator.holdStationary(displayed)
+                stationaryPosition.rebase(desiredDisplayed,fix,s.walking)
+                renderInterpolator.holdStationary(desiredDisplayed)
             }
+            val displayed=if(s.navigating)presentedPosition.commit(desiredDisplayed,nowSeconds,
+                StationaryMapPosition.visualSpeed(fix)) else desiredDisplayed
             val heading = travelHeading(s, fix)
             val position = LatLng(displayed.lat, displayed.lon)
             val markerAngle = NavigationCameraBehavior.cursorAngle(

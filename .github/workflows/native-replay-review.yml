@@ -1,0 +1,43 @@
+name: Review recorded native GPS evidence
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Existing native Android validation run (no emulator replay)'
+        required: true
+        default: '39327632423'
+        type: string
+  push:
+    branches: ['migration/native-core-kotlin']
+    paths: ['.github/workflows/native-replay-review.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reuse the recorded trip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPLAY_RUN_ID: ${{ inputs.run_id || '39327632423' }}
+        run: |
+          gh run download "$REPLAY_RUN_ID" --repo jorgee16/atlas --name Atlas-native-ui-review --dir /tmp/atlas-evidence
+      - name: Install video inspection tools
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
+            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
+          fi
+      - name: Inspect camera and driving images
+        run: python3 tools/emit-native-replay-previews.py /tmp/atlas-evidence/ui-preview/camera-smoke /tmp/atlas-evidence/ui-preview/atlas-camera-smoke && python3 tools/emit-native-replay-previews.py /tmp/atlas-evidence/ui-preview/gps-replay /tmp/atlas-evidence/ui-preview/atlas-gps-replay
+      - name: Diagnose all recorded motion metrics
+        continue-on-error: true
+        working-directory: /tmp/atlas-evidence
+        run: python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-recorded-replay-analysis
+          path: /tmp/atlas-evidence/ui-preview/gps-replay/*summary.json

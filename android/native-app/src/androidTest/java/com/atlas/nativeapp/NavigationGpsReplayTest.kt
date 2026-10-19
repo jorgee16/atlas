@@ -264,6 +264,13 @@ class NavigationGpsReplayTest {
         File(output,if(walking)"walk-route.json" else "drive-route.json").writeText(route.toString(2))
         confirmedStartFix(points(route).first(),true)
         await("MapLibre must finish loading",45){!snapshot(s).optBoolean("styleLoading",true)}
+        // Changing the simulated start is a setup relocation, not stationary
+        // jitter. Wait for its bounded visual correction before taking a new
+        // stationary baseline; do not relax the later one-metre assertion.
+        await("route-start fix must be presented before replay",25) {
+            val f=snapshot(s)
+            f.has("renderLat") && distance(Coordinate(f.getDouble("renderLat"),f.getDouble("renderLon")),points(route).first())<.05
+        }
         s.onActivity { map(it).recenter() }
         return route
     }

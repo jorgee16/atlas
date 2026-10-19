@@ -19,7 +19,7 @@ if not shutil.which('ffmpeg'):
     raise SystemExit(0)
 preferred=['cursor-bitmap','drive-0','pan-before','pan-after','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
            'reroute-recenter','walking-compass-recenter','walking-stop','walk-15','walk-arrived']
-preferred += sorted(p.stem for p in root.glob('camera-*.png'))
+preferred += sorted(p.stem for pattern in ['camera-*.png','drive-*.png','deviation-*.png'] for p in root.glob(pattern) if p.stem not in preferred)
 def emit(name,target):
     print('ATLAS_PREVIEW_BEGIN '+name,flush=True)
     for line in textwrap.wrap(base64.b64encode(target.read_bytes()).decode(),16000):

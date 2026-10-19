@@ -56,10 +56,7 @@ for a,b in zip(frames,frames[1:]):
         intervals.append(dt)
 for step,a,b in sorted(observations,key=lambda item:item[0],reverse=True)[:5]:
     print('ATLAS_LARGEST_RENDER_STEP '+json.dumps({'meters':step,'before':a,'after':b}),flush=True)
-assert steps and max(steps)<6.0, f'Excessive cursor step: {max(steps,default=0):.2f} m'
-assert max(angles)<60, f'Instantaneous camera reversal: {max(angles):.2f} degrees'
 guided=[f for f in frames if f.get('follow') and f.get('headingUp')]
-assert guided and all(abs(f.get('cursorBearing',0))<1.5 for f in guided), 'Heading-up cursor must point forward'
 # Check actual camera course against replay truth. A shared erroneous route
 # heading can make cursor/map agree while both point backwards. Allow four
 # seconds after a genuine sharp turn, and exclude stale/poor-quality fixes.
@@ -70,11 +67,22 @@ truth_frames=[f for f in guided if f.get('speed',0)>=1.2 and f.get('accuracy',10
 heading_errors=[(abs((f['mapBearing']-f['truthHeading']+180)%360-180),f) for f in truth_frames]
 for error,frame in sorted(heading_errors,key=lambda item:item[0],reverse=True)[:3]:
     print('ATLAS_HEADING_TRUTH_ERROR '+json.dumps({'degrees':error,'frame':frame}),flush=True)
+moving_fraction=sum(step>.01 for step in good_steps)/len(good_steps) if good_steps else 0.0
+# Emit all findings before enforcing gates. Re-analysis of an existing artifact
+# can diagnose independent problems without spending another real-time trip.
+diagnostic={'frames':len(frames),'fixes':len(fixes),'videoDurationSeconds':video_seconds,
+    'maxCursorStepMeters':max(steps,default=0),'maxCameraRotationDegrees':max(angles,default=0),
+    'maxStableGoodGpsHeadingErrorDegrees':max((e for e,_ in heading_errors),default=0),
+    'headingTruthFrames':len(heading_errors),'movingFrameFractionUnderGoodGps':moving_fraction}
+(root/'diagnostic-summary.json').write_text(json.dumps(diagnostic,indent=2))
+print('ATLAS_REPLAY_DIAGNOSTIC '+json.dumps(diagnostic),flush=True)
+assert steps and max(steps)<6.0, f'Excessive cursor step: {max(steps,default=0):.2f} m'
+assert max(angles)<60, f'Instantaneous camera reversal: {max(angles):.2f} degrees'
+assert guided and all(abs(f.get('cursorBearing',0))<1.5 for f in guided), 'Heading-up cursor must point forward'
 assert len(heading_errors)>300, 'Missing camera/ground-truth heading evidence'
 assert max(error for error,_ in heading_errors)<100, 'Camera reversed against confirmed movement'
 assert len(good_steps)>60, 'Missing rendered movement under good GPS'
-moving_fraction=sum(step>.01 for step in good_steps)/len(good_steps)
-assert moving_fraction>.65, f'1 Hz fixes did not produce continuous visible movement: {moving_fraction:.2%}'
+assert moving_fraction>.65, f'1 Hz fixes did not produce continuous visible movement: {moving_fraction:.2%}' 
 phases=sorted({f.get('phase','') for f in frames})
 for gap in [2,5,9]:
     assert any(f'gap-{gap}' in p for p in phases), f'No {gap}s GPS gap evidence'
