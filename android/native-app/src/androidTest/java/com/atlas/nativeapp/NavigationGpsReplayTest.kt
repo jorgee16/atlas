@@ -139,20 +139,31 @@ class NavigationGpsReplayTest {
     }
     private fun manualZoom(s:ActivityScenario<MainActivity>) {
         val before=snapshot(s).getDouble("mapZoom")
-        var x=0f;var y=0f
-        s.onActivity { x=it.window.decorView.width*.5f;y=it.window.decorView.height*.45f }
-        repeat(2) {
-            val down=SystemClock.uptimeMillis()
-            for(action in listOf(MotionEvent.ACTION_DOWN,MotionEvent.ACTION_UP)) {
-                val e=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,x,y,0)
-                e.source=InputDevice.SOURCE_TOUCHSCREEN
-                instrumentation.uiAutomation.injectInputEvent(e,true);e.recycle()
-                SystemClock.sleep(25)
-            }
-            SystemClock.sleep(60)
+        var x=0f;var y=0f;var width=0f
+        s.onActivity { width=it.window.decorView.width.toFloat();x=width*.5f;y=it.window.decorView.height*.45f }
+        capture(s,"zoom-before")
+        val down=SystemClock.uptimeMillis()
+        fun send(action:Int,span:Float,count:Int=2) {
+            val properties=Array(count) { i -> MotionEvent.PointerProperties().apply {
+                id=i;toolType=MotionEvent.TOOL_TYPE_FINGER
+            } }
+            val coordinates=Array(count) { i -> MotionEvent.PointerCoords().apply {
+                this.x=x+(if(i==0)-span else span);this.y=y;pressure=1f;size=1f
+            } }
+            val event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,count,
+                properties,coordinates,0,0,1f,1f,0,0,InputDevice.SOURCE_TOUCHSCREEN,0)
+            instrumentation.uiAutomation.injectInputEvent(event,true);event.recycle()
+            SystemClock.sleep(40)
         }
+        send(MotionEvent.ACTION_DOWN,width*.15f,1)
+        send(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.15f)
+        for(i in 1..12)send(MotionEvent.ACTION_MOVE,width*(.15f+.15f*i/12))
+        send(MotionEvent.ACTION_POINTER_UP or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),width*.30f)
+        send(MotionEvent.ACTION_UP,width*.30f,1)
         SystemClock.sleep(500)
-        assertTrue("manual double-tap must actually zoom MapLibre",snapshot(s).getDouble("mapZoom")>before+.2)
+        capture(s,"manual-zoom")
+        val after=snapshot(s).getDouble("mapZoom")
+        assertTrue("manual pinch must actually zoom MapLibre: $before -> $after",after>before+.2)
         assertFalse("manual zoom must not restore follow",snapshot(s).getBoolean("follow"))
     }
     private fun recenter(s:ActivityScenario<MainActivity>,name:String) {

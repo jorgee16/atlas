@@ -62,6 +62,8 @@ jobs:
           name: Atlas-native-debug-apk
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
+      - name: Install video tools for visual evidence review
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Download and verify real Portugal routing and offline map for GPS replay
         env:
           R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
