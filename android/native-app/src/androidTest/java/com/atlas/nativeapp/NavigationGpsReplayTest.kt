@@ -267,7 +267,7 @@ class NavigationGpsReplayTest {
             if(!tests && !checkingRecentered && model!!.updates.value.guidance?.optString("state")=="checking") {
                 phase="checking-recenter";recenter(s,"checking-recenter");checkingRecentered=true
             }
-            if(tests && tick==5) { pan(s);manualZoom(s);SystemClock.sleep(400)
+            if(tests && tick==5) { pan(s);recenter(s,"pan-recenter");manualZoom(s);SystemClock.sleep(400)
                 assertFalse(snapshot(s).getBoolean("follow"));recenter(s,"drive-recenter") }
             if(tests && tick==10) { s.onActivity { map(it).compass() };SystemClock.sleep(600)
                 assertTrue(AtlasHeading.angleDifference(0.0,snapshot(s).getDouble("mapBearing"))<1.0)

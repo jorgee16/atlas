@@ -20,7 +20,7 @@ The background navigation service receives the mock Android Location callbacks,
 which cross Kotlin, JNI motion/guidance, the production model and MapLibre.
 
 The trip covers driving at approximately 1 Hz, noisy GNSS bearings, accuracy
-5/20/35/60/100 m, 2/5/9 second GPS gaps, gesture pan and immediate recenter,
+5/20/35/60/100 m, 2/5/9 second GPS gaps, gesture pan and pinch zoom, each starting with follow active, and immediate recenter,
 heading-up and north-up, Activity recreation and background GPS reception.
 A deliberate deviation follows a separate route calculated from the same real
 graph; Atlas must reroute to its unchanged destination. Walking uses another
@@ -28,7 +28,7 @@ real route and includes a stationary period with jitter and a compass animation 
 
 The test installs a debug-frame callback only for the replay. Production frames
 perform no diagnostic serialization, logging or disk writes. The callback
-records render cadence, GPS timestamp/quality, speed, provider/native heading,
+records render cadence, GPS timestamp/quality, speed, provider/native heading and independent replay-truth heading,
 guidance state/progress/segment, tunnel prediction, rendered position, camera
 center/bearing, cursor bearing, raw/filtered speed and follow state.
 
@@ -43,7 +43,7 @@ Evidence is uploaded in `Atlas-native-ui-review`:
 - `gps-replay-input/routing-manifest.json`: input asset sizes and SHA-256 values.
 - Android instrumented-test reports and the existing UI review evidence.
 
-`Atlas-native-debug-apk` contains the APK for the exact workflow commit. A build
+`Atlas-native-debug-apk` contains the APK for the exact workflow commit. The analyzer also compares camera heading with independent replay truth under stable, fresh, good GPS, and decodes every MP4 to verify recording coverage. A build
 artifact alone is not navigation acceptance. Inspect instrumented results,
 summary, the movement-frame fraction and recordings before describing a run as end-to-end validated.
 
@@ -51,3 +51,10 @@ Limitations of this replay: mock Android GPS is not radio/GNSS hardware; the off
 not exercised; extreme multipath and all real-world intersections are not exhaustive.
 Search, backup, imports, cartography and other regressions remain covered by the
 existing tests. Real-device and full offline package checks are separate evidence.
+
+The cursor retains the same bitmap/design but is now an Android ImageView
+positioned through MapLibre projection. Software-GPU recordings exposed a white
+silhouette in the legacy annotation-icon path despite a correct source bitmap.
+Recenter checkpoints test the blue arrow in actual screenshots. Gesture begin
+callbacks release follow synchronously; the coalesced camera-move-start event
+can lose its gesture reason during the continuous navigation render loop.
