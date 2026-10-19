@@ -15,7 +15,7 @@ for checkpoint in sorted(root.glob('*.json')):
 if not shutil.which('ffmpeg'):
     print('Visual previews unavailable: ffmpeg not installed; see original artifact PNGs.')
     raise SystemExit(0)
-preferred=['cursor-bitmap','drive-0','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
+preferred=['cursor-bitmap','drive-0','pan-before','pan-after','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
            'reroute-recenter','walking-compass-recenter','walking-stop','walk-15','walk-arrived']
 def emit(name,target):
     print('ATLAS_PREVIEW_BEGIN '+name,flush=True)
@@ -34,7 +34,9 @@ for name in preferred:
 # Sample the actual driving recording, including approach/circulation/exit.
 movies=sorted(Path('ui-preview/atlas-gps-replay').glob('segment-*.mp4'))
 for number,movie in enumerate(movies,1):
-    subprocess.run(['ffmpeg','-loglevel','error','-y','-i',str(movie),
-        '-vf','fps=1/30,scale=480:-1','-frames:v','6','-q:v','7',str(root/f'video-{number}-%02d.jpg')],check=True)
+    result=subprocess.run(['ffmpeg','-loglevel','error','-y','-i',str(movie),
+        '-vf','fps=1/30,scale=480:-1','-frames:v','6','-q:v','7',str(root/f'video-{number}-%02d.jpg')])
+    if result.returncode:
+        print('ATLAS_VIDEO_DECODE_FAILURE '+str(movie),flush=True)
 for target in sorted(root.glob('video-*.jpg')):
     emit(target.stem,target)

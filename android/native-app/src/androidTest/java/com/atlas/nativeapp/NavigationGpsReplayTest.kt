@@ -45,6 +45,8 @@ class NavigationGpsReplayTest {
     private var model: AtlasModel?=null
     private var phase="setup"
     private var lastLogged=0.0
+    private data class Truth(val heading:Double,val stableSince:Double,val fixTime:Double)
+    @Volatile private var latestTruth:Truth?=null
 
     private fun map(activity: MainActivity): AtlasMap {
         val field=MainActivity::class.java.getDeclaredField("atlasMap").apply{isAccessible=true}
@@ -68,8 +70,12 @@ class NavigationGpsReplayTest {
             }
             map(a).onDebugFrame={ frame ->
                 frame.put("phase",phase)
-                frames.add(frame.toString())
                 val now=frame.getDouble("time")
+                latestTruth?.let {
+                    frame.put("truthHeading",it.heading).put("truthFixTime",it.fixTime)
+                        .put("truthStableFor",now-it.stableSince)
+                }
+                frames.add(frame.toString())
                 if(now-lastLogged>=1.0) { Log.i("ATLAS_GPS_REPLAY",frame.toString());lastLogged=now }
             }
         }
@@ -87,7 +93,7 @@ class NavigationGpsReplayTest {
         }
         fail("$message; state=${model?.updates?.value?.status}")
     }
-    private fun fix(point:Coordinate,speed:Double,heading:Double,accuracy:Double=5.0,bearingAccuracy:Double=5.0) {
+    private fun fix(point:Coordinate,speed:Double,heading:Double,accuracy:Double=5.0,bearingAccuracy:Double=5.0,truthHeading:Double=heading) {
         val l=Location(LocationManager.GPS_PROVIDER).apply {
             latitude=point.lat; longitude=point.lon; this.accuracy=accuracy.toFloat()
             this.speed=speed.toFloat(); bearing=heading.toFloat()
@@ -95,10 +101,15 @@ class NavigationGpsReplayTest {
             time=System.currentTimeMillis(); elapsedRealtimeNanos=SystemClock.elapsedRealtimeNanos()
             altitude=0.0
         }
+        val previous=latestTruth
+        val fixTime=l.elapsedRealtimeNanos/1e9
+        latestTruth=Truth(truthHeading,
+            if(previous==null || AtlasHeading.angleDifference(previous.heading,truthHeading)>45.0)
+                fixTime else previous.stableSince,fixTime)
         locations.setTestProviderLocation(LocationManager.GPS_PROVIDER,l)
         fixes.add(JSONObject().put("time",l.elapsedRealtimeNanos/1e9).put("lat",point.lat)
             .put("lon",point.lon).put("speed",speed).put("accuracy",accuracy)
-            .put("heading",heading).put("bearingAccuracy",bearingAccuracy).put("phase",phase).toString())
+            .put("heading",heading).put("truthHeading",truthHeading).put("bearingAccuracy",bearingAccuracy).put("phase",phase).toString())
     }
     private fun distance(a:Coordinate,b:Coordinate)=hypot((a.lat-b.lat)*111320.0,
         (a.lon-b.lon)*111320.0*cos(Math.toRadians((a.lat+b.lat)/2)))
@@ -144,16 +155,24 @@ class NavigationGpsReplayTest {
         }
     }
     private fun pan(s:ActivityScenario<MainActivity>) {
-        var x=0f;var y=0f
-        s.onActivity { x=it.window.decorView.width*.45f;y=it.window.decorView.height*.45f }
+        val before=snapshot(s)
+        capture(s,"pan-before")
+        var x=0f;var y=0f;var width=0f
+        s.onActivity { width=it.window.decorView.width.toFloat();x=width*.30f;y=it.window.decorView.height*.45f }
         val down=SystemClock.uptimeMillis()
         for(i in 0..12) {
             val action=when(i){0->MotionEvent.ACTION_DOWN;12->MotionEvent.ACTION_UP;else->MotionEvent.ACTION_MOVE}
-            val e=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,x+i*12,y,0)
+            val e=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,x+i*width*.025f,y,0)
             e.source=InputDevice.SOURCE_TOUCHSCREEN
-            instrumentation.uiAutomation.injectInputEvent(e,true);e.recycle();SystemClock.sleep(16)
+            assertTrue("Android must accept pan event $action",instrumentation.uiAutomation.injectInputEvent(e,false));e.recycle();SystemClock.sleep(16)
         }
+        SystemClock.sleep(400)
+        capture(s,"pan-after")
         await("gesture must disable follow",5){!snapshot(s).optBoolean("follow",true)}
+        val after=snapshot(s)
+        assertTrue("pan must actually move the MapLibre camera",distance(
+            Coordinate(before.getDouble("cameraLat"),before.getDouble("cameraLon")),
+            Coordinate(after.getDouble("cameraLat"),after.getDouble("cameraLon")))>2.0)
     }
     private fun manualZoom(s:ActivityScenario<MainActivity>) {
         val before=snapshot(s).getDouble("mapZoom")
@@ -241,7 +260,7 @@ class NavigationGpsReplayTest {
             // Deterministic horizontal noise, recorded alongside the exact truth.
             val jitter=if(tests)sin(tick*1.7)*min(accuracy*.12,5.0) else 0.0
             val measured=Coordinate(truth.lat+jitter/111320.0,truth.lon)
-            fix(measured,speed,heading,accuracy,if(bad)5.0 else if(accuracy>=60)60.0 else 8.0)
+            fix(measured,speed,heading,accuracy,if(bad)5.0 else if(accuracy>=60)60.0 else 8.0,truthHeading=trueHeading)
             SystemClock.sleep(1020)
             if(bad) assertTrue("two inverted GNSS fixes must not reverse the camera",
                 AtlasHeading.angleDifference(trueHeading,snapshot(s).getDouble("mapBearing"))<100.0)

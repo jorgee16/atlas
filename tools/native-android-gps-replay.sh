@@ -21,7 +21,7 @@ adb logcat -c
 record() {
   local number=1
   while true; do
-    adb shell screenrecord --bit-rate 2000000 --time-limit 180 "/sdcard/Download/atlas-gps-replay/segment-$number.mp4" || return
+    adb shell screenrecord --size 540x960 --bit-rate 1000000 --time-limit 180 "/sdcard/Download/atlas-gps-replay/segment-$number.mp4" || return
     number=$((number+1))
   done
 }
@@ -31,6 +31,9 @@ cleanup() {
   kill "$record_pid" 2>/dev/null || true
   adb shell pkill -2 screenrecord || true
   wait "$record_pid" 2>/dev/null || true
+  # SIGINT asks screenrecord to flush the MP4 index. Wait before adb pull.
+  timeout 15s adb shell 'while pidof screenrecord >/dev/null; do sleep 0.2; done' || true
+  cat ui-preview/gps-replay/screenrecord.log || true
   adb pull /sdcard/Download/atlas-gps-replay ui-preview/ || true
   if [[ -d ui-preview/atlas-gps-replay/metrics ]]; then
     cp -R ui-preview/atlas-gps-replay/metrics/. ui-preview/gps-replay/
