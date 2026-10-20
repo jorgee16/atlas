@@ -152,9 +152,29 @@ class NavigationGpsReplayTest {
         // Assertions execute before capture. Give Android/MapLibre a frame to
         // present a just-installed style before collecting visual evidence.
         if(name.startsWith("camera-"))SystemClock.sleep(750)
+        // Camera commands are synchronous, but their View/Surface composition is
+        // presented on subsequent frames. Observe real drawing frames before
+        // sampling the cursor pixel; no additional GPS fix is required.
+        val presented=java.util.concurrent.CountDownLatch(1)
+        s.onActivity { a ->
+            val view=a.window.decorView
+            view.postOnAnimation {
+                view.postOnAnimation {
+                    view.postOnAnimation { presented.countDown() }
+                }
+            }
+        }
+        assertTrue("Android must present camera frames before capture: $name",
+            presented.await(5,java.util.concurrent.TimeUnit.SECONDS))
+        instrumentation.waitForIdleSync()
         var cursor:android.graphics.PointF?=null
         s.onActivity { cursor=map(it).debugCursorScreenCenter() }
         val screenshot=instrumentation.uiAutomation.takeScreenshot()
+        // Retain the exact failing frame and state when a visual assertion fails.
+        File(output,"$name.png").outputStream().use {
+            assertTrue(screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it))
+        }
+        File(output,"$name.json").writeText(snapshot(s).toString(2))
         if(name in listOf("drive-recenter","walking-compass-recenter")) {
             val c=checkNotNull(cursor) { "Rendered cursor must be visible" }
             val x=c.x.toInt().coerceIn(0,screenshot.width-1)
@@ -164,10 +184,6 @@ class NavigationGpsReplayTest {
                 android.graphics.Color.blue(color)>180 && android.graphics.Color.red(color)<120 &&
                     android.graphics.Color.green(color)<170)
         }
-        File(output,"$name.png").outputStream().use {
-            assertTrue(screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it))
-        }
-        File(output,"$name.json").writeText(snapshot(s).toString(2))
         if(name=="manual-zoom")s.onActivity { a ->
             map(a).debugCursorBitmap()?.let { bitmap ->
                 File(output,"cursor-bitmap.png").outputStream().use {
