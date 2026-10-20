@@ -86,6 +86,11 @@ int main(int argc, char **argv) {
       progressedAfterMovement |= movingFix.position.along > parked.position.along + 1;
     }
     check(progressedAfterMovement, "confirmed motion unfreezes route progress");
+    GuidanceSession recentlyStopped;
+    auto cruising = recentlyStopped.update(drive->points.front(), 5, 8, 200, *drive);
+    auto stopJitter = recentlyStopped.update(drive->points[1], 5, 0, 201, *drive);
+    check(std::abs(stopJitter.position.along - cruising.position.along) < .01,
+          "first stationary fix after driving must not advance progress");
     // Nearby parallel road/route-loop projections must not teleport progress.
     GuidanceSession continuity;
     auto established = continuity.update(drive->points.front(), 5, 1, 100, *drive);
