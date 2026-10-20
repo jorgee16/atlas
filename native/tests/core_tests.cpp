@@ -164,6 +164,52 @@ int main(int argc, char **argv) {
                                      std::nullopt, std::nullopt});
     check(estimated.moving && estimated.speed > 1,
           "infer speed when provider has no speed");
+    // Reacquiring accurate GPS after being stationary with a 20 m fix
+    // must not permanently suppress genuine 1.5 m/s walking. Prior code
+    // used half the POOR anchor accuracy (10 m), so five 1.5 m steps
+    // were still reported as stopped despite good new GNSS observations.
+    MotionFilter walkingResume;
+    const Point footStart{40, -8};
+    auto parkedWalker = walkingResume.update(
+        {footStart, 20, 10, 0., 0.});
+    check(!parkedWalker.moving, "walker initially stationary");
+    for (int i = 1; i <= 4; ++i) {
+      auto p = Point{40 + (1.5 * i) / 111320., -8};
+      auto motion = walkingResume.update({p, 5, 10. + i, 1.5, 0.});
+      if (i <= 3)
+        check(!motion.moving, "walking fix must confirm travel before moving");
+      else
+        check(motion.moving && motion.speed > .45,
+              "walking resumes after confirmed accurate displacement");
+    }
+    MotionFilter stationaryNoMovement;
+    stationaryNoMovement.update({footStart, 20, 10, 0., 0.});
+    for (int i = 1; i <= 30; ++i) {
+      auto jitter = Point{40 + ((i % 3) - 1) * 2.5 / 111320., -8};
+      auto motion = stationaryNoMovement.update(
+          {jitter, 20, 10. + i, 0., 0.});
+      check(!motion.moving && motion.speed == 0,
+            "stationary poor-GPS wander cannot establish movement");
+    }
+    // The speed filter and the native route-progress filter must agree.
+    Route footRoute;
+    footRoute.points = {footStart, {40.0002, -8}};
+    footRoute.meters = distance(footRoute.points[0], footRoute.points[1]);
+    footRoute.seconds = footRoute.meters / 1.5;
+    GuidanceSession walkingGuidance;
+    MotionFilter walkingSpeed;
+    walkingGuidance.update(footStart, 20, 0, 10, footRoute);
+    walkingSpeed.update({footStart, 20, 10, 0., 0.});
+    double resumedAlong = 0;
+    for (int i = 1; i <= 5; ++i) {
+      auto p = Point{40 + (1.5 * i) / 111320., -8};
+      auto motion = walkingSpeed.update({p, 5, 10. + i, 1.5, 0.});
+      auto guidance = walkingGuidance.update(
+          p, 5, motion.speed, 10. + i, footRoute);
+      resumedAlong = guidance.position.along;
+    }
+    check(resumedAlong > 1.,
+          "native guidance must advance once walking is confirmed");
     auto originalSeconds = drive->seconds;
     calibrateDriveEta(*drive, graph);
     check(drive->seconds > originalSeconds,

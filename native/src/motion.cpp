@@ -33,6 +33,22 @@ Motion MotionFilter::update(const MotionFix &fix) {
       speed_ = 0;
       lastMove_.reset();
     } else if (age > 0) {
+      // A parked 20-50 m accuracy fix can become the stationary anchor.
+      // When the receiver subsequently obtains accurate fixes with a
+      // corroborating nonzero provider speed, do not require the pedestrian
+      // to travel half the OLD accuracy radius before walking is recognized.
+      // Rebase once to the first accurate moving candidate, then still require
+      // multiple fixes with >=4 m real displacement. GPS drift with zero
+      // provider speed never triggers this confidence upgrade.
+      const bool accurateMovingCandidate =
+          !moving_ && providerSpeed >= .45 && fix.accuracy <= 10. &&
+          anchor_->accuracy >= 15. &&
+          distance(anchor_->point, fix.point) <=
+              std::max(20., anchor_->accuracy * 2.);
+      if (accurateMovingCandidate) {
+        anchor_ = fix;
+      }
+      age = fix.timestamp - anchor_->timestamp;
       double travelled = distance(anchor_->point, fix.point),
              observed = travelled / age;
       double required =
