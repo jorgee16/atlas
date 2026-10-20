@@ -612,19 +612,34 @@ class NavigationGpsReplayTest {
         // A genuinely NEW fix releases the hold and jumps to that location;
         // it must not draw the diagonal path between old and new positions.
         movingFix()
-        val nextFix=model!!.updates.value.fix
+        // Observe the FIRST real rendered frame for the new fix, before JNI
+        // pairing or screenshots introduce unrelated latency. On the previous
+        // emulator run the cursor was 0.11 m from this GPS fix at 0.08 s;
+        // waiting for JNI first meant our 5-second assertion ran only AFTER
+        // the legitimate 8 m/s tunnel predictor had already advanced >20 m.
+        // The old held cursor is ~8 m behind this next fix, so a 3 m gate
+        // still detects a stale foreground position and any path replay.
+        await("first rendered frame of the new foreground GPS fix must catch up immediately",5) {
+            val observed = synchronized(frames) { frames.takeLast(180).toList() }
+            observed.any { value ->
+                val frame=JSONObject(value)
+                val fixAge=frame.optDouble("fixAgeSeconds",Double.POSITIVE_INFINITY)
+                val renderLat=frame.optDouble("renderLat",Double.NaN)
+                val renderLon=frame.optDouble("renderLon",Double.NaN)
+                frame.optDouble("fixTime",Double.NaN)>latest.time &&
+                    fixAge in 0.0..1.0 &&
+                    renderLat.isFinite() && renderLon.isFinite() &&
+                    !frame.optDouble("predictedAt",Double.NaN).isFinite() &&
+                    distance(Coordinate(renderLat,renderLon),
+                        Coordinate(frame.getDouble("gpsLat"),frame.getDouble("gpsLon")))<3.0
+            }
+        }
         await("GPS processing resumes after foreground hold",10) {
             val current=model!!.updates.value.fix
             current != null && current.time>latest.time &&
                 model!!.updates.value.guidance?.optDouble("gpsFixTime",-1.0)==current.time
         }
         val reacquired=model!!.updates.value.fix!!
-        await("new GPS must not start interpolating the old background path",5) {
-            val frame=snapshot(s)
-            frame.has("renderLat") &&
-                distance(Coordinate(frame.getDouble("renderLat"),frame.getDouble("renderLon")),
-                    reacquired.point)<20.0
-        }
         capture(s,"camera-foreground-new-fix")
         // The assertion ABOVE validated that a newly confirmed fix was shown
         // immediately. capture() can take several seconds for screenshot/Surface
