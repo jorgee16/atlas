@@ -621,9 +621,23 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun render(s: AtlasState) {
         current = s
         if (!s.navigating) resumeSyncPending = false
-        // Recalculating a route keeps confirmed motion; starting a different
-        // trip must not inherit the previous journey's opposite course.
-        if(s.navigating && !wasNavigating)headingStabilizer.reset()
+        // Entering guidance from a preview is a NEW visual epoch. Reusing the
+        // preview cursor/route smoothing anchor makes the car replay the
+        // movement accumulated while the user was looking at the preview.
+        val navigationStarting = s.navigating && !wasNavigating
+        if (navigationStarting) {
+            headingStabilizer.reset()
+            stationaryPosition.reset()
+            freePosition.reset()
+            presentedPosition.reset()
+            renderInterpolator.reset()
+            interpolatedRoute=null
+            routeRendering=false
+            lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
+            lastRenderedMarker=null
+            lastRenderedFrameAt=0.0
+            cameraState.viewportChanged()
+        }
         if (!s.navigating) {
             stopNavigationFrames()
             renderInterpolator.reset()
@@ -641,6 +655,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         // Do not draw route annotations into the old style while the new
         // exploration/navigation style is being installed asynchronously.
         if (loadStyle(anchor)) return
+        if (navigationStarting && geometry.size >= 2 && s.route != null) {
+            // A preview route can already be drawn, so route===route will
+            // not trigger the normal route-change setup below.
+            renderInterpolator.setRoute(
+                geometry.map { Coordinate(it.latitude,it.longitude) },
+                s.route.optDouble("distanceMeters",0.0))
+            interpolatedRoute=s.route
+        }
         if (s.route !== route || s.routeOptions !== options) {
             val previousVisible = lastRenderedMarker
             val previousCameraRoute=cameraRoute

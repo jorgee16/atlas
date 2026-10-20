@@ -418,6 +418,51 @@ class NavigationGpsReplayTest {
         assertEquals(a.getDouble("mapZoom"),b.getDouble("mapZoom"),.001)
         assertTrue(AtlasHeading.angleDifference(a.getDouble("mapBearing"),b.getDouble("mapBearing"))<.1)
     }
+    private fun delayedPreviewStart(s: ActivityScenario<MainActivity>) {
+        phase="delayed-preview-start"
+        val origin=Coordinate(38.7215,-9.147)
+        val destination=Coordinate(38.728,-9.152)
+        s.onActivity {
+            model!!.endNavigation()
+            model!!.mode("drive")
+        }
+        confirmedStartFix(origin)
+        s.onActivity {
+            model!!.select(JSONObject().put("id","delayed-preview-destination")
+                .put("name","Delayed preview destination")
+                .put("lat",destination.lat).put("lon",destination.lon))
+            model!!.calculate()
+        }
+        await("preview must finish planning",45) {
+            model!!.updates.value.route != null && !model!!.updates.value.busy
+        }
+        val originalRoute=model!!.updates.value.route
+        val path=points(originalRoute!!)
+        // The user drove while the preview was open, before pressing Start.
+        val latestPoint=at(path,90.0)
+        fix(latestPoint,8.0,bearing(latestPoint,at(path,100.0)))
+        await("preview must receive a fresh moving GPS fix",10) {
+            model!!.updates.value.fix?.let {
+                distance(it.point,latestPoint)<5.0
+            } == true
+        }
+        s.onActivity { model!!.start() }
+        await("Start must replan from the GPS position, not the preview origin",60) {
+            model!!.updates.value.navigating && !model!!.updates.value.busy
+        }
+        assertTrue("old preview route must be invalidated",
+            model!!.updates.value.route !== originalRoute)
+        await("new navigation starts with its current GPS cursor",10) {
+            val f=snapshot(s)
+            f.optString("cameraMode")=="FOLLOWING" &&
+                f.has("renderLat") && f.has("renderLon") &&
+                distance(Coordinate(f.getDouble("renderLat"),f.getDouble("renderLon")),
+                    latestPoint)<30.0
+        }
+        capture(s,"delayed-preview-start-gps")
+        s.onActivity { model!!.endNavigation();map(it).endNavigation() }
+    }
+
     private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
         phase="camera-smoke"
         val path=points(route)
@@ -581,6 +626,7 @@ class NavigationGpsReplayTest {
             ActivityScenario.launch(MainActivity::class.java).use { s ->
                 attach(s)
                 s.onActivity { model!!.mapSourceMode=MapSourcePolicy.OFFLINE }
+                if(cameraOnly) delayedPreviewStart(s)
                 val drive=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.728,-9.152),false)
                 assertTrue("Portugal drive must include a roundabout",drive.getJSONArray("maneuvers").objects()
                     .any{it.optString("type")=="roundabout"})

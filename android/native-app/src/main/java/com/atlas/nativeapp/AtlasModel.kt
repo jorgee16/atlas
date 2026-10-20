@@ -133,6 +133,10 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     // when JNI processing temporarily falls behind the Android location rate.
     private val locationFixes = Channel<Fix>(Channel.CONFLATED)
     private var lastQueuedFixTime = Double.NEGATIVE_INFINITY
+    // The preview may have been planned minutes before Start was pressed.
+    // Keep the origin used for graph calculation rather than assuming that
+    // the selected route still starts near the vehicle.
+    private var preparedLiveRouteOrigin: Coordinate? = null
     private var navigationRevision = 0L
     private val fixPump = viewModelScope.launch {
         for (next in locationFixes) {
@@ -217,7 +221,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         state.update { it.copy(mode = value, walking = value == "walk") }
     }
     fun avoidTolls(value: Boolean) { invalidateRoute(); state.update { it.copy(avoidTolls = value) } }
-    private fun invalidateRoute() { stop(); state.update { it.copy(route = null, routeOptions = emptyList(), arrived = false, journeys = emptyList(), journey = null, journeyLeg = -1) } }
+    private fun invalidateRoute() { preparedLiveRouteOrigin=null; stop(); state.update { it.copy(route = null, routeOptions = emptyList(), arrived = false, journeys = emptyList(), journey = null, journeyLeg = -1) } }
     fun clearSearch() { searchJob?.cancel(); ++searchGeneration; state.update { it.copy(results = emptyList(), searching = false, searchQuery = "", searchError = null) } }
     fun search(text: String, nearby: Boolean = false, category: String = "", anchor: Coordinate = this.anchor) {
         searchJob?.cancel(); val generation = ++searchGeneration
@@ -267,6 +271,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     choices
                 }
                 if (generation == routeGeneration) {
+                    preparedLiveRouteOrigin = if (snapshot.origin == null) from else null
                     lastSpoken = -1
                     state.update { it.copy(route = choices.first(), routeOptions = choices, guidance = null, navigating = startAfter && snapshot.origin == null) }
                     if (startAfter && snapshot.origin == null) recordNavigation()
@@ -300,14 +305,27 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         }
     }
     fun start() {
-        if (state.value.origin != null) return status("This is a fixed preview. Choose My location for live navigation.")
-        if (state.value.route == null) calculate(true)
-        else if (!state.value.busy) {
-            ++navigationRevision
-            lastSpoken = -1
-            state.update { it.copy(navigating = true, arrived = false) }
-            recordNavigation()
+        val snapshot = state.value
+        if (snapshot.origin != null) return status("This is a fixed preview. Choose My location for live navigation.")
+        if (snapshot.navigating) return
+        if (snapshot.busy) return status("Still calculating the route. Please wait.")
+        val fix = snapshot.fix
+        val now = android.os.SystemClock.elapsedRealtimeNanos() / 1e9
+        if (fix == null || !NavigationStartPolicy.freshFix(now,fix.time,fix.accuracy)) {
+            return status("Waiting for a recent GPS fix before starting navigation.")
         }
+        if (snapshot.route == null ||
+            NavigationStartPolicy.requiresNewOrigin(
+                preparedLiveRouteOrigin,fix.point,fix.accuracy,snapshot.walking)) {
+            // Discard the preview's old origin, ask C++ for a fresh route from
+            // the current GPS position, and start only after it is calculated.
+            calculate(true)
+            return
+        }
+        ++navigationRevision
+        lastSpoken = -1
+        state.update { it.copy(navigating = true, guidance = null, arrived = false) }
+        recordNavigation()
     }
     private fun cancelCurrentRouteWork() {
         ++routeGeneration
@@ -319,6 +337,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
 
     /** Internal stop preserves a prepared route for preview/edit workflows. */
     fun stop() {
+        preparedLiveRouteOrigin=null
         cancelCurrentRouteWork()
         state.update { it.copy(navigating = false, guidance = null, busy = false) }
         // A paused/ended live route must not auto-resume after process death.
