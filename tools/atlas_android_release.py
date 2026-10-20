@@ -79,8 +79,8 @@ def main():
         die("Missing APK, probe, build tools or release metadata")
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):
         die("Version must be X.Y.Z")
-    if args.code < 1:
-        die("versionCode must be positive")
+    if args.code <= 2:
+        die("versionCode must exceed the previously distributed Atlas native debug code 2")
     tools = args.build_tools
     current = identity(args.apk, tools)
     probe = identity(args.probe, tools)
