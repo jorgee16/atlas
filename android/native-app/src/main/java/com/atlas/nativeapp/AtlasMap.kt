@@ -125,6 +125,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private val choreographer by lazy { Choreographer.getInstance() }
     private var frameScheduled = false
     private var framesEnabled = false
+    // While the Activity is stopped NavigationService keeps receiving fixes.
+    // Never animate the stale on-screen cursor over the distance travelled away.
+    private var backgroundPausedAt = Double.NaN
+    private var resumeSyncPending = false
     private var lastRenderedFrameAt = 0.0
     private var lastRenderedMarker: Coordinate? = null
     private var lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
@@ -140,7 +144,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var lastMarkerAngle = Double.NaN
     private val navigationFrame = Choreographer.FrameCallback { _ ->
         frameScheduled = false
-        if (!framesEnabled || styleLoading) return@FrameCallback
+        if (!framesEnabled || styleLoading || resumeSyncPending) return@FrameCallback
         val s = current ?: return@FrameCallback
         if (!s.navigating || s.fix == null || map == null) return@FrameCallback
         // Choreographer's frame clock may exclude deep sleep, while GPS fix
@@ -607,6 +611,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun overview() = requestCamera(NavigationCameraState.Mode.OVERVIEW)
     fun render(s: AtlasState) {
         current = s
+        if (!s.navigating) resumeSyncPending = false
         // Recalculating a route keeps confirmed motion; starting a different
         // trip must not inherit the previous journey's opposite course.
         if(s.navigating && !wasNavigating)headingStabilizer.reset()
@@ -672,14 +677,43 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             lastSegment = segment
         }
         s.fix?.let { fix ->
-            val candidate = if (s.navigating && !s.busy && s.guidance != null &&
+            val nowSeconds = SystemClock.elapsedRealtimeNanos() / 1e9
+            val catchingUp = resumeSyncPending &&
+                NavigationResumePolicy.freshFix(nowSeconds, fix.time)
+            if (catchingUp) {
+                // Normal visual smoothing is correct for 1 Hz fixes, but not
+                // for minutes of movement accumulated while drawing was paused.
+                // Recreate ONLY the visual interpolation clock/anchors. Neither
+                // C++ guidance nor the user's chosen camera mode is modified.
+                stationaryPosition.reset()
+                freePosition.reset()
+                presentedPosition.reset()
+                lastRenderedMarker = null
+                lastRenderedFrameAt = nowSeconds
+                lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
+                renderInterpolator.reset()
+                if (geometry.size >= 2 && s.route != null) {
+                    renderInterpolator.setRoute(
+                        geometry.map { Coordinate(it.latitude, it.longitude) },
+                        s.route.optDouble("distanceMeters", 0.0))
+                    interpolatedRoute = s.route
+                } else {
+                    interpolatedRoute = null
+                }
+                routeRendering = false
+                lastFixTime = -1.0
+            }
+            // The Activity can observe the newest GPS fix before the JNI
+            // projection for that fix arrives. Do not snap to old guidance.
+            val guidanceCurrent = !catchingUp || NavigationResumePolicy.currentGuidance(
+                fix.time, s.guidance?.optDouble("gpsFixTime", Double.NaN) ?: Double.NaN)
+            val candidate = if (guidanceCurrent && s.navigating && !s.busy && s.guidance != null &&
                 s.guidance.optString("state") !in listOf("checking","reroute","changed") &&
                 s.guidance.optDouble("offRoute") < 60) s.guidance.coordinate() else fix.point
             // Visual-only: retain the map-matched road position during
             // stationary GPS jitter; native guidance keeps receiving fixes.
             val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
-            val nowSeconds=SystemClock.elapsedRealtimeNanos()/1e9
-            val trusted = s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
+            val trusted = guidanceCurrent && s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
                 s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY)<60.0 &&
                 s.guidance.optString("state") !in listOf("checking","reroute","arrived")
             if (trusted) lastTrustedGuidanceAt = s.guidance!!
@@ -729,6 +763,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             setPosition(displayed)
             updatePositionIcon(markerAngle)
             lastRenderedMarker=displayed
+            if (catchingUp) {
+                resumeSyncPending = false
+                // A following camera must jump to the same current position as
+                // the cursor. FREE and OVERVIEW keep their deliberate framing.
+                if (follow) cameraState.viewportChanged()
+            }
             if (s.navigating) {
                 // The camera keeps rotating and moving independently of 1Hz fixes.
                 scheduleNavigationFrame()
@@ -857,10 +897,19 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun onStart() = view.onStart()
     fun onResume() {
         view.onResume()
+        val now = SystemClock.elapsedRealtimeNanos() / 1e9
+        if (NavigationResumePolicy.shouldSynchronize(
+                backgroundPausedAt, now, current?.navigating == true)) {
+            resumeSyncPending = true
+        }
+        backgroundPausedAt = Double.NaN
         framesEnabled=true
-        scheduleNavigationFrame()
+        if (!resumeSyncPending) scheduleNavigationFrame()
+        // MainActivity immediately renders the latest StateFlow state after
+        // this callback; render() completes the pending one-shot resync.
     }
     fun onPause() {
+        backgroundPausedAt = SystemClock.elapsedRealtimeNanos() / 1e9
         framesEnabled=false
         stopNavigationFrames()
         view.onPause()

@@ -476,6 +476,34 @@ class NavigationGpsReplayTest {
         tap(s,"Overview");assertMode(s,"OVERVIEW")
         tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
         capture(s,"camera-degraded-recenter")
+        // A real background Service keeps updating GPS while the Activity's
+        // Choreographer is paused. On return we must show the LATEST fix,
+        // never replay the accumulated distance through interpolation.
+        phase="background-foreground-catchup"
+        val oldCursor=snapshot(s)
+        s.moveToState(Lifecycle.State.CREATED)
+        repeat(7) {
+            movingFix()
+            SystemClock.sleep(1020)
+        }
+        val latest=model!!.updates.value.fix!!
+        assertTrue("background GPS must move significantly",
+            distance(Coordinate(oldCursor.getDouble("renderLat"),oldCursor.getDouble("renderLon")),
+                latest.point)>35.0)
+        await("background JNI guidance must catch up",10) {
+            model!!.updates.value.guidance?.optDouble("gpsFixTime",-1.0)==latest.time
+        }
+        s.moveToState(Lifecycle.State.RESUMED);attach(s)
+        await("resume must snap to the newest GPS fix (not animate old progress)",3) {
+            val frame=snapshot(s)
+            frame.optString("cameraMode")=="FOLLOWING" &&
+                frame.optDouble("renderLat",0.0)!=0.0 &&
+                distance(Coordinate(frame.getDouble("renderLat"),frame.getDouble("renderLon")),
+                    model!!.updates.value.guidance!!.coordinate())<15.0 &&
+                distance(Coordinate(frame.getDouble("cameraLat"),frame.getDouble("cameraLon")),
+                    model!!.updates.value.guidance!!.coordinate())<15.0
+        }
+        capture(s,"camera-background-caught-up")
         tap(s,"Overview");s.recreate();attach(s)
         assertMode(s,"OVERVIEW");capture(s,"camera-overview-recreated")
         tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
