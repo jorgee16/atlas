@@ -20,6 +20,19 @@ class NavigationPositionLimiterTest {
         assertTrue(moving.lat < road.lat)
         assertTrue(limiter.active)
     }
+    @Test fun firstVerifiedRouteProjectionRebasesWithoutFakeTravel() {
+        val limiter=NavigationPositionLimiter()
+        // Preview GPS was outside the routing graph's snapped first point.
+        limiter.commit(origin,100.0,0.0)
+        // A fresh, paired JNI projection starts a new visual reference.
+        limiter.reset()
+        assertEquals(road,limiter.commit(road,100.1,0.0))
+        val noisyRoad=Coordinate(road.lat+25.0/111320.0,road.lon)
+        repeat(90) {
+            assertEquals(road,limiter.commit(noisyRoad,100.2+(it+1)/30.0,0.0))
+            assertFalse(limiter.active)
+        }
+    }
     @Test fun suddenMapMatchingSwitchKeepsCursorStepBounded() {
         // The full Portugal replay recorded >100m instantaneous jumps from
         // the normal projection update. These are NOT background resumes.

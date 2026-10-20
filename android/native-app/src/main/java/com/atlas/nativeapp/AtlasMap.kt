@@ -798,6 +798,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             val trusted = guidanceUsable && s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
                 s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY)<60.0 &&
                 s.guidance.optString("state") !in listOf("checking","reroute","arrived")
+            // Before the first confirmed route projection, the cursor might
+            // still have an unprojected preview/GPS reference. Adopting the
+            // first matched road point changes coordinate reference, not
+            // physical position: never animate a fake trip to the road.
+            val firstConfirmedMatch = trusted && !lastTrustedGuidanceAt.isFinite()
             if (trusted) lastTrustedGuidanceAt = s.guidance!!
                 .optDouble("predictedAt",s.guidance.optDouble("gpsFixTime",fix.time))
             val hold = NavigationCameraBehavior.useHeldRouteFix(s.navigating,
@@ -849,6 +854,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // coordinate reference; raw-origin anchors caused later creep.
                 stationaryPosition.rebase(desiredDisplayed,fix,s.walking)
                 renderInterpolator.holdStationary(desiredDisplayed)
+                if (firstConfirmedMatch) {
+                    // A one-time, trustworthy initialization is not movement.
+                    // Later stationary projections must retain this anchor.
+                    presentedPosition.reset()
+                }
             }
             val displayed=if(s.navigating)presentedPosition.commit(desiredDisplayed,nowSeconds,
                 StationaryMapPosition.visualSpeed(fix)) else desiredDisplayed
