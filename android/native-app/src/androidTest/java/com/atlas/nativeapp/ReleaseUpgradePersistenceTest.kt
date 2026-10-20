@@ -16,6 +16,9 @@ class ReleaseUpgradePersistenceTest {
         val phase = args.getString("upgradePhase")
         val preferences = InstrumentationRegistry.getInstrumentation()
             .targetContext.getSharedPreferences("atlas-native", 0)
+        // Debug CI runs the whole instrumentation suite. This special probe
+        // only runs when the Release upgrade script supplies its phase.
+        org.junit.Assume.assumeTrue("Only for signed Release upgrades", phase != null)
         when (phase) {
             "write" -> {
                 val ok = preferences.edit()
