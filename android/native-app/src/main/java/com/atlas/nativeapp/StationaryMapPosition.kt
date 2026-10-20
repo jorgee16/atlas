@@ -1,94 +1,47 @@
 package com.atlas.nativeapp
 
-import kotlin.math.cos
-import kotlin.math.hypot
-import kotlin.math.max
-
 /**
- * Visual-only position stabilizer with distinct stopped-car and pedestrian thresholds. Navigation decisions,
- * off-route checks and voice guidance still use real GPS fixes in C++.
- * Every candidate must come from the current guidance's route projection.
+ * Stabilizes visual positions while a navigation fix has no motion evidence.
+ * A collection of consecutive GNSS fixes is not proof of physical travel:
+ * indoors all of them can drift consistently towards the wrong road segment.
+ * Routing/arrival/rerouting still use real fixes in the native engine.
  */
 internal class StationaryMapPosition {
     private var stable: Coordinate? = null
     private var previousWalking: Boolean? = null
-    private var candidateGroup: Coordinate? = null
-    private var candidateFixes = 0
-    private var previousFixTime = Double.NEGATIVE_INFINITY
 
     fun reset() {
         stable = null
         previousWalking = null
-        candidateGroup = null
-        candidateFixes = 0
-        previousFixTime = Double.NEGATIVE_INFINITY
     }
 
-    /** A first route projection establishes the visual coordinate reference. */
-    fun rebase(position: Coordinate,fix:Fix,walking:Boolean) {
+    /** A one-time projection reference for a new navigation visual epoch. */
+    fun rebase(position: Coordinate, fix: Fix, walking: Boolean) {
         reset()
-        previousWalking=walking
-        stable=position
-        previousFixTime=fix.time
+        previousWalking = walking
+        stable = position
     }
+
     fun select(position: Coordinate, fix: Fix, navigating: Boolean, walking: Boolean): Coordinate {
         if (previousWalking != walking) {
             reset()
             previousWalking = walking
         }
-        val movingThreshold = if(walking) 0.45 else 1.2
-        if (!navigating || !visualSpeed(fix).isFinite() || visualSpeed(fix) >= movingThreshold) {
+        val movingThreshold = if (walking) 0.45 else 1.2
+        val speed = visualSpeed(fix)
+        if (!navigating || (speed.isFinite() && speed >= movingThreshold)) {
             reset()
             previousWalking = walking
             if (navigating) stable = position
             return position
         }
-        val anchor = stable
-        if (anchor == null) {
-            stable = position
-            previousFixTime = fix.time
-            return position
-        }
-        // Inaccurate stationary fixes can shift road projections by tens
-        // of metres. Camera and cursor must not chase each fluctuation.
-        val noiseRadius = if(walking) max(4.0,fix.accuracy.coerceIn(0.0,20.0)*0.6)
-            else max(10.0, fix.accuracy.coerceIn(0.0, 30.0) * 1.2)
-        if (distance(anchor, position) <= noiseRadius) {
-            candidateGroup = null
-            candidateFixes = 0
-            previousFixTime = max(previousFixTime, fix.time)
-            return anchor
-        }
-        // A fresh and consistent location may indicate that initial GPS was
-        // wrong (or the car has started very slowly). Require three distinct
-        // timestamps near the same new point before re-anchoring.
-        if (fix.time > previousFixTime) {
-            previousFixTime = fix.time
-            val previous = candidateGroup
-            if (previous == null ||
-                distance(previous, position) > max(12.0, fix.accuracy.coerceIn(0.0, 25.0))) {
-                candidateGroup = position
-                candidateFixes = 1
-            } else {
-                candidateFixes++
-            }
-            if (candidateFixes >= 3) {
-                stable = position
-                candidateGroup = null
-                candidateFixes = 0
-                return position
-            }
-        }
-        return anchor
+        // Stationary/unknown speed: keep the same anchor even if several fixes
+        // agree on a new position. A new confident motion fix releases it.
+        return stable ?: position.also { stable = it }
     }
 
     companion object {
-        fun visualSpeed(fix: Fix): Double = fix.providerSpeed?.takeIf { it.isFinite() && it>=0.0 } ?: fix.speed
-    }
-    private fun distance(a: Coordinate, b: Coordinate): Double {
-        val mid = Math.toRadians((a.lat + b.lat) * 0.5)
-        return hypot((b.lat - a.lat) * 111_320.0,
-            (b.lon - a.lon) * 111_320.0 * cos(mid))
+        fun visualSpeed(fix: Fix): Double =
+            fix.providerSpeed?.takeIf { it.isFinite() && it >= 0.0 } ?: fix.speed
     }
 }
-

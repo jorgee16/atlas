@@ -14,14 +14,15 @@ class StationaryMapPositionTest {
         assertEquals(base,policy.select(drift,fix(2.0),true,false))
         assertEquals(base,policy.select(drift,fix(3.0),true,false))
     }
-    @Test fun confirmedNewPositionIsAcceptedAfterIndependentFixes() {
+    @Test fun evenConsistentStationaryGpsShiftCannotCreateMotion() {
         val policy=StationaryMapPosition()
         policy.select(base,fix(1.0),true,false)
         val position=Coordinate(base.lat+0.00032,base.lon)
-        assertEquals(base,policy.select(position,fix(2.0),true,false))
-        assertEquals(base,policy.select(position,fix(2.0),true,false))
-        assertEquals(base,policy.select(position,fix(3.0),true,false))
-        assertEquals(position,policy.select(position,fix(4.0),true,false))
+        repeat(60) {
+            assertEquals(base,policy.select(position,fix(2.0+it),true,false))
+        }
+        // An actual motion fix releases the old parked anchor.
+        assertEquals(position,policy.select(position,fix(63.0,2.0,5.0),true,false))
     }
     @Test fun confirmedMovementAndWalkingNeverGetFrozen() {
         val policy=StationaryMapPosition()

@@ -66,6 +66,26 @@ int main(int argc, char **argv) {
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);
     check(end.remaining < 1, "route progress destination");
+    // Repeated GNSS wander on the route while stationary must not create
+    // progress, reduce ETA, or advance maneuver distance.
+    GuidanceSession stationary;
+    const auto parked = stationary.update(drive->points.front(), 12, 0, 100, *drive);
+    const auto nextRoadPoint = drive->points[1];
+    for (int i = 1; i <= 60; ++i) {
+      const auto noise = stationary.update(nextRoadPoint, 12, 0,
+                                           100 + i, *drive);
+      check(std::abs(noise.position.along - parked.position.along) < .01 &&
+                std::abs(noise.position.remaining - parked.position.remaining) < .01 &&
+                std::abs(noise.position.toManeuver - parked.position.toManeuver) < .01,
+            "stationary GNSS wander cannot advance native guidance");
+    }
+    // Once motion is independently confirmed, progress can resume.
+    bool progressedAfterMovement = false;
+    for (int i = 1; i <= 4; ++i) {
+      auto movingFix = stationary.update(nextRoadPoint, 5, 8, 160 + i, *drive);
+      progressedAfterMovement |= movingFix.position.along > parked.position.along + 1;
+    }
+    check(progressedAfterMovement, "confirmed motion unfreezes route progress");
     // Nearby parallel road/route-loop projections must not teleport progress.
     GuidanceSession continuity;
     auto established = continuity.update(drive->points.front(), 5, 1, 100, *drive);

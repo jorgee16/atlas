@@ -248,6 +248,24 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     out.state = Guidance::State::reduced;
     return out;
   }
+  // Low-speed fixes cannot establish progress along the route by themselves.
+  // Indoors GNSS can drift dozens of metres *along* the very same road,
+  // producing false distance/ETA changes despite a stationary vehicle.
+  // Freeze the last reliable projection until the motion filter confirms movement.
+  // Keep the separate off-route flow for genuinely distant observations.
+  if (lastGoodPosition_ && speed < .35 &&
+      out.position.offRoute <= std::max(30., accuracy * 2) &&
+      lastGoodPosition_->offRoute <= std::max(30., accuracy * 2)) {
+    out.position = *lastGoodPosition_;
+    lastPosition_ = out.position;
+    lastGoodTime_ = t;
+    lastGoodSpeed_ = 0;
+    offSince_ = -1;
+    offFixes_ = 0;
+    implausibleCandidate_.reset();
+    implausibleFixes_ = 0;
+    return out;
+  }
   // A global nearest-segment projection may snap onto a distant section of
   // the same route at a loop, parallel street or overpass. Require sustained
   // positional evidence before accepting an impossible instantaneous leap.

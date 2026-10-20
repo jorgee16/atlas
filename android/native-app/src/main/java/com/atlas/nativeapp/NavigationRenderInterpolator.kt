@@ -117,14 +117,11 @@ internal class NavigationRenderInterpolator {
         if (vertices.isEmpty() || !along.isFinite() || !fixTime.isFinite() ||
             fixTime <= lastGpsAt) return false
         lastGpsAt = fixTime
-        if (speed < (if(walking) 0.45 else 1.2) && lastAcceptedPosition?.let {
-                distance(it, snapped) < 0.4
-            } == true) {
-            // StationaryMapPosition already rejected the GPS jitter. Do not
-            // make the cursor creep based on a different noisy along value.
-            // Freeze what was actually drawn, including the last short-horizon
-            // prediction. Retaining the old measuredAlong slowly pulled a
-            // stopped cursor backwards even after rejecting subsequent jitter.
+        if (speed < (if(walking) 0.45 else 1.2) && renderedAlong != null) {
+            // No confirmed motion: retain precisely what was last drawn.
+            // Route-projection changes are measurement uncertainty, not travel.
+            // In particular, do not animate towards a newly matched segment
+            // while the device is stationary.
             measuredAlong = renderedAlong ?: measuredAlong
             measuredAt = fixTime
             measuredSpeed = 0.0

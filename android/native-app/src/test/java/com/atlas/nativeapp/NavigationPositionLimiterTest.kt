@@ -6,15 +6,19 @@ import org.junit.Test
 class NavigationPositionLimiterTest {
     private val origin=Coordinate(38.7215,-9.147)
     private val road=Coordinate(origin.lat+38.0/111320.0,origin.lon)
-    @Test fun firstMatchingCannotTeleportThirtyEightMeters() {
+    @Test fun stationaryMapMatchingDoesNotAnimateAcrossThirtyEightMeters() {
         val limiter=NavigationPositionLimiter()
         limiter.commit(origin,100.0,0.0)
-        val first=limiter.commit(road,100.04,0.0)
-        assertTrue((first.lat-origin.lat)*111320.0<=.161)
+        // A 38 m map-matching offset must not be replayed as a drive at 4 m/s.
+        repeat(330) {
+            assertEquals(origin,limiter.commit(road,100.04+(it+1)/30.0,0.0))
+            assertFalse(limiter.active)
+        }
+        // Confirmed movement permits normal bounded recovery.
+        val moving=limiter.commit(road,112.0,8.0)
+        assertTrue(moving.lat > origin.lat)
+        assertTrue(moving.lat < road.lat)
         assertTrue(limiter.active)
-        repeat(320){limiter.commit(road,100.04+(it+1)/30.0,0.0)}
-        assertEquals(road,limiter.commit(road,111.0,0.0))
-        assertFalse(limiter.active)
     }
     @Test fun suddenMapMatchingSwitchKeepsCursorStepBounded() {
         // The full Portugal replay recorded >100m instantaneous jumps from

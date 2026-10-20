@@ -20,6 +20,13 @@ internal class NavigationPositionLimiter {
         if(!now.isFinite() || now<=lastTime)return previous
         val dt=(now-lastTime).coerceAtMost(.1)
         lastTime=now
+        // A position correction is not evidence of travel. Never animate
+        // toward a new road projection when there is no confirmed motion.
+        // A new navigation epoch may reset the limiter explicitly.
+        if (!speed.isFinite() || speed < 0.45) {
+            active=false
+            return previous
+        }
         val distance=hypot((target.lat-previous.lat)*111320.0,
             (target.lon-previous.lon)*111320.0*cos(Math.toRadians(target.lat)))
         val budget=max(4.0,(speed.takeIf { it.isFinite() && it>=0.0 } ?: 0.0)*1.7+3.0)*dt
