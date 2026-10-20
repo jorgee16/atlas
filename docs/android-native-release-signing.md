@@ -74,13 +74,28 @@ and alias are valid.
 
 ## Release execution
 
-GitHub Actions → **Native C++ and Kotlin Android** → Run workflow, select
-`migration/native-core-kotlin`, and enter:
+Since the native workflow is currently present **only on the migration branch**
+(and not on default `main`), its `workflow_dispatch` UI may not be available
+until the workflow also exists on default. To publish reliably **without
+changing `main`**, use an explicit push on the migration branch:
 
-- `publish_release=true`
-- `release_version=0.2.0` for the first Release, then increasing SemVer
-- `release_code=3` initially, then an integer **larger than the previous
-  release's versionCode**
+1. Update `tools/atlas-release-version.json`: `versionName` = `0.2.0`
+   and `versionCode` = `3` for the first Release; strictly increase both
+   on later Releases.
+2. After the signing secrets and certificate variable are configured, push a
+   commit whose message includes **`[atlas-release]`**. For example:
+
+```bash
+git checkout migration/native-core-kotlin
+git pull --ff-only
+git commit --allow-empty -m 'chore(android): publish Atlas v0.2.0 [atlas-release]'
+git push origin migration/native-core-kotlin
+```
+
+The marker only requests publication. It never bypasses C++, Android, GPS or
+emulator checks. On repositories where `workflow_dispatch` is available,
+the inputs `publish_release=true`, `release_version=X.Y.Z`,
+`release_code=N` remain supported.
 
 The normal push CI builds Debug and runs all existing native/Android checks.
 A publication request *forces the full Portugal GPS replay* on the Android
