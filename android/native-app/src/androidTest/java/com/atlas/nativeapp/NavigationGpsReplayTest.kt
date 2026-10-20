@@ -429,9 +429,16 @@ class NavigationGpsReplayTest {
         repeat(3){movingFix();SystemClock.sleep(1020)}
         tap(s,"Overview") { movingFix();SystemClock.sleep(250) }
         assertMode(s,"OVERVIEW");capture(s,"camera-overview-first-tap")
+        // The old fit initially passed, then a cursor correction escaped the
+        // exact-fit boundary ~250 ms later. Check the settled frame too.
+        SystemClock.sleep(650)
+        assertEquals("Overview must retain room for cursor corrections",0,
+            snapshot(s).getInt("remainingOutsideFraming"))
         val overview=snapshot(s)
         repeat(3){movingFix();SystemClock.sleep(1020)}
         assertSameCamera(overview,snapshot(s))
+        assertEquals("Overview framing must survive GPS updates",0,
+            snapshot(s).getInt("remainingOutsideFraming"))
         val before=snapshot(s).getDouble("fixTime")
         tap(s,"Recenter on my location")
         assertMode(s,"FOLLOWING")

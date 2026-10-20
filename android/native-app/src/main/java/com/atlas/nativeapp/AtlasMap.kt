@@ -287,7 +287,16 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // half the top/bottom difference, underneath the UI panels.
                 val fitted=ready.getCameraForLatLngBounds(LatLngBounds.Builder().includes(points).build(),insets,0.0,0.0)
                     ?: return
+                // The fitted route touched the clipping boundary exactly. The
+                // route-progress cursor continues moving for several frames
+                // after Overview is pressed, so even ~1 m of correction made
+                // its first point disappear behind the guidance/bottom panels.
+                // Reserve a density-aware visual margin without changing the
+                // actual UI padding or causing continuous camera refits.
+                val safetyZoom=OverviewCameraFit.zoomOut(
+                    view.width,view.height,insets,d)
                 ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(fitted)
+                    .zoom((fitted.zoom-safetyZoom).coerceAtLeast(ready.minZoomLevel))
                     .bearing(0.0).tilt(0.0).padding(insets.map { it.toDouble() }.toDoubleArray()).build()))
                 cameraState.applied(request)
             }
