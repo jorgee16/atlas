@@ -16,6 +16,8 @@ class ReleaseUpgradePersistenceTest {
         val phase = args.getString("upgradePhase")
         val preferences = InstrumentationRegistry.getInstrumentation()
             .targetContext.getSharedPreferences("atlas-native", 0)
+        val storedFile=java.io.File(InstrumentationRegistry.getInstrumentation().targetContext.filesDir,
+            "release-upgrade-persistence.geojson")
         // Debug CI runs the whole instrumentation suite. This special probe
         // only runs when the Release upgrade script supplies its phase.
         org.junit.Assume.assumeTrue("Only for signed Release upgrades", phase != null)
@@ -29,6 +31,7 @@ class ReleaseUpgradePersistenceTest {
                     .putString("bookmarks", "[{\"id\":\"upgrade-check\",\"name\":\"Saved location\"}]")
                     .commit()
                 assertTrue("Must persist real Atlas settings before upgrade", ok)
+                storedFile.writeText("{\"type\":\"FeatureCollection\",\"features\":[]}")
             }
             "verify" -> {
                 assertEquals("persistent-v1", preferences.getString("atlas-release-upgrade-probe", null))
@@ -36,8 +39,11 @@ class ReleaseUpgradePersistenceTest {
                 assertEquals("offline", preferences.getString("mapSourceMode", null))
                 assertFalse(preferences.getBoolean("voice", true))
                 assertTrue(preferences.getString("bookmarks", "")!!.contains("upgrade-check"))
+                assertEquals("persistent files must survive adb install -r",
+                    "{\"type\":\"FeatureCollection\",\"features\":[]}",storedFile.readText())
             }
             else -> fail("upgradePhase must be write or verify")
         }
     }
 }
+

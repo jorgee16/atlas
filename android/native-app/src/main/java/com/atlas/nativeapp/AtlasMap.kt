@@ -917,6 +917,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("time",SystemClock.elapsedRealtimeNanos()/1e9)
             put("frames",debugFrameCount)
             put("fixTime",f?.time); put("accuracy",f?.accuracy)
+            put("gpsLat",f?.point?.lat);put("gpsLon",f?.point?.lon)
+            put("fixAgeSeconds",f?.let { SystemClock.elapsedRealtimeNanos()/1e9-it.time })
+            put("guidanceFixTime",g?.optDouble("gpsFixTime")?.takeIf { it.isFinite() })
+            put("matchedLat",g?.optDouble("lat")?.takeIf { it.isFinite() })
+            put("matchedLon",g?.optDouble("lon")?.takeIf { it.isFinite() })
+            put("confirmedAlong",g?.optDouble("predictionBaseAlong",g.optDouble("along"))?.takeIf { it.isFinite() })
+            put("resumeSyncPending",resumeSyncPending)
+            put("resumeAnchorFixTime",resumeAnchorFixTime.takeIf { it.isFinite() })
             put("bearingAccuracy",f?.bearingAccuracy); put("speed",f?.speed)
             put("rawSpeed",f?.providerSpeed); put("busy",s?.busy)
             put("rawBearing",f?.providerBearing); put("filteredBearing",f?.bearing)
@@ -1036,4 +1044,5 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         view.onSaveInstanceState(bundle)
     }
 }
+
 

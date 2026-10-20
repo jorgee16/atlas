@@ -8,6 +8,10 @@ import kotlin.math.min
 /** Visual-only prediction bounded by age, speed, distance and route endpoint. */
 internal object RouteGapPrediction {
     fun predict(route: JSONObject, guidance: JSONObject, fix: Fix, now: Double): JSONObject? {
+        // GPS is published before its asynchronous JNI projection. A newer
+        // fix must never lend its timestamp to the previous fix's route point.
+        if (!NavigationResumePolicy.currentGuidance(fix.time,
+                guidance.optDouble("gpsFixTime", Double.NaN))) return null
         val age = now - fix.time
         if (!age.isFinite() || age < 2.0 || age > 9.0 ||
             StationaryMapPosition.visualSpeed(fix) < 2.0 || fix.accuracy > 35.0 ||
@@ -62,3 +66,4 @@ internal object RouteGapPrediction {
         return null
     }
 }
+

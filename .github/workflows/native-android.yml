@@ -28,6 +28,35 @@ on:
 permissions:
   contents: read
 jobs:
+  release-identity:
+    # Fail early on a missing/mismatched existing key while navigation tests run.
+    # Never generates a keystore and never changes the pinned identity.
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.publish_release == true || github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]')) && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    runs-on: ubuntu-latest
+    env:
+      ATLAS_ANDROID_KEYSTORE_BASE64: ${{ secrets.ATLAS_ANDROID_KEYSTORE_BASE64 }}
+      ATLAS_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEYSTORE_PASSWORD }}
+      ATLAS_ANDROID_KEY_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEY_PASSWORD }}
+      ATLAS_ANDROID_KEY_ALIAS: ${{ secrets.ATLAS_ANDROID_KEY_ALIAS }}
+      ATLAS_ANDROID_CERT_SHA256: ${{ vars.ATLAS_ANDROID_CERT_SHA256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify existing signing identity without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in ATLAS_ANDROID_KEYSTORE_BASE64 ATLAS_ANDROID_KEYSTORE_PASSWORD ATLAS_ANDROID_KEY_PASSWORD ATLAS_ANDROID_KEY_ALIAS ATLAS_ANDROID_CERT_SHA256; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error::Missing ${key}; signed Release is blocked."
+              exit 1
+            fi
+          done
+          keyfile="$RUNNER_TEMP/atlas-signing-preflight.jks"
+          trap 'rm -f "$keyfile"' EXIT
+          ( umask 077; printf '%s' "$ATLAS_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keyfile" )
+          keytool -exportcert -keystore "$keyfile" -storepass:env ATLAS_ANDROID_KEYSTORE_PASSWORD -alias "$ATLAS_ANDROID_KEY_ALIAS" \
+            | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/atlas-preflight-certificate.sha256"
+          python3 tools/atlas_android_release.py check-cert --certificate-file "$RUNNER_TEMP/atlas-preflight-certificate.sha256"
   core:
     runs-on: ubuntu-latest
     steps:
@@ -133,7 +162,7 @@ jobs:
   release:
     # Publishing is explicit. A normal push never tries to access signing secrets.
     # This job cannot execute unless both the native and emulator jobs passed.
-    needs: [core, android]
+    needs: [core, android, release-identity]
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.publish_release == true || github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]')) && github.ref == 'refs/heads/migration/native-core-kotlin' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -290,3 +319,4 @@ jobs:
             dist/android-validated/*.sha256
             dist/android-validated/upgrade-report.txt
             android/native-app/build/reports/lint-results-release.*
+

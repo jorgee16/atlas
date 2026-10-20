@@ -190,5 +190,22 @@ class NavigationRenderInterpolatorTest {
         repeat(150){a.sample(101.0+it/30.0)}
         assertEquals(drawn.position,a.sample(106.0)!!.position)
     }
+    @Test fun tunnelTargetsKeepDrivingSpeedWithoutPredictingTwice() {
+        val a=NavigationRenderInterpolator().apply {
+            setRoute(listOf(first,Coordinate(first.lat+400.0/111320,first.lon)),400.0)
+        }
+        a.acceptGps(0.0,first,8.0,5.0,100.0,false)
+        a.sample(100.0)
+        repeat(60) { a.sample(100.0+(it+1)/30.0) }
+        for(second in 2..9) {
+            a.acceptGapPrediction(second*8.0,100.0+second,5.0,false)
+            repeat(30) { a.sample(100.0+second+(it+1)/30.0) }
+        }
+        val drawn=a.sample(110.0)!!
+        assertTrue("gap prediction must not halve a moving car's rendering speed",drawn.along>64.0)
+        repeat(90) { a.sample(110.0+(it+1)/30.0) }
+        assertTrue("already predicted target must not be extrapolated again",a.sample(113.0)!!.along<=72.0001)
+    }
 }
+
 

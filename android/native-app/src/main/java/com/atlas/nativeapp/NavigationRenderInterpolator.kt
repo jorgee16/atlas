@@ -173,7 +173,10 @@ internal class NavigationRenderInterpolator {
         if (vertices.isEmpty() || !along.isFinite() || !predictedAt.isFinite() ||
             predictedAt <= lastGapAt || predictedAt <= lastGpsAt) return false
         lastGapAt = predictedAt
-        applyMeasurement(along, 0.0, gpsAccuracy, predictedAt, walking, false)
+        // A gap target is already predicted: disable extrapolation, but retain
+        // the observed speed for the correction budget. Setting speed to zero
+        // capped an 8m/s car at 4m/s and accumulated visual lag in every gap.
+        applyMeasurement(along, measuredSpeed, gpsAccuracy, predictedAt, walking, false)
         return true
     }
 
@@ -244,4 +247,5 @@ internal class NavigationRenderInterpolator {
             (b.lon - a.lon) * 111_320.0 * cos(mid))
     }
 }
+
 

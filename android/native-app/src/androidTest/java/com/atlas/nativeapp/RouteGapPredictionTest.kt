@@ -15,6 +15,7 @@ class RouteGapPredictionTest {
     private fun guidance() = JSONObject()
         .put("state", "normal").put("along", 20.0).put("remaining", 180.0)
         .put("seconds", 30.0).put("toManeuver", 90.0).put("offRoute", 0.0)
+        .put("gpsFixTime",100.0)
     private fun fix() = Fix(Coordinate(40.0, -8.0), 5.0, 10.0, 0.0, 100.0)
 
     @Test fun predictsOnlyDuringShortSignalLoss() {
@@ -43,4 +44,10 @@ class RouteGapPredictionTest {
         val nearEnd = guidance().put("along", 180.0)
         assertNull(RouteGapPrediction.predict(route(), nearEnd, fix(), 105.0))
     }
+    @Test fun newGpsCannotReuseAnOlderJniProjection() {
+        assertNull(RouteGapPrediction.predict(route(),guidance(),fix().copy(time=101.0),105.0))
+        val missingTimestamp=guidance().apply { remove("gpsFixTime") }
+        assertNull(RouteGapPrediction.predict(route(),missingTimestamp,fix(),105.0))
+    }
 }
+

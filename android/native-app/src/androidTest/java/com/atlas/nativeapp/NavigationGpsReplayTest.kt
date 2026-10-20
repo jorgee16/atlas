@@ -46,6 +46,9 @@ class NavigationGpsReplayTest {
     private var model: AtlasModel?=null
     private var phase="setup"
     private var lastLogged=0.0
+    private var enforceTrajectory=false
+    private var previousFrame:JSONObject?=null
+    @Volatile private var trajectoryFailure:String?=null
     private data class Truth(val heading:Double,val stableSince:Double,val fixTime:Double)
     @Volatile private var latestTruth:Truth?=null
 
@@ -77,6 +80,20 @@ class NavigationGpsReplayTest {
                         .put("truthStableFor",now-it.stableSince)
                 }
                 frames.add(frame.toString())
+                val before=previousFrame
+                previousFrame=frame
+                if(enforceTrajectory && trajectoryFailure==null && before!=null &&
+                    now-before.getDouble("time") in 0.000001..0.149999 &&
+                    before.has("renderLat") && frame.has("renderLat")) {
+                    val step=distance(Coordinate(before.getDouble("renderLat"),before.getDouble("renderLon")),
+                        Coordinate(frame.getDouble("renderLat"),frame.getDouble("renderLon")))
+                    if(step>=6.0) {
+                        val failure=JSONObject().put("meters",step).put("before",before).put("after",frame)
+                        trajectoryFailure=failure.toString()
+                        File(output,"trajectory-failure.json").writeText(failure.toString(2))
+                        Log.e("ATLAS_GPS_REPLAY","ATLAS_TRAJECTORY_FAILURE $failure")
+                    }
+                }
                 if(now-lastLogged>=1.0) { Log.i("ATLAS_GPS_REPLAY",frame.toString());lastLogged=now }
             }
         }
@@ -89,12 +106,14 @@ class NavigationGpsReplayTest {
     private fun await(message:String, seconds:Int=30, condition:()->Boolean) {
         val until=SystemClock.elapsedRealtime()+seconds*1000
         while(SystemClock.elapsedRealtime()<until) {
+            assertNull("Trajectory gate failed: $trajectoryFailure",trajectoryFailure)
             if(condition())return
             SystemClock.sleep(100)
         }
         fail("$message; state=${model?.updates?.value?.status}")
     }
     private fun fix(point:Coordinate,speed:Double,heading:Double,accuracy:Double=5.0,bearingAccuracy:Double=5.0,truthHeading:Double=heading):Double {
+        assertNull("Trajectory gate failed: $trajectoryFailure",trajectoryFailure)
         val l=Location(LocationManager.GPS_PROVIDER).apply {
             latitude=point.lat; longitude=point.lon; this.accuracy=accuracy.toFloat()
             this.speed=speed.toFloat(); bearing=heading.toFloat()
@@ -651,6 +670,8 @@ class NavigationGpsReplayTest {
     @Test fun portugalTripThroughAndroidLocationServiceJniAndMapLibre() = runReplay(false)
     @Suppress("DEPRECATION")
     private fun runReplay(cameraOnly:Boolean) {
+        enforceTrajectory=!cameraOnly
+        previousFrame=null;trajectoryFailure=null
         output.listFiles()?.forEach{it.delete()}
         // run-as-installed package contains hash-verified routing only, not a
         // fake graph or a claim to have tested the full offline map package.
@@ -737,3 +758,4 @@ class NavigationGpsReplayTest {
         }
     }
 }
+
