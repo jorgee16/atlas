@@ -82,7 +82,13 @@ class NavigationGpsReplayTest {
                 frames.add(frame.toString())
                 val before=previousFrame
                 previousFrame=frame
-                if(enforceTrajectory && trajectoryFailure==null && before!=null &&
+                // Planning deliberately injects a different absolute GNSS
+                // coordinate (the first routed graph point can be 38 m from
+                // the mock origin). This is test setup relocation, not 1 Hz
+                // driving motion. Its presentation is checked explicitly by
+                // plan(); the continuous trajectory gate starts at replay.
+                val simulatedRelocation = phase == "drive-plan" || phase == "walk-plan"
+                if(enforceTrajectory && !simulatedRelocation && trajectoryFailure==null && before!=null &&
                     now-before.getDouble("time") in 0.000001..0.149999 &&
                     before.has("renderLat") && frame.has("renderLat")) {
                     val step=distance(Coordinate(before.getDouble("renderLat"),before.getDouble("renderLon")),
