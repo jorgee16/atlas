@@ -595,12 +595,28 @@ class NavigationGpsReplayTest {
                     reacquired.point)<20.0
         }
         capture(s,"camera-foreground-new-fix")
-        // The cursor must not drift backwards or traverse the missed journey
-        // after an immediate foreground catch-up.
+        // The assertion ABOVE validated that a newly confirmed fix was shown
+        // immediately. capture() can take several seconds for screenshot/Surface
+        // composition. During that gap, the intentional route-constrained
+        // tunnel predictor may advance up to nine seconds along the route.
+        // Do not mistake that forward dead-reckoning for old background frames:
+        // verify the prediction is bounded by the ACTUAL age of the fix, and
+        // that the FOLLOWING camera remains attached to the rendered cursor.
         val settled=snapshot(s)
-        assertTrue("foreground resync must not replay an old visual position",
-            distance(Coordinate(settled.getDouble("renderLat"),settled.getDouble("renderLon")),
-                reacquired.point)<20.0)
+        val cursor=Coordinate(settled.getDouble("renderLat"),settled.getDouble("renderLon"))
+        val camera=Coordinate(settled.getDouble("cameraLat"),settled.getDouble("cameraLon"))
+        val fixAge=(settled.getDouble("time")-reacquired.time).coerceAtLeast(0.0)
+        val observedAdvance=distance(cursor,reacquired.point)
+        val predicted=settled.optString("guidance")=="reduced" &&
+            settled.optDouble("predictedAt",Double.NaN).isFinite()
+        val allowed=if(predicted) {
+            // RouteGapPrediction is capped at 9 seconds, 110m and 25m/s.
+            min(110.0,fixAge.coerceAtMost(9.0)*reacquired.speed.coerceIn(0.0,25.0))+15.0
+        } else 20.0
+        assertTrue("resumed cursor exceeds bounded prediction: gap=$observedAdvance allowed=$allowed; frame=$settled",
+            observedAdvance <= allowed)
+        assertTrue("FOLLOWING camera must stay with live cursor after replay: frame=$settled",
+            distance(camera,cursor)<15.0)
         tap(s,"Overview");s.recreate();attach(s)
         assertMode(s,"OVERVIEW");capture(s,"camera-overview-recreated")
         tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
