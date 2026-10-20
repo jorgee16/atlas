@@ -79,4 +79,17 @@ class MotionHeadingStabilizerTest {
         assertEquals(325.0,filter.resolve(fix(2.0,325.0).copy(providerBearing=325.0),
             null,true,325.0,true),.001)
     }
+    @Test fun oneHzEightMetreDisplacementConfirmsAGenuineUTurn() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,0.0,lat=38.72),null,true)
+        filter.resolve(fix(2.0,0.0,lat=38.72+8.0/111320),null,true)
+        val turn=filter.resolve(fix(3.0,180.0,lat=38.72),null,true,180.0,true)
+        assertEquals(180.0,turn,.001)
+    }
+    @Test fun twoInvertedBearingsCannotOverrideContinuingDisplacement() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,0.0,lat=38.72),null,true)
+        for(i in 1..2)assertEquals(0.0,filter.resolve(
+            fix(i+1.0,180.0,lat=38.72+i*8.0/111320),null,true),.001)
+    }
 }

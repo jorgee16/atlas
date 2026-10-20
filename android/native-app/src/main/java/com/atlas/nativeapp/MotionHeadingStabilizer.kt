@@ -95,7 +95,10 @@ internal class MotionHeadingStabilizer {
             val lat = Math.toRadians((previous.lat + f.point.lat) / 2.0)
             val meters = hypot((previous.lat - f.point.lat) * 111320.0,
                 (previous.lon - f.point.lon) * 111320.0 * cos(lat))
-            val enough = meters >= max(8.0, max(f.accuracy, previousAccuracy) * 1.3)
+            // At 1 Hz an 8 m/s car travels almost exactly eight metres.
+            // An eight-metre floor discarded that evidence due to coordinate
+            // rounding, so a real U-turn looked like uncorroborated GNSS noise.
+            val enough = meters >= max(6.0, max(f.accuracy, previousAccuracy) * 1.3)
             val plausible = meters / elapsed <= max(8.0, f.speed.coerceAtLeast(0.0) * 2.4 + 6.0)
             if (enough && plausible) {
                 val dLon = Math.toRadians(f.point.lon - previous.lon)
@@ -135,9 +138,16 @@ internal class MotionHeadingStabilizer {
         // can commit immediately with displacement evidence, or after three
         // consistent fixes; ordinary bends retain the shorter confirmation.
         val confirmations = if (change > 110.0) 3 else 2
-        if (corroborated || turnCount >= confirmations) {
+        if (corroborated) {
+            // Independent displacement confirms the new course. The camera
+            // already eases rotation per frame; limiting it again per GPS fix
+            // leaves the map facing backwards for several seconds after a
+            // genuine reversal. Inverted bearings without motion agreement
+            // still require the existing confirmation policy below.
+            course=normalized
+        } else if (turnCount >= confirmations) {
             val maximumStep = AtlasHeading.signedDelta(old, normalized).coerceIn(-55.0,55.0)
-            course = AtlasHeading.normalize(old + maximumStep * (if (corroborated) 0.75 else 0.58))
+            course = AtlasHeading.normalize(old + maximumStep * 0.58)
         }
     }
 
