@@ -752,6 +752,34 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // During checking/rerouting retain the last filtered position
             // briefly instead of dropping into raw GPS every second.
             // After the hold expires, raw fixes can show a real deviation.
+            // Once a fresh GPS fix has been *confirmed by JNI* and matched
+            // close to the observed road, a large visual delay is not normal
+            // smoothing. Skip the accumulated playback once; never do this
+            // for weak/stale fixes, pedestrians at rest or tunnel prediction.
+            val matchedFix = if (trusted && s.guidance != null &&
+                s.guidance.has("gpsFixTime") &&
+                NavigationResumePolicy.currentGuidance(fix.time,
+                    s.guidance.optDouble("gpsFixTime", Double.NaN)) &&
+                (!s.guidance.has("predictedAt") ||
+                    s.guidance.optDouble("predictedAt", Double.NaN) <= fix.time + .01))
+                    s.guidance else null
+            val snapToConfirmed = matchedFix != null && !catchingUp &&
+                lastRenderedMarker?.let { last ->
+                    NavigationVisualCatchUp.shouldSnap(
+                        distanceMeters(last,matchedFix.coordinate()),
+                        nowSeconds - fix.time,
+                        distanceMeters(fix.point,matchedFix.coordinate()),
+                        fix.accuracy,
+                        StationaryMapPosition.visualSpeed(fix),
+                        s.walking)
+                } == true
+            if (snapToConfirmed) {
+                renderInterpolator.synchronizeConfirmedGps(
+                    matchedFix!!.optDouble("along", Double.NaN),
+                    matchedFix.coordinate(), fix.time)
+                presentedPosition.reset()
+                freePosition.reset()
+            }
             val desiredDisplayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
                 ?: lastRenderedMarker ?: display else if(s.navigating)
                     freePosition.sample(nowSeconds)?.first ?: display else display
@@ -772,6 +800,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             setPosition(displayed)
             updatePositionIcon(markerAngle)
             lastRenderedMarker=displayed
+            if (snapToConfirmed && follow) cameraState.viewportChanged()
             if (catchingUp) {
                 resumeSyncPending = false
                 // A following camera must jump to the same current position as
@@ -860,6 +889,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("maxZoom",map?.maxZoomLevel)
             put("cameraLat",camera?.target?.latitude); put("cameraLon",camera?.target?.longitude)
             put("renderLat",lastRenderedMarker?.lat); put("renderLon",lastRenderedMarker?.lon)
+            put("visualGpsGapMeters",if(lastRenderedMarker!=null && f!=null)
+                distanceMeters(lastRenderedMarker!!,f.point) else null)
+            put("visualMatchedGapMeters",if(lastRenderedMarker!=null && f!=null && g!=null &&
+                NavigationResumePolicy.currentGuidance(f.time,
+                    g.optDouble("gpsFixTime", Double.NaN)))
+                distanceMeters(lastRenderedMarker!!,g.coordinate()) else null)
             put("cursorBearing",lastMarkerAngle.takeIf { it.isFinite() })
             put("cursorVisible",positionCursor.visibility==View.VISIBLE)
             put("cursorScreenX",debugCursorScreenCenter()?.x)

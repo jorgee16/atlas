@@ -165,6 +165,21 @@ class NavigationRenderInterpolatorTest {
         a.acceptGps(26.0,turn,.6,5.0,107.0,true)
         assertTrue(a.sample(107.03)!!.along>stopped.along)
     }
+    @Test fun confirmedGpsCanSnapFarBehindRendererWithoutReplayingOldFrames() {
+        val a=route()
+        a.acceptGps(5.0,first,11.0,5.0,100.0,false)
+        a.sample(100.0)
+        repeat(60) { a.sample(100.0+(it+1)/30.0) }
+        a.acceptGps(105.0,turn,11.0,5.0,103.0,false)
+        val lagging=a.sample(103.0)!!
+        assertTrue("normal smoothing cannot cross a 100m GPS gap immediately",
+            lagging.along < 75.0)
+        a.synchronizeConfirmedGps(105.0,turn,103.0)
+        val caughtUp=a.sample(103.001)!!
+        assertEquals(105.0,caughtUp.along,.15)
+        assertTrue(caughtUp.position.lat > first.lat)
+    }
+
     @Test fun stationaryRoadMatchingHandoffKeepsItsDrawnAnchor() {
         val a=route()
         val raw=Coordinate(first.lat-.0002,first.lon)

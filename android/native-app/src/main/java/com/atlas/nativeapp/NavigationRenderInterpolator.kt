@@ -142,6 +142,22 @@ internal class NavigationRenderInterpolator {
         return true
     }
 
+    /** A trustworthy, fresh and matched GPS fix has moved far beyond the
+     * previously rendered cursor. Catch up once instead of replaying the
+     * missed distance at a few metres per second. Never called for predictions
+     * or inaccurate/off-route fixes.
+     */
+    fun synchronizeConfirmedGps(along: Double, snapped: Coordinate, fixTime: Double) {
+        if (vertices.isEmpty() || !along.isFinite() || !fixTime.isFinite()) return
+        val confirmed = along.coerceIn(0.0, routeMeters)
+        measuredAlong = confirmed
+        renderedAlong = confirmed
+        measuredAt = fixTime
+        lastGpsAt = max(lastGpsAt, fixTime)
+        lastFrameAt = Double.NaN
+        lastAcceptedPosition = snapped
+    }
+
     /** Align a stopped filter with the point the route renderer actually drew. */
     fun holdStationary(position: Coordinate) {
         measuredAlong=renderedAlong ?: measuredAlong
