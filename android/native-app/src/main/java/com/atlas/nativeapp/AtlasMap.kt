@@ -829,34 +829,16 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // During checking/rerouting retain the last filtered position
             // briefly instead of dropping into raw GPS every second.
             // After the hold expires, raw fixes can show a real deviation.
-            // Once a fresh GPS fix has been *confirmed by JNI* and matched
-            // close to the observed road, a large visual delay is not normal
-            // smoothing. Skip the accumulated playback once; never do this
-            // for weak/stale fixes, pedestrians at rest or tunnel prediction.
-            val matchedFix = if (trusted && s.guidance != null &&
-                s.guidance.has("gpsFixTime") &&
-                NavigationResumePolicy.currentGuidance(fix.time,
-                    s.guidance.optDouble("gpsFixTime", Double.NaN)) &&
-                (!s.guidance.has("predictedAt") ||
-                    s.guidance.optDouble("predictedAt", Double.NaN) <= fix.time + .01))
-                    s.guidance else null
-            val snapToConfirmed = matchedFix != null && !catchingUp &&
-                lastRenderedMarker?.let { last ->
-                    NavigationVisualCatchUp.shouldSnap(
-                        distanceMeters(last,matchedFix.coordinate()),
-                        nowSeconds - fix.time,
-                        distanceMeters(fix.point,matchedFix.coordinate()),
-                        fix.accuracy,
-                        StationaryMapPosition.visualSpeed(fix),
-                        s.walking)
-                } == true
-            if (snapToConfirmed) {
-                renderInterpolator.synchronizeConfirmedGps(
-                    matchedFix!!.optDouble("along", Double.NaN),
-                    matchedFix.coordinate(), fix.time)
-                presentedPosition.reset()
-                freePosition.reset()
-            }
+            // Do not hard-snap the on-screen cursor for ordinary JNI updates.
+            // The complete driving replay recorded 121m/108m/102m jumps when
+            // valid GPS projections arrived after a "reduced" guidance frame.
+            // Resetting the final limiter here also rotated the camera by 120
+            // degrees in a single frame. This was NOT a foreground resync.
+            //
+            // Foreground resume and preview->Start already have their own
+            // explicit, one-shot resynchronization epochs above. While active,
+            // preserve the route-constrained interpolator and final per-frame
+            // distance budget, even if a GPS projection changes segments.
             val desiredDisplayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
                 ?: lastRenderedMarker ?: display else if(s.navigating)
                     freePosition.sample(nowSeconds)?.first ?: display else display
@@ -877,7 +859,6 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             setPosition(displayed)
             updatePositionIcon(markerAngle)
             lastRenderedMarker=displayed
-            if (snapToConfirmed && follow) cameraState.viewportChanged()
             if (catchingUp) {
                 resumeSyncPending = false
                 // A following camera must jump to the same current position as

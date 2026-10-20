@@ -16,6 +16,22 @@ class NavigationPositionLimiterTest {
         assertEquals(road,limiter.commit(road,111.0,0.0))
         assertFalse(limiter.active)
     }
+    @Test fun suddenMapMatchingSwitchKeepsCursorStepBounded() {
+        // The full Portugal replay recorded >100m instantaneous jumps from
+        // the normal projection update. These are NOT background resumes.
+        val limiter=NavigationPositionLimiter()
+        limiter.commit(origin,100.0,8.0)
+        val jump=Coordinate(origin.lat+121.5/111320.0,origin.lon)
+        val following=limiter.commit(jump,100.065,8.0)
+        val metres=(following.lat-origin.lat)*111320.0
+        assertTrue("ordinary guidance cannot jump 121m in a frame",metres<6.0)
+        assertTrue("normal guidance must remain interpolated",limiter.active)
+        val next=limiter.commit(jump,100.10,8.0)
+        assertTrue((next.lat-following.lat)*111320.0<6.0)
+        // Only explicit resume/start epochs call reset. A normal matched-fix
+        // change must not reset this limiter.
+    }
+
     @Test fun stateAndRenderUpdatesShareOneElapsedTimeBudget() {
         val limiter=NavigationPositionLimiter()
         limiter.commit(origin,100.0,8.0)
