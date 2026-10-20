@@ -10,8 +10,8 @@ android {
         applicationId 'com.atlas.nativeapp'
         minSdk 26
         targetSdk 36
-        versionCode 2
-        versionName '0.2.0-native'
+        versionCode (project.findProperty('atlasVersionCode') ?: '2').toString().toInteger()
+        versionName (project.findProperty('atlasVersionName') ?: '0.2.0-native').toString()
         externalNativeBuild { cmake { cppFlags '-std=c++17'; arguments '-DANDROID_STL=c++_shared' } }
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -19,7 +19,45 @@ android {
     externalNativeBuild { cmake { path '../../native/CMakeLists.txt'; version '3.22.1' } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = '17' }
-    buildTypes { release { minifyEnabled false } }
+    // Debug CI keeps testing the debug variant; release CI opts in explicitly.
+    testBuildType (project.findProperty('atlasTestBuildType') ?: 'debug').toString()
+    // Only the CI/user-supplied keystore is accepted; no ephemeral key generation.
+    // An assembleRelease without these variables fails instead of silently
+    // distributing an unsigned release (debug builds remain unchanged).
+    def releaseEnvNames = [
+        'ATLAS_ANDROID_KEYSTORE_PATH', 'ATLAS_ANDROID_KEYSTORE_PASSWORD',
+        'ATLAS_ANDROID_KEY_PASSWORD', 'ATLAS_ANDROID_KEY_ALIAS'
+    ]
+    def releaseSigningProvided = releaseEnvNames.every { name ->
+        def value = System.getenv(name)
+        value != null && !value.trim().isEmpty()
+    }
+    signingConfigs {
+        if (releaseSigningProvided) {
+            release {
+                storeFile file(System.getenv('ATLAS_ANDROID_KEYSTORE_PATH'))
+                storePassword System.getenv('ATLAS_ANDROID_KEYSTORE_PASSWORD')
+                keyPassword System.getenv('ATLAS_ANDROID_KEY_PASSWORD')
+                keyAlias System.getenv('ATLAS_ANDROID_KEY_ALIAS')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (releaseSigningProvided) signingConfig signingConfigs.release
+        }
+    }
+    // Fail closed for release tasks, including assembleReleaseAndroidTest.
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.allTasks.any { it.project == project &&
+                (it.name == 'assembleRelease' ||
+                 it.name == 'bundleRelease' ||
+                 it.name == 'packageRelease' ||
+                 it.name == 'assembleReleaseAndroidTest') } && !releaseSigningProvided) {
+            throw new GradleException('Missing ATLAS_ANDROID_* signing environment variables; refusing unsigned Release')
+        }
+    }
 }
 dependencies {
     implementation 'androidx.activity:activity-ktx:1.11.0'

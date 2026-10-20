@@ -9,6 +9,18 @@ on:
         description: 'Release validation: complete Portugal GPS trip and videos'
         type: boolean
         default: false
+      publish_release:
+        description: 'Publish a signed, validated GitHub Release (requires stable signing secrets)'
+        type: boolean
+        default: false
+      release_version:
+        description: 'SemVer X.Y.Z (must exceed the previous Release version)'
+        type: string
+        default: '0.2.0'
+      release_code:
+        description: 'Android versionCode (must exceed previous released code)'
+        type: string
+        default: '3'
   push:
     branches: ['migration/native-core-kotlin']
   pull_request:
@@ -41,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      ATLAS_FULL_GPS_REPLAY: ${{ inputs.full_gps_replay || contains(github.event.head_commit.message, '[full-gps-replay]') }}
+      ATLAS_FULL_GPS_REPLAY: ${{ inputs.publish_release || inputs.full_gps_replay || contains(github.event.head_commit.message, '[full-gps-replay]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -70,7 +82,6 @@ jobs:
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
       - name: Install video tools for visual evidence review
-        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         run: |
           if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
             # ffmpeg needs only Ubuntu. An unrelated Microsoft apt feed can
@@ -80,20 +91,17 @@ jobs:
           fi
           ffmpeg -version | head -1
       - name: Download and verify real Portugal routing and offline map for GPS replay
-        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         env:
           R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
         run: python3 tools/prepare-native-gps-replay.py
       - name: Enable hardware acceleration
-        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Native UI and focused camera smoke (full GPS trip only for validation)
-        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -120,3 +128,155 @@ jobs:
             android/native-app/build/outputs/androidTest-results/
           if-no-files-found: warn
 
+  release:
+    # Publishing is explicit. A normal push never tries to access signing secrets.
+    # This job cannot execute unless both the native and emulator jobs passed.
+    needs: [core, android]
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    env:
+      ATLAS_ANDROID_KEYSTORE_BASE64: ${{ secrets.ATLAS_ANDROID_KEYSTORE_BASE64 }}
+      ATLAS_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEYSTORE_PASSWORD }}
+      ATLAS_ANDROID_KEY_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEY_PASSWORD }}
+      ATLAS_ANDROID_KEY_ALIAS: ${{ secrets.ATLAS_ANDROID_KEY_ALIAS }}
+      ATLAS_ANDROID_CERT_SHA256: ${{ vars.ATLAS_ANDROID_CERT_SHA256 }}
+      RELEASE_VERSION: ${{ inputs.release_version }}
+      RELEASE_CODE: ${{ inputs.release_code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - name: Install Android release toolchain
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: Require a stable signing identity and valid release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in ATLAS_ANDROID_KEYSTORE_BASE64 ATLAS_ANDROID_KEYSTORE_PASSWORD ATLAS_ANDROID_KEY_PASSWORD ATLAS_ANDROID_KEY_ALIAS ATLAS_ANDROID_CERT_SHA256; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error::Missing ${key}; signed release publication is blocked."
+              exit 1
+            fi
+          done
+          [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Release version must be X.Y.Z"; exit 1; }
+          [[ "$RELEASE_CODE" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Release code must be a positive integer"; exit 1; }
+          [[ "${#ATLAS_ANDROID_CERT_SHA256}" -ge 64 ]] || { echo "::error::Expected certificate SHA-256 is invalid"; exit 1; }
+          keyfile="$RUNNER_TEMP/atlas-release-signing.jks"
+          ( umask 077; printf '%s' "$ATLAS_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keyfile" )
+          test -s "$keyfile" || { echo "::error::Invalid keystore data"; exit 1; }
+          echo "ATLAS_ANDROID_KEYSTORE_PATH=$keyfile" >> "$GITHUB_ENV"
+          # Only a public certificate digest is handled here, never the private key.
+          keytool -exportcert -keystore "$keyfile" -storepass:env ATLAS_ANDROID_KEYSTORE_PASSWORD -alias "$ATLAS_ANDROID_KEY_ALIAS" \
+            | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/atlas-certificate.sha256"
+          python3 tools/atlas_android_release.py check-cert --certificate-file "$RUNNER_TEMP/atlas-certificate.sha256"
+      - name: Locate previous published APK (if any)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/android-previous
+          tag="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '[.[] | select(.tag_name | startswith("atlas-android-v"))] | sort_by(.published_at) | last | .tag_name // ""')"
+          if [[ -n "$tag" ]]; then
+            [[ "$tag" != "atlas-android-v$RELEASE_VERSION" ]] || { echo "::error::This release version already exists"; exit 1; }
+            gh release download "$tag" --dir dist/android-previous --pattern 'Atlas-v*.apk' --pattern release-manifest.json
+            echo "ATLAS_PREVIOUS_TAG=$tag" >> "$GITHUB_ENV"
+          else
+            echo "No prior Atlas signed release; first installation may require uninstalling older debug builds."
+          fi
+          if gh release view "atlas-android-v$RELEASE_VERSION" >/dev/null 2>&1; then
+            echo "::error::Refusing to replace an existing release/tag."
+            exit 1
+          fi
+      - name: Build signed Release and Release instrumentation tests
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash gradlew -PnativeOnly -PatlasVersionCode="$RELEASE_CODE" -PatlasVersionName="$RELEASE_VERSION" -PatlasTestBuildType=release \
+            :native-app:assembleRelease :native-app:testReleaseUnitTest :native-app:lintRelease :native-app:assembleReleaseAndroidTest \
+            --no-daemon --console=plain
+          mkdir -p ../dist/android-release-inputs
+          cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/release.apk
+          cp native-app/build/outputs/apk/androidTest/release/native-app-release-androidTest.apk ../dist/android-release-inputs/instrumentation.apk
+      - name: Create same-certificate future-update probe (not distributed)
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          next_code=$((RELEASE_CODE + 1))
+          bash gradlew -PnativeOnly -PatlasVersionCode="$next_code" -PatlasVersionName="$RELEASE_VERSION-upgrade-probe" \
+            :native-app:assembleRelease --no-daemon --console=plain
+          cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/upgrade-probe.apk
+      - name: Check APK signature, certificate, package, versions and previous Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          previous=(dist/android-previous/Atlas-v*.apk)
+          if (( ${#previous[@]} > 1 )); then echo "::error::Ambiguous previous release APKs"; exit 1; fi
+          args=()
+          if (( ${#previous[@]} == 1 )); then
+            args+=(--previous-apk "${previous[0]}" --previous-manifest dist/android-previous/release-manifest.json)
+          fi
+          python3 tools/atlas_android_release.py package \
+            --apk dist/android-release-inputs/release.apk \
+            --probe dist/android-release-inputs/upgrade-probe.apk \
+            --build-tools "$ANDROID_HOME/build-tools/36.0.0" \
+            --version "$RELEASE_VERSION" --code "$RELEASE_CODE" --commit "$GITHUB_SHA" \
+            --output dist/android-validated "${args[@]}"
+      - name: Validate Release install and in-place upgrade on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          script: bash tools/atlas-android-release-upgrade.sh
+      - name: Publish signed APK directly to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist/android-validated
+          sha256sum --check "Atlas-v$RELEASE_VERSION.apk.sha256"
+          tag="atlas-android-v$RELEASE_VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::error::Refusing to overwrite existing release $tag"
+            exit 1
+          fi
+          gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
+            --target "$GITHUB_SHA" --title "Atlas v$RELEASE_VERSION" \
+            --notes "Signed Android Release (versionCode $RELEASE_CODE). Native C++ tests, Android navigation/GPS emulator tests, certificate and in-place-upgrade checks passed. Preserve this signing key for future updates." \
+            --prerelease
+          echo "APK: https://github.com/$GH_REPO/releases/download/$tag/Atlas-v$RELEASE_VERSION.apk" >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove temporary keystore
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${ATLAS_ANDROID_KEYSTORE_PATH:-}" && -f "$ATLAS_ANDROID_KEYSTORE_PATH" ]]; then
+            rm -f "$ATLAS_ANDROID_KEYSTORE_PATH"
+          fi
+      - name: Upload Release validation reports (no keys)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-native-release-validation
+          if-no-files-found: ignore
+          path: |
+            dist/android-validated/release-manifest.json
+            dist/android-validated/*.sha256
+            dist/android-validated/upgrade-report.txt
+            android/native-app/build/reports/lint-results-release.*
