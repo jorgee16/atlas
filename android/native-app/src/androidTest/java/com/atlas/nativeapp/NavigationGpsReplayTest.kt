@@ -501,14 +501,27 @@ class NavigationGpsReplayTest {
             model!!.updates.value.guidance?.optDouble("gpsFixTime",-1.0)==latest.time
         }
         s.moveToState(Lifecycle.State.RESUMED);attach(s)
-        await("resume must snap to the newest GPS fix (not animate old progress)",3) {
-            val frame=snapshot(s)
-            frame.optString("cameraMode")=="FOLLOWING" &&
-                frame.optDouble("renderLat",0.0)!=0.0 &&
-                distance(Coordinate(frame.getDouble("renderLat"),frame.getDouble("renderLon")),
-                    model!!.updates.value.guidance!!.coordinate())<15.0 &&
-                distance(Coordinate(frame.getDouble("cameraLat"),frame.getDouble("cameraLon")),
-                    model!!.updates.value.guidance!!.coordinate())<15.0
+        // The foreground camera and marker must immediately catch up to the
+        // LAST CONFIRMED GPS fix. Do not compare them with mutable guidance:
+        // RouteGapPrediction keeps advancing that estimated position when the
+        // replay intentionally stops delivering real GPS fixes.
+        val lastConfirmedFix = latest.point
+        val tolerance = max(12.0, latest.accuracy * 1.5)
+        try {
+            await("resume must snap to the latest confirmed GPS fix, not replay older frames",3) {
+                val frame=snapshot(s)
+                frame.optString("cameraMode")=="FOLLOWING" &&
+                    frame.optDouble("fixTime",Double.NaN)==latest.time &&
+                    frame.has("renderLat") && frame.has("renderLon") &&
+                    frame.has("cameraLat") && frame.has("cameraLon") &&
+                    distance(Coordinate(frame.getDouble("renderLat"),frame.getDouble("renderLon")),
+                        lastConfirmedFix)<tolerance &&
+                    distance(Coordinate(frame.getDouble("cameraLat"),frame.getDouble("cameraLon")),
+                        lastConfirmedFix)<tolerance
+            }
+        } catch(failure:AssertionError) {
+            capture(s,"camera-background-catchup-failed")
+            throw AssertionError("${failure.message}; expectedFix=${lastConfirmedFix}; camera=${snapshot(s)}",failure)
         }
         capture(s,"camera-background-caught-up")
         tap(s,"Overview");s.recreate();attach(s)
