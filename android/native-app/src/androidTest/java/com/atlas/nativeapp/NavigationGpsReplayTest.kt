@@ -569,16 +569,38 @@ class NavigationGpsReplayTest {
             throw AssertionError("${failure.message}; expectedFix=${lastConfirmedFix}; camera=${snapshot(s)}",failure)
         }
         capture(s,"camera-background-caught-up")
+        // When GPS stops after returning to the Activity, RouteGapPrediction
+        // may keep emitting reduced guidance for its tunnel horizon. That
+        // must NOT drag the foreground cursor away from its last fix.
+        phase="background-foreground-prediction-suppression"
+        SystemClock.sleep(10_100)
+        val held=snapshot(s)
+        assertTrue("old GPS prediction must not advance the resumed cursor",distance(
+            Coordinate(held.getDouble("renderLat"),held.getDouble("renderLon")),
+            lastConfirmedFix)<15.0)
+        // A genuinely NEW fix releases the hold and jumps to that location;
+        // it must not draw the diagonal path between old and new positions.
+        movingFix()
+        val nextFix=model!!.updates.value.fix
+        await("GPS processing resumes after foreground hold",10) {
+            val current=model!!.updates.value.fix
+            current != null && current.time>latest.time &&
+                model!!.updates.value.guidance?.optDouble("gpsFixTime",-1.0)==current.time
+        }
+        val reacquired=model!!.updates.value.fix!!
+        await("new GPS must not start interpolating the old background path",5) {
+            val frame=snapshot(s)
+            frame.has("renderLat") &&
+                distance(Coordinate(frame.getDouble("renderLat"),frame.getDouble("renderLon")),
+                    reacquired.point)<20.0
+        }
+        capture(s,"camera-foreground-new-fix")
         // The cursor must not drift backwards or traverse the missed journey
         // after an immediate foreground catch-up.
-        val resumeFrame=snapshot(s)
-        val renderedAtResume=Coordinate(
-            resumeFrame.getDouble("renderLat"),resumeFrame.getDouble("renderLon"))
-        SystemClock.sleep(650)
         val settled=snapshot(s)
         assertTrue("foreground resync must not replay an old visual position",
-            distance(renderedAtResume, Coordinate(
-                settled.getDouble("renderLat"),settled.getDouble("renderLon")))<20.0)
+            distance(Coordinate(settled.getDouble("renderLat"),settled.getDouble("renderLon")),
+                reacquired.point)<20.0)
         tap(s,"Overview");s.recreate();attach(s)
         assertMode(s,"OVERVIEW");capture(s,"camera-overview-recreated")
         tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")

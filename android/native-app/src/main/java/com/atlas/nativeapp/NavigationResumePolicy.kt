@@ -17,6 +17,18 @@ internal object NavigationResumePolicy {
         freshFix(now,fixAt) && accuracyMeters.isFinite() &&
             accuracyMeters in 0.0..70.0
 
+    /** A predicted route point based on the foreground anchor is not a new
+     * GPS observation. It cannot move the cursor after a background resume.
+     */
+    fun suppressOldFixPrediction(anchorFixAt: Double, currentFixAt: Double,
+                                 predicted: Boolean): Boolean =
+        predicted && anchorFixAt.isFinite() && currentFixAt.isFinite() &&
+            currentFixAt <= anchorFixAt + 0.000001
+
+    fun newFixAfterResume(anchorFixAt: Double, currentFixAt: Double): Boolean =
+        anchorFixAt.isFinite() && currentFixAt.isFinite() &&
+            currentFixAt > anchorFixAt + 0.000001
+
     fun currentGuidance(fixAt: Double, guidanceFixAt: Double): Boolean =
         fixAt.isFinite() && guidanceFixAt.isFinite() &&
             abs(fixAt - guidanceFixAt) < 0.01

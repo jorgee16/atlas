@@ -21,6 +21,15 @@ class NavigationResumePolicyTest {
         assertFalse(NavigationResumePolicy.trustworthyResumeFix(110.0,109.0,95.0))
         assertFalse(NavigationResumePolicy.trustworthyResumeFix(110.0,109.0,Double.NaN))
     }
+    @Test fun predictedGuidanceCannotReplayTheFixUsedToResume() {
+        assertTrue(NavigationResumePolicy.suppressOldFixPrediction(120.0, 120.0, true))
+        assertFalse(NavigationResumePolicy.suppressOldFixPrediction(120.0, 120.0, false))
+        assertFalse(NavigationResumePolicy.suppressOldFixPrediction(120.0, 121.0, true))
+        assertFalse(NavigationResumePolicy.suppressOldFixPrediction(Double.NaN, 120.0, true))
+        assertTrue(NavigationResumePolicy.newFixAfterResume(120.0,121.0))
+        assertFalse(NavigationResumePolicy.newFixAfterResume(120.0,120.0))
+    }
+
     @Test fun backgroundGpsCanRaceNativeGuidance() {
         assertTrue(NavigationResumePolicy.currentGuidance(109.0,109.0))
         assertFalse(NavigationResumePolicy.currentGuidance(109.0,108.0))

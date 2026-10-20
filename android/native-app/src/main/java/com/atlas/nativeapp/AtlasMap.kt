@@ -129,6 +129,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     // Never animate the stale on-screen cursor over the distance travelled away.
     private var backgroundPausedAt = Double.NaN
     private var resumeSyncPending = false
+    // After a foreground catch-up, do not draw further dead-reckoning
+    // predictions based on the SAME fix. Wait for a genuinely newer GPS fix.
+    // Otherwise the stopped foreground observer replays a 9-second tunnel
+    // prediction even if no new location has actually been measured.
+    private var resumeAnchorFixTime = Double.NaN
     private var lastRenderedFrameAt = 0.0
     private var lastRenderedMarker: Coordinate? = null
     private var lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
@@ -620,7 +625,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun overview() = requestCamera(NavigationCameraState.Mode.OVERVIEW)
     fun render(s: AtlasState) {
         current = s
-        if (!s.navigating) resumeSyncPending = false
+        if (!s.navigating) {
+            resumeSyncPending = false
+            resumeAnchorFixTime = Double.NaN
+        }
         // Entering guidance from a preview is a NEW visual epoch. Reusing the
         // preview cursor/route smoothing anchor makes the car replay the
         // movement accumulated while the user was looking at the preview.
@@ -719,6 +727,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 return
             }
             if (catchingUp) {
+                resumeAnchorFixTime = fix.time
                 // Normal visual smoothing is correct for 1 Hz fixes, but not
                 // for minutes of movement accumulated while drawing was paused.
                 // Recreate ONLY the visual interpolation clock/anchors. Neither
@@ -747,11 +756,39 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // Old guidance is not the projection of the current GPS position.
             // Reduced (gap-predicted) guidance is likewise not a confirmed
             // position to which we may snap on foreground resume.
+            // The first REAL fix after returning to foreground starts a new
+            // visual epoch. Do not join the old and new points with a straight
+            // interpolated shortcut. JNI guidance may follow asynchronously.
+            val newFixAfterResume = NavigationResumePolicy.newFixAfterResume(
+                resumeAnchorFixTime, fix.time)
+            if (newFixAfterResume) {
+                resumeAnchorFixTime = Double.NaN
+                stationaryPosition.reset()
+                freePosition.reset()
+                presentedPosition.reset()
+                renderInterpolator.reset()
+                if (geometry.size >= 2 && s.route != null) {
+                    renderInterpolator.setRoute(
+                        geometry.map { Coordinate(it.latitude, it.longitude) },
+                        s.route.optDouble("distanceMeters", 0.0))
+                    interpolatedRoute = s.route
+                } else {
+                    interpolatedRoute = null
+                }
+                lastRenderedMarker = null
+                lastRenderedFrameAt = nowSeconds
+                lastTrustedGuidanceAt = Double.NEGATIVE_INFINITY
+                routeRendering = false
+                if (follow) cameraState.viewportChanged()
+            }
             val guidanceCurrent = NavigationResumePolicy.currentGuidance(
                 fix.time, s.guidance?.optDouble("gpsFixTime", Double.NaN) ?: Double.NaN)
             val isPredictedGuidance = s.guidance?.optDouble(
                 "predictedAt", Double.NaN)?.isFinite() == true
-            val guidanceUsable = guidanceCurrent && (!catchingUp || !isPredictedGuidance)
+            val suppressedPrediction = NavigationResumePolicy.suppressOldFixPrediction(
+                resumeAnchorFixTime, fix.time, isPredictedGuidance)
+            val guidanceUsable = guidanceCurrent &&
+                !suppressedPrediction && (!catchingUp || !isPredictedGuidance)
             val candidate = if (guidanceUsable && s.navigating && !s.busy && s.guidance != null &&
                 s.guidance.optString("state") !in listOf("checking","reroute","changed") &&
                 s.guidance.optDouble("offRoute") < 60) s.guidance.coordinate() else fix.point
