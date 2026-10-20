@@ -31,6 +31,19 @@ int main() {
    check(g.state==Guidance::State::reduced,"poor GPS must not reroute");
    check(std::abs(g.position.along-base.position.along)<.01,"poor GPS must not advance");
   }
+  Route straight;
+  straight.points={{40,-8},{40.0045,-8}};
+  straight.meters=distance(straight.points[0],straight.points[1]);
+  straight.seconds=straight.meters/8;
+  GuidanceSession gap;
+  gap.update(straight.points.front(),5,8,100,straight);
+  for(int second=1;second<=16;++second)
+   gap.update({40+second*8.0/111320,-8},100,8,100+second,straight);
+  // The motion filter can temporarily report zero while reacquiring GPS.
+  auto fresh=gap.update({40+136.0/111320,-8},5,0,117,straight);
+  check(fresh.state==Guidance::State::normal && fresh.position.along>130,
+      "recovery travel budget must use time since last reliable projection, not last poor fix");
   std::cout<<"Navigation loop ambiguity, recovery and poor GPS passed\n";
  } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }
+

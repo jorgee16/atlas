@@ -52,3 +52,27 @@ updates defer rebuilding pressed controls until touch up/cancel.
 
 Mock GPS tests do not replace real-device/GNSS hardware validation or exhaustive
 intersection and multipath coverage. Online imagery needs its external provider.
+
+## Temporal recovery and diagnostics
+
+Ordinary JNI projections retain the shared presentation budget; they never reset
+it to catch up. Start and foreground return are explicit visual epochs using a
+fresh observed fix. Predictions are marked separately by `predictedAt` and
+`predictionBaseAlong`, and cannot use a projection from a different GPS timestamp.
+Gap targets retain the observed motion speed for correction while disabling any
+second extrapolation. Native reachability budgets use the timestamp/speed of the
+last reliable projection, rather than the timestamp of a later rejected fix.
+
+The full replay now stops at the next input/wait when a recorded frame exceeds
+the unchanged six-metre step gate, retaining both frames in
+`trajectory-failure.json`. The post-run gates remain mandatory. Frame diagnostics
+include observed GPS, matching timestamp/coordinates, confirmed progress,
+rendered position, prediction timestamp and foreground synchronization state.
+
+`ATLAS_REPLAY_TIMINGS` reports the measured input span, nominal 1.02-second input
+cadence, actual delivery intervals, screenshot time and route/startup setup time.
+About 600 fixes alone require about ten minutes of real-time playback; GPS-loss
+scenarios, screenshots, native route setup and software-renderer/instrumentation
+overhead account for the rest. Normal pushes retain the focused replay; full
+travel remains compulsory for publication via `[atlas-release]`.
+

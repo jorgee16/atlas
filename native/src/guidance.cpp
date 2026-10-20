@@ -188,6 +188,8 @@ void GuidanceSession::reset() {
   offSince_ = -1;
   lastReroute_ = -1;
   lastTime_ = -1;
+  lastGoodTime_ = -1;
+  lastGoodSpeed_ = 0;
   offFixes_ = 0;
   implausibleFixes_ = 0;
   implausibleCandidate_.reset();
@@ -207,6 +209,11 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     return out;
   }
   const double elapsed = lastTime_ < 0 ? 0 : t - lastTime_;
+  // A retained projection belongs to the last reliable observation, not to
+  // each subsequent poor fix. Match the travel budget's time and speed to
+  // that observation, including a motion filter reacquiring from zero speed.
+  const double sinceGood = lastGoodTime_ < 0 ? elapsed : t - lastGoodTime_;
+  const double travelSpeed = std::max(speed, lastGoodSpeed_);
   out.position = progress(p, r);
   // At a roundabout entrance/exit or an overpass, two route segments can be
   // equally close. Prefer physically reachable progress only within the GPS
@@ -220,7 +227,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       return n;
     }();
     const double scale = r.meters > 0 ? total/r.meters : 1;
-    const double budget = std::max(20.,speed*elapsed*1.8+accuracy);
+    const double budget = std::max(20.,travelSpeed*sinceGood*1.8+accuracy);
     const auto local = project(p,r,
         (lastGoodPosition_->along-std::max(12.,accuracy))*scale,
         (lastGoodPosition_->along+budget)*scale);
@@ -244,10 +251,10 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
   // A global nearest-segment projection may snap onto a distant section of
   // the same route at a loop, parallel street or overpass. Require sustained
   // positional evidence before accepting an impossible instantaneous leap.
-  if (lastGoodPosition_ && elapsed > 0 && elapsed < 20 &&
+  if (lastGoodPosition_ && sinceGood > 0 && sinceGood < 20 &&
       out.position.offRoute <= std::max(45., accuracy * 2)) {
     const double travelBudget =
-        std::max(45., speed * elapsed * 2.5 + accuracy * 2 + 15);
+        std::max(45., travelSpeed * sinceGood * 2.5 + accuracy * 2 + 15);
     const double jump = out.position.along - lastGoodPosition_->along;
     if (std::abs(jump) > travelBudget) {
       if (implausibleCandidate_ &&
@@ -301,9 +308,12 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     offSince_ = -1;
     offFixes_ = 0;
     lastGoodPosition_ = out.position;
+    lastGoodTime_ = t;
+    lastGoodSpeed_ = speed;
     lastPosition_ = out.position;
   }
   return out;
 }
 } // namespace atlas
+
 

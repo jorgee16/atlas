@@ -168,6 +168,7 @@ class NavigationGpsReplayTest {
         return p.last()
     }
     private fun capture(s: ActivityScenario<MainActivity>,name:String) {
+        val began=SystemClock.elapsedRealtimeNanos()/1e9
         // Assertions execute before capture. Give Android/MapLibre a frame to
         // present a just-installed style before collecting visual evidence.
         if(name.startsWith("camera-"))SystemClock.sleep(750)
@@ -210,6 +211,8 @@ class NavigationGpsReplayTest {
                 }
             }
         }
+        events.add(JSONObject().put("event","capture-timing").put("name",name)
+            .put("seconds",SystemClock.elapsedRealtimeNanos()/1e9-began).toString())
     }
     private fun pan(s:ActivityScenario<MainActivity>) {
         val before=snapshot(s)
@@ -285,6 +288,7 @@ class NavigationGpsReplayTest {
         capture(s,name)
     }
     private fun plan(s: ActivityScenario<MainActivity>,from:Coordinate,to:Coordinate,walking:Boolean):JSONObject {
+        val began=SystemClock.elapsedRealtimeNanos()/1e9
         phase=if(walking)"walk-plan" else "drive-plan"
         s.onActivity { model!!.endNavigation();model!!.voice=false;model!!.mode(if(walking)"walk" else "drive") }
         confirmedStartFix(from)
@@ -307,6 +311,8 @@ class NavigationGpsReplayTest {
             f.has("renderLat") && distance(Coordinate(f.getDouble("renderLat"),f.getDouble("renderLon")),points(route).first())<.05
         }
         s.onActivity { map(it).recenter() }
+        events.add(JSONObject().put("event","plan-setup-timing").put("walking",walking)
+            .put("seconds",SystemClock.elapsedRealtimeNanos()/1e9-began).toString())
         return route
     }
     private fun replay(s:ActivityScenario<MainActivity>,route:JSONObject,speed:Double,tests:Boolean,allowArrival:Boolean=true,startAlong:Double=0.0) {

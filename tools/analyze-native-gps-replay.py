@@ -9,6 +9,15 @@ mode=sys.argv[1] if len(sys.argv)>1 else 'full'
 root=Path('ui-preview/camera-smoke' if mode=='camera' else 'ui-preview/gps-replay')
 frames=[json.loads(s) for s in (root/'frames.ndjson').read_text().splitlines() if s.strip()]
 fixes=[json.loads(s) for s in (root/'fixes.ndjson').read_text().splitlines() if s.strip()]
+events=[json.loads(s) for s in (root/'events.ndjson').read_text().splitlines() if s.strip()]
+delivery_intervals=[b['time']-a['time'] for a,b in zip(fixes,fixes[1:])]
+timings={'gpsInputSpanSeconds':fixes[-1]['time']-fixes[0]['time'],
+    'nominalOneHzSleepSeconds':1.02*len(delivery_intervals),
+    'medianGpsDeliveryIntervalSeconds':sorted(delivery_intervals)[len(delivery_intervals)//2],
+    'maxGpsDeliveryIntervalSeconds':max(delivery_intervals),
+    'screenshotCaptureSeconds':sum(e['seconds'] for e in events if e.get('event')=='capture-timing'),
+    'routePlanSetupSeconds':sum(e['seconds'] for e in events if e.get('event')=='plan-setup-timing')}
+print('ATLAS_REPLAY_TIMINGS '+json.dumps(timings),flush=True)
 movies=list(Path('ui-preview/atlas-camera-smoke' if mode=='camera' else 'ui-preview/atlas-gps-replay').glob('*.mp4'))
 assert movies, 'Missing emulator screen recording'
 video_seconds=0.0
@@ -29,7 +38,7 @@ if mode=='camera':
     assert len(frames)>100 and len(fixes)>10, 'Missing dynamic camera replay'
     summary={'scope':'Real Portugal route, Android Location, JNI, MainActivity UI touches and MapLibre camera transitions',
         'cameraModes':sorted(modes),'frames':len(frames),'fixes':len(fixes),
-        'stationaryWalkingDriftMeters':max(stationary),'videoDurationSeconds':video_seconds}
+        'stationaryWalkingDriftMeters':max(stationary),'videoDurationSeconds':video_seconds,'timings':timings}
     (root/'summary.json').write_text(json.dumps(summary,indent=2))
     print(json.dumps(summary,indent=2))
     raise SystemExit(0)
@@ -76,6 +85,7 @@ moving_fraction=sum(step>.01 for step in good_steps)/len(good_steps) if good_ste
 # Emit all findings before enforcing gates. Re-analysis of an existing artifact
 # can diagnose independent problems without spending another real-time trip.
 diagnostic={'frames':len(frames),'fixes':len(fixes),'videoDurationSeconds':video_seconds,
+    'timings':timings,
     'maxCursorStepMeters':max(steps,default=0),'maxCameraRotationDegrees':max(angles,default=0),
     'maxStableGoodGpsHeadingErrorDegrees':max((e for e,_ in heading_errors),default=0),
     'headingTruthFrames':len(heading_errors),'movingFrameFractionUnderGoodGps':moving_fraction}
@@ -94,6 +104,7 @@ for gap in [2,5,9]:
 assert any('walk' in p for p in phases), 'No walking evidence'
 assert {5,20,35,60,100}.issubset({f['accuracy'] for f in fixes}), 'Missing accuracy cases'
 summary={'videoDurationSeconds':video_seconds,'frames':len(frames),'fixes':len(fixes),'phases':phases,
+    'timings':timings,
     'movingFrameFractionUnderGoodGps':moving_fraction,
     'maxConsecutiveCursorStepMeters':max(steps),'maxConsecutiveCameraRotationDegrees':max(angles),
     'maxStableGoodGpsHeadingErrorDegrees':max(error for error,_ in heading_errors),
@@ -102,3 +113,4 @@ summary={'videoDurationSeconds':video_seconds,'frames':len(frames),'fixes':len(f
     'scope':'Actual mainland Portugal C++ routing, mock Android GPS provider, NavigationService, JNI, MapLibre and UI; offline PMTiles installed; POI/address search package not installed.'}
 (root/'summary.json').write_text(json.dumps(summary,indent=2))
 print(json.dumps(summary,indent=2))
+

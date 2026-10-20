@@ -148,6 +148,7 @@ public:
 
 private:
   double offSince_ = -1, lastReroute_ = -1, lastTime_ = -1;
+  double lastGoodTime_ = -1, lastGoodSpeed_ = 0;
   uint32_t offFixes_ = 0, implausibleFixes_ = 0;
   std::optional<Point> implausibleCandidate_;
   std::optional<Progress> lastPosition_, lastGoodPosition_;
@@ -182,3 +183,4 @@ std::string jsonString(std::string_view text);
 std::string routeJson(const Route &r);
 std::string placesJson(const std::vector<Place> &places);
 } // namespace atlas
+
