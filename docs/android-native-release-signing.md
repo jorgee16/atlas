@@ -52,7 +52,7 @@ Then set exactly these GitHub **Actions Secrets** in
 Example with authenticated GitHub CLI, executed locally (never in CI):
 
 ```bash
-base64 < "$HOME/.config/atlas/atlas-release.jks" | tr -d '\\n' | gh secret set ATLAS_ANDROID_KEYSTORE_BASE64 --repo jorgee16/atlas
+base64 < "$HOME/.config/atlas/atlas-release.jks" | tr -d '\n' | gh secret set ATLAS_ANDROID_KEYSTORE_BASE64 --repo jorgee16/atlas
 gh secret set ATLAS_ANDROID_KEYSTORE_PASSWORD --repo jorgee16/atlas
 gh secret set ATLAS_ANDROID_KEY_PASSWORD --repo jorgee16/atlas
 gh secret set ATLAS_ANDROID_KEY_ALIAS --repo jorgee16/atlas
