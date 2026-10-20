@@ -688,7 +688,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         s.fix?.let { fix ->
             val nowSeconds = SystemClock.elapsedRealtimeNanos() / 1e9
             val catchingUp = resumeSyncPending &&
-                NavigationResumePolicy.freshFix(nowSeconds, fix.time)
+                NavigationResumePolicy.trustworthyResumeFix(
+                    nowSeconds, fix.time, fix.accuracy)
+            if (resumeSyncPending && !catchingUp) {
+                // The Activity may return before the LocationService has a
+                // trustworthy fresh fix. Freeze the last visual position;
+                // never replay stale/interpolated movement while waiting.
+                return
+            }
             if (catchingUp) {
                 // Normal visual smoothing is correct for 1 Hz fixes, but not
                 // for minutes of movement accumulated while drawing was paused.
@@ -714,15 +721,22 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             }
             // The Activity can observe the newest GPS fix before the JNI
             // projection for that fix arrives. Do not snap to old guidance.
-            val guidanceCurrent = !catchingUp || NavigationResumePolicy.currentGuidance(
+            // StateFlow publishes a new fix BEFORE its JNI map-matching result.
+            // Old guidance is not the projection of the current GPS position.
+            // Reduced (gap-predicted) guidance is likewise not a confirmed
+            // position to which we may snap on foreground resume.
+            val guidanceCurrent = NavigationResumePolicy.currentGuidance(
                 fix.time, s.guidance?.optDouble("gpsFixTime", Double.NaN) ?: Double.NaN)
-            val candidate = if (guidanceCurrent && s.navigating && !s.busy && s.guidance != null &&
+            val isPredictedGuidance = s.guidance?.optDouble(
+                "predictedAt", Double.NaN)?.isFinite() == true
+            val guidanceUsable = guidanceCurrent && (!catchingUp || !isPredictedGuidance)
+            val candidate = if (guidanceUsable && s.navigating && !s.busy && s.guidance != null &&
                 s.guidance.optString("state") !in listOf("checking","reroute","changed") &&
                 s.guidance.optDouble("offRoute") < 60) s.guidance.coordinate() else fix.point
             // Visual-only: retain the map-matched road position during
             // stationary GPS jitter; native guidance keeps receiving fixes.
             val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
-            val trusted = guidanceCurrent && s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
+            val trusted = guidanceUsable && s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
                 s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY)<60.0 &&
                 s.guidance.optString("state") !in listOf("checking","reroute","arrived")
             if (trusted) lastTrustedGuidanceAt = s.guidance!!
@@ -742,11 +756,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 val predictedAt=guidance.optDouble("predictedAt",Double.NaN)
                 if (predictedAt.isFinite()) {
                     renderInterpolator.acceptGapPrediction(along,predictedAt,fix.accuracy,s.walking)
-                } else if (!guidance.has("gpsFixTime") ||
-                    kotlin.math.abs(guidance.optDouble("gpsFixTime") - fix.time)<0.000001) {
-                    // Ignore the intermediate StateFlow update where the new
-                    // GPS fix arrives before its JNI guidance projection.
+                } else {
                     renderInterpolator.acceptGps(along,display,StationaryMapPosition.visualSpeed(fix),fix.accuracy,fix.time,s.walking,fix.bearingAccuracy)
+                    if (catchingUp && along.isFinite()) {
+                        // The Activity was suspended while navigation advanced.
+                        // Anchor the route renderer to the latest JNI-confirmed
+                        // along-distance, not its old interpolated progress.
+                        renderInterpolator.synchronizeConfirmedGps(
+                            along,guidance.coordinate(),fix.time)
+                    }
                 }
             }
             // During checking/rerouting retain the last filtered position
@@ -942,10 +960,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun onResume() {
         view.onResume()
         val now = SystemClock.elapsedRealtimeNanos() / 1e9
-        if (NavigationResumePolicy.shouldSynchronize(
-                backgroundPausedAt, now, current?.navigating == true)) {
-            resumeSyncPending = true
-        }
+        resumeSyncPending = NavigationResumePolicy.shouldSynchronize(
+            backgroundPausedAt, now, current?.navigating == true)
         backgroundPausedAt = Double.NaN
         framesEnabled=true
         if (!resumeSyncPending) scheduleNavigationFrame()
@@ -954,6 +970,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     fun onPause() {
         backgroundPausedAt = SystemClock.elapsedRealtimeNanos() / 1e9
+        // The STARTED collector can render new state before onResume runs.
+        // Prevent it from blending background and foreground timestamps.
+        resumeSyncPending = current?.navigating == true
         framesEnabled=false
         stopNavigationFrames()
         view.onPause()

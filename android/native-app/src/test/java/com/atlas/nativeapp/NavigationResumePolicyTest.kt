@@ -15,6 +15,12 @@ class NavigationResumePolicyTest {
         assertFalse(NavigationResumePolicy.freshFix(109.0,90.0))
         assertFalse(NavigationResumePolicy.freshFix(109.0,110.0))
     }
+    @Test fun foregroundWaitsForCurrentAccurateGpsRatherThanOldFrames() {
+        assertTrue(NavigationResumePolicy.trustworthyResumeFix(110.0,109.0,5.0))
+        assertFalse(NavigationResumePolicy.trustworthyResumeFix(110.0,95.0,5.0))
+        assertFalse(NavigationResumePolicy.trustworthyResumeFix(110.0,109.0,95.0))
+        assertFalse(NavigationResumePolicy.trustworthyResumeFix(110.0,109.0,Double.NaN))
+    }
     @Test fun backgroundGpsCanRaceNativeGuidance() {
         assertTrue(NavigationResumePolicy.currentGuidance(109.0,109.0))
         assertFalse(NavigationResumePolicy.currentGuidance(109.0,108.0))

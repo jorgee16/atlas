@@ -524,6 +524,16 @@ class NavigationGpsReplayTest {
             throw AssertionError("${failure.message}; expectedFix=${lastConfirmedFix}; camera=${snapshot(s)}",failure)
         }
         capture(s,"camera-background-caught-up")
+        // The cursor must not drift backwards or traverse the missed journey
+        // after an immediate foreground catch-up.
+        val resumeFrame=snapshot(s)
+        val renderedAtResume=Coordinate(
+            resumeFrame.getDouble("renderLat"),resumeFrame.getDouble("renderLon"))
+        SystemClock.sleep(650)
+        val settled=snapshot(s)
+        assertTrue("foreground resync must not replay an old visual position",
+            distance(renderedAtResume, Coordinate(
+                settled.getDouble("renderLat"),settled.getDouble("renderLon")))<20.0)
         tap(s,"Overview");s.recreate();attach(s)
         assertMode(s,"OVERVIEW");capture(s,"camera-overview-recreated")
         tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")

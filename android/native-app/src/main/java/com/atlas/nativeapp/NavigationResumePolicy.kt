@@ -13,6 +13,10 @@ internal object NavigationResumePolicy {
     fun freshFix(now: Double, fixAt: Double): Boolean =
         now.isFinite() && fixAt.isFinite() && now - fixAt in 0.0..8.0
 
+    fun trustworthyResumeFix(now: Double, fixAt: Double, accuracyMeters: Double): Boolean =
+        freshFix(now,fixAt) && accuracyMeters.isFinite() &&
+            accuracyMeters in 0.0..70.0
+
     fun currentGuidance(fixAt: Double, guidanceFixAt: Double): Boolean =
         fixAt.isFinite() && guidanceFixAt.isFinite() &&
             abs(fixAt - guidanceFixAt) < 0.01
