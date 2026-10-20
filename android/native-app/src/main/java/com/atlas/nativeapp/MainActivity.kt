@@ -94,6 +94,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private var lastNotice = 0L
     private var lastTouch = 0L
     private var navigationTouch = false
+    private var navigationTouchGeneration = 0L
     private var deferredChrome = false
     private var lastRoute: JSONObject? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -410,12 +411,21 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if(event.actionMasked==MotionEvent.ACTION_DOWN) {
             lastTouch=System.currentTimeMillis()
+            navigationTouchGeneration++
             navigationTouch=model.updates.value.navigating && page==null
         }
         val handled=super.dispatchTouchEvent(event)
         if(event.actionMasked==MotionEvent.ACTION_UP || event.actionMasked==MotionEvent.ACTION_CANCEL) {
-            navigationTouch=false
-            if(deferredChrome) { deferredChrome=false;root.post { render(model.updates.value) } }
+            // View posts PerformClick from ACTION_UP. Keep the pressed control
+            // attached while already-queued GPS/guidance callbacks run before
+            // that click; clearing here allowed them to remove its target.
+            val generation=navigationTouchGeneration
+            root.post {
+                if(generation==navigationTouchGeneration) {
+                    navigationTouch=false
+                    if(deferredChrome) { deferredChrome=false;render(model.updates.value) }
+                }
+            }
         }
         return handled
     }

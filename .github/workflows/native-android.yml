@@ -70,6 +70,7 @@ jobs:
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
       - name: Install video tools for visual evidence review
+        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         run: |
           if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
             # ffmpeg needs only Ubuntu. An unrelated Microsoft apt feed can
@@ -79,17 +80,20 @@ jobs:
           fi
           ffmpeg -version | head -1
       - name: Download and verify real Portugal routing and offline map for GPS replay
+        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         env:
           R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
         run: python3 tools/prepare-native-gps-replay.py
       - name: Enable hardware acceleration
+        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Native UI and focused camera smoke (full GPS trip only for validation)
+        if: ${{ !contains(github.event.head_commit.message, '[apk-only]') }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35

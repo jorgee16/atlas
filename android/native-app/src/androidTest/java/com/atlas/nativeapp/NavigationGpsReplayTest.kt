@@ -386,8 +386,13 @@ class NavigationGpsReplayTest {
         send(MotionEvent.ACTION_UP);SystemClock.sleep(180)
     }
     private fun assertMode(s:ActivityScenario<MainActivity>,mode:String) {
-        await("camera must apply $mode after a single action",15) {
-            val f=snapshot(s);f.optString("cameraMode")==mode && !f.optBoolean("cameraPending",true) && !f.optBoolean("styleLoading",true)
+        try {
+            await("camera must apply $mode after a single action",15) {
+                val f=snapshot(s);f.optString("cameraMode")==mode && !f.optBoolean("cameraPending",true) && !f.optBoolean("styleLoading",true)
+            }
+        } catch(failure:AssertionError) {
+            capture(s,"camera-failed-$mode")
+            throw AssertionError("${failure.message}; camera=${snapshot(s)}",failure)
         }
         val f=snapshot(s)
         assertEquals(mode=="FOLLOWING",f.getBoolean("follow"))
