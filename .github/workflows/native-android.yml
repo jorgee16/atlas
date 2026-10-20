@@ -185,7 +185,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/android-previous
-          tag="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '[.[] | select(.tag_name | startswith("atlas-android-v"))] | sort_by(.published_at) | last | .tag_name // ""')"
+          tag="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '[.[] | select((.tag_name | startswith("atlas-android-v")) and (.draft | not))] | sort_by(.published_at) | last | .tag_name // ""')"
           if [[ -n "$tag" ]]; then
             [[ "$tag" != "atlas-android-v$RELEASE_VERSION" ]] || { echo "::error::This release version already exists"; exit 1; }
             gh release download "$tag" --dir dist/android-previous --pattern 'Atlas-v*.apk' --pattern release-manifest.json
@@ -193,7 +193,8 @@ jobs:
           else
             echo "No prior Atlas signed release; first installation may require uninstalling older debug builds."
           fi
-          if gh release view "atlas-android-v$RELEASE_VERSION" >/dev/null 2>&1; then
+          if gh release view "atlas-android-v$RELEASE_VERSION" >/dev/null 2>&1 ||
+             git ls-remote --exit-code --tags origin "refs/tags/atlas-android-v$RELEASE_VERSION" >/dev/null 2>&1; then
             echo "::error::Refusing to replace an existing release/tag."
             exit 1
           fi
