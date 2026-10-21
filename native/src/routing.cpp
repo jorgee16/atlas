@@ -214,6 +214,62 @@ std::optional<uint32_t> Graph::nearest(Point p, Profile profile,
   }
   return found;
 }
+std::optional<DirectedRoadStart> Graph::nearestDirected(
+    Point p, Profile profile, double heading, double tolerance) const {
+  if (!valid(p) || !std::isfinite(heading) || heading < 0 ||
+      !std::isfinite(tolerance) || tolerance <= 0) return {};
+  // Search nearby directional ROAD EDGES, not arbitrary nearby road nodes.
+  // A position on a two-way road must not pick its opposite travel direction.
+  const double cell=grid_.u32(8)/1e6;
+  const double rad=3.141592653589793/180;
+  const double mx=111320*std::max(std::cos(p.lat*rad),.01);
+  const int cx=int(std::floor(p.lon/cell)), cy=int(std::floor(p.lat/cell));
+  const int rx=int(std::ceil(240./(mx*cell)))+1;
+  const int ry=int(std::ceil(240./(111320.*cell)))+1;
+  const auto base=24+std::size_t(grid_.u32(12))*16;
+  std::optional<DirectedRoadStart> selected;
+  double scoreBest=std::numeric_limits<double>::infinity();
+  for(uint32_t cellIndex=0;cellIndex<grid_.u32(12);++cellIndex) {
+    const auto o=24+std::size_t(cellIndex)*16;
+    const int x=grid_.i32(o), y=grid_.i32(o+4);
+    if(x<cx-rx || x>cx+rx || y<cy-ry || y>cy+ry)continue;
+    const auto begin=grid_.u32(o+8),count=grid_.u32(o+12);
+    for(uint32_t k=0;k<count;++k) {
+      const auto n=grid_.u32(base+(std::size_t(begin)+k)*4);
+      if(distance(p,point(n))>240.)continue;
+      for(uint32_t ei=offset(n);ei<offset(n+1);++ei) {
+        const auto e=edge(ei);
+        if(!e.allows(profile))continue;
+        std::vector<Point> line{point(n)};
+        appendGeometry(e,line);
+        for(std::size_t i=1;i<line.size();++i) {
+          const auto a=line[i-1], b=line[i];
+          const double dx=(b.lon-a.lon)*mx, dy=(b.lat-a.lat)*111320.;
+          const double den=dx*dx+dy*dy;
+          if(den<1e-5)continue;
+          const double xx=(a.lon-p.lon)*mx,yy=(a.lat-p.lat)*111320.;
+          const double fraction=std::clamp(-(xx*dx+yy*dy)/den,0.,1.);
+          const Point projected{a.lat+(b.lat-a.lat)*fraction,
+                                a.lon+(b.lon-a.lon)*fraction};
+          const double proximity=distance(p,projected);
+          if(proximity>tolerance)continue;
+          const double angular=std::abs(std::remainder(heading-bearing(a,b),360.));
+          if(angular>55.)continue;
+          double remaining=distance(projected,b);
+          for(std::size_t j=i+1;j<line.size();++j)
+            remaining+=distance(line[j-1],line[j]);
+          if(remaining<4.)continue;
+          const double score=proximity+angular*.19+std::min(remaining,150.)*.015;
+          if(score<scoreBest) {
+            scoreBest=score;
+            selected=DirectedRoadStart{n,ei,projected};
+          }
+        }
+      }
+    }
+  }
+  return selected;
+}
 void Graph::appendGeometry(const Edge &e, std::vector<Point> &out) const {
   auto arc = e.geometry & 0x1fffffff;
   auto o = 24 + std::size_t(arc) * 8;
@@ -326,6 +382,58 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
           r.tollEuros += meters / 1000 * tollRate(road.ref, op.vehicleClass);
         from = e.target;
       }
+      // Trim the edge geometry behind the current GPS projection. Without
+      // this, the preview starts at a graph intersection BEHIND the car and
+      // guidance may appear to point in the opposite direction.
+      if(op.initialEdge && op.initialSnap && !r.legs.empty() &&
+         !r.edges.empty() && r.edges.front()==*op.initialEdge) {
+        const std::size_t last=r.legs.front().last;
+        std::size_t segment=0;
+        double nearest=std::numeric_limits<double>::infinity();
+        Point snapped{};
+        const double mx=111320*std::max(
+            std::cos(op.initialSnap->lat*3.141592653589793/180),.01);
+        for(std::size_t i=1;i<=last;++i) {
+          const auto a=r.points[i-1], b=r.points[i];
+          const double dx=(b.lon-a.lon)*mx,dy=(b.lat-a.lat)*111320.;
+          const double x=(a.lon-op.initialSnap->lon)*mx;
+          const double y=(a.lat-op.initialSnap->lat)*111320.;
+          const double den=dx*dx+dy*dy;
+          const double t=den>0?std::clamp(-(x*dx+y*dy)/den,0.,1.):0.;
+          const Point projected{a.lat+(b.lat-a.lat)*t,
+                                a.lon+(b.lon-a.lon)*t};
+          const double d=distance(projected,*op.initialSnap);
+          if(d<nearest) {nearest=d;segment=i-1;snapped=projected;}
+        }
+        if(nearest<=8.0 && segment<last) {
+          double total=0,discarded=0;
+          for(std::size_t i=1;i<=last;++i)
+            total+=distance(r.points[i-1],r.points[i]);
+          for(std::size_t i=1;i<=segment;++i)
+            discarded+=distance(r.points[i-1],r.points[i]);
+          discarded+=distance(r.points[segment],snapped);
+          const double fraction=total>1.0?
+              std::clamp(discarded/total,0.,1.):0.;
+          const double clippedMeters=r.legs.front().distance*fraction;
+          const double clippedSeconds=r.legs.front().duration*fraction;
+          std::vector<Point> cropped{snapped};
+          cropped.insert(cropped.end(),r.points.begin()+segment+1,
+                         r.points.end());
+          r.points=std::move(cropped);
+          r.legs.front().distance-=clippedMeters;
+          r.legs.front().duration-=clippedSeconds;
+          r.meters-=clippedMeters;
+          r.seconds-=clippedSeconds;
+          for(std::size_t i=0;i<r.legs.size();++i) {
+            auto &leg=r.legs[i];
+            if(i>0) {
+              leg.first-=segment;
+              leg.startDistance-=clippedMeters;
+            }
+            leg.last-=segment;
+          }
+        }
+      }
       makeManeuvers(r, g);
       return r;
     }
@@ -336,6 +444,10 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
     const int64_t incomingFrom =
         item.state < n ? -1 : int64_t(virtualStates[item.state - n].from);
     for (auto i = g.offset(currentNode); i < g.offset(currentNode + 1); ++i) {
+      // Force a physically confirmed initial travel direction. Following
+      // turns and turn restrictions remain handled by normal graph routing.
+      if(currentNode==start && item.state==start &&
+         op.initialEdge && i!=*op.initialEdge) continue;
       auto e = g.edge(i);
       if (!e.allows(op.profile))
         continue;

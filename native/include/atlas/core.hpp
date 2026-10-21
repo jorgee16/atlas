@@ -70,6 +70,10 @@ struct Route {
   double meters = 0, seconds = 0, tollEuros = 0;
   uint32_t expanded = 0;
 };
+struct DirectedRoadStart {
+  uint32_t node = 0, edge = 0;
+  Point snapped;
+};
 class Graph {
 public:
   explicit Graph(const std::string &directory);
@@ -86,6 +90,8 @@ public:
                    int64_t from, uint32_t target) const;
   std::optional<uint32_t> nearest(Point p, Profile profile,
                                   double radius = 2000) const;
+  std::optional<DirectedRoadStart> nearestDirected(
+      Point p, Profile profile, double heading, double tolerance = 35) const;
   void appendGeometry(const Edge &edge, std::vector<Point> &points) const;
 
 private:
@@ -100,6 +106,8 @@ struct RouteOptions {
   double penaltyMinutesPerEuro = 0;
   int vehicleClass = 1;
   uint32_t maxExpanded = 2000000;
+  std::optional<uint32_t> initialEdge;
+  std::optional<Point> initialSnap;
   std::function<bool()> cancelled;
 };
 double tollRate(std::string reference, int vehicleClass);

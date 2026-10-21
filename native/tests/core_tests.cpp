@@ -62,6 +62,26 @@ int main(int argc, char **argv) {
     auto near = search.nearby({40, -8}, 3000, "");
     check(near.size() == 2, "nearby excludes cities");
     check(search.nearby({40, -8}, 3000, "cafe").size() == 1, "category search");
+    // A real moving eastbound driver in the middle of the first street
+    // must not be routed from an unrelated/behind intersection or westbound.
+    const Point realStart{40.0,-7.9995};
+    const auto eastStart=graph.nearestDirected(realStart,Profile::drive,90,22);
+    check(eastStart.has_value(),"eastbound GPS fixes select a directed road");
+    check(eastStart->node==0,"eastbound road edge starts from the west");
+    RouteOptions headed;
+    headed.initialEdge=eastStart->edge;
+    headed.initialSnap=eastStart->snapped;
+    const auto eastRoute=route(graph,eastStart->node,2,headed);
+    check(eastRoute.has_value(),"eastbound route remains connected");
+    check(distance(eastRoute->points.front(),realStart)<5,
+          "initial route geometry begins at CURRENT GPS projection");
+    check(eastRoute->points.size()>=2 &&
+          std::abs(std::remainder(bearing(eastRoute->points[0],
+                                          eastRoute->points[1])-90.0,360.0))<30,
+          "first route segment follows confirmed eastbound heading");
+    // No reverse directed edge exists on this one-way fixture.
+    const auto westStart=graph.nearestDirected(realStart,Profile::drive,270,22);
+    check(!westStart,"missing westbound edge must not fake reverse travel");
     auto p = progress({40, -8}, *drive);
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);

@@ -163,7 +163,7 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
                                               jdouble a, jdouble b, jdouble c,
                                               jdouble d, jboolean walk,
                                               jboolean avoid, jdouble penalty,
-                                              jint vehicle) {
+                                              jint vehicle, jdouble gpsHeading) {
   try {
     std::lock_guard<std::mutex> lock(gate);
     auto &e = engine(id);
@@ -178,12 +178,27 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     op.cancelled = [generation] {
       return cancellationGeneration.load() != generation;
     };
-    auto start = e.graph->nearest({a, b}, op.profile),
-         goal = e.graph->nearest({c, d}, op.profile);
-    if (!start || !goal)
+    const auto directed = !walk && std::isfinite(gpsHeading) &&
+        gpsHeading>=0 ? e.graph->nearestDirected({a,b},op.profile,gpsHeading)
+                      : std::nullopt;
+    auto start = directed ? std::optional<uint32_t>(directed->node)
+                          : e.graph->nearest({a,b},op.profile);
+    auto goal = e.graph->nearest({c,d},op.profile);
+    if(!start || !goal)
       throw std::runtime_error("No accessible road within 2 km of an endpoint");
-    auto next = atlas::route(*e.graph, *start, *goal, op);
-    if (!next)
+    if(directed) {
+      op.initialEdge=directed->edge;
+      op.initialSnap=directed->snapped;
+    }
+    auto next=atlas::route(*e.graph,*start,*goal,op);
+    if(!next && directed) {
+      // The selected carriageway may have no legal continuation.
+      op.initialEdge.reset();
+      op.initialSnap.reset();
+      start=e.graph->nearest({a,b},op.profile);
+      if(start) next=atlas::route(*e.graph,*start,*goal,op);
+    }
+    if(!next)
       throw std::runtime_error("No route connects these points");
     if (!walk)
       atlas::calibrateDriveEta(*next, *e.graph);

@@ -143,6 +143,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     // Keep the origin used for graph calculation rather than assuming that
     // the selected route still starts near the vehicle.
     private var preparedLiveRouteOrigin: Coordinate? = null
+    private var preparedLiveRouteHeading: Double? = null
     private var navigationRevision = 0L
     private val fixPump = viewModelScope.launch {
         for (next in locationFixes) {
@@ -233,7 +234,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         state.update { it.copy(mode = value, walking = value == "walk") }
     }
     fun avoidTolls(value: Boolean) { invalidateRoute(); state.update { it.copy(avoidTolls = value) } }
-    private fun invalidateRoute() { preparedLiveRouteOrigin=null; stop(); state.update { it.copy(route = null, routeOptions = emptyList(), arrived = false, journeys = emptyList(), journey = null, journeyLeg = -1) } }
+    private fun invalidateRoute() { preparedLiveRouteOrigin=null;preparedLiveRouteHeading=null; stop(); state.update { it.copy(route = null, routeOptions = emptyList(), arrived = false, journeys = emptyList(), journey = null, journeyLeg = -1) } }
     fun clearSearch() { searchJob?.cancel(); ++searchGeneration; state.update { it.copy(results = emptyList(), searching = false, searchQuery = "", searchError = null) } }
     fun search(text: String, nearby: Boolean = false, category: String = "", anchor: Coordinate = this.anchor) {
         searchJob?.cancel(); val generation = ++searchGeneration
@@ -266,24 +267,32 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     if (journeys.isEmpty()) status("No public transport journeys found")
                     return@launch
                 }
-                val choices = withContext(worker) {
-                    core.graph(regions.graph(from, destination.coordinate()).path)
-                    val primary = JSONObject(core.route(from, destination.coordinate(), snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass))
+                // The user can continue driving while the button action waits
+                // for the native worker: sample the latest FILTERED GPS fix
+                // INSIDE the worker before launching graph routing.
+                val (choices,liveOrigin,routingHeading) = withContext(worker) {
+                    val routingFix=if(snapshot.origin==null)state.value.fix else null
+                    val liveOrigin=if(snapshot.origin==null)routingFix?.point ?: from else from
+                    val routingHeading=if(snapshot.origin==null && !snapshot.walking)
+                        NavigationStartPolicy.movingHeading(routingFix) else null
+                    core.graph(regions.graph(liveOrigin, destination.coordinate()).path)
+                    val primary = JSONObject(core.route(liveOrigin, destination.coordinate(), snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
                     core.remember(0); primary.put("key", 0).put("label", if (snapshot.avoidTolls) "Without tolls" else "Recommended")
                     val choices = mutableListOf(primary)
                     if (!snapshot.walking && !snapshot.avoidTolls && primary.optDouble("tollEuros") > 0) {
                         try {
-                            val alternative = JSONObject(core.route(from, destination.coordinate(), false, true, 0.0, vehicleClass))
+                            val alternative = JSONObject(core.route(liveOrigin, destination.coordinate(), false, true, 0.0, vehicleClass, routingHeading))
                             if (alternative.getJSONArray("edgeIndexes").toString() != primary.getJSONArray("edgeIndexes").toString()) {
                                 core.remember(1); alternative.put("key", 1).put("label", "Without tolls"); choices.add(alternative)
                             }
                         } catch (e: IllegalStateException) { if (e.message?.contains("cancel", true) == true) throw e }
                     }
                     core.activate(0)
-                    choices
+                    Triple(choices,liveOrigin,routingHeading)
                 }
                 if (generation == routeGeneration) {
-                    preparedLiveRouteOrigin = if (snapshot.origin == null) from else null
+                    preparedLiveRouteOrigin = if (snapshot.origin == null) liveOrigin else null
+                    preparedLiveRouteHeading = if (snapshot.origin == null) routingHeading else null
                     lastSpoken = -1
                     state.update { it.copy(route = choices.first(), routeOptions = choices, guidance = null, navigating = startAfter && snapshot.origin == null) }
                     if (startAfter && snapshot.origin == null) recordNavigation()
@@ -328,7 +337,10 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         }
         if (snapshot.route == null ||
             NavigationStartPolicy.requiresNewOrigin(
-                preparedLiveRouteOrigin,fix.point,fix.accuracy,snapshot.walking)) {
+                preparedLiveRouteOrigin,fix.point,fix.accuracy,snapshot.walking,
+                NavigationStartPolicy.movingHeading(fix)!=null) ||
+            (!snapshot.walking && NavigationStartPolicy.directionChanged(
+                preparedLiveRouteHeading,NavigationStartPolicy.movingHeading(fix)))) {
             // Discard the preview's old origin, ask C++ for a fresh route from
             // the current GPS position, and start only after it is calculated.
             calculate(true)
@@ -350,6 +362,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     /** Internal stop preserves a prepared route for preview/edit workflows. */
     fun stop() {
         preparedLiveRouteOrigin=null
+        preparedLiveRouteHeading=null
         cancelCurrentRouteWork()
         state.update { it.copy(navigating = false, guidance = null, busy = false) }
         // A paused/ended live route must not auto-resume after process death.
