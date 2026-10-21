@@ -147,6 +147,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var navigationStartAt = Double.NaN
     private var navigationStartFixTime = Double.NaN
     private var initialGpsAlignmentPending = false
+    private val offRoutePresentation = NavigationOffRoutePresentation()
     private var lastCameraCue: JSONObject? = null
     private var lastCameraFraming: NavigationCameraFraming.Target? = null
     private val freePosition = NavigationPositionInterpolator()
@@ -633,7 +634,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val onRoute = s.navigating && guidance != null &&
             NavigationResumePolicy.currentHeadingGuidance(now, fix.time, guidanceFixTime) &&
             distance.isFinite() && distance < maxOf(30.0, fix.accuracy * 1.5) &&
-            guidance.optString("state") !in listOf("checking","reroute","changed")
+            guidance.optString("state") !in listOf("checking","reroute","changed") &&
+            !offRoutePresentation.active
         val routeBearing = if (onRoute) guidance
             ?.optDouble("bearing")?.takeIf { it.isFinite() && it >= 0.0 } else null
         return headingStabilizer.resolve(fix,deviceHeading,s.navigating,routeBearing,onRoute)
@@ -675,6 +677,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             resumeSyncPending = false
             resumeAnchorFixTime = Double.NaN
             initialGpsAlignmentPending = false
+            offRoutePresentation.reset()
             navigationStartAt = Double.NaN
             navigationStartFixTime = Double.NaN
         }
@@ -686,6 +689,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             navigationStartAt = SystemClock.elapsedRealtimeNanos() / 1e9
             navigationStartFixTime = s.fix?.time ?: Double.NaN
             initialGpsAlignmentPending = true
+            offRoutePresentation.reset()
             headingStabilizer.reset()
             stationaryPosition.reset()
             freePosition.reset()
@@ -853,10 +857,37 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 resumeAnchorFixTime, fix.time, isPredictedGuidance)
             val guidanceUsable = guidanceCurrent &&
                 !suppressedPrediction && (!catchingUp || !isPredictedGuidance)
+            val wasOffRoute = offRoutePresentation.active
+            val enteredOffRoute = offRoutePresentation.observe(
+                s.navigating,fix,guidanceUsable && !isPredictedGuidance,
+                s.guidance?.optBoolean("offRouteConfirmed",false)==true,
+                s.guidance?.optDouble("offRoute",Double.POSITIVE_INFINITY)
+                    ?: Double.POSITIVE_INFINITY,
+                s.guidance?.optString("state") ?: "")
+            val rejoinedRoute = wasOffRoute && !offRoutePresentation.active
+            if (enteredOffRoute || rejoinedRoute) {
+                // Independently verified physical deviation, not a visual
+                // accuracy/map-match transition: switch coordinate reference.
+                stationaryPosition.reset()
+                freePosition.reset()
+                presentedPosition.reset()
+                lastRenderedMarker=null
+                routeRendering=false
+                lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
+                renderInterpolator.reset()
+                if (geometry.size>=2 && s.route!=null) {
+                    renderInterpolator.setRoute(
+                        geometry.map { Coordinate(it.latitude,it.longitude) },
+                        s.route.optDouble("distanceMeters",0.0))
+                    interpolatedRoute=s.route
+                }
+                if(follow)cameraState.viewportChanged()
+            }
             // GPS and JNI guidance are distinct coordinates. A recent fix
             // can start the route even with poor indoor accuracy; it must not
             // automatically teleport the displayed position to the road.
             val eligibleMatch = guidanceUsable && s.navigating && !s.busy &&
+                !offRoutePresentation.active &&
                 geometry.size >= 2 && s.guidance != null &&
                 s.guidance.optString("state") !in listOf("checking","reroute","changed","arrived") &&
                 s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY) < 60.0
@@ -866,7 +897,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 (initialRoadMatchAccepted || NavigationInitialMatchPolicy.canAdopt(
                     fix, s.guidance!!.optDouble("offRoute",Double.POSITIVE_INFINITY), s.walking))
             if (matchVisible) initialRoadMatchAccepted = true
-            val candidate = if (matchVisible) s.guidance!!.coordinate() else fix.point
+            val candidate = if (matchVisible) s.guidance!!.coordinate()
+                else if (offRoutePresentation.active && fix.accuracy>35.0)
+                    lastRenderedMarker ?: fix.point
+                else fix.point
             // Until the first trustworthy visual match, keep the original GPS
             // location separate from the routable route origin.
             val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
@@ -876,7 +910,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // Explicit start/foreground epochs above own any legitimate rebase.
             if (trusted) lastTrustedGuidanceAt = s.guidance!!
                 .optDouble("predictedAt",s.guidance.optDouble("gpsFixTime",fix.time))
-            val hold = NavigationCameraBehavior.useHeldRouteFix(s.navigating,
+            val hold = !offRoutePresentation.active &&
+                NavigationCameraBehavior.useHeldRouteFix(s.navigating,
                 trusted,nowSeconds-lastTrustedGuidanceAt)
             val smooth = trusted || hold
             val wasRouteRendering = routeRendering
@@ -954,7 +989,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             }
             val positionTarget = NavigationCursorPresentation.choose(
                 lastRenderedMarker,desiredDisplayed,fix,
-                catchingUp || mustRebaseAfterStaleAnchor || initialAlignment || navigationStarting)
+                catchingUp || mustRebaseAfterStaleAnchor || initialAlignment ||
+                    navigationStarting || enteredOffRoute || rejoinedRoute)
             val displayed=if(s.navigating)presentedPosition.commit(positionTarget,nowSeconds,
                 StationaryMapPosition.visualSpeed(fix)) else desiredDisplayed
             val heading = travelHeading(s, fix)

@@ -193,6 +193,10 @@ void GuidanceSession::reset() {
   offFixes_ = 0;
   implausibleFixes_ = 0;
   implausibleCandidate_.reset();
+  deviationMotionPoint_.reset();
+  deviationMotionAt_ = -1;
+  deviationMotionDistance_ = 0;
+  deviationVerifiedAt_ = -1;
   lastPosition_.reset();
   lastGoodPosition_.reset();
 }
@@ -235,6 +239,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
         local.offRoute <= out.position.offRoute + std::min(8.,accuracy*.4))
       out.position=local;
   }
+  out.observedOffRoute = out.position.offRoute;
   lastTime_ = t;
   if (accuracy > 50) {
     // Ignore unreliable projections while retaining the last reliable
@@ -245,6 +250,45 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     offFixes_ = 0;
     implausibleCandidate_.reset();
     implausibleFixes_ = 0;
+    out.state = Guidance::State::reduced;
+    return out;
+  }
+  // A real private-road diversion can be only 30-70 metres from the route.
+  // Reduce the old 80m gate only after two independent plausible moving GPS
+  // fixes. Accuracy alone does not prove travel (indoor GNSS can drift).
+  const double observedOffRoute = out.position.offRoute;
+  if (observedOffRoute <= std::max(12., accuracy * 1.5)) {
+    deviationMotionPoint_.reset();
+    deviationMotionAt_ = -1;
+    deviationVerifiedAt_ = -1;
+  } else if (accuracy <= 20 && speed >= .6 &&
+             observedOffRoute >= std::max(12., accuracy * 1.5)) {
+    if (deviationMotionPoint_ && deviationMotionAt_ >= 0) {
+      const double dt = t - deviationMotionAt_;
+      const double moved = distance(*deviationMotionPoint_, p);
+      if (dt > 0 && dt <= 6 && moved >= 3 &&
+          moved <= std::max(20., speed * dt * 3 + accuracy) &&
+          observedOffRoute >= deviationMotionDistance_ - 5.)
+        deviationVerifiedAt_ = t;
+    }
+    deviationMotionPoint_ = p;
+    deviationMotionAt_ = t;
+    deviationMotionDistance_ = observedOffRoute;
+  }
+  const bool verifiedDeparture =
+      deviationVerifiedAt_ >= 0 && t - deviationVerifiedAt_ <= 18 &&
+      deviationMotionPoint_ &&
+      distance(*deviationMotionPoint_, p) <= std::max(30., accuracy * 2.5);
+  const double deviationThreshold = verifiedDeparture
+      ? std::max(28., accuracy * 2.5) : std::max(80., accuracy * 2.);
+  const bool deviationCandidate = observedOffRoute > deviationThreshold;
+  // Without independent movement, stationary off-road wander must not
+  // silently replace the last reliable map-matched reference.
+  if (!verifiedDeparture && lastGoodPosition_ && speed < .35 &&
+      observedOffRoute > std::max(30., accuracy * 2.) &&
+      !deviationCandidate) {
+    out.position = *lastGoodPosition_;
+    lastPosition_ = out.position;
     out.state = Guidance::State::reduced;
     return out;
   }
@@ -270,7 +314,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
   // jump forward once the native motion filter reports zero movement.
   // A background-to-foreground screen sync is a separate Android visual
   // epoch and uses consecutive *real* fixes; routing waits for motion proof.
-  if (lastGoodPosition_ && speed < .35 &&
+  if (lastGoodPosition_ && speed < .35 && !deviationCandidate &&
       out.position.offRoute <= std::max(30., accuracy * 2) &&
       lastGoodPosition_->offRoute <= std::max(30., accuracy * 2)) {
     out.position = *lastGoodPosition_;
@@ -320,8 +364,7 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       out.position.along < lastPosition_->along &&
       lastPosition_->along - out.position.along <= std::max(20., accuracy * 2))
     out.position = *lastPosition_;
-  double threshold = std::max(80., accuracy * 2);
-  if (out.position.offRoute > threshold) {
+  if (deviationCandidate) {
     // A distant fix must not teleport the navigation marker onto an
     // unrelated road before sustained deviation has been confirmed.
     // Keep evaluating the raw off-route distance for reroute decisions.
@@ -332,6 +375,9 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       offSince_ = t;
     ++offFixes_;
     out.state = Guidance::State::checking;
+    // Tell Android that genuine off-road fixes should be drawn unsnapped.
+    out.offRouteConfirmed = verifiedDeparture && offFixes_ >= 3 &&
+                            t - offSince_ >= 2.;
     if (offFixes_ >= 3 && t - offSince_ >= 5 &&
         (lastReroute_ < 0 || t - lastReroute_ >= 15)) {
       out.state = Guidance::State::reroute;

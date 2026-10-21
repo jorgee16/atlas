@@ -26,6 +26,12 @@ class AtlasPages(
     val importBackup: () -> Unit,
     val exportBackup: () -> Unit
 ) {
+    internal var diagnosticsLiveText: TextView? = null
+        private set
+    fun updateDiagnostics(state: AtlasState) {
+        diagnosticsLiveText?.text=NavigationDiagnostics.snapshot(
+            state,android.os.SystemClock.elapsedRealtimeNanos()/1e9).details
+    }
     private fun lp(top: Int = 0) = LinearLayout.LayoutParams(-1, -2).apply { topMargin = ui.dp(top) }
     private fun scroll(content: View) = ScrollView(context).apply { isFillViewport = false; clipToPadding = false; setPadding(ui.dp(20), ui.dp(8), ui.dp(20), ui.dp(28)); addView(content) }
     private fun paragraph(text: String) = ui.text(text, 14f, ui.muted).apply { setLineSpacing(ui.dp(4).toFloat(), 1f) }
@@ -209,6 +215,7 @@ class AtlasPages(
         val body=ui.column();body.addView(ui.text("MAKE ATLAS YOURS",11f,ui.muted,true),lp(16))
         body.addView(ui.card(padding=5).apply{
             addView(rowAction("volume","Voice guidance",if(model.voice)"On · Speak upcoming turns" else "Off · Quiet navigation"){model.voice=!model.voice})
+            addView(ui.rule());addView(rowAction("compass","Diagnostics",if(model.diagnosticsEnabled)"GPS overlay enabled" else "Inspect GPS, heading and positioning"){open("diagnostics")})
             addView(ui.rule());addView(rowAction("sun","Appearance",model.theme.replaceFirstChar{it.titlecase()}){open("appearance")})
             addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Toll estimates"){open("vehicle")})
             addView(ui.rule());addView(rowAction("layers","Map layers",when(model.mapVisualStyle){
@@ -242,6 +249,28 @@ class AtlasPages(
         body.addView(ui.text("Explore with a little more freedom.",12f,ui.muted).apply{gravity=Gravity.CENTER},lp(8))
         return scroll(body)
     }
+    fun diagnostics(state: AtlasState): View=scroll(ui.column().apply {
+        addView(ui.heading("Navigation diagnostics",
+            "Inspect actual GNSS measurements independently of filtered route tracking."),lp(8))
+        addView(ui.card(padding=5).apply {
+            addView(rowAction("compass","Show on-map overlay",
+                if(model.diagnosticsEnabled)"Enabled · tap to disable" else "Disabled · tap to enable") {
+                model.diagnosticsEnabled=!model.diagnosticsEnabled
+            })
+        },lp(18))
+        addView(paragraph("When enabled, a small on-map panel shows live GPS fix rate, reported precision, heading, speed, movement evidence, and off-route status. Tap its header for more details or × to hide it."),lp(16))
+        val telemetry=NavigationDiagnostics.snapshot(
+            state,android.os.SystemClock.elapsedRealtimeNanos()/1e9)
+        addView(ui.card().apply {
+            addView(ui.text(telemetry.headline,15f,ui.blue,true))
+            addView(ui.space(12))
+            diagnosticsLiveText=ui.text(telemetry.details,13f,ui.ink).apply {
+                setLineSpacing(ui.dp(4).toFloat(),1f)
+            }
+            addView(diagnosticsLiveText)
+        },lp(16))
+        addView(paragraph("Accuracy is the value reported by Android, not a guarantee of physical position. GPS rate counts accepted real location fixes, never interpolated rendering frames. The overlay stays within Atlas and is off by default."),lp(18))
+    })
     fun appearance(): View=scroll(ui.column().apply{
         addView(paragraph("Choose how Atlas looks on your device."),lp(12))
         listOf("system" to "Use device setting","light" to "Light","dark" to "Dark").forEach{(key,label)->addView(ui.card(padding=5).apply{addView(rowAction(if(key=="dark")"compass" else "sun",label,if(model.theme==key)"Selected" else "Tap to apply"){changeTheme(key)})},lp(12))}

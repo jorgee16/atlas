@@ -74,6 +74,35 @@ int main() {
   auto teleported=falseArrival.update(straight.points.back(),5,0,201,straight);
   check(teleported.state!=Guidance::State::arrived,
         "GPS drift near destination must not invent route completion");
+  // A driver exits the mapped road using several real moving GPS fixes,
+  // then parks 39 metres away on an unmapped private driveway.
+  GuidanceSession privateLot;
+  const double eastMetre=1.0/(111320.0*std::cos(40.0*3.141592653589793/180.0));
+  auto lotPoint=[&](double along,double east)->Point {
+    return {40.0+along/111320.0,-8.0+east*eastMetre};
+  };
+  privateLot.update(lotPoint(20,0),5,5,300,straight);
+  privateLot.update(lotPoint(26,15),5,5,301,straight);
+  privateLot.update(lotPoint(34,26),5,5,302,straight);
+  auto departing=privateLot.update(lotPoint(42,37),5,5,303,straight);
+  check(departing.state==Guidance::State::checking,
+        "real sub-80m diversion must enter route-deviation checking");
+  bool showedRealLocation=false,requestedNewRoute=false;
+  for(int sec=304;sec<=312;++sec) {
+    auto stopped=privateLot.update(lotPoint(43,39),5,0,sec,straight);
+    showedRealLocation|=stopped.offRouteConfirmed;
+    requestedNewRoute|=stopped.state==Guidance::State::reroute;
+  }
+  check(showedRealLocation,"parked driver must not remain snapped to old road");
+  check(requestedNewRoute,"real sub-80m deviation must reroute after stopping");
+  // A 55m apparently precise stationary offset alone is not real travel.
+  GuidanceSession falseExit;
+  falseExit.update(lotPoint(20,0),5,0,400,straight);
+  for(int sec=401;sec<=415;++sec) {
+    auto drift=falseExit.update(lotPoint(20,55),5,0,sec,straight);
+    check(!drift.offRouteConfirmed && drift.state!=Guidance::State::reroute,
+          "stationary GNSS wander must not become a verified departure");
+  }
   std::cout<<"Navigation loop ambiguity, recovery and poor GPS passed\n";
  } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }

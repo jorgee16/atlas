@@ -77,6 +77,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private lateinit var snackbar: TextView
     private lateinit var credit: TextView
     private lateinit var mapSourceBadge: TextView
+    private lateinit var diagnosticsOverlay: LinearLayout
+    private lateinit var diagnosticsLabel: TextView
+    private lateinit var diagnosticsBody: TextView
+    private var diagnosticsExpanded = false
     private var topSourceBadge: TextView? = null
     private var page: String? = null
     private var pageKey: List<Any?>? = null
@@ -108,6 +112,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private val gapTick = object : Runnable {
         override fun run() {
             model.predictSignalGap(android.os.SystemClock.elapsedRealtimeNanos() / 1e9)
+            if (::diagnosticsOverlay.isInitialized &&
+                (model.diagnosticsEnabled || page=="diagnostics"))
+                updateDiagnostics(model.updates.value)
             handler.postDelayed(this, 1000L)
         }
     }
@@ -360,6 +367,40 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         root.addView(credit,FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM or Gravity.START))
         pageLayer = ui.column().apply { setBackgroundColor(ui.canvas); visibility = View.GONE; elevation = ui.dp(12).toFloat(); isClickable = true }
         root.addView(pageLayer,FrameLayout.LayoutParams(-1,-1))
+        // Opt-in IN-APP overlay; no SYSTEM_ALERT_WINDOW permission or
+        // screen-over-other-apps behaviour. Touches outside this card remain map touches.
+        diagnosticsOverlay=ui.column().apply {
+            setPadding(ui.dp(13),ui.dp(12),ui.dp(13),ui.dp(12))
+            background=ui.shape(Color.argb(238,24,32,47),16)
+            elevation=ui.dp(11).toFloat()
+            visibility=View.GONE
+            addView(ui.row().apply {
+                diagnosticsLabel=ui.text("GPS DIAGNOSTICS",12f,Color.WHITE,true).apply {
+                    setOnClickListener {
+                        diagnosticsExpanded=!diagnosticsExpanded
+                        updateDiagnostics(model.updates.value)
+                    }
+                }
+                addView(diagnosticsLabel,LinearLayout.LayoutParams(0,ui.dp(35),1f).apply {
+                    gravity=Gravity.CENTER_VERTICAL
+                })
+                addView(ui.text("×",23f,Color.WHITE,true).apply {
+                    contentDescription="Hide GPS diagnostics"
+                    gravity=Gravity.CENTER
+                    setOnClickListener { model.diagnosticsEnabled=false }
+                },LinearLayout.LayoutParams(ui.dp(38),ui.dp(38)))
+            })
+            diagnosticsBody=ui.text("",12f,Color.WHITE).apply {
+                setLineSpacing(ui.dp(3).toFloat(),1f)
+                setOnClickListener {
+                    diagnosticsExpanded=!diagnosticsExpanded
+                    updateDiagnostics(model.updates.value)
+                }
+            }
+            addView(diagnosticsBody,linear(4))
+        }
+        root.addView(diagnosticsOverlay,
+            FrameLayout.LayoutParams(ui.dp(258),-2,Gravity.TOP or Gravity.START))
         snackbar = ui.text("",13f,Color.WHITE).apply { background=ui.shape(Color.rgb(24,32,47),16);setPadding(ui.dp(16),ui.dp(13),ui.dp(16),ui.dp(13));elevation=ui.dp(24).toFloat();visibility=View.GONE }
         root.addView(snackbar,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
         trailList=trails.all()
@@ -462,6 +503,13 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             leftMargin=left
             bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(215)else ui.dp(116)
         }.also{mapSourceBadge.layoutParams=it}
+        (diagnosticsOverlay.layoutParams as FrameLayout.LayoutParams).apply {
+            width=ui.dp(if(landscape)232 else 258)
+            gravity=Gravity.TOP or if(landscape)Gravity.END else Gravity.START
+            leftMargin=if(landscape)0 else left
+            rightMargin=if(landscape)right else 0
+            topMargin=topInset+ui.dp(if(landscape)14 else if(model.updates.value.navigating)172 else 150)
+        }.also{diagnosticsOverlay.layoutParams=it}
         (snackbar.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(24);rightMargin=rightInset+ui.dp(24);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(180) else ui.dp(100)}.also{snackbar.layoutParams=it}
         pageLayer.setPadding(leftInset,topInset,rightInset,if(page=="trips")bottomInset+ui.dp(91) else bottomInset)
     }
@@ -472,6 +520,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         atlasMap.sourceMode = model.mapSourceMode
         atlasMap.visualStyle = model.mapVisualStyle
         atlasMap.render(state)
+        updateDiagnostics(state)
         atlasMap.previewTrail(if(state.tab=="Trail") pendingTrail ?: trailList.firstOrNull{it.id==selectedTrailId} else null)
         mapSourceBadge.visibility=if(page==null&&(state.navigating||fullMap))View.VISIBLE else View.GONE
         updateMapSourceIndicators()
@@ -484,6 +533,20 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         if(state.navigating)window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         updatePage(state)
         if(state.notice!=lastNotice){lastNotice=state.notice;if(state.status.isNotBlank()){snackbar.text=state.status;snackbar.visibility=View.VISIBLE;handler.removeCallbacks(hideNotice);handler.postDelayed(hideNotice,4500)}}
+    }
+    private fun updateDiagnostics(state: AtlasState) {
+        val enabled=model.diagnosticsEnabled
+        diagnosticsOverlay.visibility=if(enabled&&page==null)View.VISIBLE else View.GONE
+        if(!enabled && page!="diagnostics")return
+        if(page=="diagnostics") pages.updateDiagnostics(state)
+        val snapshot=NavigationDiagnostics.snapshot(state,
+            android.os.SystemClock.elapsedRealtimeNanos()/1e9)
+        if(enabled) {
+            diagnosticsLabel.text=snapshot.headline+
+                if(diagnosticsExpanded)"  ▴" else "  ▾"
+            diagnosticsBody.text=if(diagnosticsExpanded)
+                snapshot.details else snapshot.short
+        }
     }
     private val hideNotice=Runnable{snackbar.visibility=View.GONE}
     private fun renderTop(s: AtlasState) {
@@ -1005,7 +1068,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         page=name;pageKey=null;pageLayer.removeAllViews();pageLayer.visibility=View.VISIBLE
         val header=ui.row().apply{setPadding(ui.dp(16),ui.dp(14),ui.dp(20),ui.dp(14));setBackgroundColor(ui.canvas)}
         header.addView(ui.iconButton("back","Back"){backPage()},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
-        val title=when(name){"search"->if(searchTarget=="origin")"Starting point" else "Find a place";"regions"->"Offline regions";"trips"->"Your trips";"bookmarks"->"Saved places";"nearby"->"Around you";"journeys"->"Public transport";"journey"->"Your journey";"appearance"->"Appearance";"vehicle"->"Vehicle class";else->"Settings"}
+        val title=when(name){"diagnostics"->"Diagnostics";"search"->if(searchTarget=="origin")"Starting point" else "Find a place";"regions"->"Offline regions";"trips"->"Your trips";"bookmarks"->"Saved places";"nearby"->"Around you";"journeys"->"Public transport";"journey"->"Your journey";"appearance"->"Appearance";"vehicle"->"Vehicle class";else->"Settings"}
         header.addView(ui.text(title,21f,bold=true),LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(14)})
         if(name=="trips")header.addView(ui.iconButton("upload","Import trip"){importTrip.launch(arrayOf("application/json","text/*"))},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
         pageLayer.addView(header)
@@ -1024,20 +1087,20 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         pageBody=FrameLayout(this);pageLayer.addView(pageBody,LinearLayout.LayoutParams(-1,0,1f))
         rebuildChrome();updatePage(model.updates.value)
     }
-    private fun backPage(){when(page){"appearance","vehicle"->openPage("settings");"journey"->openPage("journeys");else->closePage()}}
+    private fun backPage(){when(page){"appearance","vehicle","diagnostics"->openPage("settings");"journey"->openPage("journeys");else->closePage()}}
     private fun closePage(){hideKeyboard();val was=page;page=null;searchInput=null;pageKey=null;pageLayer.visibility=View.GONE;if(was=="trips"&&model.updates.value.tab=="Trip")model.tab("Explore");rebuildChrome()}
     private fun updatePage(s:AtlasState){
         val currentPage=page?:return
-        val key=listOf(currentPage,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journey,s.journeyLeg,s.journeyPhase,model.voice,model.vehicleClass,model.mapSourceMode)
+        val key=listOf(currentPage,model.diagnosticsEnabled,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journey,s.journeyLeg,s.journeyPhase,model.voice,model.vehicleClass,model.mapSourceMode)
         if(key==pageKey)return;pageKey=key
-        val content=when(currentPage){"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();else->pages.settings()}
+        val content=when(currentPage){"diagnostics"->pages.diagnostics(s);"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();else->pages.settings()}
         val oldScroll=if(currentPage!="search")pageBody.getChildAt(0)?.scrollY?:0 else 0
         pageBody.removeAllViews();pageBody.addView(content,FrameLayout.LayoutParams(-1,-1))
         if(oldScroll>0)content.post{content.scrollTo(0,oldScroll)}
         layoutChrome()
         if(currentPage=="trips"){navigation.bringToFront();snackbar.bringToFront()}
     }
-    private fun showMenu(){showChoices("Atlas",listOf("Saved places" to "bookmark","Offline regions" to "download","Your trips" to "trip","Settings" to "sun")){index->openPage(listOf("bookmarks","regions","trips","settings")[index])}}
+    private fun showMenu(){showChoices("Atlas",listOf("Saved places" to "bookmark","Offline regions" to "download","Your trips" to "trip","Diagnostics" to "compass","Settings" to "sun")){index->openPage(listOf("bookmarks","regions","trips","diagnostics","settings")[index])}}
     private fun showChoices(title:String,options:List<Pair<String,String>>,select:(Int)->Unit){
         val card=ui.card(22);card.addView(ui.text(title,23f,bold=true));card.addView(ui.space(16))
         val dialog=AlertDialog.Builder(this).setView(card).create()
@@ -1096,7 +1159,8 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             if (location.hasBearing()) location.bearing.toDouble() else null, time,
             if (location.hasBearing() && location.hasBearingAccuracy())
                 location.bearingAccuracyDegrees.toDouble() else null,
-            if (location.hasBearing()) location.bearing.toDouble() else null))
+            if (location.hasBearing()) location.bearing.toDouble() else null,
+            provider=location.provider))
     }
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return

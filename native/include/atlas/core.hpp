@@ -139,6 +139,8 @@ struct Guidance {
   enum class State { normal, reduced, checking, reroute, arrived };
   State state = State::normal;
   Progress position;
+  bool offRouteConfirmed = false;
+  double observedOffRoute = 0;
 };
 class GuidanceSession {
 public:
@@ -151,6 +153,9 @@ private:
   double lastGoodTime_ = -1, lastGoodSpeed_ = 0;
   uint32_t offFixes_ = 0, implausibleFixes_ = 0;
   std::optional<Point> implausibleCandidate_;
+  std::optional<Point> deviationMotionPoint_;
+  double deviationMotionAt_ = -1, deviationMotionDistance_ = 0;
+  double deviationVerifiedAt_ = -1;
   std::optional<Progress> lastPosition_, lastGoodPosition_;
 };
 struct Place {

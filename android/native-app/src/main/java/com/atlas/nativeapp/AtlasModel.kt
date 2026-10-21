@@ -36,6 +36,8 @@ data class AtlasState(
     // Previous real, native-filtered fix stays available across background
     // navigation: the map can validate a pair of observations on resume.
     val previousFix: Fix? = null,
+    // Accepted REAL fixes per second (10s rolling window), never 30Hz drawing frames.
+    val gpsHz: Double = 0.0,
     val destination: JSONObject? = null,
     val origin: Coordinate? = null,
     val navigating: Boolean = false,
@@ -136,6 +138,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     // when JNI processing temporarily falls behind the Android location rate.
     private val locationFixes = Channel<Fix>(Channel.CONFLATED)
     private var lastQueuedFixTime = Double.NEGATIVE_INFINITY
+    private val recentRealFixTimes = java.util.ArrayDeque<Double>()
     // The preview may have been planned minutes before Start was pressed.
     // Keep the origin used for graph calculation rather than assuming that
     // the selected route still starts near the vehicle.
@@ -153,6 +156,12 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     private var journeyExecution: TransitExecution? = null
     private var enrichmentJob: Job? = null
     var speak: ((String) -> Unit)? = null
+    var diagnosticsEnabled: Boolean
+        get() = prefs.getBoolean("diagnosticsEnabled",false)
+        set(value) {
+            prefs.edit().putBoolean("diagnosticsEnabled",value).apply()
+            refresh()
+        }
     var voice = prefs.getBoolean("voice", true)
         set(value) { field = value; prefs.edit().putBoolean("voice", value).apply(); refresh() }
     var theme: String
@@ -373,10 +382,18 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun processLocationFix(fix: Fix) {
         val trusted = withContext(worker) { core.filter(fix) }
+        recentRealFixTimes.addLast(trusted.time)
+        while(recentRealFixTimes.isNotEmpty() &&
+            (recentRealFixTimes.size>12 ||
+             trusted.time-recentRealFixTimes.peekFirst()>10.0))
+            recentRealFixTimes.removeFirst()
+        val span=if(recentRealFixTimes.size>1)
+            recentRealFixTimes.peekLast()-recentRealFixTimes.peekFirst() else 0.0
+        val measuredHz=if(span>0.0)(recentRealFixTimes.size-1)/span else 0.0
         state.update { s ->
             // Older asynchronous results must not overwrite newer positions.
             if (s.fix != null && trusted.time <= s.fix.time) s else
-                s.copy(previousFix = s.fix, fix = trusted)
+                s.copy(previousFix = s.fix, fix = trusted, gpsHz = measuredHz)
         }
         val initial = state.value
         val route = initial.route ?: return

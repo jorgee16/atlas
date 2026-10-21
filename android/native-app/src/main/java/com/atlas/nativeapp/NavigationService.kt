@@ -121,7 +121,8 @@ class NavigationService : Service(), LocationListener {
             now,
             if (location.hasBearing() && location.hasBearingAccuracy())
                 location.bearingAccuracyDegrees.toDouble() else null,
-            if (location.hasBearing()) location.bearing.toDouble() else null
+            if (location.hasBearing()) location.bearing.toDouble() else null,
+            provider=location.provider
         ))
     }
 

@@ -233,7 +233,9 @@ Java_com_atlas_nativeapp_NativeCore_update(JNIEnv *env, jobject, jlong id,
       << ",\"along\":" << p.along << ",\"remaining\":" << p.remaining
       << ",\"seconds\":" << p.seconds << ",\"maneuver\":" << p.maneuver
       << ",\"toManeuver\":" << p.toManeuver << ",\"segment\":" << p.segment
-      << ",\"offRoute\":" << p.offRoute << ",\"bearing\":";
+      << ",\"offRoute\":" << p.offRoute
+      << ",\"observedOffRoute\":" << g.observedOffRoute
+      << ",\"offRouteConfirmed\":" << (g.offRouteConfirmed ? "true" : "false") << ",\"bearing\":";
     if (std::isfinite(heading))
       s << heading;
     else
