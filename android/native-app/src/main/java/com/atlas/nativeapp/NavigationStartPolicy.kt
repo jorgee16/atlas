@@ -9,9 +9,19 @@ import kotlin.math.max
  * origin. Normal GPS noise alone must not trigger repeated replanning.
  */
 internal object NavigationStartPolicy {
-    fun freshFix(now: Double, fixAt: Double, accuracyMeters: Double): Boolean =
-        now.isFinite() && fixAt.isFinite() && now - fixAt in 0.0..8.0 &&
-            accuracyMeters.isFinite() && accuracyMeters in 0.0..70.0
+    /** Freshness prevents stale route origins. Horizontal accuracy is a confidence
+     * signal, NOT a prerequisite for starting: indoor/weak GPS can be hundreds
+     * of metres off while still reporting a legitimate recent location fix.
+     * Guidance and rerouting continue to handle uncertainty separately.
+     */
+    fun freshFix(
+        now: Double, fixAt: Double, accuracyMeters: Double,
+        maxAgeSeconds: Double = 8.0
+    ): Boolean =
+        now.isFinite() && fixAt.isFinite() &&
+            maxAgeSeconds.isFinite() && maxAgeSeconds > 0.0 &&
+            now - fixAt in 0.0..maxAgeSeconds &&
+            accuracyMeters.isFinite() && accuracyMeters >= 0.0
 
     fun requiresNewOrigin(
         plannedFrom: Coordinate?, current: Coordinate,

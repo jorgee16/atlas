@@ -111,7 +111,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         }
         val now=android.os.SystemClock.elapsedRealtimeNanos()/1e9
         val fix=state.value.fix
-        if (fix==null || now-fix.time !in 0.0..15.0 || fix.accuracy>70.0) {
+        if (fix==null || !NavigationStartPolicy.freshFix(now,fix.time,fix.accuracy,15.0)) {
             return status("Waiting for a recent GPS fix. Try Resume again shortly.")
         }
         val requestedMode=snapshot.optString("mode","drive").takeIf { it in listOf("drive","walk") }?:"drive"
