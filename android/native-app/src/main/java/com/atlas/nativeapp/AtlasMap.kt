@@ -773,8 +773,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         s.fix?.let { fix ->
             val nowSeconds = SystemClock.elapsedRealtimeNanos() / 1e9
             val catchingUp = resumeSyncPending &&
-                NavigationResumePolicy.trustworthyResumeFix(
-                    nowSeconds, fix.time, fix.accuracy)
+                NavigationResumePolicy.consecutiveResumeFix(
+                    nowSeconds,fix,s.previousFix)
             if (resumeSyncPending && !catchingUp) {
                 // The Activity may return before the LocationService has a
                 // trustworthy fresh fix. Freeze the last visual position;
@@ -816,8 +816,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // interpolated shortcut. JNI guidance may follow asynchronously.
             val newFixAfterResume = NavigationResumePolicy.newFixAfterResume(
                 resumeAnchorFixTime, fix.time)
-            if (newFixAfterResume) {
-                resumeAnchorFixTime = Double.NaN
+            // A recent, paired GPS fix was already snapped into the correct
+            // visual epoch. Do not reset again on the next ordinary 1 Hz fix.
+            // A significantly stale background anchor is the exception: when
+            // the first NEW real fix finally arrives it must catch up at once.
+            val mustRebaseAfterStaleAnchor = newFixAfterResume &&
+                nowSeconds - resumeAnchorFixTime > 3.0
+            if (newFixAfterResume) resumeAnchorFixTime = Double.NaN
+            if (mustRebaseAfterStaleAnchor) {
                 stationaryPosition.reset()
                 freePosition.reset()
                 presentedPosition.reset()
@@ -852,6 +858,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 s.guidance.optString("state") !in listOf("checking","reroute","changed","arrived") &&
                 s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY) < 60.0
             val matchVisible = eligibleMatch &&
+                (!catchingUp || NavigationResumePolicy.useRouteOnResume(
+                    fix,s.guidance!!.optString("state"))) &&
                 (initialRoadMatchAccepted || NavigationInitialMatchPolicy.canAdopt(
                     fix, s.guidance!!.optDouble("offRoute",Double.POSITIVE_INFINITY), s.walking))
             if (matchVisible) initialRoadMatchAccepted = true
