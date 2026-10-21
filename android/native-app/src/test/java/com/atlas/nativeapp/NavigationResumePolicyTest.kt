@@ -61,6 +61,18 @@ class NavigationResumePolicyTest {
             b.copy(accuracy=100.0),a))
     }
 
+    @Test fun reducedGuidanceCannotOverrulePairedRealPositionOnReturn() {
+        val base=Fix(Coordinate(40.0,-8.0),6.0,8.0,null,112.0,
+            providerSpeed=8.0,motionConfirmed=true)
+        assertTrue(NavigationResumePolicy.useRouteOnResume(base,"normal"))
+        assertFalse(NavigationResumePolicy.useRouteOnResume(base,"reduced"))
+        assertFalse(NavigationResumePolicy.useRouteOnResume(base,"checking"))
+        assertFalse(NavigationResumePolicy.useRouteOnResume(
+            base.copy(motionConfirmed=false),"normal"))
+        assertFalse(NavigationResumePolicy.useRouteOnResume(
+            base.copy(accuracy=65.0),"normal"))
+    }
+
     @Test fun predictedGuidanceCannotReplayTheFixUsedToResume() {
         assertTrue(NavigationResumePolicy.suppressOldFixPrediction(120.0, 120.0, true))
         assertFalse(NavigationResumePolicy.suppressOldFixPrediction(120.0, 120.0, false))

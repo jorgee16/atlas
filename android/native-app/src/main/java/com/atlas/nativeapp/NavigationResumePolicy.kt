@@ -50,6 +50,14 @@ internal object NavigationResumePolicy {
         return tightPair || corroboratedDrive
     }
 
+    /** Reduced guidance preserves an old route projection, not a new GNSS
+     * observation. On foreground return it must never replace a recent
+     * consecutive real GPS fix. Reliable, moving guidance may use snapping.
+     */
+    fun useRouteOnResume(fix: Fix, guidanceState: String): Boolean =
+        guidanceState == "normal" && fix.motionConfirmed == true &&
+            fix.accuracy.isFinite() && fix.accuracy in 0.0..35.0
+
     /** A predicted route point based on the foreground anchor is not a new
      * GPS observation. It cannot move the cursor after a background resume.
      */
