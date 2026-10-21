@@ -86,6 +86,26 @@ int main(int argc, char **argv) {
       progressedAfterMovement |= movingFix.position.along > parked.position.along + 1;
     }
     check(progressedAfterMovement, "confirmed motion unfreezes route progress");
+    // Regression: a vehicle was travelling, then the receiver degraded for
+    // several seconds, then a 5m-accuracy fix projected 76m farther along.
+    // The previously known 8 m/s MUST NOT be used as current movement.
+    GuidanceSession recoveredAccuracy;
+    const auto beforeLoss = recoveredAccuracy.update(
+        drive->points.front(), 5, 8, 300, *drive);
+    for (int i = 1; i <= 8; ++i) {
+      auto weak = recoveredAccuracy.update(
+          drive->points[1], 100, 0, 300 + i, *drive);
+      check(std::abs(weak.position.along-beforeLoss.position.along)<.01,
+            "poor accuracy must hold old route progress");
+    }
+    auto stoppedReacquisition = recoveredAccuracy.update(
+        drive->points[1], 5, 0, 309, *drive);
+    check(std::abs(stoppedReacquisition.position.along-beforeLoss.position.along)<.01,
+          "GPS reacquisition without motion cannot teleport route progress");
+    auto resumingTravel = recoveredAccuracy.update(
+        drive->points[1], 5, 8, 310, *drive);
+    check(resumingTravel.position.along>beforeLoss.position.along+1,
+          "confirmed travel after bad GPS must re-enable progress");
     GuidanceSession recentlyStopped;
     auto cruising = recentlyStopped.update(drive->points.front(), 5, 8, 200, *drive);
     auto stopJitter = recentlyStopped.update(drive->points[1], 5, 0, 201, *drive);
