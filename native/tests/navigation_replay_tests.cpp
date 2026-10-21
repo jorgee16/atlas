@@ -39,10 +39,19 @@ int main() {
   gap.update(straight.points.front(),5,8,100,straight);
   for(int second=1;second<=16;++second)
    gap.update({40+second*8.0/111320,-8},100,8,100+second,straight);
-  // The motion filter can temporarily report zero while reacquiring GPS.
-  auto fresh=gap.update({40+136.0/111320,-8},5,0,117,straight);
-  check(fresh.state==Guidance::State::normal && fresh.position.along>130,
-      "recovery travel budget must use time since last reliable projection, not last poor fix");
+  // A first highly accurate GPS fix after a gap may reflect either real
+  // travel or a GPS/route snap. Native guidance cannot treat an OLD 8m/s
+  // velocity as current proof that 136m of driving really occurred.
+  auto unconfirmed=gap.update({40+136.0/111320,-8},5,0,117,straight);
+  check(unconfirmed.state==Guidance::State::normal &&
+        std::abs(unconfirmed.position.along)<1,
+      "accurate reacquisition with zero confirmed speed must hold progress");
+  // Once independent movement is confirmed, a fresh, consistent position
+  // may catch up to the observed route. Android handles foreground visual
+  // repositioning separately, using recent consecutive real GPS fixes.
+  auto fresh=gap.update({40+144.0/111320,-8},5,8,118,straight);
+  check(fresh.state==Guidance::State::normal && fresh.position.along>140,
+      "confirmed motion must restore route progress after weak GPS");
   std::cout<<"Navigation loop ambiguity, recovery and poor GPS passed\n";
  } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }
