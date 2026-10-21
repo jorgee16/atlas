@@ -11,7 +11,7 @@ import kotlin.math.max
 internal object NavigationResumePolicy {
     fun shouldSynchronize(pausedAt: Double, now: Double, navigating: Boolean): Boolean =
         navigating && pausedAt.isFinite() && now.isFinite() &&
-            now - pausedAt >= 2.0
+            now - pausedAt >= 0.9
 
     fun freshFix(now: Double, fixAt: Double): Boolean =
         now.isFinite() && fixAt.isFinite() && now - fixAt in 0.0..8.0
