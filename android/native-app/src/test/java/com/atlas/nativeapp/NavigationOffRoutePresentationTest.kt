@@ -8,6 +8,24 @@ class NavigationOffRoutePresentationTest {
         Fix(Coordinate(40.0,-8.0),5.0,if(moving)5.0 else 0.0,null,t,
             motionConfirmed=moving)
 
+    @Test fun physicalDeparturePreservesLiveCursorFrameContinuity() {
+        val visible=Coordinate(40.0,-8.0)
+        val moving=fix(451.0,true).copy(
+            point=Coordinate(40.0,-8.0001),accuracy=5.0)
+        assertTrue(NavigationOffRoutePresentation.animateHandoff(moving,visible,false))
+        assertFalse(NavigationOffRoutePresentation.animateHandoff(moving,null,false))
+        assertFalse(NavigationOffRoutePresentation.animateHandoff(fix(452.0),visible,false))
+        assertFalse(NavigationOffRoutePresentation.animateHandoff(
+            moving.copy(accuracy=100.0),visible,false))
+        val interpolator=NavigationPositionInterpolator()
+        interpolator.accept(moving.point,moving.time,moving.accuracy,451.1,visible)
+        val first=interpolator.sample(451.1)!!.first
+        assertEquals(visible.lat,first.lat,1e-9)
+        assertEquals(visible.lon,first.lon,1e-9)
+        val next=interpolator.sample(451.2)!!.first
+        assertTrue(kotlin.math.abs(next.lon-visible.lon)<0.00006)
+    }
+
     @Test fun parkedRealDepartureStaysOffRoadThroughReroute() {
         val policy=NavigationOffRoutePresentation()
         assertFalse(policy.observe(true,fix(1.0),true,false,0.0,"normal"))

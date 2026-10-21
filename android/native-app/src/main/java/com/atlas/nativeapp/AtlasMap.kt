@@ -866,19 +866,34 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 s.guidance?.optString("state") ?: "")
             val rejoinedRoute = wasOffRoute && !offRoutePresentation.active
             if (enteredOffRoute || rejoinedRoute) {
-                // Independently verified physical deviation, not a visual
-                // accuracy/map-match transition: switch coordinate reference.
+                // Switch the map-matching reference, not the physical cursor.
+                // During 1 Hz driving a confirmed off-road fix can be ~8 m
+                // ahead of the last rendered frame. Hard resetting both
+                // presentation anchors here caused an 8m/100ms teleport in
+                // the real Portugal reroute replay. Only stationary/new visual
+                // epochs may rebase without interpolation.
+                val previousVisible=lastRenderedMarker
+                val animateHandoff=NavigationOffRoutePresentation.animateHandoff(
+                    fix,previousVisible,s.walking)
                 stationaryPosition.reset()
                 freePosition.reset()
-                presentedPosition.reset()
-                lastRenderedMarker=null
+                if (animateHandoff) {
+                    // Seed unprojected interpolation from what was actually on
+                    // screen, not the newly received GPS fix.
+                    freePosition.accept(fix.point,fix.time,fix.accuracy,
+                        nowSeconds,previousVisible)
+                } else {
+                    presentedPosition.reset()
+                    lastRenderedMarker=null
+                }
                 routeRendering=false
                 lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
                 renderInterpolator.reset()
                 if (geometry.size>=2 && s.route!=null) {
                     renderInterpolator.setRoute(
                         geometry.map { Coordinate(it.latitude,it.longitude) },
-                        s.route.optDouble("distanceMeters",0.0))
+                        s.route.optDouble("distanceMeters",0.0),
+                        if (animateHandoff) previousVisible else null)
                     interpolatedRoute=s.route
                 }
                 if(follow)cameraState.viewportChanged()

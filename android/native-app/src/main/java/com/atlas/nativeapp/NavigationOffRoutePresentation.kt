@@ -9,6 +9,18 @@ import kotlin.math.max
  * return the cursor to route-constrained presentation.
  */
 internal class NavigationOffRoutePresentation {
+    companion object {
+        /** Never teleport from a 1 Hz driving fix at an ordinary off-route
+         * handoff. Background resume/Start own their separate explicit rebases.
+         */
+        fun animateHandoff(fix: Fix, visible: Coordinate?, walking: Boolean): Boolean {
+            if (visible == null || !fix.accuracy.isFinite() ||
+                fix.accuracy > 35.0 || fix.accuracy < 0.0) return false
+            val speed = StationaryMapPosition.visualSpeed(fix)
+            return speed.isFinite() && speed >= if (walking) 0.45 else 1.2
+        }
+    }
+
     var active: Boolean = false
         private set
     private var backOnRouteFixes = 0
