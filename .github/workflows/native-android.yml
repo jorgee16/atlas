@@ -28,6 +28,7 @@ on:
     paths: ['native/**', 'android/native-app/**', 'android/build.gradle', 'android/settings.gradle', '.github/workflows/native-android.yml']
 permissions:
   contents: read
+  actions: read
 jobs:
   release-identity:
     # Fail early on a missing/mismatched existing key while navigation tests run.
@@ -82,6 +83,47 @@ jobs:
         run: python3 native/tests/compare-search.py /tmp/atlas-search-parity /tmp/atlas-build/atlas_search
       - name: Test signed Release certificate and update guards (offline)
         run: python3 -m unittest discover -s tools -p 'test_atlas_android_release.py'
+      - name: Test circular cursor-angle regression
+        run: python3 -m unittest discover -s tools -p 'test_native_replay*.py'
+  replay-analysis:
+    # Recheck existing evidence after analyzer-only fixes, without another trip.
+    # This diagnostic job never substitutes for the signed Release replay gate.
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[recheck-gps:') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve evidence source and reject changed application code
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          python3 tools/resolve-native-replay-evidence.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: Atlas-native-full-gps-review
+          run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: replay-analysis-input
+      - name: Require video metadata tool
+        run: |
+          if ! command -v ffprobe >/dev/null; then
+            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
+            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
+          fi
+      - name: Recheck unchanged application against complete recorded GPS evidence
+        working-directory: replay-analysis-input
+        run: python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-native-replay-reanalysis
+          path: |
+            replay-analysis-source.json
+            replay-analysis-input/ui-preview/gps-replay/*summary.json
+          if-no-files-found: warn
+
   android:
     # Fast, high-signal gate: ordinary Android instrumentation and the focused
     # GPS/camera smoke. Full-trip replay runs concurrently in its own job on

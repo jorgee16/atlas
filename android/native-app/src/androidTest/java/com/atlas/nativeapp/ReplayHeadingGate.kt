@@ -5,6 +5,12 @@ import org.json.JSONObject
 /** Same eligibility and 100-degree limit as analyze-native-gps-replay.py. */
 internal object ReplayHeadingGate {
     fun violation(frame: JSONObject): JSONObject? {
+        if (frame.optBoolean("follow") && frame.optBoolean("headingUp")) {
+            val cursorError = AtlasHeading.angleDifference(0.0, frame.optDouble("cursorBearing", 0.0))
+            if (cursorError >= 1.5) return JSONObject()
+                .put("reason", "Heading-up cursor must point forward")
+                .put("degrees", cursorError).put("frame", frame)
+        }
         val phase = frame.optString("phase")
         val age = frame.optDouble("time") - frame.optDouble("truthFixTime", Double.NEGATIVE_INFINITY)
         if (!(phase.startsWith("drive-accuracy-") || phase == "reroute-replay" || phase == "walking") ||

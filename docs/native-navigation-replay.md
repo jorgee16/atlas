@@ -97,3 +97,12 @@ Full trips are requested explicitly or required for publication, not for ordinar
 small changes. No GPS timestamps, 1 Hz waits, route coverage or assertion limits
 are reduced to improve CI duration. Successful full trips still take real time;
 this change reduces repeated setup and time wasted after a known failure.
+
+
+For analyzer-only corrections, a push marker `[recheck-gps:RUN_ID]` reanalyzes
+that completed run's `Atlas-native-full-gps-review` artifact. It rejects changes
+to application sources, renamed production files, divergent history and truncated
+comparisons. Its report identifies both source and analysis commits. This is
+recorded-evidence analysis, not a fresh trip, and cannot satisfy the Release job's
+mandatory `android-full-replay` dependency. Cursor alignment uses circular error
+around zero: 359.88 degrees is -0.12 degrees; the 1.5-degree limit is unchanged.

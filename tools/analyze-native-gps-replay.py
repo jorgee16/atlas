@@ -4,6 +4,7 @@ import json
 import math
 import subprocess
 import sys
+from native_replay_angles import heading_up_cursor_error
 from pathlib import Path
 mode=sys.argv[1] if len(sys.argv)>1 else 'full'
 root=Path('ui-preview/camera-smoke' if mode=='camera' else 'ui-preview/gps-replay')
@@ -93,7 +94,7 @@ diagnostic={'frames':len(frames),'fixes':len(fixes),'videoDurationSeconds':video
 print('ATLAS_REPLAY_DIAGNOSTIC '+json.dumps(diagnostic),flush=True)
 assert steps and max(steps)<6.0, f'Excessive cursor step: {max(steps,default=0):.2f} m'
 assert max(angles)<60, f'Instantaneous camera reversal: {max(angles):.2f} degrees'
-assert guided and all(abs(f.get('cursorBearing',0))<1.5 for f in guided), 'Heading-up cursor must point forward'
+assert guided and all(heading_up_cursor_error(f.get('cursorBearing',0))<1.5 for f in guided), 'Heading-up cursor must point forward'
 assert len(heading_errors)>300, 'Missing camera/ground-truth heading evidence'
 assert max(error for error,_ in heading_errors)<100, 'Camera reversed against confirmed movement'
 assert len(good_steps)>60, 'Missing rendered movement under good GPS'
@@ -113,4 +114,3 @@ summary={'videoDurationSeconds':video_seconds,'frames':len(frames),'fixes':len(f
     'scope':'Actual mainland Portugal C++ routing, mock Android GPS provider, NavigationService, JNI, MapLibre and UI; offline PMTiles installed; POI/address search package not installed.'}
 (root/'summary.json').write_text(json.dumps(summary,indent=2))
 print(json.dumps(summary,indent=2))
-

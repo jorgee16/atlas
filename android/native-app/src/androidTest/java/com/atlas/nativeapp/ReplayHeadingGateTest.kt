@@ -32,6 +32,14 @@ class ReplayHeadingGateTest {
         }
     }
 
+    @Test fun cursorNorthWrapPassesButRealMisalignmentFails() {
+        val frame = confirmed().put("mapBearing", 0.0).put("cursorBearing", 359.88167690086743)
+        assertNull(ReplayHeadingGate.violation(frame))
+        assertEquals("Heading-up cursor must point forward",
+            checkNotNull(ReplayHeadingGate.violation(frame.put("cursorBearing", 1.5))).getString("reason"))
+        assertNull(ReplayHeadingGate.violation(frame.put("follow", false)))
+    }
+
     @Test fun drivingAndWalkingUseTheSameConfirmedMovementGate() {
         for (phase in listOf("drive-accuracy-5.0", "walking")) {
             assertNotNull(ReplayHeadingGate.violation(confirmed().put("phase", phase)))
