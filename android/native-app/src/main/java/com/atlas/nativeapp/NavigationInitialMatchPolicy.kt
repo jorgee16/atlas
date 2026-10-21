@@ -10,6 +10,17 @@ import kotlin.math.min
  * Native guidance is still free to calculate and retain a routable origin.
  */
 internal object NavigationInitialMatchPolicy {
+    fun canRebaseOnStart(now: Double, startedAt: Double,
+                         startingFixTime: Double, fix: Fix,
+                         offRouteMeters: Double, rawToMatchedMeters: Double): Boolean =
+        now.isFinite() && startedAt.isFinite() &&
+        now - startedAt in 0.0..20.0 &&
+        startingFixTime.isFinite() && fix.time > startingFixTime + 0.00001 &&
+        now - fix.time in 0.0..8.0 &&
+        fix.accuracy.isFinite() && fix.accuracy in 0.0..10.0 &&
+        offRouteMeters.isFinite() && offRouteMeters in 0.0..8.0 &&
+        rawToMatchedMeters.isFinite() && rawToMatchedMeters in 0.0..8.0
+
     fun canAdopt(fix: Fix, offRouteMeters: Double, walking: Boolean): Boolean {
         if (!fix.accuracy.isFinite() || fix.accuracy < 0.0 ||
             !offRouteMeters.isFinite() || offRouteMeters < 0.0) return false

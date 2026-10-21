@@ -47,6 +47,27 @@ class NavigationInitialMatchPolicyTest {
         assertFalse(NavigationInitialMatchPolicy.canAdopt(unreliable,20.0,false))
     }
 
+    @Test fun onlyARecentAccurateNewFixMayInitializeTheRoutePosition() {
+        val newFix = fix(5.0,0.0).copy(time=102.0,motionConfirmed=false)
+        assertTrue(NavigationInitialMatchPolicy.canRebaseOnStart(
+            102.1,100.0,100.5,newFix,0.3,0.4))
+        // The fix already used to establish the route is not a new
+        // observation and must never cause a map-matching teleport.
+        assertFalse(NavigationInitialMatchPolicy.canRebaseOnStart(
+            102.1,100.0,102.0,newFix,0.3,0.4))
+        // Reacquisition in the middle of an established journey is not
+        // initial calibration, regardless of apparent GNSS accuracy.
+        assertFalse(NavigationInitialMatchPolicy.canRebaseOnStart(
+            200.0,100.0,100.5,newFix.copy(time=199.0),0.3,0.4))
+        assertFalse(NavigationInitialMatchPolicy.canRebaseOnStart(
+            102.1,100.0,100.5,newFix.copy(accuracy=70.0),0.3,0.4))
+        // A distant road projection must not masquerade as a GPS fix.
+        assertFalse(NavigationInitialMatchPolicy.canRebaseOnStart(
+            102.1,100.0,100.5,newFix,0.3,38.0))
+        assertFalse(NavigationInitialMatchPolicy.canRebaseOnStart(
+            102.1,100.0,100.5,newFix,24.0,0.4))
+    }
+
     @Test fun invalidProjectionIsNeverAccepted() {
         assertFalse(NavigationInitialMatchPolicy.canAdopt(fix(5.0), Double.NaN, false))
         assertFalse(NavigationInitialMatchPolicy.canAdopt(fix(5.0), -1.0, false))
