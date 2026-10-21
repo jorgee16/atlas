@@ -1,6 +1,9 @@
 package com.atlas.nativeapp
 
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.max
 
 /** Decide whether a foreground return needs a one-shot visual reposition.
  * NavigationService and native guidance remain the sources of truth.
@@ -16,6 +19,36 @@ internal object NavigationResumePolicy {
     fun trustworthyResumeFix(now: Double, fixAt: Double, accuracyMeters: Double): Boolean =
         freshFix(now,fixAt) && accuracyMeters.isFinite() &&
             accuracyMeters in 0.0..70.0
+
+    /**
+     * A single GPS position can be an outlier even when it claims 5 m
+     * accuracy. Accept the freshest position after background only when the
+     * last two REAL, native-filtered fixes are temporally ordered and mutually
+     * plausible. We do not compare with the pre-background cursor: genuine
+     * travel can cover kilometres and MUST synchronize immediately.
+     *
+     * Tight fixes permit a stationary or slow user; moderate (<=70 m) fixes
+     * need native-confirmed motion in both observations. Poor/no-speed fixes
+     * remain visible to the routing core but cannot force a visual teleport.
+     */
+    fun consecutiveResumeFix(now: Double, latest: Fix, previous: Fix?): Boolean {
+        if (!trustworthyResumeFix(now, latest.time, latest.accuracy)) return false
+        val prior = previous ?: return false
+        val dt = latest.time - prior.time
+        if (!dt.isFinite() || dt !in 0.2..12.0 ||
+            !prior.accuracy.isFinite() || prior.accuracy !in 0.0..70.0) return false
+        val latDelta = (latest.point.lat-prior.point.lat)*111320.0
+        val eastDelta = (latest.point.lon-prior.point.lon)*111320.0*
+            cos(Math.toRadians((latest.point.lat+prior.point.lat)*.5))
+        val measured = hypot(latDelta,eastDelta)
+        val observedSpeed = StationaryMapPosition.visualSpeed(latest)
+        val limit = max(7.0, (max(0.0,observedSpeed)*1.9+4.0)*dt)
+        if (measured > limit || !measured.isFinite()) return false
+        val tightPair = latest.accuracy <= 35.0 && prior.accuracy <= 35.0
+        val corroboratedDrive = latest.motionConfirmed == true &&
+            prior.motionConfirmed == true
+        return tightPair || corroboratedDrive
+    }
 
     /** A predicted route point based on the foreground anchor is not a new
      * GPS observation. It cannot move the cursor after a background resume.

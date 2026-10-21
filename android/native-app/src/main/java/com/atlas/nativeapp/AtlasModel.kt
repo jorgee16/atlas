@@ -33,6 +33,9 @@ data class AtlasState(
     val routeOptions: List<JSONObject> = emptyList(),
     val guidance: JSONObject? = null,
     val fix: Fix? = null,
+    // Previous real, native-filtered fix stays available across background
+    // navigation: the map can validate a pair of observations on resume.
+    val previousFix: Fix? = null,
     val destination: JSONObject? = null,
     val origin: Coordinate? = null,
     val navigating: Boolean = false,
@@ -373,7 +376,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         state.update { s ->
             // Older asynchronous results must not overwrite newer positions.
             if (s.fix != null && trusted.time <= s.fix.time) s else
-                s.copy(fix = trusted)
+                s.copy(previousFix = s.fix, fix = trusted)
         }
         val initial = state.value
         val route = initial.route ?: return

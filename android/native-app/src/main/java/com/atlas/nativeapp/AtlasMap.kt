@@ -773,8 +773,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         s.fix?.let { fix ->
             val nowSeconds = SystemClock.elapsedRealtimeNanos() / 1e9
             val catchingUp = resumeSyncPending &&
-                NavigationResumePolicy.trustworthyResumeFix(
-                    nowSeconds, fix.time, fix.accuracy)
+                NavigationResumePolicy.consecutiveResumeFix(
+                    nowSeconds,fix,s.previousFix)
             if (resumeSyncPending && !catchingUp) {
                 // The Activity may return before the LocationService has a
                 // trustworthy fresh fix. Freeze the last visual position;
