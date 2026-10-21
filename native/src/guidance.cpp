@@ -253,12 +253,12 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
   // producing false distance/ETA changes despite a stationary vehicle.
   // Freeze the last reliable projection until the motion filter confirms movement.
   // Keep the separate off-route flow for genuinely distant observations.
-  // A reliable fix after a long GPS outage must be allowed to resynchronize
-  // even if the motion estimator is momentarily at zero. The previously
-  // confirmed moving speed and elapsed outage distinguish it from stationary
-  // jitter, whose successive observations must remain anchored.
+  // Accuracy recovery is not an independent movement observation. The
+  // last known speed could be from minutes ago; it does NOT authorize a
+  // jump forward once the native motion filter reports zero movement.
+  // A background-to-foreground screen sync is a separate Android visual
+  // epoch and uses consecutive *real* fixes; routing waits for motion proof.
   if (lastGoodPosition_ && speed < .35 &&
-      (lastGoodSpeed_ < .35 || sinceGood <= 3.0) &&
       out.position.offRoute <= std::max(30., accuracy * 2) &&
       lastGoodPosition_->offRoute <= std::max(30., accuracy * 2)) {
     out.position = *lastGoodPosition_;

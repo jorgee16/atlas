@@ -175,7 +175,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val freeFrame = if (routeFrame == null) freePosition.sample(time) else null
         val desiredPosition = routeFrame?.position ?: freeFrame?.first ?: lastRenderedMarker
             ?: return@FrameCallback
-        val position=presentedPosition.commit(desiredPosition,time,StationaryMapPosition.visualSpeed(s.fix))
+        val visibleTarget = NavigationCursorPresentation.choose(
+            lastRenderedMarker,desiredPosition,s.fix,false)
+        val position=presentedPosition.commit(visibleTarget,time,
+            StationaryMapPosition.visualSpeed(s.fix))
         val markerActive = (routeFrame?.active ?: freeFrame?.second ?: false) || presentedPosition.active
         val last = lastRenderedMarker
         if (last == null || distanceMeters(last,position) > 0.001) {
@@ -949,7 +952,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // Keep presentedPosition's previous on-screen anchor.
                 // A matched road coordinate alone must not reset it.
             }
-            val displayed=if(s.navigating)presentedPosition.commit(desiredDisplayed,nowSeconds,
+            val positionTarget = NavigationCursorPresentation.choose(
+                lastRenderedMarker,desiredDisplayed,fix,
+                catchingUp || mustRebaseAfterStaleAnchor || initialAlignment || navigationStarting)
+            val displayed=if(s.navigating)presentedPosition.commit(positionTarget,nowSeconds,
                 StationaryMapPosition.visualSpeed(fix)) else desiredDisplayed
             val heading = travelHeading(s, fix)
             val position = LatLng(displayed.lat, displayed.lon)
