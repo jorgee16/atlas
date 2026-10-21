@@ -642,15 +642,20 @@ class NavigationGpsReplayTest {
         // never replay the accumulated distance through interpolation.
         phase="background-foreground-catchup"
         val oldCursor=snapshot(s)
+        val backgroundStartFix=checkNotNull(model!!.updates.value.fix)
         s.moveToState(Lifecycle.State.CREATED)
         repeat(7) {
             movingFix()
             SystemClock.sleep(1020)
         }
         val latest=model!!.updates.value.fix!!
-        assertTrue("background GPS must move significantly",
-            distance(Coordinate(oldCursor.getDouble("renderLat"),oldCursor.getDouble("renderLon")),
-                latest.point)>35.0)
+        // A predicted/map-matched cursor may be ahead of the last real fix.
+        // Validate background service delivery using real GPS observations,
+        // not by subtracting a visual prediction from a raw position.
+        val backgroundDistance=distance(backgroundStartFix.point,latest.point)
+        assertTrue("background service must deliver consecutive real fixes: " +
+            "delta=${backgroundDistance}m start=${backgroundStartFix.time} latest=${latest.time}",
+            latest.time>backgroundStartFix.time+3.0 && backgroundDistance>35.0)
         await("background JNI guidance must catch up",10) {
             model!!.updates.value.guidance?.optDouble("gpsFixTime",-1.0)==latest.time
         }
