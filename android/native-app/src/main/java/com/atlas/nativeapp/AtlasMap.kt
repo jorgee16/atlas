@@ -585,7 +585,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val guidance = s.guidance
         val distance = guidance?.optDouble("offRoute",Double.POSITIVE_INFINITY)
             ?: Double.POSITIVE_INFINITY
+        val guidanceFixTime = guidance?.optDouble("gpsFixTime", Double.NaN) ?: Double.NaN
+        val now = SystemClock.elapsedRealtimeNanos() / 1e9
         val onRoute = s.navigating && guidance != null &&
+            NavigationResumePolicy.currentHeadingGuidance(now, fix.time, guidanceFixTime) &&
             distance.isFinite() && distance < maxOf(30.0, fix.accuracy * 1.5) &&
             guidance.optString("state") !in listOf("checking","reroute","changed")
         val routeBearing = if (onRoute) guidance
