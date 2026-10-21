@@ -56,6 +56,7 @@ class NavigationStartPolicyTest {
         assertNull(NavigationStartPolicy.rerouteHeading(current.copy(time=90.0),null,101.0))
         assertNull(NavigationStartPolicy.rerouteHeading(current.copy(accuracy=80.0),null,101.0))
         assertNull(NavigationStartPolicy.rerouteHeading(current.copy(providerSpeed=0.0),null,101.0))
+        assertNull(NavigationStartPolicy.rerouteHeading(current.copy(providerBearing=null),null,101.0))
     }
 
     @Test fun rerouteWithoutMotionRequiresConsecutiveConsistentGpsFixes() {

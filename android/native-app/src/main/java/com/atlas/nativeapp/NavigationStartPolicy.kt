@@ -50,18 +50,21 @@ internal object NavigationStartPolicy {
             it.isFinite() && it >= 0.0 &&
                 (bearingError == null || (bearingError.isFinite() && bearingError <= 35.0))
         }?.let { ((it % 360.0) + 360.0) % 360.0 }
-        if (current.motionConfirmed == true) return raw ?: movingHeading(current)
+        // A filtered course can lag badly through turns or a U-turn. Never
+        // promote that old course into a new reroute when GNSS lacks a bearing.
+        val verifiedReceiver = current.motionConfirmed == true && raw != null
         if (previous == null || previous.accuracy > 25.0 ||
-            !previous.time.isFinite()) return null
+            !previous.time.isFinite()) return if (verifiedReceiver) raw else null
         val elapsed = current.time - previous.time
-        if (elapsed !in 0.5..6.0) return null
+        if (elapsed !in 0.5..6.0) return if (verifiedReceiver) raw else null
         val north = (current.point.lat - previous.point.lat) * 111_320.0
         val east = (current.point.lon - previous.point.lon) * 111_320.0 *
             cos(Math.toRadians((current.point.lat + previous.point.lat) / 2.0))
         val traveled = hypot(north, east)
         if (!traveled.isFinite() ||
             traveled < max(5.0, max(current.accuracy, previous.accuracy) * 0.75) ||
-            traveled / elapsed > max(10.0, speed * 2.5)) return null
+            traveled / elapsed > max(10.0, speed * 2.5))
+            return if (verifiedReceiver && traveled < 5.0) raw else null
         val course = ((Math.toDegrees(atan2(east, north)) % 360.0) + 360.0) % 360.0
         if (raw != null && abs(Math.IEEEremainder(raw - course, 360.0)) > 55.0)
             return null
