@@ -12,9 +12,9 @@ def github(path):
 
 
 def main():
-    match = re.search(r'\[recheck-gps:(\d+)\]', os.environ['COMMIT_MESSAGE'])
+    match = re.search(r'\[(?:recheck-gps|release-evidence):(\d+)\]', os.environ['COMMIT_MESSAGE'])
     if not match:
-        raise SystemExit('Missing [recheck-gps:RUN_ID]')
+        raise SystemExit('Missing recorded-evidence RUN_ID marker')
     run_id = match.group(1)
     repo = os.environ['GH_REPO']
     run = github(f'repos/{repo}/actions/runs/{run_id}')
@@ -36,7 +36,7 @@ def main():
         raise SystemExit('Application code changed: a fresh emulator replay is required')
     manifest = {'sourceRun': int(run_id), 'sourceCommit': run['head_sha'],
                 'analysisCommit': head, 'changedFiles': changed,
-                'scope': 'Reanalysis of existing emulator evidence; no fresh trip or Release publication'}
+                'scope': 'Recorded full Android trip; application unchanged; no fresh trip. Release still requires JUnit, trajectory, fresh Android smoke, signature and upgrade gates.'}
     Path('replay-analysis-source.json').write_text(json.dumps(manifest, indent=2))
     with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
         output.write(f'run_id={run_id}\n')

@@ -10,10 +10,10 @@ spec.loader.exec_module(resolver)
 
 
 class EvidenceCompatibilityTest(unittest.TestCase):
-    def resolve(self, files, status='ahead', base='original'):
+    def resolve(self, files, status='ahead', base='original', marker='recheck-gps'):
         run = {'status': 'completed', 'head_branch': 'migration/native-core-kotlin', 'head_sha': 'original'}
         comparison = {'files': files, 'status': status, 'merge_base_commit': {'sha': base}}
-        with patch.dict(os.environ, COMMIT_MESSAGE='fix [recheck-gps:123]', GH_REPO='jorgee16/atlas',
+        with patch.dict(os.environ, COMMIT_MESSAGE=f'fix [{marker}:123]', GH_REPO='jorgee16/atlas',
                         GITHUB_SHA='current', GITHUB_OUTPUT='/tmp/mock-output'), \
              patch.object(resolver, 'github', side_effect=[run, comparison]), \
              patch.object(Path, 'write_text'), patch('builtins.open', mock_open()), patch('builtins.print'):
@@ -22,6 +22,11 @@ class EvidenceCompatibilityTest(unittest.TestCase):
     def test_analyzer_and_instrumentation_only_changes_can_reuse_evidence(self):
         self.resolve([{'filename': 'tools/analyze-native-gps-replay.py'},
                       {'filename': 'android/native-app/src/androidTest/java/ReplayHeadingGate.kt'}])
+
+    def test_release_evidence_uses_the_same_source_identity_guard(self):
+        self.resolve([{'filename': 'tools/analyze-native-gps-replay.py'}], marker='release-evidence')
+        with self.assertRaises(SystemExit):
+            self.resolve([{'filename': 'native/src/motion.cpp'}], marker='release-evidence')
 
     def test_production_change_requires_fresh_trip(self):
         for path in ['native/src/motion.cpp', 'android/native-app/src/main/java/AtlasMap.kt',

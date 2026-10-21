@@ -207,28 +207,48 @@ jobs:
           if-no-files-found: warn
 
   android-full-replay:
-    # Execute the long, real-Portugal GPS trip IN PARALLEL with Android smoke,
-    # only when explicitly requested. Signed releases still require its result.
+    # Mandatory full-trip gate: fresh replay, or source-identical recorded trip
+    # with passing Android JUnit plus every current trajectory/video assertion.
     if: ${{ (github.event_name == 'workflow_dispatch' && (inputs.publish_release == true || inputs.full_gps_replay == true)) || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[full-gps-replay]') || contains(github.event.head_commit.message, '[atlas-release]'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve unchanged application for recorded full trip
+        if: ${{ contains(github.event.head_commit.message, '[release-evidence:') }}
+        id: recorded
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: python3 tools/resolve-native-replay-evidence.py
+      - uses: actions/download-artifact@v4
+        if: ${{ contains(github.event.head_commit.message, '[release-evidence:') }}
+        with:
+          name: Atlas-native-full-gps-review
+          run-id: ${{ steps.recorded.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: recorded-gps
       - uses: actions/setup-java@v4
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         with:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         with:
           # This migration branch must be able to populate its own cache.
           cache-read-only: ${{ github.event_name == 'pull_request' }}
       - uses: android-actions/setup-android@v3
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
       - name: Install native Android toolchain
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Build GPS replay APK and instrumentation package
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         working-directory: android
         run: bash gradlew --build-cache -PnativeOnly :native-app:assembleDebug :native-app:assembleDebugAndroidTest --stacktrace
       - name: Install video tools for visual evidence review
@@ -239,17 +259,20 @@ jobs:
           fi
           ffmpeg -version | head -1
       - name: Download and verify real Portugal routing and offline map
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         env:
           R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
         run: python3 tools/prepare-native-gps-replay.py
       - name: Enable hardware acceleration
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Complete Portugal Android GPS navigation replay
+        if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -258,11 +281,21 @@ jobs:
           emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: bash tools/native-android-gps-replay.sh full
+      - name: Verify complete recorded Android trip and all current replay gates
+        if: ${{ contains(github.event.head_commit.message, '[release-evidence:') }}
+        run: |
+          set -euo pipefail
+          python3 tools/verify_native_replay_instrumentation.py recorded-gps
+          (cd recorded-gps && python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full)
+          mkdir -p ui-preview android/native-app/build/outputs
+          cp -R recorded-gps/ui-preview/. ui-preview/
+          cp -R recorded-gps/android/native-app/build/outputs/androidTest-results android/native-app/build/outputs/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Atlas-native-full-gps-review
           path: |
+            replay-analysis-source.json
             ui-preview/
             android/native-app/build/reports/androidTests/
             android/native-app/build/outputs/androidTest-results/
@@ -386,6 +419,11 @@ jobs:
             --build-tools "$ANDROID_HOME/build-tools/36.0.0" \
             --version "$RELEASE_VERSION" --code "$RELEASE_CODE" --commit "$GITHUB_SHA" \
             --output dist/android-validated "${args[@]}"
+      - name: Enable hardware acceleration for Release validation
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
       - name: Validate Release install and in-place upgrade on Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:

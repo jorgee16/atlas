@@ -106,3 +106,27 @@ comparisons. Its report identifies both source and analysis commits. This is
 recorded-evidence analysis, not a fresh trip, and cannot satisfy the Release job's
 mandatory `android-full-replay` dependency. Cursor alignment uses circular error
 around zero: 359.88 degrees is -0.12 degrees; the 1.5-degree limit is unchanged.
+
+
+## Source-identical full-trip reuse for a Release
+
+A Release push may specify `[release-evidence:RUN_ID]`. The mandatory
+`android-full-replay` job then verifies that source run is complete and its app
+sources are identical to the current commit, downloads its full raw artifact,
+requires a successful full-trip Android JUnit testcase (no failure/error/skip),
+and executes EVERY current trajectory, heading, coverage and video gate. Missing
+reports, changed production sources, divergent/truncated comparisons or any
+failed analysis block publication. Fresh Android camera smoke and signed Release
+installation/update tests still run. Without this explicit marker a fresh full
+emulator trip runs. Provenance records source and analysis commits; reused data
+is never described as a newly executed trip.
+
+Fixture `plan()` deliberately sets stationary mock GPS to a new route origin.
+Only pairs labelled with the same drive-plan/walk-plan phase, zero raw/filtered
+speed, fresh GPS and rendered agreement within one metre of that GPS are reported
+as setup relocations. Their frames and largest displacement remain in diagnostics.
+All other movement retains the strict six-metre gate, including identical jumps
+during driving, moving setup fixes and stale/inconsistent setup positions.
+The recorded 37.86m initial relocation in run39564625824 is such a setup pair;
+it precedes the first driving fix. Setup completion is separately asserted by the
+Android test before travel begins. Camera rotation and heading gates still apply.

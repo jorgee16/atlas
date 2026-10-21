@@ -5,6 +5,7 @@ import math
 import subprocess
 import sys
 from native_replay_angles import heading_up_cursor_error
+from native_replay_trajectory import is_setup_relocation
 from pathlib import Path
 mode=sys.argv[1] if len(sys.argv)>1 else 'full'
 root=Path('ui-preview/camera-smoke' if mode=='camera' else 'ui-preview/gps-replay')
@@ -50,6 +51,7 @@ def distance(a,b):
     return math.hypot((a['renderLat']-b['renderLat'])*111320,
         (a['renderLon']-b['renderLon'])*111320*math.cos(math.radians(a['renderLat'])))
 steps=[]
+setup_relocations=[]
 angles=[]
 intervals=[]
 good_steps=[]
@@ -59,14 +61,19 @@ for a,b in zip(frames,frames[1:]):
     dt=b['time']-a['time']
     if 0<dt<.15 and a.get('renderLat') is not None and b.get('renderLat') is not None:
         step=distance(a,b)
-        steps.append(step)
-        observations.append((step,a,b))
-        if a.get('phase','').startswith('drive-accuracy-') and a.get('accuracy',100)<=20 and a.get('speed',0)>=2:
-            good_steps.append(step)
+        if is_setup_relocation(a,b):
+            setup_relocations.append((step,a,b))
+        else:
+            steps.append(step)
+            observations.append((step,a,b))
+            if a.get('phase','').startswith('drive-accuracy-') and a.get('accuracy',100)<=20 and a.get('speed',0)>=2:
+                good_steps.append(step)
         angle=abs((b.get('mapBearing',0)-a.get('mapBearing',0)+180)%360-180)
         angles.append(angle)
         camera_observations.append((angle,a,b))
         intervals.append(dt)
+for step,a,b in sorted(setup_relocations,key=lambda item:item[0],reverse=True)[:5]:
+    print('ATLAS_SETUP_RELOCATION '+json.dumps({'meters':step,'before':a,'after':b}),flush=True)
 for step,a,b in sorted(observations,key=lambda item:item[0],reverse=True)[:5]:
     print('ATLAS_LARGEST_RENDER_STEP '+json.dumps({'meters':step,'before':a,'after':b}),flush=True)
 for angle,a,b in sorted(camera_observations,key=lambda item:item[0],reverse=True)[:3]:
@@ -87,6 +94,7 @@ moving_fraction=sum(step>.01 for step in good_steps)/len(good_steps) if good_ste
 # can diagnose independent problems without spending another real-time trip.
 diagnostic={'frames':len(frames),'fixes':len(fixes),'videoDurationSeconds':video_seconds,
     'timings':timings,
+    'setupRelocationPairs':len(setup_relocations),'maxSetupRelocationMeters':max((s for s,_,_ in setup_relocations),default=0),
     'maxCursorStepMeters':max(steps,default=0),'maxCameraRotationDegrees':max(angles,default=0),
     'maxStableGoodGpsHeadingErrorDegrees':max((e for e,_ in heading_errors),default=0),
     'headingTruthFrames':len(heading_errors),'movingFrameFractionUnderGoodGps':moving_fraction}
@@ -104,7 +112,8 @@ for gap in [2,5,9]:
     assert any(f'gap-{gap}' in p for p in phases), f'No {gap}s GPS gap evidence'
 assert any('walk' in p for p in phases), 'No walking evidence'
 assert {5,20,35,60,100}.issubset({f['accuracy'] for f in fixes}), 'Missing accuracy cases'
-summary={'videoDurationSeconds':video_seconds,'frames':len(frames),'fixes':len(fixes),'phases':phases,
+summary={'setupRelocationPairs':len(setup_relocations),'maxSetupRelocationMeters':max((s for s,_,_ in setup_relocations),default=0),
+    'videoDurationSeconds':video_seconds,'frames':len(frames),'fixes':len(fixes),'phases':phases,
     'timings':timings,
     'movingFrameFractionUnderGoodGps':moving_fraction,
     'maxConsecutiveCursorStepMeters':max(steps),'maxConsecutiveCameraRotationDegrees':max(angles),
