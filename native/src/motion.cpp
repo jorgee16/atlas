@@ -55,7 +55,16 @@ Motion MotionFilter::update(const MotionFix &fix) {
           std::max(4., std::max(fix.accuracy, anchor_->accuracy) * .5);
       bool plausible =
           !fix.speed || observed <= std::max(3.5, providerSpeed * 3);
-      if (travelled >= required && observed >= .55 && plausible) {
+      // Unreliable GNSS may drift tens of metres along a perfectly routable
+      // road while the device stays parked. Distance alone is not motion:
+      // infer speed without provider telemetry only at good GNSS accuracy;
+      // likewise a reported zero speed must veto distance-derived motion.
+      const bool trustworthyDisplacement =
+          fix.accuracy <= (fix.speed ? 35. : 15.) &&
+          anchor_->accuracy <= (fix.speed ? 35. : 15.);
+      const bool providerNotStopped = !fix.speed || providerSpeed >= .35;
+      if (travelled >= required && observed >= .55 && plausible &&
+          trustworthyDisplacement && providerNotStopped) {
         auto course = bearing(anchor_->point, fix.point);
         heading_ =
             heading_

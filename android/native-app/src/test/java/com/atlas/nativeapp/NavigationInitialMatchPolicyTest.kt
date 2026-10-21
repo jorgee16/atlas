@@ -42,6 +42,11 @@ class NavigationInitialMatchPolicyTest {
             fix(110.0, speed = 3.5, providerSpeed = 2.4), 80.0, false))
     }
 
+    @Test fun anUnconfirmedMotionFlagCannotInitializeAnIndoorRoadSnap() {
+        val unreliable = fix(80.0,4.0,providerSpeed=4.0).copy(motionConfirmed=false)
+        assertFalse(NavigationInitialMatchPolicy.canAdopt(unreliable,20.0,false))
+    }
+
     @Test fun invalidProjectionIsNeverAccepted() {
         assertFalse(NavigationInitialMatchPolicy.canAdopt(fix(5.0), Double.NaN, false))
         assertFalse(NavigationInitialMatchPolicy.canAdopt(fix(5.0), -1.0, false))

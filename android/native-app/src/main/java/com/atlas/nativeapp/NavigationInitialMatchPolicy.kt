@@ -16,7 +16,8 @@ internal object NavigationInitialMatchPolicy {
         val tolerance = max(12.0, min(50.0, fix.accuracy * 1.5))
         if (offRouteMeters > tolerance) return false
         val speed = StationaryMapPosition.visualSpeed(fix)
-        val moving = speed.isFinite() && speed >= if (walking) 0.45 else 1.2
+        val moving = fix.motionConfirmed != false &&
+            speed.isFinite() && speed >= if (walking) 0.45 else 1.2
         // Good GPS close to the road can adopt its projection once. Poor
         // stationary GPS must remain visually at its measured coordinates.
         return moving || fix.accuracy <= 35.0

@@ -55,6 +55,20 @@ class StationaryMapPositionTest {
             fix(i.toDouble(),2.5,20.0).copy(providerSpeed=0.0),true,true))
         assertEquals(jitter,policy.select(jitter,fix(8.0,1.1).copy(providerSpeed=.6),true,true))
     }
+    @Test fun cxxStationaryVerdictOverridesProviderSpeedAndRouteSnapping() {
+        val stopped=fix(100.0,7.0,70.0)
+            .copy(providerSpeed=4.0,motionConfirmed=false)
+        assertEquals(0.0,StationaryMapPosition.visualSpeed(stopped),0.0)
+        val policy=StationaryMapPosition()
+        policy.select(base,stopped,true,false)
+        for(i in 1..40) {
+            val virtualRoad=Coordinate(base.lat+i*0.00003,base.lon)
+            assertEquals(base,policy.select(virtualRoad,stopped.copy(time=100.0+i),true,false))
+        }
+        val confirmed=stopped.copy(speed=3.0,providerSpeed=3.0,motionConfirmed=true)
+        assertEquals(3.0,StationaryMapPosition.visualSpeed(confirmed),0.0)
+    }
+
     @Test fun unavailableProviderSpeedKeepsDisplacementFallback() {
         assertEquals(.8,StationaryMapPosition.visualSpeed(fix(1.0,.8).copy(providerSpeed=-1.0)),0.0)
     }

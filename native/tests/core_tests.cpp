@@ -191,6 +191,37 @@ int main(int argc, char **argv) {
       check(!motion.moving && motion.speed == 0,
             "stationary poor-GPS wander cannot establish movement");
     }
+    // A parked car's indoor fixes can wander steadily, including dozens of
+    // metres along the planned road. Neither poor no-speed telemetry nor
+    // inaccurate GPS reporting a plausible speed confirms vehicle motion.
+    MotionFilter indoorWander;
+    const Point indoorStart{40, -8};
+    indoorWander.update({indoorStart, 70, 1, std::nullopt, std::nullopt});
+    for (int i = 1; i <= 35; ++i) {
+      const auto drift = Point{40 + i * 2.0 / 111320., -8};
+      const auto estimate = indoorWander.update(
+          {drift, 70, 1. + i, std::nullopt, std::nullopt});
+      check(!estimate.moving && estimate.speed == 0,
+            "missing-speed indoor GPS drift must not become driving");
+    }
+    MotionFilter poorSpeed;
+    poorSpeed.update({indoorStart, 75, 1, 3., 0.});
+    for (int i = 1; i <= 35; ++i) {
+      const auto drift = Point{40 + i * 3.0 / 111320., -8};
+      const auto estimate = poorSpeed.update({drift, 65, 1. + i, 3., 0.});
+      check(!estimate.moving && estimate.speed == 0,
+            "poor GPS and reported speed cannot initialize phantom driving");
+    }
+    // Even accurately spaced GNSS fixes with provider speed zero must not
+    // cause navigation progress when the receiver reports a stop.
+    MotionFilter reportedStop;
+    reportedStop.update({indoorStart, 5, 1, 0., 0.});
+    for (int i = 1; i <= 6; ++i) {
+      const auto point = Point{40 + i * 6.0 / 111320., -8};
+      const auto estimate = reportedStop.update({point, 5, 1. + i, 0., 0.});
+      check(!estimate.moving && estimate.speed == 0,
+            "provider stop must veto inferred speed from drifting fixes");
+    }
     // The speed filter and the native route-progress filter must agree.
     Route footRoute;
     footRoute.points = {footStart, {40.0002, -8}};

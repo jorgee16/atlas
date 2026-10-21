@@ -12,6 +12,9 @@ internal object RouteGapPrediction {
         // fix must never lend its timestamp to the previous fix's route point.
         if (!NavigationResumePolicy.currentGuidance(fix.time,
                 guidance.optDouble("gpsFixTime", Double.NaN))) return null
+        // Prediction must never turn noisy, unconfirmed GNSS movement into
+        // a virtual drive, even if a provider supplies a nonzero speed.
+        if (fix.motionConfirmed == false) return null
         val age = now - fix.time
         if (!age.isFinite() || age < 2.0 || age > 9.0 ||
             StationaryMapPosition.visualSpeed(fix) < 2.0 || fix.accuracy > 35.0 ||

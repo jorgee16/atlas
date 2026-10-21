@@ -41,7 +41,14 @@ internal class StationaryMapPosition {
     }
 
     companion object {
-        fun visualSpeed(fix: Fix): Double =
-            fix.providerSpeed?.takeIf { it.isFinite() && it >= 0.0 } ?: fix.speed
+        fun visualSpeed(fix: Fix): Double {
+            // Android Location speed can be absent or derived from noisy GNSS.
+            // Never override the C++ filter's explicit "not moving" verdict.
+            // Only the native MotionFilter can confirm motion; a negative
+            // provider-speed sentinel falls back to its filtered estimate.
+            if (fix.motionConfirmed == false) return 0.0
+            return fix.providerSpeed?.takeIf { it.isFinite() && it >= 0.0 }
+                ?: fix.speed
+        }
     }
 }
