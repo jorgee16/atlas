@@ -15,6 +15,7 @@ struct Engine {
   std::map<int, atlas::Route> savedRoutes;
   atlas::GuidanceSession guidance;
   atlas::MotionFilter motion;
+  std::optional<atlas::Profile> motionProfile;
   std::optional<double> motionHeading;
   std::string graphPath, searchPath;
 };
@@ -186,6 +187,16 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
       throw std::runtime_error("No route connects these points");
     if (!walk)
       atlas::calibrateDriveEta(*next, *e.graph);
+    // The same native engine processes GPS across driving and walking
+    // routes. Carrying an old car-motion anchor into a new walking route can
+    // reject several genuine 1.5m/s fixes as impossible displacement.
+    // Only reset when changing motion profile; reroutes in the same mode
+    // retain their useful speed/heading evidence.
+    if (e.motionProfile && *e.motionProfile != op.profile) {
+      e.motion = atlas::MotionFilter{};
+      e.motionHeading.reset();
+    }
+    e.motionProfile = op.profile;
     e.route = std::move(next);
     e.guidance.reset();
     return bytes(env, atlas::routeJson(*e.route));

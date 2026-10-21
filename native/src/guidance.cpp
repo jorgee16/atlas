@@ -248,6 +248,18 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     out.state = Guidance::State::reduced;
     return out;
   }
+  // Arrival is a special case: an independent, accurate fix at the actual
+  // destination may complete a previously confirmed approach, even when the
+  // vehicle is stopped. Merely wandering onto the destination with the old
+  // route progress far away must NOT count as arrival.
+  if (lastGoodPosition_ && lastGoodPosition_->remaining <= 35. &&
+      accuracy <= 35. && speed < 4. &&
+      distance(p, r.points.back()) <= std::max(20., accuracy) &&
+      out.position.offRoute <= std::max(25., accuracy * 2.)) {
+    out.state = Guidance::State::arrived;
+    lastPosition_ = out.position;
+    return out;
+  }
   // Low-speed fixes cannot establish progress along the route by themselves.
   // Indoors GNSS can drift dozens of metres *along* the very same road,
   // producing false distance/ETA changes despite a stationary vehicle.
