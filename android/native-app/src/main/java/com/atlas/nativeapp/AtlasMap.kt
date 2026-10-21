@@ -868,11 +868,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // location separate from the routable route origin.
             val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
             val trusted = matchVisible
-            // Before the first confirmed route projection, the cursor might
-            // still have an unprojected preview/GPS reference. Adopting the
-            // first matched road point changes coordinate reference, not
-            // physical position: never animate a fake trip to the road.
-            val firstConfirmedMatch = trusted && !lastTrustedGuidanceAt.isFinite()
+            // A new route projection is not measured travel. Mid-drive GNSS
+            // recovery must never reset the final visual position limiter.
+            // Explicit start/foreground epochs above own any legitimate rebase.
             if (trusted) lastTrustedGuidanceAt = s.guidance!!
                 .optDouble("predictedAt",s.guidance.optDouble("gpsFixTime",fix.time))
             val hold = NavigationCameraBehavior.useHeldRouteFix(s.navigating,
@@ -948,17 +946,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // coordinate reference; raw-origin anchors caused later creep.
                 stationaryPosition.rebase(desiredDisplayed,fix,s.walking)
                 renderInterpolator.holdStationary(desiredDisplayed)
-                if (firstConfirmedMatch &&
-                    (lastRenderedMarker == null ||
-                        distanceMeters(lastRenderedMarker!!,desiredDisplayed) <= 5.0)) {
-                    // Only a nearby, first road match may rebase the visual
-                    // presentation. A reacquired GNSS fix after poor accuracy
-                    // is NOT proof of motion, so never reset the limiter and
-                    // jump dozens of metres along the route while stopped.
-                    // When real motion resumes, the shared per-frame budget
-                    // will smoothly catch up without teleporting the cursor.
-                    presentedPosition.reset()
-                }
+                // Keep presentedPosition's previous on-screen anchor.
+                // A matched road coordinate alone must not reset it.
             }
             val displayed=if(s.navigating)presentedPosition.commit(desiredDisplayed,nowSeconds,
                 StationaryMapPosition.visualSpeed(fix)) else desiredDisplayed
