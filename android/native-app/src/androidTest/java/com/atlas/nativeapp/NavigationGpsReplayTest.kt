@@ -510,6 +510,45 @@ class NavigationGpsReplayTest {
         s.onActivity { model!!.endNavigation();map(it).endNavigation() }
     }
 
+    /** Reproduce indoor GNSS wandering 50+ metres while a car is parked.
+     * The Android GPS mock explicitly does NOT supply Location.speed, so the
+     * real JNI MotionFilter must decide if displacement is physical motion.
+     */
+    private fun verifyParkedCarWithBadGps(s:ActivityScenario<MainActivity>,route:JSONObject) {
+        phase="parked-car-indoor-drift"
+        val origin=points(route).first()
+        val original=snapshot(s)
+        val stable=Coordinate(original.getDouble("renderLat"),original.getDouble("renderLon"))
+        val initialProgress=model!!.updates.value.guidance?.optDouble("along",0.0) ?: 0.0
+        repeat(12) { index ->
+            val point=Coordinate(origin.lat+(index+1)*5.0/111320.0,origin.lon)
+            val location=Location(LocationManager.GPS_PROVIDER).apply {
+                latitude=point.lat;longitude=point.lon
+                accuracy=75f
+                // Do not assign speed or bearing: Android must preserve the
+                // absence of provider-speed telemetry (hasSpeed()==false).
+                time=System.currentTimeMillis()
+                elapsedRealtimeNanos=SystemClock.elapsedRealtimeNanos()
+            }
+            val sent=location.elapsedRealtimeNanos/1e9
+            locations.setTestProviderLocation(LocationManager.GPS_PROVIDER,location)
+            await("Android must receive parked low-accuracy GPS",3) {
+                (model!!.updates.value.fix?.time ?: 0.0)>=sent
+            }
+            SystemClock.sleep(1020)
+            val state=model!!.updates.value
+            assertEquals("poor GPS must never establish real driving motion",false,
+                state.fix?.motionConfirmed)
+            val snap=snapshot(s)
+            val rendered=Coordinate(snap.getDouble("renderLat"),snap.getDouble("renderLon"))
+            assertTrue("parked GNSS drift moved the cursor: ${distance(stable,rendered)}m",
+                distance(stable,rendered)<1.0)
+            val along=state.guidance?.optDouble("along",initialProgress) ?: initialProgress
+            assertTrue("parked GPS must not advance native route progress",
+                kotlin.math.abs(along-initialProgress)<1.0)
+        }
+        capture(s,"parked-car-indoor-no-phantom-travel")
+    }
     private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
         phase="camera-smoke"
         val path=points(route)
@@ -752,6 +791,7 @@ class NavigationGpsReplayTest {
                 assertTrue("Portugal drive must include a roundabout",drive.getJSONArray("maneuvers").objects()
                     .any{it.optString("type")=="roundabout"})
                 if(cameraOnly) {
+                    verifyParkedCarWithBadGps(s,drive)
                     cameraSmoke(s,drive)
                     val walk=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.7224,-9.1475),true)
                     verifyStationaryWalker(s,walk)
