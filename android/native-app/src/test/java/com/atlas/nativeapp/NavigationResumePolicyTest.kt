@@ -4,8 +4,12 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class NavigationResumePolicyTest {
-    @Test fun shortPauseKeepsNormalSmoothFollow() {
-        assertFalse(NavigationResumePolicy.shouldSynchronize(100.0,101.0,true))
+    @Test fun shortPauseWithoutNewFixKeepsNormalSmoothFollow() {
+        assertFalse(NavigationResumePolicy.shouldSynchronize(100.0,100.2,true))
+        // An ordinary app switch can last only one second. Treat it as
+        // foreground resumption instead of replaying previously animated
+        // route progress from the paused camera.
+        assertTrue(NavigationResumePolicy.shouldSynchronize(100.0,101.0,true))
         assertFalse(NavigationResumePolicy.shouldSynchronize(100.0,200.0,false))
         assertFalse(NavigationResumePolicy.shouldSynchronize(Double.NaN,200.0,true))
     }
