@@ -142,6 +142,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var wasNavigating = false
     private var routeRendering = false
     private var initialRoadMatchAccepted = false
+    // A genuinely newer, accurate GPS fix may establish the initial visual
+    // reference once. This must not be reused when GNSS recovers mid-trip.
+    private var navigationStartAt = Double.NaN
+    private var navigationStartFixTime = Double.NaN
+    private var initialGpsAlignmentPending = false
     private var lastCameraCue: JSONObject? = null
     private var lastCameraFraming: NavigationCameraFraming.Target? = null
     private val freePosition = NavigationPositionInterpolator()
@@ -666,12 +671,18 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         if (!s.navigating) {
             resumeSyncPending = false
             resumeAnchorFixTime = Double.NaN
+            initialGpsAlignmentPending = false
+            navigationStartAt = Double.NaN
+            navigationStartFixTime = Double.NaN
         }
         // Entering guidance from a preview is a NEW visual epoch. Reusing the
         // preview cursor/route smoothing anchor makes the car replay the
         // movement accumulated while the user was looking at the preview.
         val navigationStarting = s.navigating && !wasNavigating
         if (navigationStarting) {
+            navigationStartAt = SystemClock.elapsedRealtimeNanos() / 1e9
+            navigationStartFixTime = s.fix?.time ?: Double.NaN
+            initialGpsAlignmentPending = true
             headingStabilizer.reset()
             stationaryPosition.reset()
             freePosition.reset()
@@ -895,10 +906,34 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // explicit, one-shot resynchronization epochs above. While active,
             // preserve the route-constrained interpolator and final per-frame
             // distance budget, even if a GPS projection changes segments.
-            val desiredDisplayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
+            var desiredDisplayed = if(smooth) renderInterpolator.sample(nowSeconds)?.position
                 ?: lastRenderedMarker ?: display else if(s.navigating)
                     freePosition.sample(nowSeconds)?.first ?: display else display
-            if(trusted && !wasRouteRendering &&
+            // A start-of-route mock/real position can legitimately receive a
+            // newer, highly accurate fix near the routed start, even while
+            // stationary. Distinguish this one-time initialization from
+            // a mid-drive recovery after weak GNSS; only the former may rebase
+            // the visual coordinate reference without interpolating travel.
+            val initialAlignment = trusted && initialGpsAlignmentPending &&
+                NavigationInitialMatchPolicy.canRebaseOnStart(
+                    nowSeconds,navigationStartAt,navigationStartFixTime,
+                    fix,s.guidance!!.optDouble("offRoute",Double.POSITIVE_INFINITY),
+                    distanceMeters(fix.point,s.guidance.coordinate()))
+            if (initialAlignment) {
+                val guidance = s.guidance!!
+                val coordinate = guidance.coordinate()
+                val along = guidance.optDouble("along",Double.NaN)
+                if (along.isFinite()) {
+                    renderInterpolator.synchronizeConfirmedGps(
+                        along,coordinate,fix.time)
+                }
+                stationaryPosition.rebase(coordinate,fix,s.walking)
+                freePosition.reset()
+                presentedPosition.reset()
+                desiredDisplayed = coordinate
+                initialGpsAlignmentPending = false
+            }
+            if(trusted && !wasRouteRendering && !initialAlignment &&
                 StationaryMapPosition.visualSpeed(fix)<(if(s.walking).45 else 1.2)) {
                 // Initial road matching may snap an unprojected fix to a nearby
                 // footpath. Both stationary filters must then use the same
