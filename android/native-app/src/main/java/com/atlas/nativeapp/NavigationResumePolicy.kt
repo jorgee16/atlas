@@ -32,4 +32,13 @@ internal object NavigationResumePolicy {
     fun currentGuidance(fixAt: Double, guidanceFixAt: Double): Boolean =
         fixAt.isFinite() && guidanceFixAt.isFinite() &&
             abs(fixAt - guidanceFixAt) < 0.01
+
+    /** Never aim a moving camera using an old JNI projection. During a GPS
+     * delivery gap retain the last physically observed travel direction;
+     * a route prediction is not an independent heading measurement.
+     */
+    fun currentHeadingGuidance(now: Double, fixAt: Double,
+                               guidanceFixAt: Double): Boolean =
+        currentGuidance(fixAt, guidanceFixAt) &&
+            now.isFinite() && now - fixAt in 0.0..2.5
 }
