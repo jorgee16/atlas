@@ -371,11 +371,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         // screen-over-other-apps behaviour. Touches outside this card remain map touches.
         diagnosticsOverlay=ui.column().apply {
             setPadding(ui.dp(13),ui.dp(12),ui.dp(13),ui.dp(12))
-            background=ui.shape(Color.argb(238,24,32,47),16)
-            elevation=ui.dp(11).toFloat()
+            // Fully transparent diagnostic text overlay: the satellite/map
+            // imagery is never darkened, blurred or covered by a solid card.
+            setBackgroundColor(Color.TRANSPARENT)
+            elevation=0f
             visibility=View.GONE
             addView(ui.row().apply {
                 diagnosticsLabel=ui.text("GPS DIAGNOSTICS",12f,Color.WHITE,true).apply {
+                    setShadowLayer(ui.dp(3).toFloat(),0f,ui.dp(1).toFloat(),Color.BLACK)
                     setOnClickListener {
                         diagnosticsExpanded=!diagnosticsExpanded
                         updateDiagnostics(model.updates.value)
@@ -385,12 +388,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                     gravity=Gravity.CENTER_VERTICAL
                 })
                 addView(ui.text("×",23f,Color.WHITE,true).apply {
+                    setShadowLayer(ui.dp(3).toFloat(),0f,ui.dp(1).toFloat(),Color.BLACK)
                     contentDescription="Hide GPS diagnostics"
                     gravity=Gravity.CENTER
                     setOnClickListener { model.diagnosticsEnabled=false }
                 },LinearLayout.LayoutParams(ui.dp(38),ui.dp(38)))
             })
             diagnosticsBody=ui.text("",12f,Color.WHITE).apply {
+                setShadowLayer(ui.dp(3).toFloat(),0f,ui.dp(1).toFloat(),Color.BLACK)
                 setLineSpacing(ui.dp(3).toFloat(),1f)
                 setOnClickListener {
                     diagnosticsExpanded=!diagnosticsExpanded
