@@ -920,8 +920,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     fix,s.guidance!!.optDouble("offRoute",Double.POSITIVE_INFINITY),
                     distanceMeters(fix.point,s.guidance.coordinate()))
             if (initialAlignment) {
-                val coordinate = s.guidance!!.coordinate()
-                val along = s.guidance.optDouble("along",Double.NaN)
+                val guidance = s.guidance!!
+                val coordinate = guidance.coordinate()
+                val along = guidance.optDouble("along",Double.NaN)
                 if (along.isFinite()) {
                     renderInterpolator.synchronizeConfirmedGps(
                         along,coordinate,fix.time)
