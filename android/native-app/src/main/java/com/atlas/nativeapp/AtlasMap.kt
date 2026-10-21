@@ -142,6 +142,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var wasNavigating = false
     private var routeRendering = false
     private var initialRoadMatchAccepted = false
+    private var lastCameraCue: JSONObject? = null
+    private var lastCameraFraming: NavigationCameraFraming.Target? = null
     private val freePosition = NavigationPositionInterpolator()
     private val presentedPosition = NavigationPositionLimiter()
     /** Installed only by instrumented debug replay; no JSON work in production frames. */
@@ -184,11 +186,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             val angle = AtlasHeading.normalize(camera.bearing+
                 AtlasHeading.signedDelta(camera.bearing,desiredHeading)*easing)
             followingAngle = angle
-            val targetZoom = if (s.walking) 18.0 else
-                18.0-((s.fix.speed*3.6-40)/85).coerceIn(0.0,.8)
-            val zoom = camera.zoom+(targetZoom-camera.zoom)*easing
-            val tiltTarget = if(s.walking) 0.0 else 42.0
-            val tilt = camera.tilt+(tiltTarget-camera.tilt)*easing
+            val framing = desiredFraming(s)
+            val cameraEasing = 1-kotlin.math.exp(-1.6*deltaTime)
+            val zoom = camera.zoom+(framing.zoom-camera.zoom)*cameraEasing
+            val tilt = camera.tilt+(framing.tilt-camera.tilt)*cameraEasing
             val center = camera.target ?: LatLng(position.lat,position.lon)
             val centerCoordinate = Coordinate(center.latitude,center.longitude)
             val centerEase = 1-kotlin.math.exp(-6.0*deltaTime)
@@ -216,13 +217,12 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             distanceMeters(Coordinate(it.latitude,it.longitude),position)
         } ?: Double.POSITIVE_INFINITY
         val expected = if (headingUp) travelHeading(s,s.fix) else 0.0
-        val zoom = if (s.walking) 18.0 else
-            18.0-((s.fix.speed*3.6-40)/85).coerceIn(0.0,.8)
+        val framing = desiredFraming(s)
         debugFrameCount++
         onDebugFrame?.invoke(debugSnapshot())
         if (NavigationCameraBehavior.shouldContinueFrame(follow,markerActive,
                 error,AtlasHeading.signedDelta(camera.bearing,expected),
-                camera.zoom-zoom,camera.tilt-(if(s.walking)0.0 else 42.0)))
+                camera.zoom-framing.zoom,camera.tilt-framing.tilt))
             scheduleNavigationFrame()
     }
     private fun updatePositionIcon(degrees: Double) {
@@ -245,7 +245,42 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         applyCameraMode()
     }
     private fun followPadding(s: AtlasState): DoubleArray = doubleArrayOf(0.0,
-        if(s.navigating && headingUp)view.height*.25 else 0.0,0.0,0.0)
+        if(s.navigating && headingUp)view.height*.30 else 0.0,0.0,0.0)
+
+    /** Only current JNI guidance may set a new camera target. Never use a
+     * predicted/stale fix to trigger a dramatic zoom during rerouting or GPS loss.
+     * Holding the previous target also avoids zoom pulsing at 1 Hz.
+     */
+    private fun desiredFraming(s: AtlasState): NavigationCameraFraming.Target {
+        if (!s.navigating) return NavigationCameraFraming.Target(15.0, 0.0)
+        if (s.walking) return NavigationCameraFraming.target(true, 0.0, null)
+        val guidance = s.guidance
+        val fix = s.fix
+        if (guidance != null && fix != null && guidance !== lastCameraCue &&
+            guidance.optString("state") !in listOf("checking","reroute","changed","reduced","arrived") &&
+            NavigationResumePolicy.currentGuidance(
+                fix.time,guidance.optDouble("gpsFixTime",Double.NaN))) {
+            val i = guidance.optInt("maneuver",-1)
+            val cues = s.route?.optJSONArray("maneuvers")
+            val currentCue = if (i>=0) cues?.optJSONObject(i) else null
+            val nextAfterDepart = if (currentCue?.optString("type")=="depart") {
+                val at = cues?.optJSONObject(i+1)?.optDouble("at",Double.NaN)
+                val along = guidance.optDouble("along",Double.NaN)
+                if (at != null && at.isFinite() && along.isFinite()) at-along else null
+            } else null
+            val distance = if (currentCue != null)
+                NavigationCameraFraming.upcomingDistance(
+                    currentCue.optString("type"),
+                    guidance.optDouble("toManeuver",Double.NaN),nextAfterDepart)
+                else null
+            lastCameraFraming=NavigationCameraFraming.target(false,
+                StationaryMapPosition.visualSpeed(fix),distance)
+            lastCameraCue=guidance
+        }
+        return lastCameraFraming ?: NavigationCameraFraming.target(false,
+            StationaryMapPosition.visualSpeed(fix ?: return NavigationCameraFraming.Target(17.4,57.0)),null)
+    }
+
     private fun overviewPoints(): List<LatLng> {
         if(geometry.size<2)return emptyList()
         val s=current
@@ -265,12 +300,11 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 val fix=s.fix ?: return
                 val target=lastRenderedMarker ?: fix.point
                 val bearing=if(headingUp)travelHeading(s,fix) else 0.0
-                val zoom=if(!s.navigating)15.0 else if(s.walking)18.0 else
-                    18.0-((fix.speed*3.6-40)/85).coerceIn(0.0,.8)
+                val framing = desiredFraming(s)
                 ready.cancelTransitions()
                 ready.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-                    .target(LatLng(target.lat,target.lon)).zoom(zoom).bearing(bearing)
-                    .tilt(if(s.navigating && !s.walking)42.0 else 0.0)
+                    .target(LatLng(target.lat,target.lon)).zoom(framing.zoom).bearing(bearing)
+                    .tilt(framing.tilt)
                     .padding(followPadding(s)).build()))
                 lastFixTime=fix.time
                 updatePositionIcon(NavigationCameraBehavior.cursorAngle(s.navigating,true,headingUp,
@@ -646,6 +680,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             interpolatedRoute=null
             routeRendering=false
             initialRoadMatchAccepted=false
+            lastCameraCue=null
+            lastCameraFraming=null
             lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
             lastRenderedMarker=null
             lastRenderedFrameAt=0.0
@@ -657,6 +693,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             interpolatedRoute=null
             routeRendering=false
             initialRoadMatchAccepted=false
+            lastCameraCue=null
+            lastCameraFraming=null
             lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
             freePosition.reset()
             presentedPosition.reset()

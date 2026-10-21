@@ -444,10 +444,17 @@ class NavigationGpsReplayTest {
             assertEquals(0.0,f.getDouble("mapTilt"),.1)
         }
         if(mode=="FOLLOWING") {
-            assertEquals(18.0,f.getDouble("mapZoom"),.1)
-            assertEquals(if(model!!.updates.value.walking)0.0 else 42.0,f.getDouble("mapTilt"),.2)
+            if(model!!.updates.value.walking) {
+                assertEquals(18.0,f.getDouble("mapZoom"),.1)
+                assertEquals(0.0,f.getDouble("mapTilt"),.2)
+            } else {
+                assertTrue("car follow zoom must stay within adaptive limits",
+                    f.getDouble("mapZoom") in 15.9..18.8)
+                assertTrue("car follow pitch must show more road than old fixed 42 degrees",
+                    f.getDouble("mapTilt") in 48.0..60.5)
+            }
             val p=f.getJSONArray("cameraPadding")
-            assertEquals(if(f.getBoolean("headingUp"))f.getDouble("viewportHeight")*.25 else 0.0,p.getDouble(1),1.0)
+            assertEquals(if(f.getBoolean("headingUp"))f.getDouble("viewportHeight")*.30 else 0.0,p.getDouble(1),1.0)
         }
         events.add(JSONObject(f.toString()).put("event","camera-$mode").toString())
     }
