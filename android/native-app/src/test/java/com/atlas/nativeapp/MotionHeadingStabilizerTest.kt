@@ -105,6 +105,22 @@ class MotionHeadingStabilizerTest {
         val unmoved=fix(6.5,60.0,speed=8.0).copy(providerBearing=60.0)
         assertEquals(176.0,filter.resolve(unmoved,null,true,176.0,true),1.0)
     }
+    @Test fun movementVerifiedGnssPreventsOnRouteRerouteBearingFromTurningCameraBackwards() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,60.0,speed=8.0).copy(providerBearing=60.0),
+            null,true,60.0,true)
+        // JNI/native heading is noisy, but the independent raw GNSS bearing
+        // agrees with the 8 m physical movement to the north-east.
+        val moved=fix(2.0,331.0,speed=8.0).copy(
+            point=Coordinate(38.72+4.0/111320.0,
+                -9.14+7.0/(111320.0*0.7809)),providerBearing=60.0)
+        assertEquals(60.0,filter.resolve(moved,null,true,176.0,true),1.0)
+    }
+    @Test fun headingIgnoresOldOrMismatchedNativeGuidanceButAcceptsFreshGuidance() {
+        assertFalse(NavigationResumePolicy.currentHeadingGuidance(10.0,9.9,9.0))
+        assertFalse(NavigationResumePolicy.currentHeadingGuidance(10.0,7.0,7.0))
+        assertTrue(NavigationResumePolicy.currentHeadingGuidance(10.0,9.0,9.0))
+    }
     @Test fun twoInvertedBearingsCannotOverrideContinuingDisplacement() {
         val filter=MotionHeadingStabilizer()
         filter.resolve(fix(1.0,0.0,lat=38.72),null,true)
