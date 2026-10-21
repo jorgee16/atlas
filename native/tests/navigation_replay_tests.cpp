@@ -58,6 +58,22 @@ int main() {
   }
   check(recoveredAfterConsecutiveFixes,
       "three consistent moving GPS fixes must restore progress after weak GPS");
+  // A real approach may complete at zero speed; a GPS wander that jumps
+  // from the beginning straight to the destination must never auto-arrive.
+  GuidanceSession approachingDestination;
+  auto nearEnd=straight.points.back();
+  nearEnd.lat-=16.0/111320.0;
+  auto approach=approachingDestination.update(nearEnd,5,8,200,straight);
+  check(approach.position.remaining < 35.,
+        "arrival precondition must be confirmed near destination");
+  auto reached=approachingDestination.update(straight.points.back(),5,0,201,straight);
+  check(reached.state==Guidance::State::arrived,
+        "stationary last fix must confirm a previously approached destination");
+  GuidanceSession falseArrival;
+  falseArrival.update(straight.points.front(),5,0,200,straight);
+  auto teleported=falseArrival.update(straight.points.back(),5,0,201,straight);
+  check(teleported.state!=Guidance::State::arrived,
+        "GPS drift near destination must not invent route completion");
   std::cout<<"Navigation loop ambiguity, recovery and poor GPS passed\n";
  } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }
