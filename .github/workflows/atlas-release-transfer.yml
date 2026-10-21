@@ -1,0 +1,31 @@
+name: Transfer signed Atlas Release APK
+on:
+  push:
+    branches: ['migration/native-core-kotlin']
+    paths: ['.github/workflows/atlas-release-transfer.yml']
+permissions:
+  contents: read
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download published signed release and check integrity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p apk
+          gh release download atlas-android-v0.2.2 --repo "$GH_REPO" --dir apk \
+            --pattern 'Atlas-v0.2.2.apk' --pattern 'Atlas-v0.2.2.apk.sha256'
+          ( cd apk && sha256sum --check Atlas-v0.2.2.apk.sha256 )
+          test "$(stat -c '%s' apk/Atlas-v0.2.2.apk)" -eq 29764189
+      - name: Make APK accessible as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-v0.2.2-release-apk
+          path: apk/Atlas-v0.2.2.apk
+          if-no-files-found: error
+          retention-days: 7
