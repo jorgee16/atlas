@@ -141,6 +141,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private var cameraRoute: JSONObject? = null
     private var wasNavigating = false
     private var routeRendering = false
+    private var initialRoadMatchAccepted = false
     private val freePosition = NavigationPositionInterpolator()
     private val presentedPosition = NavigationPositionLimiter()
     /** Installed only by instrumented debug replay; no JSON work in production frames. */
@@ -644,6 +645,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             renderInterpolator.reset()
             interpolatedRoute=null
             routeRendering=false
+            initialRoadMatchAccepted=false
             lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
             lastRenderedMarker=null
             lastRenderedFrameAt=0.0
@@ -654,6 +656,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             renderInterpolator.reset()
             interpolatedRoute=null
             routeRendering=false
+            initialRoadMatchAccepted=false
             lastTrustedGuidanceAt=Double.NEGATIVE_INFINITY
             freePosition.reset()
             presentedPosition.reset()
@@ -792,15 +795,22 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 resumeAnchorFixTime, fix.time, isPredictedGuidance)
             val guidanceUsable = guidanceCurrent &&
                 !suppressedPrediction && (!catchingUp || !isPredictedGuidance)
-            val candidate = if (guidanceUsable && s.navigating && !s.busy && s.guidance != null &&
-                s.guidance.optString("state") !in listOf("checking","reroute","changed") &&
-                s.guidance.optDouble("offRoute") < 60) s.guidance.coordinate() else fix.point
-            // Visual-only: retain the map-matched road position during
-            // stationary GPS jitter; native guidance keeps receiving fixes.
+            // GPS and JNI guidance are distinct coordinates. A recent fix
+            // can start the route even with poor indoor accuracy; it must not
+            // automatically teleport the displayed position to the road.
+            val eligibleMatch = guidanceUsable && s.navigating && !s.busy &&
+                geometry.size >= 2 && s.guidance != null &&
+                s.guidance.optString("state") !in listOf("checking","reroute","changed","arrived") &&
+                s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY) < 60.0
+            val matchVisible = eligibleMatch &&
+                (initialRoadMatchAccepted || NavigationInitialMatchPolicy.canAdopt(
+                    fix, s.guidance!!.optDouble("offRoute",Double.POSITIVE_INFINITY), s.walking))
+            if (matchVisible) initialRoadMatchAccepted = true
+            val candidate = if (matchVisible) s.guidance!!.coordinate() else fix.point
+            // Until the first trustworthy visual match, keep the original GPS
+            // location separate from the routable route origin.
             val display = stationaryPosition.select(candidate, fix, s.navigating, s.walking)
-            val trusted = guidanceUsable && s.navigating && !s.busy && geometry.size>=2 && s.guidance != null &&
-                s.guidance.optDouble("offRoute",Double.POSITIVE_INFINITY)<60.0 &&
-                s.guidance.optString("state") !in listOf("checking","reroute","arrived")
+            val trusted = matchVisible
             // Before the first confirmed route projection, the cursor might
             // still have an unprojected preview/GPS reference. Adopting the
             // first matched road point changes coordinate reference, not
