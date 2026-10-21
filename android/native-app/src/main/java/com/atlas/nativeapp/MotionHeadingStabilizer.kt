@@ -15,6 +15,9 @@ internal class MotionHeadingStabilizer {
     private var lastTime = Double.NEGATIVE_INFINITY
     private var lastPoint: Coordinate? = null
     private var lastAccuracy = Double.POSITIVE_INFINITY
+    // Physical movement is independent of a potentially reversed route segment.
+    // Valid only for the most recently observed GPS fix.
+    private var lastDisplacementHeading: Double? = null
     private var course: Double? = null
     private var turnCandidate: Double? = null
     private var turnCount = 0
@@ -25,6 +28,7 @@ internal class MotionHeadingStabilizer {
         lastTime=Double.NEGATIVE_INFINITY
         lastPoint=null
         lastAccuracy=Double.POSITIVE_INFINITY
+        lastDisplacementHeading=null
         course=null
         turnCandidate=null;turnCount=0
         routeCandidate=null;routeCandidateCount=0
@@ -41,6 +45,28 @@ internal class MotionHeadingStabilizer {
         // one coherent reading of movement and guidance.
         val stableCourse = course
         if (navigating && onRoute && route != null) {
+            // A fresh, accurate GNSS course corroborated by actual position
+            // displacement is stronger evidence than a projected route edge.
+            // In particular, rerouting on roundabouts / parallel roads can
+            // return an on-route but opposite-direction segment. Never steer
+            // the camera toward it while the car is demonstrably moving in
+            // another direction.
+            val verifiedGnss = fix.providerBearing?.takeIf {
+                it.isFinite() && it >= 0.0 && fix.speed >= 2.0 &&
+                    fix.accuracy.isFinite() && fix.accuracy <= 25.0 &&
+                    fix.bearingAccuracy != null && fix.bearingAccuracy.isFinite() &&
+                    fix.bearingAccuracy <= 15.0
+            }?.takeIf { raw ->
+                lastDisplacementHeading?.let { displacement ->
+                    abs(AtlasHeading.signedDelta(raw, displacement)) <= 26.0
+                } == true
+            }
+            if (verifiedGnss != null &&
+                abs(AtlasHeading.signedDelta(verifiedGnss, route)) > 55.0) {
+                routeCandidate = null
+                routeCandidateCount = 0
+                return stableCourse ?: verifiedGnss
+            }
             // A fresh reroute can select an opposite-direction segment on
             // dual carriageways or roundabouts. Do not flip the camera 180°
             // from one projected segment while actual travel says otherwise.
@@ -85,6 +111,7 @@ internal class MotionHeadingStabilizer {
         }
         val previous = lastPoint
         val previousAccuracy = lastAccuracy
+        lastDisplacementHeading = null
         lastTime = f.time
         lastPoint = f.point
         lastAccuracy = f.accuracy
@@ -114,6 +141,7 @@ internal class MotionHeadingStabilizer {
                     cos(a) * sin(b) - sin(a) * cos(b) * cos(dLon))))
             }
         }
+        lastDisplacementHeading = displacementHeading
         val good = usable(f)
         // C++'s heading may be calculated from successive coordinates.
         // When Android reports a credible *bearing accuracy*, prefer the
