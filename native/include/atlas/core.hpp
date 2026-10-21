@@ -113,6 +113,9 @@ struct RouteOptions {
 double tollRate(std::string reference, int vehicleClass);
 std::optional<Route> route(const Graph &graph, uint32_t start, uint32_t goal,
                            const RouteOptions &options = {});
+// A known GPS heading is a hard directed-road start constraint, not a hint.
+std::optional<Route> routeFromPosition(const Graph &graph, Point from, Point to,
+    const RouteOptions &options, std::optional<double> travelHeading);
 void makeManeuvers(Route &route, const Graph &graph);
 void calibrateDriveEta(Route &route, const Graph &graph);
 struct MotionFix {

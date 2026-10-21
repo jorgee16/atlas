@@ -351,7 +351,7 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
     if (item.cost != costs[item.state])
       continue;
     const auto currentNode = nodeOf(item.state);
-    if (currentNode == goal) {
+    if (currentNode == goal && !(op.initialEdge && item.state == start)) {
       Route r;
       r.expanded = expanded;
       for (int64_t state = int64_t(item.state); state >= 0;
@@ -492,6 +492,32 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
     }
   }
   return {};
+}
+std::optional<Route> routeFromPosition(const Graph &g, Point from, Point to,
+                                       const RouteOptions &op,
+                                       std::optional<double> travelHeading) {
+  if (!valid(from) || !valid(to))
+    throw std::invalid_argument("Invalid route coordinates");
+  auto goal = g.nearest(to, op.profile);
+  if (!goal)
+    return {};
+  if (travelHeading && op.profile == Profile::drive) {
+    if (!std::isfinite(*travelHeading) || *travelHeading < 0)
+      throw std::invalid_argument("Invalid driving heading");
+    auto directed = g.nearestDirected(from, op.profile, *travelHeading);
+    if (!directed)
+      return {}; // Never fabricate a wrong-way route from a nearby node.
+    auto constrained = op;
+    constrained.initialEdge = directed->edge;
+    constrained.initialSnap = directed->snapped;
+    // If this graph entry cannot legally reach the destination, report that
+    // failure. Never fall back to a different/opposite edge.
+    return route(g, directed->node, *goal, constrained);
+  }
+  auto start = g.nearest(from, op.profile);
+  if (!start)
+    return {};
+  return route(g, *start, *goal, op);
 }
 std::string routeJson(const Route &r) {
   std::ostringstream s;

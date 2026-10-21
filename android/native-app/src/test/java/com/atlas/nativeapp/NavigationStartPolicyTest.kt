@@ -48,6 +48,29 @@ class NavigationStartPolicyTest {
         assertFalse(NavigationStartPolicy.directionChanged(359.0,4.0))
     }
 
+    @Test fun rerouteUsesLiveGpsBearingInsteadOfStaleSmoothedCourse() {
+        val current=Fix(from,5.0,7.0,245.0,100.0,
+            bearingAccuracy=9.0, providerBearing=88.0, providerSpeed=9.0,
+            motionConfirmed=true)
+        assertEquals(88.0,NavigationStartPolicy.rerouteHeading(current,null,101.0)!!,0.001)
+        assertNull(NavigationStartPolicy.rerouteHeading(current.copy(time=90.0),null,101.0))
+        assertNull(NavigationStartPolicy.rerouteHeading(current.copy(accuracy=80.0),null,101.0))
+        assertNull(NavigationStartPolicy.rerouteHeading(current.copy(providerSpeed=0.0),null,101.0))
+    }
+
+    @Test fun rerouteWithoutMotionRequiresConsecutiveConsistentGpsFixes() {
+        val previous=Fix(from,5.0,7.0,90.0,100.0,motionConfirmed=false)
+        val next=Fix(
+            Coordinate(from.lat,from.lon+12.0/(111_320.0 * kotlin.math.cos(Math.toRadians(from.lat)))),
+            5.0,0.0,90.0,102.0,bearingAccuracy=7.0,providerBearing=90.0,
+            providerSpeed=7.0,motionConfirmed=false)
+        assertEquals(90.0,NavigationStartPolicy.rerouteHeading(next,previous,103.0)!!,1.0)
+        assertNull(NavigationStartPolicy.rerouteHeading(next.copy(providerBearing=270.0),previous,103.0))
+        assertNull(NavigationStartPolicy.rerouteHeading(next.copy(providerSpeed=0.0),previous,103.0))
+        assertNull(NavigationStartPolicy.rerouteHeading(next.copy(point=from),previous,103.0))
+        assertNull(NavigationStartPolicy.rerouteHeading(next,null,103.0))
+    }
+
     @Test fun movingDriverReplansEarlierInsteadOfStartingFromBehind() {
         val advanced=Coordinate(from.lat+14.0/111_320.0,from.lon)
         assertFalse(NavigationStartPolicy.requiresNewOrigin(from,advanced,5.0,false))

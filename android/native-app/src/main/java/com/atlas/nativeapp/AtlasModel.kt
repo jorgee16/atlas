@@ -250,7 +250,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-    fun calculate(startAfter: Boolean = false) {
+    fun calculate(startAfter: Boolean = false, directionalReroute: Boolean = false) {
         val snapshot = state.value
         val destination = snapshot.destination ?: return status("Choose a destination first")
         val from = snapshot.origin ?: snapshot.fix?.point ?: return status("Use your location or choose a starting point on the map")
@@ -273,8 +273,19 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                 val (choices,liveOrigin,routingHeading) = withContext(worker) {
                     val routingFix=if(snapshot.origin==null)state.value.fix else null
                     val liveOrigin=if(snapshot.origin==null)routingFix?.point ?: from else from
-                    val routingHeading=if(snapshot.origin==null && !snapshot.walking)
-                        NavigationStartPolicy.movingHeading(routingFix) else null
+                    val enforceDirection = directionalReroute && snapshot.origin == null &&
+                        !snapshot.walking
+                    val routingHeading=when {
+                        enforceDirection -> NavigationStartPolicy.rerouteHeading(
+                            routingFix, state.value.previousFix,
+                            android.os.SystemClock.elapsedRealtimeNanos() / 1e9)
+                        snapshot.origin==null && !snapshot.walking ->
+                            NavigationStartPolicy.movingHeading(routingFix)
+                        else -> null
+                    }
+                    if (enforceDirection && routingHeading == null)
+                        throw IllegalStateException(
+                            "Waiting for confirmed driving direction before rerouting; keeping the current route")
                     core.graph(regions.graph(liveOrigin, destination.coordinate()).path)
                     val primary = JSONObject(core.route(liveOrigin, destination.coordinate(), snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
                     core.remember(0); primary.put("key", 0).put("label", if (snapshot.avoidTolls) "Without tolls" else "Recommended")
@@ -429,7 +440,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
             lastSpoken = maneuver
         }
         when (result.getString("state")) {
-            "reroute" -> calculate(true)
+            "reroute" -> calculate(true, directionalReroute = true)
             "arrived" -> {
                 current.destination?.optString("id")?.takeIf { it.startsWith("trip:") }
                     ?.let { visited(it, true) }

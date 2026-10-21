@@ -1,5 +1,7 @@
 package com.atlas.nativeapp
 
+import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
@@ -32,6 +34,38 @@ internal object NavigationStartPolicy {
         return fix.bearing?.takeIf { it.isFinite() && it>=0.0 }?.let {
             ((it%360.0)+360.0)%360.0
         }
+    }
+
+    /** Rerouting prefers a fresh receiver bearing to a smoothed heading from
+     * an older part of the route. Without confirmed motion, corroborate two
+     * consecutive REAL fixes; never derive direction from camera prediction.
+     */
+    fun rerouteHeading(current: Fix?, previous: Fix?, now: Double): Double? {
+        if (current == null || !freshFix(now, current.time, current.accuracy, 5.0) ||
+            current.accuracy > 25.0) return null
+        val speed = current.providerSpeed ?: current.speed
+        if (!speed.isFinite() || speed < 2.0) return null
+        val bearingError = current.bearingAccuracy
+        val raw = current.providerBearing?.takeIf {
+            it.isFinite() && it >= 0.0 &&
+                (bearingError == null || (bearingError.isFinite() && bearingError <= 35.0))
+        }?.let { ((it % 360.0) + 360.0) % 360.0 }
+        if (current.motionConfirmed == true) return raw ?: movingHeading(current)
+        if (previous == null || previous.accuracy > 25.0 ||
+            !previous.time.isFinite()) return null
+        val elapsed = current.time - previous.time
+        if (elapsed !in 0.5..6.0) return null
+        val north = (current.point.lat - previous.point.lat) * 111_320.0
+        val east = (current.point.lon - previous.point.lon) * 111_320.0 *
+            cos(Math.toRadians((current.point.lat + previous.point.lat) / 2.0))
+        val traveled = hypot(north, east)
+        if (!traveled.isFinite() ||
+            traveled < max(5.0, max(current.accuracy, previous.accuracy) * 0.75) ||
+            traveled / elapsed > max(10.0, speed * 2.5)) return null
+        val course = ((Math.toDegrees(atan2(east, north)) % 360.0) + 360.0) % 360.0
+        if (raw != null && abs(Math.IEEEremainder(raw - course, 360.0)) > 55.0)
+            return null
+        return raw ?: course
     }
 
     /** A significant heading change invalidates a nearby but reversed preview. */

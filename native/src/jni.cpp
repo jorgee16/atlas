@@ -178,28 +178,16 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     op.cancelled = [generation] {
       return cancellationGeneration.load() != generation;
     };
-    const auto directed = !walk && std::isfinite(gpsHeading) &&
-        gpsHeading>=0 ? e.graph->nearestDirected({a,b},op.profile,gpsHeading)
-                      : std::nullopt;
-    auto start = directed ? std::optional<uint32_t>(directed->node)
-                          : e.graph->nearest({a,b},op.profile);
-    auto goal = e.graph->nearest({c,d},op.profile);
-    if(!start || !goal)
-      throw std::runtime_error("No accessible road within 2 km of an endpoint");
-    if(directed) {
-      op.initialEdge=directed->edge;
-      op.initialSnap=directed->snapped;
-    }
-    auto next=atlas::route(*e.graph,*start,*goal,op);
-    if(!next && directed) {
-      // The selected carriageway may have no legal continuation.
-      op.initialEdge.reset();
-      op.initialSnap.reset();
-      start=e.graph->nearest({a,b},op.profile);
-      if(start) next=atlas::route(*e.graph,*start,*goal,op);
-    }
+    // Direction is a hard constraint when a trusted heading is supplied.
+    // Never retry a wrong-way route from an arbitrary nearest graph node.
+    const bool hasDirection = !walk && std::isfinite(gpsHeading) && gpsHeading >= 0;
+    auto next = atlas::routeFromPosition(
+        *e.graph, {a, b}, {c, d}, op,
+        hasDirection ? std::optional<double>(gpsHeading) : std::nullopt);
     if(!next)
-      throw std::runtime_error("No route connects these points");
+      throw std::runtime_error(hasDirection
+          ? "Cannot find a legal route in the confirmed driving direction"
+          : "No route connects these points");
     if (!walk)
       atlas::calibrateDriveEta(*next, *e.graph);
     // The same native engine processes GPS across driving and walking

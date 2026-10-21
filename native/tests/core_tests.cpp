@@ -79,9 +79,15 @@ int main(int argc, char **argv) {
           std::abs(std::remainder(bearing(eastRoute->points[0],
                                           eastRoute->points[1])-90.0,360.0))<30,
           "first route segment follows confirmed eastbound heading");
+    const auto rerouteForward=routeFromPosition(
+        graph,realStart,{40,-7.998},RouteOptions{},90.0);
+    check(rerouteForward && distance(rerouteForward->points.front(),realStart)<5,
+          "live reroute begins at GPS and follows the legal directed edge");
     // No reverse directed edge exists on this one-way fixture.
     const auto westStart=graph.nearestDirected(realStart,Profile::drive,270,22);
     check(!westStart,"missing westbound edge must not fake reverse travel");
+    check(!routeFromPosition(graph,realStart,{40,-7.998},RouteOptions{},270.0),
+          "known westbound heading must not silently fall back to eastbound nearest-node route");
     auto p = progress({40, -8}, *drive);
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);
