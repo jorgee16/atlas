@@ -58,6 +58,23 @@ class NavigationPositionLimiterTest {
         assertTrue((frame.lat-origin.lat)*111320.0<=16.6*.07+.001)
         assertEquals(frame,limiter.commit(road,100.07,8.0))
     }
+    @Test fun stationaryGnssReacquisitionDoesNotTeleportButExplicitResumeSynchronizes() {
+        val limiter=NavigationPositionLimiter()
+        val reacquired=Coordinate(origin.lat+76.8/111320.0,origin.lon)
+        assertEquals(origin,limiter.commit(origin,100.0,0.0))
+        // Foreground GNSS accuracy may recover from 100 to 5 metres and
+        // project 76.8 m forward even though the car has not moved.
+        repeat(90) {
+            assertEquals(origin,limiter.commit(reacquired,100.03+(it+1)/30.0,0.0))
+            assertFalse(limiter.active)
+        }
+        // Returning from the background is a separate explicit visual epoch:
+        // a fresh trustworthy fix MUST be applied immediately, not slowly
+        // animated over kilometres of old recorded route.
+        limiter.reset()
+        assertEquals(reacquired,limiter.commit(reacquired,106.0,0.0))
+    }
+
     @Test fun ordinaryMovementIsNotInterpolatedAgain() {
         val limiter=NavigationPositionLimiter()
         limiter.commit(origin,100.0,8.0)
