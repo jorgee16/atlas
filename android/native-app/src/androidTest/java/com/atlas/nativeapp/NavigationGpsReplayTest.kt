@@ -519,6 +519,25 @@ class NavigationGpsReplayTest {
             fix(p,8.0,bearing(p,at(path,along+3)),accuracy,8.0)
         }
         repeat(3){movingFix();SystemClock.sleep(1020)}
+        // Navigation summary controls must remain the same Android View across
+        // live GPS updates; otherwise an in-flight real touch can disappear.
+        var overviewControl: android.view.View? = null
+        fun visibleOverview(a: MainActivity): android.view.View? {
+            fun search(v: android.view.View): android.view.View? {
+                if(v.contentDescription == "Overview")return v
+                if(v is android.view.ViewGroup)for(i in 0 until v.childCount)
+                    search(v.getChildAt(i))?.let{return it}
+                return null
+            }
+            return search(a.window.decorView)
+        }
+        s.onActivity { overviewControl=checkNotNull(visibleOverview(it)) }
+        repeat(2){movingFix();SystemClock.sleep(1020)}
+        s.onActivity { a ->
+            assertSame("GPS updates must not detach or replace Overview control",
+                overviewControl, visibleOverview(a))
+            assertTrue("Overview must be clickable",overviewControl!!.isClickable)
+        }
         tap(s,"Overview") { movingFix();SystemClock.sleep(250) }
         assertMode(s,"OVERVIEW");capture(s,"camera-overview-first-tap")
         // The old fit initially passed, then a cursor correction escaped the

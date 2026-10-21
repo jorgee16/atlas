@@ -96,6 +96,13 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private var navigationTouch = false
     private var navigationTouchGeneration = 0L
     private var deferredChrome = false
+    // Keep navigation controls attached while 1 Hz GPS/guidance updates refresh
+    // their labels. Detaching the Overview button can silently cancel touch UP.
+    private var navigationSummaryCard: View? = null
+    private var navigationArrival: TextView? = null
+    private var navigationRemaining: TextView? = null
+    private var navigationDistance: TextView? = null
+    private var navigationVoiceIcon: AtlasIcon? = null
     private var lastRoute: JSONObject? = null
     private val handler = Handler(Looper.getMainLooper())
     private val gapTick = object : Runnable {
@@ -548,8 +555,24 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
     }
     private fun renderBottom(s: AtlasState) {
-        bottom.removeAllViews();bottom.visibility=if((page!=null&&page!="trips")||fullMap||page=="trips")View.GONE else View.VISIBLE
-        if(s.navigating){bottom.addView(journeySummary(s));return}
+        bottom.visibility=if((page!=null&&page!="trips")||fullMap||page=="trips")View.GONE else View.VISIBLE
+        if(s.navigating) {
+            val existing = navigationSummaryCard
+            if(existing == null || existing.parent !== bottom) {
+                bottom.removeAllViews()
+                bottom.addView(journeySummary(s))
+            }
+            updateJourneySummary(s)
+            return
+        }
+        // Only rebuild the bottom panel on navigation-mode changes, never for
+        // a GPS tick. The cached card cannot outlive an active route.
+        navigationSummaryCard = null
+        navigationArrival = null
+        navigationRemaining = null
+        navigationDistance = null
+        navigationVoiceIcon = null
+        bottom.removeAllViews()
         selectedPlace?.let{place->bottom.addView(placePeek(place));return}
         if(s.tab=="Navigation"){bottom.addView(planner(s));return}
         if(s.tab=="Trail"){bottom.addView(trailPanel());return}
@@ -790,20 +813,58 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
         return card
     }
-    private fun journeySummary(s: AtlasState): View = ui.card(16,true).apply {
+    private fun updateJourneySummary(s: AtlasState) {
         val seconds=s.guidance?.optDouble("seconds")?:s.route?.optDouble("durationSeconds")?:0.0
         val meters=s.guidance?.optDouble("remaining")?:s.route?.optDouble("distanceMeters")?:0.0
         val eta=SimpleDateFormat("HH:mm",Locale.getDefault()).format(Date(System.currentTimeMillis()+(seconds*1000).toLong()))
-        addView(ui.row().apply{
-            addView(ui.stat(eta,"ARRIVAL"),LinearLayout.LayoutParams(0,-2,1f))
-            addView(ui.stat(AtlasPages.formatTime(seconds),"REMAINING"),LinearLayout.LayoutParams(0,-2,1f))
-            addView(ui.stat(AtlasPages.formatDistance(meters),"DISTANCE"),LinearLayout.LayoutParams(0,-2,1f))
+        navigationArrival?.text=eta
+        navigationRemaining?.text=AtlasPages.formatTime(seconds)
+        navigationDistance?.text=AtlasPages.formatDistance(meters)
+        navigationVoiceIcon?.let { icon ->
+            val required = if(model.voice)"volume" else "mute"
+            if(icon.name!=required) { icon.name=required;icon.invalidate() }
+        }
+    }
+    private fun journeySummary(s: AtlasState): View {
+        navigationSummaryCard?.let { return it }
+        val card=ui.card(16,true)
+        val stats=ui.row()
+        val arrival=ui.stat("","ARRIVAL")
+        val time=ui.stat("","REMAINING")
+        val distance=ui.stat("","DISTANCE")
+        navigationArrival=arrival.getChildAt(0) as TextView
+        navigationRemaining=time.getChildAt(0) as TextView
+        navigationDistance=distance.getChildAt(0) as TextView
+        stats.addView(arrival,LinearLayout.LayoutParams(0,-2,1f))
+        stats.addView(time,LinearLayout.LayoutParams(0,-2,1f))
+        stats.addView(distance,LinearLayout.LayoutParams(0,-2,1f))
+        card.addView(stats)
+        val actions=ui.row()
+        actions.addView(ui.chip("Overview","route"){
+            atlasMap.overview()
+            // Never detach Overview just after its click while another
+            // guidance/StateFlow emission is queued.
+            rebuildChrome()
+        },LinearLayout.LayoutParams(0,-2,1f))
+        val voice=ui.iconButton(if(model.voice)"volume" else "mute","Toggle voice guidance"){
+            model.voice=!model.voice
+            navigationVoiceIcon?.let { icon ->
+                icon.name=if(model.voice)"volume" else "mute"
+                icon.invalidate()
+            }
+        }
+        navigationVoiceIcon=voice.getChildAt(0) as AtlasIcon
+        actions.addView(voice,LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)).apply{leftMargin=ui.dp(7)})
+        actions.addView(ui.text("End",13f,ui.red,true).apply{
+            gravity=Gravity.CENTER
+            setPadding(ui.dp(18),ui.dp(12),ui.dp(5),ui.dp(12))
+            contentDescription="End navigation"
+            setOnClickListener{confirm("End this navigation?"){endNavigation()}}
         })
-        addView(ui.row().apply{
-            addView(ui.chip("Overview","route"){atlasMap.overview();rebuildChrome()},LinearLayout.LayoutParams(0,-2,1f))
-            addView(ui.iconButton(if(model.voice)"volume" else "mute","Toggle voice guidance"){model.voice=!model.voice},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)).apply{leftMargin=ui.dp(7)})
-            addView(ui.text("End",13f,ui.red,true).apply{gravity=Gravity.CENTER;setPadding(ui.dp(18),ui.dp(12),ui.dp(5),ui.dp(12));contentDescription="End navigation";setOnClickListener{confirm("End this navigation?"){endNavigation()}}})
-        },linear(14))
+        card.addView(actions,linear(14))
+        navigationSummaryCard=card
+        updateJourneySummary(s)
+        return card
     }
     private fun renderGuidance(s: AtlasState) {
         guidance.removeAllViews();guidance.visibility=if(s.navigating&&page==null)View.VISIBLE else View.GONE
