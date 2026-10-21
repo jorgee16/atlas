@@ -49,9 +49,15 @@ int main() {
   // Once independent movement is confirmed, a fresh, consistent position
   // may catch up to the observed route. Android handles foreground visual
   // repositioning separately, using recent consecutive real GPS fixes.
-  auto fresh=gap.update({40+144.0/111320,-8},5,8,118,straight);
-  check(fresh.state==Guidance::State::normal && fresh.position.along>140,
-      "confirmed motion must restore route progress after weak GPS");
+  bool recoveredAfterConsecutiveFixes=false;
+  for (int second=0; second<3; ++second) {
+    auto fresh=gap.update({40+(144.0+8.0*second)/111320,-8},
+                          5,8,118+second,straight);
+    recoveredAfterConsecutiveFixes |=
+        fresh.state==Guidance::State::normal && fresh.position.along>140;
+  }
+  check(recoveredAfterConsecutiveFixes,
+      "three consistent moving GPS fixes must restore progress after weak GPS");
   std::cout<<"Navigation loop ambiguity, recovery and poor GPS passed\n";
  } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }

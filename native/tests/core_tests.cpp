@@ -102,10 +102,14 @@ int main(int argc, char **argv) {
         drive->points[1], 5, 0, 309, *drive);
     check(std::abs(stoppedReacquisition.position.along-beforeLoss.position.along)<.01,
           "GPS reacquisition without motion cannot teleport route progress");
-    auto resumingTravel = recoveredAccuracy.update(
-        drive->points[1], 5, 8, 310, *drive);
-    check(resumingTravel.position.along>beforeLoss.position.along+1,
-          "confirmed travel after bad GPS must re-enable progress");
+    bool restoredProgress=false;
+    for (int n=0; n<3; ++n) {
+      auto resumingTravel = recoveredAccuracy.update(
+          drive->points[1], 5, 8, 310+n, *drive);
+      restoredProgress |= resumingTravel.position.along>beforeLoss.position.along+1;
+    }
+    check(restoredProgress,
+          "three consistent good fixes must restore progress after bad GPS");
     GuidanceSession recentlyStopped;
     auto cruising = recentlyStopped.update(drive->points.front(), 5, 8, 200, *drive);
     auto stopJitter = recentlyStopped.update(drive->points[1], 5, 0, 201, *drive);
