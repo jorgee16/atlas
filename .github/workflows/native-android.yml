@@ -1,7 +1,8 @@
 name: Native C++ and Kotlin Android
 concurrency:
   group: native-${{ github.ref }}
-  cancel-in-progress: true
+  # Keep an in-flight trip on this branch; superseded PR checks may cancel.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 on:
   workflow_dispatch:
     inputs:
@@ -64,6 +65,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install existing Atlas dependencies for parity fixtures
         run: npm ci --ignore-scripts
       - name: Generate fixtures with the existing Atlas packager
@@ -92,6 +94,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          # This migration branch must be able to populate its own cache.
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
@@ -101,13 +107,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Generate transit expectations from the original app
         run: |
           npm ci --ignore-scripts
           node tools/generate-native-transit-fixtures.mjs
       - name: Build Kotlin and JNI APK
         working-directory: android
-        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:testDebugUnitTest :native-app:lintDebug :native-app:assembleDebugAndroidTest --stacktrace
+        run: bash gradlew --build-cache -PnativeOnly :native-app:assembleDebug :native-app:testDebugUnitTest :native-app:lintDebug :native-app:assembleDebugAndroidTest --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: Atlas-native-debug-apk
@@ -169,6 +176,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          # This migration branch must be able to populate its own cache.
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
@@ -177,7 +188,7 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Build GPS replay APK and instrumentation package
         working-directory: android
-        run: bash gradlew -PnativeOnly :native-app:assembleDebug :native-app:assembleDebugAndroidTest --stacktrace
+        run: bash gradlew --build-cache -PnativeOnly :native-app:assembleDebug :native-app:assembleDebugAndroidTest --stacktrace
       - name: Install video tools for visual evidence review
         run: |
           if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
@@ -238,6 +249,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          # This migration branch must be able to populate its own cache.
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
@@ -297,7 +312,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash gradlew -PnativeOnly -PatlasVersionCode="$RELEASE_CODE" -PatlasVersionName="$RELEASE_VERSION" -PatlasTestBuildType=release \
+          bash gradlew --build-cache -PnativeOnly -PatlasVersionCode="$RELEASE_CODE" -PatlasVersionName="$RELEASE_VERSION" -PatlasTestBuildType=release \
             :native-app:assembleRelease :native-app:testReleaseUnitTest :native-app:lintRelease :native-app:assembleReleaseAndroidTest \
             --no-daemon --console=plain
           mkdir -p ../dist/android-release-inputs
@@ -309,7 +324,7 @@ jobs:
         run: |
           set -euo pipefail
           next_code=$((RELEASE_CODE + 1))
-          bash gradlew -PnativeOnly -PatlasVersionCode="$next_code" -PatlasVersionName="$RELEASE_VERSION-upgrade-probe" \
+          bash gradlew --build-cache -PnativeOnly -PatlasVersionCode="$next_code" -PatlasVersionName="$RELEASE_VERSION-upgrade-probe" \
             :native-app:assembleRelease --no-daemon --console=plain
           cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/upgrade-probe.apk
       - name: Check APK signature, certificate, package, versions and previous Release
@@ -375,4 +390,3 @@ jobs:
             dist/android-validated/*.sha256
             dist/android-validated/upgrade-report.txt
             android/native-app/build/reports/lint-results-release.*
-

@@ -100,6 +100,15 @@ class NavigationGpsReplayTest {
                         Log.e("ATLAS_GPS_REPLAY","ATLAS_TRAJECTORY_FAILURE $failure")
                     }
                 }
+                // Match the final analyzer, but fail before replaying the
+                // remaining legs after a confirmed camera reversal.
+                if(enforceTrajectory && trajectoryFailure==null) {
+                    ReplayHeadingGate.violation(frame)?.let { failure ->
+                        trajectoryFailure=failure.toString()
+                        File(output,"trajectory-failure.json").writeText(failure.toString(2))
+                        Log.e("ATLAS_GPS_REPLAY","ATLAS_HEADING_TRUTH_FAILURE $failure")
+                    }
+                }
                 if(now-lastLogged>=1.0) { Log.i("ATLAS_GPS_REPLAY",frame.toString());lastLogged=now }
             }
         }
@@ -785,4 +794,3 @@ class NavigationGpsReplayTest {
         }
     }
 }
-

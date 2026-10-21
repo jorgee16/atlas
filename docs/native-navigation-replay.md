@@ -14,7 +14,7 @@ padding, and restoration without another GPS fix.
 The complete `portugalTripThroughAndroidLocationServiceJniAndMapLibre` replay is
 retained for release validation. Run the workflow manually with `full_gps_replay`
 selected, or push a validation commit containing `[full-gps-replay]`. Ordinary
-minor UI commits do not run the 12-minute trip. A validation run executes both
+minor UI commits do not run the full trip. A validation run executes both
 focused and full tests for the same commit. Full mode covers roundabouts,
 intentional deviation/rerouting, 1 Hz driving/walking, GNSS inversions, GPS gaps
 of 2/5/9 seconds and native arrival.
@@ -29,8 +29,8 @@ Evidence in `Atlas-native-ui-review`:
 
 - `camera-smoke/`: focused frame/fix/event logs, screenshots and summary.
 - `atlas-camera-smoke/segment-*.mp4`: focused camera transition recordings.
-- `gps-replay/` and `atlas-gps-replay/`: full-trip metrics/screenshots and videos
-  when full validation is selected.
+- `Atlas-native-full-gps-review`: full-trip `gps-replay/` and
+  `atlas-gps-replay/` metrics/screenshots/videos from the parallel replay job.
 - `gps-replay-input/routing-manifest.json`: actual installed asset hashes.
 - Android/JVM reports, lint and device logcat.
 
@@ -76,3 +76,24 @@ scenarios, screenshots, native route setup and software-renderer/instrumentation
 overhead account for the rest. Normal pushes retain the focused replay; full
 travel remains compulsory for publication via `[atlas-release]`.
 
+
+## Keeping iteration fast
+
+Gradle dependency caches and task-output caching are enabled for Android smoke,
+full replay and signed Release builds. The migration branch can write its own
+cache; pull requests only read it. Node parity/transit jobs reuse the npm cache.
+The first run populates these caches; savings must be measured on later runs.
+
+Confirmed camera reversals now fail during playback, using the final analyzer's
+unchanged eligibility: following/heading-up, speed >= 1.2 m/s, accuracy <= 20 m,
+bearing accuracy <= 15 degrees, truth stable for >= 4 seconds, and truth fix age
+in [0, 1.5) seconds. An error >= 100 degrees records the exact frame in
+`trajectory-failure.json` and aborts at the next input/wait. Sharp turns, stale
+fixes and poor GNSS do not trigger this gate. Boundary/eligibility tests run in
+the ordinary Android instrumentation suite; final artifact analysis still runs.
+
+Fast Android smoke and the full trip already run as separate parallel jobs.
+Full trips are requested explicitly or required for publication, not for ordinary
+small changes. No GPS timestamps, 1 Hz waits, route coverage or assertion limits
+are reduced to improve CI duration. Successful full trips still take real time;
+this change reduces repeated setup and time wasted after a known failure.
