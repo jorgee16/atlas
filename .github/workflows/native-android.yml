@@ -209,7 +209,7 @@ jobs:
   android-full-replay:
     # Mandatory full-trip gate: fresh replay, or source-identical recorded trip
     # with passing Android JUnit plus every current trajectory/video assertion.
-    if: ${{ (github.event_name == 'workflow_dispatch' && (inputs.publish_release == true || inputs.full_gps_replay == true)) || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[full-gps-replay]') || contains(github.event.head_commit.message, '[atlas-release]'))) }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && (inputs.publish_release == true || inputs.full_gps_replay == true)) || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[full-gps-replay]') || contains(github.event.head_commit.message, '[atlas-release]'))) || (github.event_name == 'pull_request' && contains(github.event.pull_request.title, '[full-gps-replay]')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
