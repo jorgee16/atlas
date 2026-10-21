@@ -905,9 +905,15 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 // coordinate reference; raw-origin anchors caused later creep.
                 stationaryPosition.rebase(desiredDisplayed,fix,s.walking)
                 renderInterpolator.holdStationary(desiredDisplayed)
-                if (firstConfirmedMatch) {
-                    // A one-time, trustworthy initialization is not movement.
-                    // Later stationary projections must retain this anchor.
+                if (firstConfirmedMatch &&
+                    (lastRenderedMarker == null ||
+                        distanceMeters(lastRenderedMarker!!,desiredDisplayed) <= 5.0)) {
+                    // Only a nearby, first road match may rebase the visual
+                    // presentation. A reacquired GNSS fix after poor accuracy
+                    // is NOT proof of motion, so never reset the limiter and
+                    // jump dozens of metres along the route while stopped.
+                    // When real motion resumes, the shared per-frame budget
+                    // will smoothly catch up without teleporting the cursor.
                     presentedPosition.reset()
                 }
             }

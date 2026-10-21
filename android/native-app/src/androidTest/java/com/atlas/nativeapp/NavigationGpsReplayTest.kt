@@ -520,6 +520,10 @@ class NavigationGpsReplayTest {
         val original=snapshot(s)
         val stable=Coordinate(original.getDouble("renderLat"),original.getDouble("renderLon"))
         val initialProgress=model!!.updates.value.guidance?.optDouble("along",0.0) ?: 0.0
+        // GPS listeners register with minTime=1000ms. A mock point injected
+        // immediately after route setup may be legitimately throttled by
+        // Android before the app's own location pipeline sees it.
+        SystemClock.sleep(1200)
         repeat(12) { index ->
             val point=Coordinate(origin.lat+(index+1)*5.0/111320.0,origin.lon)
             val location=Location(LocationManager.GPS_PROVIDER).apply {
