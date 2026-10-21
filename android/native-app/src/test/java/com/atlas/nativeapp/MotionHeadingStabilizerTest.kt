@@ -86,6 +86,25 @@ class MotionHeadingStabilizerTest {
         val turn=filter.resolve(fix(3.0,180.0,lat=38.72),null,true,180.0,true)
         assertEquals(180.0,turn,.001)
     }
+    @Test fun reacquiredGnssAfterFiveSecondGapConfirmsPhysicalTurnInsteadOfHoldingOldRouteBearing() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,176.0,speed=8.0),null,true,176.0,true)
+        // A replay screenshot or Android callback delay can separate GPS
+        // deliveries by >5s without invalidating 8m of observable movement.
+        // Native-filtered heading may be wrong even though provider bearing
+        // accuracy is 8 degrees. The independent position delta corroborates
+        // the new ~60-degree course and rejects the stale reroute bearing.
+        val moved=fix(6.5,331.0,speed=8.0).copy(
+            point=Coordinate(38.72+4.0/111320.0,
+                -9.14+7.0/(111320.0*0.7809)),providerBearing=60.0)
+        assertEquals(60.0,filter.resolve(moved,null,true,176.0,true),1.0)
+    }
+    @Test fun longGapWithoutDisplacementDoesNotAuthorizeSpuriousGpsReversal() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,176.0,speed=8.0),null,true,176.0,true)
+        val unmoved=fix(6.5,60.0,speed=8.0).copy(providerBearing=60.0)
+        assertEquals(176.0,filter.resolve(unmoved,null,true,176.0,true),1.0)
+    }
     @Test fun twoInvertedBearingsCannotOverrideContinuingDisplacement() {
         val filter=MotionHeadingStabilizer()
         filter.resolve(fix(1.0,0.0,lat=38.72),null,true)

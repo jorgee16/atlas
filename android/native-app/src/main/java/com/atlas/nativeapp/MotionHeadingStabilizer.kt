@@ -89,7 +89,12 @@ internal class MotionHeadingStabilizer {
         lastPoint = f.point
         lastAccuracy = f.accuracy
         var displacementHeading: Double? = null
-        if (previous != null && elapsed in 0.5..5.0 &&
+        // GNSS may pause for several seconds during rerouting, screenshots or a
+        // short tunnel. The first reacquired fix can still supply independent
+        // position-displacement evidence for a real turn. A five-second cap
+        // left an old camera course in charge even after a fresh, accurate
+        // GNSS bearing and physical displacement agreed on the new direction.
+        if (previous != null && elapsed in 0.5..12.0 &&
             f.accuracy.isFinite() && previousAccuracy.isFinite() &&
             f.accuracy <= 35.0) {
             val lat = Math.toRadians((previous.lat + f.point.lat) / 2.0)
