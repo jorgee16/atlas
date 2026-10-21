@@ -31,10 +31,10 @@ class NavigationCameraFramingTest {
 
     @Test fun departureAtZeroUsesRealNextManeuver() {
         val cue = NavigationCameraFraming.upcomingDistance("depart", 0.0, 22_000.0)
-        assertEquals(22_000.0, cue!!)
+        assertEquals(22_000.0, cue!!, 0.0)
         assertTrue(drive(cue).zoom < drive(0.0).zoom)
         assertEquals(200.0, NavigationCameraFraming.upcomingDistance(
-            "turn-right", 200.0, 22_000.0)!!)
+            "turn-right", 200.0, 22_000.0)!!, 0.0)
         assertNull(NavigationCameraFraming.upcomingDistance("depart", 0.0, null))
     }
 
