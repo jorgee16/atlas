@@ -1,7 +1,8 @@
 name: Native C++ and Kotlin Android
 concurrency:
-  group: native-${{ github.ref }}
-  # Keep an in-flight trip on this branch; superseded PR checks may cancel.
+  # A full signed-Release trip must not block independent patch-validation CI.
+  # Keep both kinds serialized within their respective groups.
+  group: native-${{ github.ref }}-${{ ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]'))) && 'release' || 'checks' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 on:
   workflow_dispatch:
