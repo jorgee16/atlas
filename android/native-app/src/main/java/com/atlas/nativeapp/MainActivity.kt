@@ -609,6 +609,21 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         add("compass",if(atlasMap.headingUp)"Switch to north up" else "Switch to heading up"){atlasMap.compass();rebuildChrome()}
         add("layers","Map layers: ${mapVisualLabel()}"){showMapLayersOptions()}
         add("locate","Recenter on my location",atlasMap.follow){if(hasLocation()){atlasMap.recenter();rebuildChrome()}else enableLocation()}
+        if (s.navigating) {
+            // The main Atlas menu disappears during live navigation. Give
+            // telemetry its own always-accessible on-map control without
+            // stopping navigation or hiding the guidance banner.
+            val gpsButton = ui.iconButton("diagnostics",
+                if (model.diagnosticsEnabled) "Hide GPS diagnostics" else "Show GPS diagnostics",
+                model.diagnosticsEnabled) {
+                model.diagnosticsEnabled = !model.diagnosticsEnabled
+                diagnosticsExpanded = false
+                rebuildChrome()
+            }
+            gpsButton.setOnLongClickListener { openPage("diagnostics"); true }
+            controls.addView(gpsButton,LinearLayout.LayoutParams(ui.dp(48),ui.dp(48))
+                .apply { topMargin = ui.dp(10) })
+        }
         if(!s.navigating)add("expand",if(fullMap)"Show controls" else "Full map"){fullMap=!fullMap;rebuildChrome()}
     }
     private fun renderTabs(s: AtlasState) {
@@ -1092,7 +1107,12 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         pageBody=FrameLayout(this);pageLayer.addView(pageBody,LinearLayout.LayoutParams(-1,0,1f))
         rebuildChrome();updatePage(model.updates.value)
     }
-    private fun backPage(){when(page){"appearance","vehicle","diagnostics"->openPage("settings");"journey"->openPage("journeys");else->closePage()}}
+    private fun backPage(){when(page){
+        "diagnostics" -> if(model.updates.value.navigating) closePage() else openPage("settings")
+        "appearance","vehicle" -> openPage("settings")
+        "journey" -> openPage("journeys")
+        else -> closePage()
+    }}
     private fun closePage(){hideKeyboard();val was=page;page=null;searchInput=null;pageKey=null;pageLayer.visibility=View.GONE;if(was=="trips"&&model.updates.value.tab=="Trip")model.tab("Explore");rebuildChrome()}
     private fun updatePage(s:AtlasState){
         val currentPage=page?:return

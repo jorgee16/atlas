@@ -118,6 +118,7 @@ class AtlasIcon(context: Context, var name: String, var tint: Int) : View(contex
             "locate" -> { circle(12f, 12f, 7f); circle(12f, 12f, 2f); line(12f, 2f, 12f, 5f); line(12f, 19f, 12f, 22f); line(2f, 12f, 5f, 12f); line(19f, 12f, 22f, 12f) }
             "follow", "navigate" -> line(12f, 3f, 20f, 21f, 12f, 16f, 4f, 21f, 12f, 3f)
             "compass", "explore" -> { circle(12f, 12f, 9f); line(16f, 7f, 14f, 14f, 7f, 17f, 10f, 10f, 16f, 7f) }
+            "diagnostics" -> { rect(3f,4f,21f,20f,3f);line(6f,15f,9f,15f);line(11f,11f,14f,11f);line(16f,8f,19f,8f);line(7.5f,15f,7.5f,17f);line(12.5f,11f,12.5f,17f);line(17.5f,8f,17.5f,17f) }
             "bookmark" -> line(6f, 3f, 18f, 3f, 18f, 21f, 12f, 17f, 6f, 21f, 6f, 3f)
             "pin" -> { val path = Path(); path.moveTo(12f, 22f); path.cubicTo(8f, 17f, 5f, 13f, 5f, 9f); path.cubicTo(5f, 0f, 19f, 0f, 19f, 9f); path.cubicTo(19f, 13f, 16f, 17f, 12f, 22f); canvas.drawPath(path, p); circle(12f, 9f, 2.5f) }
             "download" -> { line(12f, 3f, 12f, 15f); line(7f, 10f, 12f, 15f, 17f, 10f); line(4f, 16f, 4f, 21f, 20f, 21f, 20f, 16f) }

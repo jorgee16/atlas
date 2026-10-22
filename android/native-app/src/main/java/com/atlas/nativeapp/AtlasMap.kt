@@ -645,7 +645,17 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         headingUp = !headingUp
         val s=current
         when(cameraState.mode) {
-            NavigationCameraState.Mode.FOLLOWING -> requestCamera(NavigationCameraState.Mode.FOLLOWING)
+            NavigationCameraState.Mode.FOLLOWING -> {
+                if (s?.navigating == true && !cameraState.pending) {
+                    // Do not start a second camera transaction when changing
+                    // heading-up/north-up during driving. The 30 FPS navigation
+                    // clock owns rotation AND cursor presentation. An immediate
+                    // moveCamera here fought that clock and made the arrow shake.
+                    scheduleNavigationFrame()
+                } else {
+                    requestCamera(NavigationCameraState.Mode.FOLLOWING)
+                }
+            }
             NavigationCameraState.Mode.OVERVIEW -> requestCamera(NavigationCameraState.Mode.OVERVIEW)
             NavigationCameraState.Mode.FREE -> {
                 val ready=map ?: return

@@ -82,14 +82,20 @@ internal class MotionHeadingStabilizer {
             }
             routeCandidate = null
             routeCandidateCount = 0
-            val weight = if (usable(fix)) 0.70 else 0.90
+            // A changing map match must not pull a confirmed moving GNSS
+            // direction towards a different road at every 1 Hz update,
+            // then release it on the next "checking" or "reduced" state.
+            // GNSS owns driving direction; route geometry only nudges it.
+            val weight = if (usable(fix)) 0.16 else 0.90
             return if (stableCourse == null) route else mix(stableCourse, route, weight)
         }
         routeCandidate = null
         routeCandidateCount = 0
         // At road speeds do not use phone orientation as vehicle direction.
         if (fix.speed.isFinite() && fix.speed >= 2.0)
-            return course ?: fallback ?: 0.0
+            return if (navigating) course ?: fix.bearing?.takeIf { it.isFinite() && it >= 0.0 }
+                ?: route ?: 0.0
+            else course ?: fallback ?: 0.0
         return if (navigating) course ?: route ?: fallback ?: 0.0
                else fallback ?: course ?: 0.0
     }

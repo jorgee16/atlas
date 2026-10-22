@@ -602,6 +602,31 @@ class NavigationGpsReplayTest {
             tap(s,"Overview");assertMode(s,"OVERVIEW")
             tap(s,"Recenter on my location");assertMode(s,"FOLLOWING")
         }
+        // Navigation diagnostics must be reachable while normal controls/menu
+        // are hidden; switching telemetry must not restart active guidance.
+        val activeBefore=model!!.updates.value.route
+        tap(s,"Show GPS diagnostics")
+        assertTrue("GPS overlay toggle stays available during live navigation",
+            model!!.diagnosticsEnabled)
+        assertTrue(model!!.updates.value.navigating)
+        assertSame(activeBefore,model!!.updates.value.route)
+        tap(s,"Hide GPS diagnostics")
+        assertFalse(model!!.diagnosticsEnabled)
+        // Compass changes must leave the camera at its current angle on
+        // the first render. The navigation clock then eases the new bearing.
+        s.onActivity { a ->
+            val before=map(a).debugSnapshot().getDouble("mapBearing")
+            if (map(a).headingUp) {
+                map(a).compass()
+                val after=map(a).debugSnapshot().getDouble("mapBearing")
+                assertTrue("compass toggle caused an instantaneous camera snap",
+                    AtlasHeading.angleDifference(before,after)<1.0)
+            }
+        }
+        SystemClock.sleep(1800)
+        assertTrue("north-up should settle under the single navigation clock",
+            AtlasHeading.angleDifference(0.0,snapshot(s).getDouble("mapBearing"))<4.0)
+        s.onActivity { map(it).compass() }
         fun style(source:String,visual:String,next:(MainActivity)->Unit) {
             s.onActivity { a ->
                 model!!.mapSourceMode=source;model!!.mapVisualStyle=visual

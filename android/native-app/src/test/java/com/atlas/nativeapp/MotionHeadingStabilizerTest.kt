@@ -43,6 +43,22 @@ class MotionHeadingStabilizerTest {
         val accepted=filter.resolve(fix(3.0,12.0),90.0,true,35.0,true)
         assertTrue(accepted in 10.0..40.0)
     }
+    @Test fun compassRotationAndRouteCheckingCannotFightGpsDrivingCourse() {
+        val filter=MotionHeadingStabilizer()
+        val initial=fix(1.0,80.0,speed=12.0)
+        filter.resolve(initial,270.0,true,80.0,true)
+        val driving=fix(2.0,81.0,speed=12.0)
+        val onRoute=filter.resolve(driving,300.0,true,125.0,true)
+        val checking=filter.resolve(driving,40.0,true,null,false)
+        val matchedAgain=filter.resolve(driving,220.0,true,125.0,true)
+        assertTrue("route coupling cannot tug the arrow by more than 10 degrees",
+            AtlasHeading.angleDifference(onRoute,checking)<10.0)
+        assertTrue("repeated camera frames must not alternate headings",
+            AtlasHeading.angleDifference(onRoute,matchedAgain)<0.001)
+        assertTrue("device compass must not override the driving course",
+            AtlasHeading.angleDifference(onRoute,300.0)>100.0)
+    }
+
     @Test fun weakGpsTrustsRouteOnlyIfOnRoute() {
         val filter = MotionHeadingStabilizer()
         filter.resolve(fix(1.0,55.0),200.0,false)
