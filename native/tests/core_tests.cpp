@@ -88,6 +88,18 @@ int main(int argc, char **argv) {
     check(!westStart,"missing westbound edge must not fake reverse travel");
     check(!routeFromPosition(graph,realStart,{40,-7.998},RouteOptions{},270.0),
           "known westbound heading must not silently fall back to eastbound nearest-node route");
+    auto candidates=graph.destinationCandidates(
+        {40,-7.999},Profile::drive,graph.component(0),300,12);
+    check(!candidates.empty() && candidates.front()==1,
+          "spatial lookup finds real reachable road access");
+    check(graph.destinationCandidates(
+        {37,-25},Profile::drive,graph.component(0),300,12).empty(),
+          "disconnected airport service road is not a drivable destination");
+    auto access=routeFromPosition(graph,{40,-8},{40.001,-7.9988},
+        RouteOptions{},std::nullopt);
+    check(access && access->destinationAccessMeters>1 &&
+          access->destinationAccessMeters<400,
+          "route terminates on road and exposes remaining gap to POI");
     auto p = progress({40, -8}, *drive);
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);

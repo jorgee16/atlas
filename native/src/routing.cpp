@@ -214,6 +214,48 @@ std::optional<uint32_t> Graph::nearest(Point p, Profile profile,
   }
   return found;
 }
+std::vector<uint32_t> Graph::destinationCandidates(
+    Point p, Profile profile, uint32_t componentId,
+    double radius, std::size_t limit) const {
+  if (!valid(p) || !std::isfinite(radius) || radius<=0 ||
+      radius>10000 || limit==0 || limit>64)
+    throw std::invalid_argument("Invalid destination access search");
+  const double cell=grid_.u32(8)/1e6, rad=3.141592653589793/180;
+  const int cx=int(std::floor(p.lon/cell)),cy=int(std::floor(p.lat/cell));
+  const int rx=int(std::ceil(radius/(111320*std::max(
+      std::cos(p.lat*rad),.01)*cell)))+1;
+  const int ry=int(std::ceil(radius/(111320*cell)))+1;
+  const auto base=24+std::size_t(grid_.u32(12))*16;
+  std::vector<std::pair<double,uint32_t>> near;
+  for(uint32_t i=0;i<grid_.u32(12);++i) {
+    const auto o=24+std::size_t(i)*16;
+    const int x=grid_.i32(o),y=grid_.i32(o+4);
+    if(x<cx-rx||x>cx+rx||y<cy-ry||y>cy+ry)continue;
+    const auto begin=grid_.u32(o+8),count=grid_.u32(o+12);
+    for(uint32_t j=0;j<count;++j) {
+      const auto n=grid_.u32(base+(std::size_t(begin)+j)*4);
+      if(component(n)!=componentId ||
+          !(profileMasks_[n]&(profile==Profile::drive?1:2)))continue;
+      const auto d=distance(p,point(n));
+      if(d<=radius)near.emplace_back(d,n);
+    }
+  }
+  std::sort(near.begin(),near.end(),[](const auto &a,const auto &b){
+    return a.first!=b.first?a.first<b.first:a.second<b.second;
+  });
+  std::vector<uint32_t> out;
+  out.reserve(limit);
+  // Avoid retrying many nodes at the same dead-end road approach.
+  for(const auto &[meters,n]:near) {
+    bool duplicate=false;
+    for(const auto chosen:out)
+      if(distance(point(n),point(chosen))<65.){duplicate=true;break;}
+    if(duplicate)continue;
+    out.push_back(n);
+    if(out.size()==limit)break;
+  }
+  return out;
+}
 std::optional<DirectedRoadStart> Graph::nearestDirected(
     Point p, Profile profile, double heading, double tolerance) const {
   if (!valid(p) || !std::isfinite(heading) || heading < 0 ||
@@ -498,31 +540,37 @@ std::optional<Route> routeFromPosition(const Graph &g, Point from, Point to,
                                        std::optional<double> travelHeading) {
   if (!valid(from) || !valid(to))
     throw std::invalid_argument("Invalid route coordinates");
-  auto goal = g.nearest(to, op.profile);
-  if (!goal)
-    return {};
-  if (travelHeading && op.profile == Profile::drive) {
-    if (!std::isfinite(*travelHeading) || *travelHeading < 0)
+  // The direction of a moving vehicle remains a HARD constraint; never
+  // fall back to wrong-way routing merely to reach a difficult POI.
+  auto options=op;
+  std::optional<uint32_t> start;
+  if(travelHeading && op.profile==Profile::drive) {
+    if(!std::isfinite(*travelHeading)||*travelHeading<0)
       throw std::invalid_argument("Invalid driving heading");
-    auto directed = g.nearestDirected(from, op.profile, *travelHeading);
-    if (!directed)
-      return {}; // Never fabricate a wrong-way route from a nearby node.
-    auto constrained = op;
-    constrained.initialEdge = directed->edge;
-    constrained.initialSnap = directed->snapped;
-    // If this graph entry cannot legally reach the destination, report that
-    // failure. Never fall back to a different/opposite edge.
-    return route(g, directed->node, *goal, constrained);
+    const auto directed=g.nearestDirected(from,op.profile,*travelHeading);
+    if(!directed)return {};
+    start=directed->node;
+    options.initialEdge=directed->edge;
+    options.initialSnap=directed->snapped;
+  } else start=g.nearest(from,op.profile);
+  if(!start)return {};
+  const auto candidates=g.destinationCandidates(
+      to,op.profile,g.component(*start),5000,12);
+  for(auto destination:candidates) {
+    if(options.cancelled&&options.cancelled())
+      throw std::runtime_error("Route cancelled");
+    auto answer=route(g,*start,destination,options);
+    if(!answer)continue;
+    answer->destinationAccessMeters=distance(to,answer->points.back());
+    return answer;
   }
-  auto start = g.nearest(from, op.profile);
-  if (!start)
-    return {};
-  return route(g, *start, *goal, op);
+  return {};
 }
 std::string routeJson(const Route &r) {
   std::ostringstream s;
   s.precision(12);
-  s << "{\"distanceMeters\":" << r.meters
+  s << "{\"destinationAccessMeters\":" << r.destinationAccessMeters
+    << ",\"distanceMeters\":" << r.meters
     << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":" << r.tollEuros
     << ",\"expandedNodes\":" << r.expanded << ",\"points\":[";
   for (std::size_t i = 0; i < r.points.size(); ++i) {

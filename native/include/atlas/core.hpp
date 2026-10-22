@@ -69,6 +69,7 @@ struct Route {
   std::vector<Maneuver> maneuvers;
   double meters = 0, seconds = 0, tollEuros = 0;
   uint32_t expanded = 0;
+  double destinationAccessMeters = 0; // distance from road end to true POI
 };
 struct DirectedRoadStart {
   uint32_t node = 0, edge = 0;
@@ -90,6 +91,9 @@ public:
                    int64_t from, uint32_t target) const;
   std::optional<uint32_t> nearest(Point p, Profile profile,
                                   double radius = 2000) const;
+  std::vector<uint32_t> destinationCandidates(Point p, Profile profile,
+      uint32_t reachableComponent, double radius = 5000,
+      std::size_t limit = 12) const;
   std::optional<DirectedRoadStart> nearestDirected(
       Point p, Profile profile, double heading, double tolerance = 35) const;
   void appendGeometry(const Edge &edge, std::vector<Point> &points) const;
