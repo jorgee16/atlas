@@ -554,9 +554,22 @@ std::optional<Route> routeFromPosition(const Graph &g, Point from, Point to,
     options.initialSnap=directed->snapped;
   } else start=g.nearest(from,op.profile);
   if(!start)return {};
+  const auto componentId=g.component(*start);
+  const auto originalGoal=g.nearest(to,op.profile);
+  // Preserve the exact same route as before for ordinary reachable POIs.
+  // Only invoke access recovery after the original goal fails or belongs
+  // to a disconnected road network (airport perimeter, car park, campus).
+  if(originalGoal && g.component(*originalGoal)==componentId) {
+    auto original=route(g,*start,*originalGoal,options);
+    if(original) {
+      original->destinationAccessMeters=distance(to,original->points.back());
+      return original;
+    }
+  }
   const auto candidates=g.destinationCandidates(
-      to,op.profile,g.component(*start),5000,12);
+      to,op.profile,componentId,5000,12);
   for(auto destination:candidates) {
+    if(originalGoal && destination==*originalGoal)continue;
     if(options.cancelled&&options.cancelled())
       throw std::runtime_error("Route cancelled");
     auto answer=route(g,*start,destination,options);
