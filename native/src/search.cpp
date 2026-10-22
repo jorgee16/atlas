@@ -679,6 +679,8 @@ std::string placesJson(const std::vector<Place> &places) {
       << ",\"distanceMeters\":" << p.meters << ",\"matchScore\":" << p.score
       << ",\"address\":" << jsonString(address(p))
       << ",\"city\":" << jsonString(city(p))
+      << ",\"municipality\":" << jsonString(p.fields[16])
+      << ",\"district\":" << jsonString(p.fields[17])
       << ",\"amenity\":" << jsonString(p.fields[2])
       << ",\"place\":" << jsonString(p.fields[3])
       << ",\"type\":" << jsonString(p.fields[1]) << '}';

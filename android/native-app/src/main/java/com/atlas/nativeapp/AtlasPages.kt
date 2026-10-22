@@ -64,6 +64,11 @@ class AtlasPages(
         val details=ui.column();details.addView(ui.text(place.optString("name","Selected location"),15f,bold=true).apply { maxLines=2 })
         details.addView(ui.space(5))
         val distance=place.optDouble("distanceMeters",Double.NaN).takeIf { it.isFinite() }?.let { formatDistance(it)+" · " }.orEmpty()
+        val location=PlaceLocationPresentation.subtitle(place)
+        if(location.isNotBlank()) {
+            details.addView(ui.text(location,12f,ui.muted).apply { maxLines=2 })
+            details.addView(ui.space(4))
+        }
         details.addView(ui.text(distance+type.replaceFirstChar { it.titlecase(Locale.getDefault()) },12f,ui.muted))
         addView(details,LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(13);rightMargin=ui.dp(8)})
         if(trailing!=null)addView(ui.iconButton(if(visited)"check" else "plus",if(visited)"Mark unvisited" else "Mark visited",false,trailing),LinearLayout.LayoutParams(ui.dp(44),ui.dp(44)))

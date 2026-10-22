@@ -243,7 +243,18 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         searchJob = viewModelScope.launch {
             delay(if (nearby) 0 else 260)
             try {
-                val results = withContext(worker) { core.search(regions.search(anchor).path); JSONArray(core.find(text, anchor, nearby, category)).objects() }
+                val results = withContext(worker) {
+                    core.search(regions.search(anchor).path)
+                    JSONArray(core.find(text, anchor, nearby, category)).objects().onEach { place ->
+                        // Country comes from the downloaded region covering
+                        // EACH result, not from the current GPS position.
+                        val region=regions.regions.firstOrNull {
+                            it.contains(place.coordinate())
+                        }
+                        region?.json?.optString("country")?.takeIf { it.isNotBlank() }
+                            ?.let { place.put("country",it) }
+                    }
+                }
                 if (searchGeneration == generation) state.update { it.copy(results = results, exploreResults = if (nearby) results else it.exploreResults, searching = false) }
             } catch (e: Throwable) {
                 if (e !is CancellationException && searchGeneration == generation) state.update { it.copy(searching = false, results = emptyList(), searchError = e.message ?: "Search unavailable") }
