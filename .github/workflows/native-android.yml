@@ -3,7 +3,9 @@ concurrency:
   # A full signed-Release trip must not block independent patch-validation CI.
   # Keep both kinds serialized within their respective groups.
   group: native-${{ github.ref }}-${{ ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]'))) && 'release' || 'checks' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # New signed Release runs supersede obsolete failed/blocked Release runs.
+  # Independent patch checks stay on their separate concurrency group.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]')) }}
 on:
   workflow_dispatch:
     inputs:
