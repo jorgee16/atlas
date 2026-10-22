@@ -73,12 +73,12 @@ internal object AtlasCartography {
               "minzoom":${if(navigating) 9 else 5},"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
               "text-size":${if(dark) 13 else 12},"text-max-width":9},
               "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 2.0 else 1.2}}}
-            ${if(navigating) "" else ""","}
-            {"id":"atlas-poi-labels","type":"symbol","source":"atlas","source-layer":"poi",
+        """.trimIndent()
+        val poiLabels = if(navigating) "" else """
+            ,{"id":"atlas-poi-labels","type":"symbol","source":"atlas","source-layer":"poi",
               "minzoom":16,"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
               "text-size":10,"text-max-width":7},
               "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 1.8 else 1}}}
-            ${if(navigating) "" else ""}
         """.trimIndent()
         val parks = if (navigating) "" else """
             ,{"id":"atlas-parks","type":"fill","source":"atlas","source-layer":"landuse",
@@ -111,6 +111,7 @@ internal object AtlasCartography {
               "text-font":["Noto Sans Regular"],"text-size":${if(dark) 12 else 11}},
               "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 2.1 else 1.25}}}
             $placeLabels
+            $poiLabels
           ]
         }
         """.trimIndent()
