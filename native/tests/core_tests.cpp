@@ -59,6 +59,8 @@ int main(int argc, char **argv) {
     auto result = search.query("cafe cen", {40, -8});
     check(result.size() == 1 && result[0].name() == "Café Central",
           "prefix search");
+    check(search.nearestLocality({40,-8})=="Cidade Central",
+          "offline geographic fallback identifies nearby named locality");
     auto near = search.nearby({40, -8}, 3000, "");
     check(near.size() == 2, "nearby excludes cities");
     check(search.nearby({40, -8}, 3000, "cafe").size() == 1, "category search");

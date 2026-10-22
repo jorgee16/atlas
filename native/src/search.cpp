@@ -419,6 +419,34 @@ std::optional<double> matchScore(const Place &p, const std::string &query,
   return score;
 }
 } // namespace
+std::string Search::nearestLocality(Point p) const {
+  if(!valid(p))return {};
+  if(!localitiesLoaded_) {
+    // Lazily make a compact point index from the SAME installed offline
+    // records. No remote geocoder, invented municipal boundary or new package.
+    const auto n=records_.u32(8);
+    for(uint32_t id=0;id<n;++id) {
+      const auto offset=records_.u32(16)+std::size_t(id)*4;
+      const auto at=records_.u32(20)+std::size_t(records_.u32(offset));
+      if(!(records_.u32(at+12)&(1u<<3)))continue;
+      auto place=record(id);
+      const auto kind=normalize(place.fields[3]);
+      if((kind=="city"||kind=="town"||kind=="village"||
+          kind=="hamlet"||kind=="suburb"||kind=="quarter"||
+          kind=="neighbourhood"||kind=="municipality"||
+          kind=="parish") && !place.name().empty())
+        localities_.push_back({place.point,place.name()});
+    }
+    localitiesLoaded_=true;
+  }
+  std::string result;
+  double best=15000; // farther than this is not reliable geographic context
+  for(const auto &location:localities_) {
+    const double metres=distance(p,location.point);
+    if(metres<best) {best=metres;result=location.name;}
+  }
+  return result;
+}
 std::vector<Place> Search::query(std::string_view input, Point anchor,
                                  std::size_t limit) const {
   if (!valid(anchor) || limit > 1000)
@@ -681,6 +709,7 @@ std::string placesJson(const std::vector<Place> &places) {
       << ",\"city\":" << jsonString(city(p))
       << ",\"municipality\":" << jsonString(p.fields[16])
       << ",\"district\":" << jsonString(p.fields[17])
+      << ",\"nearbyLocality\":" << jsonString(p.nearbyLocality)
       << ",\"amenity\":" << jsonString(p.fields[2])
       << ",\"place\":" << jsonString(p.fields[3])
       << ",\"type\":" << jsonString(p.fields[1]) << '}';

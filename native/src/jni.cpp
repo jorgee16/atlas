@@ -152,6 +152,14 @@ Java_com_atlas_nativeapp_NativeCore_find(JNIEnv *env, jobject, jlong id,
       if (results.size() > 12)
         results.resize(12);
     }
+    // Most raw OSM POIs have no addr:city/municipality. Provide a clearly
+    // approximate nearby locality from the already downloaded search index.
+    // Do not misrepresent a nearest village as a municipality/district.
+    if(e.search)for(auto &place:results) {
+      if(place.fields.size()>17 && place.fields[7].empty() &&
+          place.fields[16].empty() && place.fields[17].empty())
+        place.nearbyLocality=e.search->nearestLocality(place.point);
+    }
     return bytes(env, atlas::placesJson(results));
   } catch (const std::exception &e) {
     error(env, e);

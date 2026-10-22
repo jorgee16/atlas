@@ -178,6 +178,7 @@ struct Place {
   Point point;
   std::vector<std::string> fields;
   double meters = 0, score = 0;
+  std::string nearbyLocality; // approximate, explicitly labeled (not municipality)
   std::string name() const;
   bool visitable() const;
 };
@@ -186,6 +187,7 @@ class Search {
 public:
   Search(const std::string &indexPath, const std::string &recordsPath);
   Place record(uint32_t id) const;
+  std::string nearestLocality(Point p) const;
   std::vector<Place> query(std::string_view text, Point anchor,
                            std::size_t limit = 20) const;
   std::vector<Place> addresses(std::string_view text, Point anchor,
@@ -195,7 +197,10 @@ public:
                             std::size_t limit = 30) const;
 
 private:
+  struct LocalityEntry { Point point; std::string name; };
   Binary index_, records_;
+  mutable bool localitiesLoaded_ = false;
+  mutable std::vector<LocalityEntry> localities_;
   std::vector<uint32_t> postings(std::string_view token, bool prefix) const;
   std::string stringAt(uint32_t id) const;
 };
