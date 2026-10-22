@@ -8,7 +8,7 @@ permissions:
 jobs:
   transfer:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - name: Download published signed release and check integrity
         env:
@@ -18,14 +18,23 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p apk
-          gh release download atlas-android-v0.2.6 --repo "$GH_REPO" --dir apk \
-            --pattern 'Atlas-v0.2.6.apk' --pattern 'Atlas-v0.2.6.apk.sha256'
-          ( cd apk && sha256sum --check Atlas-v0.2.6.apk.sha256 )
-          test "$(stat -c '%s' apk/Atlas-v0.2.6.apk)" -eq 29813345
+          # The signed Release is published only AFTER all emulator checks.
+          # Transfer automatically when it appears, with bounded retries.
+          for attempt in $(seq 1 60); do
+            if gh release view atlas-android-v0.2.7 --repo "$GH_REPO" >/dev/null 2>&1; then
+              break
+            fi
+            echo "Waiting for signed v0.2.7 Release (attempt $attempt/60)"
+            sleep 20
+          done
+          gh release download atlas-android-v0.2.7 --repo "$GH_REPO" --dir apk \
+            --pattern 'Atlas-v0.2.7.apk' --pattern 'Atlas-v0.2.7.apk.sha256'
+          ( cd apk && sha256sum --check Atlas-v0.2.7.apk.sha256 )
+          test "$(stat -c '%s' apk/Atlas-v0.2.7.apk)" -gt 10000000
       - name: Make APK accessible as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Atlas-v0.2.6-release-apk
-          path: apk/Atlas-v0.2.6.apk
+          name: Atlas-v0.2.7-release-apk
+          path: apk/Atlas-v0.2.7.apk
           if-no-files-found: error
           retention-days: 7
