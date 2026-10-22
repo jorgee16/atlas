@@ -1,0 +1,80 @@
+name: Export validated signed Atlas APK to chat
+on:
+  push:
+    branches: ['migration/native-core-kotlin']
+    paths: ['.github/workflows/atlas-chat-signed-apk.yml']
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ATLAS_ANDROID_KEYSTORE_BASE64: ${{ secrets.ATLAS_ANDROID_KEYSTORE_BASE64 }}
+      ATLAS_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEYSTORE_PASSWORD }}
+      ATLAS_ANDROID_KEY_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEY_PASSWORD }}
+      ATLAS_ANDROID_KEY_ALIAS: ${{ secrets.ATLAS_ANDROID_KEY_ALIAS }}
+      ATLAS_ANDROID_CERT_SHA256: ${{ vars.ATLAS_ANDROID_CERT_SHA256 }}
+      RELEASE_VERSION: '0.2.7'
+      RELEASE_CODE: '10'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - name: Install same SDK and NDK as validated Release
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: Restore and verify persistent signing identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in ATLAS_ANDROID_KEYSTORE_BASE64 ATLAS_ANDROID_KEYSTORE_PASSWORD ATLAS_ANDROID_KEY_PASSWORD ATLAS_ANDROID_KEY_ALIAS ATLAS_ANDROID_CERT_SHA256; do
+            [[ -n "${!key:-}" ]] || { echo "::error::Missing $key"; exit 1; }
+          done
+          keyfile="$RUNNER_TEMP/atlas-release-signing.jks"
+          (umask 077; printf '%s' "$ATLAS_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keyfile")
+          test -s "$keyfile"
+          echo "ATLAS_ANDROID_KEYSTORE_PATH=$keyfile" >> "$GITHUB_ENV"
+          keytool -exportcert -keystore "$keyfile" -storepass:env ATLAS_ANDROID_KEYSTORE_PASSWORD -alias "$ATLAS_ANDROID_KEY_ALIAS" | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/cert.sha256"
+          python3 tools/atlas_android_release.py check-cert --certificate-file "$RUNNER_TEMP/cert.sha256"
+      - name: Reproduce signed Release APK and future-upgrade probe
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash gradlew --build-cache -PnativeOnly -PatlasVersionCode="$RELEASE_CODE" -PatlasVersionName="$RELEASE_VERSION" :native-app:assembleRelease :native-app:testReleaseUnitTest --no-daemon --console=plain
+          mkdir -p ../dist/android-release-inputs
+          cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/release.apk
+          bash gradlew --build-cache -PnativeOnly -PatlasVersionCode="$((RELEASE_CODE + 1))" -PatlasVersionName="$RELEASE_VERSION-upgrade-probe" :native-app:assembleRelease --no-daemon --console=plain
+          cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/upgrade-probe.apk
+      - name: Verify APK signature certificate version and SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/atlas_android_release.py package \
+            --apk dist/android-release-inputs/release.apk \
+            --probe dist/android-release-inputs/upgrade-probe.apk \
+            --build-tools "$ANDROID_HOME/build-tools/36.0.0" \
+            --version "$RELEASE_VERSION" --code "$RELEASE_CODE" \
+            --commit "$GITHUB_SHA" --output dist/android-validated
+          (cd dist/android-validated && sha256sum --check "Atlas-v$RELEASE_VERSION.apk.sha256")
+      - name: Export signed APK artifact for direct chat attachment
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-v0.2.7-chat-signed-apk
+          path: dist/android-validated/Atlas-v0.2.7.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Wipe temporary keystore
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${ATLAS_ANDROID_KEYSTORE_PATH:-}" && -f "$ATLAS_ANDROID_KEYSTORE_PATH" ]]; then
+            rm -f "$ATLAS_ANDROID_KEYSTORE_PATH"
+          fi
