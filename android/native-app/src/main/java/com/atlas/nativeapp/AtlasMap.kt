@@ -105,6 +105,40 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         contentDescription = "Your location"
     }
     private var positionCoordinate: Coordinate? = null
+    private var gestureDepth = 0
+    /** The debug accuracy circle is a screen overlay, never a fake road/POI. */
+    var diagnosticsEnabled: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                gpsAccuracyOverlay.visibility = if(value) View.VISIBLE else View.GONE
+                gpsAccuracyOverlay.invalidate()
+            }
+        }
+    private val gpsAccuracyOverlay = object : View(context) {
+        private val inner = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color=Color.argb(42,42,139,255);style=Paint.Style.FILL
+        }
+        private val rim = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color=Color.argb(220,63,163,255);style=Paint.Style.STROKE
+            strokeWidth=2.2f*resources.displayMetrics.density
+        }
+        override fun onDraw(canvas: Canvas) {
+            super.onDraw(canvas)
+            if(!diagnosticsEnabled) return
+            val gps=current?.fix ?: return
+            val pos=gps.point
+            val east=GpsAccuracyCircleGeometry.eastLongitude(
+                pos.lat,pos.lon,gps.accuracy) ?: return
+            val projection=map?.projection ?: return
+            val center=projection.toScreenLocation(LatLng(pos.lat,pos.lon))
+            val edge=projection.toScreenLocation(LatLng(pos.lat,east))
+            val radius=kotlin.math.hypot(center.x-edge.x,center.y-edge.y)
+            if(!radius.isFinite()||radius<=0f) return
+            canvas.drawCircle(center.x,center.y,radius,inner)
+            canvas.drawCircle(center.x,center.y,radius,rim)
+        }
+    }
     private val markers = mutableListOf<Marker>()
     private val places = mutableMapOf<Long, JSONObject>()
     private val lines = mutableListOf<Polyline>()
@@ -239,7 +273,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             scheduleNavigationFrame()
     }
     private fun updatePositionIcon(degrees: Double) {
-        if (positionCoordinate == null || !degrees.isFinite()) return
+        // Camera bearings may fluctuate while finger-dragging/zooming. Keep
+        // the arrow orientation fixed during the gesture; its geographic
+        // position still follows the MapLibre projection.
+        if (gestureDepth>0 || positionCoordinate == null || !degrees.isFinite()) return
         if (!lastMarkerAngle.isFinite() ||
             AtlasHeading.angleDifference(lastMarkerAngle,degrees) > 1.2) {
             lastMarkerAngle = degrees
@@ -249,7 +286,22 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     private fun releaseFollowForGesture() {
         if (cameraState.mode == NavigationCameraState.Mode.FREE) return
         requestCamera(NavigationCameraState.Mode.FREE)
-        // Keep the pressed control alive until the input gesture is complete.
+        // The panel must not resize while the finger is still dragging.
+    }
+    private fun beginUserGesture() {
+        gestureDepth++
+        releaseFollowForGesture()
+    }
+    private fun endUserGesture() {
+        gestureDepth=(gestureDepth-1).coerceAtLeast(0)
+        if(gestureDepth>0)return
+        val fix=current?.fix
+        val ready=map
+        if(fix!=null&&ready!=null)
+            updatePositionIcon(NavigationCameraBehavior.cursorAngle(
+                current?.navigating==true,follow,headingUp,
+                travelHeading(current!!,fix),ready.cameraPosition.bearing))
+        // All bottom-sheet changes happen after the gesture, never mid-pan.
         view.post { onPan?.invoke() }
     }
     private fun requestCamera(mode: NavigationCameraState.Mode) {
@@ -362,6 +414,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         val taps = GestureDetector(context,object: GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(event: MotionEvent): Boolean {
                 releaseFollowForGesture()
+                view.post { onPan?.invoke() }
                 return false
             }
         })
@@ -409,6 +462,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         }
         val cursorSize = (44*context.resources.displayMetrics.density).toInt()
         positionCursor.setImageBitmap(cursorBitmap)
+        view.addView(gpsAccuracyOverlay,FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT))
+        gpsAccuracyOverlay.isClickable=false
+        gpsAccuracyOverlay.visibility=View.GONE
         view.addView(positionCursor,FrameLayout.LayoutParams(cursorSize,cursorSize,Gravity.TOP or Gravity.START))
         view.getMapAsync { ready ->
             map = ready
@@ -448,6 +505,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             ready.setOnMarkerClickListener { marker: Marker -> places[marker.id]?.let { onPlace?.invoke(it) }; true }
             ready.addOnCameraIdleListener {
                 updatePositionPlacement()
+                gpsAccuracyOverlay.invalidate()
                 loadStyle(current?.takeIf { it.navigating }?.fix?.point ?: centerPoint)
                 // The marker bitmap is screen-oriented. After a camera bearing
                 // animation, re-express its angle in the *new* map reference.
@@ -465,6 +523,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // camera even when no navigation frame is currently scheduled.
             ready.addOnCameraMoveListener {
                 updatePositionPlacement()
+                gpsAccuracyOverlay.invalidate()
                 val state=current
                 if (!styleLoading && state != null && (!follow || !headingUp)) {
                     state.fix?.let { fix ->
@@ -478,24 +537,24 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // REASON_API_GESTURE to the next render frame. Yield synchronously
             // at the recognized gesture boundary instead of waiting for that event.
             ready.addOnMoveListener(object: MapLibreMap.OnMoveListener {
-                override fun onMoveBegin(detector: MoveGestureDetector) = releaseFollowForGesture()
+                override fun onMoveBegin(detector: MoveGestureDetector) = beginUserGesture()
                 override fun onMove(detector: MoveGestureDetector) {}
-                override fun onMoveEnd(detector: MoveGestureDetector) {}
+                override fun onMoveEnd(detector: MoveGestureDetector) = endUserGesture()
             })
             ready.addOnScaleListener(object: MapLibreMap.OnScaleListener {
-                override fun onScaleBegin(detector: StandardScaleGestureDetector) = releaseFollowForGesture()
+                override fun onScaleBegin(detector: StandardScaleGestureDetector) = beginUserGesture()
                 override fun onScale(detector: StandardScaleGestureDetector) {}
-                override fun onScaleEnd(detector: StandardScaleGestureDetector) {}
+                override fun onScaleEnd(detector: StandardScaleGestureDetector) = endUserGesture()
             })
             ready.addOnRotateListener(object: MapLibreMap.OnRotateListener {
-                override fun onRotateBegin(detector: RotateGestureDetector) = releaseFollowForGesture()
+                override fun onRotateBegin(detector: RotateGestureDetector) = beginUserGesture()
                 override fun onRotate(detector: RotateGestureDetector) {}
-                override fun onRotateEnd(detector: RotateGestureDetector) {}
+                override fun onRotateEnd(detector: RotateGestureDetector) = endUserGesture()
             })
             ready.addOnShoveListener(object: MapLibreMap.OnShoveListener {
-                override fun onShoveBegin(detector: ShoveGestureDetector) = releaseFollowForGesture()
+                override fun onShoveBegin(detector: ShoveGestureDetector) = beginUserGesture()
                 override fun onShove(detector: ShoveGestureDetector) {}
-                override fun onShoveEnd(detector: ShoveGestureDetector) {}
+                override fun onShoveEnd(detector: ShoveGestureDetector) = endUserGesture()
             })
             // Do not consume queued camera-start reasons: a stale gesture event
             // arriving after Recenter must not switch FOLLOWING back to FREE.
@@ -690,6 +749,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun overview() = requestCamera(NavigationCameraState.Mode.OVERVIEW)
     fun render(s: AtlasState) {
         current = s
+        if(diagnosticsEnabled)gpsAccuracyOverlay.invalidate()
         if (!s.navigating) {
             resumeSyncPending = false
             resumeAnchorFixTime = Double.NaN
@@ -1190,6 +1250,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         // this callback; render() completes the pending one-shot resync.
     }
     fun onPause() {
+        gestureDepth=0
         backgroundPausedAt = SystemClock.elapsedRealtimeNanos() / 1e9
         // The STARTED collector can render new state before onResume runs.
         // Prevent it from blending background and foreground timestamps.
