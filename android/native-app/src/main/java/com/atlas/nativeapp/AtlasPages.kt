@@ -223,12 +223,12 @@ class AtlasPages(
             addView(ui.rule());addView(rowAction("compass","Diagnostics",if(model.diagnosticsEnabled)"GPS overlay enabled" else "Inspect GPS, heading and positioning"){open("diagnostics")})
             addView(ui.rule());addView(rowAction("sun","Appearance",model.theme.replaceFirstChar{it.titlecase()}){open("appearance")})
             addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Toll estimates"){open("vehicle")})
-            addView(ui.rule());addView(rowAction("layers","Map layers",when(model.mapVisualStyle){
+            addView(ui.rule());addView(rowAction("layers","Map appearance",when(model.mapVisualStyle){
                 MapVisualStyle.SATELLITE -> "Satellite · Online imagery"
                 MapVisualStyle.HYBRID -> "Hybrid · Imagery with labels"
                 else -> "Streets · Atlas cartography"
             }){open("mapLayers")})
-            addView(ui.rule());addView(rowAction("map","Map source",when(model.mapSourceMode){
+            addView(ui.rule());addView(rowAction("map","Map connection",when(model.mapSourceMode){
                 MapSourcePolicy.ONLINE -> "Online · internet maps"
                 MapSourcePolicy.OFFLINE -> "Offline · downloaded maps only"
                 else -> "Automatic · prefer downloaded maps"

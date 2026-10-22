@@ -628,7 +628,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
              else if(region!=null&&atlasMap.activeMapSource==MapSourcePolicy.ONLINE)" · Offline routes"
              else "")
         val badge=ui.badge(label,atlasMap.activeMapSource==MapSourcePolicy.OFFLINE).apply{
-            contentDescription="Change map source"
+            contentDescription="Map connection: online or offline"
             setOnClickListener{showMapSourceOptions()}
         }
         topSourceBadge=badge
