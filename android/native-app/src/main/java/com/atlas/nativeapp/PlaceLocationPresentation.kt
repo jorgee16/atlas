@@ -5,17 +5,34 @@ import java.util.Locale
 
 /** Grounded offline location context, never inferred from the search origin. */
 internal object PlaceLocationPresentation {
-    fun subtitle(place: JSONObject): String {
-        val administrative=listOf("city","municipality","district")
-            .map { place.optString(it).trim() }
+    // Keep the formatter JVM-only. Android's org.json.JSONObject throws
+    // "Method not mocked" inside local Gradle unit tests.
+    fun subtitle(
+        city: String = "",
+        municipality: String = "",
+        district: String = "",
+        nearbyLocality: String = "",
+        country: String = ""
+    ): String {
+        val administrative = listOf(city, municipality, district)
+            .map { it.trim() }
             .filter { it.isNotBlank() }
             .distinctBy { it.lowercase(Locale.ROOT) }
-        val nearby=place.optString("nearbyLocality").trim()
-        val country=place.optString("country").trim()
-        val context=if(administrative.isNotEmpty())administrative
-            else if(nearby.isNotBlank())listOf("Near $nearby")
+        val nearby = nearbyLocality.trim()
+        val area = if (administrative.isNotEmpty()) administrative
+            else if (nearby.isNotBlank()) listOf("Near $nearby")
             else emptyList()
-        return (context+listOf(country).filter { it.isNotBlank() })
-            .distinctBy { it.lowercase(Locale.ROOT) }.joinToString(" · ")
+        return (area + listOf(country.trim()).filter { it.isNotBlank() })
+            .distinctBy { it.lowercase(Locale.ROOT) }
+            .joinToString(" · ")
     }
+
+    // JSONObject is confined to production Android integration.
+    fun subtitle(place: JSONObject): String = subtitle(
+        city = place.optString("city"),
+        municipality = place.optString("municipality"),
+        district = place.optString("district"),
+        nearbyLocality = place.optString("nearbyLocality"),
+        country = place.optString("country")
+    )
 }
