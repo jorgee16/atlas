@@ -108,6 +108,28 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private var navigationDistance: TextView? = null
     private var navigationVoiceIcon: AtlasIcon? = null
     private var lastRoute: JSONObject? = null
+    private var previewCollapseTicket = 0L
+
+    /** Repeat the idle check: a touch near the old one-shot deadline must
+     * not leave the full route panel expanded forever. */
+    private fun scheduleRoutePreviewCollapse(previewRoute: JSONObject) {
+        val ticket = ++previewCollapseTicket
+        val shownAt = System.currentTimeMillis()
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                if (ticket != previewCollapseTicket) return
+                val state = model.updates.value
+                if (state.route !== previewRoute || state.navigating || state.destination == null ||
+                    previewCollapsed) return
+                val now = System.currentTimeMillis()
+                if (page == null && !state.busy &&
+                    RoutePreviewAutoCollapse.shouldCollapse(now, shownAt, lastTouch)) {
+                    previewCollapsed = true
+                    rebuildChrome()
+                } else handler.postDelayed(this, 1200L)
+            }
+        }, 10000L)
+    }
     private val handler = Handler(Looper.getMainLooper())
     private val gapTick = object : Runnable {
         override fun run() {
@@ -358,7 +380,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         navigation = ui.row(); root.addView(navigation,FrameLayout.LayoutParams(-1,ui.dp(68),Gravity.BOTTOM))
         guidance = ui.column(); root.addView(guidance,FrameLayout.LayoutParams(-1,-2,Gravity.TOP))
         mapSourceBadge = ui.badge("MAP · LOADING").apply {
-            contentDescription = "Change map source"
+            contentDescription = "Map connection: choose online or offline"
             setOnClickListener { showMapSourceOptions() }
             elevation = ui.dp(3).toFloat()
         }
@@ -428,7 +450,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
         guidance.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_ -> atlasMap.onChromeLayout() }
         bottom.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_ -> atlasMap.onChromeLayout() }
-        atlasMap.onPan = { if(model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true}; rebuildChrome() }
+        // Invoked after a map gesture ends, not while the finger is dragging:
+        // changing the bottom panel mid-gesture shifts the map projection
+        // and makes a stationary GPS cursor look as though it wobbles.
+        atlasMap.onPan = {
+            if(model.updates.value.route!=null&&!model.updates.value.navigating)
+                previewCollapsed=true
+            rebuildChrome()
+        }
         atlasMap.onPoint = { point ->
             if(pickingOrigin){pickingOrigin=false;model.origin(point);model.status("Starting point set");model.updates.value.destination?.let{model.calculate()}}
             else { selectedPlace=JSONObject().put("id","pin:${point.lat},${point.lon}").put("name","Selected location").put("type","Map pin").put("lat",point.lat).put("lon",point.lon);rebuildChrome() }
@@ -524,6 +553,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         syncNavigationService(state.navigating)
         atlasMap.sourceMode = model.mapSourceMode
         atlasMap.visualStyle = model.mapVisualStyle
+        atlasMap.diagnosticsEnabled = model.diagnosticsEnabled
         atlasMap.render(state)
         updateDiagnostics(state)
         atlasMap.previewTrail(if(state.tab=="Trail") pendingTrail ?: trailList.firstOrNull{it.id==selectedTrailId} else null)
@@ -534,7 +564,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             if(navigationTouch)deferredChrome=true
             else {lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
         }
-        if(state.route!==lastRoute){lastRoute=state.route;if(state.route!=null&&!state.navigating){previewCollapsed=false;handler.postDelayed({if(System.currentTimeMillis()-lastTouch>8000&&page==null&&model.updates.value.route!=null&&!model.updates.value.navigating){previewCollapsed=true;rebuildChrome()}},12000)}}
+        if(state.route!==lastRoute) {
+            lastRoute=state.route
+            ++previewCollapseTicket // invalidate a timer tied to the old route
+            if(state.route!=null && !state.navigating) {
+                previewCollapsed=false
+                scheduleRoutePreviewCollapse(state.route)
+            }
+        }
         if(state.navigating)window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         updatePage(state)
         if(state.notice!=lastNotice){lastNotice=state.notice;if(state.status.isNotBlank()){snackbar.text=state.status;snackbar.visibility=View.VISIBLE;handler.removeCallbacks(hideNotice);handler.postDelayed(hideNotice,4500)}}
@@ -607,7 +644,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             View.GONE else View.VISIBLE
         fun add(name:String,label:String,selected:Boolean=false,click:()->Unit){controls.addView(ui.iconButton(name,label,selected,click),LinearLayout.LayoutParams(ui.dp(48),ui.dp(48)).apply{topMargin=ui.dp(10)})}
         add("compass",if(atlasMap.headingUp)"Switch to north up" else "Switch to heading up"){atlasMap.compass();rebuildChrome()}
-        add("layers","Map layers: ${mapVisualLabel()}"){showMapLayersOptions()}
+        add("layers","Map appearance: ${mapVisualLabel()}"){showMapLayersOptions()}
         add("locate","Recenter on my location",atlasMap.follow){if(hasLocation()){atlasMap.recenter();rebuildChrome()}else enableLocation()}
         if (s.navigating) {
             // The main Atlas menu disappears during live navigation. Give
@@ -1070,9 +1107,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             Triple("Satellite · aerial imagery (online)",MapVisualStyle.SATELLITE,"layers"),
             Triple("Hybrid · aerial imagery with labels (online)",MapVisualStyle.HYBRID,"layers")
         )
-        showChoices("Map layers",choices.map{(label,style,icon)->
+        showChoices("Map appearance",choices.map{(label,style,icon)->
             (if(model.mapVisualStyle==style)"✓  " else "")+label to icon
-        }) { selected ->
+        }, "What the map looks like. Satellite and Hybrid need internet; Streets can work offline.") { selected ->
             val chosen=choices[selected].second
             if(chosen!=MapVisualStyle.STREETS && model.mapSourceMode==MapSourcePolicy.OFFLINE) {
                 model.status("Satellite needs internet. Switch the map source to Auto or Online.")
@@ -1088,9 +1125,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             Triple("Online · use internet maps",MapSourcePolicy.ONLINE,"map"),
             Triple("Offline · downloaded maps only",MapSourcePolicy.OFFLINE,"download")
         )
-        showChoices("Map source",choices.map { (title, mode, icon) ->
+        showChoices("Map connection",choices.map { (title, mode, icon) ->
             (if(model.mapSourceMode==mode)"✓  " else "")+title to icon
-        }) { selected ->
+        }, "Where map tiles come from. This does not change offline routing or search.") { selected ->
             val mode=choices[selected].second
             val state=model.updates.value
             val point=if(state.navigating&&state.fix!=null)state.fix.point else atlasMap.centerPoint
@@ -1150,11 +1187,31 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         if(currentPage=="trips"){navigation.bringToFront();snackbar.bringToFront()}
     }
     private fun showMenu(){showChoices("Atlas",listOf("Saved places" to "bookmark","Offline regions" to "download","Your trips" to "trip","Diagnostics" to "compass","Settings" to "sun")){index->openPage(listOf("bookmarks","regions","trips","diagnostics","settings")[index])}}
-    private fun showChoices(title:String,options:List<Pair<String,String>>,select:(Int)->Unit){
-        val card=ui.card(22);card.addView(ui.text(title,23f,bold=true));card.addView(ui.space(16))
+    private fun showChoices(title:String,options:List<Pair<String,String>>,
+                            description:String?=null,select:(Int)->Unit){
+        val card=ui.card(22)
+        card.addView(ui.text(title,23f,bold=true))
+        description?.let {
+            card.addView(ui.text(it,13f,ui.muted),linear(9))
+        }
+        card.addView(ui.space(16))
         val dialog=AlertDialog.Builder(this).setView(card).create()
-        options.forEachIndexed{index,(label,icon)->card.addView(ui.action(label,icon,false){dialog.dismiss();select(index)},linear(9))}
-        dialog.setOnShowListener{dialog.window?.setBackgroundDrawableResource(android.R.color.transparent);dialog.window?.setLayout((resources.displayMetrics.widthPixels-ui.dp(40)).coerceAtMost(ui.dp(400)),-2)};dialog.show()
+        options.forEachIndexed{index,(label,icon)->
+            card.addView(ui.action(label,icon,false){dialog.dismiss();select(index)},linear(9))
+        }
+        // The decor is invisible until Android applies the intended width.
+        // Otherwise a standard-width dialog visibly jumps on its first frame.
+        dialog.window?.decorView?.alpha=0f
+        dialog.setOnShowListener {
+            dialog.window?.apply {
+                setBackgroundDrawableResource(android.R.color.transparent)
+                setGravity(Gravity.CENTER)
+                setLayout((resources.displayMetrics.widthPixels-ui.dp(40))
+                    .coerceAtMost(ui.dp(400)),-2)
+                decorView.alpha=1f
+            }
+        }
+        dialog.show()
     }
     private fun confirm(message:String,action:()->Unit){
         val card=ui.card(23);card.addView(ui.text(message,21f,bold=true));card.addView(ui.space(18))
