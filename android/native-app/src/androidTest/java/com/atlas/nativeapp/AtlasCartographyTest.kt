@@ -32,6 +32,7 @@ class AtlasCartographyTest {
             assertTrue(exploreIds.contains("atlas-parks"))
             assertTrue(navIds.contains("atlas-buildings"))
             assertTrue(navIds.contains("atlas-road-labels"))
+            assertTrue(navIds.contains("atlas-place-labels"))
             assertFalse(navIds.contains("atlas-poi-labels"))
             assertFalse(navIds.contains("atlas-parks"))
             assertEquals("pmtiles://file:///tmp/atlas.pmtiles",
@@ -51,6 +52,19 @@ class AtlasCartographyTest {
         assertTrue(hybrid.getJSONObject("sources").has("satellite-references"))
         assertEquals(2,satellite.getJSONArray("layers").length())
         assertEquals(3,hybrid.getJSONArray("layers").length())
+    }
+
+    @Test fun darkMapLabelsRemainHighContrastInNavigation() {
+        val style=JSONObject(AtlasCartography.offlineStyle(
+            "pmtiles://file:///tmp/atlas.pmtiles",true,true))
+        val layers=style.getJSONArray("layers")
+        for(id in listOf("atlas-road-labels","atlas-place-labels")) {
+            val layer=(0 until layers.length()).map { layers.getJSONObject(it) }
+                .first { it.getString("id")==id }
+            val paint=layer.getJSONObject("paint")
+            assertEquals("#F9FCFF",paint.getString("text-color"))
+            assertTrue(paint.getDouble("text-halo-width")>=2.0)
+        }
     }
 
     @Test fun darkStyleUsesReadableNonBlackPalette() {

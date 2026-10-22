@@ -63,18 +63,22 @@ internal object AtlasCartography {
         val building = if (dark) "#364958" else "#DFE4E3"
         val outline = if (dark) "#63788A" else "#BAC7CD"
         val roadCasing = if (dark) "#344555" else "#D5DADD"
-        val road = if (dark) "#8EA3B8" else "#FFFFFF"
-        val names = if (dark) "#E1EAF2" else "#344453"
-        val halo = if (dark) "#1D2B38" else "#FFFFFF"
-        val placeLabels = if (navigating) "" else """
+        val road = if (dark) "#B8CBDF" else "#FFFFFF"
+        val names = if (dark) "#F9FCFF" else "#344453"
+        val halo = if (dark) "#0B1926" else "#FFFFFF"
+        // Dark navigation must keep town/city labels visible. Only POIs
+        // become optional so the route stays uncluttered.
+        val placeLabels = """
             ,{"id":"atlas-place-labels","type":"symbol","source":"atlas","source-layer":"place",
-              "minzoom":5,"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
-              "text-size":12,"text-max-width":9},
-              "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":1.2}}
-            ,{"id":"atlas-poi-labels","type":"symbol","source":"atlas","source-layer":"poi",
+              "minzoom":${if(navigating) 9 else 5},"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
+              "text-size":${if(dark) 13 else 12},"text-max-width":9},
+              "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 2.0 else 1.2}}}
+            ${if(navigating) "" else ""","}
+            {"id":"atlas-poi-labels","type":"symbol","source":"atlas","source-layer":"poi",
               "minzoom":16,"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
               "text-size":10,"text-max-width":7},
-              "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":1}}
+              "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 1.8 else 1}}}
+            ${if(navigating) "" else ""}
         """.trimIndent()
         val parks = if (navigating) "" else """
             ,{"id":"atlas-parks","type":"fill","source":"atlas","source-layer":"landuse",
@@ -104,8 +108,8 @@ internal object AtlasCartography {
               "line-width":["interpolate",["linear"],["zoom"],8,0.8,14,2.5,18,6]}},
             {"id":"atlas-road-labels","type":"symbol","source":"atlas","source-layer":"transportation_name",
               "minzoom":13,"layout":{"symbol-placement":"line","text-field":["get","name"],
-              "text-font":["Noto Sans Regular"],"text-size":11},
-              "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":1.25}}
+              "text-font":["Noto Sans Regular"],"text-size":${if(dark) 12 else 11}},
+              "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 2.1 else 1.25}}}
             $placeLabels
           ]
         }
@@ -139,12 +143,13 @@ internal object AtlasCartography {
                         layer.setProperties(
                             PropertyFactory.lineColor(if (navigating) "#7C92A7" else "#8196AA"))
                     }
-                    is SymbolLayer -> if (id.contains("road") || id.contains("street") ||
-                            id.contains("place") || id.contains("city") || id.contains("town")) {
-                        layer.setProperties(PropertyFactory.textColor("#E1EAF2"),
-                            PropertyFactory.textHaloColor("#20303D"),
-                            PropertyFactory.textHaloWidth(1.3f))
-                    }
+                    // Online style IDs vary: "settlement", "poi", "boundary",
+                    // "neighbourhood" and "water-name" can all contain text.
+                    // Improve ALL text-bearing symbol layers, not only "road".
+                    is SymbolLayer -> layer.setProperties(
+                        PropertyFactory.textColor("#F9FCFF"),
+                        PropertyFactory.textHaloColor("#101C29"),
+                        PropertyFactory.textHaloWidth(2.0f))
                 }
             }
         }
