@@ -18,6 +18,16 @@ class NavigationCameraBehaviorTest {
         assertEquals(30.0,NavigationCameraBehavior.cursorAngle(
             false,true,true,70.0,40.0),0.0001)
     }
+    @Test fun compassToggleSettlesInSixHundredMillisecondsWithoutSnapping() {
+        val rate=NavigationCameraBehavior.rotationRate(0.0)
+        assertEquals(14.0,rate,0.001)
+        val initialDifference=180.0
+        val residual=initialDifference*kotlin.math.exp(-rate*0.6)
+        assertTrue("north-up compass should settle below 1 degree in 600 ms",
+            residual < 1.0)
+        assertEquals(2.8,NavigationCameraBehavior.rotationRate(1.0),0.001)
+        assertEquals(2.8,NavigationCameraBehavior.rotationRate(Double.POSITIVE_INFINITY),0.001)
+    }
     @Test fun animationKeepsRunningUntilRotationAndZoomSettle() {
         assertTrue(NavigationCameraBehavior.shouldContinueFrame(
             true,false,0.0,16.0,0.0,0.0))

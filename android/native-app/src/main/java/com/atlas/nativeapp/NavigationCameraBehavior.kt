@@ -9,6 +9,15 @@ internal object NavigationCameraBehavior {
         if (navigating && follow && headingUp) 0.0
         else AtlasHeading.normalize(travelBearing - mapBearing)
 
+    /** A compass tap settles quickly, but still rotates smoothly on the
+     * same rendering clock. Normal live-heading changes retain slower damping.
+     * Rate 14/s settles a 180° north-up switch inside the replay's 600 ms
+     * bound without an instantaneous camera snap or a competing animator.
+     */
+    fun rotationRate(secondsSinceCompassTap: Double): Double =
+        if (secondsSinceCompassTap.isFinite() &&
+            secondsSinceCompassTap in 0.0..0.85) 14.0 else 2.8
+
     fun shouldContinueFrame(follow: Boolean, markerActive: Boolean,
                             centerErrorMeters: Double, angularError: Double,
                             zoomError: Double, tiltError: Double): Boolean =

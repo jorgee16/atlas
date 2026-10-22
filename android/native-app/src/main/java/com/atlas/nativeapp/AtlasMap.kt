@@ -156,6 +156,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     internal var onDebugFrame: ((JSONObject) -> Unit)? = null
     private var debugFrameCount = 0L
     private var lastMarkerAngle = Double.NaN
+    // Switching heading-up/north-up is a short, explicit camera transition.
+    // Keep one frame-clock owner; do not start MapLibre animations in parallel.
+    private var compassChangedAt = Double.NEGATIVE_INFINITY
     private val navigationFrame = Choreographer.FrameCallback { _ ->
         frameScheduled = false
         if (!framesEnabled || styleLoading || resumeSyncPending) return@FrameCallback
@@ -191,7 +194,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         if (follow && !cameraState.pending) {
             val camera = ready.cameraPosition
             val desiredHeading = if (headingUp) travelHeading(s,s.fix) else 0.0
-            val easing = 1-kotlin.math.exp(-2.8*deltaTime)
+            val turnRate=NavigationCameraBehavior.rotationRate(time-compassChangedAt)
+            val easing = 1-kotlin.math.exp(-turnRate*deltaTime)
             val angle = AtlasHeading.normalize(camera.bearing+
                 AtlasHeading.signedDelta(camera.bearing,desiredHeading)*easing)
             followingAngle = angle
@@ -644,6 +648,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     fun compass() {
         headingUp = !headingUp
         val s=current
+        compassChangedAt=if (s?.navigating==true &&
+            cameraState.mode==NavigationCameraState.Mode.FOLLOWING)
+            SystemClock.elapsedRealtimeNanos()/1e9 else Double.NEGATIVE_INFINITY
         when(cameraState.mode) {
             NavigationCameraState.Mode.FOLLOWING -> {
                 if (s?.navigating == true && !cameraState.pending) {
