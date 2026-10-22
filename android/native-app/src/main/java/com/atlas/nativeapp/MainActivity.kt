@@ -885,6 +885,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 addView(ui.column().apply{addView(ui.text(stats,if(compact)15f else 18f,ui.green,true));if(!compact){addView(ui.space(5));addView(ui.text(if(s.walking)"Walking route" else if(route.optDouble("tollEuros")>0)"Estimated tolls €${"%.2f".format(route.optDouble("tollEuros"))}" else "No tolls on this route",12f,ui.muted))}},LinearLayout.LayoutParams(0,-2,1f))
                 if(compact)addView(ui.action("Start","navigate"){startNavigation()},LinearLayout.LayoutParams(ui.dp(112),ui.dp(48)))
             },linear(15))
+            RoadsideArrivalNotice.text(route.optDouble("destinationAccessMeters",0.0))?.let { note ->
+                card.addView(ui.text(note,12f,ui.muted).apply{maxLines=3},linear(10))
+            }
             if(!compact){
                 if(s.routeOptions.size>1)card.addView(ui.row().apply{s.routeOptions.forEach{choice->addView(ui.chip(choice.optString("label"),selected=choice===route){model.chooseRoute(choice)},LinearLayout.LayoutParams(0,-2,1f).apply{rightMargin=ui.dp(6)})}},linear(13))
                 card.addView(ui.action(if(s.origin==null)"Start navigation" else "View route","navigate"){if(s.origin==null)startNavigation()else atlasMap.overview()},linear(15))
@@ -979,6 +982,15 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 if(distance<=350&&lanes.size>1){addView(ui.space(12));addView(ui.text(lanes.joinToString("    "){when{it.contains("left")->"←";it.contains("right")->"→";else->"↑"}},23f,Color.WHITE))}
             },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(18)})
         };guidance.addView(banner)
+        val accessGap=s.route?.optDouble("destinationAccessMeters",0.0)?:0.0
+        val remaining=s.guidance?.optDouble("remaining",Double.POSITIVE_INFINITY)
+            ?:Double.POSITIVE_INFINITY
+        if(remaining<=350.0)RoadsideArrivalNotice.text(accessGap)?.let { notice ->
+            guidance.addView(ui.text(notice,12f,ui.ink,true).apply{
+                background=ui.shape(ui.surface,14)
+                setPadding(ui.dp(12),ui.dp(9),ui.dp(12),ui.dp(9))
+            },linear(9))
+        }
         val confidence=s.guidance?.optString("state")
         if(confidence=="reduced"||confidence=="checking")guidance.addView(ui.text(if(confidence=="reduced")"GPS accuracy reduced · Keeping your route" else "Checking your route…",12f,ui.ink,true).apply{background=ui.shape(ui.surface,14);setPadding(ui.dp(14),ui.dp(11),ui.dp(14),ui.dp(11))},linear(9))
     }
