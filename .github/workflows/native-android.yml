@@ -24,6 +24,7 @@ on:
         type: string
         default: '3'
   push:
+    # Include navigation, offline search and native POI access changes in CI.
     branches: ['migration/native-core-kotlin']
   pull_request:
     paths: ['native/**', 'android/native-app/**', 'android/build.gradle', 'android/settings.gradle', '.github/workflows/native-android.yml']
