@@ -28,6 +28,30 @@ for(const variant of ['basic','restricted','only','toll','profile','uturn']) {
   expected.push({directory,profile,avoidTolls,edges:r?.edgeIndexes??null,distance:r?.distanceMeters??null,duration:r?.durationSeconds??null,maneuvers:r?new ManeuverGenerator().generate({graph,route:r}).map(m=>({type:m.type,instruction:m.instruction,at:m.routeDistanceMeters})):null});
  }
 }
+// The closest road to this airport-style polygon centre is an isolated
+// service graph. A second publicly reachable road is only 80m away.
+{
+ const nodes=[
+  {lat:40,lon:-8},{lat:40,lon:-7.999},{lat:40,lon:-7.998},
+  {lat:40,lon:-7.997},
+  {lat:40.0003,lon:-7.9986,component:1},
+  {lat:40.0004,lon:-7.9986,component:1}
+ ];
+ const edges=[
+  {from:0,to:1,road:0,distanceDecimeters:850,durationCentiseconds:1000},
+  {from:1,to:2,road:0,distanceDecimeters:850,durationCentiseconds:1000},
+  {from:2,to:3,road:0,distanceDecimeters:850,durationCentiseconds:1000},
+  {from:4,to:5,road:1,distanceDecimeters:110,durationCentiseconds:200}
+ ];
+ const assets=createRoutingBuffers({nodes,edges,roads:[
+  {name:'Public access road'},{name:'Restricted internal road'}
+ ]});
+ const directory=`${root}/access`;
+ await fs.mkdir(directory,{recursive:true});
+ for(const [name,value] of Object.entries(assets))
+  if(value instanceof ArrayBuffer)
+   await fs.writeFile(`${directory}/${name==='spatialIndex'?'spatial-index':name}.bin`,Buffer.from(value));
+}
 await fs.writeFile(`${root}/expected.json`,JSON.stringify(expected));
 const raw=`${root}/places.geojson`;
 await fs.writeFile(raw,JSON.stringify({type:'FeatureCollection',features:[

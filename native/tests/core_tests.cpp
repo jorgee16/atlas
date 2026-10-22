@@ -100,6 +100,18 @@ int main(int argc, char **argv) {
     check(access && access->destinationAccessMeters>1 &&
           access->destinationAccessMeters<400,
           "route terminates on road and exposes remaining gap to POI");
+    Graph airport(root+"/access");
+    const Point internalNode{40.0003,-7.9986};
+    const auto closest=airport.nearest(internalNode,Profile::drive,200);
+    check(closest && airport.component(*closest)==1,
+          "the closest POI node is isolated in airport service graph");
+    const auto roadside=routeFromPosition(airport,{40,-8},internalNode,
+        RouteOptions{},std::nullopt);
+    check(roadside && roadside->points.size()>=2 &&
+          airport.component(roadside->nodes.back())==0 &&
+          roadside->destinationAccessMeters>20.0 &&
+          roadside->destinationAccessMeters<250.0,
+          "POI routing bypasses disconnected internal node in favor of reachable road");
     auto p = progress({40, -8}, *drive);
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);
