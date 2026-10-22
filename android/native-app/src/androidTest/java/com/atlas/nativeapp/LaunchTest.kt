@@ -55,7 +55,7 @@ class LaunchTest {
             scenario.onActivity {
                 (it.application as AtlasApplication).model.mapSourceMode=MapSourcePolicy.AUTO
             }
-            onView(allOf(withContentDescription("Change map source"),isDisplayed())).perform(click())
+            onView(allOf(withContentDescription("Map connection: online or offline"),isDisplayed())).perform(click())
             onView(withText(containsString("Online · use internet maps"))).perform(click())
             scenario.onActivity {
                 assertEquals(MapSourcePolicy.ONLINE,
@@ -103,7 +103,7 @@ class LaunchTest {
             scenario.onActivity { (it.application as AtlasApplication).model.endNavigation() }
             SystemClock.sleep(3500)
             onView(withContentDescription("Search places")).check(matches(isDisplayed()))
-            onView(withContentDescription(org.hamcrest.Matchers.containsString("Map layers:")))
+            onView(withContentDescription(org.hamcrest.Matchers.containsString("Map appearance:")))
                 .perform(click())
             onView(withText(org.hamcrest.Matchers.containsString("Hybrid · aerial imagery")))
                 .check(matches(isDisplayed()))
