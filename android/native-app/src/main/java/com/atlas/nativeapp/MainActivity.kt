@@ -956,13 +956,25 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val maneuver=s.route?.optJSONArray("maneuvers")?.optJSONObject(index)
         val distance=s.guidance?.optDouble("toManeuver")?:0.0
         val type=maneuver?.optString("type").orEmpty()
+        val instruction=GuidanceInstructionPresentation.format(
+            maneuver?.optString("instruction"))
         val icon=when{type.contains("roundabout")->"roundabout";type.contains("left")->"arrow-left";type.contains("right")->"arrow-right";type=="arrive"->"flag";else->"arrow"}
         val banner=ui.row().apply{
             background=ui.shape(Color.rgb(24,42,66),24);elevation=ui.dp(7).toFloat();setPadding(ui.dp(20),ui.dp(20),ui.dp(18),ui.dp(20))
             addView(ui.icon(icon,Color.WHITE,44),LinearLayout.LayoutParams(ui.dp(44),ui.dp(52)))
             addView(ui.column().apply{
-                addView(ui.text(if(distance<=20)"Now" else AtlasPages.formatDistance(distance),30f,Color.WHITE,true));addView(ui.space(7))
-                addView(ui.text(maneuver?.optString("instruction")?:"Continue on your route",15f,Color.WHITE,true).apply{maxLines=2})
+                addView(ui.text(if(distance<=20)"Now" else AtlasPages.formatDistance(distance),30f,Color.WHITE,true))
+                addView(ui.space(9))
+                // Action first, destination/road references beneath it. Never
+                // display raw semicolon-delimited OSM destination tags.
+                addView(ui.text(instruction.action,17f,Color.WHITE,true).apply{maxLines=2})
+                instruction.destination?.let { destination ->
+                    addView(ui.space(6))
+                    addView(ui.text(destination,13f,Color.rgb(226,235,248)).apply {
+                        maxLines=3
+                        ellipsize=android.text.TextUtils.TruncateAt.END
+                    })
+                }
                 val lanes=maneuver?.optString("turnLanes").orEmpty().split('|')
                 if(distance<=350&&lanes.size>1){addView(ui.space(12));addView(ui.text(lanes.joinToString("    "){when{it.contains("left")->"←";it.contains("right")->"→";else->"↑"}},23f,Color.WHITE))}
             },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(18)})
