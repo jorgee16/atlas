@@ -72,14 +72,27 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                     visualStyle else MapVisualStyle.STREETS
     var onMapSourceChanged: (() -> Unit)? = null
     internal var overviewInsets: (() -> IntArray)? = null
+    private var chromeLayoutGeneration = 0L
     internal fun onChromeLayout() {
-        if(cameraState.mode==NavigationCameraState.Mode.OVERVIEW) {
-            val expected=overviewInsets?.invoke()
-            val actual=map?.cameraPosition?.padding
-            if(expected!=null && actual!=null && expected.indices.all { abs(expected[it]-actual[it])<1.0 })return
+        // Navigation guidance is rebuilt at each GPS tick. Its Android views
+        // briefly pass through intermediate sizes before settling. Fitting
+        // Overview against those transient insets re-centers the camera as
+        // the moving cursor updates, even when the final UI bounds are equal.
+        // Only refit AFTER all layout passes have settled, and only if the
+        // requested padding actually differs from the installed padding.
+        if(cameraState.mode!=NavigationCameraState.Mode.OVERVIEW)return
+        val generation=++chromeLayoutGeneration
+        view.postDelayed({
+            if(generation!=chromeLayoutGeneration ||
+                cameraState.mode!=NavigationCameraState.Mode.OVERVIEW ||
+                styleLoading)return@postDelayed
+            val expected=overviewInsets?.invoke() ?: return@postDelayed
+            val actual=map?.cameraPosition?.padding ?: return@postDelayed
+            if(expected.size!=4 || actual.size!=4)return@postDelayed
+            if(expected.indices.all { abs(expected[it]-actual[it])<1.0 })return@postDelayed
             cameraState.viewportChanged()
             applyCameraMode()
-        }
+        }, 180L)
     }
     private var loadedSource = "loading"
     val activeMapSource: String get() = if (styleLoading) "loading" else loadedSource
