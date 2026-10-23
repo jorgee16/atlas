@@ -5,12 +5,12 @@ on:
       run_id:
         description: 'Existing native Android validation run (no emulator replay)'
         required: true
-        default: '39955632353'
+        default: '39958128074'
         type: string
       review_group:
         description: 'Small batch of existing Android captures to inspect'
         type: choice
-        default: diagnostics
+        default: styles
         options: [diagnostics, styles, lisbon, sintra, a5, icons]
   push:
     branches: ['migration/native-core-kotlin']
@@ -23,14 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        group: ["${{ inputs.review_group || 'diagnostics' }}"]
+        group: ["${{ inputs.review_group || 'styles' }}"]
     steps:
       - uses: actions/checkout@v4
       - name: Reuse recorded Android images; no emulator
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.run_id || '39955632353' }}
+          run-id: ${{ inputs.run_id || '39958128074' }}
           name: Atlas-native-ui-review
           path: /tmp/atlas-evidence
       - name: Setup pinned video tools (no apt mirror)
@@ -56,7 +56,7 @@ jobs:
                   print('ATLAS_ROAD_CASE',json.dumps({'case':group,'reviewPoint':d['reviewPoint'],'rawPoints':len(r['points']),'visualPoints':len(d['visual']),'maneuvers':r['maneuvers']}))
           if group in ('styles','diagnostics'):
               for log in root.rglob('logcat.txt'):
-                  errors=[line for line in log.read_text(errors='replace').splitlines() if any(term in line.lower() for term in ('glyph','font','pbf','mbgl','pmtiles'))]
+                  errors=[line for line in log.read_text(errors='replace').splitlines() if any(term in line.lower() for term in ('glyph','font','pbf','pmtiles'))]
                   print('ATLAS_FONT_DIAGNOSTICS',str(log),json.dumps([line for line in errors if 'AppsFilter' not in line][:300]))
           summary=next(root.rglob('route-visual-summary.json'))
           d=json.loads(summary.read_text())

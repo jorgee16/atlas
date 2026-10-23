@@ -2,7 +2,7 @@ name: Native C++ and Kotlin Android
 concurrency:
   # A full signed-Release trip must not block independent patch-validation CI.
   # Keep both kinds serialized within their respective groups.
-  group: native-${{ github.ref }}-${{ ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]'))) && 'release' || 'checks' }}
+  group: native-${{ github.ref }}-${{ ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]'))) && 'release' || (contains(github.event.head_commit.message, '[recorded-evidence-only]') && 'evidence' || 'checks') }}
   # New signed Release runs supersede obsolete failed/blocked Release runs.
   # Independent patch checks stay on their separate concurrency group.
   # New push supersedes old checks as well as signed Releases: don't run
