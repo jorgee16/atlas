@@ -5,8 +5,13 @@ on:
       run_id:
         description: 'Existing native Android validation run (no emulator replay)'
         required: true
-        default: '39950254685'
+        default: '39952796391'
         type: string
+      review_group:
+        description: 'Small batch of existing Android captures to inspect'
+        type: choice
+        default: styles
+        options: [styles, lisbon, sintra, a5, icons]
   push:
     branches: ['migration/native-core-kotlin']
     paths: ['.github/workflows/native-replay-review.yml']
@@ -18,14 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        group: [lisbon, sintra, a5, icons]
+        group: ["${{ inputs.review_group || 'styles' }}"]
     steps:
       - uses: actions/checkout@v4
       - name: Reuse recorded Android images; no emulator
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.run_id || '39950254685' }}
+          run-id: ${{ inputs.run_id || '39952796391' }}
           name: Atlas-native-ui-review
           path: /tmp/atlas-evidence
       - name: Setup pinned video tools (no apt mirror)
@@ -42,13 +47,17 @@ jobs:
           prefixes={'lisbon':'lisbon-roundabout','sintra':'sintra-curves','a5':'a5-access'}
           for p in root.rglob('*.png'):
               n=p.stem
-              selected=(n.startswith(('09-','10-')) if group=='icons' else n.startswith(prefixes[group]) and '-offline-z18-' in n and n.endswith(('-before','-after','-after-progress-boundary')))
+              selected=(n.endswith('-navigation-after') or (n.startswith('lisbon-') and '-online-z18-' in n and n.endswith(('-before','-after')))) if group=='styles' else (n.startswith(('09-','10-')) if group=='icons' else n.startswith(prefixes[group]) and '-offline-z18-' in n and n.endswith(('-before','-after','-after-progress-boundary')))
               if selected: shutil.copyfile(p,dest/p.name)
           assert list(dest.glob('*.png')), 'Original Android captures are required'
           for p in root.rglob('*-geometry.json'):
               if group in prefixes and p.name.startswith(prefixes[group]):
                   d=json.loads(p.read_text());r=d['nativeRoute']
                   print('ATLAS_ROAD_CASE',json.dumps({'case':group,'reviewPoint':d['reviewPoint'],'rawPoints':len(r['points']),'visualPoints':len(d['visual']),'maneuvers':r['maneuvers']}))
+          if group=='styles':
+              for log in root.rglob('logcat.txt'):
+                  errors=[line for line in log.read_text(errors='replace').splitlines() if any(term in line.lower() for term in ('glyph','font','pbf'))]
+                  print('ATLAS_FONT_DIAGNOSTICS',str(log),json.dumps(errors[:30]))
           summary=next(root.rglob('route-visual-summary.json'))
           d=json.loads(summary.read_text())
           print('ATLAS_VISUAL_COMPLETENESS',json.dumps({'images':len(d['cases']),'navigationImages':d['navigationImages'],'routingAttempts':d.get('routingAttempts')}))
