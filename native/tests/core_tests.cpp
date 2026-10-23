@@ -201,13 +201,13 @@ int main(int argc, char **argv) {
     GuidanceSession continuity;
     auto established = continuity.update(drive->points.front(), 5, 1, 100, *drive);
     auto impossible = continuity.update(drive->points.back(), 5, 1, 101, *drive);
-    check(impossible.state == Guidance::State::reduced &&
+    check(impossible.state == Guidance::State::checking &&
               std::abs(impossible.position.along - established.position.along) < .01,
-          "first implausible projection holds the cursor");
+          "first precise but implausible projection is checking, and holds the cursor");
     auto repeated = continuity.update(drive->points.back(), 5, 1, 102, *drive);
-    check(repeated.state == Guidance::State::reduced &&
+    check(repeated.state == Guidance::State::checking &&
               std::abs(repeated.position.along - established.position.along) < .01,
-          "second implausible projection still holds the cursor");
+          "second precise but implausible projection is checking and still holds cursor");
     auto confirmed = continuity.update(drive->points.back(), 5, 1, 103, *drive);
     check(confirmed.state == Guidance::State::arrived,
           "repeated stable destination fixes eventually allow arrival");
