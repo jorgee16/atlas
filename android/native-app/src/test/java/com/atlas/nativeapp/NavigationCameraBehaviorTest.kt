@@ -55,4 +55,12 @@ class NavigationCameraBehaviorTest {
         assertFalse(NavigationCameraBehavior.useHeldRouteFix(true,false,3.0))
         assertFalse(NavigationCameraBehavior.useHeldRouteFix(true,true,0.5))
     }
+    @Test fun roundaboutVisualRotationDoesNotAlterNormalGPSRates() {
+        assertEquals(12.0,NavigationCameraBehavior.rotationRate(
+            10.0,70.0,7.0,true),0.001)
+        assertEquals(8.0,NavigationCameraBehavior.rotationRate(
+            10.0,70.0,7.0,false),0.001)
+        assertEquals(2.8,NavigationCameraBehavior.rotationRate(
+            10.0,70.0,0.5,true),0.001)
+    }
 }

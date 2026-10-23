@@ -155,6 +155,20 @@ internal class NavigationRenderInterpolator {
         lastAcceptedPosition = snapped
     }
 
+    /** Camera-only tangent along the displayed route. Does not affect GPS
+     * heading, map matching or routing confidence. A short symmetric segment
+     * gives the vehicle's visual direction on curved roads/roundabouts. */
+    fun visualBearing(along: Double, aheadMeters: Double = 7.0): Double? {
+        if (vertices.size < 2 || !along.isFinite() || routeMeters <= 0) return null
+        val from=atDistance((along - 2.0).coerceAtLeast(0.0))
+        val to=atDistance((along + aheadMeters.coerceIn(3.0,15.0)).coerceAtMost(routeMeters))
+        val north=(to.lat-from.lat)*111_320.0
+        val east=(to.lon-from.lon)*111_320.0*
+            cos(Math.toRadians((from.lat+to.lat)*.5))
+        if (hypot(east,north)<0.5) return null
+        return (Math.toDegrees(kotlin.math.atan2(east,north))+360.0)%360.0
+    }
+
     /** Align a stopped filter with the point the route renderer actually drew. */
     fun holdStationary(position: Coordinate) {
         measuredAlong=renderedAlong ?: measuredAlong

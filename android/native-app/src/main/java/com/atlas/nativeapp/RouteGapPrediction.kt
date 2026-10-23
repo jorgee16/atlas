@@ -16,8 +16,18 @@ internal object RouteGapPrediction {
         // a virtual drive, even if a provider supplies a nonzero speed.
         if (fix.motionConfirmed == false) return null
         val age = now - fix.time
-        if (!age.isFinite() || age < 2.0 || age > 9.0 ||
-            StationaryMapPosition.visualSpeed(fix) < 2.0 || fix.accuracy > 35.0 ||
+        // A sudden sustained GNSS blackout at confirmed driving speed may
+        // be a tunnel. Hold the last REAL speed, and constrain virtual travel
+        // strictly to the existing route. Do not simulate indefinite driving:
+        // without mapped tunnel metadata, signal loss alone is not proof of
+        // a tunnel and the car may have stopped inside one.
+        val visualSpeed = StationaryMapPosition.visualSpeed(fix)
+        val strongBlackout = fix.accuracy <= 18.0 &&
+            visualSpeed >= 3.0 && fix.motionConfirmed == true
+        val horizon = if (strongBlackout) 60.0 else 9.0
+        val distanceCap = if (strongBlackout) 1500.0 else 110.0
+        if (!age.isFinite() || age < 2.0 || age > horizon ||
+            visualSpeed < 2.0 || fix.accuracy > 35.0 ||
             guidance.optString("state") == "arrived" ||
             guidance.optString("state") == "reroute" ||
             guidance.optString("state") == "checking" ||
@@ -27,7 +37,8 @@ internal object RouteGapPrediction {
         val total = route.optDouble("distanceMeters")
         val base = guidance.optDouble("predictionBaseAlong", guidance.optDouble("along"))
         if (points.length() < 2 || !total.isFinite() || total <= 0 || !base.isFinite()) return null
-        val target = min(total - 30.0, base + min(110.0, age * min(fix.speed, 25.0)))
+        val target = min(total - 30.0,
+            base + min(distanceCap, age * min(visualSpeed, 25.0)))
         val previous = guidance.optDouble("along")
         if (target <= previous) return null
         val lengths = DoubleArray(points.length() - 1)
@@ -58,10 +69,11 @@ internal object RouteGapPrediction {
                     put("along", target)
                     put("remaining", total - target)
                     put("toManeuver", (guidance.optDouble("toManeuver") - (target - previous)).coerceAtLeast(0.0))
-                    put("seconds", (guidance.optDouble("seconds") - (target - previous) / fix.speed).coerceAtLeast(0.0))
+                    put("seconds", (guidance.optDouble("seconds") - (target - previous) / visualSpeed).coerceAtLeast(0.0))
                     put("state", "reduced")
                     put("predictionBaseAlong", base)
                     put("predictedAt", now)
+                    put("gpsBlackoutPrediction", strongBlackout)
                 }
             }
             traversed += segment

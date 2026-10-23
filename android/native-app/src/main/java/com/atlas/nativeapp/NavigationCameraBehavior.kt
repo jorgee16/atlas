@@ -16,9 +16,14 @@ internal object NavigationCameraBehavior {
      */
     fun rotationRate(secondsSinceCompassTap: Double,
                      angularErrorDegrees: Double = 0.0,
-                     speedMetersPerSecond: Double = 0.0): Double {
+                     speedMetersPerSecond: Double = 0.0,
+                     visualRoundabout: Boolean = false): Double {
         if (secondsSinceCompassTap.isFinite() &&
             secondsSinceCompassTap in 0.0..0.85) return 14.0
+        // Visual route-tangent mode only: keep tight loops in alignment.
+        // This does NOT change filtered GPS bearing, guidance or map matching.
+        if(visualRoundabout && speedMetersPerSecond.isFinite() &&
+            speedMetersPerSecond>=2.0) return 12.0
         // Follow confirmed moving bends sooner, without any camera snap.
         // Keep the original damping for stationary/noisy GPS bearings.
         if (!speedMetersPerSecond.isFinite() || speedMetersPerSecond < 1.8)

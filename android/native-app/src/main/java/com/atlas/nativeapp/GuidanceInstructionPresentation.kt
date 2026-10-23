@@ -10,6 +10,17 @@ package com.atlas.nativeapp
 internal object GuidanceInstructionPresentation {
     data class Text(val action: String, val destination: String?)
 
+    fun roundaboutDestination(rawInstruction: String?, road: String?): String {
+        val instruction=rawInstruction.orEmpty().trim()
+        val connector=Regex("\\s+(?:onto|toward)\\s+",RegexOption.IGNORE_CASE)
+            .find(instruction)
+        val destination=(connector?.let { instruction.substring(it.range.last+1) }
+            ?: road.orEmpty()).trim()
+            .replace(Regex("\\s*;\\s*")," · ")
+            .replace(Regex("\\s+")," ")
+        return destination.ifBlank { "Follow the signed exit" }
+    }
+
     fun format(rawInstruction: String?): Text {
         val cleaned = rawInstruction.orEmpty().trim()
             .replace(Regex("\\s*;\\s*"), " · ")

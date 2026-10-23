@@ -441,7 +441,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             if(landscape)intArrayOf(
                 maxOf(if(guidance.visibility==View.VISIBLE)guidance.right else 0,
                     if(bottom.visibility==View.VISIBLE)bottom.right else 0)+ui.dp(20),
-                topInset+ui.dp(24),rightInset+ui.dp(80),bottomInset+ui.dp(24))
+                topInset+ui.dp(24),rightInset+ui.dp(80),bottomInset+ui.dp(160))
             else intArrayOf(leftInset+ui.dp(32),
                 // Reserve a fixed guidance-banner envelope in Overview.
                 // The next instruction/lanes can change banner height on a
@@ -521,7 +521,13 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val pad=ui.dp(16)
         val left=pad+leftInset;val right=pad+rightInset
         (top.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(350) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12) }.also{top.layoutParams=it}
-        (bottom.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(340) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.START else Gravity.CENTER_HORIZONTAL;leftMargin=left;rightMargin=right;bottomMargin=bottomInset+if(landscape||model.updates.value.navigating)ui.dp(16) else ui.dp(100) }.also{bottom.layoutParams=it}
+        (bottom.layoutParams as FrameLayout.LayoutParams).apply {
+            width=if(landscape)ui.dp(355) else -1
+            gravity=Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            leftMargin=if(landscape)0 else left
+            rightMargin=if(landscape)0 else right
+            bottomMargin=bottomInset+if(landscape||model.updates.value.navigating)ui.dp(12) else ui.dp(100)
+        }.also{bottom.layoutParams=it}
         (navigation.layoutParams as FrameLayout.LayoutParams).apply {width=if(landscape)ui.dp(300) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.CENTER_HORIZONTAL;leftMargin=left;rightMargin=right;bottomMargin=bottomInset+ui.dp(14)}.also{navigation.layoutParams=it}
         (guidance.layoutParams as FrameLayout.LayoutParams).apply{width=if(landscape)ui.dp(360) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12)}.also{guidance.layoutParams=it}
         (controls.layoutParams as FrameLayout.LayoutParams).apply {
@@ -531,17 +537,30 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             // Anchor the map toolbar beside the exposed map, never the sheet.
             val trailMap=state.tab=="Trail"&&!state.navigating&&!landscape&&!fullMap
             val fromTop=(planning||trailMap)&&!landscape
-            gravity=Gravity.END or if(fromTop)Gravity.TOP else Gravity.BOTTOM
+            gravity=Gravity.END or if(landscape||fromTop)Gravity.TOP else Gravity.BOTTOM
             rightMargin=right
-            topMargin=if(trailMap)topInset+ui.dp(85)
-                else if(planning&&!landscape)topInset+ui.dp(165) else 0
-            bottomMargin=if(fromTop)0 else bottomInset+
+            topMargin=when {
+                landscape -> topInset+ui.dp(38)
+                trailMap -> topInset+ui.dp(85)
+                planning -> topInset+ui.dp(165)
+                else -> 0
+            }
+            bottomMargin=if(landscape||fromTop)0 else bottomInset+
                 if(state.navigating)ui.dp(178) else ui.dp(118)
         }.also{controls.layoutParams=it}
-        (credit.layoutParams as FrameLayout.LayoutParams).apply{leftMargin=leftInset+ui.dp(22);bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(184)else ui.dp(88)}.also{credit.layoutParams=it}
+        (credit.layoutParams as FrameLayout.LayoutParams).apply {
+            gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.START
+            leftMargin=if(landscape)0 else leftInset+ui.dp(22)
+            rightMargin=if(landscape)right else 0
+            bottomMargin=bottomInset+if(landscape)ui.dp(5)
+                else if(model.updates.value.navigating)ui.dp(184) else ui.dp(88)
+        }.also{credit.layoutParams=it}
         (mapSourceBadge.layoutParams as FrameLayout.LayoutParams).apply {
-            leftMargin=left
-            bottomMargin=bottomInset+if(model.updates.value.navigating)ui.dp(215)else ui.dp(116)
+            gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.START
+            leftMargin=if(landscape)0 else left
+            rightMargin=if(landscape)right else 0
+            bottomMargin=bottomInset+if(landscape)ui.dp(28)
+                else if(model.updates.value.navigating)ui.dp(215) else ui.dp(116)
         }.also{mapSourceBadge.layoutParams=it}
         (diagnosticsOverlay.layoutParams as FrameLayout.LayoutParams).apply {
             width=ui.dp(if(landscape)232 else 258)
@@ -1072,24 +1091,25 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             addView(ui.column().apply{
                 addView(ui.text(if(distance<=20)"Now" else AtlasPages.formatDistance(distance),30f,Color.WHITE,true))
                 addView(ui.space(9))
-                // Action first, destination/road references beneath it. Never
-                // display raw semicolon-delimited OSM destination tags.
-                addView(ui.text(if(farAhead)"Continue on your route" else instruction.action,
-                    17f,Color.WHITE,true).apply{maxLines=2})
-                (if(farAhead)"Next: ${instruction.action}" else instruction.destination)?.let { destination ->
-                    addView(ui.space(6))
-                    addView(ui.text(destination,13f,Color.rgb(226,235,248)).apply {
+                // The numbered icon already identifies the roundabout exit.
+                // Prioritise bold named roads and signed destinations.
+                if(type=="roundabout" && !farAhead) {
+                    val destination=GuidanceInstructionPresentation.roundaboutDestination(
+                        rawInstruction,maneuver?.optString("road"))
+                    addView(ui.text(destination,19f,Color.WHITE,true).apply {
                         maxLines=3
                         ellipsize=android.text.TextUtils.TruncateAt.END
                     })
-                }
-                if(type=="roundabout" && !farAhead) {
-                    val exitNumber=maneuver?.optInt("exitNumber",0) ?: 0
-                    if(exitNumber in 1..20) addView(
-                        ui.text("EXIT $exitNumber",15f,Color.WHITE,true).apply {
-                            background=ui.shape(Color.rgb(49,107,160),12)
-                            setPadding(ui.dp(12),ui.dp(8),ui.dp(12),ui.dp(8))
-                        },linear(11))
+                } else {
+                    addView(ui.text(if(farAhead)"Continue on your route" else instruction.action,
+                        17f,Color.WHITE,true).apply{maxLines=2})
+                    (if(farAhead)"Next: ${instruction.action}" else instruction.destination)?.let { destination ->
+                        addView(ui.space(6))
+                        addView(ui.text(destination,14f,Color.rgb(226,235,248),true).apply {
+                            maxLines=3
+                            ellipsize=android.text.TextUtils.TruncateAt.END
+                        })
+                    }
                 }
                 if(!s.walking && !farAhead && distance<=500.0) {
                     val laneGuide=LaneGuidance.parse(maneuver?.optString("turnLanes").orEmpty(),type)

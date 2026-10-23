@@ -49,5 +49,19 @@ class RouteGapPredictionTest {
         val missingTimestamp=guidance().apply { remove("gpsFixTime") }
         assertNull(RouteGapPrediction.predict(route(),missingTimestamp,fix(),105.0))
     }
+    @Test fun confirmedMotionContinuesAlongRouteBeyondNineSecondsInBlackout() {
+        val longRoute=JSONObject()
+            .put("distanceMeters",3000.0)
+            .put("points",JSONArray("[[-8.0,40.0],[-8.0,40.027]]"))
+        val moving=fix().copy(speed=15.0,accuracy=6.0,motionConfirmed=true)
+        val prediction=RouteGapPrediction.predict(longRoute,guidance(),moving,130.0)
+        assertNotNull("long GNSS blackout should retain route-based visual progress",prediction)
+        assertTrue(prediction!!.optBoolean("gpsBlackoutPrediction"))
+        assertEquals(470.0,prediction.getDouble("along"),0.01)
+        assertNull("must never drift indefinitely after maximum blackout window",
+            RouteGapPrediction.predict(longRoute,guidance(),moving,170.0))
+        assertNull("stationary evidence cannot create tunnel movement",
+            RouteGapPrediction.predict(longRoute,guidance(),
+                moving.copy(motionConfirmed=false),130.0))
+    }
 }
-

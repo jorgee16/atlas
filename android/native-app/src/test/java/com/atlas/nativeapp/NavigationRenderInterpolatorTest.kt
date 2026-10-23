@@ -206,6 +206,15 @@ class NavigationRenderInterpolatorTest {
         repeat(90) { a.sample(110.0+(it+1)/30.0) }
         assertTrue("already predicted target must not be extrapolated again",a.sample(113.0)!!.along<=72.0001)
     }
+    @Test fun visualTangentFollowsRouteCurveIndependentlyOfGpsHeading() {
+        val a=NavigationRenderInterpolator()
+        a.setRoute(listOf(
+            Coordinate(38.0,-9.0),
+            Coordinate(38.0,-8.999),
+            Coordinate(38.001,-8.999)), 200.0)
+        val east=a.visualBearing(25.0,5.0)!!
+        val north=a.visualBearing(175.0,5.0)!!
+        assertTrue("first leg east",east in 70.0..110.0)
+        assertTrue("second leg north",north<25.0 || north>335.0)
+    }
 }
-
-

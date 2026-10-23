@@ -38,4 +38,13 @@ class GuidanceInstructionPresentationTest {
         assertEquals("Turn right",shown.action)
         assertEquals("Toward Sobral · Enxara · Torres Vedras",shown.destination)
     }
+    @Test fun roundaboutShowsOnlyExitRoadNotDuplicateExitNumber() {
+        assertEquals("A 36 · IC 17 · CRIL",GuidanceInstructionPresentation.roundaboutDestination(
+            "At the roundabout, take the 1st exit onto A 36; IC 17; CRIL",
+            "Circular Regional Interior de Lisboa"))
+        assertEquals("Sintra · A16",GuidanceInstructionPresentation.roundaboutDestination(
+            "At the roundabout, take the 2nd exit toward Sintra; A16",null))
+        assertEquals("Rua do Sol",GuidanceInstructionPresentation.roundaboutDestination(
+            "At the roundabout, take the 3rd exit","Rua do Sol"))
+    }
 }

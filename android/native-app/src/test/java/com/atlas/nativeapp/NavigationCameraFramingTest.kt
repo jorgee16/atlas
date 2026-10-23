@@ -57,4 +57,12 @@ class NavigationCameraFramingTest {
         assertEquals(NavigationCameraFraming.Target(18.0, 0.0),
             NavigationCameraFraming.target(true, 1.5, 25_000.0))
     }
+    @Test fun nearRoundaboutShowsMoreRoadWithoutAbruptHighwayZoom() {
+        val base=NavigationCameraFraming.Target(18.0,53.0)
+        val approach=NavigationCameraFraming.roundaboutTarget(base,20.0,7.0)
+        assertTrue(approach.zoom>base.zoom)
+        assertTrue(approach.zoom<=19.1)
+        assertTrue(approach.tilt<base.tilt)
+        assertEquals(base,NavigationCameraFraming.roundaboutTarget(base,500.0,7.0))
+    }
 }

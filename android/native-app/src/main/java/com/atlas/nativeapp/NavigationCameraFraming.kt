@@ -32,6 +32,16 @@ internal object NavigationCameraFraming {
         return value?.takeIf { it.isFinite() && it >= 0.0 }
     }
 
+    fun roundaboutTarget(base: Target, distanceMeters: Double, speed: Double): Target {
+        if (!distanceMeters.isFinite() || distanceMeters !in 0.0..140.0) return base
+        // More street geometry while actually navigating an approaching circle.
+        // At high speeds resist zooming into the junction too early.
+        val extra=((140.0-distanceMeters)/140.0).coerceIn(0.0,1.0)*
+            if(speed >= 17.0) 0.25 else 0.65
+        return Target((base.zoom+extra).coerceAtMost(19.1),
+            (base.tilt-extra*8.0).coerceAtLeast(42.0))
+    }
+
     fun target(walking: Boolean, speedMetersPerSecond: Double, nextMeters: Double?): Target {
         if (walking) return Target(18.0, 0.0)
         val distance = nextMeters?.takeIf { it.isFinite() && it >= 0.0 }
