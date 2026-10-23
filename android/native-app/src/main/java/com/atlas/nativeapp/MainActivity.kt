@@ -443,8 +443,14 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                     if(bottom.visibility==View.VISIBLE)bottom.right else 0)+ui.dp(20),
                 topInset+ui.dp(24),rightInset+ui.dp(80),bottomInset+ui.dp(24))
             else intArrayOf(leftInset+ui.dp(32),
-                maxOf(topInset+ui.dp(if(model.updates.value.navigating)220 else 40),
-                    if(guidance.visibility==View.VISIBLE)guidance.bottom+ui.dp(20) else 0),
+                // Reserve a fixed guidance-banner envelope in Overview.
+                // The next instruction/lanes can change banner height on a
+                // 1 Hz GPS update. That must NOT cause a detached Overview
+                // camera to repeatedly re-fit or slide across the map.
+                OverviewGuidanceInsets.top(
+                    topInset,model.updates.value.navigating,
+                    if(guidance.visibility==View.VISIBLE)guidance.bottom else null,
+                    ui.dp(1)),
                 rightInset+ui.dp(80),
                 maxOf(bottomInset+ui.dp(40),if(bottom.visibility==View.VISIBLE)root.height-bottom.top+ui.dp(24) else 0))
         }
