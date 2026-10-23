@@ -1,5 +1,5 @@
 name: Export validated signed Atlas APK to chat
-# Current 0.2.9 candidate uses bounded visual progress chunks.
+# Current 0.2.9 candidate verifies opaque travelled paint on real MapLibre frames.
 on:
   push:
     branches: ['migration/native-core-kotlin']
@@ -79,3 +79,4 @@ jobs:
           if [[ -n "${ATLAS_ANDROID_KEYSTORE_PATH:-}" && -f "$ATLAS_ANDROID_KEYSTORE_PATH" ]]; then
             rm -f "$ATLAS_ANDROID_KEYSTORE_PATH"
           fi
+

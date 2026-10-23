@@ -30,6 +30,14 @@ for name in preferred:
     source=root/(name+'.png')
     if not source.is_file():
         continue
+    # Original full-resolution PNGs stay in artifacts. Keep the main job's text
+    # log bounded so the review connector can actually open its evidence.
+    if name.startswith(('lisbon-','sintra-','a5-')) and name not in {
+        'sintra-curves-light-offline-z18-before','sintra-curves-light-offline-z18-after',
+        'lisbon-roundabout-light-offline-z18-after-progress-boundary',
+        'lisbon-roundabout-dark-offline-z18-after-progress-boundary',
+        'a5-access-light-offline-z18-after'} and root.name!='atlas-selected':
+        continue
     target=root/(name+'-preview.jpg')
     subprocess.run(['ffmpeg','-loglevel','error','-y','-i',str(source),
         '-vf','scale=1080:-1' if name.startswith(('lisbon-','sintra-','a5-','09-','10-')) else 'scale=480:-1','-q:v','2' if name.startswith(('lisbon-','sintra-','a5-','09-','10-')) else '7',str(target)],check=True)

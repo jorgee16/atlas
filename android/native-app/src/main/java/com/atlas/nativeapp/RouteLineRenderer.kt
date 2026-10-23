@@ -48,7 +48,7 @@ internal class RouteLineRenderer(
             completed=add("completed",5f,Color.rgb(158,169,186))
             future=add("future",6f,Color.rgb(49,94,251))
             remaining = add("remaining", 6f, Color.rgb(49, 94, 251))
-            travelled = add("travelled", 5f, Color.TRANSPARENT)
+            travelled = add("travelled", 5f, Color.rgb(158, 169, 186))
             progress(0.0)
         }
     }

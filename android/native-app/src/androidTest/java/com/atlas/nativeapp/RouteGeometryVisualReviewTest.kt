@@ -70,7 +70,7 @@ class RouteGeometryVisualReviewTest {
         while(SystemClock.elapsedRealtime()<end) { if(predicate())return;SystemClock.sleep(100) }
         fail(label)
     }
-    private fun snapshot(s:ActivityScenario<MainActivity>,name:String) {
+    private fun snapshot(s:ActivityScenario<MainActivity>,name:String, expectedPaint:List<Pair<LatLng,Int>> = emptyList()) {
         waitFor("actual road tiles must be visible in $name") {
             var roads=false
             s.onActivity { a ->
@@ -88,6 +88,20 @@ class RouteGeometryVisualReviewTest {
         s.onActivity { map(atlas(it)).snapshot { bitmap -> image=bitmap;latch.countDown() } }
         assertTrue("MapLibre must produce a rendered snapshot",latch.await(10,TimeUnit.SECONDS))
         checkNotNull(image).let { bitmap ->
+            for((coordinate,color) in expectedPaint) {
+                var pixel:android.graphics.PointF?=null
+                s.onActivity { pixel=map(atlas(it)).projection.toScreenLocation(coordinate) }
+                val point=checkNotNull(pixel)
+                assertTrue("Paint sample must be inside the actual MapLibre snapshot",point.x in 4f..(bitmap.width-5).toFloat() && point.y in 4f..(bitmap.height-5).toFloat())
+                var matches=0
+                for(y in point.y.toInt()-3..point.y.toInt()+3)for(x in point.x.toInt()-3..point.x.toInt()+3) {
+                    val actual=bitmap.getPixel(x,y)
+                    if(abs(android.graphics.Color.red(actual)-android.graphics.Color.red(color))<12 &&
+                        abs(android.graphics.Color.green(actual)-android.graphics.Color.green(color))<12 &&
+                        abs(android.graphics.Color.blue(actual)-android.graphics.Color.blue(color))<12)matches++
+                }
+                assertTrue("$name must visibly paint ${Integer.toHexString(color)} at $point; a white/transparent active chunk is a regression",matches>0)
+            }
             File(output,"$name.png").outputStream().use { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG,100,it)) }
             bitmap.recycle()
         }
@@ -239,8 +253,26 @@ class RouteGeometryVisualReviewTest {
                                     snapshot(s,name)
                                     if(road===cases.first() && source==MapSourcePolicy.OFFLINE && zoom==18.0 && variant=="after") {
                                         val immutable=prepared.points
-                                        s.onActivity { layer!!.progress(prepared.fraction(centreIndex,raw[centreIndex])) }
-                                        snapshot(s,"$name-progress-boundary")
+                                        val chunks=RouteVisualChunks.prepare(prepared.points)
+                                        val part=chunks.chunks[chunks.progress(prepared.fraction(centreIndex,raw[centreIndex])).index]
+                                        fun at(fraction:Double):LatLng {
+                                            var remaining=(part.end-part.start)*fraction
+                                            for(i in 1 until part.points.size) {
+                                                val a=part.points[i-1];val b=part.points[i]
+                                                val length=RouteVisualSmoothing.distance(a,b)
+                                                if(remaining<=length && length>0) {
+                                                    val t=remaining/length
+                                                    return LatLng(a.latitude+(b.latitude-a.latitude)*t,a.longitude+(b.longitude-a.longitude)*t)
+                                                }
+                                                remaining-=length
+                                            }
+                                            return part.points.last()
+                                        }
+                                        val fraction=(part.start+(part.end-part.start)*.6)/chunks.chunks.last().end
+                                        s.onActivity { layer!!.progress(fraction) }
+                                        snapshot(s,"$name-progress-boundary",listOf(
+                                            at(.25) to android.graphics.Color.rgb(158,169,186),
+                                            at(.85) to android.graphics.Color.rgb(49,94,251)))
                                         assertSame("Progress paint must retain the same centreline",immutable,prepared.points)
                                     }
                                     s.onActivity { a -> layer?.remove();annotations.forEach { map(atlas(a)).removePolyline(it) } }
