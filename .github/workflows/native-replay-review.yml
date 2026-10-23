@@ -5,13 +5,13 @@ on:
       run_id:
         description: 'Existing native Android validation run (no emulator replay)'
         required: true
-        default: '39952796391'
+        default: '39955632353'
         type: string
       review_group:
         description: 'Small batch of existing Android captures to inspect'
         type: choice
-        default: styles
-        options: [styles, lisbon, sintra, a5, icons]
+        default: diagnostics
+        options: [diagnostics, styles, lisbon, sintra, a5, icons]
   push:
     branches: ['migration/native-core-kotlin']
     paths: ['.github/workflows/native-replay-review.yml']
@@ -23,14 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        group: ["${{ inputs.review_group || 'styles' }}"]
+        group: ["${{ inputs.review_group || 'diagnostics' }}"]
     steps:
       - uses: actions/checkout@v4
       - name: Reuse recorded Android images; no emulator
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.run_id || '39952796391' }}
+          run-id: ${{ inputs.run_id || '39955632353' }}
           name: Atlas-native-ui-review
           path: /tmp/atlas-evidence
       - name: Setup pinned video tools (no apt mirror)
@@ -47,20 +47,51 @@ jobs:
           prefixes={'lisbon':'lisbon-roundabout','sintra':'sintra-curves','a5':'a5-access'}
           for p in root.rglob('*.png'):
               n=p.stem
-              selected=(n.endswith('-navigation-after') or (n.startswith('lisbon-') and '-online-z18-' in n and n.endswith(('-before','-after')))) if group=='styles' else (n.startswith(('09-','10-')) if group=='icons' else n.startswith(prefixes[group]) and '-offline-z18-' in n and n.endswith(('-before','-after','-after-progress-boundary')))
+              selected=False if group=='diagnostics' else (n.endswith('-navigation-after') or (n.startswith('lisbon-') and '-online-z18-' in n and n.endswith(('-before','-after')))) if group=='styles' else (n.startswith(('09-','10-')) if group=='icons' else n.startswith(prefixes[group]) and '-offline-z18-' in n and n.endswith(('-before','-after','-after-progress-boundary')))
               if selected: shutil.copyfile(p,dest/p.name)
-          assert list(dest.glob('*.png')), 'Original Android captures are required'
+          assert group=='diagnostics' or list(dest.glob('*.png')), 'Original Android captures are required'
           for p in root.rglob('*-geometry.json'):
               if group in prefixes and p.name.startswith(prefixes[group]):
                   d=json.loads(p.read_text());r=d['nativeRoute']
                   print('ATLAS_ROAD_CASE',json.dumps({'case':group,'reviewPoint':d['reviewPoint'],'rawPoints':len(r['points']),'visualPoints':len(d['visual']),'maneuvers':r['maneuvers']}))
-          if group=='styles':
+          if group in ('styles','diagnostics'):
               for log in root.rglob('logcat.txt'):
                   errors=[line for line in log.read_text(errors='replace').splitlines() if any(term in line.lower() for term in ('glyph','font','pbf'))]
-                  print('ATLAS_FONT_DIAGNOSTICS',str(log),json.dumps(errors[:30]))
+                  print('ATLAS_FONT_DIAGNOSTICS',str(log),json.dumps([line for line in errors if 'AppsFilter' not in line][:300]))
           summary=next(root.rglob('route-visual-summary.json'))
           d=json.loads(summary.read_text())
           print('ATLAS_VISUAL_COMPLETENESS',json.dumps({'images':len(d['cases']),'navigationImages':d['navigationImages'],'routingAttempts':d.get('routingAttempts')}))
           PYCODE
       - name: Inspect actual Android before and after images
+        if: ${{ matrix.group != 'diagnostics' }}
         run: python3 tools/emit-native-replay-previews.py /tmp/atlas-selected /tmp/no-movies
+      - name: Verify existing glyph URLs and PMTiles label-layer metadata
+        if: ${{ matrix.group == 'diagnostics' }}
+        run: |
+          python3 - <<'PYCODE'
+          import gzip,json,struct,urllib.request,urllib.error,urllib.parse
+          from pathlib import Path
+          for font in ('Noto Sans Regular','Noto Sans Bold','Open Sans Regular,Arial Unicode MS Regular'):
+              url='https://tiles.openfreemap.org/fonts/'+urllib.parse.quote(font,safe='')+'/0-255.pbf'
+              try:
+                  with urllib.request.urlopen(url,timeout=20) as response:
+                      print('ATLAS_GLYPH_HTTP',font,response.status,len(response.read()))
+              except Exception as e: print('ATLAS_GLYPH_HTTP_ERROR',font,str(e))
+          regions=json.loads(Path('android/native-app/src/main/assets/regions.json').read_text())['regions']
+          region=next(r for r in regions if r['id']=='portugal')
+          url='https://pub-75539028275a4826aa383fdb89292ed7.r2.dev'+region['assets']['map']
+          def read_range(offset,length):
+              request=urllib.request.Request(url,headers={'Range':f'bytes={offset}-{offset+length-1}'})
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  assert response.status==206, 'Byte-range metadata review requires HTTP206'
+                  return response.read(length)
+          try:
+              header=read_range(0,127)
+              offset,length=struct.unpack_from('<QQ',header,24)
+              assert length<2000000
+              data=read_range(offset,length)
+              if header[97]==2:data=gzip.decompress(data)
+              metadata=json.loads(data)
+              print('ATLAS_PMTILES_LABEL_METADATA',json.dumps(metadata))
+          except Exception as e: print('ATLAS_PMTILES_METADATA_ERROR',str(e))
+          PYCODE
