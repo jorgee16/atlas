@@ -38,7 +38,7 @@ class RouteGeometryVisualReviewTest {
     private val navigationImages=JSONArray()
     private val routingAttempts=JSONArray()
     private data class RoadCase(val name:String,val from:Coordinate,val to:Coordinate,
-        val alternatives:List<Pair<Coordinate,Coordinate>> = emptyList())
+        val alternatives:List<Pair<Coordinate,Coordinate>> = emptyList(), val reviewRoad:String? = null)
 
     private fun route(road:RoadCase):JSONObject = NativeCore().use { core ->
         core.graph(model.regions.graph(road.from,road.to).path)
@@ -171,7 +171,10 @@ class RouteGeometryVisualReviewTest {
                 Coordinate(38.8001,-9.4451) to Coordinate(38.7983,-9.4210))),
             RoadCase("a5-access",Coordinate(38.7195,-9.2384),Coordinate(38.7119,-9.2206),listOf(
                 Coordinate(38.7207,-9.2559) to Coordinate(38.7123,-9.2125),
-                Coordinate(38.7270,-9.2370) to Coordinate(38.7250,-9.2020))))
+                Coordinate(38.7270,-9.2370) to Coordinate(38.7250,-9.2020))),
+            // Same genuine route, but inspect the actual A36/IC17 joining
+            // maneuver rather than mistaking the urban approach for motorway coverage.
+            RoadCase("cril-motorway-join",Coordinate(38.7195,-9.2384),Coordinate(38.7119,-9.2206),reviewRoad="IC 17"))
         try {
             for(dark in listOf(false,true)) {
                 model.theme=if(dark)"dark" else "light"
@@ -192,13 +195,19 @@ class RouteGeometryVisualReviewTest {
                         route.optJSONArray("visualProtectedPoints")?.let { a -> for(i in 0 until a.length())anchors.add(a.getInt(i)) }
                         val prepared=RouteVisualSmoothing.prepare(raw,anchors)
                         val before=legacy(raw)
-                        val centreIndex=(1 until raw.lastIndex).filter { it !in anchors }.maxByOrNull { i ->
+                        val centreIndex=road.reviewRoad?.let { wanted ->
+                            (0 until maneuvers.length()).map { maneuvers.getJSONObject(it) }
+                                .firstOrNull { it.optString("road").contains(wanted) }?.getInt("point")
+                                ?: error("The real C++ route must contain the requested motorway join: $wanted")
+                        } ?: ((1 until raw.lastIndex).filter { it !in anchors }.maxByOrNull { i ->
                             // Select a bend that actually changed. A protected 90-degree
                             // junction is a useful safety check, not evidence of curve quality.
                             prepared.points.minOf { RouteVisualSmoothing.distance(it,raw[i]) }
-                        } ?: raw.size/2
-                        assertTrue("${road.name} must contain an eligible real road bend",
+                        } ?: raw.size/2)
+                        if(road.reviewRoad==null)assertTrue("${road.name} must contain an eligible real road bend",
                             prepared.points.minOf { RouteVisualSmoothing.distance(it,raw[centreIndex]) } > .05)
+                        else assertTrue("The actual motorway maneuver must retain its exact geometry anchor",
+                            centreIndex in anchors && prepared.points.any { RouteVisualSmoothing.distance(it,raw[centreIndex])<.001 })
                         File(output,"${road.name}-geometry.json").writeText(JSONObject()
                             .put("nativeRoute",route).put("legacy",coordinates(before))
                             .put("visual",coordinates(prepared.points)).put("reviewPoint",centreIndex).toString())
