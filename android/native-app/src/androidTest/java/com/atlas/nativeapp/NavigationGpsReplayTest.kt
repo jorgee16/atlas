@@ -586,7 +586,12 @@ class NavigationGpsReplayTest {
                 sideways.getDouble("renderLon")))<1.0)
         val pad=sideways.getJSONArray("cameraPadding")
         assertEquals(sideways.getInt("viewportWidth")*.18,pad.getDouble(0),2.0)
-        assertEquals(sideways.getInt("viewportHeight")*.24,pad.getDouble(3),2.0)
+        assertEquals(sideways.getInt("viewportHeight")*.38,pad.getDouble(1),2.0)
+        assertEquals(0.0,pad.getDouble(3),1.0)
+        val cursorY=sideways.getDouble("cursorScreenY")
+        val viewportH=sideways.getInt("viewportHeight").toDouble()
+        assertTrue("heading-up landscape cursor should be lower, showing the road ahead",
+            cursorY in viewportH*.62..viewportH*.76)
         s.onActivity { a ->
             val bottomField=MainActivity::class.java.getDeclaredField("bottom")
                 .apply{isAccessible=true}

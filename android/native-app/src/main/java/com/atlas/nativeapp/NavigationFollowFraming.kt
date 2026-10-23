@@ -10,10 +10,14 @@ internal object NavigationFollowFraming {
                 navigating: Boolean, headingUp: Boolean,
                 landscape: Boolean): DoubleArray {
         if (!navigating || width<=0 || height<=0) return doubleArrayOf(0.0,0.0,0.0,0.0)
-        // The landscape HUD is below-left, the guidance banner above-left.
-        // Shift the *screen framing* to the free centre/right and above the
-        // arrival HUD; never shift the GPS/map-matched coordinate itself.
-        if (landscape) return doubleArrayOf(width*0.18,0.0,0.0,height*0.24)
+        // Landscape HUD + guidance occupy the LEFT, not the full bottom.
+        // The previous BOTTOM 24% padding put the cursor near 38% screen
+        // height, hiding most of the road AHEAD. A TOP 38% inset positions
+        // the heading-up cursor near 69% while preserving left HUD clearance.
+        // Keep north-up vertically centred: it has no directional "ahead".
+        // This changes camera framing ONLY, not GPS, map matching or routing.
+        if (landscape) return doubleArrayOf(
+            width*0.18,if(headingUp)height*0.38 else 0.0,0.0,0.0)
         return doubleArrayOf(0.0,if(headingUp)height*0.30 else 0.0,0.0,0.0)
     }
 }
