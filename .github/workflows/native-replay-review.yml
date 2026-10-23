@@ -56,7 +56,7 @@ jobs:
                   print('ATLAS_ROAD_CASE',json.dumps({'case':group,'reviewPoint':d['reviewPoint'],'rawPoints':len(r['points']),'visualPoints':len(d['visual']),'maneuvers':r['maneuvers']}))
           if group in ('styles','diagnostics'):
               for log in root.rglob('logcat.txt'):
-                  errors=[line for line in log.read_text(errors='replace').splitlines() if any(term in line.lower() for term in ('glyph','font','pbf'))]
+                  errors=[line for line in log.read_text(errors='replace').splitlines() if any(term in line.lower() for term in ('glyph','font','pbf','mbgl','pmtiles'))]
                   print('ATLAS_FONT_DIAGNOSTICS',str(log),json.dumps([line for line in errors if 'AppsFilter' not in line][:300]))
           summary=next(root.rglob('route-visual-summary.json'))
           d=json.loads(summary.read_text())
@@ -74,7 +74,7 @@ jobs:
           for font in ('Noto Sans Regular','Noto Sans Bold','Open Sans Regular,Arial Unicode MS Regular'):
               url='https://tiles.openfreemap.org/fonts/'+urllib.parse.quote(font,safe='')+'/0-255.pbf'
               try:
-                  with urllib.request.urlopen(url,timeout=20) as response:
+                  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Atlas-Native-GPS-Replay/1.0'}),timeout=20) as response:
                       print('ATLAS_GLYPH_HTTP',font,response.status,len(response.read()))
               except Exception as e: print('ATLAS_GLYPH_HTTP_ERROR',font,str(e))
           regions=json.loads(Path('android/native-app/src/main/assets/regions.json').read_text())['regions']
@@ -94,4 +94,29 @@ jobs:
               metadata=json.loads(data)
               print('ATLAS_PMTILES_LABEL_METADATA',json.dumps(metadata))
           except Exception as e: print('ATLAS_PMTILES_METADATA_ERROR',str(e))
+          PYCODE
+      - name: Read label metadata using the existing R2 read identity
+        if: ${{ matrix.group == 'diagnostics' }}
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_EC2_METADATA_DISABLED: 'true'
+        run: |
+          python3 - <<'PYCODE'
+          import gzip,json,os,struct,subprocess
+          from pathlib import Path
+          region=next(r for r in json.loads(Path('android/native-app/src/main/assets/regions.json').read_text())['regions'] if r['id']=='portugal')
+          key=region['assets']['map'].lstrip('/')
+          def read_range(offset,length,name):
+              path=Path('/tmp')/name
+              subprocess.run(['aws','--endpoint-url','https://'+os.environ['R2_ACCOUNT_ID']+'.r2.cloudflarestorage.com','s3api','get-object','--bucket','atlas-regions','--key',key,'--range',f'bytes={offset}-{offset+length-1}',str(path)],check=True,stdout=subprocess.DEVNULL)
+              return path.read_bytes()
+          header=read_range(0,127,'atlas-map-header.bin')
+          offset,length=struct.unpack_from('<QQ',header,24)
+          assert length<2000000
+          data=read_range(offset,length,'atlas-map-metadata.bin')
+          if header[97]==2:data=gzip.decompress(data)
+          print('ATLAS_VERIFIED_R2_PMTILES_METADATA',data.decode())
           PYCODE
