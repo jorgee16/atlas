@@ -112,12 +112,8 @@ jobs:
           run-id: ${{ steps.source.outputs.run_id }}
           github-token: ${{ github.token }}
           path: replay-analysis-input
-      - name: Require video metadata tool
-        run: |
-          if ! command -v ffprobe >/dev/null; then
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
-          fi
+      - name: Setup pinned video metadata tools
+        uses: ./.github/actions/setup-video-tools
       - name: Recheck unchanged application against complete recorded GPS evidence
         working-directory: replay-analysis-input
         run: python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full
@@ -168,15 +164,8 @@ jobs:
           name: Atlas-native-debug-apk
           path: android/native-app/build/outputs/apk/debug/native-app-debug.apk
           if-no-files-found: error
-      - name: Install video tools for visual evidence review
-        run: |
-          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
-            # ffmpeg needs only Ubuntu. An unrelated Microsoft apt feed can
-            # reject CI IPs and must not block Android emulator validation.
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
-          fi
-          ffmpeg -version | head -1
+      - name: Setup pinned video tools (no apt mirror)
+        uses: ./.github/actions/setup-video-tools
       - name: Download and verify real Portugal routing and offline map for GPS replay
         env:
           R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
@@ -257,13 +246,8 @@ jobs:
         if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         working-directory: android
         run: bash gradlew --build-cache -PnativeOnly :native-app:assembleDebug :native-app:assembleDebugAndroidTest --stacktrace
-      - name: Install video tools for visual evidence review
-        run: |
-          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
-          fi
-          ffmpeg -version | head -1
+      - name: Setup pinned video tools (no apt mirror)
+        uses: ./.github/actions/setup-video-tools
       - name: Download and verify real Portugal routing and offline map
         if: ${{ !contains(github.event.head_commit.message, '[release-evidence:') }}
         env:

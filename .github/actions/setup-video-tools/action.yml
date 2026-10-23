@@ -1,0 +1,46 @@
+name: "Setup pinned FFmpeg video tools"
+description: "Fast, checksum-pinned FFmpeg/FFprobe without slow apt Ubuntu mirror dependencies"
+runs:
+  using: "composite"
+  steps:
+    - name: Restore cached FFmpeg binaries
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/atlas-video-tools/v9.0.2
+        key: ${{ runner.os }}-${{ runner.arch }}-atlas-ffmpeg-static-v9.0.2-c68c36b3
+    - name: Verify or fetch pinned Linux static FFmpeg and FFprobe
+      shell: bash
+      env:
+        FFMPEG_URL: https://github.com/binmgr/ffmpeg/releases/download/v9.0.2/ffmpeg-linux-amd64.tar.gz
+        FFMPEG_SHA256: c68c36b3af4acaefc24f5098fbd8f63127e46dbb3b1e32dffd79bf81f73a6e8e
+      run: |
+        set -euo pipefail
+        [[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 ]] || {
+          echo "::error::Atlas video tooling is pinned for Linux x86_64 runners only."
+          exit 1
+        }
+        bin="$HOME/.cache/atlas-video-tools/v9.0.2"
+        if [[ ! -x "$bin/ffmpeg" || ! -x "$bin/ffprobe" ]]; then
+          mkdir -p "$bin"
+          temp="$(mktemp -d)"
+          trap 'rm -rf "$temp"' EXIT
+          # This is one prebuilt archive, not a 100-package apt dependency tree.
+          # Fail fast if GitHub's CDN is unavailable; never hang for 30 minutes.
+          timeout 210 curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 180 --retry 2 --retry-delay 2 \
+            --retry-all-errors "$FFMPEG_URL" -o "$temp/ffmpeg.tar.gz"
+          printf '%s  %s\n' "$FFMPEG_SHA256" "$temp/ffmpeg.tar.gz" | sha256sum --check --status || {
+            echo "::error::Pinned FFmpeg archive digest mismatch"
+            exit 1
+          }
+          tar -xzf "$temp/ffmpeg.tar.gz" -C "$temp"
+          [[ -f "$temp/ffmpeg" && -f "$temp/ffprobe" ]] || {
+            echo "::error::Pinned FFmpeg archive lacks ffmpeg/ffprobe"
+            exit 1
+          }
+          install -m 0755 "$temp/ffmpeg" "$bin/ffmpeg"
+          install -m 0755 "$temp/ffprobe" "$bin/ffprobe"
+        fi
+        echo "$bin" >> "$GITHUB_PATH"
+        "$bin/ffmpeg" -version | head -1
+        "$bin/ffprobe" -version | head -1
