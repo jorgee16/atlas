@@ -168,6 +168,23 @@ internal object AtlasCartography {
             }
         }
 
+        // OpenFreeMap's dark style is sparser than Liberty. Recover street-level
+        // POI names from the SAME vector tiles instead of sending map searches
+        // to an online service or brightening every unrelated text label.
+        // This opt-in layer is exploration-only and does not affect routing.
+        if (dark && !navigating && style.getLayer("atlas-night-poi-names") == null) {
+            val poi = SymbolLayer("atlas-night-poi-names",source.id)
+                .withSourceLayer("poi")
+                .withProperties(
+                    PropertyFactory.textField("{name}"),
+                    PropertyFactory.textSize(10.5f),
+                    PropertyFactory.textColor("#C2D3E0"),
+                    PropertyFactory.textHaloColor("#172635"),
+                    PropertyFactory.textHaloWidth(1.4f))
+            poi.setMinZoom(16.0f)
+            style.addLayer(poi)
+        }
+
         if (style.getLayer("atlas-building-footprints") == null) {
             val buildings = FillLayer("atlas-building-footprints", source.id)
                 .withSourceLayer("building")
