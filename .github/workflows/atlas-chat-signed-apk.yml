@@ -1,4 +1,5 @@
 name: Export validated signed Atlas APK to chat
+# Current 0.2.9 candidate uses bounded visual progress chunks.
 on:
   push:
     branches: ['migration/native-core-kotlin']

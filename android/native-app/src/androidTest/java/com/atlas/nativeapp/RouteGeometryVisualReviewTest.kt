@@ -187,6 +187,15 @@ class RouteGeometryVisualReviewTest {
                                     }
                                     roads
                                 }
+                                if(!dark && zoom==18.0)s.onActivity { a ->
+                                    val m=map(atlas(a))
+                                    val ids=m.style!!.layers.filter { it is org.maplibre.android.style.layers.LineLayer &&
+                                        !it.id.startsWith("atlas-route") }.map { it.id }.toTypedArray()
+                                    val features=m.queryRenderedFeatures(android.graphics.RectF(0f,0f,
+                                        atlas(a).view.width.toFloat(),atlas(a).view.height.toFloat()),*ids)
+                                    File(output,"${road.name}-$source-displayed-roads.json").writeText(
+                                        org.maplibre.geojson.FeatureCollection.fromFeatures(features).toJson())
+                                }
                                 for(variant in listOf("raw","before","after")) {
                                     val annotations=mutableListOf<Polyline>();var layer:RouteLineRenderer?=null
                                     s.onActivity { a ->

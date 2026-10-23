@@ -191,7 +191,10 @@ jobs:
           script: |
             bash tools/native-android-smoke.sh
             bash tools/native-android-gps-replay.sh camera
-            if [[ "$ATLAS_ROUTE_VISUAL_REVIEW" == true ]]; then bash tools/native-android-gps-replay.sh visual; fi
+            if [ "$ATLAS_ROUTE_VISUAL_REVIEW" = true ]; then bash tools/native-android-gps-replay.sh visual; fi
+      - name: Require requested Android route visual evidence
+        if: ${{ contains(github.event.head_commit.message, '[route-visual-review]') }}
+        run: python3 tools/analyze-route-visual-review.py ui-preview/route-visual-review
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -11,6 +11,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 
@@ -27,16 +28,25 @@ internal class RouteLineRenderer(
     private var remaining: LineLayer? = null
     private var travelled: LineLayer? = null
     private var lastFraction = Double.NaN
+    private var activeIndex = -1
+    private var completed: LineLayer? = null
+    private var future: LineLayer? = null
+    private val chunks=RouteVisualChunks.prepare(prepared.points)
 
     init {
-        val coordinates = prepared.points.map { Point.fromLngLat(it.longitude, it.latitude) }
-        val source = GeoJsonSource(sourceId, Feature.fromGeometry(LineString.fromLngLats(coordinates)),
+        val features=chunks.chunks.mapIndexed { index,part ->
+            Feature.fromGeometry(LineString.fromLngLats(part.points.map { Point.fromLngLat(it.longitude,it.latitude) }))
+                .apply { addNumberProperty("atlas-route-chunk",index) }
+        }
+        val source = GeoJsonSource(sourceId, FeatureCollection.fromFeatures(features),
             GeoJsonOptions().withLineMetrics(true).withTolerance(0f))
         style.addSource(source)
         if (alternative) {
             add("alternative", 4f, if (dark) Color.parseColor("#667385") else Color.parseColor("#AAB5C7"))
         } else {
             add("casing", 9f, Color.WHITE)
+            completed=add("completed",5f,Color.rgb(158,169,186))
+            future=add("future",6f,Color.rgb(49,94,251))
             remaining = add("remaining", 6f, Color.rgb(49, 94, 251))
             travelled = add("travelled", 5f, Color.TRANSPARENT)
             progress(0.0)
@@ -55,7 +65,16 @@ internal class RouteLineRenderer(
     fun progress(segment: Int, position: LatLng) = progress(prepared.fraction(segment, position))
 
     internal fun progress(fraction: Double) {
-        val value = fraction.coerceIn(0.0, 1.0)
+        val paint=chunks.progress(fraction)
+        val value=paint.fraction
+        if(paint.index!=activeIndex) {
+            activeIndex=paint.index
+            completed?.setFilter(lt(get("atlas-route-chunk"),literal(activeIndex)))
+            future?.setFilter(gt(get("atlas-route-chunk"),literal(activeIndex)))
+            remaining?.setFilter(eq(get("atlas-route-chunk"),literal(activeIndex)))
+            travelled?.setFilter(eq(get("atlas-route-chunk"),literal(activeIndex)))
+            lastFraction=Double.NaN
+        }
         if (value == lastFraction) return
         lastFraction = value
         remaining?.setProperties(lineGradient(step(lineProgress(), rgba(0, 0, 0, 0),
