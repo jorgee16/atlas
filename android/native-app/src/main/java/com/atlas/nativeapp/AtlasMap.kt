@@ -154,9 +154,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     }
     private val markers = mutableListOf<Marker>()
     private val places = mutableMapOf<Long, JSONObject>()
-    private val lines = mutableListOf<Polyline>()
-    private var remaining: Polyline? = null
-    private var travelled: Polyline? = null
+    private val routeLayers = mutableListOf<RouteLineRenderer>()
+    private var activeRouteLayer: RouteLineRenderer? = null
+    private val visualRoutes = java.util.IdentityHashMap<JSONObject, Pair<Boolean, RouteVisualSmoothing.Prepared>>()
     private var geometry = emptyList<LatLng>()
     private var trailOverlay: Polyline? = null
     private var trailPath: List<LatLng> = emptyList()
@@ -601,12 +601,13 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         // visible/predicted point. Only annotations are rebuilt below.
         // Annotation objects survive style switches in the legacy MapLibre API.
         // Remove them from the map, not just from our Kotlin references.
+        clearRouteLayers()
         map?.clear()
         trailOverlay=null
-        lines.clear(); markers.clear(); places.clear()
+        clearRouteLayers(); markers.clear(); places.clear()
         clearPosition()
         lastMarkerAngle = Double.NaN
-        remaining = null; travelled = null; geometry = emptyList()
+        activeRouteLayer = null; geometry = emptyList()
         route = null; destination = null; options = null; nearby = null
         val builder = when {
             selection == MapSourcePolicy.OFFLINE -> Style.Builder().fromJson(
@@ -632,8 +633,8 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // transient annotations before restoring exactly one live cursor.
             map?.clear()
             trailOverlay=null
-            lines.clear(); markers.clear(); places.clear()
-            remaining = null; travelled = null; geometry = emptyList()
+            clearRouteLayers(); markers.clear(); places.clear()
+            activeRouteLayer = null; geometry = emptyList()
             lastSegment = -1; clearPosition()
             lastMarkerAngle = Double.NaN
             route = null; destination = null; options = null; nearby = null
@@ -828,11 +829,14 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             val previousCameraRoute=cameraRoute
             val newCameraRoute=s.route!==cameraRoute
             cameraRoute=s.route
-            lines.forEach { ready.removePolyline(it) }; lines.clear(); remaining = null; travelled = null; lastSegment = -1
+            clearRouteLayers(); lastSegment = -1
+            val retained = s.routeOptions + listOfNotNull(s.route)
+            visualRoutes.keys.removeAll { key -> retained.none { it === key } }
             route = s.route; options = s.routeOptions
             for (choice in s.routeOptions.filter { it !== s.route }) {
-                val points = points(choice.getJSONArray("points"))
-                lines.add(ready.addPolyline(PolylineOptions().addAll(RouteVisualSmoothing.smooth(points)).color(Color.parseColor(if (dark) "#667385" else "#AAB5C7")).width(4f)))
+                val visual = preparedRoute(choice, s.walking)
+                if (visual.points.size >= 2) routeLayers.add(RouteLineRenderer(ready.style!!,
+                    "atlas-route-alt-${routeLayers.size}", visual, true, dark))
             }
             geometry = s.route?.let { points(it.getJSONArray("points")) } ?: emptyList()
             if (s.navigating && geometry.size >= 2 && s.route !== interpolatedRoute) {
@@ -843,10 +847,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 lastRenderedMarker=previousVisible
             }
             if (geometry.size >= 2) {
-                // Only map annotations are smoothed. JNI guidance uses geometry.
-                val visual = RouteVisualSmoothing.smooth(geometry)
-                lines.add(ready.addPolyline(PolylineOptions().addAll(visual).color(Color.WHITE).width(9f)))
-                remaining = ready.addPolyline(PolylineOptions().addAll(visual).color(Color.rgb(49,94,251)).width(6f)).also { lines.add(it) }
+                // One immutable visual source; original geometry still drives JNI/camera/cursor.
+                val visual = preparedRoute(s.route!!, s.walking)
+                activeRouteLayer = RouteLineRenderer(ready.style!!, "atlas-route-active", visual, false, dark)
+                    .also { routeLayers.add(it) }
                 if (!s.navigating && newCameraRoute && (!restoreCamera || previousCameraRoute!=null)) overview()
                 else if(cameraState.mode==NavigationCameraState.Mode.OVERVIEW)cameraState.viewportChanged()
             }
@@ -863,11 +867,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // Update at every accepted progress fix, not only on segment
             // changes: otherwise travelled/remaining lines appear frozen.
             val snapped = s.guidance.coordinate().let { LatLng(it.lat, it.lon) }
-            remaining?.points = RouteVisualSmoothing.smooth(
-                listOf(snapped) + geometry.drop(segment + 1))
-            val done = RouteVisualSmoothing.smooth(geometry.take(segment + 1) + snapped)
-            if (travelled == null) travelled = ready.addPolyline(PolylineOptions().addAll(done).color(Color.parseColor("#9EA9BA")).width(5f)).also { lines.add(it) }
-            else travelled?.points = done
+            activeRouteLayer?.progress(segment, snapped)
             lastSegment = segment
         }
         s.fix?.let { fix ->
@@ -1216,6 +1216,28 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("cursorScreenY",debugCursorScreenCenter()?.y)
         }
     }
+    private fun clearRouteLayers() {
+        routeLayers.forEach { it.remove() }
+        routeLayers.clear()
+        activeRouteLayer = null
+    }
+
+    private fun preparedRoute(value: JSONObject, walking: Boolean): RouteVisualSmoothing.Prepared {
+        visualRoutes[value]?.takeIf { it.first == walking }?.let { return it.second }
+        val raw = points(value.getJSONArray("points"))
+        val maneuvers = value.optJSONArray("maneuvers") ?: JSONArray()
+        val protected = (0 until maneuvers.length()).mapNotNull {
+            maneuvers.optJSONObject(it)?.optInt("point", -1)?.takeIf { index -> index in raw.indices }
+        }.toMutableSet()
+        value.optJSONArray("visualProtectedPoints")?.let { anchors ->
+            for (i in 0 until anchors.length()) anchors.optInt(i, -1)
+                .takeIf { it in raw.indices }?.let { protected.add(it) }
+        }
+        return RouteVisualSmoothing.prepare(raw, protected, walking).also {
+            visualRoutes[value] = walking to it
+        }
+    }
+
     private fun points(array: JSONArray): List<LatLng> = (0 until array.length()).map { array.getJSONArray(it).let { p -> LatLng(p.getDouble(1), p.getDouble(0)) } }
     private fun addPlace(place: JSONObject, selected: Boolean) {
         val p = place.coordinate()
@@ -1294,5 +1316,3 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         view.onSaveInstanceState(bundle)
     }
 }
-
-

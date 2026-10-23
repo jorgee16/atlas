@@ -178,6 +178,8 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Native Android UI and focused GPS/camera smoke
+        env:
+          ATLAS_ROUTE_VISUAL_REVIEW: ${{ contains(github.event.head_commit.message, '[route-visual-review]') }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -189,6 +191,7 @@ jobs:
           script: |
             bash tools/native-android-smoke.sh
             bash tools/native-android-gps-replay.sh camera
+            if [[ "$ATLAS_ROUTE_VISUAL_REVIEW" == true ]]; then bash tools/native-android-gps-replay.sh visual; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

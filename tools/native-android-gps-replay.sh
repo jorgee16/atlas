@@ -2,6 +2,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 mode="${1:-full}"
+test_class=com.atlas.nativeapp.NavigationGpsReplayTest
 if [[ "$mode" == camera ]]; then
   collection=atlas-camera-smoke
   metrics_dir=ui-preview/camera-smoke
@@ -10,6 +11,11 @@ elif [[ "$mode" == full ]]; then
   collection=atlas-gps-replay
   metrics_dir=ui-preview/gps-replay
   method=portugalTripThroughAndroidLocationServiceJniAndMapLibre
+elif [[ "$mode" == visual ]]; then
+  collection=atlas-route-visual-review
+  metrics_dir=ui-preview/route-visual-review
+  test_class=com.atlas.nativeapp.RouteGeometryVisualReviewTest
+  method=compareRealPortugalRoadGeometryAtStreetZooms
 else
   echo "Unknown replay mode: $mode" >&2
   exit 2
@@ -57,13 +63,17 @@ cleanup() {
 trap cleanup EXIT
 result=0
 bash android/gradlew -p android -PnativeOnly :native-app:connectedDebugAndroidTest \
-  "-Pandroid.testInstrumentationRunnerArguments.class=com.atlas.nativeapp.NavigationGpsReplayTest#$method" \
+  "-Pandroid.testInstrumentationRunnerArguments.class=$test_class#$method" \
   "-Pandroid.testInstrumentationRunnerArguments.evidenceDirectory=$collection" \
   --stacktrace || result=$?
 cleanup
 trap - EXIT
 python3 tools/emit-native-replay-previews.py "$metrics_dir" "ui-preview/$collection" || true
 if [[ "$result" -eq 0 ]]; then
-  python3 tools/analyze-native-gps-replay.py "$mode" || result=$?
+  if [[ "$mode" == visual ]]; then
+    python3 tools/analyze-route-visual-review.py "$metrics_dir" || result=$?
+  else
+    python3 tools/analyze-native-gps-replay.py "$mode" || result=$?
+  fi
 fi
 exit "$result"

@@ -603,6 +603,16 @@ std::string routeJson(const Route &r) {
       << ",\"turnLanes\":" << jsonString(m.turnLanes)
       << ",\"exitNumber\":" << m.exitNumber << '}';
   }
+  // Display-only anchors: preserve the exact roundabout entry/exit junction.
+  // This metadata never changes geometry, lengths, maneuvers or matching.
+  s << "],\"visualProtectedPoints\":[";
+  bool protectedPointWritten = false;
+  for (std::size_t i = 1; i < r.legs.size(); ++i) {
+    if (bool(r.legs[i-1].road.flags & 1) == bool(r.legs[i].road.flags & 1)) continue;
+    if (protectedPointWritten) s << ',';
+    s << r.legs[i].first;
+    protectedPointWritten = true;
+  }
   s << "],\"edgeIndexes\":[";
   for (std::size_t i = 0; i < r.edges.size(); ++i) {
     if (i)

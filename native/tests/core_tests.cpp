@@ -23,6 +23,21 @@ int main(int argc, char **argv) {
   try {
     const std::string root = argc > 1 ? argv[1] : "/tmp/atlas-native-fixtures";
     Graph graph(root + "/basic");
+    // Display metadata protects entry/exit but does not pin every roundabout
+    // shape vertex or mutate the engine's authoritative route.
+    Route displayMetadata;
+    displayMetadata.points={{40,-8},{40.0001,-8},{40.0002,-8}};
+    displayMetadata.legs.resize(4);
+    displayMetadata.legs[0].road.flags=0;
+    displayMetadata.legs[1].road.flags=1; displayMetadata.legs[1].first=1;
+    displayMetadata.legs[2].road.flags=1; displayMetadata.legs[2].first=2;
+    displayMetadata.legs[3].road.flags=0; displayMetadata.legs[3].first=2;
+    displayMetadata.meters=123; displayMetadata.seconds=45;
+    const auto displayJson=routeJson(displayMetadata);
+    check(displayJson.find("\"visualProtectedPoints\":[1,2]")!=std::string::npos,
+          "roundabout entry and exit are exact visual anchors");
+    check(displayMetadata.points.size()==3 && displayMetadata.meters==123 && displayMetadata.seconds==45,
+          "display metadata never mutates routing geometry, distance or ETA");
     auto drive = route(graph, 0, 2);
     check(drive.has_value(), "drive route");
     check(std::abs(drive->seconds - 8) < .001, "fastest drive path");
