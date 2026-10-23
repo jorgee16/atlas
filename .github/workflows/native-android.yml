@@ -66,6 +66,7 @@ jobs:
             | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/atlas-preflight-certificate.sha256"
           python3 tools/atlas_android_release.py check-cert --certificate-file "$RUNNER_TEMP/atlas-preflight-certificate.sha256"
   evidence-scope:
+    if: ${{ !contains(github.event.head_commit.message, '[publish-validated:') }}
     # Only recorded-evidence plumbing can bypass another emulator. App changes
     # always retain the Android gate, regardless of the commit message.
     runs-on: ubuntu-latest
@@ -88,6 +89,7 @@ jobs:
           print('Recorded-evidence-only change:',review,'; changed paths:',sorted(changed))
           PYCODE
   core:
+    if: ${{ !contains(github.event.head_commit.message, '[publish-validated:') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -491,6 +493,214 @@ jobs:
             if gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
                 --target "$GITHUB_SHA" --title "Atlas v$RELEASE_VERSION" \
                 --notes "Signed Android Release (versionCode $RELEASE_CODE). Native C++ tests, Android navigation/GPS emulator tests, certificate and in-place-upgrade checks passed. Preserve this signing key for future updates." \
+                --prerelease; then
+              published=true
+              break
+            fi
+            # Never try to overwrite a partially-created Release.
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "::error::Release tag exists after a failed upload; manual inspection required."
+              exit 1
+            fi
+            if (( attempt < 3 )); then sleep $(( attempt * 10 )); fi
+          done
+          if [[ "$published" != true ]]; then
+            echo "::error::GitHub Releases denied publication (HTTP 403). The validated, signed APK is preserved as the Atlas-native-signed-release-apk workflow artifact. If this is an integration-permission restriction, configure ATLAS_RELEASE_PUBLISH_TOKEN (fine-grained Contents: write) in repository Actions secrets."
+            exit 1
+          fi
+          echo "APK: https://github.com/$GH_REPO/releases/download/$tag/Atlas-v$RELEASE_VERSION.apk" >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove temporary keystore
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${ATLAS_ANDROID_KEYSTORE_PATH:-}" && -f "$ATLAS_ANDROID_KEYSTORE_PATH" ]]; then
+            rm -f "$ATLAS_ANDROID_KEYSTORE_PATH"
+          fi
+      - name: Upload Release validation reports (no keys)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-native-release-validation
+          if-no-files-found: ignore
+          path: |
+            dist/android-validated/release-manifest.json
+            dist/android-validated/*.sha256
+            dist/android-validated/upgrade-report.txt
+            android/native-app/build/reports/lint-results-release.*
+
+
+  publish-validated:
+    # Publishing is explicit. A normal push never tries to access signing secrets.
+    # Signed Releases require core, focused Android smoke, and the full replay.
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-validated:39998300089]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      actions: read
+    env:
+      ATLAS_ANDROID_KEYSTORE_BASE64: ${{ secrets.ATLAS_ANDROID_KEYSTORE_BASE64 }}
+      ATLAS_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEYSTORE_PASSWORD }}
+      ATLAS_ANDROID_KEY_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEY_PASSWORD }}
+      ATLAS_ANDROID_KEY_ALIAS: ${{ secrets.ATLAS_ANDROID_KEY_ALIAS }}
+      ATLAS_ANDROID_CERT_SHA256: ${{ vars.ATLAS_ANDROID_CERT_SHA256 }}
+      RELEASE_VERSION: '0.2.10'
+      RELEASE_CODE: '13'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Confirm source is EXACTLY successful CI #235, no app changes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          validated=983197ad000ab098ee46a8c359a6453c013d6028
+          result="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/39998300089" --jq '.conclusion + " " + .head_sha')"
+          [[ "$result" == "success $validated" ]] || { echo '::error::Validated CI was not successful for exact source'; exit 1; }
+          jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/39998300089/jobs?per_page=100" --jq '[.jobs[] | select(.name == "core" or .name == "android") | select(.conclusion == "success")] | length')"
+          [[ "$jobs" == 2 ]] || { echo '::error::Native and Android gates must both pass'; exit 1; }
+          git merge-base --is-ancestor "$validated" "$GITHUB_SHA"
+          invalid="$(git diff --name-only "$validated" "$GITHUB_SHA" | grep -Ev '^(.github/workflows/native-android.yml|tools/atlas-release-version.json|tools/atlas-validated-release.json)$' || true)"
+          [[ -z "$invalid" ]] || { echo "::error::App source changed after green CI: $invalid"; exit 1; }
+          [[ "$(python3 -c 'import json; x=json.load(open("tools/atlas-release-version.json")); print(x["versionName"],x["versionCode"])')" == '0.2.10 13' ]]
+          echo "VALIDATED_SHA=$validated" >> "$GITHUB_ENV"
+          git checkout --detach "$validated"
+          echo 'Validated #235 passed, checked out exactly tested source, no tests are repeated.'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          # This migration branch must be able to populate its own cache.
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - name: Install Android release toolchain
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: Require a stable signing identity and valid release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          # When native-android.yml is not on the default branch, GitHub may
+          # not expose its workflow_dispatch UI. An explicit commit marker
+          # triggers the same gated release process using this tracked version.
+          RELEASE_VERSION="${RELEASE_VERSION:-$(python3 -c 'import json; print(json.load(open("tools/atlas-release-version.json"))["versionName"])')}"
+          RELEASE_CODE="${RELEASE_CODE:-$(python3 -c 'import json; print(json.load(open("tools/atlas-release-version.json"))["versionCode"])')}"
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> "$GITHUB_ENV"
+          echo "RELEASE_CODE=$RELEASE_CODE" >> "$GITHUB_ENV"
+          for key in ATLAS_ANDROID_KEYSTORE_BASE64 ATLAS_ANDROID_KEYSTORE_PASSWORD ATLAS_ANDROID_KEY_PASSWORD ATLAS_ANDROID_KEY_ALIAS ATLAS_ANDROID_CERT_SHA256; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error::Missing ${key}; signed release publication is blocked."
+              exit 1
+            fi
+          done
+          [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Release version must be X.Y.Z"; exit 1; }
+          [[ "$RELEASE_CODE" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Release code must be a positive integer"; exit 1; }
+          [[ "${#ATLAS_ANDROID_CERT_SHA256}" -ge 64 ]] || { echo "::error::Expected certificate SHA-256 is invalid"; exit 1; }
+          keyfile="$RUNNER_TEMP/atlas-release-signing.jks"
+          ( umask 077; printf '%s' "$ATLAS_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keyfile" )
+          test -s "$keyfile" || { echo "::error::Invalid keystore data"; exit 1; }
+          echo "ATLAS_ANDROID_KEYSTORE_PATH=$keyfile" >> "$GITHUB_ENV"
+          # Only a public certificate digest is handled here, never the private key.
+          keytool -exportcert -keystore "$keyfile" -storepass:env ATLAS_ANDROID_KEYSTORE_PASSWORD -alias "$ATLAS_ANDROID_KEY_ALIAS" \
+            | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/atlas-certificate.sha256"
+          python3 tools/atlas_android_release.py check-cert --certificate-file "$RUNNER_TEMP/atlas-certificate.sha256"
+      - name: Locate previous published APK (if any)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/android-previous
+          tag="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '[.[] | select((.tag_name | startswith("atlas-android-v")) and (.draft | not))] | sort_by(.published_at) | last | .tag_name // ""')"
+          if [[ -n "$tag" ]]; then
+            [[ "$tag" != "atlas-android-v$RELEASE_VERSION" ]] || { echo "::error::This release version already exists"; exit 1; }
+            gh release download "$tag" --dir dist/android-previous --pattern 'Atlas-v*.apk' --pattern release-manifest.json
+            echo "ATLAS_PREVIOUS_TAG=$tag" >> "$GITHUB_ENV"
+          else
+            echo "No prior Atlas signed release; first installation may require uninstalling older debug builds."
+          fi
+          if gh release view "atlas-android-v$RELEASE_VERSION" >/dev/null 2>&1 ||
+             git ls-remote --exit-code --tags origin "refs/tags/atlas-android-v$RELEASE_VERSION" >/dev/null 2>&1; then
+            echo "::error::Refusing to replace an existing release/tag."
+            exit 1
+          fi
+      - name: Build signed Release APK without re-running unit tests
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash gradlew --build-cache -PnativeOnly -PatlasVersionCode="$RELEASE_CODE" -PatlasVersionName="$RELEASE_VERSION" \
+            :native-app:assembleRelease --no-daemon --console=plain
+          mkdir -p ../dist/android-release-inputs
+          cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/release.apk
+      - name: Create same-certificate future-update probe (not distributed)
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          next_code=$((RELEASE_CODE + 1))
+          bash gradlew --build-cache -PnativeOnly -PatlasVersionCode="$next_code" -PatlasVersionName="$RELEASE_VERSION-upgrade-probe" \
+            :native-app:assembleRelease --no-daemon --console=plain
+          cp native-app/build/outputs/apk/release/native-app-release.apk ../dist/android-release-inputs/upgrade-probe.apk
+      - name: Check APK signature, certificate, package, versions and previous Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          previous=(dist/android-previous/Atlas-v*.apk)
+          if (( ${#previous[@]} > 1 )); then echo "::error::Ambiguous previous release APKs"; exit 1; fi
+          args=()
+          if (( ${#previous[@]} == 1 )); then
+            args+=(--previous-apk "${previous[0]}" --previous-manifest dist/android-previous/release-manifest.json)
+          fi
+          python3 tools/atlas_android_release.py package \
+            --apk dist/android-release-inputs/release.apk \
+            --probe dist/android-release-inputs/upgrade-probe.apk \
+            --build-tools "$ANDROID_HOME/build-tools/36.0.0" \
+            --version "$RELEASE_VERSION" --code "$RELEASE_CODE" --commit "$VALIDATED_SHA" \
+            --output dist/android-validated "${args[@]}"
+      # Keep the validated, signed APK accessible even when GitHub Releases
+      # rejects publication. Publishing failure must still fail the job.
+      - name: Preserve validated signed APK before Release publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-native-signed-release-apk
+          path: |
+            dist/android-validated/Atlas-v*.apk
+            dist/android-validated/Atlas-v*.apk.sha256
+            dist/android-validated/release-manifest.json
+          compression-level: 0
+          if-no-files-found: error
+      - name: Publish signed APK directly to GitHub Releases
+        env:
+          # Optional fine-grained PAT with repository Contents: write, for
+          # installations where Actions' GITHUB_TOKEN is refused by Releases.
+          GH_TOKEN: ${{ secrets.ATLAS_RELEASE_PUBLISH_TOKEN || github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist/android-validated
+          sha256sum --check "Atlas-v$RELEASE_VERSION.apk.sha256"
+          tag="atlas-android-v$RELEASE_VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::error::Refusing to overwrite existing release $tag"
+            exit 1
+          fi
+          # A previous Release succeeded with contents:write; a later run
+          # received HTTP 403 from the same endpoint. Retry transient failures
+          # without ever overwriting a published tag or changing signing keys.
+          published=false
+          for attempt in 1 2 3; do
+            if gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
+                --target "$VALIDATED_SHA" --title "Atlas v$RELEASE_VERSION" \
+                --notes "Signed Release (versionCode $RELEASE_CODE) from validated commit $VALIDATED_SHA, CI run #235. Native and Android emulator tests previously passed; no tests rerun. Persistent certificate, signature and version upgrade compatibility verified." \
                 --prerelease; then
               published=true
               break
