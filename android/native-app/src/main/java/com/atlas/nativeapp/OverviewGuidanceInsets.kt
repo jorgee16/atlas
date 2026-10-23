@@ -1,15 +1,18 @@
 package com.atlas.nativeapp
 
 /**
- * Stable top map padding in Overview. Guidance text and lane arrows grow or
- * shrink as GPS changes the upcoming maneuver; this must not refit the map.
- * Changes to the device viewport or manual Overview request still refit.
+ * Stable top map padding in Overview. GPS guidance text and lane arrows can
+ * change height every second, but the detached map must not move with them.
+ *
+ * Navigating: reserve an ample, density-scaled banner envelope independent
+ * of the live text. A device rotation still computes a new insets value.
+ * Non-navigation: there is no live GPS banner; respect the actual overlay.
  */
 internal object OverviewGuidanceInsets {
     fun top(insetPx:Int,navigating:Boolean,guidanceBottomPx:Int?,pixelsPerDp:Int):Int {
         val dp=pixelsPerDp.coerceAtLeast(1)
-        val reserved=insetPx + dp*(if(navigating) 285 else 40)
-        val occupied=if(guidanceBottomPx!=null)guidanceBottomPx + 20*dp else 0
-        return maxOf(reserved,occupied)
+        if(navigating) return insetPx + 360*dp
+        val occupied=if(guidanceBottomPx!=null)guidanceBottomPx+20*dp else 0
+        return maxOf(insetPx + 40*dp,occupied)
     }
 }
