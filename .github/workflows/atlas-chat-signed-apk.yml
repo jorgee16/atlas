@@ -1,5 +1,5 @@
 name: Export validated signed Atlas APK to chat
-# Current 0.2.9 candidate verifies route visibility above online road layers and real labels.
+# Current 0.2.9 candidate reads the shipped Portugal name:latin fields and checks visible labels.
 on:
   push:
     branches: ['migration/native-core-kotlin']

@@ -89,7 +89,9 @@ class RouteGeometryVisualReviewTest {
                 val ids=m.style!!.layers.filterIsInstance<org.maplibre.android.style.layers.SymbolLayer>().map { it.id }.toTypedArray()
                 labels=ids.isNotEmpty() && m.queryRenderedFeatures(android.graphics.RectF(0f,0f,
                     atlas(a).view.width.toFloat(),atlas(a).view.height.toFloat()),*ids).any {
-                        it.hasProperty("name") && it.getStringProperty("name").isNotBlank()
+                        feature -> listOf("name","name:latin","name:en").any { key ->
+                            feature.hasProperty(key) && feature.getStringProperty(key).isNotBlank()
+                        }
                     }
             }
             labels

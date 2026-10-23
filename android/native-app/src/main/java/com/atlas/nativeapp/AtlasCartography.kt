@@ -2,6 +2,7 @@ package com.atlas.nativeapp
 
 import org.json.JSONObject
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.BackgroundLayer
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -53,7 +54,9 @@ internal object AtlasCartography {
             (if (dark) "dark" else if (navigating) "positron" else "liberty")
 
     /**
-     * PMTiles use the OpenMapTiles layer names. Labels require glyph PBFs;
+     * The shipped Tilemaker/OpenMapTiles package exposes name:latin, while
+     * online tiles can expose name. Accept both without modifying either pack.
+     * Labels require glyph PBFs;
      * package glyphs locally before promising a fully offline labelled map.
      */
     fun offlineStyle(pmtilesUrl: String, dark: Boolean, navigating: Boolean): String {
@@ -70,13 +73,13 @@ internal object AtlasCartography {
         // become optional so the route stays uncluttered.
         val placeLabels = """
             ,{"id":"atlas-place-labels","type":"symbol","source":"atlas","source-layer":"place",
-              "minzoom":${if(navigating) 9 else 5},"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
+              "minzoom":${if(navigating) 9 else 5},"layout":{"text-field":["coalesce",["get","name"],["get","name:latin"],["get","name:en"]],"text-font":["Noto Sans Regular"],
               "text-size":${if(dark) 13 else 12},"text-max-width":9},
               "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 2.0 else 1.2}}}
         """.trimIndent()
         val poiLabels = if(navigating) "" else """
             ,{"id":"atlas-poi-labels","type":"symbol","source":"atlas","source-layer":"poi",
-              "minzoom":16,"layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],
+              "minzoom":16,"layout":{"text-field":["coalesce",["get","name"],["get","name:latin"],["get","name:en"]],"text-font":["Noto Sans Regular"],
               "text-size":10,"text-max-width":7},
               "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 1.8 else 1}}}
         """.trimIndent()
@@ -107,7 +110,7 @@ internal object AtlasCartography {
               "paint":{"line-color":"$road",
               "line-width":["interpolate",["linear"],["zoom"],8,0.8,14,2.5,18,6]}},
             {"id":"atlas-road-labels","type":"symbol","source":"atlas","source-layer":"transportation_name",
-              "minzoom":13,"layout":{"symbol-placement":"line","text-field":["get","name"],
+              "minzoom":13,"layout":{"symbol-placement":"line","text-field":["coalesce",["get","name"],["get","name:latin"],["get","name:en"]],
               "text-font":["Noto Sans Regular"],"text-size":${if(dark) 12 else 11}},
               "paint":{"text-color":"$names","text-halo-color":"$halo","text-halo-width":${if(dark) 2.1 else 1.25}}}
             $placeLabels
@@ -176,7 +179,8 @@ internal object AtlasCartography {
             val poi = SymbolLayer("atlas-night-poi-names",source.id)
                 .withSourceLayer("poi")
                 .withProperties(
-                    PropertyFactory.textField("{name}"),
+                    PropertyFactory.textField(Expression.coalesce(Expression.get("name"),
+                        Expression.get("name:latin"),Expression.get("name:en"))),
                     // Match the existing OpenFreeMap glyph endpoint. The SDK's
                     // default Open Sans/Arial stack is unavailable there (404).
                     PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
