@@ -355,7 +355,12 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
       }
       if (implausibleFixes_ < 3) {
         out.position = *lastGoodPosition_;
-        out.state = Guidance::State::reduced;
+        // Rejected map projection is NOT evidence of degraded GNSS.
+        // A recent, precise and moving receiver should report route
+        // uncertainty rather than misleading "GPS accuracy reduced".
+        out.state = accuracy <= 20. && speed >= .6
+                        ? Guidance::State::checking
+                        : Guidance::State::reduced;
         return out;
       }
     }
@@ -388,7 +393,12 @@ Guidance GuidanceSession::update(Point p, double accuracy, double speed,
     // Tell Android that genuine off-road fixes should be drawn unsnapped.
     out.offRouteConfirmed = verifiedDeparture && offFixes_ >= 3 &&
                             t - offSince_ >= 2.;
-    if (offFixes_ >= 3 && t - offSince_ >= 5 &&
+    // Several accurate fixes proving continued movement away from a missed
+    // turn allow a quicker reroute. Keep the old conservative delay for
+    // stationary drift, marginal precision and unverified departures.
+    const double rerouteDelay =
+        verifiedDeparture && accuracy <= 20. && speed >= 1.2 ? 3. : 5.;
+    if (offFixes_ >= 3 && t - offSince_ >= rerouteDelay &&
         (lastReroute_ < 0 || t - lastReroute_ >= 15)) {
       out.state = Guidance::State::reroute;
       lastReroute_ = t;

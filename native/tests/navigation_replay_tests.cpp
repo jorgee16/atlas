@@ -58,6 +58,32 @@ int main() {
   }
   check(recoveredAfterConsecutiveFixes,
       "three consistent moving GPS fixes must restore progress after weak GPS");
+  // Missed right exit: GPS remains accurate and the car demonstrably
+  // continues east while the planned road turns north. This is a route
+  // deviation, never a deterioration of the GPS receiver's accuracy.
+  Route missedExit;
+  missedExit.points={{40,-8},{40,-7.999},{40.001,-7.999}};
+  for(std::size_t i=1;i<missedExit.points.size();++i)
+    missedExit.meters+=distance(missedExit.points[i-1],missedExit.points[i]);
+  missedExit.seconds=missedExit.meters/10.;
+  GuidanceSession missed;
+  bool checking=false, confirmed=false, recalculated=false;
+  const double observedLons[]={
+    -7.9994,-7.9992,-7.9990,-7.99887,-7.99870,-7.99850,
+    -7.99840,-7.99830,-7.99820,-7.99810,-7.99800
+  };
+  for(int i=0;i<11;++i) {
+    auto state=missed.update({40,observedLons[i]},5,10,500.+i,missedExit);
+    if(i>=5) {
+      check(state.state!=Guidance::State::reduced,
+            "missed exit with accurate moving GNSS must not say GPS reduced");
+      checking|=state.state==Guidance::State::checking;
+      confirmed|=state.offRouteConfirmed;
+      recalculated|=state.state==Guidance::State::reroute;
+    }
+  }
+  check(checking && confirmed && recalculated,
+        "missed exit must progress through checking, confirmed off-route and reroute");
   // A real approach may complete at zero speed; a GPS wander that jumps
   // from the beginning straight to the destination must never auto-arrive.
   GuidanceSession approachingDestination;

@@ -1081,8 +1081,15 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 setPadding(ui.dp(12),ui.dp(9),ui.dp(12),ui.dp(9))
             },linear(9))
         }
-        val confidence=s.guidance?.optString("state")
-        if(confidence=="reduced"||confidence=="checking")guidance.addView(ui.text(if(confidence=="reduced")"GPS accuracy reduced · Keeping your route" else "Checking your route…",12f,ui.ink,true).apply{background=ui.shape(ui.surface,14);setPadding(ui.dp(14),ui.dp(11),ui.dp(14),ui.dp(11))},linear(9))
+        val guidanceStatus = GuidanceConfidencePresentation.text(
+            s.guidance?.optString("state"),
+            s.fix?.accuracy,
+            s.guidance?.optBoolean("offRouteConfirmed",false)==true)
+        if(guidanceStatus!=null) guidance.addView(ui.text(
+            guidanceStatus,12f,ui.ink,true).apply {
+                background=ui.shape(ui.surface,14)
+                setPadding(ui.dp(14),ui.dp(11),ui.dp(14),ui.dp(11))
+            },linear(9))
     }
     private fun endNavigation() {
         selectedPlace = null
