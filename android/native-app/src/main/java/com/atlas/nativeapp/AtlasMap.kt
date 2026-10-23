@@ -819,7 +819,7 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             route = s.route; options = s.routeOptions
             for (choice in s.routeOptions.filter { it !== s.route }) {
                 val points = points(choice.getJSONArray("points"))
-                lines.add(ready.addPolyline(PolylineOptions().addAll(points).color(Color.parseColor(if (dark) "#667385" else "#AAB5C7")).width(4f)))
+                lines.add(ready.addPolyline(PolylineOptions().addAll(RouteVisualSmoothing.smooth(points)).color(Color.parseColor(if (dark) "#667385" else "#AAB5C7")).width(4f)))
             }
             geometry = s.route?.let { points(it.getJSONArray("points")) } ?: emptyList()
             if (s.navigating && geometry.size >= 2 && s.route !== interpolatedRoute) {
@@ -830,8 +830,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 lastRenderedMarker=previousVisible
             }
             if (geometry.size >= 2) {
-                lines.add(ready.addPolyline(PolylineOptions().addAll(geometry).color(Color.WHITE).width(9f)))
-                remaining = ready.addPolyline(PolylineOptions().addAll(geometry).color(Color.rgb(49,94,251)).width(6f)).also { lines.add(it) }
+                // Only map annotations are smoothed. JNI guidance uses geometry.
+                val visual = RouteVisualSmoothing.smooth(geometry)
+                lines.add(ready.addPolyline(PolylineOptions().addAll(visual).color(Color.WHITE).width(9f)))
+                remaining = ready.addPolyline(PolylineOptions().addAll(visual).color(Color.rgb(49,94,251)).width(6f)).also { lines.add(it) }
                 if (!s.navigating && newCameraRoute && (!restoreCamera || previousCameraRoute!=null)) overview()
                 else if(cameraState.mode==NavigationCameraState.Mode.OVERVIEW)cameraState.viewportChanged()
             }
@@ -848,8 +850,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             // Update at every accepted progress fix, not only on segment
             // changes: otherwise travelled/remaining lines appear frozen.
             val snapped = s.guidance.coordinate().let { LatLng(it.lat, it.lon) }
-            remaining?.points = listOf(snapped) + geometry.drop(segment + 1)
-            val done = geometry.take(segment + 1) + snapped
+            remaining?.points = RouteVisualSmoothing.smooth(
+                listOf(snapped) + geometry.drop(segment + 1))
+            val done = RouteVisualSmoothing.smooth(geometry.take(segment + 1) + snapped)
             if (travelled == null) travelled = ready.addPolyline(PolylineOptions().addAll(done).color(Color.parseColor("#9EA9BA")).width(5f)).also { lines.add(it) }
             else travelled?.points = done
             lastSegment = segment

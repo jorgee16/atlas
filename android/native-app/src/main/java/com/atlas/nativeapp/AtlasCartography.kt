@@ -129,28 +129,41 @@ internal object AtlasCartography {
                 val id = layer.id.lowercase()
                 when (layer) {
                     is BackgroundLayer -> layer.setProperties(
-                        PropertyFactory.backgroundColor(if (navigating) "#1D2B38" else "#20303D"))
+                        PropertyFactory.backgroundColor(if (navigating) "#1B2B3A" else "#1E2D3C"))
                     is FillLayer -> when {
                         id.contains("park") || id.contains("forest") || id.contains("wood") ->
                             layer.setProperties(PropertyFactory.fillColor("#2C493B"))
                         id.contains("water") ->
                             layer.setProperties(PropertyFactory.fillColor("#24485E"))
                         id.contains("building") ->
-                            layer.setProperties(PropertyFactory.fillColor("#334657"),
-                                PropertyFactory.fillOutlineColor("#526C7F"))
+                            layer.setProperties(PropertyFactory.fillColor("#314452"),
+                                PropertyFactory.fillOutlineColor("#586C7F"))
                     }
-                    is LineLayer -> if ((id.contains("road") || id.contains("highway") ||
-                            id.contains("street")) && !id.contains("casing")) {
+                    is LineLayer -> if (id.contains("road") || id.contains("highway") ||
+                        id.contains("street") || id.contains("transport") ||
+                        id.contains("motorway") || id.contains("trunk")) {
+                        val major = id.contains("motorway") || id.contains("trunk") ||
+                            id.contains("primary") || id.contains("major")
+                        val casing = id.contains("casing") || id.contains("outline")
+                        layer.setProperties(PropertyFactory.lineColor(when {
+                            casing -> if (major) "#526677" else "#394A59"
+                            major -> "#C3D5E2"
+                            else -> if(navigating) "#93A9BB" else "#9BAEC0"
+                        }))
+                    }
+                    // Preserve a readable hierarchy rather than making all
+                    // labels bright white on the dark streets map.
+                    is SymbolLayer -> {
+                        val primary=id.contains("motorway") || id.contains("trunk") ||
+                            id.contains("city") || id.contains("town") ||
+                            id.contains("place") || id.contains("primary")
+                        val minor=id.contains("poi") || id.contains("housenumber")
                         layer.setProperties(
-                            PropertyFactory.lineColor(if (navigating) "#7C92A7" else "#8196AA"))
+                            PropertyFactory.textColor(
+                                if(primary) "#F5FAFE" else if(minor) "#AFC3D3" else "#DCE7F1"),
+                            PropertyFactory.textHaloColor("#172635"),
+                            PropertyFactory.textHaloWidth(if(primary) 1.85f else 1.45f))
                     }
-                    // Online style IDs vary: "settlement", "poi", "boundary",
-                    // "neighbourhood" and "water-name" can all contain text.
-                    // Improve ALL text-bearing symbol layers, not only "road".
-                    is SymbolLayer -> layer.setProperties(
-                        PropertyFactory.textColor("#F9FCFF"),
-                        PropertyFactory.textHaloColor("#101C29"),
-                        PropertyFactory.textHaloWidth(2.0f))
                 }
             }
         }
