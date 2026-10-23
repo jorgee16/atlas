@@ -371,7 +371,7 @@ int main(int argc, char **argv) {
     check(names.size()==4 && names[0]=="A8" && names[1]=="IC17" &&
           names[2]=="A5" && names[3]=="EN9-2",
           "brief signed motorway/IC/national references remain in travel order");
-    check(routeJson(named).find("\\\"mainRoads\\\":[")!=std::string::npos,
+    check(routeJson(named).find("\"mainRoads\":[")!=std::string::npos,
           "main road references are serialized for Kotlin");
     auto originalSeconds = drive->seconds;
     calibrateDriveEta(*drive, graph);
