@@ -998,10 +998,26 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val type=maneuver?.optString("type").orEmpty()
         val instruction=GuidanceInstructionPresentation.format(
             maneuver?.optString("instruction"))
-        val icon=when{type.contains("roundabout")->"roundabout";type.contains("left")->"arrow-left";type.contains("right")->"arrow-right";type=="arrive"->"flag";else->"arrow"}
+        val rawInstruction=maneuver?.optString("instruction").orEmpty()
+        val icon=when {
+            type=="roundabout" -> "roundabout"
+            rawInstruction.startsWith("Take the ramp",ignoreCase=true) ->
+                if(type.contains("left"))"exit-left" else "exit-right"
+            type=="slight-left" -> "slight-left"
+            type=="slight-right" -> "slight-right"
+            type=="sharp-left" -> "sharp-left"
+            type=="sharp-right" -> "sharp-right"
+            type.contains("left") -> "arrow-left"
+            type.contains("right") -> "arrow-right"
+            type=="arrive" -> "flag"
+            else -> "arrow"
+        }
         val banner=ui.row().apply{
             background=ui.shape(Color.rgb(24,42,66),24);elevation=ui.dp(7).toFloat();setPadding(ui.dp(20),ui.dp(20),ui.dp(18),ui.dp(20))
-            addView(ui.icon(icon,Color.WHITE,44),LinearLayout.LayoutParams(ui.dp(44),ui.dp(52)))
+            val maneuverIcon=ui.icon(icon,Color.WHITE,44).apply {
+                exitNumber=if(type=="roundabout")maneuver?.optInt("exitNumber",0) ?: 0 else 0
+            }
+            addView(maneuverIcon,LinearLayout.LayoutParams(ui.dp(44),ui.dp(52)))
             addView(ui.column().apply{
                 addView(ui.text(if(distance<=20)"Now" else AtlasPages.formatDistance(distance),30f,Color.WHITE,true))
                 addView(ui.space(9))
@@ -1032,9 +1048,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                             laneGuide.lanes.forEach { lane ->
                                 val recommended=lane.recommended
                                 val bg=if(recommended) Color.rgb(23,132,104) else Color.rgb(44,62,88)
-                                val arrow=ui.text(lane.symbols,if(lane.symbols.length>=3)17f else 23f,
-                                    Color.WHITE,true).apply {
-                                    gravity=Gravity.CENTER
+                                val arrow=AtlasLaneIcon(this@MainActivity,lane.symbols,Color.WHITE).apply {
                                     background=ui.shape(bg,9)
                                     contentDescription=if(recommended)
                                         "Recommended lane: ${lane.description}" else "Lane: ${lane.description}"

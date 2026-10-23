@@ -101,6 +101,9 @@ class AtlasUi(val context: Context, val dark: Boolean = false) {
 
 /** Small consistent stroke icons, rendered at device density. */
 class AtlasIcon(context: Context, var name: String, var tint: Int) : View(context) {
+    var exitNumber: Int = 0
+        set(value) { field=value;invalidate() }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.save(); canvas.translate(width * .08f, height * .08f); canvas.scale(width * .84f / 24f, height * .84f / 24f)
@@ -108,6 +111,9 @@ class AtlasIcon(context: Context, var name: String, var tint: Int) : View(contex
         fun line(vararg points: Float) { val path = Path(); path.moveTo(points[0], points[1]); for (i in 2 until points.size step 2) path.lineTo(points[i], points[i + 1]); canvas.drawPath(path, p) }
         fun circle(x: Float, y: Float, r: Float) = canvas.drawCircle(x, y, r, p)
         fun rect(a: Float, b: Float, c: Float, d: Float, r: Float = 2f) = canvas.drawRoundRect(a, b, c, d, r, r, p)
+        if(name in setOf("arrow-left","arrow-right","arrow","roundabout",
+                "slight-left","slight-right","sharp-left","sharp-right",
+                "exit-left","exit-right")) p.strokeWidth=2.65f
         when (name) {
             "search" -> { circle(10.5f, 10.5f, 6.5f); line(15f, 15f, 21f, 21f) }
             "close" -> { line(6f, 6f, 18f, 18f); line(18f, 6f, 6f, 18f) }
@@ -135,10 +141,62 @@ class AtlasIcon(context: Context, var name: String, var tint: Int) : View(contex
             "transit" -> { rect(5f, 2f, 19f, 19f, 4f); line(5f, 11f, 19f, 11f); line(12f, 2f, 12f, 11f); line(8f, 19f, 6f, 22f); line(16f, 19f, 18f, 22f); circle(9f, 15f, .6f); circle(15f, 15f, .6f) }
             "clock" -> { circle(12f, 12f, 9f); line(12f, 6f, 12f, 12f, 16f, 14f) }
             "volume", "mute" -> { line(3f, 9f, 7f, 9f, 12f, 5f, 12f, 19f, 7f, 15f, 3f, 15f, 3f, 9f); if (name == "volume") { val path = Path(); path.moveTo(16f, 7f); path.quadTo(22f, 12f, 16f, 17f); canvas.drawPath(path, p) } else { line(16f, 9f, 22f, 15f); line(22f, 9f, 16f, 15f) } }
-            "arrow-right" -> { line(5f, 21f, 5f, 11f, 19f, 11f); line(13f, 5f, 19f, 11f, 13f, 17f) }
-            "arrow-left" -> { line(19f, 21f, 19f, 11f, 5f, 11f); line(11f, 5f, 5f, 11f, 11f, 17f) }
-            "arrow" -> { line(12f, 21f, 12f, 3f); line(6f, 9f, 12f, 3f, 18f, 9f) }
-            "roundabout" -> { val path = Path(); path.addArc(4f, 4f, 20f, 20f, 90f, 285f); canvas.drawPath(path, p); line(16f, 2f, 21f, 5f, 18f, 10f) }
+            "arrow-right" -> {
+                val turn=Path().apply { moveTo(7f,22f);lineTo(7f,13f);quadTo(7f,10f,10f,10f);lineTo(21f,10f) }
+                canvas.drawPath(turn,p);line(15f,4f,21f,10f,15f,16f)
+            }
+            "arrow-left" -> {
+                val turn=Path().apply { moveTo(17f,22f);lineTo(17f,13f);quadTo(17f,10f,14f,10f);lineTo(3f,10f) }
+                canvas.drawPath(turn,p);line(9f,4f,3f,10f,9f,16f)
+            }
+            "slight-right", "slight-left" -> {
+                val right=name.endsWith("right")
+                val direction=if(right)1f else -1f
+                val path=Path().apply {
+                    moveTo(12f,22f);lineTo(12f,16f)
+                    cubicTo(12f,12f,12f+direction*4f,9f,12f+direction*8f,5f)
+                }
+                canvas.drawPath(path,p)
+                line(12f+direction*2f,5f,12f+direction*8f,5f,12f+direction*8f,11f)
+            }
+            "sharp-right", "sharp-left" -> {
+                val right=name.endsWith("right")
+                val turnX=if(right)20f else 4f
+                val approach=if(right)9f else 15f
+                line(approach,22f,approach,11f,turnX,11f)
+                line(if(right)14f else 10f,5f,turnX,11f,if(right)14f else 10f,17f)
+            }
+            "exit-right", "exit-left" -> {
+                val right=name.endsWith("right")
+                val direction=if(right)1f else -1f
+                p.alpha=110
+                line(12f,22f,12f,4f)
+                p.alpha=255
+                val ramp=Path().apply {
+                    moveTo(12f,22f);lineTo(12f,17f)
+                    cubicTo(12f,12f,15f*if(right)1f else .6f,11f,12f+direction*8f,5f)
+                }
+                canvas.drawPath(ramp,p)
+                line(12f+direction*1.5f,5f,12f+direction*8f,5f,
+                    12f+direction*8f,11f)
+            }
+            "arrow" -> { line(12f,21f,12f,3f);line(6f,9f,12f,3f,18f,9f) }
+            "roundabout" -> {
+                // Counterclockwise circular junction with approach and exit.
+                // Number identifies the actual exit; no invented exit angle.
+                circle(12f,10.5f,6f)
+                line(12f,23f,12f,16.5f)
+                line(16.4f,6.4f,21f,2.5f)
+                line(15.7f,2.5f,21f,2.5f,20f,8f)
+                if(exitNumber in 1..20) {
+                    val textPaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color=tint;style=Paint.Style.FILL;textSize=7.8f
+                        textAlign=Paint.Align.CENTER
+                        typeface=Typeface.create(Typeface.DEFAULT,Typeface.BOLD)
+                    }
+                    canvas.drawText(exitNumber.toString(),12f,13.2f,textPaint)
+                }
+            }
             "flag" -> { line(5f, 22f, 5f, 3f, 19f, 3f, 17f, 8f, 19f, 13f, 5f, 13f) }
             "trash" -> { line(4f, 6f, 20f, 6f); line(9f, 3f, 15f, 3f); line(6f, 6f, 7f, 21f, 17f, 21f, 18f, 6f); line(10f, 10f, 10f, 17f); line(14f, 10f, 14f, 17f) }
             "sun" -> { circle(12f, 12f, 4f); for (i in 0..7) { val a = i * Math.PI / 4; line((12 + 7 * kotlin.math.cos(a)).toFloat(), (12 + 7 * kotlin.math.sin(a)).toFloat(), (12 + 10 * kotlin.math.cos(a)).toFloat(), (12 + 10 * kotlin.math.sin(a)).toFloat()) } }
