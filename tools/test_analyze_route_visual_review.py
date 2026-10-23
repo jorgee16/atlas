@@ -32,10 +32,10 @@ class RouteVisualReviewContractTest(unittest.TestCase):
                         name = f"{road}-{'dark' if dark else 'light'}-{source}-z{zoom}-{variant}"
                         cases.append({"image": name, "variant": variant, "dark": dark,
                                       "source": source, "zoom": zoom})
-                        (root / f"{name}.png").write_bytes(b"\\x89PNG\\r\\n\\x1a\\n" + b"x" * 1024)
+                        (root / f"{name}.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"x" * 1024)
         navigation = [f"navigation-{i}" for i in range(4)]
         for name in navigation:
-            (root / f"{name}.png").write_bytes(b"\\x89PNG\\r\\n\\x1a\\n" + b"x" * 1024)
+            (root / f"{name}.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"x" * 1024)
         (root / "route-visual-summary.json").write_text(
             json.dumps({"navigationImages": navigation, "cases": cases,
                         "scope": "Real C++ test geometry and MapLibre screenshots"}))
