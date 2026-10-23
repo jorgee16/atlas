@@ -5,7 +5,9 @@ concurrency:
   group: native-${{ github.ref }}-${{ ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]'))) && 'release' || 'checks' }}
   # New signed Release runs supersede obsolete failed/blocked Release runs.
   # Independent patch checks stay on their separate concurrency group.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[atlas-release]')) }}
+  # New push supersedes old checks as well as signed Releases: don't run
+  # expensive emulator replays for superseded branch commits.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
 on:
   workflow_dispatch:
     inputs:
