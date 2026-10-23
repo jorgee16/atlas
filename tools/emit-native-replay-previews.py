@@ -19,7 +19,7 @@ if not shutil.which('ffmpeg'):
     raise SystemExit(0)
 preferred=['cursor-bitmap','drive-0','pan-before','pan-after','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
            'reroute-recenter','walking-compass-recenter','walking-stop','walk-15','walk-arrived']
-preferred += sorted(p.stem for pattern in ['camera-*.png','drive-*.png','deviation-*.png','lisbon-*.png','sintra-*.png','a5-*.png'] for p in root.glob(pattern) if p.stem not in preferred)
+preferred += sorted(p.stem for pattern in ['camera-*.png','drive-*.png','deviation-*.png','lisbon-*.png','sintra-*.png','a5-*.png','09-*.png','10-*.png'] for p in root.glob(pattern) if p.stem not in preferred)
 def emit(name,target):
     print('ATLAS_PREVIEW_BEGIN '+name,flush=True)
     for line in textwrap.wrap(base64.b64encode(target.read_bytes()).decode(),16000):
@@ -32,7 +32,7 @@ for name in preferred:
         continue
     target=root/(name+'-preview.jpg')
     subprocess.run(['ffmpeg','-loglevel','error','-y','-i',str(source),
-        '-vf','scale=480:-1','-q:v','7',str(target)],check=True)
+        '-vf','scale=1080:-1' if name.startswith(('lisbon-','sintra-','a5-','09-','10-')) else 'scale=480:-1','-q:v','2' if name.startswith(('lisbon-','sintra-','a5-','09-','10-')) else '7',str(target)],check=True)
     emit(name,target)
 # Sample the actual driving recording, including approach/circulation/exit.
 movies=sorted(movies_root.glob('segment-*.mp4'))
@@ -43,3 +43,4 @@ for number,movie in enumerate(movies,1):
         print('ATLAS_VIDEO_DECODE_FAILURE '+str(movie),flush=True)
 for target in sorted(root.glob('video-*.jpg')):
     emit(target.stem,target)
+

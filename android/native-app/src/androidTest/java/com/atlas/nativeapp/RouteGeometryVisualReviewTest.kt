@@ -36,7 +36,30 @@ class RouteGeometryVisualReviewTest {
     private val output get()=File(context.getExternalFilesDir(null),"route-visual-review").apply { mkdirs() }
     private val results=JSONArray()
     private val navigationImages=JSONArray()
-    private data class RoadCase(val name:String,val from:Coordinate,val to:Coordinate)
+    private val routingAttempts=JSONArray()
+    private data class RoadCase(val name:String,val from:Coordinate,val to:Coordinate,
+        val alternatives:List<Pair<Coordinate,Coordinate>> = emptyList())
+
+    private fun route(road:RoadCase):JSONObject = NativeCore().use { core ->
+        core.graph(model.regions.graph(road.from,road.to).path)
+        for((from,to) in listOf(road.from to road.to)+road.alternatives) {
+            val attempt=JSONObject().put("case",road.name)
+                .put("from",JSONArray().put(from.lon).put(from.lat))
+                .put("to",JSONArray().put(to.lon).put(to.lat))
+            routingAttempts.put(attempt)
+            try {
+                val result=JSONObject(core.route(from,to,false,false,0.0,1))
+                attempt.put("result","connected");return@use result
+            } catch(error:IllegalStateException) {
+                // Arbitrary endpoints can snap to disconnected/private road components.
+                // Record the genuine failure, then try another public-road corridor
+                // in the SAME geographic case. Never substitute invented geometry.
+                attempt.put("error",error.message)
+                if(error.message?.contains("No route connects") != true)throw error
+            }
+        }
+        error("No connected real routing corridor available for ${road.name}: $routingAttempts")
+    }
 
     private fun atlas(activity:MainActivity):AtlasMap = MainActivity::class.java
         .getDeclaredField("atlasMap").apply { isAccessible=true }.get(activity) as AtlasMap
@@ -115,8 +138,12 @@ class RouteGeometryVisualReviewTest {
         val previousTheme=model.theme
         val cases=listOf(
             RoadCase("lisbon-roundabout",Coordinate(38.7215,-9.147),Coordinate(38.728,-9.152)),
-            RoadCase("sintra-curves",Coordinate(38.7854,-9.3904),Coordinate(38.7807,-9.4155)),
-            RoadCase("a5-access",Coordinate(38.7195,-9.2384),Coordinate(38.7119,-9.2206)))
+            RoadCase("sintra-curves",Coordinate(38.7854,-9.3904),Coordinate(38.7807,-9.4155),listOf(
+                Coordinate(38.7964,-9.3890) to Coordinate(38.7902,-9.4182),
+                Coordinate(38.8001,-9.4451) to Coordinate(38.7983,-9.4210))),
+            RoadCase("a5-access",Coordinate(38.7195,-9.2384),Coordinate(38.7119,-9.2206),listOf(
+                Coordinate(38.7207,-9.2559) to Coordinate(38.7123,-9.2125),
+                Coordinate(38.7270,-9.2370) to Coordinate(38.7250,-9.2020))))
         try {
             for(dark in listOf(false,true)) {
                 model.theme=if(dark)"dark" else "light"
@@ -128,10 +155,7 @@ class RouteGeometryVisualReviewTest {
                         model.mapVisualStyle=MapVisualStyle.STREETS
                     }
                     for(road in cases) {
-                        val route=NativeCore().use { core ->
-                            core.graph(model.regions.graph(road.from,road.to).path)
-                            JSONObject(core.route(road.from,road.to,false,false,0.0,1))
-                        }
+                        val route=route(road)
                         assertTrue("Real routing graph edges required",route.getJSONArray("edgeIndexes").length()>0)
                         val raw=points(route)
                         val anchors=mutableSetOf<Int>()
@@ -141,8 +165,12 @@ class RouteGeometryVisualReviewTest {
                         val prepared=RouteVisualSmoothing.prepare(raw,anchors)
                         val before=legacy(raw)
                         val centreIndex=(1 until raw.lastIndex).filter { it !in anchors }.maxByOrNull { i ->
-                            RouteVisualSmoothing.segmentDistance(raw[i],raw[i-1],raw[i+1])
+                            // Select a bend that actually changed. A protected 90-degree
+                            // junction is a useful safety check, not evidence of curve quality.
+                            prepared.points.minOf { RouteVisualSmoothing.distance(it,raw[i]) }
                         } ?: raw.size/2
+                        assertTrue("${road.name} must contain an eligible real road bend",
+                            prepared.points.minOf { RouteVisualSmoothing.distance(it,raw[centreIndex]) } > .05)
                         File(output,"${road.name}-geometry.json").writeText(JSONObject()
                             .put("nativeRoute",route).put("legacy",coordinates(before))
                             .put("visual",coordinates(prepared.points)).put("reviewPoint",centreIndex).toString())
@@ -250,6 +278,7 @@ class RouteGeometryVisualReviewTest {
         } finally {
             instrumentation.runOnMainSync { model.endNavigation();model.theme=previousTheme }
             File(output,"route-visual-summary.json").writeText(JSONObject().put("cases",results).put("navigationImages",navigationImages)
+                .put("routingAttempts",routingAttempts)
                 .put("scope","Actual C++ Portugal routes and MapLibre snapshots; controlled visual review, not a GPS replay").toString(2))
             export()
         }
