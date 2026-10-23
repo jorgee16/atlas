@@ -28,6 +28,20 @@ class NavigationCameraBehaviorTest {
         assertEquals(2.8,NavigationCameraBehavior.rotationRate(1.0),0.001)
         assertEquals(2.8,NavigationCameraBehavior.rotationRate(Double.POSITIVE_INFINITY),0.001)
     }
+    @Test fun bendsSettleSoonWithoutSnappingOrRotatingWhenParked() {
+        val rate = NavigationCameraBehavior.rotationRate(
+            Double.NEGATIVE_INFINITY,65.0,12.0)
+        assertEquals(8.0,rate,0.001)
+        val frame=65.0*(1.0-kotlin.math.exp(-rate/30.0))
+        assertTrue("single frame must not snap",frame<20.0)
+        assertTrue("bend must settle quickly",65.0*kotlin.math.exp(-rate*0.45)<3.0)
+        assertEquals(5.5,NavigationCameraBehavior.rotationRate(
+            Double.NEGATIVE_INFINITY,18.0,8.0),0.001)
+        assertEquals(2.8,NavigationCameraBehavior.rotationRate(
+            Double.NEGATIVE_INFINITY,80.0,0.0),0.001)
+        assertEquals(2.8,NavigationCameraBehavior.rotationRate(
+            Double.NEGATIVE_INFINITY,4.0,14.0),0.001)
+    }
     @Test fun animationKeepsRunningUntilRotationAndZoomSettle() {
         assertTrue(NavigationCameraBehavior.shouldContinueFrame(
             true,false,0.0,16.0,0.0,0.0))

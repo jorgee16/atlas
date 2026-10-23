@@ -182,19 +182,17 @@ class AtlasIcon(context: Context, var name: String, var tint: Int) : View(contex
             }
             "arrow" -> { line(12f,21f,12f,3f);line(6f,9f,12f,3f,18f,9f) }
             "roundabout" -> {
-                // Counterclockwise circular junction with approach and exit.
-                // Number identifies the actual exit; no invented exit angle.
-                circle(12f,10.5f,6f)
-                line(12f,23f,12f,16.5f)
-                line(16.4f,6.4f,21f,2.5f)
-                line(15.7f,2.5f,21f,2.5f,20f,8f)
+                // A simple ring and numbered legal exit, with no invented
+                // ramp direction: legible even at the banner's small size.
+                circle(12f,12f,9f)
                 if(exitNumber in 1..20) {
                     val textPaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                        color=tint;style=Paint.Style.FILL;textSize=7.8f
+                        color=tint;style=Paint.Style.FILL
+                        textSize=if(exitNumber>=10) 9.4f else 12f
                         textAlign=Paint.Align.CENTER
                         typeface=Typeface.create(Typeface.DEFAULT,Typeface.BOLD)
                     }
-                    canvas.drawText(exitNumber.toString(),12f,13.2f,textPaint)
+                    canvas.drawText(exitNumber.toString(),12f,15.8f,textPaint)
                 }
             }
             "flag" -> { line(5f, 22f, 5f, 3f, 19f, 3f, 17f, 8f, 19f, 13f, 5f, 13f) }

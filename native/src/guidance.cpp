@@ -70,9 +70,12 @@ void makeManeuvers(Route &r, const Graph &g) {
         for (auto edgeIndex = g.offset(leg.to);
              edgeIndex < g.offset(leg.to + 1); ++edgeIndex) {
           auto edge = g.edge(edgeIndex);
-          if (!(g.roadFlags(edge.road) & 1) &&
-              g.turnAllowed(leg.to, g.edge(leg.edge).road, edge.road, -1,
-                            edge.target)) {
+          // Only legal exits in our travel direction are physical exits:
+          // ignore pedestrian-only edges and the wrong way of a one-way road.
+          if (edge.allows(Profile::drive) && edge.target != leg.from &&
+              !(g.roadFlags(edge.road) & 1) &&
+              g.turnAllowed(leg.to, g.edge(leg.edge).road, edge.road,
+                            leg.from, edge.target)) {
             exitAtJunction = true;
             break;
           }

@@ -500,7 +500,14 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
                           e.target)))
         continue;
       auto target = std::size_t(e.target);
-      if (op.profile == Profile::drive && g.restricted(e.target)) {
+      // Preserve the incoming approach at the first junction when starting
+      // from confirmed vehicle heading, even without an OSM turn restriction.
+      // Otherwise the node-only A* state can propose an instant reversal.
+      const bool firstDirectedArrival =
+          op.profile == Profile::drive && op.initialEdge &&
+          currentNode == start && item.state == start;
+      if (op.profile == Profile::drive &&
+          (g.restricted(e.target) || firstDirectedArrival)) {
         uint64_t key = (uint64_t(e.target) << 32) | i;
         auto it = arrivals.find(key);
         if (it == arrivals.end()) {
@@ -524,6 +531,18 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
                            tollRate(g.road(e.road).ref, op.vehicleClass) *
                            op.penaltyMinutesPerEuro * 6000)
               : 0;
+      if (op.profile == Profile::drive && op.initialEdge && item.state >= n &&
+          predecessors[item.state] == int64_t(start) && incomingFrom >= 0 &&
+          !(g.roadFlags(uint32_t(incomingRoad)) & 1) && !(flags & 1)) {
+        // Prefer a legal turn farther along the road over a 180-degree
+        // reversal at the very next junction. Do not ban it entirely: an
+        // actual dead-end still needs a last-resort turnaround route.
+        const double approach = bearing(g.point(uint32_t(incomingFrom)),
+                                        g.point(currentNode));
+        const double departure = bearing(g.point(currentNode),g.point(e.target));
+        if (std::abs(std::remainder(departure-approach,360.0)) >= 150.0)
+          penalty += 24000.0; // 4 min, A* edge costs are centiseconds.
+      }
       double next = item.cost + base + penalty;
       if (next < costs[target]) {
         costs[target] = next;

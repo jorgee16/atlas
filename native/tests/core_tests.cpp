@@ -129,6 +129,21 @@ int main(int argc, char **argv) {
           roadside->destinationAccessMeters>20.0 &&
           roadside->destinationAccessMeters<250.0,
           "POI routing bypasses disconnected internal node in favor of reachable road");
+    // Confirmed heading must prefer an onward legal loop to an immediate
+    // on-the-spot hairpin, without making dead ends unreachable.
+    Graph forwardLoop(root + "/directional-loop");
+    RouteOptions liveHeading;
+    liveHeading.initialEdge=forwardLoop.offset(0);
+    auto safeTurnaround=route(forwardLoop,0,4,liveHeading);
+    check(safeTurnaround && safeTurnaround->nodes.size()>=4 &&
+          safeTurnaround->nodes[2]==2,
+          "live reroute favors forward junction over instant U-turn");
+    Graph deadEnd(root + "/directional-dead-end");
+    RouteOptions deadEndHeading;
+    deadEndHeading.initialEdge=deadEnd.offset(0);
+    auto fallback=route(deadEnd,0,4,deadEndHeading);
+    check(fallback && fallback->nodes.size()==3 && fallback->nodes[1]==1,
+          "dead-end driving route retains a last-resort legal U-turn");
     auto p = progress({40, -8}, *drive);
     check(p.along < 1 && p.remaining == drive->meters, "route progress origin");
     auto end = progress(drive->points.back(), *drive);

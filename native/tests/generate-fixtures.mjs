@@ -52,6 +52,31 @@ for(const variant of ['basic','restricted','only','toll','profile','uturn']) {
   if(value instanceof ArrayBuffer)
    await fs.writeFile(`${directory}/${name==='spatialIndex'?'spatial-index':name}.bin`,Buffer.from(value));
 }
+// GPS-heading constrained driving must seek a forward turnaround when
+// available, but still permit a last-resort U-turn on a dead-end road.
+for (const loop of [true,false]) {
+ const nodes=[
+  {lat:40,lon:-8},{lat:40,lon:-7.999},{lat:40,lon:-7.998},
+  {lat:40.0005,lon:-7.998},{lat:40,lon:-8.001}
+ ];
+ const edges=[
+  {from:0,to:1,road:0,distanceDecimeters:850,durationCentiseconds:1000},
+  {from:1,to:4,road:1,distanceDecimeters:1700,durationCentiseconds:600},
+  ...(loop?[
+   {from:1,to:2,road:2,distanceDecimeters:850,durationCentiseconds:1000},
+   {from:2,to:3,road:2,distanceDecimeters:550,durationCentiseconds:1000},
+   {from:3,to:4,road:2,distanceDecimeters:2000,durationCentiseconds:2000}
+  ]:[])
+ ];
+ const assets=createRoutingBuffers({nodes,edges,roads:[
+  {name:'Current direction'},{name:'Immediate reversal'},{name:'Forward junction loop'}
+ ]});
+ const directory=`${root}/${loop?'directional-loop':'directional-dead-end'}`;
+ await fs.mkdir(directory,{recursive:true});
+ for(const [name,value] of Object.entries(assets))
+  if(value instanceof ArrayBuffer)
+   await fs.writeFile(`${directory}/${name==='spatialIndex'?'spatial-index':name}.bin`,Buffer.from(value));
+}
 await fs.writeFile(`${root}/expected.json`,JSON.stringify(expected));
 const raw=`${root}/places.geojson`;
 await fs.writeFile(raw,JSON.stringify({type:'FeatureCollection',features:[
