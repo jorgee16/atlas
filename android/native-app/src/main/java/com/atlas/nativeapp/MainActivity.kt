@@ -442,10 +442,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         // can detach a search button between Android touch down and click.
         atlasMap.onMapSourceChanged = { updateMapSourceIndicators() }
         atlasMap.overviewInsets = {
-            if(landscape)intArrayOf(
+            if(landscape)OverviewLandscapeInsets.compute(
+                root.width,root.height,
                 maxOf(if(guidance.visibility==View.VISIBLE)guidance.right else 0,
-                    if(bottom.visibility==View.VISIBLE)bottom.right else 0)+ui.dp(20),
-                topInset+ui.dp(24),rightInset+ui.dp(80),bottomInset+ui.dp(160))
+                    if(bottom.visibility==View.VISIBLE)bottom.right else 0),
+                topInset,rightInset,bottomInset,ui.dp(1))
             else intArrayOf(leftInset+ui.dp(32),
                 // Reserve a fixed guidance-banner envelope in Overview.
                 // The next instruction/lanes can change banner height on a

@@ -605,6 +605,27 @@ class NavigationGpsReplayTest {
                 root.y in pos[1].toFloat()..(pos[1]+bottom.height).toFloat())
         }
         capture(s,"parked-landscape-no-reprojection")
+        // Regression: Overview for a long north/south route in a short/wide
+        // viewport must fit the full route in the map area RIGHT of the HUD.
+        // The landscape HUD is left-aligned, NOT a bottom-sheet overlay.
+        s.onActivity { map(it).overview() }
+        await("landscape Overview refits after orientation",12) {
+            val frame=snapshot(s)
+            frame.optString("cameraMode")=="OVERVIEW" &&
+                !frame.optBoolean("cameraPending",true)
+        }
+        val overview=snapshot(s)
+        val overviewInsets=overview.getJSONArray("cameraPadding")
+        val overviewHeight=overview.getInt("viewportHeight")
+        val usable=overviewHeight-overviewInsets.getDouble(1)-
+            overviewInsets.getDouble(3)
+        assertTrue("Overview must use most of the landscape map height, not "+
+            "reserve portrait bottom-sheet space: $overview",
+            usable>=overviewHeight*0.64)
+        assertEquals("all remaining route points must be inside Overview",
+            0,overview.getInt("remainingOutsideFraming"))
+        capture(s,"landscape-overview-full-height")
+        s.onActivity { map(it).recenter() }
         s.onActivity {
             it.requestedOrientation=android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
