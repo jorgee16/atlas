@@ -298,16 +298,73 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         throw IllegalStateException(
                             "Waiting for confirmed driving direction before rerouting; keeping the current route")
                     core.graph(regions.graph(liveOrigin, destination.coordinate()).path)
-                    val primary = JSONObject(core.route(liveOrigin, destination.coordinate(), snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
-                    core.remember(0); primary.put("key", 0).put("label", if (snapshot.avoidTolls) "Without tolls" else "Recommended")
+                    val primary = JSONObject(core.route(liveOrigin, destination.coordinate(),
+                        snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
+                    core.remember(0)
+                    primary.put("key",0)
+                        .put("label",if(snapshot.avoidTolls) "No tolls" else "Recommended")
+                        .put("avoidTolls",snapshot.avoidTolls)
                     val choices = mutableListOf(primary)
-                    if (!snapshot.walking && !snapshot.avoidTolls && primary.optDouble("tollEuros") > 0) {
-                        try {
-                            val alternative = JSONObject(core.route(liveOrigin, destination.coordinate(), false, true, 0.0, vehicleClass, routingHeading))
-                            if (alternative.getJSONArray("edgeIndexes").toString() != primary.getJSONArray("edgeIndexes").toString()) {
-                                core.remember(1); alternative.put("key", 1).put("label", "Without tolls"); choices.add(alternative)
+                    if (!snapshot.walking && !startAfter) {
+                        val baseSeconds=primary.optDouble("durationSeconds")
+                        val baseMeters=primary.optDouble("distanceMeters")
+                        fun addChoice(candidate: JSONObject, name: String,
+                                      avoid: Boolean): Int? {
+                            val edges=RouteChoices.edgeIndexes(candidate)
+                            if(!RouteChoices.distinctEdges(edges,
+                                choices.map(RouteChoices::edgeIndexes)) ||
+                                !RouteChoices.reasonableDetour(baseSeconds,baseMeters,
+                                    candidate.optDouble("durationSeconds"),
+                                    candidate.optDouble("distanceMeters"))) return null
+                            val key=choices.size
+                            core.remember(key)
+                            candidate.put("key",key).put("label",name)
+                                .put("avoidTolls",avoid)
+                            choices.add(candidate)
+                            return key
+                        }
+                        fun candidate(avoid: Boolean, seed: Int = -1,
+                                      penalty: Double = 0.0): JSONObject? = try {
+                            JSONObject(core.route(liveOrigin,destination.coordinate(),
+                                false,avoid,0.0,vehicleClass,routingHeading,
+                                seed,penalty))
+                        } catch (e: IllegalStateException) {
+                            if (e.message?.contains("cancel",true)==true) throw e
+                            null
+                        }
+                        // The default may be toll-free. When Avoid tolls is
+                        // selected, still look for the regular fastest option.
+                        var fastestKey: Int? = if(snapshot.avoidTolls) null else 0
+                        if (snapshot.avoidTolls) {
+                            candidate(false)?.let {
+                                fastestKey=addChoice(it,"Recommended",false)
                             }
-                        } catch (e: IllegalStateException) { if (e.message?.contains("cancel", true) == true) throw e }
+                        }
+                        val fastest=choices.firstOrNull {
+                            it.optInt("key",-1)==fastestKey
+                        }
+                        if (fastestKey!=null && fastest?.optBoolean("hasTolls")==true) {
+                            var tollAlternatives=0
+                            var alternateSeed=fastestKey!!
+                            // A* penalizes overlapping edges in its SEARCH
+                            // cost only; arrival time and roads stay factual.
+                            // Never fabricate an option if no distinct legal
+                            // motorway corridor exists in the installed graph.
+                            for (weight in listOf(110.0,300.0,550.0)) {
+                                if (tollAlternatives>=2) break
+                                val alternate=candidate(false,alternateSeed,weight) ?: continue
+                                if (!alternate.optBoolean("hasTolls")) continue
+                                val key=addChoice(alternate,
+                                    "Toll alternative ${tollAlternatives+1}",false)
+                                if(key!=null) {
+                                    tollAlternatives++
+                                    alternateSeed=key
+                                }
+                            }
+                        }
+                        if(!snapshot.avoidTolls) {
+                            candidate(true)?.let { addChoice(it,"No tolls",true) }
+                        }
                     }
                     core.activate(0)
                     Triple(choices,liveOrigin,routingHeading)
@@ -339,7 +396,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     lastSpoken = -1
                     state.update {
                         it.copy(route = choice, guidance = null,
-                            avoidTolls = choice.optString("label") == "Without tolls")
+                            avoidTolls = choice.optBoolean("avoidTolls",false))
                     }
                 }
             } catch (e: Throwable) {

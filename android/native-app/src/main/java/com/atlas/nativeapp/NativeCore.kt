@@ -12,7 +12,7 @@ class NativeCore : AutoCloseable {
     private external fun openGraph(handle: Long, directory: String)
     private external fun openSearch(handle: Long, directory: String)
     private external fun find(handle: Long, query: ByteArray, lat: Double, lon: Double, nearby: Boolean, category: String): ByteArray
-    private external fun calculate(handle: Long, a: Double, b: Double, c: Double, d: Double, walk: Boolean, avoid: Boolean, penalty: Double, vehicle: Int, heading: Double): ByteArray
+    private external fun calculate(handle: Long, a: Double, b: Double, c: Double, d: Double, walk: Boolean, avoid: Boolean, penalty: Double, vehicle: Int, heading: Double, alternativeSeedKey: Int, diversitySecondsPerKm: Double): ByteArray
     private external fun filter(handle: Long, lat: Double, lon: Double, accuracy: Double, speed: Double, heading: Double, time: Double): ByteArray
     private external fun update(handle: Long, lat: Double, lon: Double, accuracy: Double, speed: Double, time: Double): ByteArray
     fun remember(key: Int) = remember(handle, key)
@@ -22,9 +22,11 @@ class NativeCore : AutoCloseable {
     fun find(query: String, anchor: Coordinate, nearby: Boolean = false, category: String = "") =
         find(handle, query.toByteArray(Charsets.UTF_8), anchor.lat, anchor.lon, nearby, category).toString(Charsets.UTF_8)
     fun route(from: Coordinate, to: Coordinate, walking: Boolean, avoid: Boolean, penalty: Double, vehicle: Int,
-              heading: Double? = null) =
+              heading: Double? = null, alternativeSeedKey: Int = -1,
+              diversitySecondsPerKm: Double = 0.0) =
         calculate(handle, from.lat, from.lon, to.lat, to.lon, walking, avoid, penalty, vehicle,
-                  heading?.takeIf { it.isFinite() && it >= 0.0 } ?: -1.0).toString(Charsets.UTF_8)
+                  heading?.takeIf { it.isFinite() && it >= 0.0 } ?: -1.0,
+                  alternativeSeedKey, diversitySecondsPerKm).toString(Charsets.UTF_8)
     fun filter(fix: Fix): Fix {
         val result = org.json.JSONObject(filter(handle, fix.point.lat, fix.point.lon, fix.accuracy, fix.speed, fix.bearing ?: -1.0, fix.time).toString(Charsets.UTF_8))
         return fix.copy(speed = result.getDouble("speed"), bearing = if (result.isNull("heading")) null else result.getDouble("heading"),

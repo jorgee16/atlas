@@ -171,7 +171,9 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
                                               jdouble a, jdouble b, jdouble c,
                                               jdouble d, jboolean walk,
                                               jboolean avoid, jdouble penalty,
-                                              jint vehicle, jdouble gpsHeading) {
+                                              jint vehicle, jdouble gpsHeading,
+                                              jint alternateSeedKey,
+                                              jdouble diversitySecondsPerKm) {
   try {
     std::lock_guard<std::mutex> lock(gate);
     auto &e = engine(id);
@@ -182,6 +184,17 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     op.avoidTolls = avoid;
     op.penaltyMinutesPerEuro = penalty;
     op.vehicleClass = vehicle;
+    if (alternateSeedKey >= 0 && diversitySecondsPerKm > 0) {
+      if (!std::isfinite(diversitySecondsPerKm) ||
+          diversitySecondsPerKm > 1200.)
+        throw std::invalid_argument("Invalid alternative route weighting");
+      const auto previous = e.savedRoutes.find(alternateSeedKey);
+      if (previous == e.savedRoutes.end())
+        throw std::invalid_argument("Alternative seed route does not exist");
+      op.sharedEdgePenaltySecondsPerKm = diversitySecondsPerKm;
+      op.discouragedEdges.insert(previous->second.edges.begin(),
+                                previous->second.edges.end());
+    }
     auto generation = cancellationGeneration.load();
     op.cancelled = [generation] {
       return cancellationGeneration.load() != generation;

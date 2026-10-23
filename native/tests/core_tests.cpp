@@ -347,6 +347,32 @@ int main(int argc, char **argv) {
     }
     check(resumedAlong > 1.,
           "native guidance must advance once walking is confirmed");
+    // A* route alternatives must change actual edges, not just labels.
+    RouteOptions diverse;
+    diverse.sharedEdgePenaltySecondsPerKm = 600.0;
+    diverse.discouragedEdges.insert(drive->edges.begin(),drive->edges.end());
+    auto otherCorridor = route(graph,0,2,diverse);
+    check(otherCorridor && otherCorridor->edges != drive->edges,
+          "overlap penalty chooses a distinct legal corridor");
+    check(otherCorridor->seconds > drive->seconds,
+          "route search penalties must NOT contaminate actual ETA");
+    RouteOptions noDiversity;
+    noDiversity.discouragedEdges=diverse.discouragedEdges;
+    check(route(graph,0,2,noDiversity)->edges == drive->edges,
+          "zero diversity penalty retains the real fastest route");
+    Route named;
+    named.meters=110000;
+    Leg firstRoad{}; firstRoad.distance=26000;firstRoad.road.ref="A8";
+    Leg secondRoad{};secondRoad.distance=16000;secondRoad.road.ref="IC17";
+    Leg thirdRoad{};thirdRoad.distance=51000;thirdRoad.road.ref="A5; EN 9-2";
+    Leg lastRoad{};lastRoad.distance=13000;lastRoad.road.ref="EN360";
+    named.legs={firstRoad,secondRoad,thirdRoad,lastRoad};
+    const auto names=principalRoadRefs(named);
+    check(names.size()==4 && names[0]=="A8" && names[1]=="IC17" &&
+          names[2]=="A5" && names[3]=="EN9-2",
+          "brief signed motorway/IC/national references remain in travel order");
+    check(routeJson(named).find("\\\"mainRoads\\\":[")!=std::string::npos,
+          "main road references are serialized for Kotlin");
     auto originalSeconds = drive->seconds;
     calibrateDriveEta(*drive, graph);
     check(drive->seconds > originalSeconds,

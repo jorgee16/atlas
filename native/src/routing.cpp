@@ -3,6 +3,7 @@
 #include <cctype>
 #include <cmath>
 #include <map>
+#include <unordered_set>
 #include <queue>
 #include <sstream>
 #include <stdexcept>
@@ -354,6 +355,8 @@ double tollRate(std::string ref, int cls) {
 std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
                            const RouteOptions &op) {
   if (start >= g.nodeCount() || goal >= g.nodeCount() ||
+      !std::isfinite(op.sharedEdgePenaltySecondsPerKm) ||
+      op.sharedEdgePenaltySecondsPerKm < 0 ||
       !std::isfinite(op.penaltyMinutesPerEuro) || op.penaltyMinutesPerEuro < 0)
     throw std::invalid_argument("Invalid routing options");
   if (g.component(start) != g.component(goal))
@@ -531,6 +534,14 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
                            tollRate(g.road(e.road).ref, op.vehicleClass) *
                            op.penaltyMinutesPerEuro * 6000)
               : 0;
+      if (op.profile == Profile::drive &&
+          op.sharedEdgePenaltySecondsPerKm > 0 &&
+          op.discouragedEdges.count(i) != 0) {
+        // Penalize overlap in A* search, not real driving time/ETA.
+        // A physically legal alternative may share the first/last road.
+        penalty += std::round(e.distanceDm / 10000. *
+                              op.sharedEdgePenaltySecondsPerKm * 100.);
+      }
       if (op.profile == Profile::drive && op.initialEdge && item.state >= n &&
           predecessors[item.state] == int64_t(start) && incomingFrom >= 0 &&
           !(g.roadFlags(uint32_t(incomingRoad)) & 1) && !(flags & 1)) {
@@ -598,6 +609,63 @@ std::optional<Route> routeFromPosition(const Graph &g, Point from, Point to,
   }
   return {};
 }
+std::vector<std::string> principalRoadRefs(const Route &r,
+                                           std::size_t limit) {
+  struct Frequency { std::size_t first; double meters; };
+  std::map<std::string, Frequency> refs;
+  for (std::size_t i = 0; i < r.legs.size(); ++i) {
+    std::string chunk;
+    const auto add = [&]() {
+      std::string key;
+      for (unsigned char c : chunk)
+        if (!std::isspace(c)) key += char(std::toupper(c));
+      chunk.clear();
+      // Only genuine signed highway references, not arbitrary road names.
+      const std::string prefixes[] = {"IC","IP","EN","A","N"};
+      bool validRef = false;
+      for (const auto &prefix : prefixes) {
+        if (key.size() <= prefix.size() ||
+            key.compare(0,prefix.size(),prefix) != 0) continue;
+        const auto suffix = key.substr(prefix.size());
+        validRef = std::isdigit(static_cast<unsigned char>(suffix.front())) &&
+            std::isdigit(static_cast<unsigned char>(suffix.back())) &&
+            std::all_of(suffix.begin(),suffix.end(),
+                        [](unsigned char c) {
+                          return std::isdigit(c) != 0 || c == '-';
+                        });
+        break;
+      }
+      if (!validRef) return;
+      auto it = refs.find(key);
+      if (it == refs.end()) refs.emplace(key,Frequency{i,r.legs[i].distance});
+      else it->second.meters += r.legs[i].distance;
+    };
+    for (const char c : r.legs[i].road.ref) {
+      if (c == ';' || c == ',' || c == '/') add();
+      else chunk += c;
+    }
+    add();
+  }
+  if (!limit || refs.empty()) return {};
+  const double cutoff = std::min(5000.,std::max(500.,r.meters*0.015));
+  std::vector<std::pair<std::string,Frequency>> options(refs.begin(),refs.end());
+  const auto substantial = std::count_if(options.begin(),options.end(),
+      [&](const auto &v) {return v.second.meters >= cutoff;});
+  if (substantial) options.erase(
+      std::remove_if(options.begin(),options.end(),
+        [&](const auto &v) {return v.second.meters < cutoff;}),
+      options.end());
+  std::sort(options.begin(),options.end(),[](const auto &a,const auto &b) {
+    return a.second.meters > b.second.meters;
+  });
+  if (options.size() > limit) options.resize(limit);
+  std::sort(options.begin(),options.end(),[](const auto &a,const auto &b) {
+    return a.second.first < b.second.first;
+  });
+  std::vector<std::string> result;
+  for (const auto &entry : options) result.push_back(entry.first);
+  return result;
+}
 std::string routeJson(const Route &r) {
   std::ostringstream s;
   s.precision(12);
@@ -632,7 +700,16 @@ std::string routeJson(const Route &r) {
     s << r.legs[i].first;
     protectedPointWritten = true;
   }
-  s << "],\"edgeIndexes\":[";
+  s << "],\"mainRoads\":[";
+  const auto roadRefs = principalRoadRefs(r);
+  for (std::size_t i=0;i<roadRefs.size();++i) {
+    if (i) s << ',';
+    s << jsonString(roadRefs[i]);
+  }
+  const bool hasTolls = std::any_of(r.legs.begin(),r.legs.end(),
+      [](const Leg &leg) {return (leg.road.flags & 4) != 0;});
+  s << "],\"hasTolls\":" << (hasTolls?"true":"false")
+    << ",\"edgeIndexes\":[";
   for (std::size_t i = 0; i < r.edges.size(); ++i) {
     if (i)
       s << ',';

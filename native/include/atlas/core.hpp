@@ -2,6 +2,7 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <unordered_set>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -113,9 +114,15 @@ struct RouteOptions {
   uint32_t maxExpanded = 2000000;
   std::optional<uint32_t> initialEdge;
   std::optional<Point> initialSnap;
+  // Non-negative soft cost for edges from another saved alternative.
+  // Routing restrictions, headings and walking profile are unchanged.
+  std::unordered_set<uint32_t> discouragedEdges;
+  double sharedEdgePenaltySecondsPerKm = 0;
   std::function<bool()> cancelled;
 };
 double tollRate(std::string reference, int vehicleClass);
+std::vector<std::string> principalRoadRefs(const Route &route,
+                                           std::size_t limit = 4);
 std::optional<Route> route(const Graph &graph, uint32_t start, uint32_t goal,
                            const RouteOptions &options = {});
 // A known GPS heading is a hard directed-road start constraint, not a hint.
