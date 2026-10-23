@@ -1236,8 +1236,8 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 override fun onMeasure(widthMeasureSpec:Int,heightMeasureSpec:Int) {
                     val screen=root.height.takeIf{it>0}
                         ?:resources.displayMetrics.heightPixels
-                    val arrivalHeight=if(bottom.visibility==View.VISIBLE)
-                        maxOf(bottom.height,ui.dp(94)) else 0
+                    val arrivalHeight=if(this@MainActivity.bottom.visibility==View.VISIBLE)
+                        maxOf(this@MainActivity.bottom.height,ui.dp(94)) else 0
                     val limit=(screen-topInset-bottomInset-ui.dp(40)-
                         arrivalHeight).coerceAtLeast(ui.dp(90))
                     super.onMeasure(widthMeasureSpec,
