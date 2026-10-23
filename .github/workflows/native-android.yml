@@ -453,9 +453,23 @@ jobs:
           emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: bash tools/atlas-android-release-upgrade.sh
+      # Keep the validated, signed APK accessible even when GitHub Releases
+      # rejects publication. Publishing failure must still fail the job.
+      - name: Preserve validated signed APK before Release publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-native-signed-release-apk
+          path: |
+            dist/android-validated/Atlas-v*.apk
+            dist/android-validated/Atlas-v*.apk.sha256
+            dist/android-validated/release-manifest.json
+          compression-level: 0
+          if-no-files-found: error
       - name: Publish signed APK directly to GitHub Releases
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Optional fine-grained PAT with repository Contents: write, for
+          # installations where Actions' GITHUB_TOKEN is refused by Releases.
+          GH_TOKEN: ${{ secrets.ATLAS_RELEASE_PUBLISH_TOKEN || github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
@@ -467,10 +481,29 @@ jobs:
             echo "::error::Refusing to overwrite existing release $tag"
             exit 1
           fi
-          gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
-            --target "$GITHUB_SHA" --title "Atlas v$RELEASE_VERSION" \
-            --notes "Signed Android Release (versionCode $RELEASE_CODE). Native C++ tests, Android navigation/GPS emulator tests, certificate and in-place-upgrade checks passed. Preserve this signing key for future updates." \
-            --prerelease
+          # A previous Release succeeded with contents:write; a later run
+          # received HTTP 403 from the same endpoint. Retry transient failures
+          # without ever overwriting a published tag or changing signing keys.
+          published=false
+          for attempt in 1 2 3; do
+            if gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
+                --target "$GITHUB_SHA" --title "Atlas v$RELEASE_VERSION" \
+                --notes "Signed Android Release (versionCode $RELEASE_CODE). Native C++ tests, Android navigation/GPS emulator tests, certificate and in-place-upgrade checks passed. Preserve this signing key for future updates." \
+                --prerelease; then
+              published=true
+              break
+            fi
+            # Never try to overwrite a partially-created Release.
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "::error::Release tag exists after a failed upload; manual inspection required."
+              exit 1
+            fi
+            if (( attempt < 3 )); then sleep $(( attempt * 10 )); fi
+          done
+          if [[ "$published" != true ]]; then
+            echo "::error::GitHub Releases denied publication (HTTP 403). The validated, signed APK is preserved as the Atlas-native-signed-release-apk workflow artifact. If this is an integration-permission restriction, configure ATLAS_RELEASE_PUBLISH_TOKEN (fine-grained Contents: write) in repository Actions secrets."
+            exit 1
+          fi
           echo "APK: https://github.com/$GH_REPO/releases/download/$tag/Atlas-v$RELEASE_VERSION.apk" >> "$GITHUB_STEP_SUMMARY"
       - name: Remove temporary keystore
         if: always()
