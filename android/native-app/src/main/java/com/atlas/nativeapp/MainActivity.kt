@@ -519,16 +519,19 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
         val handled=super.dispatchTouchEvent(event)
         if(event.actionMasked==MotionEvent.ACTION_UP || event.actionMasked==MotionEvent.ACTION_CANCEL) {
-            // View posts PerformClick from ACTION_UP. Keep the pressed control
-            // attached while already-queued GPS/guidance callbacks run before
-            // that click; clearing here allowed them to remove its target.
+            // Android View posts PerformClick from ACTION_UP. With a 1 Hz
+            // GNSS fix or a blackout prediction already queued on the UI
+            // thread, a root.post refresh can run BEFORE PerformClick and
+            // detach the exact GPS/zoom/overview button that was pressed.
+            // Keep the pressed view stable through the next click frame.
+            // This defers ONLY visual chrome changes, not GPS/JNI/navigation.
             val generation=navigationTouchGeneration
-            root.post {
+            handler.postDelayed({
                 if(generation==navigationTouchGeneration) {
                     navigationTouch=false
                     if(deferredChrome) { deferredChrome=false;render(model.updates.value) }
                 }
-            }
+            }, 90L)
         }
         return handled
     }
