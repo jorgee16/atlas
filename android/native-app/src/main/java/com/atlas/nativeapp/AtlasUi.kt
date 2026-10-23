@@ -174,7 +174,7 @@ class AtlasIcon(context: Context, var name: String, var tint: Int) : View(contex
                 p.alpha=255
                 val ramp=Path().apply {
                     moveTo(12f,22f);lineTo(12f,17f)
-                    cubicTo(12f,12f,15f*if(right)1f else .6f,11f,12f+direction*8f,5f)
+                    cubicTo(12f,12f,if(right) 15f else 9f,11f,12f+direction*8f,5f)
                 }
                 canvas.drawPath(ramp,p)
                 line(12f+direction*1.5f,5f,12f+direction*8f,5f,

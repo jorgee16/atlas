@@ -999,7 +999,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val instruction=GuidanceInstructionPresentation.format(
             maneuver?.optString("instruction"))
         val rawInstruction=maneuver?.optString("instruction").orEmpty()
+        // A roundabout 70 km away is a future maneuver, not an imminent turn.
+        val farAhead=distance>5_000.0 && type!="arrive" && type!="depart"
         val icon=when {
+            farAhead -> "arrow"
             type=="roundabout" -> "roundabout"
             rawInstruction.startsWith("Take the ramp",ignoreCase=true) ->
                 if(type.contains("left"))"exit-left" else "exit-right"
@@ -1023,15 +1026,16 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 addView(ui.space(9))
                 // Action first, destination/road references beneath it. Never
                 // display raw semicolon-delimited OSM destination tags.
-                addView(ui.text(instruction.action,17f,Color.WHITE,true).apply{maxLines=2})
-                instruction.destination?.let { destination ->
+                addView(ui.text(if(farAhead)"Continue on your route" else instruction.action,
+                    17f,Color.WHITE,true).apply{maxLines=2})
+                (if(farAhead)"Next: ${instruction.action}" else instruction.destination)?.let { destination ->
                     addView(ui.space(6))
                     addView(ui.text(destination,13f,Color.rgb(226,235,248)).apply {
                         maxLines=3
                         ellipsize=android.text.TextUtils.TruncateAt.END
                     })
                 }
-                if(type=="roundabout") {
+                if(type=="roundabout" && !farAhead) {
                     val exitNumber=maneuver?.optInt("exitNumber",0) ?: 0
                     if(exitNumber in 1..20) addView(
                         ui.text("EXIT $exitNumber",15f,Color.WHITE,true).apply {
@@ -1039,7 +1043,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                             setPadding(ui.dp(12),ui.dp(8),ui.dp(12),ui.dp(8))
                         },linear(11))
                 }
-                if(!s.walking && distance<=500.0) {
+                if(!s.walking && !farAhead && distance<=500.0) {
                     val laneGuide=LaneGuidance.parse(maneuver?.optString("turnLanes").orEmpty(),type)
                     if(laneGuide!=null) {
                         addView(ui.text(if(laneGuide.hasRecommendation)"Recommended lanes"

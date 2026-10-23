@@ -14,8 +14,8 @@ internal class AtlasLaneIcon(context:Context,private val directions:String,
         val arrows=directions.filter { it!='·' }.take(3)
         if(arrows.isEmpty())return
         canvas.save()
-        val unit=height/24f
         val span=width/arrows.length.toFloat()
+        val unit=kotlin.math.min(height/24f,span/24f)
         val paint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style=Paint.Style.STROKE
             strokeWidth=(2.15f*unit).coerceAtLeast(1.8f)
