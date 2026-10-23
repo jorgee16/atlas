@@ -338,8 +338,23 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         map?.cancelTransitions()
         applyCameraMode()
     }
-    private fun followPadding(s: AtlasState): DoubleArray = doubleArrayOf(0.0,
-        if(s.navigating && headingUp)view.height*.30 else 0.0,0.0,0.0)
+    private fun followPadding(s: AtlasState): DoubleArray =
+        NavigationFollowFraming.padding(view.width,view.height,
+            s.navigating,headingUp,view.width > view.height)
+
+    /**
+     * Orientation is a VIEWPORT change, never a fresh GPS epoch.
+     * Keep the same render interpolator, stationary anchor, last visible
+     * coordinate and native guidance. Only camera padding is reapplied.
+     */
+    internal fun onViewportConfigurationChanged() {
+        view.post {
+            cameraState.viewportChanged()
+            applyCameraMode()
+            updatePositionPlacement()
+            if(current?.navigating==true) scheduleNavigationFrame()
+        }
+    }
 
     /** Only current JNI guidance may set a new camera target. Never use a
      * predicted/stale fix to trigger a dramatic zoom during rerouting or GPS loss.

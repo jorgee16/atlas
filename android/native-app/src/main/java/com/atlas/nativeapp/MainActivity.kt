@@ -3,6 +3,7 @@ package com.atlas.nativeapp
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.res.Configuration
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.widget.ImageView
@@ -499,6 +500,17 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             }
         }
     }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Android retains this Activity/MapLibre instance for screen rotation.
+        // Reflow panels only: no GPS/filter reset, no re-matching and no
+        // fresh navigation-start epoch for an unchanged real fix.
+        rebuildChrome()
+        root.post {
+            layoutChrome()
+            atlasMap.onViewportConfigurationChanged()
+        }
+    }
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if(event.actionMasked==MotionEvent.ACTION_DOWN) {
             lastTouch=System.currentTimeMillis()
@@ -526,13 +538,26 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         (top.layoutParams as FrameLayout.LayoutParams).apply { width=if(landscape)ui.dp(350) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12) }.also{top.layoutParams=it}
         (bottom.layoutParams as FrameLayout.LayoutParams).apply {
             width=if(landscape)ui.dp(355) else -1
-            gravity=Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            leftMargin=if(landscape)0 else left
+            gravity=Gravity.BOTTOM or if(landscape)Gravity.START else Gravity.CENTER_HORIZONTAL
+            leftMargin=left
             rightMargin=if(landscape)0 else right
             bottomMargin=bottomInset+if(landscape||model.updates.value.navigating)ui.dp(12) else ui.dp(100)
         }.also{bottom.layoutParams=it}
         (navigation.layoutParams as FrameLayout.LayoutParams).apply {width=if(landscape)ui.dp(300) else -1;gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.CENTER_HORIZONTAL;leftMargin=left;rightMargin=right;bottomMargin=bottomInset+ui.dp(14)}.also{navigation.layoutParams=it}
-        (guidance.layoutParams as FrameLayout.LayoutParams).apply{width=if(landscape)ui.dp(360) else -1;leftMargin=left;rightMargin=right;topMargin=topInset+ui.dp(12)}.also{guidance.layoutParams=it}
+        (guidance.layoutParams as FrameLayout.LayoutParams).apply {
+            val state=model.updates.value
+            val upcoming=state.route?.optJSONArray("maneuvers")
+                ?.optJSONObject(state.guidance?.optInt("maneuver") ?: 0)
+            val hasLanes=landscape && state.navigating && !state.walking &&
+                (state.guidance?.optDouble("toManeuver",Double.POSITIVE_INFINITY)
+                    ?: Double.POSITIVE_INFINITY)<=500.0 &&
+                LaneGuidance.parse(upcoming?.optString("turnLanes").orEmpty(),
+                    upcoming?.optString("type").orEmpty())!=null
+            width=if(landscape)ui.dp(if(hasLanes)430 else 360) else -1
+            leftMargin=left
+            rightMargin=if(landscape)0 else right
+            topMargin=topInset+ui.dp(12)
+        }.also{guidance.layoutParams=it}
         (controls.layoutParams as FrameLayout.LayoutParams).apply {
             val state=model.updates.value
             val planning=state.tab=="Navigation"&&!state.navigating&&!fullMap
@@ -1085,6 +1110,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private fun renderGuidance(s: AtlasState) {
         guidance.removeAllViews();guidance.visibility=if(s.navigating&&page==null)View.VISIBLE else View.GONE
         if(!s.navigating)return
+        val guidanceContent=if(landscape)ui.column() else guidance
         val index=s.guidance?.optInt("maneuver")?:0
         val maneuver=s.route?.optJSONArray("maneuvers")?.optJSONObject(index)
         val distance=s.guidance?.optDouble("toManeuver")?:0.0
@@ -1092,6 +1118,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val instruction=GuidanceInstructionPresentation.format(
             maneuver?.optString("instruction"))
         val rawInstruction=maneuver?.optString("instruction").orEmpty()
+        val laneGuide=if(!s.walking && distance<=500.0)
+            LaneGuidance.parse(maneuver?.optString("turnLanes").orEmpty(),type)
+            else null
+        val compactLanes=landscape && laneGuide!=null
         // A roundabout 70 km away is a future maneuver, not an imminent turn.
         val farAhead=distance>5_000.0 && type!="arrive" && type!="depart"
         val icon=when {
@@ -1137,9 +1167,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                         })
                     }
                 }
-                if(!s.walking && !farAhead && distance<=500.0) {
-                    val laneGuide=LaneGuidance.parse(maneuver?.optString("turnLanes").orEmpty(),type)
-                    if(laneGuide!=null) {
+                if(!compactLanes && laneGuide!=null && !farAhead) {
                         addView(ui.text(if(laneGuide.hasRecommendation)"Recommended lanes"
                             else "Lane directions",12f,Color.rgb(226,235,248),true),linear(13))
                         addView(ui.row().apply {
@@ -1156,15 +1184,37 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                                 })
                             }
                         },linear(7))
-                    }
                 }
-            },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(18)})
-        };guidance.addView(banner)
+            },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(if(compactLanes)10 else 18)})
+            // In landscape the lanes live BESIDE the instruction, not below
+            // it. Their appearance must not increase the banner's height and
+            // push it onto the bottom-left arrival HUD.
+            if(compactLanes && !farAhead) {
+                addView(ui.column().apply {
+                    addView(ui.text("LANES",10f,Color.rgb(226,235,248),true))
+                    addView(ui.row().apply {
+                        laneGuide!!.lanes.forEach { lane ->
+                            val bg=if(lane.recommended)Color.rgb(23,132,104)
+                                else Color.rgb(44,62,88)
+                            val arrow=AtlasLaneIcon(this@MainActivity,lane.symbols,
+                                Color.WHITE).apply {
+                                background=ui.shape(bg,7)
+                                contentDescription=if(lane.recommended)
+                                    "Recommended lane: ${lane.description}"
+                                    else "Lane: ${lane.description}"
+                            }
+                            addView(arrow,LinearLayout.LayoutParams(0,ui.dp(34),1f)
+                                .apply{rightMargin=ui.dp(2)})
+                        }
+                    },linear(4))
+                },LinearLayout.LayoutParams(ui.dp(116),-2).apply{leftMargin=ui.dp(6)})
+            }
+        };guidanceContent.addView(banner)
         val accessGap=s.route?.optDouble("destinationAccessMeters",0.0)?:0.0
         val remaining=s.guidance?.optDouble("remaining",Double.POSITIVE_INFINITY)
             ?:Double.POSITIVE_INFINITY
         if(remaining<=350.0)RoadsideArrivalNotice.text(accessGap)?.let { notice ->
-            guidance.addView(ui.text(notice,12f,ui.ink,true).apply{
+            guidanceContent.addView(ui.text(notice,12f,ui.ink,true).apply{
                 background=ui.shape(ui.surface,14)
                 setPadding(ui.dp(12),ui.dp(9),ui.dp(12),ui.dp(9))
             },linear(9))
@@ -1173,11 +1223,33 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             s.guidance?.optString("state"),
             s.fix?.accuracy,
             s.guidance?.optBoolean("offRouteConfirmed",false)==true)
-        if(guidanceStatus!=null) guidance.addView(ui.text(
+        if(guidanceStatus!=null) guidanceContent.addView(ui.text(
             guidanceStatus,12f,ui.ink,true).apply {
                 background=ui.shape(ui.surface,14)
                 setPadding(ui.dp(14),ui.dp(11),ui.dp(14),ui.dp(11))
             },linear(9))
+        if(landscape) {
+            // On short/wide displays the text and optional confidence warning
+            // must NEVER overlay the arrival HUD. Scroll only if content
+            // exceeds the space physically available above the lower card.
+            val scroll=object: ScrollView(this@MainActivity) {
+                override fun onMeasure(widthMeasureSpec:Int,heightMeasureSpec:Int) {
+                    val screen=root.height.takeIf{it>0}
+                        ?:resources.displayMetrics.heightPixels
+                    val arrivalHeight=if(bottom.visibility==View.VISIBLE)
+                        maxOf(bottom.height,ui.dp(94)) else 0
+                    val limit=(screen-topInset-bottomInset-ui.dp(40)-
+                        arrivalHeight).coerceAtLeast(ui.dp(90))
+                    super.onMeasure(widthMeasureSpec,
+                        View.MeasureSpec.makeMeasureSpec(limit,View.MeasureSpec.AT_MOST))
+                }
+            }.apply {
+                isVerticalScrollBarEnabled=false
+                isFillViewport=false
+                addView(guidanceContent)
+            }
+            guidance.addView(scroll,LinearLayout.LayoutParams(-1,-2))
+        }
     }
     private fun endNavigation() {
         selectedPlace = null

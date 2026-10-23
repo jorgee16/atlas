@@ -553,6 +553,71 @@ class NavigationGpsReplayTest {
         }
         capture(s,"parked-car-indoor-no-phantom-travel")
     }
+    /**
+     * A real screen rotation while parked must NEVER be interpreted as a
+     * new navigation-start epoch, GNSS movement or accepted road projection.
+     * Check Android View identity, rendered coordinate and real GPS fix time.
+     */
+    private fun parkedRotationSmoke(s:ActivityScenario<MainActivity>) {
+        phase="parked-rotation"
+        val before=snapshot(s)
+        val anchor=Coordinate(before.getDouble("renderLat"),before.getDouble("renderLon"))
+        val gpsTime=before.getDouble("fixTime")
+        var originalActivity: MainActivity?=null
+        s.onActivity { a ->
+            originalActivity=a
+            a.requestedOrientation=android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+        await("landscape viewport should reflow without Activity restart",20) {
+            val f=snapshot(s);f.getInt("viewportWidth")>f.getInt("viewportHeight")
+        }
+        s.onActivity { a ->
+            assertSame("screen rotation must not replace the Activity or JNI visual anchor",
+                originalActivity,a)
+        }
+        SystemClock.sleep(500)
+        val sideways=snapshot(s)
+        assertEquals("orientation cannot manufacture a new GPS fix",gpsTime,
+            sideways.getDouble("fixTime"),0.0)
+        assertTrue("landscape must preserve the stationary measured cursor",
+            distance(anchor,Coordinate(sideways.getDouble("renderLat"),
+                sideways.getDouble("renderLon")))<1.0)
+        val pad=sideways.getJSONArray("cameraPadding")
+        assertEquals(sideways.getInt("viewportWidth")*.18,pad.getDouble(0),2.0)
+        assertEquals(sideways.getInt("viewportHeight")*.24,pad.getDouble(3),2.0)
+        s.onActivity { a ->
+            val bottomField=MainActivity::class.java.getDeclaredField("bottom")
+                .apply{isAccessible=true}
+            val guidanceField=MainActivity::class.java.getDeclaredField("guidance")
+                .apply{isAccessible=true}
+            val bottom=bottomField.get(a) as android.view.View
+            val guidance=guidanceField.get(a) as android.view.View
+            assertTrue("HUD must be visible in landscape",bottom.visibility==android.view.View.VISIBLE)
+            assertTrue("guidance and HUD must not overlap",
+                guidance.bottom + 8*a.resources.displayMetrics.density < bottom.top)
+            val cursor=map(a).debugCursorScreenCenter()!!
+            val root=android.graphics.PointF(cursor.x,cursor.y)
+            val pos=IntArray(2);bottom.getLocationOnScreen(pos)
+            assertFalse("cursor cannot be covered by landscape HUD",
+                root.x in pos[0].toFloat()..(pos[0]+bottom.width).toFloat() &&
+                root.y in pos[1].toFloat()..(pos[1]+bottom.height).toFloat())
+        }
+        capture(s,"parked-landscape-no-reprojection")
+        s.onActivity {
+            it.requestedOrientation=android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+        await("portrait viewport restored",20) {
+            val f=snapshot(s);f.getInt("viewportHeight")>f.getInt("viewportWidth")
+        }
+        SystemClock.sleep(500)
+        val portrait=snapshot(s)
+        assertEquals(gpsTime,portrait.getDouble("fixTime"),0.0)
+        assertTrue("returning to portrait cannot create movement",
+            distance(anchor,Coordinate(portrait.getDouble("renderLat"),
+                portrait.getDouble("renderLon")))<1.0)
+        capture(s,"parked-portrait-no-reprojection")
+    }
+
     private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
         phase="camera-smoke"
         val path=points(route)
@@ -826,6 +891,7 @@ class NavigationGpsReplayTest {
                     .any{it.optString("type")=="roundabout"})
                 if(cameraOnly) {
                     verifyParkedCarWithBadGps(s,drive)
+                    parkedRotationSmoke(s)
                     cameraSmoke(s,drive)
                     val walk=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.7224,-9.1475),true)
                     verifyStationaryWalker(s,walk)
