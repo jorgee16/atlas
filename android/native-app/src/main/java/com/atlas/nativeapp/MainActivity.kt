@@ -85,6 +85,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     private var page: String? = null
     private var pageKey: List<Any?>? = null
     private var lastChrome: List<Any?>? = null
+    // Navigation guidance can update each second (and during long GPS gaps).
+    // Never detach toolbar controls for a distance/ETA-only frame.
+    private var lastControlsChrome: List<Any?>? = null
     private var searchInput: EditText? = null
     private var searchTarget = "destination"
     private var selectedPlace: JSONObject? = null
@@ -573,7 +576,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         pageLayer.setPadding(leftInset,topInset,rightInset,if(page=="trips")bottomInset+ui.dp(91) else bottomInset)
     }
     private fun linear(top: Int = 0) = LinearLayout.LayoutParams(-1,-2).apply{topMargin=ui.dp(top)}
-    private fun rebuildChrome(){lastChrome=null;render(model.updates.value)}
+    private fun rebuildChrome(){
+        lastChrome=null
+        lastControlsChrome=null
+        render(model.updates.value)
+    }
     private fun render(state: AtlasState) {
         syncNavigationService(state.navigating)
         atlasMap.sourceMode = model.mapSourceMode
@@ -587,7 +594,26 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val chrome=listOf(state.tab,state.destination,state.route,state.guidance,state.mode,state.arrived,state.busy,state.navigating,state.routeOptions,state.journeys,state.journeyLeg,state.revision,state.downloading,state.downloadPercent,state.exploreResults,state.searching,state.searchError,selectedPlace,previewCollapsed,trailExpanded,selectedTrailId,pendingTrail?.id,model.mapVisualStyle,fullMap,hasLocation(),atlasMap.follow,atlasMap.headingUp)
         if(chrome!=lastChrome) {
             if(navigationTouch)deferredChrome=true
-            else {lastChrome=chrome;renderTop(state);renderControls(state);renderBottom(state);renderTabs(state);renderGuidance(state);layoutChrome()}
+            else {
+                lastChrome=chrome
+                renderTop(state)
+                // Keep the actual View instances for camera/zoom/diagnostic
+                // buttons while 1 Hz guidance and GNSS-blackout prediction
+                // replace unrelated HUD text. An Android DOWN/UP gesture
+                // needs to finish on the same clickable View.
+                val controlsChrome=listOf(
+                    state.navigating,state.tab,page,fullMap,trailExpanded,
+                    atlasMap.follow,atlasMap.headingUp,model.diagnosticsEnabled,
+                    model.mapVisualStyle,hasLocation(),landscape)
+                if (controlsChrome!=lastControlsChrome) {
+                    lastControlsChrome=controlsChrome
+                    renderControls(state)
+                }
+                renderBottom(state)
+                renderTabs(state)
+                renderGuidance(state)
+                layoutChrome()
+            }
         }
         if(state.route!==lastRoute) {
             lastRoute=state.route
