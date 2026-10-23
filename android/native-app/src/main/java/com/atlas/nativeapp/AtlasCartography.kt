@@ -177,6 +177,9 @@ internal object AtlasCartography {
                 .withSourceLayer("poi")
                 .withProperties(
                     PropertyFactory.textField("{name}"),
+                    // Match the existing OpenFreeMap glyph endpoint. The SDK's
+                    // default Open Sans/Arial stack is unavailable there (404).
+                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
                     PropertyFactory.textSize(10.5f),
                     PropertyFactory.textColor("#C2D3E0"),
                     PropertyFactory.textHaloColor("#172635"),
@@ -206,3 +209,4 @@ internal object AtlasCartography {
         }
     }
 }
+

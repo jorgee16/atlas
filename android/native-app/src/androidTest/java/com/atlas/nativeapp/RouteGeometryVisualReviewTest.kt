@@ -82,6 +82,18 @@ class RouteGeometryVisualReviewTest {
             }
             roads
         }
+        if(name.startsWith("lisbon-"))waitFor("Real named labels must render in $name") {
+            var labels=false
+            s.onActivity { a ->
+                val m=map(atlas(a))
+                val ids=m.style!!.layers.filterIsInstance<org.maplibre.android.style.layers.SymbolLayer>().map { it.id }.toTypedArray()
+                labels=ids.isNotEmpty() && m.queryRenderedFeatures(android.graphics.RectF(0f,0f,
+                    atlas(a).view.width.toFloat(),atlas(a).view.height.toFloat()),*ids).any {
+                        it.hasProperty("name") && it.getStringProperty("name").isNotBlank()
+                    }
+            }
+            labels
+        }
         SystemClock.sleep(400)
         val latch=CountDownLatch(1)
         var image:Bitmap?=null
@@ -250,7 +262,8 @@ class RouteGeometryVisualReviewTest {
                                         }
                                     }
                                     val name="${road.name}-${if(dark)"dark" else "light"}-$source-z${zoom.toInt()}-$variant"
-                                    snapshot(s,name)
+                                    val routeSample=prepared.points.minByOrNull { RouteVisualSmoothing.distance(it,raw[centreIndex]) }!!
+                                    snapshot(s,name,if(variant=="after")listOf(routeSample to android.graphics.Color.rgb(49,94,251)) else emptyList())
                                     if(road===cases.first() && source==MapSourcePolicy.OFFLINE && zoom==18.0 && variant=="after") {
                                         val immutable=prepared.points
                                         val chunks=RouteVisualChunks.prepare(prepared.points)
@@ -296,7 +309,8 @@ class RouteGeometryVisualReviewTest {
                                     map(atlas(a)).moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
                                         .target(raw[centreIndex]).zoom(17.0).tilt(0.0).bearing(0.0).padding(0.0,0.0,0.0,0.0).build())) }
                                 val name="${road.name}-${if(dark)"dark" else "light"}-$source-z17-navigation-after"
-                                snapshot(s,name)
+                                val routeSample=prepared.points.minByOrNull { RouteVisualSmoothing.distance(it,raw[centreIndex]) }!!
+                                snapshot(s,name,listOf(routeSample to android.graphics.Color.rgb(49,94,251)))
                                 navigationImages.put(name)
                                 s.onActivity { a -> atlas(a).onMapSourceChanged=onSource;atlas(a).render(model.updates.value) }
                                 waitFor("exploration style must be restored") {

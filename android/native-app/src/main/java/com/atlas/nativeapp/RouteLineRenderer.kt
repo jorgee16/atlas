@@ -56,7 +56,11 @@ internal class RouteLineRenderer(
     private fun add(suffix: String, width: Float, color: Int): LineLayer {
         val layer = LineLayer("$id-$suffix", sourceId).withProperties(
             lineWidth(width), lineColor(color), lineJoin(Property.LINE_JOIN_ROUND), lineCap(Property.LINE_CAP_ROUND))
-        val labels = style.layers.firstOrNull { it is SymbolLayer }?.id
+        // Some online styles interleave early POI symbols with later roads.
+        // Inserting below the FIRST symbol can put the route underneath roads.
+        val stack=style.layers
+        val lastGeometry=stack.indexOfLast { it !is SymbolLayer }
+        val labels=stack.drop(lastGeometry+1).firstOrNull { it is SymbolLayer }?.id
         if (labels == null) style.addLayer(layer) else style.addLayerBelow(layer, labels)
         layers.add(layer.id)
         return layer
