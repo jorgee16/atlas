@@ -564,8 +564,10 @@ class NavigationGpsReplayTest {
         val anchor=Coordinate(before.getDouble("renderLat"),before.getDouble("renderLon"))
         val gpsTime=before.getDouble("fixTime")
         var originalActivity: MainActivity?=null
+        var previousOrientation=android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         s.onActivity { a ->
             originalActivity=a
+            previousOrientation=a.requestedOrientation
             a.requestedOrientation=android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
         await("landscape viewport should reflow without Activity restart",20) {
@@ -616,6 +618,27 @@ class NavigationGpsReplayTest {
             distance(anchor,Coordinate(portrait.getDouble("renderLat"),
                 portrait.getDouble("renderLon")))<1.0)
         capture(s,"parked-portrait-no-reprojection")
+        // Changing Activity.requestedOrientation was ONLY a test gesture.
+        // Restore the user's original orientation policy before doing any
+        // touch-injection tests; leaving portrait permanently locked can
+        // change Android input-coordinate transformation on the emulator.
+        s.onActivity { it.requestedOrientation=previousOrientation }
+        await("restore original portrait orientation policy",20) {
+            val f=snapshot(s);f.getInt("viewportHeight")>f.getInt("viewportWidth")
+        }
+        s.onActivity { a ->
+            assertEquals("orientation policy must be restored after gesture",
+                previousOrientation,a.requestedOrientation)
+            assertSame("restoring orientation must retain Activity",
+                originalActivity,a)
+        }
+        // Exercise the same bottom-right button that used to stop responding
+        // after a portrait/landscape/portrait transition.
+        tap(s,"Show GPS diagnostics")
+        assertTrue("diagnostics button must respond after orientation round-trip",
+            model!!.diagnosticsEnabled)
+        tap(s,"Hide GPS diagnostics")
+        assertFalse("diagnostics must remain toggleable",model!!.diagnosticsEnabled)
     }
 
     private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
