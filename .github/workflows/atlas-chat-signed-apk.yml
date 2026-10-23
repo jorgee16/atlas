@@ -15,8 +15,8 @@ jobs:
       ATLAS_ANDROID_KEY_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEY_PASSWORD }}
       ATLAS_ANDROID_KEY_ALIAS: ${{ secrets.ATLAS_ANDROID_KEY_ALIAS }}
       ATLAS_ANDROID_CERT_SHA256: ${{ vars.ATLAS_ANDROID_CERT_SHA256 }}
-      RELEASE_VERSION: '0.2.7'
-      RELEASE_CODE: '10'
+      RELEASE_VERSION: '0.2.8'
+      RELEASE_CODE: '11'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -67,8 +67,8 @@ jobs:
       - name: Export signed APK artifact for direct chat attachment
         uses: actions/upload-artifact@v4
         with:
-          name: Atlas-v0.2.7-chat-signed-apk
-          path: dist/android-validated/Atlas-v0.2.7.apk
+          name: Atlas-v0.2.8-chat-signed-apk
+          path: dist/android-validated/Atlas-v0.2.8.apk
           if-no-files-found: error
           retention-days: 7
       - name: Wipe temporary keystore
