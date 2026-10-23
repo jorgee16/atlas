@@ -5,7 +5,7 @@ on:
       run_id:
         description: 'Existing native Android validation run (no emulator replay)'
         required: true
-        default: '39327632423'
+        default: '39950254685'
         type: string
   push:
     branches: ['migration/native-core-kotlin']
@@ -16,28 +16,42 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        group: [lisbon, sintra, a5, icons]
     steps:
       - uses: actions/checkout@v4
-      - name: Reuse the recorded trip
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPLAY_RUN_ID: ${{ inputs.run_id || '39327632423' }}
-        run: |
-          gh run download "$REPLAY_RUN_ID" --repo jorgee16/atlas --name Atlas-native-ui-review --dir /tmp/atlas-evidence
-      - name: Install video inspection tools
-        run: |
-          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 update -qq
-            sudo apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y --no-install-recommends ffmpeg
-          fi
-      - name: Inspect camera and driving images
-        run: python3 tools/emit-native-replay-previews.py /tmp/atlas-evidence/ui-preview/camera-smoke /tmp/atlas-evidence/ui-preview/atlas-camera-smoke && python3 tools/emit-native-replay-previews.py /tmp/atlas-evidence/ui-preview/gps-replay /tmp/atlas-evidence/ui-preview/atlas-gps-replay
-      - name: Diagnose recorded motion metrics and camera transition context
-        continue-on-error: true
-        working-directory: /tmp/atlas-evidence
-        run: python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full
-      - uses: actions/upload-artifact@v4
-        if: always()
+      - name: Reuse recorded Android images; no emulator
+        uses: actions/download-artifact@v4
         with:
-          name: Atlas-recorded-replay-analysis
-          path: /tmp/atlas-evidence/ui-preview/gps-replay/*summary.json
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id || '39950254685' }}
+          name: Atlas-native-ui-review
+          path: /tmp/atlas-evidence
+      - name: Setup pinned video tools (no apt mirror)
+        uses: ./.github/actions/setup-video-tools
+      - name: Select small original-image review batches
+        env:
+          REVIEW_GROUP: ${{ matrix.group }}
+        run: |
+          python3 - <<'PYCODE'
+          import json,os,shutil
+          from pathlib import Path
+          root=Path('/tmp/atlas-evidence');dest=Path('/tmp/atlas-selected');dest.mkdir()
+          group=os.environ['REVIEW_GROUP']
+          prefixes={'lisbon':'lisbon-roundabout','sintra':'sintra-curves','a5':'a5-access'}
+          for p in root.rglob('*.png'):
+              n=p.stem
+              selected=(n.startswith(('09-','10-')) if group=='icons' else n.startswith(prefixes[group]) and '-offline-z18-' in n and n.endswith(('-before','-after','-after-progress-boundary')))
+              if selected: shutil.copyfile(p,dest/p.name)
+          assert list(dest.glob('*.png')), 'Original Android captures are required'
+          for p in root.rglob('*-geometry.json'):
+              if group in prefixes and p.name.startswith(prefixes[group]):
+                  d=json.loads(p.read_text());r=d['nativeRoute']
+                  print('ATLAS_ROAD_CASE',json.dumps({'case':group,'reviewPoint':d['reviewPoint'],'rawPoints':len(r['points']),'visualPoints':len(d['visual']),'maneuvers':r['maneuvers']}))
+          summary=next(root.rglob('route-visual-summary.json'))
+          d=json.loads(summary.read_text())
+          print('ATLAS_VISUAL_COMPLETENESS',json.dumps({'images':len(d['cases']),'navigationImages':d['navigationImages'],'routingAttempts':d.get('routingAttempts')}))
+          PYCODE
+      - name: Inspect actual Android before and after images
+        run: python3 tools/emit-native-replay-previews.py /tmp/atlas-selected /tmp/no-movies

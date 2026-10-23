@@ -65,6 +65,28 @@ jobs:
           keytool -exportcert -keystore "$keyfile" -storepass:env ATLAS_ANDROID_KEYSTORE_PASSWORD -alias "$ATLAS_ANDROID_KEY_ALIAS" \
             | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/atlas-preflight-certificate.sha256"
           python3 tools/atlas_android_release.py check-cert --certificate-file "$RUNNER_TEMP/atlas-preflight-certificate.sha256"
+  evidence-scope:
+    # Only recorded-evidence plumbing can bypass another emulator. App changes
+    # always retain the Android gate, regardless of the commit message.
+    runs-on: ubuntu-latest
+    outputs:
+      review_only: ${{ steps.scope.outputs.review_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: scope
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, subprocess
+          changed=set(subprocess.check_output(['git','diff','--name-only','HEAD^','HEAD'],text=True).splitlines())
+          allowed={'.github/workflows/native-android.yml','.github/workflows/native-replay-review.yml'}
+          review=bool(changed) and changed <= allowed and '[recorded-evidence-only]' in os.environ.get('MESSAGE','')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('review_only='+str(review).lower()+'\n')
+          print('Recorded-evidence-only change:',review,'; changed paths:',sorted(changed))
+          PYCODE
   core:
     runs-on: ubuntu-latest
     steps:
@@ -127,6 +149,8 @@ jobs:
           if-no-files-found: warn
 
   android:
+    needs: evidence-scope
+    if: ${{ needs.evidence-scope.outputs.review_only != 'true' }}
     # Fast, high-signal gate: ordinary Android instrumentation and the focused
     # GPS/camera smoke. Full-trip replay runs concurrently in its own job on
     # explicit validation/release requests; it must never serialize this gate.
@@ -466,3 +490,4 @@ jobs:
             dist/android-validated/*.sha256
             dist/android-validated/upgrade-report.txt
             android/native-app/build/reports/lint-results-release.*
+
