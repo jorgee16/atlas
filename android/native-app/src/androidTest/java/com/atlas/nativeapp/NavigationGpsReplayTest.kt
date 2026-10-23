@@ -454,7 +454,7 @@ class NavigationGpsReplayTest {
                     f.getDouble("mapTilt") in 48.0..60.5)
             }
             val p=f.getJSONArray("cameraPadding")
-            assertEquals(if(f.getBoolean("headingUp"))f.getDouble("viewportHeight")*.30 else 0.0,p.getDouble(1),1.0)
+            assertEquals(if(f.getBoolean("headingUp"))f.getDouble("viewportHeight")*.46 else 0.0,p.getDouble(1),1.0)
         }
         events.add(JSONObject(f.toString()).put("event","camera-$mode").toString())
     }

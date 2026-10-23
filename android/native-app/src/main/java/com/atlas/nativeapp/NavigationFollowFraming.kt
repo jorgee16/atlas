@@ -18,6 +18,9 @@ internal object NavigationFollowFraming {
         // This changes camera framing ONLY, not GPS, map matching or routing.
         if (landscape) return doubleArrayOf(
             width*0.18,if(headingUp)height*0.38 else 0.0,0.0,0.0)
-        return doubleArrayOf(0.0,if(headingUp)height*0.30 else 0.0,0.0,0.0)
+        // Portrait: keep the present zoom/tilt and expose more of the
+        // upcoming road by moving the cursor from 65% to about 73%.
+        // Do not change the navigation position or simulate being on-route.
+        return doubleArrayOf(0.0,if(headingUp)height*0.46 else 0.0,0.0,0.0)
     }
 }
