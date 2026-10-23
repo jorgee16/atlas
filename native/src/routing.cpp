@@ -600,7 +600,8 @@ std::string routeJson(const Route &r) {
       << ",\"instruction\":" << jsonString(m.instruction)
       << ",\"road\":" << jsonString(m.road) << ",\"at\":" << m.at
       << ",\"point\":" << m.point
-      << ",\"turnLanes\":" << jsonString(m.turnLanes) << '}';
+      << ",\"turnLanes\":" << jsonString(m.turnLanes)
+      << ",\"exitNumber\":" << m.exitNumber << '}';
   }
   s << "],\"edgeIndexes\":[";
   for (std::size_t i = 0; i < r.edges.size(); ++i) {

@@ -1015,8 +1015,37 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                         ellipsize=android.text.TextUtils.TruncateAt.END
                     })
                 }
-                val lanes=maneuver?.optString("turnLanes").orEmpty().split('|')
-                if(distance<=350&&lanes.size>1){addView(ui.space(12));addView(ui.text(lanes.joinToString("    "){when{it.contains("left")->"←";it.contains("right")->"→";else->"↑"}},23f,Color.WHITE))}
+                if(type=="roundabout") {
+                    val exitNumber=maneuver?.optInt("exitNumber",0) ?: 0
+                    if(exitNumber in 1..20) addView(
+                        ui.text("EXIT $exitNumber",15f,Color.WHITE,true).apply {
+                            background=ui.shape(Color.rgb(49,107,160),12)
+                            setPadding(ui.dp(12),ui.dp(8),ui.dp(12),ui.dp(8))
+                        },linear(11))
+                }
+                if(!s.walking && distance<=500.0) {
+                    val laneGuide=LaneGuidance.parse(maneuver?.optString("turnLanes").orEmpty(),type)
+                    if(laneGuide!=null) {
+                        addView(ui.text(if(laneGuide.hasRecommendation)"Recommended lanes"
+                            else "Lane directions",12f,Color.rgb(226,235,248),true),linear(13))
+                        addView(ui.row().apply {
+                            laneGuide.lanes.forEach { lane ->
+                                val recommended=lane.recommended
+                                val bg=if(recommended) Color.rgb(23,132,104) else Color.rgb(44,62,88)
+                                val arrow=ui.text(lane.symbols,if(lane.symbols.length>=3)17f else 23f,
+                                    Color.WHITE,true).apply {
+                                    gravity=Gravity.CENTER
+                                    background=ui.shape(bg,9)
+                                    contentDescription=if(recommended)
+                                        "Recommended lane: ${lane.description}" else "Lane: ${lane.description}"
+                                }
+                                addView(arrow,LinearLayout.LayoutParams(0,ui.dp(48),1f).apply {
+                                    rightMargin=ui.dp(4)
+                                })
+                            }
+                        },linear(7))
+                    }
+                }
             },LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(18)})
         };guidance.addView(banner)
         val accessGap=s.route?.optDouble("destinationAccessMeters",0.0)?:0.0

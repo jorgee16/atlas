@@ -62,16 +62,23 @@ void makeManeuvers(Route &r, const Graph &g) {
       while (last + 1 < r.legs.size() && (r.legs[last + 1].road.flags & 1))
         ++last;
       unsigned exits = 0;
+      // Split outgoing OSM edges at the same road junction describe one
+      // roundabout exit, not multiple physical exits.
       for (auto legIndex = i; legIndex <= last; ++legIndex) {
         auto &leg = r.legs[legIndex];
+        bool exitAtJunction = false;
         for (auto edgeIndex = g.offset(leg.to);
              edgeIndex < g.offset(leg.to + 1); ++edgeIndex) {
           auto edge = g.edge(edgeIndex);
           if (!(g.roadFlags(edge.road) & 1) &&
               g.turnAllowed(leg.to, g.edge(leg.edge).road, edge.road, -1,
-                            edge.target))
-            ++exits;
+                            edge.target)) {
+            exitAtJunction = true;
+            break;
+          }
         }
+        if (exitAtJunction)
+          ++exits;
       }
       exits = std::max(1u, exits);
       const auto &exitRoad =
@@ -82,7 +89,7 @@ void makeManeuvers(Route &r, const Graph &g) {
                              label(exitRoad),
                              outgoing.startDistance,
                              outgoing.first,
-                             {}});
+                             {}, exits});
       i = last + 1;
       continue;
     }

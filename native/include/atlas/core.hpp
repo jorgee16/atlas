@@ -61,6 +61,7 @@ struct Maneuver {
   double at = 0;
   std::size_t point = 0;
   std::string turnLanes;
+  unsigned exitNumber = 0;
 };
 struct Route {
   std::vector<uint32_t> nodes, edges;
