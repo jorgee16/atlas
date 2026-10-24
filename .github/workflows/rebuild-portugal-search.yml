@@ -1,0 +1,187 @@
+name: Rebuild and publish Portugal offline street search v10
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['migration/native-core-kotlin']
+    paths:
+      - '.github/workflows/rebuild-portugal-search.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portugal-offline-search-publish
+  cancel-in-progress: false
+
+jobs:
+  rebuild-search:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 220
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: atlas-regions
+      RCLONE_CONFIG_ATLASR2_TYPE: s3
+      RCLONE_CONFIG_ATLASR2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_ATLASR2_NO_CHECK_BUCKET: 'true'
+      RCLONE_CONFIG_ATLASR2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_ATLASR2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: migration/native-core-kotlin
+          persist-credentials: true
+      - name: Check publishing secrets and live Portugal catalog FIRST
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "::error::Missing GitHub Actions secret for $key"
+              exit 1
+            fi
+          done
+          echo "RCLONE_CONFIG_ATLASR2_ENDPOINT=https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" >> "$GITHUB_ENV"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq osmium-tool rclone
+          mkdir -p work/source work/built-search
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/live-catalog.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const live=JSON.parse(fs.readFileSync('work/live-catalog.json','utf8'));
+          const local=JSON.parse(fs.readFileSync('public/regions/catalog.json','utf8'));
+          const a=live.regions.find(x=>x.id==='portugal');
+          const b=local.regions.find(x=>x.id==='portugal');
+          if(a?.version!==9 || b?.version!==9)
+            throw Error('Stop: unexpected Portugal version; do not overwrite newer catalog');
+          for(const key of ['map','search','searchRecords','addressSearch','addressRecords']){
+            if(a.assets[key]!==b.assets[key])throw Error('Catalog asset changed: '+key);
+          }
+          console.log('Verified live R2 + repository Portugal v9; will create v10.');
+          JS
+      - name: Download fresh official Portugal OSM extract
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 5 --retry-delay 10 \
+            --connect-timeout 30 --speed-limit 1024 --speed-time 120 \
+            https://download.geofabrik.de/europe/portugal-latest.osm.pbf \
+            -o work/source/portugal.osm.pbf
+          test "$(stat -c%s work/source/portugal.osm.pbf)" -gt 300000000
+          osmium fileinfo work/source/portugal.osm.pbf
+      - name: Build complete addresses with named OSM highway ways
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Build into work/ rather than overwriting tracked/installed v9 files.
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const c=JSON.parse(fs.readFileSync('tools/region-builder/config/portugal.json','utf8'));
+          c.output='work/built-search';
+          fs.writeFileSync('work/config-search.json',JSON.stringify(c));
+          JS
+          node tools/region-builder/cli.mjs build \
+            --config work/config-search.json \
+            --input work/source/portugal.osm.pbf
+          for file in search-index.bin search-records.bin address-index.bin address-records.bin; do
+            test -s "work/built-search/$file"
+          done
+      - name: Validate real Coimbra street query and existing address support
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S native -B work/native-check -DCMAKE_BUILD_TYPE=Release
+          cmake --build work/native-check --target atlas_search --parallel 2
+          work/native-check/atlas_search work/built-search \
+            'Rua Professor Albuquerque de Matos' 40.25 -8.42 address \
+            > work/eiras-results.json
+          python3 - <<'PY'
+          import json
+          items=json.load(open('work/eiras-results.json'))
+          target='rua professor albuquerque de matos'
+          matches=[r for r in items if target in (r.get('name','')+' '+r.get('address','')).casefold()]
+          if not matches:
+              raise SystemExit('FAIL: Coimbra street missing after region rebuild')
+          print('Street found:',matches[:3])
+          PY
+          work/native-check/atlas_search work/built-search \
+            'Rua Augusta' 38.71 -9.14 address > work/other-results.json
+          python3 - <<'PY'
+          import json
+          matches=json.load(open('work/other-results.json'))
+          assert any('augusta' in (r.get('name','')+' '+r.get('address','')).casefold()
+                     for r in matches), 'Existing address searches regressed'
+          print('Lisbon existing street results preserved:',len(matches))
+          PY
+      - name: Prepare atomic versioned search catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/region-builder/publish-portugal-search.mjs \
+            --catalog work/live-catalog.json \
+            --search-dir work/built-search \
+            --output work/catalog-v10.json
+          cp work/catalog-v10.json work/verified-catalog.json
+      - name: Store regenerated search files if publishing subsequently fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-portugal-v10-offline-search
+          path: |
+            work/built-search/search-index.bin
+            work/built-search/search-records.bin
+            work/built-search/address-index.bin
+            work/built-search/address-records.bin
+            work/verified-catalog.json
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload four search files to NEW immutable v10 object keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in search-index.bin search-records.bin address-index.bin address-records.bin; do
+            key="region-packages/portugal/search/v10/$file"
+            rclone copyto "work/built-search/$file" \
+              atlasr2:"$R2_BUCKET"/"$key" \
+              --s3-no-check-bucket --retries 4 --stats 30s
+            want="$(stat -c%s "work/built-search/$file")"
+            got="$(rclone lsl atlasr2:"$R2_BUCKET"/"$key" --s3-no-check-bucket | awk '{print $1}')"
+            test "$want" = "$got" || { echo "::error::Uploaded $file size mismatch"; exit 1; }
+            echo "Verified $key ($got bytes)"
+          done
+      - name: Commit updated Android and website catalog before making it live
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fail closed if unrelated source has changed during the build.
+          git fetch origin migration/native-core-kotlin
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/migration/native-core-kotlin)" \
+            || { echo "::error::Branch changed during packaging; do not publish stale catalog"; exit 1; }
+          cp work/catalog-v10.json public/regions/catalog.json
+          cp work/catalog-v10.json android/native-app/src/main/assets/regions.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/regions/catalog.json android/native-app/src/main/assets/regions.json
+          git commit -m "data(portugal): register immutable offline street-search v10"
+          git push origin HEAD:migration/native-core-kotlin
+      - name: Publish Portugal catalog LAST and verify live R2
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copyto work/catalog-v10.json \
+            atlasr2:"$R2_BUCKET"/regions/catalog.json \
+            --s3-no-check-bucket --retries 4
+          rclone cat atlasr2:"$R2_BUCKET"/regions/catalog.json > work/confirmed.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const catalog=JSON.parse(fs.readFileSync('work/confirmed.json','utf8'));
+          const pt=catalog.regions.find(x=>x.id==='portugal');
+          if(pt?.version!==10 || !pt.assets.addressSearch.includes('/search/v10/'))
+            throw Error('Portugal street-search v10 was NOT activated');
+          console.log('Portugal v10 catalog confirmed. Maps and routing unchanged.');
+          JS
+          echo '## Portugal offline search v10 published' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Named roads, including Rua Professor Albuquerque de Matos, are indexed.' >> "$GITHUB_STEP_SUMMARY"
