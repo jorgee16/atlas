@@ -380,7 +380,12 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         root.addView(atlasMap.view,FrameLayout.LayoutParams(-1,-1))
         top = ui.column(); root.addView(top,FrameLayout.LayoutParams(-1,-2,Gravity.TOP))
         bottom = ui.column(); root.addView(bottom,FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM))
-        controls = ui.column(); root.addView(controls,FrameLayout.LayoutParams(ui.dp(48),-2,Gravity.END or Gravity.BOTTOM))
+        controls = ui.column().apply {
+            // A dedicated touch surface above the map and navigation chrome.
+            // Do not let guidance, source labels or map gestures steal taps.
+            elevation=ui.dp(9).toFloat()
+        }
+        root.addView(controls,FrameLayout.LayoutParams(ui.dp(48),-2,Gravity.END or Gravity.BOTTOM))
         navigation = ui.row(); root.addView(navigation,FrameLayout.LayoutParams(-1,ui.dp(68),Gravity.BOTTOM))
         guidance = ui.column(); root.addView(guidance,FrameLayout.LayoutParams(-1,-2,Gravity.TOP))
         mapSourceBadge = ui.badge("MAP · LOADING").apply {
@@ -400,7 +405,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             // Fully transparent diagnostic text overlay: the satellite/map
             // imagery is never darkened, blurred or covered by a solid card.
             setBackgroundColor(Color.TRANSPARENT)
-            elevation=0f
+            // Expanded diagnostics is intentionally above map controls, but
+            // beneath full-screen pages and dialogs.
+            elevation=ui.dp(10).toFloat()
             visibility=View.GONE
             addView(ui.row().apply {
                 diagnosticsLabel=ui.text("GPS DIAGNOSTICS",12f,Color.WHITE,true).apply {
@@ -506,7 +513,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         // Android retains this Activity/MapLibre instance for screen rotation.
         // Reflow panels only: no GPS/filter reset, no re-matching and no
         // fresh navigation-start epoch for an unchanged real fix.
-        rebuildChrome()
+        // Rotation changes dimensions, never the existing interactive Views.
+        // Rebuilding the toolbar here removes the pressed child of an
+        // in-flight gesture; reuse the same controls across orientation.
+        lastChrome=null
+        render(model.updates.value)
         root.post {
             layoutChrome()
             atlasMap.onViewportConfigurationChanged()
@@ -580,6 +591,9 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             bottomMargin=if(landscape||fromTop)0 else bottomInset+
                 if(state.navigating)ui.dp(178) else ui.dp(118)
         }.also{controls.layoutParams=it}
+        controls.visibility=if(page!=null ||
+            (model.updates.value.tab=="Trail"&&trailExpanded&&!landscape))
+            View.GONE else View.VISIBLE
         (credit.layoutParams as FrameLayout.LayoutParams).apply {
             gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.START
             leftMargin=if(landscape)0 else leftInset+ui.dp(22)
@@ -633,7 +647,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 val controlsChrome=listOf(
                     state.navigating,state.tab,page,fullMap,trailExpanded,
                     atlasMap.follow,atlasMap.headingUp,model.diagnosticsEnabled,
-                    model.mapVisualStyle,hasLocation(),landscape)
+                    model.mapVisualStyle,hasLocation())
                 if (controlsChrome!=lastControlsChrome) {
                     lastControlsChrome=controlsChrome
                     renderControls(state)

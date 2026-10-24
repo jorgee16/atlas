@@ -419,11 +419,16 @@ class NavigationGpsReplayTest {
         fun send(action:Int) {
             val event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,x,y,0)
             event.source=InputDevice.SOURCE_TOUCHSCREEN
-            assertTrue(instrumentation.uiAutomation.injectInputEvent(event,false));event.recycle()
+            assertTrue(instrumentation.uiAutomation.injectInputEvent(event,true));event.recycle()
         }
-        send(MotionEvent.ACTION_DOWN);instrumentation.waitForIdleSync()
-        during();SystemClock.sleep(120)
-        send(MotionEvent.ACTION_UP);SystemClock.sleep(180)
+        // uiAutomation injectInputEvent(..., true) acknowledges dispatch.
+        // Never waitForIdleSync between DOWN and UP: busy map frames make the
+        // "short tap" last beyond Android's long-press timeout, invoking the
+        // GPS button's long-click (open diagnostics page) instead of toggle.
+        send(MotionEvent.ACTION_DOWN)
+        during();SystemClock.sleep(90)
+        send(MotionEvent.ACTION_UP)
+        instrumentation.waitForIdleSync()
     }
     private fun assertMode(s:ActivityScenario<MainActivity>,mode:String) {
         try {
@@ -560,6 +565,18 @@ class NavigationGpsReplayTest {
      */
     private fun parkedRotationSmoke(s:ActivityScenario<MainActivity>) {
         phase="parked-rotation"
+        fun control(a: MainActivity,label: String): android.view.View {
+            val field=MainActivity::class.java.getDeclaredField("controls")
+                .apply{isAccessible=true}
+            val bar=field.get(a) as android.view.ViewGroup
+            return (0 until bar.childCount).map{bar.getChildAt(it)}
+                .firstOrNull{it.contentDescription==label}
+                ?: error("Control not mounted in the toolbar: $label")
+        }
+        var persistentDiagnostics: android.view.View?=null
+        s.onActivity {
+            persistentDiagnostics=control(it,"Show GPS diagnostics")
+        }
         val before=snapshot(s)
         val anchor=Coordinate(before.getDouble("renderLat"),before.getDouble("renderLon"))
         val gpsTime=before.getDouble("fixTime")
@@ -576,6 +593,8 @@ class NavigationGpsReplayTest {
         s.onActivity { a ->
             assertSame("screen rotation must not replace the Activity or JNI visual anchor",
                 originalActivity,a)
+            assertSame("orientation must not detach navigation controls",
+                persistentDiagnostics,control(a,"Show GPS diagnostics"))
         }
         SystemClock.sleep(500)
         val sideways=snapshot(s)
@@ -658,13 +677,25 @@ class NavigationGpsReplayTest {
             assertSame("restoring orientation must retain Activity",
                 originalActivity,a)
         }
-        // Exercise the same bottom-right button that used to stop responding
-        // after a portrait/landscape/portrait transition.
+        // Exercise a REAL injected touch, not View.performClick. The control
+        // itself must survive rotation and have a visible on-screen hit rect.
+        s.onActivity { a ->
+            val target=control(a,"Show GPS diagnostics")
+            assertSame("the control must survive the full orientation round-trip",
+                persistentDiagnostics,target)
+            val rect=android.graphics.Rect()
+            assertTrue("GPS button has no visible touch target",
+                target.isShown && target.isEnabled && target.getGlobalVisibleRect(rect))
+            assertTrue("GPS button must have a tappable target",rect.width()>0&&rect.height()>0)
+        }
         tap(s,"Show GPS diagnostics")
-        assertTrue("diagnostics button must respond after orientation round-trip",
-            model!!.diagnosticsEnabled)
+        await("GPS overlay becomes visible after a real screen tap",5) {
+            model!!.diagnosticsEnabled
+        }
         tap(s,"Hide GPS diagnostics")
-        assertFalse("diagnostics must remain toggleable",model!!.diagnosticsEnabled)
+        await("GPS overlay can be hidden with a real screen tap",5) {
+            !model!!.diagnosticsEnabled
+        }
     }
 
     private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
