@@ -206,6 +206,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
     internal var onDebugFrame: ((JSONObject) -> Unit)? = null
     private var debugFrameCount = 0L
     private var lastMarkerAngle = Double.NaN
+    private var cameraRouteTangent: Double? = null
+    private var cameraHeadingSource = "gps"
+    private var cameraHeadingTarget = Double.NaN
     // Switching heading-up/north-up is a short, explicit camera transition.
     // Keep one frame-clock owner; do not start MapLibre animations in parallel.
     private var compassChangedAt = Double.NEGATIVE_INFINITY
@@ -241,19 +244,33 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             lastRenderedMarker=position
         }
         val ready = map ?: return@FrameCallback
+        val travelBearing=travelHeading(s,s.fix)
+        val speed=StationaryMapPosition.visualSpeed(s.fix)
+        val guidance=s.guidance
+        val tangent=if(follow && headingUp && !s.walking && routeFrame!=null)
+            renderInterpolator.visualBearingAt(
+                position,routeFrame.along,if(speed>12.0)10.0 else 4.0)
+            else null
+        val trustedTangent=NavigationCameraBehavior.trustedRouteBearing(
+            tangent,travelBearing,s.fix.providerBearing,s.fix.bearingAccuracy,
+            speed,s.fix.accuracy,time-s.fix.time,s.fix.motionConfirmed,
+            guidance!=null && NavigationResumePolicy.currentHeadingGuidance(
+                time,s.fix.time,guidance.optDouble("gpsFixTime",Double.NaN)),
+            guidance?.optString("state") ?: "",
+            guidance?.optDouble("offRoute",Double.POSITIVE_INFINITY)
+                ?: Double.POSITIVE_INFINITY,
+            s.busy || offRoutePresentation.active)
+        cameraRouteTangent=tangent
+        cameraHeadingSource=if(trustedTangent!=null)"route" else "gps"
+        val desiredHeading=if(!headingUp)0.0 else trustedTangent?:travelBearing
+        cameraHeadingTarget=desiredHeading
         var followingAngle = ready.cameraPosition.bearing
         if (follow && !cameraState.pending) {
             val camera = ready.cameraPosition
-            val visualRouteBearing = if(roundaboutActive && routeFrame!=null)
-                renderInterpolator.visualBearing(routeFrame.along,
-                    if(StationaryMapPosition.visualSpeed(s.fix)>12.0)10.0 else 4.0)
-                else null
-            val desiredHeading = if (!headingUp) 0.0 else
-                visualRouteBearing ?: travelHeading(s,s.fix)
             val turnRate=NavigationCameraBehavior.rotationRate(
                 time-compassChangedAt,
                 AtlasHeading.signedDelta(camera.bearing,desiredHeading),
-                StationaryMapPosition.visualSpeed(s.fix),roundaboutActive)
+                speed,roundaboutActive)
             val easing = 1-kotlin.math.exp(-turnRate*deltaTime)
             val angle = AtlasHeading.normalize(camera.bearing+
                 AtlasHeading.signedDelta(camera.bearing,desiredHeading)*easing)
@@ -282,17 +299,13 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
         // One render clock owns both the map's rotation and the cursor icon.
         // In heading-up guided follow, the arrow stays forward on the screen.
         val cursor = NavigationCameraBehavior.cursorAngle(
-            true,follow,headingUp,travelHeading(s,s.fix),followingAngle)
+            true,follow,headingUp,travelBearing,followingAngle)
         updatePositionIcon(cursor)
         val camera = ready.cameraPosition
         val error = camera.target?.let {
             distanceMeters(Coordinate(it.latitude,it.longitude),position)
         } ?: Double.POSITIVE_INFINITY
-        val expected = if (!headingUp) 0.0 else if(roundaboutActive && routeFrame!=null)
-            renderInterpolator.visualBearing(routeFrame.along,
-                if(StationaryMapPosition.visualSpeed(s.fix)>12.0)10.0 else 4.0)
-                ?: travelHeading(s,s.fix)
-            else travelHeading(s,s.fix)
+        val expected=desiredHeading
         val framing = visualFraming(s,roundaboutActive)
         debugFrameCount++
         onDebugFrame?.invoke(debugSnapshot())
@@ -1259,6 +1272,9 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             put("bearingAccuracy",f?.bearingAccuracy); put("speed",f?.speed)
             put("rawSpeed",f?.providerSpeed); put("busy",s?.busy)
             put("rawBearing",f?.providerBearing); put("filteredBearing",f?.bearing)
+            put("cameraHeadingSource",cameraHeadingSource)
+            put("cameraRouteTangent",cameraRouteTangent)
+            put("cameraHeadingTarget",cameraHeadingTarget.takeIf { it.isFinite() })
             put("travelBearing",if(s!=null && f!=null)travelHeading(s,f) else null)
             put("guidance",g?.optString("state")); put("along",g?.optDouble("along"))
             put("offRoute",g?.optDouble("offRoute")); put("segment",g?.optInt("segment"))

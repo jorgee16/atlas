@@ -62,6 +62,17 @@ for x in all_curve:
     y['cameraToTravel']=angle(x['mapBearing'],x['travelBearing'])
     y['travelToRoute']=angle(x['travelBearing'],target)
     y['rawToRoute']=angle(x.get('rawBearing',x['travelBearing']),target)
+    # This is the ACTUAL road tangent at the DISPLAYED cursor after the
+    # navigation presentation limiter. GPS progress can be several metres
+    # farther forward, so using route_heading(along) alone hides visual lag.
+    visual=x.get('cameraRouteTangent')
+    if isinstance(visual,(int,float)) and math.isfinite(visual):
+        y['cameraToVisualRoad']=angle(x['mapBearing'],visual)
+        y['travelToVisualRoad']=angle(x['travelBearing'],visual)
+    else:
+        y['cameraToVisualRoad']=None
+        y['travelToVisualRoad']=None
+    y['cameraHeadingSource']=x.get('cameraHeadingSource','legacy')
     valid.append(y)
 assert len(valid)>=100, f'Insufficient fresh GNSS camera frames: {len(valid)}'
 assert len({round(x['fixTime'],2) for x in valid})>=20, 'Did not receive ongoing 1Hz fixes'
@@ -71,7 +82,7 @@ regions=[('straight_before',0,320),('approach_bends',320,450),
 def percent(values,p):
     return sorted(values)[round((len(values)-1)*p)]
 def stats(rows,key):
-    values=[r[key] for r in rows]
+    values=[r[key] for r in rows if r.get(key) is not None]
     return None if not values else {
         'medianDeg':round(statistics.median(values),2),
         'p90Deg':round(percent(values,.90),2),
@@ -89,7 +100,11 @@ for name,a,b in regions:
         'frames':len(subset),'cameraVsRoute':stats(subset,'cameraToRoute'),
         'cameraVsTravelHeading':stats(subset,'cameraToTravel'),
         'travelHeadingVsRoute':stats(subset,'travelToRoute'),
-        'rawGpsVsRoute':stats(subset,'rawToRoute')
+        'rawGpsVsRoute':stats(subset,'rawToRoute'),
+        'cameraVsDisplayedRoad':stats(subset,'cameraToVisualRoad'),
+        'travelVsDisplayedRoad':stats(subset,'travelToVisualRoad'),
+        'targetSources':{mode:sum(1 for x in subset if x['cameraHeadingSource']==mode)
+                         for mode in ('route','gps','legacy')}
     }
 # Do not mistake GNSS direction latency for a slow camera rotation.
 # Report both distinct errors in the same REAL frames.
@@ -97,7 +112,8 @@ largest=sorted(valid,key=lambda x:x['cameraToRoute'],reverse=True)[:12]
 summary['worstFrames']=[{key:round(x[key],2) if isinstance(x.get(key),(int,float)) else x.get(key)
     for key in ('time','along','fixAgeSeconds','speed','mapBearing',
                 'travelBearing','rawBearing','routeTangent','cameraToRoute',
-                'cameraToTravel','travelToRoute','guidance','offRoute')}
+                'cameraToVisualRoad','cameraHeadingSource','cameraToTravel',
+                'travelToRoute','guidance','offRoute')}
     for x in largest]
 (folder/'curve-camera-diagnostic.json').write_text(json.dumps(summary,indent=2)+'\n')
 print('ATLAS_CURVE_CAMERA_DIAGNOSTIC',json.dumps(summary))

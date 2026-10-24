@@ -44,11 +44,13 @@ internal class RouteLineRenderer(
         if (alternative) {
             add("alternative", 4f, if (dark) Color.parseColor("#667385") else Color.parseColor("#AAB5C7"))
         } else {
-            add("casing", 9f, Color.WHITE)
-            completed=add("completed",5f,Color.rgb(158,169,186))
-            future=add("future",6f,Color.rgb(49,94,251))
-            remaining = add("remaining", 6f, Color.rgb(49, 94, 251))
-            travelled = add("travelled", 5f, Color.rgb(158, 169, 186))
+            // Improve route legibility at a fixed map zoom/tilt. Widths are
+            // MapLibre line paint values, not changes to route geometry.
+            add("casing", 12f, Color.WHITE)
+            completed=add("completed",7f,Color.rgb(158,169,186))
+            future=add("future",8.5f,Color.rgb(49,94,251))
+            remaining = add("remaining", 8.5f, Color.rgb(49, 94, 251))
+            travelled = add("travelled", 7f, Color.rgb(158, 169, 186))
             progress(0.0)
         }
     }

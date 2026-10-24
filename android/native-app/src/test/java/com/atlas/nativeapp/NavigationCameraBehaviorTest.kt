@@ -63,4 +63,43 @@ class NavigationCameraBehaviorTest {
         assertEquals(2.8,NavigationCameraBehavior.rotationRate(
             10.0,70.0,0.5,true),0.001)
     }
+    private fun tangent(gps: Double = 0.0, visual: Double? = 35.0,
+                        speed: Double = 12.0, accuracy: Double = 5.0,
+                        age: Double = 0.5, confirmed: Boolean? = true,
+                        fresh: Boolean = true, state: String = "normal",
+                        offRoute: Double = 2.0, rerouting: Boolean = false,
+                        raw: Double? = gps, rawAccuracy: Double? = 5.0) =
+        NavigationCameraBehavior.trustedRouteBearing(
+            visual,gps,raw,rawAccuracy,speed,accuracy,age,confirmed,
+            fresh,state,offRoute,rerouting)
+
+    @Test fun confirmedCurveUsesVisualRoadTangentNotOldGpsDirection() {
+        assertEquals(35.0,tangent()!!,0.001)
+        assertEquals(355.0,tangent(gps=10.0,visual=355.0)!!,0.001)
+    }
+
+    @Test fun doNotSteerCameraByMapMatchWhenStoppedOrGpsIsUntrusted() {
+        assertNull(tangent(speed=0.0,confirmed=false))
+        assertNull(tangent(speed=0.5))
+        assertNull(tangent(confirmed=false))
+        assertNull(tangent(confirmed=null))
+        assertNull(tangent(accuracy=65.0))
+        assertNull(tangent(age=4.0))
+        assertNull(tangent(fresh=false))
+        assertNull(tangent(state="checking"))
+        assertNull(tangent(state="reroute"))
+        assertNull(tangent(state="reduced"))
+        assertNull(tangent(offRoute=40.0))
+        assertNull(tangent(rerouting=true))
+        assertNull(tangent(visual=null))
+    }
+
+    @Test fun contradictedReverseRoadDoesNotRotateCameraAwayFromMovingCar() {
+        assertNull(tangent(gps=5.0,visual=185.0))
+        assertNull(tangent(gps=0.0,visual=108.0,raw=0.0,rawAccuracy=5.0))
+        assertEquals(75.0,tangent(gps=0.0,visual=75.0,raw=0.0)!!,0.001)
+        assertEquals(108.0,tangent(gps=15.0,visual=108.0,
+            raw=0.0,rawAccuracy=30.0)!!,0.001)
+    }
+
 }

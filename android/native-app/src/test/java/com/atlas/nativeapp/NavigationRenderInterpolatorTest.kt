@@ -217,4 +217,24 @@ class NavigationRenderInterpolatorTest {
         assertTrue("first leg east",east in 70.0..110.0)
         assertTrue("second leg north",north<25.0 || north>335.0)
     }
+    @Test fun visualTangentProjectsActualCursorWhenTheRendererLagsBehindGpsProgress() {
+        val a=route()
+        // JNI is already into the eastbound leg, while display smoothing
+        // still draws the car on the northbound approach.
+        val visualPosition=Coordinate(40.00065,-8.0)
+        val gpsTangent=a.visualBearing(125.0,4.0)!!
+        val displayedTangent=a.visualBearingAt(visualPosition,125.0,4.0)!!
+        assertTrue("raw GPS progress already points east",gpsTangent in 60.0..120.0)
+        assertTrue("map at the drawn cursor must still follow northbound road",
+            displayedTangent<20.0 || displayedTangent>340.0)
+        assertEquals(null,a.visualBearingAt(Coordinate(41.0,-9.0),125.0))
+    }
+
+    @Test fun projectedTangentReturnsRightBearingPastTheBend() {
+        val a=route()
+        val after=Coordinate(40.0009,-7.9996)
+        val d=checkNotNull(a.visualBearingAt(after,135.0,4.0))
+        assertTrue(d in 60.0..120.0)
+    }
+
 }

@@ -9,6 +9,39 @@ internal object NavigationCameraBehavior {
         if (navigating && follow && headingUp) 0.0
         else AtlasHeading.normalize(travelBearing - mapBearing)
 
+    /**
+     * Safe, display-only route heading. Physical GNSS owns direction when the
+     * road match or route is questionable. In particular never use an old
+     * projected heading during rerouting, tunnels, GPS loss, or when parked.
+     */
+    fun trustedRouteBearing(tangent: Double?, travelBearing: Double,
+                           gpsProviderBearing: Double?, bearingAccuracy: Double?,
+                           speed: Double, locationAccuracy: Double,
+                           fixAge: Double, motionConfirmed: Boolean?,
+                           guidanceFresh: Boolean, guidanceState: String,
+                           offRouteMeters: Double, rerouting: Boolean): Double? {
+        if (tangent == null || !tangent.isFinite() ||
+            !travelBearing.isFinite() || !speed.isFinite() || speed < 2.0 ||
+            motionConfirmed != true || !locationAccuracy.isFinite() ||
+            locationAccuracy !in 0.0..25.0 || !fixAge.isFinite() ||
+            fixAge !in 0.0..2.0 || !guidanceFresh ||
+            guidanceState != "normal" || rerouting ||
+            !offRouteMeters.isFinite() ||
+            offRouteMeters > maxOf(22.0,locationAccuracy*1.5)) return null
+
+        // A wrong-way map match can look "on route" near parallel roads.
+        // Filtered travel and independently accurate GNSS must not disagree
+        // violently with the route tangent; normal bend lag is allowed.
+        if (AtlasHeading.angleDifference(travelBearing,tangent) >= 110.0)
+            return null
+        if (gpsProviderBearing != null && gpsProviderBearing.isFinite() &&
+            bearingAccuracy != null && bearingAccuracy.isFinite() &&
+            bearingAccuracy <= 15.0 &&
+            AtlasHeading.angleDifference(gpsProviderBearing,tangent) >= 100.0)
+            return null
+        return AtlasHeading.normalize(tangent)
+    }
+
     /** A compass tap settles quickly, but still rotates smoothly on the
      * same rendering clock. Normal live-heading changes retain slower damping.
      * Rate 14/s settles a 180° north-up switch inside the replay's 600 ms

@@ -20,6 +20,7 @@ internal class NavigationRenderInterpolator {
     data class Frame(val position: Coordinate, val along: Double, val active: Boolean)
     private var vertices: List<Coordinate> = emptyList()
     private var lengths = DoubleArray(0)
+    private var prefixMeters = DoubleArray(0)
     private var lineLength = 0.0
     private var routeMeters = 0.0
     private var measuredAlong = 0.0
@@ -38,6 +39,7 @@ internal class NavigationRenderInterpolator {
     fun reset() {
         vertices = emptyList()
         lengths = DoubleArray(0)
+        prefixMeters = DoubleArray(0)
         lineLength = 0.0
         routeMeters = 0.0
         measuredAlong = 0.0
@@ -59,9 +61,11 @@ internal class NavigationRenderInterpolator {
         vertices = points
         routeMeters = distanceMeters
         lengths = DoubleArray(points.size - 1)
+        prefixMeters = DoubleArray(points.size)
         for (i in lengths.indices) {
             lengths[i] = distance(points[i], points[i + 1])
             lineLength += lengths[i]
+            prefixMeters[i + 1] = lineLength
         }
         if (lineLength <= 0.0) {
             reset()
@@ -167,6 +171,62 @@ internal class NavigationRenderInterpolator {
             cos(Math.toRadians((from.lat+to.lat)*.5))
         if (hypot(east,north)<0.5) return null
         return (Math.toDegrees(kotlin.math.atan2(east,north))+360.0)%360.0
+    }
+
+    /**
+     * Project the FINAL displayed cursor onto nearby original route segments.
+     * The 1 Hz guidance progress is only a search hint: presentation limiting
+     * can put the visible cursor several metres BEHIND that progress in bends.
+     *
+     * Prefix-length binary search + local scan bounds this 30 FPS operation
+     * rather than projecting against the entire Portugal route each frame.
+     * Returning null on a distant/ambiguous position preserves GNSS heading.
+     */
+    fun visualBearingAt(position: Coordinate, nearAlong: Double,
+                        aheadMeters: Double = 7.0): Double? {
+        if (vertices.size < 2 || !nearAlong.isFinite() || lineLength <= 0.0)
+            return null
+        val hint = nearAlong.coerceIn(0.0,routeMeters) / routeMeters * lineLength
+        val lowMetres = (hint - 75.0).coerceAtLeast(0.0)
+        val highMetres = (hint + 45.0).coerceAtMost(lineLength)
+        fun indexFor(metres: Double): Int {
+            var lo = 0; var hi = prefixMeters.lastIndex
+            while (lo + 1 < hi) {
+                val middle=(lo+hi) ushr 1
+                if (prefixMeters[middle] <= metres) lo=middle else hi=middle
+            }
+            return lo.coerceIn(0,lengths.lastIndex)
+        }
+        val start=indexFor(lowMetres)
+        val end=indexFor(highMetres)
+        var bestScore=Double.POSITIVE_INFINITY
+        var bestDistance=Double.POSITIVE_INFINITY
+        var bestAlong=Double.NaN
+        for (i in start..end) {
+            val a=vertices[i]
+            val b=vertices[i+1]
+            val lat=Math.toRadians((a.lat+b.lat)*0.5)
+            val east=(b.lon-a.lon)*111_320.0*cos(lat)
+            val north=(b.lat-a.lat)*111_320.0
+            val pe=(position.lon-a.lon)*111_320.0*cos(lat)
+            val pn=(position.lat-a.lat)*111_320.0
+            val lengthSquared=east*east+north*north
+            val f=if(lengthSquared>1e-8)
+                ((pe*east+pn*north)/lengthSquared).coerceIn(0.0,1.0)
+                else 0.0
+            val distance=hypot(pe-east*f,pn-north*f)
+            val along=prefixMeters[i]+lengths[i]*f
+            // Disambiguate nearby parallel carriageways / looped roads using
+            // progress, without ignoring the physically drawn cursor.
+            val score=distance + kotlin.math.abs(along-hint)*0.03
+            if (score<bestScore) {
+                bestScore=score
+                bestDistance=distance
+                bestAlong=along
+            }
+        }
+        if (bestDistance>12.0 || !bestAlong.isFinite()) return null
+        return visualBearing(bestAlong/lineLength*routeMeters,aheadMeters)
     }
 
     /** Align a stopped filter with the point the route renderer actually drew. */
