@@ -532,7 +532,7 @@ jobs:
   publish-validated:
     # Publishing is explicit. A normal push never tries to access signing secrets.
     # Signed Releases require core, focused Android smoke, and the full replay.
-    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-validated:40080205022]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-validated:40125928009]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -544,30 +544,30 @@ jobs:
       ATLAS_ANDROID_KEY_PASSWORD: ${{ secrets.ATLAS_ANDROID_KEY_PASSWORD }}
       ATLAS_ANDROID_KEY_ALIAS: ${{ secrets.ATLAS_ANDROID_KEY_ALIAS }}
       ATLAS_ANDROID_CERT_SHA256: ${{ vars.ATLAS_ANDROID_CERT_SHA256 }}
-      RELEASE_VERSION: '0.2.13'
-      RELEASE_CODE: '16'
+      RELEASE_VERSION: '0.2.14'
+      RELEASE_CODE: '17'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Confirm source is EXACTLY successful CI #248, no app changes
+      - name: Confirm source is EXACTLY successful CI #254, no app changes
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          validated=069427438f4ae2d507e663d9d44bdf0a19cb43c1
-          result="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/40080205022" --jq '.conclusion + " " + .head_sha')"
+          validated=691c60a1f6f4fc3ff4d83706a316fe8f3fe682a1
+          result="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/40125928009" --jq '.conclusion + " " + .head_sha')"
           [[ "$result" == "success $validated" ]] || { echo '::error::Validated CI was not successful for exact source'; exit 1; }
-          jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/40080205022/jobs?per_page=100" --jq '[.jobs[] | select(.name == "core" or .name == "android") | select(.conclusion == "success")] | length')"
+          jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/40125928009/jobs?per_page=100" --jq '[.jobs[] | select(.name == "core" or .name == "android") | select(.conclusion == "success")] | length')"
           [[ "$jobs" == 2 ]] || { echo '::error::Native and Android gates must both pass'; exit 1; }
           git merge-base --is-ancestor "$validated" "$GITHUB_SHA"
           invalid="$(git diff --name-only "$validated" "$GITHUB_SHA" | grep -Ev '^(.github/workflows/native-android.yml|tools/atlas-release-version.json|tools/atlas-validated-release.json)$' || true)"
           [[ -z "$invalid" ]] || { echo "::error::App source changed after green CI: $invalid"; exit 1; }
-          [[ "$(python3 -c 'import json; x=json.load(open("tools/atlas-release-version.json")); print(x["versionName"],x["versionCode"])')" == '0.2.13 16' ]]
+          [[ "$(python3 -c 'import json; x=json.load(open("tools/atlas-release-version.json")); print(x["versionName"],x["versionCode"])')" == '0.2.14 17' ]]
           echo "VALIDATED_SHA=$validated" >> "$GITHUB_ENV"
           git checkout --detach "$validated"
-          echo 'Validated #248 passed, checked out exactly tested source, no tests are repeated.'
+          echo 'Validated #254 passed, checked out exactly tested source, no tests are repeated.'
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -700,7 +700,7 @@ jobs:
           for attempt in 1 2 3; do
             if gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
                 --target "$VALIDATED_SHA" --title "Atlas v$RELEASE_VERSION" \
-                --notes "Signed Release (versionCode $RELEASE_CODE) from validated commit $VALIDATED_SHA, CI run #248. Native and Android emulator tests previously passed; no tests rerun. Persistent certificate, signature and version upgrade compatibility verified." \
+                --notes "Signed Release (versionCode $RELEASE_CODE) from validated commit $VALIDATED_SHA, CI run #254. Native and Android emulator tests previously passed; no tests rerun. Persistent certificate, signature and version upgrade compatibility verified." \
                 --prerelease; then
               published=true
               break
