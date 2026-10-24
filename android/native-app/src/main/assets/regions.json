@@ -148,8 +148,8 @@
       "id": "portugal",
       "name": "Portugal",
       "country": "Portugal",
-      "version": 9,
-      "updatedAt": "2026-10-16",
+      "version": 10,
+      "updatedAt": "2026-10-24",
       "bundled": false,
       "bounds": [
         -31.4,
@@ -237,13 +237,13 @@
             }
           ]
         },
-        "search": "/region-packages/portugal/search-index.bin",
-        "searchRecords": "/region-packages/portugal/search-records.bin",
-        "addressSearch": "/region-packages/portugal/address-index.bin",
-        "addressRecords": "/region-packages/portugal/address-records.bin",
+        "search": "/region-packages/portugal/search/v10/search-index.bin",
+        "searchRecords": "/region-packages/portugal/search/v10/search-records.bin",
+        "addressSearch": "/region-packages/portugal/search/v10/address-index.bin",
+        "addressRecords": "/region-packages/portugal/search/v10/address-records.bin",
         "map": "/region-packages/portugal/map.pmtiles"
       },
-      "sizeBytes": 960430852,
+      "sizeBytes": 977479097,
       "package": {
         "schemaVersion": 1,
         "files": [
@@ -451,32 +451,32 @@
             "sha256": "e7281db36173e010ce363884b465ca3d88e10a8fd60f44a3f97dcc5abb4af050"
           },
           {
-            "url": "/region-packages/portugal/search-index.bin",
+            "url": "/region-packages/portugal/search/v10/search-index.bin",
             "label": "search-index.bin",
             "group": "places",
-            "sizeBytes": 11455262,
-            "sha256": "a46cdc9f6074626eefed4f3519c4561cb8f52830052a0c1e1694606e655bb102"
+            "sizeBytes": 11520219,
+            "sha256": "ff0fcf211a079383bd0051caf0575d722b647bc33a1641fe6933d630ba6d5641"
           },
           {
-            "url": "/region-packages/portugal/search-records.bin",
+            "url": "/region-packages/portugal/search/v10/search-records.bin",
             "label": "search-records.bin",
             "group": "places",
-            "sizeBytes": 34657436,
-            "sha256": "e803c90596e9336c919f7a2550dc799eaecf97634a05b243f1d8ebb1f907bf1a"
+            "sizeBytes": 34943891,
+            "sha256": "a617a9a00cf48a9c374e86e125610df7cc86830ac3198262e6316266770a1780"
           },
           {
-            "url": "/region-packages/portugal/address-index.bin",
+            "url": "/region-packages/portugal/search/v10/address-index.bin",
             "label": "address-index.bin",
             "group": "places",
-            "sizeBytes": 8438137,
-            "sha256": "e29f55df6a92d47db79dc6378d9870b53148ef93e1b54e11650ecb232882a883"
+            "sizeBytes": 10179692,
+            "sha256": "1db3fbb83dce2023ee510ffad9eec7b0a2d28fdf9026c97e9887fa0870edc4e4"
           },
           {
-            "url": "/region-packages/portugal/address-records.bin",
+            "url": "/region-packages/portugal/search/v10/address-records.bin",
             "label": "address-records.bin",
             "group": "places",
-            "sizeBytes": 60603538,
-            "sha256": "2a43cd9851b5781105a4b9e5ee9f885e0d66131922158fbe9cfcd54996fd4a65"
+            "sizeBytes": 75558816,
+            "sha256": "6fbfe00910e66e49653c753dfa99a3f7035e05782356eac8bbdcd15134d8729f"
           }
         ]
       }
