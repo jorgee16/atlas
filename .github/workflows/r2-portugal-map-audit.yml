@@ -3,7 +3,7 @@ name: Cloudflare R2 Portugal map audit
 on:
   workflow_dispatch:
   push:
-    branches: ['migration/native-core-kotlin']
+    branches: ['migration/native-core-kotlin', 'audit/offline-eiras-street']
     paths:
       - '.github/workflows/r2-portugal-map-audit.yml'
 
@@ -60,3 +60,70 @@ jobs:
             rm -f "$headers"
             echo '::endgroup::'
           done
+
+  published-address-audit:
+    if: ${{ github.ref == 'refs/heads/audit/offline-eiras-street' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read exact published R2 binary search assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/atlas-r2-eiras
+          origin="https://pub-75539028275a4826aa383fdb89292ed7.r2.dev/region-packages/portugal"
+          for object in address-index.bin address-records.bin search-index.bin search-records.bin; do
+            echo "::group::Download $object"
+            curl --fail --location --retry 3 --retry-delay 2 --connect-timeout 15 \
+              --max-time 210 --silent --show-error \
+              "$origin/$object" --output "/tmp/atlas-r2-eiras/$object"
+            stat -c '%n size=%s' "/tmp/atlas-r2-eiras/$object"
+            sha256sum "/tmp/atlas-r2-eiras/$object"
+            echo '::endgroup::'
+          done
+      - name: Run real native Atlas search for street in Coimbra
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S native -B /tmp/atlas-eiras-build -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/atlas-eiras-build --target atlas_search --parallel 2
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          root=pathlib.Path('/tmp/atlas-r2-eiras')
+          expected='Rua Professor Albuquerque de Matos'
+          normalized=expected.casefold()
+          print('Target:',expected)
+          all_results={}
+          for dataset,mode in [('address','address'),('poi',None)]:
+              cmd=['/tmp/atlas-eiras-build/atlas_search',str(root),expected,
+                   '40.24887','-8.41170']
+              if mode: cmd.append(mode)
+              res=subprocess.run(cmd,check=True,text=True,capture_output=True)
+              items=json.loads(res.stdout)
+              all_results[dataset]=items
+              print(dataset,'exact query results:',len(items))
+              for item in items[:10]:
+                  print('  ',item.get('name'),item.get('address'),item.get('distanceMeters'))
+              data=(root/('address-records.bin' if dataset=='address' else 'search-records.bin')).read_bytes()
+              print(dataset,'record byte-string name occurs:',normalized.encode() in data.lower())
+          matched=[]
+          for dataset,items in all_results.items():
+              for item in items:
+                  name=item.get('name','')
+                  addr=item.get('address','')
+                  if normalized in (name+' '+addr).casefold():
+                      matched.append((dataset,name))
+          if matched:
+              conclusion='FOUND IN PUBLISHED OFFLINE ATLAS SEARCH PACKAGE'
+              print('AUDIT:',conclusion,matched)
+          else:
+              conclusion='MISSING FROM PUBLISHED OFFLINE ATLAS SEARCH QUERY'
+              print('AUDIT:',conclusion)
+          with open(__import__('os').environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write(f'## Offline Atlas Coimbra street audit\n\n')
+              f.write(f'**Street:** {expected}, Eiras, Coimbra, 3020-119\n\n')
+              f.write(f'**Result:** {conclusion}\n\n')
+              f.write(f'**Address search count:** {len(all_results["address"])}; ')
+              f.write(f'**POI search count:** {len(all_results["poi"])}\n')
+          PY
