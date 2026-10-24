@@ -18,12 +18,16 @@ place('address-one','',-9.14,38.7102,{'addr:street':'Rua Augusta','addr:housenum
 place('address-two','',-9.141,38.711,{'addr:street':'Rua Augusta','addr:housenumber':'25','addr:city':'Lisboa','addr:postcode':'1100-149'});
 place('address-english','',-.1275,51.5034,{'addr:street':'Downing Street','addr:housenumber':'10','addr:city':'London','addr:postcode':'SW1A 2AA'});
 place('station','Estação Central',-9.143,38.719,{railway:'station',ref:'CENTRAL','addr:city':'Lisboa'});
+ // Regression for a real named residential OSM way: street search must not
+ // depend on the presence of an addr:housenumber node or a Nearby POI.
+place('street-eiras','Rua Professor Albuquerque de Matos',-8.41170,40.24887,
+  {highway:'residential','addr:city':'Coimbra'});
 await fs.writeFile(root+'/raw.geojson',JSON.stringify({type:'FeatureCollection',features}));
 await normalizeRegion({rawGeoJson:root+'/raw.geojson',outputDir:root+'/data',config:{id:'parity',name:'Parity',country:'Portugal',bbox:[-10,38,1,52],categories:{cafe:[{key:'amenity',values:['cafe']}],square:[{key:'amenity',values:['square']}],museum:[{key:'tourism',values:['museum']}],hotel:[{key:'tourism',values:['hotel']}],station:[{key:'railway',values:['station']}]}}});
 const region={id:'parity',name:'Parity',poiUrl:root+'/data/pois.geojson',assets:{pois:root+'/data/pois.geojson',search:root+'/data/search-index.bin',searchRecords:root+'/data/search-records.bin',addressSearch:root+'/data/address-index.bin',addressRecords:root+'/data/address-records.bin'}};
 const options={regionRepository:{findByPosition:async()=>region},fetchFn:async url=>{try{const b=await fs.readFile(root+'/data/'+new URL(url,'https://fixture.invalid').pathname.split('/').at(-1));return{ok:true,arrayBuffer:async()=>b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),json:async()=>JSON.parse(b.toString())};}catch{return{ok:false,status:404};}}};
 const providers={poi:new LocalRegionProvider(options),address:new AddressStreetProvider(options)};
-const queries=['cafe central','café cen','praca do comercio','terreiro paco','nacional','national museum','belem','central lisboa','hotel','riverside','1100-148','24 rua augusta','rua augusta 24','rua augusta','25 augusta','SW1A 2AA','10 Downing Street','Downing Street','rua','missing place'];
+const queries=['cafe central','café cen','praca do comercio','terreiro paco','nacional','national museum','belem','central lisboa','hotel','riverside','1100-148','24 rua augusta','rua augusta 24','rua augusta','25 augusta','SW1A 2AA','10 Downing Street','Downing Street','Rua Professor Albuquerque de Matos','albuquerque matos','rua','missing place'];
 const cases=[];
 for(const anchor of [{lat:38.71,lon:-9.14},{lat:51.503,lon:-.12}])for(const query of queries)for(const [kind,provider]of Object.entries(providers)){
  const expected=kind==='poi'?await provider.searchByName(query,anchor,{limit:12,includeScore:true}):await provider.search(query,anchor,{limit:12});

@@ -17,12 +17,14 @@ function run(command, args) {
   });
 }
 
-function filterExpression(categoryRules) {
+export function filterExpression(categoryRules) {
   const expressions = [
     'n/place=city,town,village,hamlet,suburb,quarter,neighbourhood,locality,municipality,borough,island',
-    // Exact address points are search-only geocoder records. They do not
-    // appear in Nearby but let future region packages resolve house numbers.
-    'nwr/addr:housenumber'
+    // Exact addresses and all OSM named highway ways belong to the separate
+    // address/street index, NOT to Nearby POIs. The normalizer already
+    // selects named roads but it cannot see ways removed by tags-filter.
+    'nwr/addr:housenumber',
+    'w/highway'
   ];
 
   for (const rules of Object.values(categoryRules)) {
