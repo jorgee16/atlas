@@ -74,6 +74,9 @@ if [[ "$result" -eq 0 ]]; then
     python3 tools/analyze-route-visual-review.py "$metrics_dir" || result=$?
   else
     python3 tools/analyze-native-gps-replay.py "$mode" || result=$?
+    if [[ "$mode" == camera && "$result" -eq 0 ]]; then
+      python3 tools/analyze-camera-turns.py "$metrics_dir" || result=$?
+    fi
   fi
 fi
 exit "$result"

@@ -698,6 +698,45 @@ class NavigationGpsReplayTest {
         }
     }
 
+    /**
+     * Dedicated camera diagnosis using the REAL Portugal C++ routing graph.
+     * Unlike cameraSmoke (largely straight line and stale GPS during UI
+     * gestures), keep injecting fresh 1Hz GPS through both the roundabout
+     * around 455m and a separate 37-degree bend around 810m.
+     *
+     * This intentionally DOES NOT modify heading filters or camera behaviour.
+     * Frame-level telemetry is analyzed externally to compare target-heading
+     * age, the actual map rotation, and the route tangent at displayed progress.
+     */
+    private fun curveHeadingStudy(s:ActivityScenario<MainActivity>,route:JSONObject) {
+        val p=points(route)
+        val length=(1 until p.size).sumOf { distance(p[it-1],p[it]) }
+        assertTrue("Portugal camera test route must include curved section",length>=980.0)
+        File(output,"curve-route.json").writeText(route.toString(2))
+        val speed=12.0
+        var travelled=0.0
+        var ticks=0
+        phase="curve-replay"
+        while (travelled<=936.0 && ticks<85 && model!!.updates.value.navigating) {
+            val loc=at(p,travelled)
+            val before=at(p,(travelled-3.0).coerceAtLeast(0.0))
+            val after=at(p,(travelled+6.0).coerceAtMost(length))
+            val trueHeading=bearing(before,after)
+            fix(loc,speed,trueHeading,5.0,5.0,truthHeading=trueHeading)
+            SystemClock.sleep(1020)
+            travelled+=speed
+            ticks++
+        }
+        assertTrue("fresh 1Hz curved-road replay must cover the second bend, not only the straight",
+            ticks>=78)
+        assertTrue("curve study must not silently finish navigation",
+            model!!.updates.value.navigating)
+        val lastFrame=snapshot(s)
+        assertTrue("camera must stay in heading-up follow during study",
+            lastFrame.optBoolean("follow") && lastFrame.optBoolean("headingUp"))
+        File(output,"curve-study-end.json").writeText(lastFrame.toString(2))
+    }
+
     private fun cameraSmoke(s:ActivityScenario<MainActivity>,route:JSONObject) {
         phase="camera-smoke"
         val path=points(route)
@@ -973,6 +1012,11 @@ class NavigationGpsReplayTest {
                     verifyParkedCarWithBadGps(s,drive)
                     parkedRotationSmoke(s)
                     cameraSmoke(s,drive)
+                    // Re-plan from the SAME known start before curve telemetry:
+                    // cameraSmoke performed pan/zoom, background resume and GPS gaps.
+                    val freshCurveRoute=plan(s,Coordinate(38.7215,-9.147),
+                        Coordinate(38.728,-9.152),false)
+                    curveHeadingStudy(s,freshCurveRoute)
                     val walk=plan(s,Coordinate(38.7215,-9.147),Coordinate(38.7224,-9.1475),true)
                     verifyStationaryWalker(s,walk)
                     repeat(5) { i ->
