@@ -16,14 +16,14 @@ bool validDigests(const TollGraphDigests &digests) {
 }
 }
 TollCrossingMatcher::TollCrossingMatcher(TollGraphDigests graph,std::string country,
-    std::unordered_set<std::string> roads,std::vector<TollChargeBinding> bindings,bool reviewed)
-    :graph_(std::move(graph)),country_(std::move(country)),roads_(std::move(roads)),reviewed_(reviewed) {
-  if(!validDigests(graph_)||country_.empty()||roads_.empty()||bindings.empty())throw std::invalid_argument("Missing graph/country/coverage evidence");
+    std::unordered_set<uint32_t> edges,std::vector<TollChargeBinding> bindings,bool reviewed)
+    :graph_(std::move(graph)),country_(std::move(country)),coveredEdges_(std::move(edges)),reviewed_(reviewed) {
+  if(!validDigests(graph_)||country_.empty()||coveredEdges_.empty()||bindings.empty())throw std::invalid_argument("Missing graph/country/coverage evidence");
   for(auto &binding:bindings) {
-    if(binding.from==binding.to||!std::isfinite(binding.offsetMeters)||binding.offsetMeters<0||binding.chargeId.empty())throw std::invalid_argument("Invalid directed crossing binding");
+    if(binding.from==binding.to||!std::isfinite(binding.offsetMeters)||binding.offsetMeters<0||binding.chargeId.empty()||!std::isfinite(binding.edgeLengthMeters)||binding.edgeLengthMeters<=0||binding.offsetMeters>=binding.edgeLengthMeters||!coveredEdges_.count(binding.edge))throw std::invalid_argument("Invalid directed crossing binding");
     auto &same=bindings_[binding.edge];
     for(const auto &other:same) {
-      if(other.from!=binding.from||other.to!=binding.to||other.chargeId==binding.chargeId||std::abs(other.offsetMeters-binding.offsetMeters)<0.01)
+      if(other.from!=binding.from||other.to!=binding.to||other.edgeLengthMeters!=binding.edgeLengthMeters||other.chargeId==binding.chargeId||std::abs(other.offsetMeters-binding.offsetMeters)<0.01)
         throw std::invalid_argument("Ambiguous/duplicate crossing binding");
     }
     same.push_back(std::move(binding));
@@ -39,10 +39,10 @@ std::optional<TollCrossingSequence> TollCrossingMatcher::match(const TollGraphDi
     if(previous && *previous!=leg.from)return std::nullopt;
     previous=leg.to;
     if(!std::isfinite(leg.beginMeters)||!std::isfinite(leg.endMeters)||leg.beginMeters<0||leg.endMeters<leg.beginMeters||leg.from==leg.to)return std::nullopt;
-    if(leg.tolled&&!roads_.count(leg.road))result.complete=false;
+    if(leg.tolled&&!coveredEdges_.count(leg.edge))result.complete=false;
     const auto it=bindings_.find(leg.edge);if(it==bindings_.end())continue;
     for(const auto &binding:it->second) {
-      if(binding.from!=leg.from||binding.to!=leg.to)return std::nullopt;
+      if(binding.from!=leg.from||binding.to!=leg.to||leg.endMeters>binding.edgeLengthMeters)return std::nullopt;
       // Traversal intervals are [begin,end). A fix after the gate cannot charge
       // it again; a real later repeat of this directed edge remains chargeable.
       if(binding.offsetMeters>=leg.beginMeters&&binding.offsetMeters<leg.endMeters)

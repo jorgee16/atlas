@@ -30,8 +30,8 @@ int main(int argc,char** argv){try{
  std::ifstream fixedFile(argv[2]);check(bool(fixedFile),"missing fixed charge CSV");std::ostringstream fixedBuffer;fixedBuffer<<fixedFile.rdbuf();
  auto charges=TollTariffs::parse(fixedBuffer.str(),"Portugal");
  check(charges.scheme=="fixed-crossing"&&!charges.estimate("A5",1000,1),"fixed charges cannot become road averages");
- check(std::abs(*charges.fixedCharge("brisa:0501",1)-1.60)<1e-9,"published Oeiras I class1 crossing");
- for(int c=2;c<=4;++c)check(std::abs(*charges.fixedCharge("brisa:0501",c)-3.10)<1e-9,"published Oeiras I heavy classes");
+ check(std::abs(*charges.fixedCharge("brisa:0501",1)-1.60)<1e-9,"published Carcavelos PV class1 crossing");
+ for(int c=2;c<=4;++c)check(std::abs(*charges.fixedCharge("brisa:0501",c)-3.10)<1e-9,"published Carcavelos PV heavy classes");
  check(std::abs(*charges.sumFixedCharges({"brisa:0502","brisa:0503"},1)-1.60)<1e-9,"sum of identified crossings uses integer minor units");
  check(std::abs(*charges.sumFixedCharges({"brisa:0502","brisa:0502"},1)-1.40)<1e-9,"a real repeated crossing must be charged again");
  check(!charges.sumFixedCharges({"unknown"},1)&&!charges.fixedCharge("brisa:0501",5),"unknown charge/class is not zero");

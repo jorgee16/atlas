@@ -14,6 +14,7 @@ struct TollChargeBinding {
   uint32_t edge=0,from=0,to=0;
   double offsetMeters=0;
   std::string chargeId;
+  double edgeLengthMeters=0;
 };
 struct TollEdgeTraversal {
   uint32_t edge=0,from=0,to=0;
@@ -31,14 +32,14 @@ struct TollCrossingSequence {
 class TollCrossingMatcher {
 public:
   TollCrossingMatcher(TollGraphDigests boundGraph,std::string country,
-      std::unordered_set<std::string> coveredRoads,std::vector<TollChargeBinding> bindings,
+      std::unordered_set<uint32_t> coveredEdges,std::vector<TollChargeBinding> bindings,
       bool reviewed);
   std::optional<TollCrossingSequence> match(const TollGraphDigests &loadedGraph,
       const std::string &country,const std::vector<TollEdgeTraversal> &traversals) const;
 private:
   TollGraphDigests graph_;
   std::string country_;
-  std::unordered_set<std::string> roads_;
+  std::unordered_set<uint32_t> coveredEdges_;
   std::unordered_map<uint32_t,std::vector<TollChargeBinding>> bindings_;
   bool reviewed_=false;
 };

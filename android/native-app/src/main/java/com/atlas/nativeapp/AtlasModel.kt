@@ -241,6 +241,9 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     val canRollbackTolls:Boolean get()=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication()).canRollback(it)
     } ?: false
+    internal val canRollbackFixedTolls:Boolean get()=routingTariffCountry?.let {
+        TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).canRollback(it)
+    } ?: false
     internal fun fixedTollCatalog():TollCatalog?=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(it)
     }

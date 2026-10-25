@@ -6,7 +6,7 @@
   "sourcePage": 13,
   "officialCharges": 10,
   "a5Charges": 6,
-  "catalogSha256": "b358ca19b761fd9f4b21d0c7652129cf31225f2eca54ff0eeb24ce3aec8d4464",
+  "catalogSha256": "66a549c76c57b85f1c11523b7c1b67b3be91b2a83d364a99615def514afead5d",
   "legacyIndex": {
     "path": "/region-packages/portugal/routing/mainland/toll-events.json",
     "sha256": "dcd60236a3e2f93ceac7a00e99523c0dbcf8d4648b4a6b4ea1d49d3433cb3848",
@@ -75,5 +75,7 @@
     ]
   },
   "routeExactEnabled": false,
-  "reason": "The current index has no A5 bindings, no graph digest binding and no reviewed completeness guarantee. Candidate geometry is not authoritative evidence."
+  "reason": "The current index has no A5 bindings, no graph digest binding and no reviewed completeness guarantee. Candidate geometry is not authoritative evidence.",
+  "sourceSha256": "8fa27e9bcf2b3d5cf222a2411318523ca7fa0ec673759d7033aa90c22f77e29b",
+  "sourceValidation": "Page 13 visually checked: 0501 Carcavelos PV, 0502 Carcavelos I, 0503 Carcavelos II, 0504 Oeiras I, 0505 Oeiras II, 0506 Estoril. Automatic text extraction misaligned the labels."
 }

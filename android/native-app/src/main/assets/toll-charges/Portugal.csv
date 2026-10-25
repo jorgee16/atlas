@@ -12,10 +12,10 @@ charge;road;name;class1;class2;class3;class4
 brisa:0102;A1;Grijó Nó;0.70;1.25;1.60;1.80
 brisa:0201;A2;Coina I;0.90;1.55;2.00;2.20
 brisa:0505;A5;Oeiras II;0.40;0.75;0.75;0.75
-brisa:0501;A5;Oeiras I;1.60;3.10;3.10;3.10
-brisa:0502;A5;Carcavelos pv;0.70;1.35;1.35;1.35
-brisa:0503;A5;Carcavelos I;0.90;1.75;1.75;1.75
-brisa:0504;A5;Carcavelos II;0.40;0.75;0.75;0.75
+brisa:0501;A5;Carcavelos PV;1.60;3.10;3.10;3.10
+brisa:0502;A5;Carcavelos I;0.70;1.35;1.35;1.35
+brisa:0503;A5;Carcavelos II;0.90;1.75;1.75;1.75
+brisa:0504;A5;Oeiras I;0.40;0.75;0.75;0.75
 brisa:0506;A5;Estoril;0.50;0.95;0.95;0.95
 brisa:0901;A9;Queluz I;0.35;0.65;0.85;0.95
 brisa:1201;A12;Pinhal Novo I;1.10;1.95;2.50;2.75

@@ -312,6 +312,9 @@ class AtlasPages(
                 addView(ui.action("Update plaza tariffs",primary=false) {
                     model.updateTollTariffs(kind=TollCatalogKind.FIXED_CROSSING)
                 },lp(14))
+                if(model.canRollbackFixedTolls)addView(ui.action("Restore previous plaza tariffs",primary=false) {
+                    model.updateTollTariffs(rollback=true,kind=TollCatalogKind.FIXED_CROSSING)
+                },lp(10))
             }
         })
     }

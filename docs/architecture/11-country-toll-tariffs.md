@@ -146,8 +146,8 @@ The 2026 Brisa PDF, page 13, supplies ten open-system charges, including all six
 A5 codes. The audit is in `docs/data/a5-fixed-charge-audit-20261025.json`.
 
 These are different facts from the four A5 IMT section prices. For example,
-Oeiras I (0501) charges EUR1.60/3.10/3.10/3.10 per crossing, whereas Oeiras II
-(0505) charges EUR0.40/0.75/0.75/0.75. Summing motorway section prices cannot
+Carcavelos PV (0501) charges EUR1.60/3.10/3.10/3.10 per crossing, whereas Oeiras I/II
+(0504/0505) charges EUR0.40/0.75/0.75/0.75. Summing motorway section prices cannot
 identify which open-system gate was crossed. The catalog contains published
 base charges, not a validated Lisbon–Cascais journey quote.
 
@@ -170,12 +170,13 @@ catalog independently; its data remains available offline.
 
 `native/include/atlas/toll_crossings.hpp` / `native/src/toll_crossings.cpp` implement
 a price-free matcher separately from the routing algorithm. Reviewed mappings bind
-all seven graph SHA-256 digests, country, certified road coverage, directed edge
+all seven graph SHA-256 digests, country, explicitly certified directed-edge coverage (not a road-reference allowlist), directed edge
 IDs, from/to node IDs and the crossing offset on that edge. Route traversal
 intervals are [begin,end): starting after a plaza does not charge it again, and
 real repeated crossings remain chargeable. Wrong graph/country/direction,
-disconnected traversal or ambiguous bindings are rejected. Uncovered tolled roads
-keep the result incomplete. The caller must compute hashes from the loaded graph;
+disconnected traversal or ambiguous bindings are rejected. Uncertified tolled edges keep the result incomplete, even when they share the
+reference of a certified road. Binding offsets must fit the declared full edge
+length and clipped traversal bounds. The caller must compute hashes from the loaded graph;
 a region name or version number alone is insufficient proof.
 
 The existing v1 `toll-events.json` was downloaded and SHA-verified. It has 22

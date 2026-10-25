@@ -32,7 +32,7 @@ class TollChargesUiTest {
                 onView(withText("Settings")).perform(click())
                 onView(withText("Published plaza tariffs")).perform(scrollTo(),click())
                 onView(withText(org.hamcrest.Matchers.containsString("not a trip total"))).check(matches(isDisplayed()))
-                onView(withText("A5 · Oeiras I")).perform(scrollTo()).check(matches(isDisplayed()))
+                onView(withText("A5 · Carcavelos PV")).perform(scrollTo()).check(matches(isDisplayed()))
                 onView(withText("EUR 1,60")).check(matches(isDisplayed()))
                 val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
                 automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use { fd ->

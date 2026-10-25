@@ -7,8 +7,8 @@ template<class F>void rejects(F f){bool fail=false;try{f();}catch(const std::exc
 int main(){try{
  TollGraphDigests graph;
  for(const auto &name:{"nodes.bin","edges.bin","geometry.bin","roads.bin","strings.bin","restrictions.bin","spatial-index.bin"})graph[name]=std::string(64,'a');
- const std::vector<TollChargeBinding> bindings={{7,1,2,30,"gate:1"},{7,1,2,70,"gate:2"},{8,2,1,20,"gate:1"}};
- TollCrossingMatcher matcher(graph,"Testland",{"T1"},bindings,true);
+ const std::vector<TollChargeBinding> bindings={{7,1,2,30,"gate:1",100},{7,1,2,70,"gate:2",100},{8,2,1,20,"gate:1",100}};
+ TollCrossingMatcher matcher(graph,"Testland",{7,8},bindings,true);
  auto q=matcher.match(graph,"Testland",{{7,1,2,0,100,"T1",true}});
  check(q&&q->complete&&q->chargeIds==std::vector<std::string>({"gate:1","gate:2"}),"ordered physical crossings");
  q=matcher.match(graph,"Testland",{{7,1,2,31,100,"T1",true}});
@@ -18,10 +18,10 @@ int main(){try{
  check(!matcher.match(graph,"Testland",{{7,2,1,0,100,"T1",true}}),"wrong direction rejected");
  check(!matcher.match(graph,"Otherland",{}),"cross-country proof rejected");
  auto changed=graph;changed["edges.bin"]=std::string(64,'b');check(!matcher.match(changed,"Testland",{}),"changed graph rejected");
- TollCrossingMatcher unreviewed(graph,"Testland",{"T1"},bindings,false);check(!unreviewed.match(graph,"Testland",{}),"unreviewed mappings cannot quote");
- q=matcher.match(graph,"Testland",{{7,1,2,0,100,"T1",true},{8,2,1,0,100,"T2",true},{7,1,2,0,100,"T1",true}});
- check(q&&!q->complete&&q->chargeIds.size()==5,"unknown road makes total incomplete, genuine repeats preserved");
- rejects([&]{TollCrossingMatcher m(graph,"Testland",{"T1"},{{7,1,2,30,"one"},{7,1,2,30,"two"}},true);});
- rejects([&]{TollCrossingMatcher m({},"Testland",{"T1"},bindings,true);});
+ TollCrossingMatcher unreviewed(graph,"Testland",{7,8},bindings,false);check(!unreviewed.match(graph,"Testland",{}),"unreviewed mappings cannot quote");
+ q=matcher.match(graph,"Testland",{{7,1,2,0,100,"T1",true},{8,2,1,0,100,"T1",true},{7,1,2,0,100,"T1",true},{9,2,1,0,100,"T1",true}});
+ check(q&&!q->complete&&q->chargeIds.size()==5,"uncertified edge makes total incomplete, genuine repeats preserved");
+ rejects([&]{TollCrossingMatcher m(graph,"Testland",{7,8},{{7,1,2,30,"one",100},{7,1,2,30,"two",100}},true);});
+ rejects([&]{TollCrossingMatcher m({},"Testland",{7,8},bindings,true);});
  std::cout<<"Directed toll-crossing evidence tests passed\n";return 0;
  }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
