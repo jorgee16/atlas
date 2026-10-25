@@ -17,9 +17,13 @@ else()
   add_executable(atlas_navigation_replay_tests tests/navigation_replay_tests.cpp)
   target_link_libraries(atlas_navigation_replay_tests PRIVATE atlas_core)
   add_test(NAME atlas_navigation_replay_tests COMMAND atlas_navigation_replay_tests)
+  add_executable(atlas_toll_tests tests/toll_tests.cpp)
+  target_link_libraries(atlas_toll_tests PRIVATE atlas_core)
+  add_test(NAME atlas_toll_tests COMMAND atlas_toll_tests ${CMAKE_CURRENT_SOURCE_DIR}/../android/native-app/src/main/assets/tolls/Portugal.csv)
   add_executable(atlas_search src/search_cli.cpp)
   target_link_libraries(atlas_search PRIVATE atlas_core)
   add_executable(atlas_route src/cli.cpp)
   target_link_libraries(atlas_route PRIVATE atlas_core)
 endif()
+
 

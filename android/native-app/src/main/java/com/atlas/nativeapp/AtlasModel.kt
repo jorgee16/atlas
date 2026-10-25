@@ -192,7 +192,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         (getApplication<Application>().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
     var vehicleClass: Int
         get() = prefs.getInt("vehicle", 1)
-        set(value) { require(value in 1..4); prefs.edit().putInt("vehicle", value).apply(); invalidateRoute() }
+        set(value) { require(value in 1..99); prefs.edit().putInt("vehicle", value).apply(); invalidateRoute() }
     var activeTrip: String
         get() = prefs.getString("activeTrip", "") ?: ""
         set(value) { prefs.edit().putString("activeTrip", value).apply(); refresh() }
@@ -232,6 +232,27 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     fun mode(value: String) {
         require(value in listOf("drive", "walk", "transit")); invalidateRoute()
         state.update { it.copy(mode = value, walking = value == "walk") }
+    }
+    @Volatile private var routingTariffCountry:String?=null
+    val tollCountry:String? get()=routingTariffCountry
+    val tollVehicleClasses:List<Int> get()=routingTariffCountry?.let {
+        TollTableAssets.repository(getApplication()).load(it)?.classes
+    } ?: (1..4).toList()
+    val canRollbackTolls:Boolean get()=routingTariffCountry?.let {
+        TollTableAssets.repository(getApplication()).canRollback(it)
+    } ?: false
+    fun updateTollTariffs(rollback:Boolean=false) {
+        val country=routingTariffCountry ?: run { status("Calculate a route to select its tariff country first.");return }
+        if(state.value.navigating) { status("Update tariffs after ending navigation.");return }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val repository=TollTableAssets.repository(getApplication())
+                val catalog=if(rollback)repository.rollback(country) else TollCatalogUpdater(repository).update(country)
+                status("$country tariffs: version ${catalog.revision}. Applies to the next route calculation.")
+            } catch(e:Exception) {
+                status("Tariff update failed; last valid data retained: ${e.message}")
+            }
+        }
     }
     fun avoidTolls(value: Boolean) { invalidateRoute(); state.update { it.copy(avoidTolls = value) } }
     private fun invalidateRoute() { preparedLiveRouteOrigin=null;preparedLiveRouteHeading=null; stop(); state.update { it.copy(route = null, routeOptions = emptyList(), arrived = false, journeys = emptyList(), journey = null, journeyLeg = -1) } }
@@ -300,6 +321,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     val roadRegion=regions.forPosition(liveOrigin)
                     core.graph(regions.graph(liveOrigin, destination.coordinate()).path)
                     val country=roadRegion.json.getString("country")
+                    routingTariffCountry=country
                     core.tariffs(country,TollTableAssets.read(getApplication(),country))
                     val primary = JSONObject(core.route(liveOrigin, destination.coordinate(),
                         snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
@@ -686,7 +708,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         if (appearance in listOf("system","light","dark")) edit.putString("theme",appearance)
         if (data.has("voice")) edit.putBoolean("voice",data.optBoolean("voice",true))
         val vehicle=data.optInt("vehicle",vehicleClass)
-        if(vehicle in 1..4) edit.putInt("vehicle",vehicle)
+        if(vehicle in 1..99) edit.putInt("vehicle",vehicle)
         check(edit.commit()) { "Could not save imported Atlas data" }
         voice=prefs.getBoolean("voice",true)
         refresh()
@@ -749,3 +771,4 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         kotlinx.coroutines.CoroutineScope(worker).launch { core.close(); worker.close() }
     }
 }
+

@@ -1,3 +1,4 @@
+import { tollPriceLabel, formatTollMoney } from '../../routing/toll-price-label.js';
 import { escapeHtml } from '../../utils.js';
 
 export class NavigationPlannerView {
@@ -133,9 +134,6 @@ export class NavigationPlannerView {
           ? driveRoutes[selectedDriveRouteIndex] ?? driveRoutes[0] ?? null
           : null;
 
-      const selectedDriveTolls = Number(
-        selectedDriveOption?.route?.tolls?.totalEuros ?? 0
-      );
 
       const routeDetails =
         previewState === 'loading'
@@ -171,9 +169,7 @@ export class NavigationPlannerView {
                       .slice(0, 4)
                       .join(' · ');
 
-                    const tollEuros = Number(
-                      previewRoute?.tolls?.totalEuros ?? 0
-                    );
+                    const tollEuros = previewRoute?.tolls?.totalEuros;
 
                     return `
                       <div class="navigation-single-drive-route">
@@ -183,10 +179,8 @@ export class NavigationPlannerView {
                             <small>${this.#formatDistance(previewRoute.distanceMeters)}</small>
                           </span>
 
-                          <span class="navigation-single-drive-toll ${tollEuros <= 0 ? 'is-free' : ''}">
-                            ${tollEuros > 0
-                              ? `Est. €${tollEuros.toFixed(2)}`
-                              : 'No tolls'}
+                          <span class="navigation-single-drive-toll ${tollEuros === 0 && previewRoute?.tolls?.tolledDistanceMeters === 0 ? 'is-free' : ''}">
+                            ${escapeHtml(tollPriceLabel(previewRoute?.tolls))}
                           </span>
                         </div>
 
@@ -860,17 +854,17 @@ export class NavigationPlannerView {
         <div class="navigation-drive-options-list">
           ${options.map((option, index) => {
             const route = option.route;
-            const tollEuros = Number(route?.tolls?.totalEuros ?? 0);
+            const tollEuros = route?.tolls?.totalEuros;
             const selected = index === selectedIndex;
             const extraMinutes = fastest && route !== fastest
               ? Math.max(0, Math.round((route.durationSeconds - fastest.durationSeconds) / 60))
               : 0;
-            const savedEuros = fastest && route !== fastest
+            const savedEuros = fastest && route !== fastest && Number.isFinite(tollEuros) && Number.isFinite(fastest.tolls?.totalEuros) && route.tolls?.currency === fastest.tolls?.currency
               ? Math.max(0, Number(fastest.tolls?.totalEuros ?? 0) - tollEuros)
               : 0;
 
             const tradeoff = savedEuros >= 0.5
-              ? `Save €${savedEuros.toFixed(2)}${extraMinutes ? ` · +${extraMinutes} min` : ''}`
+              ? `Save ${formatTollMoney(savedEuros, route.tolls)}${extraMinutes ? ` · +${extraMinutes} min` : ''}`
               : extraMinutes
                 ? `+${extraMinutes} min`
                 : '';
@@ -902,7 +896,7 @@ export class NavigationPlannerView {
                     ${roadHint
                       ? `<small class="navigation-drive-roads"><span>Via</span> ${escapeHtml(roadHint)}</small>`
                       : '<small class="navigation-drive-roads"><span>Local roads</span></small>'}
-                    <strong class="navigation-drive-option-price">${tollEuros > 0 ? `Est. €${tollEuros.toFixed(2)}` : '€0'}</strong>
+                    <strong class="navigation-drive-option-price">${escapeHtml(tollPriceLabel(route?.tolls))}</strong>
                   </span>
 
                   <span class="navigation-drive-option-foot">
@@ -916,7 +910,7 @@ export class NavigationPlannerView {
         </div>
 
         <footer class="navigation-drive-options-footer">
-          <small class="navigation-drive-toll-note">ⓘ Estimated tolls · 2026 tariffs</small>
+          <small class="navigation-drive-toll-note">ⓘ Country tariffs · Estimates where covered</small>
           <button
             class="navigation-drive-preview-link"
             type="button"
@@ -1508,3 +1502,4 @@ export class NavigationPlannerView {
     return '⌖';
   }
 }
+

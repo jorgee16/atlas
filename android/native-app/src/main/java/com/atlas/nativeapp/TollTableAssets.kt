@@ -15,16 +15,17 @@ internal object TollTableAssets {
     fun safeCountry(country: String): Boolean =
         country.matches(Regex("[A-Za-z][A-Za-z -]{1,64}"))
 
-    fun read(context: Context, country: String): ByteArray? {
-        if (!safeCountry(country)) return null
-        return try {
-            context.assets.open("tolls/$country.csv").use { input ->
-                val bytes = input.readBytes()
-                check(bytes.size in 1..(2 * 1024 * 1024)) { "Invalid toll catalog length" }
+    @Volatile private var instance:TollCatalogRepository?=null
+    @Synchronized fun repository(context:Context):TollCatalogRepository {
+        instance?.let { return it }
+        val app=context.applicationContext
+        return TollCatalogRepository(java.io.File(app.filesDir,"toll-tariffs"), { country ->
+            try { app.assets.open("tolls/$country.csv").use { input ->
+                val bytes=input.readBytes()
+                require(bytes.size in 1..TollCatalog.MAX_BYTES)
                 bytes
-            }
-        } catch (_: FileNotFoundException) {
-            null // No table for this country: prices unavailable, NEVER free.
-        }
+            } } catch(_:FileNotFoundException) { null }
+        }, { country,bytes -> NativeCore().use { it.tariffs(country,bytes) } }).also { instance=it }
     }
+    fun read(context:Context,country:String):ByteArray?=repository(context).load(country)?.csv
 }

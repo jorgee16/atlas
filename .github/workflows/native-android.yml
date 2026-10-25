@@ -99,6 +99,11 @@ jobs:
           cache: npm
       - name: Install existing Atlas dependencies for parity fixtures
         run: npm ci --ignore-scripts
+      - name: Validate common offline country tariffs and web pricing
+        run: |
+          python3 tools/generate-toll-bundle.py --check
+          python3 tools/toll-catalog.py
+          node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
       - name: Generate search expectations from the original app
@@ -735,4 +740,5 @@ jobs:
             dist/android-validated/*.sha256
             dist/android-validated/upgrade-report.txt
             android/native-app/build/reports/lint-results-release.*
+
 

@@ -1,3 +1,5 @@
+import { countryTollTariffs } from '../src/routing/country-toll-tariffs.js';
+const tariffs = countryTollTariffs('Portugal');
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -85,7 +87,7 @@ test('avoidTolls is a hard routing constraint', async () => {
 
   assert.deepEqual(fastest.nodeIndexes, [0, 1, 2]);
   assert.equal(fastest.durationSeconds, 600);
-  assert.ok(estimateRouteTolls(graph, fastest).totalEuros > 0);
+  assert.ok(estimateRouteTolls(graph, fastest, { tariffs }).totalEuros > 0);
 
   const free = await router.route(0, 2, {
     avoidTolls: true,
@@ -102,6 +104,7 @@ test('toll penalties can prefer a slower cheaper route without corrupting ETA', 
   const router = new AStarRouter(graph);
 
   const route = await router.route(0, 2, {
+    tariffs,
     tollPenaltyMinutesPerEuro: 7,
     vehicleClass: 1,
     yieldEvery: Infinity
@@ -131,3 +134,4 @@ test('balanced route prefers the Pareto knee instead of a near no-tolls clone', 
 
   assert.equal(balanced, middle);
 });
+

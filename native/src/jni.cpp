@@ -124,6 +124,9 @@ Java_com_atlas_nativeapp_NativeCore_loadTariffs(JNIEnv *env, jobject, jlong id,
     std::lock_guard<std::mutex> lock(gate);
     auto &e=engine(id);
     const auto name=string(env,country);
+    // Clear even on parse failure: never leak the previous country's rates.
+    e.tariffs.reset();
+    e.tariffCountry=name;
     if(!payload || env->GetArrayLength(payload)==0) {
       e.tariffs.reset();
       e.tariffCountry=name;
@@ -213,6 +216,7 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     op.penaltyMinutesPerEuro = penalty;
     op.vehicleClass = vehicle;
     op.tariffs = e.tariffs ? &*e.tariffs : nullptr;
+    op.tariffCountry = e.tariffCountry;
     if (alternateSeedKey >= 0 && diversitySecondsPerKm > 0) {
       if (!std::isfinite(diversitySecondsPerKm) ||
           diversitySecondsPerKm > 1200.)
@@ -363,3 +367,4 @@ extern "C" JNIEXPORT void JNICALL Java_com_atlas_nativeapp_NativeCore_activate(
     error(env, e);
   }
 }
+

@@ -223,6 +223,10 @@ class AtlasPages(
             addView(ui.rule());addView(rowAction("compass","Diagnostics",if(model.diagnosticsEnabled)"GPS overlay enabled" else "Inspect GPS, heading and positioning"){open("diagnostics")})
             addView(ui.rule());addView(rowAction("sun","Appearance",model.theme.replaceFirstChar{it.titlecase()}){open("appearance")})
             addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Country tariff table"){open("vehicle")})
+            addView(ui.rule());addView(rowAction("download","Update toll tariffs",
+                model.tollCountry?.let { "$it · Optional data download" } ?: "Calculate a route to select its country"){model.updateTollTariffs()})
+            if(model.canRollbackTolls){addView(ui.rule());addView(rowAction("download","Previous toll tariffs",
+                "Restore the previous valid local table"){model.updateTollTariffs(true)})}
             addView(ui.rule());addView(rowAction("layers","Map appearance",when(model.mapVisualStyle){
                 MapVisualStyle.SATELLITE -> "Satellite · Online imagery"
                 MapVisualStyle.HYBRID -> "Hybrid · Imagery with labels"
@@ -282,10 +286,11 @@ class AtlasPages(
     })
     fun vehicle(): View=scroll(ui.column().apply{
         addView(paragraph("Vehicle class sets toll estimates from the current offline region's country tariff table. Tariffs are derived from official sections; they are not exact entrance/exit charges. Missing roads show Price unavailable."),lp(12))
-        for(n in 1..4)addView(ui.card(padding=5).apply{addView(rowAction("car","Class $n",if(model.vehicleClass==n)"Selected" else "Tap to select"){model.vehicleClass=n})},lp(12))
+        for(n in model.tollVehicleClasses)addView(ui.card(padding=5).apply{addView(rowAction("car","Class $n",if(model.vehicleClass==n)"Selected" else "Tap to select"){model.vehicleClass=n})},lp(12))
     })
     companion object {
         fun formatDistance(meters: Double): String = if(meters<1000)"${(meters/10).roundToInt()*10} m" else String.format(Locale.getDefault(),"%.1f km",meters/1000)
         fun formatTime(seconds: Double): String {val minutes=kotlin.math.ceil(seconds/60).toInt().coerceAtLeast(1);return if(minutes<60)"$minutes min" else "${minutes/60} h ${minutes%60} min"}
     }
 }
+

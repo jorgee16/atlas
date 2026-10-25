@@ -106,7 +106,8 @@ export class AStarRouter {
       profile = 'drive',
       avoidTolls = false,
       tollPenaltyMinutesPerEuro = 0,
-      vehicleClass = 1
+      vehicleClass = 1,
+      tariffs = null
     } = {}
   ) {
     if (profile !== 'drive' && profile !== 'walk') {
@@ -294,11 +295,12 @@ export class AStarRouter {
           profile === 'drive' &&
           tollPenaltyMinutesPerEuro > 0
             ? Math.round(
-                estimateEdgeTollEuros(
+                (estimateEdgeTollEuros(
                   this.graph,
                   edgeIndex,
-                  vehicleClass
-                ) *
+                  vehicleClass,
+                  tariffs
+                ) ?? 0) *
                 tollPenaltyMinutesPerEuro *
                 60 *
                 100
@@ -644,3 +646,4 @@ export class AStarRouter {
     };
   }
 }
+

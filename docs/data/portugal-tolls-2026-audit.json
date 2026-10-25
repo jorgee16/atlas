@@ -1,0 +1,128 @@
+{
+  "source": "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",
+  "sourceSha256": "924139c6989f67eede8d872c3ee62007cd6e3d39ae4132f98dd8c048ef7c9d83",
+  "year": 2026,
+  "rows": 151,
+  "tables": [
+    {
+      "road": "A1",
+      "rows": 25
+    },
+    {
+      "road": "A2",
+      "rows": 13
+    },
+    {
+      "road": "A3",
+      "rows": 11
+    },
+    {
+      "road": "A4",
+      "rows": 8
+    },
+    {
+      "road": "A5",
+      "rows": 4
+    },
+    {
+      "road": "A6",
+      "rows": 8
+    },
+    {
+      "road": "A8",
+      "rows": 18
+    },
+    {
+      "road": "A9",
+      "rows": 8
+    },
+    {
+      "road": "A10",
+      "rows": 4
+    },
+    {
+      "road": "A12",
+      "rows": 3
+    },
+    {
+      "road": "A13",
+      "rows": 5
+    },
+    {
+      "road": "A14",
+      "rows": 4
+    },
+    {
+      "road": "A15",
+      "rows": 6
+    },
+    {
+      "road": "A17",
+      "rows": 12
+    },
+    {
+      "road": "A21",
+      "rows": 4
+    },
+    {
+      "road": "A32",
+      "rows": 7
+    },
+    {
+      "road": "A41",
+      "rows": 9
+    },
+    {
+      "road": "A43",
+      "rows": 2
+    }
+  ],
+  "unmapped": [
+    {
+      "section": "Ponte 25 de Abril",
+      "km": "6.0",
+      "classes": [
+        "2.25",
+        "4.85",
+        "6.55",
+        "8.45"
+      ],
+      "reason": "Fixed plaza/bridge: road-wide distance pricing is inappropriate"
+    },
+    {
+      "section": "Ponte Vasco da Gama",
+      "km": "18.0",
+      "classes": [
+        "3.40",
+        "7.55",
+        "11.10",
+        "14.20"
+      ],
+      "reason": "Fixed plaza/bridge: road-wide distance pricing is inappropriate"
+    }
+  ],
+  "scope": "Published HTML section tariffs only, not a full national inventory or a Via Verde journey quote",
+  "reviewedAt": "2026-10-25",
+  "estimateRoads": [
+    "A1",
+    "A3",
+    "A5",
+    "A6",
+    "A8",
+    "A9",
+    "A10",
+    "A14",
+    "A15",
+    "A21",
+    "A32",
+    "A43"
+  ],
+  "unavailableRoads": {
+    "A2": "Unmapped fixed-fee bridge on shared motorway reference",
+    "A12": "Unmapped directional fixed-fee bridge on shared reference",
+    "A4": "Paid and abolished concessions share the same road reference",
+    "A13": "Paid and abolished concessions share the same road reference",
+    "A17": "The published HTML covers Brisal, not all operators",
+    "A41": "The published HTML does not cover all operators; conditional exemptions also require eligibility"
+  }
+}

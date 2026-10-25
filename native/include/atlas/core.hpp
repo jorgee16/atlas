@@ -74,13 +74,22 @@ public:
   static TollTariffs parse(std::string_view csv, std::string country);
   std::optional<double> estimate(std::string_view roadRef,
                                  double meters, int vehicleClass) const;
-  std::string country, currency, year, source;
+  // Section lookup is for authoritative section IDs supplied by a future,
+  // graph-version-bound mapping. Routing never guesses these IDs from a ref.
+  std::optional<double> sectionPrice(std::string_view road, std::string_view section,
+                                     int vehicleClass) const;
+  std::string country, currency, year, source, version;
+  int fractionDigits = 2;
+  std::vector<int> classes;
 private:
   struct RoadTotals {
     double km = 0;
-    std::array<double, 4> euros{};
+    std::unordered_map<int,double> prices;
   };
   std::unordered_map<std::string, RoadTotals> roadTotals_;
+  std::unordered_map<std::string,std::unordered_map<int,double>> sectionPrices_;
+  bool restrictEstimates_ = false;
+  std::unordered_set<std::string> estimateRoads_;
 };
 /** Breakdown is metadata for explaining toll coverage, not an exact tariff.
  * Individual edges are grouped by their OSM road ref in encounter order. */
@@ -98,7 +107,9 @@ struct Route {
   double meters = 0, seconds = 0, tollEuros = 0;
   double tolledMeters = 0, pricedTollMeters = 0;
   bool tollPriceComplete = true;
-  std::string tollCountry, tollCurrency, tollYear, tollSource;
+  std::string tollCountry, tollCurrency, tollYear, tollSource, tollVersion;
+  int tollFractionDigits = 2, tollVehicleClass = 1;
+  std::vector<int> tollVehicleClasses;
   uint32_t expanded = 0;
   double destinationAccessMeters = 0; // distance from road end to true POI
 };
@@ -141,6 +152,7 @@ struct RouteOptions {
   double penaltyMinutesPerEuro = 0;
   int vehicleClass = 1;
   const TollTariffs *tariffs = nullptr;
+  std::string tariffCountry;
   uint32_t maxExpanded = 2000000;
   std::optional<uint32_t> initialEdge;
   std::optional<Point> initialSnap;
@@ -245,4 +257,5 @@ std::string jsonString(std::string_view text);
 std::string routeJson(const Route &r);
 std::string placesJson(const std::vector<Place> &places);
 } // namespace atlas
+
 

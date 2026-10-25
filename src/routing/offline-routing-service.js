@@ -1,3 +1,4 @@
+import { countryTollTariffs } from './country-toll-tariffs.js';
 import {
   AStarRouter
 } from './astar-router.js';
@@ -71,6 +72,8 @@ export class OfflineRoutingService {
           origin,
           destination
         );
+
+    const tariffs = countryTollTariffs(dataset.region.country);
 
     if (signal?.aborted) {
       const error = new Error(
@@ -148,7 +151,8 @@ export class OfflineRoutingService {
         profile,
         avoidTolls,
         tollPenaltyMinutesPerEuro,
-        vehicleClass
+        vehicleClass,
+        tariffs
       }
     );
 
@@ -197,7 +201,7 @@ export class OfflineRoutingService {
           ? estimateRouteTolls(
               dataset.graph,
               route,
-              { vehicleClass }
+              { vehicleClass, tariffs }
             )
           : {
               vehicleClass,
@@ -291,6 +295,8 @@ export class OfflineRoutingService {
     const frontier = unique.filter(
       candidate =>
         !unique.some(other =>
+          Number.isFinite(other.tolls.totalEuros) &&
+          Number.isFinite(candidate.tolls.totalEuros) &&
           other !== candidate &&
           other.durationSeconds <=
             candidate.durationSeconds &&
@@ -314,7 +320,7 @@ export class OfflineRoutingService {
     );
 
     const noTolls = frontier
-      .filter(route => route.tolls.totalEuros === 0)
+      .filter(route => route.tolls.tolledDistanceMeters === 0)
       .reduce(
         (best, route) =>
           !best || route.durationSeconds < best.durationSeconds
@@ -366,3 +372,4 @@ export class OfflineRoutingService {
     }
   }
 }
+

@@ -456,11 +456,16 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
       // Price only the portion ACTUALLY driven: initial GPS projection can
       // clip the first edge. The old implementation priced it before clipping.
       // Missing tariff coverage is NOT equivalent to a zero-euro journey.
+      r.tollCountry=op.tariffCountry;
+      r.tollVehicleClass=op.vehicleClass;
       if(op.tariffs){
         r.tollCountry=op.tariffs->country;
         r.tollCurrency=op.tariffs->currency;
         r.tollYear=op.tariffs->year;
         r.tollSource=op.tariffs->source;
+        r.tollVersion=op.tariffs->version;
+        r.tollFractionDigits=op.tariffs->fractionDigits;
+        r.tollVehicleClasses=op.tariffs->classes;
       }
       std::unordered_map<std::string, std::size_t> tollRoadIndex;
       for(const auto &leg:r.legs)if(op.profile==Profile::drive &&
@@ -683,18 +688,19 @@ std::vector<std::string> principalRoadRefs(const Route &r,
   return result;
 }
 std::string routeJson(const Route &r) {
+  const auto monetaryScale=std::pow(10.0,r.tollFractionDigits);
   std::ostringstream s;
   s.precision(12);
   s << "{\"destinationAccessMeters\":" << r.destinationAccessMeters
     << ",\"distanceMeters\":" << r.meters
     << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":";
   if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
-  else s << std::round(r.tollEuros*100.)/100.;
+  else s << std::round(r.tollEuros*monetaryScale)/monetaryScale;
   // Currency-neutral result and itinerary order for future countries.
   // tollEuros remains for backward compatibility with older Android code.
   s << ",\"tollAmount\":";
   if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
-  else s << std::round(r.tollEuros*100.)/100.;
+  else s << std::round(r.tollEuros*monetaryScale)/monetaryScale;
   s << ",\"tollRoads\":[";
   for(std::size_t i=0;i<r.tollRoads.size();++i){
     if(i)s << ',';
@@ -704,7 +710,7 @@ std::string routeJson(const Route &r) {
       << ",\"pricedMeters\":" << road.pricedMeters
       << ",\"pricing\":" << jsonString(road.complete?"estimate":"unavailable")
       << ",\"amount\":";
-    if(road.complete)s << std::round(road.amount*100.)/100.;
+    if(road.complete)s << std::round(road.amount*monetaryScale)/monetaryScale;
     else s << "null";
     s << '}';
   }
@@ -717,6 +723,12 @@ std::string routeJson(const Route &r) {
     << ",\"tollCurrency\":" << jsonString(r.tollCurrency)
     << ",\"tollTariffYear\":" << jsonString(r.tollYear)
     << ",\"tollTariffSource\":" << jsonString(r.tollSource)
+    << ",\"tollTariffVersion\":" << jsonString(r.tollVersion)
+    << ",\"tollFractionDigits\":" << r.tollFractionDigits
+    << ",\"tollVehicleClass\":" << r.tollVehicleClass
+    << ",\"tollVehicleClasses\":[";
+  for(std::size_t i=0;i<r.tollVehicleClasses.size();++i){if(i)s<<',';s<<r.tollVehicleClasses[i];}
+  s << ']'
     << ",\"expandedNodes\":" << r.expanded << ",\"points\":[";
   for (std::size_t i = 0; i < r.points.size(); ++i) {
     if (i)
@@ -764,3 +776,4 @@ std::string routeJson(const Route &r) {
   return s.str();
 }
 } // namespace atlas
+

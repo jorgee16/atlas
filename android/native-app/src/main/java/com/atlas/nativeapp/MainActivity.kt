@@ -1034,10 +1034,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 if(!s.walking && route.optBoolean("hasTolls")) {
                     val tollRoads=RouteChoices.tollRoadSummary(route)
                     if(tollRoads.isNotEmpty()) {
-                        card.addView(ui.text("TOLL BREAKDOWN · ESTIMATED",11f,ui.muted,true),linear(10))
+                        card.addView(ui.text(when(route.optString("tollPricing")){"exact"->"TOLL BREAKDOWN · EXACT";"estimate"->"TOLL BREAKDOWN · ESTIMATED";else->"TOLL BREAKDOWN · INCOMPLETE PRICES"},11f,ui.muted,true),linear(10))
                         tollRoads.forEach { road ->
                             card.addView(ui.text(road,12f,ui.muted),linear(3))
                         }
+                        card.addView(ui.text(RouteChoices.tollProvenance(route),11f,ui.muted),linear(5))
                     }
                 }
                 if(!s.walking && s.routeOptions.size>1) {
@@ -1561,3 +1562,4 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         super.onDestroy()
     }
 }
+

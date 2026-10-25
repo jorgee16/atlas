@@ -8,40 +8,47 @@ internal object RouteChoices {
     fun roads(refs: List<String>): String =
         refs.take(4).joinToString(" → ").ifBlank { "Local roads" }
 
-    /** Never label an uncovered tolled road as €0. Never call a per-km
-     * approximation an exact operator/Via Verde quote. */
-    fun tollLabel(route: JSONObject): String {
-        if (!route.optBoolean("hasTolls")) return "No toll roads"
-        if (route.optString("tollPricing") != "estimate" ||
-            route.isNull("tollEuros") || !route.has("tollEuros"))
-            return "Toll roads · Price unavailable"
-        val amount=route.optDouble("tollEuros",Double.NaN)
-        if (!amount.isFinite() || amount<0) return "Toll roads · Price unavailable"
-        val currency=route.optString("tollCurrency","EUR")
-        val unit=when(currency) { "EUR"->"€";"GBP"->"£";else->"$currency " }
-        val price=String.format(Locale.forLanguageTag("pt-PT"),"%.2f",amount)
-        val year=route.optString("tollTariffYear","").takeIf { it.isNotBlank() }
-        return "≈ $unit$price · estimate" +
-            (if(year!=null) " ($year tariffs)" else "")
+    private fun money(amount:Double,route:JSONObject):String {
+        val code=route.optString("tollCurrency","")
+        val digits=route.optInt("tollFractionDigits",2).coerceIn(0,3)
+        val number=java.text.NumberFormat.getNumberInstance(Locale.forLanguageTag("pt-PT")).apply {
+            minimumFractionDigits=digits;maximumFractionDigits=digits
+        }.format(amount)
+        val symbol=try { java.util.Currency.getInstance(code).getSymbol(Locale.forLanguageTag("pt-PT")) }
+            catch(_:Exception) { code }
+        return if(symbol.isBlank())number else "$symbol $number"
     }
-
-    /** Explain which charged roads were recognized by the current country
-     * table. Mixed coverage is shown per road; do not sum unknown prices. */
-    fun tollRoadSummary(route: JSONObject): List<String> {
+    /** Unknown amounts never become zero, including legacy JSON. */
+    fun tollLabel(route:JSONObject):String {
+        if(!route.optBoolean("hasTolls"))return "No toll roads · "+money(0.0,route)
+        val pricing=route.optString("tollPricing")
+        val field=if(route.has("tollAmount"))"tollAmount" else "tollEuros"
+        val amount=route.optDouble(field,Double.NaN)
+        if(pricing !in listOf("estimate","exact") || route.isNull(field) || !amount.isFinite() || amount<0)
+            return "Toll roads · Price unavailable"
+        return (if(pricing=="exact")"" else "≈ ")+money(amount,route)+
+            (if(pricing=="exact")" · exact" else " · estimate")
+    }
+    fun tollProvenance(route:JSONObject):String {
+        val parts=mutableListOf("Class "+route.optInt("tollVehicleClass",1))
+        route.optString("tollCountry").takeIf { it.isNotBlank() }?.let { parts.add(it) }
+        route.optString("tollTariffYear").takeIf { it.isNotBlank() }?.let { parts.add("$it tariffs") }
+        route.optString("tollTariffVersion").takeIf { it.isNotBlank() }?.let { parts.add("v$it") }
+        val source=route.optString("tollTariffSource")
+        val missing=(route.optDouble("tolledMeters",0.0)-route.optDouble("pricedTollMeters",0.0)).coerceAtLeast(0.0)
+        return parts.joinToString(" · ")+(if(source.isNotBlank())"\nSource: $source" else "")+
+            (if(missing>.1)"\nSome toll roads have no applicable price coverage." else "")+
+            "\nSection-average estimates exclude special discounts and exemptions."
+    }
+    fun tollRoadSummary(route:JSONObject):List<String> {
         val entries=route.optJSONArray("tollRoads") ?: return emptyList()
-        val currency=route.optString("tollCurrency","EUR")
-        val symbol=when(currency) {
-            "EUR"->"€";"GBP"->"£";else->"$currency "
-        }
-        return (0 until minOf(entries.length(),4)).mapNotNull { index ->
+        return (0 until entries.length()).mapNotNull { index ->
             val road=entries.optJSONObject(index) ?: return@mapNotNull null
-            val name=road.optString("road").takeIf { it.isNotBlank() }
-                ?: return@mapNotNull null
+            val name=road.optString("road").takeIf { it.isNotBlank() } ?: return@mapNotNull null
             val amount=road.optDouble("amount",Double.NaN)
-            if(road.optString("pricing")!="estimate" || !amount.isFinite())
+            if(road.optString("pricing") !in listOf("estimate","exact") || road.isNull("amount") || !amount.isFinite() || amount<0)
                 "$name · price unavailable"
-            else "$name · ≈ $symbol" +
-                String.format(Locale.forLanguageTag("pt-PT"),"%.2f",amount)
+            else "$name · "+(if(road.optString("pricing")=="exact")"" else "≈ ")+money(amount,route)
         }
     }
 
@@ -77,3 +84,4 @@ internal object RouteChoices {
             alternateMeters <= maxOf(primaryMeters * 1.75, primaryMeters + 20000.0)
     }
 }
+
