@@ -1031,6 +1031,15 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                 card.addView(ui.text(note,12f,ui.muted).apply{maxLines=3},linear(10))
             }
             if(!compact){
+                if(!s.walking && route.optBoolean("hasTolls")) {
+                    val tollRoads=RouteChoices.tollRoadSummary(route)
+                    if(tollRoads.isNotEmpty()) {
+                        card.addView(ui.text("TOLL BREAKDOWN · ESTIMATED",11f,ui.muted,true),linear(10))
+                        tollRoads.forEach { road ->
+                            card.addView(ui.text(road,12f,ui.muted),linear(3))
+                        }
+                    }
+                }
                 if(!s.walking && s.routeOptions.size>1) {
                     card.addView(ui.text("ROUTE OPTIONS",12f,ui.muted,true),linear(13))
                     s.routeOptions.forEach { choice ->

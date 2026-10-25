@@ -79,6 +79,23 @@ int main(int argc, char **argv) {
           "price coverage matches all tolled edges");
     check(routeJson(*tolled).find("\"tollPricing\":\"estimate\"")!=std::string::npos,
           "only show price as estimate, not an official quoted total");
+    check(tolled->tollRoads.size()==1 && tolled->tollRoads[0].road=="A1",
+          "toll breakdown groups individual OSM edges under their charged road");
+    check(tolled->tollRoads[0].complete &&
+          tolled->tollRoads[0].pricedMeters==tolled->tollRoads[0].meters,
+          "breakdown reports only validated tariff-covered distance");
+    const auto paidJson=routeJson(*tolled);
+    check(paidJson.find("\"tollRoads\"")!=std::string::npos &&
+          paidJson.find("\"tollAmount\"")!=std::string::npos,
+          "currency-neutral route total and ordered per-road explanation");
+    const auto ukTariffs=TollTariffs::parse(
+      "# country=United Kingdom\n# currency=GBP\n# year=2026\n"
+      "# source=https://example.test/tariffs\n"
+      "road;section;km;class1;class2;class3;class4\n"
+      "M6;example;10;1.50;2.50;3.50;4.50\n","United Kingdom");
+    check(ukTariffs.currency=="GBP" &&
+          std::abs(*ukTariffs.estimate("M6",1000,1)-0.15)<.00001,
+          "country-independent table parses per-class prices in non-EUR currency");
     RouteOptions heavy=paid; heavy.vehicleClass=4;
     check(route(toll,0,2,heavy)->tollEuros>tolled->tollEuros,
           "read real per-class tariff values, not hard-coded class multipliers");
@@ -88,6 +105,13 @@ int main(int argc, char **argv) {
           "missing country table is not a zero-cost toll route");
     check(routeJson(*unknown).find("\"tollEuros\":null")!=std::string::npos,
           "missing tariff MUST serialize as null, not fake free");
+    check(unknown->tollRoads.size()==1 && !unknown->tollRoads[0].complete,
+          "missing country tariffs still list the tolled motorway");
+    const auto unknownJson=routeJson(*unknown);
+    check(unknownJson.find("\"tollAmount\":null")!=std::string::npos &&
+          unknownJson.find("\"pricing\":\"unavailable\"")!=std::string::npos,
+          "per-road breakdown cannot invent unavailable charges");
+
     check(!sampleTariffs.estimate("A28",1000,1),
           "no fictional fallback euro/km rates for unpriced roads");
     rejects([&] { TollTariffs::parse(

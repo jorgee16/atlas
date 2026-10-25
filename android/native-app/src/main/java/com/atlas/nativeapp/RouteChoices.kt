@@ -25,6 +25,26 @@ internal object RouteChoices {
             (if(year!=null) " ($year tariffs)" else "")
     }
 
+    /** Explain which charged roads were recognized by the current country
+     * table. Mixed coverage is shown per road; do not sum unknown prices. */
+    fun tollRoadSummary(route: JSONObject): List<String> {
+        val entries=route.optJSONArray("tollRoads") ?: return emptyList()
+        val currency=route.optString("tollCurrency","EUR")
+        val symbol=when(currency) {
+            "EUR"->"€";"GBP"->"£";else->"$currency "
+        }
+        return (0 until minOf(entries.length(),4)).mapNotNull { index ->
+            val road=entries.optJSONObject(index) ?: return@mapNotNull null
+            val name=road.optString("road").takeIf { it.isNotBlank() }
+                ?: return@mapNotNull null
+            val amount=road.optDouble("amount",Double.NaN)
+            if(road.optString("pricing")!="estimate" || !amount.isFinite())
+                "$name · price unavailable"
+            else "$name · ≈ $symbol" +
+                String.format(Locale.forLanguageTag("pt-PT"),"%.2f",amount)
+        }
+    }
+
     fun roadSummary(route: JSONObject): String {
         val array = route.optJSONArray("mainRoads") ?: return roads(emptyList())
         return roads((0 until array.length()).map { array.optString(it) }

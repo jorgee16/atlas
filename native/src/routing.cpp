@@ -462,14 +462,34 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         r.tollYear=op.tariffs->year;
         r.tollSource=op.tariffs->source;
       }
+      std::unordered_map<std::string, std::size_t> tollRoadIndex;
       for(const auto &leg:r.legs)if(op.profile==Profile::drive &&
                                      (leg.road.flags & 4)){
         r.tolledMeters+=leg.distance;
-        const auto euro=op.tariffs
+        const auto amount=op.tariffs
             ? op.tariffs->estimate(leg.road.ref,leg.distance,op.vehicleClass)
             : std::nullopt;
-        if(euro){r.pricedTollMeters+=leg.distance;r.tollEuros+=*euro;}
-        else r.tollPriceComplete=false;
+        // Road refs are a graph hint, not exact entry/exit tariff sections.
+        // Report uncovered distances without pretending they are toll-free.
+        const auto roadLabel=leg.road.ref.empty()
+            ? (leg.road.name.empty()?std::string("Unknown road"):leg.road.name)
+            : leg.road.ref;
+        auto found=tollRoadIndex.find(roadLabel);
+        if(found==tollRoadIndex.end()){
+          found=tollRoadIndex.emplace(roadLabel,r.tollRoads.size()).first;
+          r.tollRoads.push_back({roadLabel});
+        }
+        auto &breakdown=r.tollRoads[found->second];
+        breakdown.meters+=leg.distance;
+        if(amount){
+          breakdown.pricedMeters+=leg.distance;
+          breakdown.amount+=*amount;
+          r.pricedTollMeters+=leg.distance;
+          r.tollEuros+=*amount;
+        } else {
+          breakdown.complete=false;
+          r.tollPriceComplete=false;
+        }
       }
       makeManeuvers(r, g);
       return r;
@@ -670,6 +690,25 @@ std::string routeJson(const Route &r) {
     << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":";
   if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
   else s << std::round(r.tollEuros*100.)/100.;
+  // Currency-neutral result and itinerary order for future countries.
+  // tollEuros remains for backward compatibility with older Android code.
+  s << ",\"tollAmount\":";
+  if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
+  else s << std::round(r.tollEuros*100.)/100.;
+  s << ",\"tollRoads\":[";
+  for(std::size_t i=0;i<r.tollRoads.size();++i){
+    if(i)s << ',';
+    const auto &road=r.tollRoads[i];
+    s << "{\"road\":" << jsonString(road.road)
+      << ",\"meters\":" << road.meters
+      << ",\"pricedMeters\":" << road.pricedMeters
+      << ",\"pricing\":" << jsonString(road.complete?"estimate":"unavailable")
+      << ",\"amount\":";
+    if(road.complete)s << std::round(road.amount*100.)/100.;
+    else s << "null";
+    s << '}';
+  }
+  s << ']';
   s << ",\"tollPricing\":" << jsonString(r.tolledMeters==0?"none":
           r.tollPriceComplete?"estimate":"unavailable")
     << ",\"tolledMeters\":" << r.tolledMeters

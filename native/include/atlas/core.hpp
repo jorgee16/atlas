@@ -82,7 +82,15 @@ private:
   };
   std::unordered_map<std::string, RoadTotals> roadTotals_;
 };
+/** Breakdown is metadata for explaining toll coverage, not an exact tariff.
+ * Individual edges are grouped by their OSM road ref in encounter order. */
+struct TollRoadCharge {
+  std::string road;
+  double meters = 0, pricedMeters = 0, amount = 0;
+  bool complete = true;
+};
 struct Route {
+  std::vector<TollRoadCharge> tollRoads;
   std::vector<uint32_t> nodes, edges;
   std::vector<Point> points;
   std::vector<Leg> legs;

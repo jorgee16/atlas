@@ -47,8 +47,15 @@ national rate for unlisted roads.
 
 - `hasTolls`: OSM graph says the chosen route traverses toll-marked roads.
 - `tollPricing`: `none`, `estimate`, or `unavailable`.
-- `tollEuros`: rounded numeric value for fully table-covered routes,
-  zero for untolled routes, or **null** for partially/uncovered tolled routes.
+- `tollEuros`: legacy numeric amount for compatibility; retained but
+  not currency-neutral by its name.
+- `tollAmount`: equivalent currency-neutral total, rounded to 2 decimals
+  for fully covered routes, zero for untolled routes, or **null** when any
+  tolled road cannot be estimated.
+- `tollRoads`: ordered per-road audit list containing OSM road reference,
+  tolled length (`meters`), priced length (`pricedMeters`), `pricing`
+  (`estimate`/`unavailable`), and per-road `amount` (or null).
+  Partial coverage does **not** appear as a fake trip total.
 - `tolledMeters` and `pricedTollMeters`: audit coverage.
 - `tollCountry`, `tollCurrency`, `tollTariffYear`, `tollTariffSource`:
   calculation provenance.
