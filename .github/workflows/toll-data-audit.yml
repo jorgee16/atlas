@@ -1,0 +1,24 @@
+name: Audit official toll data
+on:
+  workflow_dispatch:
+  push:
+    branches: ['migration/native-core-kotlin']
+    paths: ['tools/import-imt-tolls.py', '.github/workflows/toll-data-audit.yml']
+permissions:
+  contents: read
+jobs:
+  official-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Extract public IMT 2026 tables without automating Via Verde
+        run: python3 tools/import-imt-tolls.py --out toll-audit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-IMT-2026-audit
+          path: toll-audit/
+          if-no-files-found: error
