@@ -1,4 +1,5 @@
 #include "atlas/core.hpp"
+#include "atlas/toll_crossings.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <filesystem>
@@ -88,6 +89,32 @@ int main(int argc, char **argv) {
     check(paidJson.find("\"tollRoads\"")!=std::string::npos &&
           paidJson.find("\"tollAmount\"")!=std::string::npos,
           "currency-neutral route total and ordered per-road explanation");
+    // Synthetic graph fixtures verify pricing invariants; real A5 journeys
+    // are validated separately against SHA-verified Portugal graph files.
+    const auto fixedFixture=TollTariffs::parse(
+      "# country=Testland\n# currency=EUR\n# year=2026\n# version=1\n"
+      "# scheme=fixed-crossing\n# source=https://example.test/fixture\n"
+      "charge;road;name;class1;class4\ngate:1;T1;Fixture plaza;2.25;9.00\n","Testland");
+    TollGraphDigests identity;
+    for(const auto &name:{"nodes.bin","edges.bin","geometry.bin","roads.bin","strings.bin","restrictions.bin","spatial-index.bin"})identity[name]=std::string(64,'a');
+    std::unordered_set<uint32_t> certified;
+    for(const auto &leg:tolled->legs)certified.insert(leg.edge);
+    const auto first=tolled->legs.front();const auto full=toll.edge(first.edge).distanceDm/10.;
+    TollCrossingMatcher fixedProof(identity,"Testland",certified,{{first.edge,first.from,first.to,full/2,"gate:1",full}},true);
+    fixedProof.validateGraph(toll);
+    auto exact=*tolled;exact.tollCountry="Testland";
+    const auto originalPoints=exact.points;const auto originalEdges=exact.edges;
+    check(applyFixedTollCharges(toll,exact,fixedFixture,fixedProof,identity),"complete directed fixture proof enables exact base tariff");
+    check(exact.tollPriceExact && std::abs(exact.tollEuros-2.25)<1e-9,"fixed price is independent of driven km");
+    check(exact.edges==originalEdges && exact.points.size()==originalPoints.size() && exact.seconds==tolled->seconds && exact.meters==tolled->meters,
+          "pricing never changes path, distance or ETA");
+    for(std::size_t i=0;i<originalPoints.size();++i)check(exact.points[i].lat==originalPoints[i].lat && exact.points[i].lon==originalPoints[i].lon,"pricing never changes geographic geometry");
+    check(routeJson(exact).find("\"tollPricing\":\"exact\"")!=std::string::npos,"exact quote is serialized only after full evidence");
+    auto foreign=*tolled;foreign.tollCountry="Otherland";
+    check(!applyFixedTollCharges(toll,foreign,fixedFixture,fixedProof,identity),"cross-country price application rejected");
+    auto changedIdentity=identity;changedIdentity["edges.bin"]=std::string(64,'b');
+    check(!applyFixedTollCharges(toll,exact,fixedFixture,fixedProof,changedIdentity),"another graph cannot reuse an exact proof");
+
     const auto ukTariffs=TollTariffs::parse(
       "# country=United Kingdom\n# currency=GBP\n# year=2026\n"
       "# source=https://example.test/tariffs\n"
@@ -455,3 +482,4 @@ int main(int argc, char **argv) {
     return 1;
   }
 }
+

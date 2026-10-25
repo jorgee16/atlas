@@ -815,6 +815,10 @@ jobs:
     if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[audit-toll-sections]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Inspect hash-verified existing toll events and official open-system tariffs
@@ -847,6 +851,10 @@ jobs:
         run: |
           python3 -m pip install 'osmium==4.1.1'
           python3 tools/audit-a5-charge-points.py
+          python3 tools/build-toll-bindings.py --config tools/toll-binding-config/portugal-a5-mainline.json --source toll-section-audit/a5-osm-charge-points.json --output toll-section-audit/Portugal-mainland.csv
+          cmake -S native -B /tmp/atlas-toll-proof -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/atlas-toll-proof --target atlas_toll_quote -j2
+          python3 tools/verify-toll-route-proof.py --binary /tmp/atlas-toll-proof/atlas_toll_quote
       - uses: actions/upload-artifact@v4
         if: always()
         with:

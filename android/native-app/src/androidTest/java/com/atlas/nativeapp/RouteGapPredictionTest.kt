@@ -64,4 +64,21 @@ class RouteGapPredictionTest {
             RouteGapPrediction.predict(longRoute,guidance(),
                 moving.copy(motionConfirmed=false),130.0))
     }
+    @Test fun weakAndStrongBlackoutsKeepTheirDistinctExistingBounds() {
+        val longRoute=JSONObject().put("distanceMeters",3000.0)
+            .put("points",JSONArray("[[-8.0,40.0],[-8.0,40.027]]"))
+        val weak=fix().copy(speed=8.0,accuracy=20.0,motionConfirmed=true)
+        val short=RouteGapPrediction.predict(longRoute,guidance(),weak,109.0)!!
+        assertFalse(short.optBoolean("gpsBlackoutPrediction"))
+        assertEquals(92.0,short.getDouble("along"),0.01)
+        assertNull(RouteGapPrediction.predict(longRoute,guidance(),weak,114.0))
+        val strong=weak.copy(accuracy=5.0)
+        val extended=RouteGapPrediction.predict(longRoute,guidance(),strong,114.0)!!
+        assertTrue(extended.optBoolean("gpsBlackoutPrediction"))
+        assertEquals(132.0,extended.getDouble("along"),0.01)
+        assertNull(RouteGapPrediction.predict(longRoute,guidance(),strong,161.0))
+        val capped=RouteGapPrediction.predict(longRoute,guidance(),strong.copy(speed=30.0),160.0)!!
+        assertEquals(1520.0,capped.getDouble("along"),0.01)
+    }
 }
+

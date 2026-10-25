@@ -19,7 +19,7 @@ Only OSM toll-marked edges contribute costs. An untolled route costs zero.
 Missing table, unsupported class, excluded road or partial coverage yields
 `tollPricing=unavailable` and `tollAmount=null`, never a fictional zero. Available
 costs are section-average distance estimates: sum(section prices)/sum(lengths).
-C++ never emits `exact`. Avoid-tolls still uses graph flags independently.
+C++ emits `exact` only with complete reviewed directed-crossing evidence. Avoid-tolls still uses graph flags independently.
 Navigation/GPS, map matching, geometry, distance and ETA algorithms are unchanged.
 Updates apply to the next route calculation, not to the current route.
 
@@ -174,8 +174,8 @@ all seven graph SHA-256 digests, country, explicitly certified directed-edge cov
 IDs, from/to node IDs and the crossing offset on that edge. Route traversal
 intervals are [begin,end): starting after a plaza does not charge it again, and
 real repeated crossings remain chargeable. Wrong graph/country/direction,
-disconnected traversal or ambiguous bindings are rejected. Uncertified tolled edges keep the result incomplete, even when they share the
-reference of a certified road. Binding offsets must fit the declared full edge
+disconnected traversal or ambiguous bindings are rejected. Any uncertified traversal keeps the result incomplete, including ramps and
+local roads without toll flags. A road-reference match never certifies an edge. Binding offsets must fit the declared full edge
 length and clipped traversal bounds. The caller must compute hashes from the loaded graph;
 a region name or version number alone is insufficient proof.
 
@@ -199,3 +199,38 @@ isolation, independent updates and rollback, and synthetic crossing evidence fro
 real Android validation. The Android instrumentation verifies the real fixed CSV
 through JNI and captures the published-plaza UI; it does not claim an exact A5
 journey or real-world driving validation.
+
+
+## Native repricing integration and first pilot
+
+The optional APK asset `toll-bindings/<country>/<partition>.csv` contains only
+reviewed directed coverage, crossing offsets and all seven graph digests. It has
+no tariffs. `TollBindingAssets` first checks whether every edge in the actual
+calculated route is certified; only eligible routes require a streamed graph
+hash check, cached by immutable directory/file signatures. Other routes retain
+the existing pricing path without hashing the graph. JNI additionally validates
+the loaded graph path, country, review declaration, CSR from/to topology, drive
+access and edge lengths before accepting the proof.
+
+Repricing occurs after C++ calculates the authoritative route. Only monetary
+fields change; the real-route verifier compares points, edge IDs, maneuvers,
+visual anchors, distance and ETA before/after. The first pilot is deliberately
+restricted to certified A5 main carriageways. Uncertified ramps and city approaches
+prevent an exact full-route quote, regardless of their OSM toll flags. The
+physical identity is the Carcavelos full-carriageway plaza (0501), confirmed from
+the visually reviewed Brisa PDF and its km14+940 notice; OSM fee tags are ignored.
+
+`tools/build-toll-bindings.py` requires every graph polyline segment to match
+original directed OSM motorway geometry exactly at the graph's float32 precision.
+It also requires every reviewed mainline charge point to be represented. Its
+case endpoints come from actual graph nodes upstream/downstream of those points;
+`atlas_toll_quote` performs actual route calculation. Classes 1–4, both carriageways,
+after-gate starts and uncertified city approaches are checked against independent
+Brisa expectations. A generated proof must pass before being installed in the APK.
+
+The camera replay exposed an existing test-policy mismatch: its resumed good-GPS
+fixture selected the already implemented 60s/1500m confirmed-blackout policy, while
+the assertion expected the 9s/110m weak-signal branch. The fixture now explicitly
+uses 20m accuracy for the latter; its numeric assertions are unchanged. Additional
+instrumentation checks both existing production branches at controlled times.
+No production GPS filter, interpolation, camera or prediction policy is changed.

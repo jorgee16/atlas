@@ -1,4 +1,5 @@
 #include "atlas/core.hpp"
+#include "atlas/toll_crossings.hpp"
 #include <algorithm>
 #include <cmath>
 #include <jni.h>
@@ -17,9 +18,12 @@ struct Engine {
   atlas::MotionFilter motion;
   std::optional<atlas::Profile> motionProfile;
   std::optional<double> motionHeading;
-  std::string graphPath, searchPath;
+  std::string graphPath, searchPath, routeGraphPath;
   std::optional<atlas::TollTariffs> tariffs;
   std::string tariffCountry;
+  std::optional<atlas::TollTariffs> fixedTariffs;
+  std::optional<atlas::TollCrossingMatcher> crossings;
+  atlas::TollGraphDigests loadedGraphDigests;
 };
 std::mutex gate;
 std::map<jlong, std::unique_ptr<Engine>> engines;
@@ -83,6 +87,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_atlas_nativeapp_NativeCore_openGraph(
     if (e.graphPath != path) {
       auto next = std::make_unique<atlas::Graph>(path);
       e.graph = std::move(next);
+      e.crossings.reset();e.loadedGraphDigests.clear();
       e.graphPath = path;
     }
   } catch (const std::exception &e) {
@@ -126,6 +131,7 @@ Java_com_atlas_nativeapp_NativeCore_loadTariffs(JNIEnv *env, jobject, jlong id,
     const auto name=string(env,country);
     // Clear even on parse failure: never leak the previous country's rates.
     e.tariffs.reset();
+    e.fixedTariffs.reset();e.crossings.reset();e.loadedGraphDigests.clear();
     e.tariffCountry=name;
     if(!payload || env->GetArrayLength(payload)==0) {
       e.tariffs.reset();
@@ -244,6 +250,8 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
           : "No route connects these points");
     if (!walk)
       atlas::calibrateDriveEta(*next, *e.graph);
+    if(!walk && e.fixedTariffs && e.crossings)
+      atlas::applyFixedTollCharges(*e.graph,*next,*e.fixedTariffs,*e.crossings,e.loadedGraphDigests);
     // The same native engine processes GPS across driving and walking
     // routes. Carrying an old car-motion anchor into a new walking route can
     // reject several genuine 1.5m/s fixes as impossible displacement.
@@ -255,6 +263,7 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     }
     e.motionProfile = op.profile;
     e.route = std::move(next);
+    e.routeGraphPath=e.graphPath;
     e.guidance.reset();
     return bytes(env, atlas::routeJson(*e.route));
   } catch (const std::exception &e) {
@@ -368,3 +377,52 @@ extern "C" JNIEXPORT void JNICALL Java_com_atlas_nativeapp_NativeCore_activate(
   }
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_atlas_nativeapp_NativeCore_loadFixedTariffs(JNIEnv *env,jobject,jlong id,
+                                                    jstring country,jbyteArray payload) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);auto &e=engine(id);
+    e.fixedTariffs.reset();e.crossings.reset();e.loadedGraphDigests.clear();
+    const auto name=string(env,country);
+    if(name!=e.tariffCountry)throw std::invalid_argument("Fixed tariff country differs from selected routing country");
+    const auto size=payload?env->GetArrayLength(payload):0;if(!size)return;
+    if(size>2*1024*1024)throw std::invalid_argument("Fixed tariff catalog too large");
+    std::string csv(size,'\0');env->GetByteArrayRegion(payload,0,size,reinterpret_cast<jbyte*>(csv.data()));
+    auto table=atlas::TollTariffs::parse(csv,name);
+    if(table.scheme!="fixed-crossing")throw std::invalid_argument("Expected fixed-crossing price catalog");
+    e.fixedTariffs=std::move(table);
+  } catch(const std::exception &errorValue) {error(env,errorValue);}
+}
+extern "C" JNIEXPORT void JNICALL
+Java_com_atlas_nativeapp_NativeCore_loadTollBindings(JNIEnv *env,jobject,jlong id,
+    jstring country,jstring directory,jbyteArray payload,jobjectArray actualHashes) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);auto &e=engine(id);
+    e.crossings.reset();e.loadedGraphDigests.clear();
+    const auto size=payload?env->GetArrayLength(payload):0;if(!size)return;
+    if(!e.graph||!e.fixedTariffs||string(env,country)!=e.tariffCountry||string(env,directory)!=e.graphPath)
+      throw std::invalid_argument("Crossing proof differs from loaded graph/country");
+    if(size>2*1024*1024||!actualHashes||env->GetArrayLength(actualHashes)!=7)throw std::invalid_argument("Invalid crossing proof size/digests");
+    const char *names[]={"nodes.bin","edges.bin","geometry.bin","roads.bin","strings.bin","restrictions.bin","spatial-index.bin"};
+    atlas::TollGraphDigests actual;
+    for(int i=0;i<7;++i) {
+      auto value=static_cast<jstring>(env->GetObjectArrayElement(actualHashes,i));
+      actual[names[i]]=string(env,value);env->DeleteLocalRef(value);
+    }
+    std::string csv(size,'\0');env->GetByteArrayRegion(payload,0,size,reinterpret_cast<jbyte*>(csv.data()));
+    auto proof=atlas::TollCrossingMatcher::parse(csv);
+    if(!proof.match(actual,e.tariffCountry,{}))throw std::invalid_argument("Unreviewed/mismatched graph crossing evidence");
+    proof.validateGraph(*e.graph);
+    e.crossings=std::move(proof);e.loadedGraphDigests=std::move(actual);
+  } catch(const std::exception &errorValue) {error(env,errorValue);}
+}
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_atlas_nativeapp_NativeCore_priceCurrentRoute(JNIEnv *env,jobject,jlong id) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);auto &e=engine(id);
+    if(!e.route||!e.graph||e.routeGraphPath!=e.graphPath)throw std::invalid_argument("No current-graph route to price");
+    if(e.fixedTariffs&&e.crossings)
+      atlas::applyFixedTollCharges(*e.graph,*e.route,*e.fixedTariffs,*e.crossings,e.loadedGraphDigests);
+    return bytes(env,atlas::routeJson(*e.route));
+  } catch(const std::exception &errorValue) {error(env,errorValue);return nullptr;}
+}

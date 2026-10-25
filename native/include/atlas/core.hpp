@@ -69,6 +69,7 @@ struct Maneuver {
 /** Country-specific tariff table, independent of OSM routing graph versions.
  * Real section prices are converted to road-average estimates until explicit
  * junction/plaza IDs exist in the road graph. No guessed default rate. */
+struct TollFixedChargeInfo { std::string id,road,name; };
 class TollTariffs {
 public:
   static TollTariffs parse(std::string_view csv, std::string country);
@@ -80,6 +81,7 @@ public:
                                      int vehicleClass) const;
   // Fixed crossings are a separate scheme: these lookups never imply a route quote.
   std::optional<double> fixedCharge(std::string_view chargeId, int vehicleClass) const;
+  std::optional<TollFixedChargeInfo> fixedChargeInfo(std::string_view chargeId) const;
   std::optional<double> sumFixedCharges(const std::vector<std::string> &crossings,
                                         int vehicleClass) const;
   std::string scheme = "road-average";
@@ -94,6 +96,7 @@ private:
   std::unordered_map<std::string, RoadTotals> roadTotals_;
   std::unordered_map<std::string,std::unordered_map<int,double>> sectionPrices_;
   std::unordered_map<std::string,std::unordered_map<int,int64_t>> fixedCharges_;
+  std::unordered_map<std::string,TollFixedChargeInfo> fixedChargeInfo_;
   bool restrictEstimates_ = false;
   std::unordered_set<std::string> estimateRoads_;
 };
@@ -103,6 +106,8 @@ struct TollRoadCharge {
   std::string road;
   double meters = 0, pricedMeters = 0, amount = 0;
   bool complete = true;
+  bool exact = false;
+  std::string chargeId, name;
 };
 struct Route {
   std::vector<TollRoadCharge> tollRoads;
@@ -113,6 +118,7 @@ struct Route {
   double meters = 0, seconds = 0, tollEuros = 0;
   double tolledMeters = 0, pricedTollMeters = 0;
   bool tollPriceComplete = true;
+  bool tollPriceExact = false;
   std::string tollCountry, tollCurrency, tollYear, tollSource, tollVersion;
   int tollFractionDigits = 2, tollVehicleClass = 1;
   std::vector<int> tollVehicleClasses;

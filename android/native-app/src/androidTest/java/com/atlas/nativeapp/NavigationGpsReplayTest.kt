@@ -903,7 +903,11 @@ class NavigationGpsReplayTest {
             lastConfirmedFix)<15.0)
         // A genuinely NEW fix releases the hold and jumps to that location;
         // it must not draw the diagonal path between old and new positions.
-        movingFix()
+        // Exercise the existing short-horizon policy explicitly. Accuracy 5m
+        // plus confirmed motion selects the separate 60s/1500m strong-blackout
+        // policy, so a 9s assertion on that fixture was timing-dependent.
+        // Keep the 9s/110m bounds below unchanged; production GPS is unchanged.
+        movingFix(20.0)
         // Observe the FIRST real rendered frame for the new fix, before JNI
         // pairing or screenshots introduce unrelated latency. On the previous
         // emulator run the cursor was 0.11 m from this GPS fix at 0.08 s;
@@ -932,6 +936,7 @@ class NavigationGpsReplayTest {
                 model!!.updates.value.guidance?.optDouble("gpsFixTime",-1.0)==current.time
         }
         val reacquired=model!!.updates.value.fix!!
+        assertTrue("foreground fixture must exercise the weak-signal 9s branch",reacquired.accuracy>18.0)
         capture(s,"camera-foreground-new-fix")
         // The assertion ABOVE validated that a newly confirmed fix was shown
         // immediately. capture() can take several seconds for screenshot/Surface
@@ -1084,3 +1089,4 @@ class NavigationGpsReplayTest {
         }
     }
 }
+

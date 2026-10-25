@@ -1,0 +1,25 @@
+{
+  "country": "Portugal",
+  "region": "portugal",
+  "partition": "mainland",
+  "road": "A5",
+  "scope": "Main carriageways only; motorway links and ramps are not certified",
+  "reviewedAt": "2026-10-25",
+  "priceSource": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910",
+  "priceSourceSha256": "8fa27e9bcf2b3d5cf222a2411318523ca7fa0ec673759d7033aa90c22f77e29b",
+  "priceSourcePage": 13,
+  "physicalSource": "https://www.brisaconcessao.pt/",
+  "physicalEvidence": "Brisa notice of 2026-05-18 identifies the Carcavelos full-carriageway plaza at A5 km 14+940. The four OSM charge points below lie on the main carriageways at that plaza; ramp charge points are excluded.",
+  "chargePoints": {
+    "3950370201": "brisa:0501",
+    "3950369827": "brisa:0501",
+    "9588718309": "brisa:0501",
+    "9588718312": "brisa:0501"
+  },
+  "validationExpectedPrices": {
+    "1": 1.6,
+    "2": 3.1,
+    "3": 3.1,
+    "4": 3.1
+  }
+}

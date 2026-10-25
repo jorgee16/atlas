@@ -48,9 +48,16 @@ if __name__=='__main__':
                 self.ways.append({'type':'way','id':w.id,'nodes':ids,'tags':{t.k:t.v for t in w.tags}})
     handler=ChargePoints();handler.apply_file(str(pbf),locations=False)
     if not handler.points: raise ValueError('No physical charging points found; no mapping may be enabled')
+    wanted={i for w in handler.ways for i in w['nodes']}
+    class Coordinates(osmium.SimpleHandler):
+        def __init__(self): super().__init__();self.values={}
+        def node(self,n):
+            if n.id in wanted and n.location.valid(): self.values[str(n.id)]=[n.location.lat,n.location.lon]
+    coordinates=Coordinates();coordinates.apply_file(str(pbf),locations=False)
+    if len(coordinates.values)!=len(wanted): raise ValueError('Incomplete original way geometry')
     with pbf.open('rb') as f: sha=hashlib.file_digest(f,'sha256').hexdigest()
     result={'source':URL,'sourceSha256':sha,'sourceMd5':checksum,'retrievedAt':datetime.now(timezone.utc).isoformat(),
         'attribution':'OpenStreetMap contributors, ODbL; Geofabrik extract',
-        'status':'unreviewed-candidates','elements':list(handler.points.values())+handler.ways}
+        'status':'unreviewed-candidates','coordinates':coordinates.values,'elements':list(handler.points.values())+handler.ways}
     (ROOT/'a5-osm-charge-points.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
-    print('A5_OSM_CHARGE_POINTS='+json.dumps(result,ensure_ascii=False))
+    print('A5_OSM_CHARGE_POINTS='+json.dumps({k:v for k,v in result.items() if k!='coordinates'},ensure_ascii=False))

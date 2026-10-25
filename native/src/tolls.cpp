@@ -65,6 +65,7 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
       if(!sections.insert(f[0]).second)throw std::invalid_argument("Duplicate fixed charge");
       // Delay conversion until currency precision metadata has been validated below.
       for(std::size_t i=0;i<table.classes.size();++i)number(f[3+i]);
+      table.fixedChargeInfo_[f[0]]={f[0],f[1],f[2]};
       auto &raw=rawFixedCharges[f[0]];
       for(std::size_t i=0;i<table.classes.size();++i)raw[table.classes[i]]=number(f[3+i]);
       if(++rows>30000)throw std::invalid_argument("Tariff size overflow");
@@ -133,6 +134,10 @@ std::optional<double> TollTariffs::fixedCharge(std::string_view chargeId,int veh
   const auto charge=fixedCharges_.find(std::string(chargeId));if(charge==fixedCharges_.end())return std::nullopt;
   const auto price=charge->second.find(vehicleClass);if(price==charge->second.end())return std::nullopt;
   return price->second/std::pow(10.0,fractionDigits);
+}
+std::optional<TollFixedChargeInfo> TollTariffs::fixedChargeInfo(std::string_view chargeId) const {
+  const auto found=fixedChargeInfo_.find(std::string(chargeId));
+  return found==fixedChargeInfo_.end()?std::nullopt:std::optional<TollFixedChargeInfo>(found->second);
 }
 std::optional<double> TollTariffs::sumFixedCharges(const std::vector<std::string> &crossings,int vehicleClass) const {
   if(scheme!="fixed-crossing"||std::find(classes.begin(),classes.end(),vehicleClass)==classes.end())return std::nullopt;

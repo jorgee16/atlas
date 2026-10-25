@@ -46,6 +46,10 @@ test('official plaza prices are independent of km and retain repeated real cross
   const c=countryTollCharges('Portugal');
   assert.equal(c.scheme,'fixed-crossing');assert.equal(c.fixedCharges.length,10);
   assert.equal(c.fixedCharges.filter(x=>x.road==='A5').length,6);
+  assert.deepEqual(Object.fromEntries(c.fixedCharges.filter(x=>x.road==='A5').map(x=>[x.id,x.name])),{
+    'brisa:0505':'Oeiras II','brisa:0501':'Carcavelos PV','brisa:0502':'Carcavelos I',
+    'brisa:0503':'Carcavelos II','brisa:0504':'Oeiras I','brisa:0506':'Estoril'
+  });
   assert.equal(c.fixedCharge('brisa:0501',1),1.6);
   for(const klass of [2,3,4]) assert.equal(c.fixedCharge('brisa:0501',klass),3.1);
   assert.equal(c.sumFixedCharges(['brisa:0502','brisa:0503'],1),1.6);

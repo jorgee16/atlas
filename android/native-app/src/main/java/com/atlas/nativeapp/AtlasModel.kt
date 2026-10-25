@@ -327,11 +327,20 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         throw IllegalStateException(
                             "Waiting for confirmed driving direction before rerouting; keeping the current route")
                     val roadRegion=regions.forPosition(liveOrigin)
-                    core.graph(regions.graph(liveOrigin, destination.coordinate()).path)
+                    val graphDirectory=regions.graph(liveOrigin, destination.coordinate())
+                    core.graph(graphDirectory.path)
                     val country=roadRegion.json.getString("country")
                     routingTariffCountry=country
                     core.tariffs(country,TollTableAssets.read(getApplication(),country))
-                    val primary = JSONObject(core.route(liveOrigin, destination.coordinate(),
+                    core.fixedTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(country)?.csv)
+                    fun priced(nativeRoute:String):JSONObject {
+                        val baseline=JSONObject(nativeRoute)
+                        if(snapshot.walking||baseline.optString("tollPricing")=="exact")return baseline
+                        val evidence=TollBindingAssets.loadForRoute(getApplication(),country,graphDirectory,baseline)
+                        return if(evidence!=null && core.tollBindings(country,graphDirectory.path,evidence))
+                            JSONObject(core.priceCurrentRoute()) else baseline
+                    }
+                    val primary = priced(core.route(liveOrigin, destination.coordinate(),
                         snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
                     core.remember(0)
                     primary.put("key",0)
@@ -358,7 +367,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         }
                         fun candidate(avoid: Boolean, seed: Int = -1,
                                       penalty: Double = 0.0): JSONObject? = try {
-                            JSONObject(core.route(liveOrigin,destination.coordinate(),
+                            priced(core.route(liveOrigin,destination.coordinate(),
                                 false,avoid,0.0,vehicleClass,routingHeading,
                                 seed,penalty))
                         } catch (e: IllegalStateException) {

@@ -38,13 +38,15 @@ internal object RouteChoices {
         val missing=(route.optDouble("tolledMeters",0.0)-route.optDouble("pricedTollMeters",0.0)).coerceAtLeast(0.0)
         return parts.joinToString(" · ")+(if(source.isNotBlank())"\nSource: $source" else "")+
             (if(missing>.1)"\nSome toll roads have no applicable price coverage." else "")+
-            "\nSection-average estimates exclude special discounts and exemptions."
+            (if(route.optString("tollPricing")=="exact")"\nPublished base tariffs exclude special discounts and exemptions."
+             else "\nSection-average estimates exclude special discounts and exemptions.")
     }
     fun tollRoadSummary(route:JSONObject):List<String> {
         val entries=route.optJSONArray("tollRoads") ?: return emptyList()
         return (0 until entries.length()).mapNotNull { index ->
             val road=entries.optJSONObject(index) ?: return@mapNotNull null
-            val name=road.optString("road").takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            val ref=road.optString("road").takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            val name=road.optString("name").takeIf { it.isNotBlank() }?.let { "$ref · $it" } ?: ref
             val amount=road.optDouble("amount",Double.NaN)
             if(road.optString("pricing") !in listOf("estimate","exact") || road.isNull("amount") || !amount.isFinite() || amount<0)
                 "$name · price unavailable"

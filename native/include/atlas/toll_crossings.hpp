@@ -3,12 +3,16 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 namespace atlas {
 // Price-free, directed, graph-bound evidence. Geometry and tariffs have separate lifetimes.
+class Graph;
+struct Route;
+class TollTariffs;
 using TollGraphDigests=std::map<std::string,std::string>;
 struct TollChargeBinding {
   uint32_t edge=0,from=0,to=0;
@@ -34,6 +38,8 @@ public:
   TollCrossingMatcher(TollGraphDigests boundGraph,std::string country,
       std::unordered_set<uint32_t> coveredEdges,std::vector<TollChargeBinding> bindings,
       bool reviewed);
+  static TollCrossingMatcher parse(std::string_view csv);
+  void validateGraph(const Graph &graph) const;
   std::optional<TollCrossingSequence> match(const TollGraphDigests &loadedGraph,
       const std::string &country,const std::vector<TollEdgeTraversal> &traversals) const;
 private:
@@ -43,4 +49,6 @@ private:
   std::unordered_map<uint32_t,std::vector<TollChargeBinding>> bindings_;
   bool reviewed_=false;
 };
+bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
+    const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
 } // namespace atlas

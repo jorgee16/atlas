@@ -12,6 +12,9 @@ class NativeCore : AutoCloseable {
     private external fun openGraph(handle: Long, directory: String)
     private external fun openSearch(handle: Long, directory: String)
     private external fun loadTariffs(handle: Long, country: String, csv: ByteArray)
+    private external fun loadFixedTariffs(handle:Long,country:String,csv:ByteArray)
+    private external fun priceCurrentRoute(handle:Long):ByteArray
+    private external fun loadTollBindings(handle:Long,country:String,directory:String,csv:ByteArray,actualHashes:Array<String>)
     private external fun find(handle: Long, query: ByteArray, lat: Double, lon: Double, nearby: Boolean, category: String): ByteArray
     private external fun calculate(handle: Long, a: Double, b: Double, c: Double, d: Double, walk: Boolean, avoid: Boolean, penalty: Double, vehicle: Int, heading: Double, alternativeSeedKey: Int, diversitySecondsPerKm: Double): ByteArray
     private external fun filter(handle: Long, lat: Double, lon: Double, accuracy: Double, speed: Double, heading: Double, time: Double): ByteArray
@@ -22,6 +25,12 @@ class NativeCore : AutoCloseable {
     fun search(directory: String) = openSearch(handle, directory)
     fun tariffs(country: String, csv: ByteArray?) =
         loadTariffs(handle, country, csv ?: byteArrayOf())
+    internal fun fixedTariffs(country:String,csv:ByteArray?)=loadFixedTariffs(handle,country,csv ?: byteArrayOf())
+    internal fun tollBindings(country:String,directory:String,input:TollBindingInput?):Boolean=try {
+        loadTollBindings(handle,country,directory,input?.csv ?: byteArrayOf(),input?.actualHashes ?: emptyArray())
+        input!=null
+    } catch(_:IllegalStateException) { false }
+    internal fun priceCurrentRoute()=priceCurrentRoute(handle).toString(Charsets.UTF_8)
     fun find(query: String, anchor: Coordinate, nearby: Boolean = false, category: String = "") =
         find(handle, query.toByteArray(Charsets.UTF_8), anchor.lat, anchor.lon, nearby, category).toString(Charsets.UTF_8)
     fun route(from: Coordinate, to: Coordinate, walking: Boolean, avoid: Boolean, penalty: Double, vehicle: Int,
@@ -44,4 +53,5 @@ data class Coordinate(val lat: Double, val lon: Double) {
 }
 data class Fix(val point: Coordinate, val accuracy: Double, val speed: Double, val bearing: Double?, val time: Double, val bearingAccuracy: Double? = null, val providerBearing: Double? = null, val providerSpeed: Double? = null,
                val motionConfirmed: Boolean? = null, val provider: String? = null)
+
 

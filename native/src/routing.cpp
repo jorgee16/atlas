@@ -482,7 +482,7 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         auto found=tollRoadIndex.find(roadLabel);
         if(found==tollRoadIndex.end()){
           found=tollRoadIndex.emplace(roadLabel,r.tollRoads.size()).first;
-          r.tollRoads.push_back({roadLabel});
+          TollRoadCharge item;item.road=roadLabel;r.tollRoads.push_back(std::move(item));
         }
         auto &breakdown=r.tollRoads[found->second];
         breakdown.meters+=leg.distance;
@@ -708,7 +708,9 @@ std::string routeJson(const Route &r) {
     s << "{\"road\":" << jsonString(road.road)
       << ",\"meters\":" << road.meters
       << ",\"pricedMeters\":" << road.pricedMeters
-      << ",\"pricing\":" << jsonString(road.complete?"estimate":"unavailable")
+      << ",\"pricing\":" << jsonString(road.complete?(road.exact?"exact":"estimate"):"unavailable")
+      << ",\"chargeId\":" << jsonString(road.chargeId)
+      << ",\"name\":" << jsonString(road.name)
       << ",\"amount\":";
     if(road.complete)s << std::round(road.amount*monetaryScale)/monetaryScale;
     else s << "null";
@@ -716,7 +718,7 @@ std::string routeJson(const Route &r) {
   }
   s << ']';
   s << ",\"tollPricing\":" << jsonString(r.tolledMeters==0?"none":
-          r.tollPriceComplete?"estimate":"unavailable")
+          r.tollPriceComplete?(r.tollPriceExact?"exact":"estimate"):"unavailable")
     << ",\"tolledMeters\":" << r.tolledMeters
     << ",\"pricedTollMeters\":" << r.pricedTollMeters
     << ",\"tollCountry\":" << jsonString(r.tollCountry)
