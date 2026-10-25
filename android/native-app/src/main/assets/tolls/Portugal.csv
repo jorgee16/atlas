@@ -1,0 +1,63 @@
+# atlas-toll-table-v1
+# country=Portugal
+# currency=EUR
+# year=2026
+# source=https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/
+# These are real, published IMT 2026 SECTION prices, NOT geofenced plaza locations.
+# Atlas currently derives a distance-weighted per-road ESTIMATE from them.
+# Do not label the result an exact Via Verde calculator quote.
+road;section;km;class1;class2;class3;class4
+A2;Fogueteiro-Coina;8.9;0.90;1.55;2.00;2.20
+A2;Coina-Palmela;11.5;0.85;1.50;1.90;2.10
+A2;Palmela-A2A12;2.0;0.10;0.15;0.20;0.25
+A2;A2A12-Marateca;17.3;1.85;3.25;4.15;4.60
+A2;Marateca-A2A6A13;2.3;0.25;0.45;0.55;0.65
+A2;A2A6A13-Alcacer;24.8;2.70;4.75;6.10;6.80
+A2;Alcacer-GrandolaNorte;22.6;2.40;4.20;5.40;6.00
+A2;GrandolaNorte-GrandolaSul;15.4;1.65;2.85;3.70;4.10
+A2;GrandolaSul-Aljustrel;31.5;3.45;6.05;7.80;8.65
+A2;Aljustrel-CastroVerde;26.8;2.95;5.15;6.60;7.35
+A2;CastroVerde-Almodovar;16.8;1.80;3.20;4.10;4.55
+A2;Almodovar-Messines;33.1;3.60;6.25;8.05;8.95
+A2;Messines-PaderneA22;12.2;1.30;2.30;2.95;3.30
+A3;Maia-SantoTirso;12.8;1.15;2.05;2.60;2.90
+A3;SantoTirso-Famalicao;5.4;0.50;0.85;1.10;1.25
+A3;Famalicao-Cruz;8.6;0.75;1.35;1.70;1.90
+A3;Cruz-BragaSul;7.3;0.80;1.35;1.75;1.95
+A3;BragaSul-BragaOeste;4.5;0.50;0.85;1.10;1.20
+A3;BragaOeste-EN201;19.9;2.20;3.80;4.90;5.45
+A3;EN201-PonteLimaSul;10.0;1.10;1.90;2.45;2.75
+A3;PonteLimaSul-PonteLimaNorte;0.8;0.10;0.15;0.20;0.20
+A3;PonteLimaNorte-EN303;20.8;2.25;3.95;5.05;5.60
+A3;EN303-Valenca;8.0;0.85;1.50;1.95;2.15
+A3;BragaSul-Celeiros;2.2;0.25;0.40;0.55;0.60
+A4;Ermesinde-Valongo;4.3;0.40;0.70;0.90;1.00
+A4;Valongo-Campo;5.0;0.40;0.65;0.85;0.95
+A4;Campo-Baltar;6.4;0.65;1.15;1.50;1.70
+A4;Baltar-Paredes;5.8;0.50;0.85;1.10;1.20
+A4;Paredes-Guilhufe;2.6;0.30;0.50;0.65;0.70
+A4;Guilhufe-Penafiel;2.2;0.20;0.35;0.45;0.50
+A4;Penafiel-Casteloes;7.7;0.75;1.30;1.70;1.90
+A4;Casteloes-Geraldes;14.3;1.55;2.75;3.55;3.90
+A5;EstadioNacional-Oeiras;3.5;0.40;0.75;0.75;0.75
+A5;Oeiras-Carcavelos;6.9;0.70;1.35;1.35;1.35
+A5;Carcavelos-Estoril;8.7;0.90;1.75;1.75;1.75
+A5;Estoril-Cascais;4.7;0.50;0.95;0.95;0.95
+A9;EstadioNacional-Queluz;3.4;0.35;0.65;0.85;0.95
+A9;Queluz-A9A16;2.9;0.30;0.55;0.70;0.80
+A9;A9A16-Pontinha;3.1;0.35;0.60;0.75;0.85
+A9;Pontinha-Odivelas;6.8;0.75;1.30;1.70;1.85
+A9;Odivelas-A8A9;3.5;0.40;0.65;0.85;0.95
+A9;A8A9-Bucelas;3.4;0.35;0.65;0.85;0.95
+A9;Bucelas-A9A10;8.3;0.90;1.60;2.05;2.30
+A9;A9A10-Alverca;3.0;0.35;0.60;0.75;0.80
+A14;SantaEulalia-Montemor;4.8;0.50;0.90;1.15;1.30
+A14;Montemor-EN335;8.0;0.85;1.50;1.95;2.15
+A14;EN335-Anca;9.6;1.05;1.80;2.35;2.60
+A14;Anca-CoimbraNorte;4.4;0.50;0.85;1.05;1.20
+A15;Arnoia-ADosNegros;4.0;0.45;0.75;0.95;1.10
+A15;ADosNegros-ADosFrancos;8.9;0.95;1.70;2.15;2.40
+A15;ADosFrancos-RioMaiorOeste;5.7;0.60;1.10;1.40;1.55
+A15;RioMaiorOeste-RioMaiorEste;3.3;0.35;0.65;0.80;0.90
+A15;RioMaiorEste-Malaqueijo;7.5;0.80;1.40;1.80;2.00
+A15;Malaqueijo-A1A15;10.8;1.15;2.05;2.60;2.90

@@ -297,7 +297,10 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     if (enforceDirection && routingHeading == null)
                         throw IllegalStateException(
                             "Waiting for confirmed driving direction before rerouting; keeping the current route")
+                    val roadRegion=regions.forPosition(liveOrigin)
                     core.graph(regions.graph(liveOrigin, destination.coordinate()).path)
+                    val country=roadRegion.json.getString("country")
+                    core.tariffs(country,TollTableAssets.read(getApplication(),country))
                     val primary = JSONObject(core.route(liveOrigin, destination.coordinate(),
                         snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
                     core.remember(0)

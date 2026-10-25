@@ -1,11 +1,29 @@
 package com.atlas.nativeapp
 
 import org.json.JSONObject
+import java.util.Locale
 
 /** Compact road labels and actual diversity checks for native C++ route options. */
 internal object RouteChoices {
     fun roads(refs: List<String>): String =
         refs.take(4).joinToString(" → ").ifBlank { "Local roads" }
+
+    /** Never label an uncovered tolled road as €0. Never call a per-km
+     * approximation an exact operator/Via Verde quote. */
+    fun tollLabel(route: JSONObject): String {
+        if (!route.optBoolean("hasTolls")) return "No toll roads"
+        if (route.optString("tollPricing") != "estimate" ||
+            route.isNull("tollEuros") || !route.has("tollEuros"))
+            return "Toll roads · Price unavailable"
+        val amount=route.optDouble("tollEuros",Double.NaN)
+        if (!amount.isFinite() || amount<0) return "Toll roads · Price unavailable"
+        val currency=route.optString("tollCurrency","EUR")
+        val unit=when(currency) { "EUR"->"€";"GBP"->"£";else->"$currency " }
+        val price=String.format(Locale.forLanguageTag("pt-PT"),"%.2f",amount)
+        val year=route.optString("tollTariffYear","").takeIf { it.isNotBlank() }
+        return "≈ $unit$price · estimate" +
+            (if(year!=null) " ($year tariffs)" else "")
+    }
 
     fun roadSummary(route: JSONObject): String {
         val array = route.optJSONArray("mainRoads") ?: return roads(emptyList())

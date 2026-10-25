@@ -11,6 +11,7 @@ class NativeCore : AutoCloseable {
     private external fun destroy(handle: Long)
     private external fun openGraph(handle: Long, directory: String)
     private external fun openSearch(handle: Long, directory: String)
+    private external fun loadTariffs(handle: Long, country: String, csv: ByteArray)
     private external fun find(handle: Long, query: ByteArray, lat: Double, lon: Double, nearby: Boolean, category: String): ByteArray
     private external fun calculate(handle: Long, a: Double, b: Double, c: Double, d: Double, walk: Boolean, avoid: Boolean, penalty: Double, vehicle: Int, heading: Double, alternativeSeedKey: Int, diversitySecondsPerKm: Double): ByteArray
     private external fun filter(handle: Long, lat: Double, lon: Double, accuracy: Double, speed: Double, heading: Double, time: Double): ByteArray
@@ -19,6 +20,8 @@ class NativeCore : AutoCloseable {
     fun activate(key: Int) = activate(handle, key)
     fun graph(directory: String) = openGraph(handle, directory)
     fun search(directory: String) = openSearch(handle, directory)
+    fun tariffs(country: String, csv: ByteArray?) =
+        loadTariffs(handle, country, csv ?: byteArrayOf())
     fun find(query: String, anchor: Coordinate, nearby: Boolean = false, category: String = "") =
         find(handle, query.toByteArray(Charsets.UTF_8), anchor.lat, anchor.lon, nearby, category).toString(Charsets.UTF_8)
     fun route(from: Coordinate, to: Coordinate, walking: Boolean, avoid: Boolean, penalty: Double, vehicle: Int,

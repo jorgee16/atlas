@@ -1017,9 +1017,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                     addView(ui.text(stats,if(compact)15f else 18f,ui.green,true))
                     addView(ui.space(5))
                     addView(ui.text(if(s.walking)"Walking route"
-                        else if(route.optBoolean("hasTolls"))
-                            "Toll roads · Price not calculated yet"
-                        else "No toll roads",12f,ui.muted))
+                        else RouteChoices.tollLabel(route),12f,ui.muted))
                     if(!s.walking) {
                         addView(ui.space(5))
                         addView(ui.text(RouteChoices.roadSummary(route),12f,ui.muted).apply{
@@ -1041,8 +1039,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                         val roads=RouteChoices.roadSummary(choice)
                         val trip="${AtlasPages.formatTime(choice.optDouble("durationSeconds"))} · " +
                             AtlasPages.formatDistance(choice.optDouble("distanceMeters"))
-                        val tollHint=if(choice.optBoolean("hasTolls")) "Toll roads"
-                            else "No toll roads"
+                        val tollHint=RouteChoices.tollLabel(choice)
                         card.addView(ui.row().apply {
                             ui.ripple(this,if(selected) ui.soft else ui.surface,13)
                             setPadding(ui.dp(12),ui.dp(11),ui.dp(12),ui.dp(11))

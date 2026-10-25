@@ -64,7 +64,38 @@ int main(int argc, char **argv) {
     RouteOptions avoid;
     avoid.avoidTolls = true;
     check(route(toll, 0, 2, avoid)->seconds == 20, "avoid tolls");
-    check(route(toll, 0, 2)->tollEuros > 0, "toll estimate");
+    const auto sampleTariffs=TollTariffs::parse(
+      "# country=Portugal\n# currency=EUR\n# year=2026\n"
+      "# source=https://www.imt-ip.pt/\n"
+      "road;section;km;class1;class2;class3;class4\n"
+      "A1;Test section;10;1.00;1.80;2.30;2.60\n","Portugal");
+    RouteOptions paid;
+    paid.tariffs=&sampleTariffs;
+    auto tolled=route(toll,0,2,paid);
+    check(tolled && tolled->tollPriceComplete && tolled->tollEuros>0,
+          "loaded country tariff estimates tolled route");
+    check(tolled->pricedTollMeters>0 &&
+          tolled->pricedTollMeters==tolled->tolledMeters,
+          "price coverage matches all tolled edges");
+    check(routeJson(*tolled).find("\"tollPricing\":\"estimate\"")!=std::string::npos,
+          "only show price as estimate, not an official quoted total");
+    RouteOptions heavy=paid; heavy.vehicleClass=4;
+    check(route(toll,0,2,heavy)->tollEuros>tolled->tollEuros,
+          "read real per-class tariff values, not hard-coded class multipliers");
+    auto unknown=route(toll,0,2);
+    check(unknown && unknown->tolledMeters>0 &&
+          !unknown->tollPriceComplete && unknown->tollEuros==0,
+          "missing country table is not a zero-cost toll route");
+    check(routeJson(*unknown).find("\"tollEuros\":null")!=std::string::npos,
+          "missing tariff MUST serialize as null, not fake free");
+    check(!sampleTariffs.estimate("A28",1000,1),
+          "no fictional fallback euro/km rates for unpriced roads");
+    rejects([&] { TollTariffs::parse(
+      "# country=Portugal\n# currency=EUR\n# year=2026\n"
+      "# source=test\nroad;section;km;class1;class2;class3;class4\n"
+      "A5;test;10;1;2;3;4\n","Spain"); });
+    check(!route(toll,0,2,avoid)->tolledMeters,
+          "avoid tolls must still route without tolled edges");
     Graph profile(root + "/profile");
     check(route(profile, 0, 2, walk)->meters == 170, "walk access flags");
     check(normalize("Café São João") == "cafe sao joao", "accent folding");

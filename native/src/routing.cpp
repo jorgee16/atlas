@@ -328,30 +328,6 @@ void Graph::appendGeometry(const Edge &e, std::vector<Point> &out) const {
   }
   out.push_back(point(e.target));
 }
-double tollRate(std::string ref, int cls) {
-  static const std::map<std::string, double> rates = {
-      {"A1", .073},  {"A2", .074},  {"A3", .099},  {"A4", .096},  {"A5", .105},
-      {"A6", .110},  {"A8", .080},  {"A9", .108},  {"A10", .109}, {"A11", .080},
-      {"A12", .080}, {"A13", .080}, {"A14", .080}, {"A15", .107}, {"A16", .080},
-      {"A17", .108}, {"A19", .080}, {"A21", .080}, {"A23", .080}, {"A24", .080},
-      {"A25", .080}, {"A28", .080}, {"A29", .080}, {"A32", .080}, {"A33", .080},
-      {"A41", .080}, {"A42", .080}, {"A43", .080}};
-  static const double mult[] = {1, 1, 1.75, 2.25, 2.5};
-  std::string token;
-  double value = .08;
-  for (char c : ref + ";") {
-    if (c == ';' || c == ',' || c == '/') {
-      auto it = rates.find(token);
-      if (it != rates.end()) {
-        value = it->second;
-        break;
-      }
-      token.clear();
-    } else if (!std::isspace(static_cast<unsigned char>(c)))
-      token += char(std::toupper(static_cast<unsigned char>(c)));
-  }
-  return value * mult[cls >= 1 && cls <= 4 ? cls : 1];
-}
 std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
                            const RouteOptions &op) {
   if (start >= g.nodeCount() || goal >= g.nodeCount() ||
@@ -423,8 +399,6 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
                           meters, seconds, r.meters, road});
         r.meters += meters;
         r.seconds += seconds;
-        if (op.profile == Profile::drive && (road.flags & 4))
-          r.tollEuros += meters / 1000 * tollRate(road.ref, op.vehicleClass);
         from = e.target;
       }
       // Trim the edge geometry behind the current GPS projection. Without
@@ -479,6 +453,24 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
           }
         }
       }
+      // Price only the portion ACTUALLY driven: initial GPS projection can
+      // clip the first edge. The old implementation priced it before clipping.
+      // Missing tariff coverage is NOT equivalent to a zero-euro journey.
+      if(op.tariffs){
+        r.tollCountry=op.tariffs->country;
+        r.tollCurrency=op.tariffs->currency;
+        r.tollYear=op.tariffs->year;
+        r.tollSource=op.tariffs->source;
+      }
+      for(const auto &leg:r.legs)if(op.profile==Profile::drive &&
+                                     (leg.road.flags & 4)){
+        r.tolledMeters+=leg.distance;
+        const auto euro=op.tariffs
+            ? op.tariffs->estimate(leg.road.ref,leg.distance,op.vehicleClass)
+            : std::nullopt;
+        if(euro){r.pricedTollMeters+=leg.distance;r.tollEuros+=*euro;}
+        else r.tollPriceComplete=false;
+      }
       makeManeuvers(r, g);
       return r;
     }
@@ -527,12 +519,16 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
           op.profile == Profile::walk
               ? std::max(1., std::round(e.distanceDm / 10. / 1.4 * 100))
               : e.durationCs;
+      // Toll-price penalty affects ranking only, never ETA. When a road
+      // has no published tariff, do not invent a non-zero euro amount.
+      const auto edgeEstimate=op.tariffs && (flags & 4)
+          ? op.tariffs->estimate(g.road(e.road).ref,e.distanceDm/10.,
+                                 op.vehicleClass)
+          : std::nullopt;
       double penalty =
-          op.profile == Profile::drive && (flags & 4) &&
-                  op.penaltyMinutesPerEuro > 0
-              ? std::round(e.distanceDm / 10000. *
-                           tollRate(g.road(e.road).ref, op.vehicleClass) *
-                           op.penaltyMinutesPerEuro * 6000)
+          op.profile == Profile::drive && op.penaltyMinutesPerEuro > 0 &&
+                  edgeEstimate
+              ? std::round(*edgeEstimate * op.penaltyMinutesPerEuro * 6000)
               : 0;
       if (op.profile == Profile::drive &&
           op.sharedEdgePenaltySecondsPerKm > 0 &&
@@ -671,7 +667,17 @@ std::string routeJson(const Route &r) {
   s.precision(12);
   s << "{\"destinationAccessMeters\":" << r.destinationAccessMeters
     << ",\"distanceMeters\":" << r.meters
-    << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":" << r.tollEuros
+    << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":";
+  if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
+  else s << std::round(r.tollEuros*100.)/100.;
+  s << ",\"tollPricing\":" << jsonString(r.tolledMeters==0?"none":
+          r.tollPriceComplete?"estimate":"unavailable")
+    << ",\"tolledMeters\":" << r.tolledMeters
+    << ",\"pricedTollMeters\":" << r.pricedTollMeters
+    << ",\"tollCountry\":" << jsonString(r.tollCountry)
+    << ",\"tollCurrency\":" << jsonString(r.tollCurrency)
+    << ",\"tollTariffYear\":" << jsonString(r.tollYear)
+    << ",\"tollTariffSource\":" << jsonString(r.tollSource)
     << ",\"expandedNodes\":" << r.expanded << ",\"points\":[";
   for (std::size_t i = 0; i < r.points.size(); ++i) {
     if (i)

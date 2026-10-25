@@ -1,5 +1,7 @@
 #pragma once
 #include <atomic>
+#include <array>
+#include <unordered_map>
 #include <cstdint>
 #include <functional>
 #include <unordered_set>
@@ -64,12 +66,31 @@ struct Maneuver {
   std::string turnLanes;
   unsigned exitNumber = 0;
 };
+/** Country-specific tariff table, independent of OSM routing graph versions.
+ * Real section prices are converted to road-average estimates until explicit
+ * junction/plaza IDs exist in the road graph. No guessed default rate. */
+class TollTariffs {
+public:
+  static TollTariffs parse(std::string_view csv, std::string country);
+  std::optional<double> estimate(std::string_view roadRef,
+                                 double meters, int vehicleClass) const;
+  std::string country, currency, year, source;
+private:
+  struct RoadTotals {
+    double km = 0;
+    std::array<double, 4> euros{};
+  };
+  std::unordered_map<std::string, RoadTotals> roadTotals_;
+};
 struct Route {
   std::vector<uint32_t> nodes, edges;
   std::vector<Point> points;
   std::vector<Leg> legs;
   std::vector<Maneuver> maneuvers;
   double meters = 0, seconds = 0, tollEuros = 0;
+  double tolledMeters = 0, pricedTollMeters = 0;
+  bool tollPriceComplete = true;
+  std::string tollCountry, tollCurrency, tollYear, tollSource;
   uint32_t expanded = 0;
   double destinationAccessMeters = 0; // distance from road end to true POI
 };
@@ -111,6 +132,7 @@ struct RouteOptions {
   bool avoidTolls = false;
   double penaltyMinutesPerEuro = 0;
   int vehicleClass = 1;
+  const TollTariffs *tariffs = nullptr;
   uint32_t maxExpanded = 2000000;
   std::optional<uint32_t> initialEdge;
   std::optional<Point> initialSnap;
@@ -120,7 +142,6 @@ struct RouteOptions {
   double sharedEdgePenaltySecondsPerKm = 0;
   std::function<bool()> cancelled;
 };
-double tollRate(std::string reference, int vehicleClass);
 std::vector<std::string> principalRoadRefs(const Route &route,
                                            std::size_t limit = 4);
 std::optional<Route> route(const Graph &graph, uint32_t start, uint32_t goal,

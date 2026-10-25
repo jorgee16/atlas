@@ -18,6 +18,8 @@ struct Engine {
   std::optional<atlas::Profile> motionProfile;
   std::optional<double> motionHeading;
   std::string graphPath, searchPath;
+  std::optional<atlas::TollTariffs> tariffs;
+  std::string tariffCountry;
 };
 std::mutex gate;
 std::map<jlong, std::unique_ptr<Engine>> engines;
@@ -111,6 +113,32 @@ Java_com_atlas_nativeapp_NativeCore_openSearch(JNIEnv *env, jobject, jlong id,
     error(env, e);
   }
 }
+// Catalog bytes are supplied by Kotlin from assets/tolls/<country>.csv.
+// Each engine has its own immutable, country-scoped tariffs, never global
+// Portugal assumptions. Missing file explicitly disables pricing.
+extern "C" JNIEXPORT void JNICALL
+Java_com_atlas_nativeapp_NativeCore_loadTariffs(JNIEnv *env, jobject, jlong id,
+                                               jstring country,
+                                               jbyteArray payload) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);
+    auto &e=engine(id);
+    const auto name=string(env,country);
+    if(!payload || env->GetArrayLength(payload)==0) {
+      e.tariffs.reset();
+      e.tariffCountry=name;
+      return;
+    }
+    const auto n=env->GetArrayLength(payload);
+    if(n>2*1024*1024)throw std::invalid_argument("Toll table too large");
+    std::string csv(std::size_t(n),'\0');
+    env->GetByteArrayRegion(payload,0,n,
+        reinterpret_cast<jbyte*>(csv.data()));
+    auto next=atlas::TollTariffs::parse(csv,name);
+    e.tariffs=std::move(next);
+    e.tariffCountry=name;
+  } catch(const std::exception &ex) { error(env,ex); }
+}
 extern "C" JNIEXPORT jbyteArray JNICALL
 Java_com_atlas_nativeapp_NativeCore_find(JNIEnv *env, jobject, jlong id,
                                          jbyteArray query, jdouble lat,
@@ -184,6 +212,7 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
     op.avoidTolls = avoid;
     op.penaltyMinutesPerEuro = penalty;
     op.vehicleClass = vehicle;
+    op.tariffs = e.tariffs ? &*e.tariffs : nullptr;
     if (alternateSeedKey >= 0 && diversitySecondsPerKm > 0) {
       if (!std::isfinite(diversitySecondsPerKm) ||
           diversitySecondsPerKm > 1200.)

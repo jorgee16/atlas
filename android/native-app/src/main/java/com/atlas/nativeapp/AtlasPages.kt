@@ -222,7 +222,7 @@ class AtlasPages(
             addView(rowAction("volume","Voice guidance",if(model.voice)"On · Speak upcoming turns" else "Off · Quiet navigation"){model.voice=!model.voice})
             addView(ui.rule());addView(rowAction("compass","Diagnostics",if(model.diagnosticsEnabled)"GPS overlay enabled" else "Inspect GPS, heading and positioning"){open("diagnostics")})
             addView(ui.rule());addView(rowAction("sun","Appearance",model.theme.replaceFirstChar{it.titlecase()}){open("appearance")})
-            addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Toll estimates"){open("vehicle")})
+            addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Country tariff table"){open("vehicle")})
             addView(ui.rule());addView(rowAction("layers","Map appearance",when(model.mapVisualStyle){
                 MapVisualStyle.SATELLITE -> "Satellite · Online imagery"
                 MapVisualStyle.HYBRID -> "Hybrid · Imagery with labels"
@@ -281,7 +281,7 @@ class AtlasPages(
         listOf("system" to "Use device setting","light" to "Light","dark" to "Dark").forEach{(key,label)->addView(ui.card(padding=5).apply{addView(rowAction(if(key=="dark")"compass" else "sun",label,if(model.theme==key)"Selected" else "Tap to apply"){changeTheme(key)})},lp(12))}
     })
     fun vehicle(): View=scroll(ui.column().apply{
-        addView(paragraph("Vehicle class is used for estimated Portugal toll costs."),lp(12))
+        addView(paragraph("Vehicle class sets toll estimates from the current offline region's country tariff table. Tariffs are derived from official sections; they are not exact entrance/exit charges. Missing roads show Price unavailable."),lp(12))
         for(n in 1..4)addView(ui.card(padding=5).apply{addView(rowAction("car","Class $n",if(model.vehicleClass==n)"Selected" else "Tap to select"){model.vehicleClass=n})},lp(12))
     })
     companion object {
