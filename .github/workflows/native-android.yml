@@ -103,7 +103,8 @@ jobs:
         run: |
           python3 tools/generate-toll-bundle.py --check
           python3 tools/toll-catalog.py
-          node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js
+          python3 -m unittest discover -s tools -p test_toll_catalog.py
+          node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
       - name: Generate search expectations from the original app
@@ -742,3 +743,48 @@ jobs:
             android/native-app/build/reports/lint-results-release.*
 
 
+
+
+  toll-coverage:
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-tolls]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit SHA-verified real Portugal routing partitions
+        run: python3 tools/audit-toll-graph.py --output toll-audit/graph-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-toll-graph-coverage
+          path: toll-audit/
+          if-no-files-found: error
+
+  toll-catalog-publish:
+    # Separate data publication: no APK/Release, graph replacement or new keys.
+    needs: [core, android, toll-coverage]
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-tolls]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare audited immutable country catalogs
+        run: python3 tools/toll-catalog.py
+      - name: Install data publisher SDK
+        run: python3 -m pip install 'boto3==1.40.58'
+      - name: Publish immutable tariff payloads and replace current manifest last
+        run: python3 tools/publish-toll-catalogs.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-validated-toll-catalogs
+          path: dist/toll-catalogs/
+          if-no-files-found: error

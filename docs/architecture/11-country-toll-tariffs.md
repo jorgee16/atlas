@@ -122,3 +122,14 @@ Existing native, JNI, Android, GPS and camera gates stay enabled.
 - https://diariodarepublica.pt/dr/legislacao-consolidada/lei/2024-875716621
 - https://servicos.infraestruturasdeportugal.pt/portagens-ips
 - https://www.viaverde.pt/ferramentas/calculador-de-portagens
+
+The `toll-coverage` workflow job measures every Portugal partition in the
+bundled region manifest against SHA-verified edges/roads/strings. Its artifact
+reports directed toll-marked driving meters and estimates coverage by road ref;
+it deliberately does not call these unique physical kilometers or exact coverage.
+`[publish-tolls]` on a branch commit enables `toll-catalog-publish` only after the
+same commit's core, Android and real graph coverage gates succeed. It uses the existing R2 account
+secrets and bucket, writes only the tariff prefix, checks remote revisions and
+immutable collisions, and replaces the current manifest with an ETag precondition.
+The publication receipt records commit/run/country/revision/hash. No APK Release
+is produced by this data publication job.

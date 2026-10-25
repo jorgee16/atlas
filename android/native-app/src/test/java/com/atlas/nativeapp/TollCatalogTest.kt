@@ -33,6 +33,13 @@ class TollCatalogTest {
         reject { TollCatalog.parse("Testland",(String(csv())+"T1;one;1;2;3\n").toByteArray(),"fixture") }
         reject { TollCatalog.parse("Testland",String(csv()).replace("230","NaN").toByteArray(),"fixture") }
     }
+    @Test fun sameBundledRevisionIsAnIdempotentUpdate() {
+        val r=repo();val bytes=csv()
+        assertEquals(1L,r.install("Testland",manifest(bytes),bytes).revision)
+        assertEquals("bundled",r.load("Testland")!!.origin)
+        val changed=csv(price=999)
+        reject { r.install("Testland",manifest(changed),changed) }
+    }
     @Test fun updatesAreOfflineAndRollbackSurvivesRestart() {
         val root=temporary.newFolder();val r=repo(root)
         val two=csv(2);r.install("Testland",manifest(two),two)

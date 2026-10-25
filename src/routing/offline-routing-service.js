@@ -289,7 +289,8 @@ export class OfflineRoutingService {
     unique.sort(
       (a, b) =>
         a.durationSeconds - b.durationSeconds ||
-        a.tolls.totalEuros - b.tolls.totalEuros
+        (Number.isFinite(a.tolls.totalEuros) && Number.isFinite(b.tolls.totalEuros)
+          ? a.tolls.totalEuros - b.tolls.totalEuros : 0)
     );
 
     const frontier = unique.filter(

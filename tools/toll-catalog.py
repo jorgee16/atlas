@@ -39,7 +39,7 @@ def package(source, output):
     if not re.fullmatch('[0-3]', digits):
         raise ValueError('Invalid currency precision')
     header, *sections = rows
-    if header[:3] != ['road','section','km'] or not 1 <= len(header[3:]) <= 32 or not sections:
+    if header[:3] != ['road','section','km'] or not 1 <= len(header[3:]) <= 32 or not 1 <= len(sections) <= 30000:
         raise ValueError('Invalid columns')
     if not all(re.fullmatch(r'class[1-9][0-9]?', c) for c in header[3:]):
         raise ValueError('Invalid classes')

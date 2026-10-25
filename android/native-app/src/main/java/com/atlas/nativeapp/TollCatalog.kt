@@ -119,6 +119,10 @@ internal class TollCatalogRepository(private val root:File,private val bundledRe
         val candidate=TollCatalog.parse(country,bytes,"cache");verify(manifest,candidate)
         nativeValidator(country,bytes)
         val before=load(country)
+        if(before?.revision==candidate.revision) {
+            require(before.sha256==candidate.sha256) { "Immutable version collision" }
+            return before
+        }
         val highest=maxOf(bundled(country)?.revision ?: 0,versions(country).firstOrNull() ?: 0)
         require(candidate.revision>=highest) { "Tariff rollback/replay rejected" }
         val target=File(directory(country),candidate.revision.toString())
