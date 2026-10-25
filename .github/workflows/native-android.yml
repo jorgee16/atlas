@@ -826,3 +826,40 @@ jobs:
           name: Atlas-toll-public-HTTPS-verification
           path: toll-public-verification.json
           if-no-files-found: error
+
+  toll-section-input-audit:
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[audit-toll-sections]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect hash-verified existing toll events and official open-system tariffs
+        run: |
+          python3 - <<'PYCODE'
+          import hashlib,json,urllib.request,subprocess,shutil
+          from pathlib import Path
+          root=Path('toll-section-audit');root.mkdir()
+          catalog=json.loads(Path('android/native-app/src/main/assets/regions.json').read_text())
+          region=next(r for r in catalog['regions'] if r['id']=='portugal')
+          entry=next(e for e in region['package']['files'] if e['url'].endswith('/mainland/toll-events.json'))
+          url='https://pub-75539028275a4826aa383fdb89292ed7.r2.dev'+entry['url']
+          with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Atlas-Toll-Catalog/1.0'}),timeout=30) as response: data=response.read(2*1024*1024)
+          assert len(data)==entry['sizeBytes'] and hashlib.sha256(data).hexdigest()==entry['sha256']
+          (root/'toll-events.json').write_bytes(data)
+          print('VERIFIED_TOLL_EVENTS='+json.dumps(json.loads(data),ensure_ascii=False))
+          source='https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910'
+          with urllib.request.urlopen(urllib.request.Request(source,headers={'User-Agent':'Atlas-Tariff-Audit/1.0'}),timeout=30) as response: pdf=response.read(8*1024*1024)
+          assert pdf.startswith(b'%PDF') and len(pdf)<8*1024*1024
+          (root/'brisa-2026.pdf').write_bytes(pdf)
+          (root/'sources.json').write_text(json.dumps({'events':entry,'brisaSource':source,'brisaSha256':hashlib.sha256(pdf).hexdigest()},indent=2))
+          if shutil.which('pdftotext'):
+              subprocess.run(['pdftotext','-layout',str(root/'brisa-2026.pdf'),str(root/'brisa-2026.txt')],check=True)
+              text=(root/'brisa-2026.txt').read_text()
+              print('BRISA_OPEN_SYSTEM_PAGE='+text.split('\f')[-2])
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-toll-section-input-audit
+          path: toll-section-audit/
+          if-no-files-found: error
