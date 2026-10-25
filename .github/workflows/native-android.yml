@@ -788,3 +788,41 @@ jobs:
           name: Atlas-validated-toll-catalogs
           path: dist/toll-catalogs/
           if-no-files-found: error
+
+  toll-public-verification:
+    # Read-only publication evidence; unchanged Android code uses its existing gate.
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[verify-tolls-public]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public HTTPS country manifest and exact published CSV bytes
+        run: |
+          python3 - <<'PYCODE'
+          import hashlib,json,urllib.request
+          from pathlib import Path
+          origin='https://pub-75539028275a4826aa383fdb89292ed7.r2.dev'
+          def get(path,limit):
+              request=urllib.request.Request(origin+path,headers={'User-Agent':'Atlas-Toll-Catalog/1.0'})
+              with urllib.request.urlopen(request,timeout=30) as response:
+                  assert response.status==200 and response.geturl()==origin+path,'Unexpected HTTP redirect/status'
+                  data=response.read(limit+1)
+                  assert 0<len(data)<=limit,'Invalid response size'
+                  return data
+          manifest=json.loads(get('/toll-tariffs/Portugal/manifest.json',65536))
+          expected=Path('android/native-app/src/main/assets/tolls/Portugal.csv').read_bytes()
+          expected_sha=hashlib.sha256(expected).hexdigest()
+          assert manifest['schemaVersion']==1 and manifest['country']=='Portugal'
+          assert manifest['sha256']==expected_sha and manifest['sizeBytes']==len(expected)
+          assert manifest['path']==f"/toll-tariffs/Portugal/{manifest['revision']}/table.csv"
+          actual=get(manifest['path'],2*1024*1024)
+          assert actual==expected and hashlib.sha256(actual).hexdigest()==manifest['sha256']
+          receipt={'country':manifest['country'],'revision':manifest['revision'],'sha256':expected_sha,'publicHttpsVerified':True}
+          Path('toll-public-verification.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps(receipt))
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-toll-public-HTTPS-verification
+          path: toll-public-verification.json
+          if-no-files-found: error
