@@ -223,6 +223,8 @@ class AtlasPages(
             addView(ui.rule());addView(rowAction("compass","Diagnostics",if(model.diagnosticsEnabled)"GPS overlay enabled" else "Inspect GPS, heading and positioning"){open("diagnostics")})
             addView(ui.rule());addView(rowAction("sun","Appearance",model.theme.replaceFirstChar{it.titlecase()}){open("appearance")})
             addView(ui.rule());addView(rowAction("car","Vehicle class","Class ${model.vehicleClass} · Country tariff table"){open("vehicle")})
+            addView(ui.rule());addView(rowAction("car","Published plaza tariffs",
+                "Official charges per crossing · Current route country"){open("tollcharges")})
             addView(ui.rule());addView(rowAction("download","Update toll tariffs",
                 model.tollCountry?.let { "$it · Optional data download" } ?: "Calculate a route to select its country"){model.updateTollTariffs()})
             if(model.canRollbackTolls){addView(ui.rule());addView(rowAction("download","Previous toll tariffs",
@@ -284,6 +286,35 @@ class AtlasPages(
         addView(paragraph("Choose how Atlas looks on your device."),lp(12))
         listOf("system" to "Use device setting","light" to "Light","dark" to "Dark").forEach{(key,label)->addView(ui.card(padding=5).apply{addView(rowAction(if(key=="dark")"compass" else "sun",label,if(model.theme==key)"Selected" else "Tap to apply"){changeTheme(key)})},lp(12))}
     })
+    fun tollCharges():View {
+        val catalog=model.fixedTollCatalog()
+        return scroll(ui.column().apply {
+            if(catalog==null) {
+                addView(paragraph("Calculate a route to select its country. Published plaza tariffs are shown when a matching country catalog is available."))
+            } else {
+                addView(paragraph("${catalog.country} · ${catalog.year} · Class ${model.vehicleClass} · ${catalog.currency}"))
+                addView(paragraph("Each amount is the published base charge for one crossing. The plazas crossed by your route have not yet been verified; this list is not a trip total."),lp(12))
+                val formatter=java.text.NumberFormat.getNumberInstance(Locale.forLanguageTag("pt-PT")).apply {
+                    minimumFractionDigits=catalog.fractionDigits;maximumFractionDigits=catalog.fractionDigits
+                }
+                for(charge in catalog.fixedCharges) {
+                    val price=charge.amounts[model.vehicleClass]
+                    val label=price?.let { catalog.currency+" "+formatter.format(it) } ?: "Price unavailable for this class"
+                    addView(ui.card(padding=14).apply {
+                        addView(ui.column().apply {
+                            addView(ui.text(charge.road+" · "+charge.name,15f,bold=true))
+                            addView(ui.text(label,14f,ui.muted))
+                            addView(ui.text(charge.id,11f,ui.muted))
+                        })
+                    },lp(10))
+                }
+                addView(paragraph("Source: ${catalog.source}"),lp(14))
+                addView(ui.action("Update plaza tariffs",primary=false) {
+                    model.updateTollTariffs(kind=TollCatalogKind.FIXED_CROSSING)
+                },lp(14))
+            }
+        })
+    }
     fun vehicle(): View=scroll(ui.column().apply{
         addView(paragraph("Vehicle class sets toll estimates from the current offline region's country tariff table. Tariffs are derived from official sections; they are not exact entrance/exit charges. Missing roads show Price unavailable."),lp(12))
         for(n in model.tollVehicleClasses)addView(ui.card(padding=5).apply{addView(rowAction("car","Class $n",if(model.vehicleClass==n)"Selected" else "Tap to select"){model.vehicleClass=n})},lp(12))

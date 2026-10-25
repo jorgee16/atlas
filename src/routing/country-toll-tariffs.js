@@ -1,4 +1,4 @@
-import bundled from './bundled-toll-tables.js';
+import bundled, { fixedChargeTables } from './bundled-toll-tables.js';
 
 const normalize = value => String(value).replace(/\s+/g, '').toUpperCase();
 export function parseTollTable(country, csv) {
@@ -14,17 +14,31 @@ export function parseTollTable(country, csv) {
   }
   if (metadata.get('country') !== country || !/^[A-Z]{3}$/.test(metadata.get('currency')) ||
       !/^\d{4}$/.test(metadata.get('year')) || !metadata.get('source')?.startsWith('https://') ||
-      (metadata.has('scheme') && metadata.get('scheme') !== 'road-average')) throw new Error('Invalid tariff provenance');
+      (metadata.has('scheme') && !['road-average','fixed-crossing'].includes(metadata.get('scheme')))) throw new Error('Invalid tariff provenance');
   const version = metadata.get('version') ?? '0', digits = metadata.get('fractionDigits') ?? '2';
   if (!/^\d{1,16}$/.test(version) || !/^[0-3]$/.test(digits)) throw new Error('Invalid tariff version/precision');
+  const fixed = metadata.get('scheme') === 'fixed-crossing';
   const header = rows.shift();
-  if (header?.slice(0, 3).join(';') !== 'road;section;km' || header.length < 4 || header.length > 35 ||
+  if (header?.slice(0, 3).join(';') !== (fixed ? 'charge;road;name' : 'road;section;km') || header.length < 4 || header.length > 35 ||
       !header.slice(3).every(x => /^class[1-9]\d?$/.test(x))) throw new Error('Invalid class columns');
   const classes = header.slice(3).map(x => Number(x.slice(5)));
   if (new Set(classes).size !== classes.length || !rows.length || rows.length > 30000) throw new Error('Invalid classes/rows');
-  const roads = new Map(), sections = new Set();
+  const roads = new Map(), sections = new Set(), charges = new Map();
+  const scale = 10 ** Number(digits);
   for (const row of rows) {
     if (row.length !== header.length || !row[0] || !row[1]) throw new Error('Invalid tariff section');
+    if (fixed) {
+      if (!/^[A-Za-z0-9:_-]{1,128}$/.test(row[0]) || !row[2] || charges.has(row[0])) throw new Error('Invalid/duplicate fixed charge');
+      const prices = new Map();
+      row.slice(3).forEach((value,i) => {
+        const n = Number(value), minor = Math.round(n * scale);
+        if (!/^\d+(\.\d+)?$/.test(value) || !Number.isFinite(n) || n < 0 || n > 1e9 || Math.abs(n * scale - minor) > .0001)
+          throw new Error('Invalid fixed price or currency precision');
+        prices.set(classes[i],minor);
+      });
+      charges.set(row[0],{id:row[0],road:row[1],name:row[2],prices});
+      continue;
+    }
     const ref = normalize(row[0]), identity = ref + '\n' + row[1];
     if (sections.has(identity)) throw new Error('Duplicate tariff section'); sections.add(identity);
     const numbers = row.slice(2).map(x => {
@@ -35,12 +49,21 @@ export function parseTollTable(country, csv) {
     const road = roads.get(ref) ?? { km: 0, prices: new Map(classes.map(c => [c, 0])) };
     road.km += numbers[0]; classes.forEach((c, i) => road.prices.set(c, road.prices.get(c) + numbers[i + 1])); roads.set(ref, road);
   }
+  if (fixed && metadata.has('estimateRoads')) throw new Error('Estimate policy in fixed catalog');
   const allowed = metadata.has('estimateRoads') ? new Set(metadata.get('estimateRoads').split(',').filter(x => x.trim()).map(normalize)) : null;
   if (allowed && [...allowed].some(ref => !roads.has(ref))) throw new Error('Invalid estimate policy');
   return Object.freeze({ country, currency: metadata.get('currency'), year: metadata.get('year'),
+    scheme: fixed ? 'fixed-crossing' : 'road-average', fixedCharges:[...charges.values()].map(c => ({id:c.id,road:c.road,name:c.name})),
+    fixedCharge(id,vehicleClass) { const n=charges.get(id)?.prices.get(vehicleClass);return n===undefined ? null : n/scale; },
+    sumFixedCharges(ids,vehicleClass) {
+      if (!fixed || !classes.includes(vehicleClass)) return null;
+      let total=0;
+      for (const id of ids) { const n=charges.get(id)?.prices.get(vehicleClass);if(n===undefined || !Number.isSafeInteger(total+n))return null;total+=n; }
+      return total/scale;
+    },
     version, source: metadata.get('source'), fractionDigits: Number(digits), classes,
     estimate(ref, meters, vehicleClass) {
-      if (!Number.isFinite(meters) || meters < 0 || !classes.includes(vehicleClass)) return null;
+      if (fixed || !Number.isFinite(meters) || meters < 0 || !classes.includes(vehicleClass)) return null;
       for (const token of String(ref ?? '').split(/[;,/]/)) {
         const key = normalize(token), road = roads.get(key); if (!road) continue;
         if (allowed && !allowed.has(key)) return null;
@@ -55,8 +78,18 @@ const catalogs = new Map();
 export function countryTollTariffs(country) {
   if (!catalogs.has(country)) {
     let table = null;
-    try { if (Object.hasOwn(bundled, country)) table = parseTollTable(country, bundled[country]); } catch { /* Missing/invalid data stays unavailable. */ }
+    try { if (Object.hasOwn(bundled, country)) { const candidate=parseTollTable(country,bundled[country]);if(candidate.scheme==='road-average')table=candidate; } } catch { /* Missing/invalid data stays unavailable. */ }
     catalogs.set(country, table);
   }
   return catalogs.get(country);
+}
+
+const fixedCatalogs = new Map();
+export function countryTollCharges(country) {
+  if (!fixedCatalogs.has(country)) {
+    let table=null;
+    try { if (Object.hasOwn(fixedChargeTables,country)) { const candidate=parseTollTable(country,fixedChargeTables[country]);if(candidate.scheme==='fixed-crossing')table=candidate; } } catch { }
+    fixedCatalogs.set(country,table);
+  }
+  return fixedCatalogs.get(country);
 }

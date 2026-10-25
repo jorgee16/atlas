@@ -7,20 +7,21 @@ import java.net.URL
 import java.net.URLEncoder
 
 internal class TollCatalogUpdater(private val repository:TollCatalogRepository,
-    private val origin:String=RegionStore.ORIGIN,private val download:(String,Int)->ByteArray={ url,limit -> httpsDownload(url,limit) }) {
+    private val origin:String=RegionStore.ORIGIN,private val namespace:String="toll-tariffs",
+    private val download:(String,Int)->ByteArray={ url,limit -> httpsDownload(url,limit) }) {
     fun update(country:String):TollCatalog {
-        require(TollTableAssets.safeCountry(country))
+        require(TollTableAssets.safeCountry(country) && namespace.matches(Regex("toll-[a-z-]{1,40}")))
         val base=URI(origin)
         require(base.scheme=="https" && !base.host.isNullOrBlank() && base.rawUserInfo==null && base.rawQuery==null && base.rawFragment==null && base.rawPath.orEmpty().isEmpty())
         val encoded=URLEncoder.encode(country,"UTF-8").replace("+","%20")
-        val metadata=download("$origin/toll-tariffs/$encoded/manifest.json",64*1024)
+        val metadata=download("$origin/$namespace/$encoded/manifest.json",64*1024)
         require(metadata.size in 1..64*1024)
         val manifest=JSONObject(String(metadata,Charsets.UTF_8))
         require(manifest.getInt("schemaVersion")==1 && manifest.getString("country")==country)
         val size=manifest.getInt("sizeBytes");require(size in 1..TollCatalog.MAX_BYTES)
         val revision=manifest.getLong("revision");require(revision>0)
         val path=manifest.getString("path")
-        require(path=="/toll-tariffs/$encoded/$revision/table.csv") { "Unexpected tariff download path" }
+        require(path=="/$namespace/$encoded/$revision/table.csv") { "Unexpected tariff download path" }
         val url=base.resolve(path);require(url.scheme==base.scheme && url.rawAuthority==base.rawAuthority)
         val bytes=download(url.toASCIIString(),size);require(bytes.size==size)
         return repository.install(country,manifest,bytes)

@@ -8,7 +8,7 @@ using namespace atlas;
 void check(bool ok,const char* why){if(!ok)throw std::runtime_error(why);}
 template<class F> void rejects(F f){bool failed=false;try{f();}catch(const std::exception&){failed=true;}check(failed,"invalid table accepted");}
 int main(int argc,char** argv){try{
- check(argc==2,"production CSV required");std::ifstream file(argv[1]);check(bool(file),"missing production CSV");std::ostringstream buffer;buffer<<file.rdbuf();
+ check(argc==3,"production road and plaza CSVs required");std::ifstream file(argv[1]);check(bool(file),"missing production CSV");std::ostringstream buffer;buffer<<file.rdbuf();
  const auto csv=buffer.str();auto pt=TollTariffs::parse(csv,"Portugal");
  check(pt.classes==std::vector<int>({1,2,3,4}),"official classes");
  check(pt.version=="2026102501"&&pt.currency=="EUR"&&pt.year=="2026","provenance");
@@ -27,5 +27,17 @@ int main(int argc,char** argv){try{
  for(auto tail:{std::string("T1;paid;10;1;2\n"),std::string("BAD;broken;0;1;2\n"),std::string("BAD;broken;1;nan;2\n"),std::string("BAD;broken;1;-1;2\n")})rejects([&]{TollTariffs::parse(second+tail,"Testland");});
  rejects([&]{TollTariffs::parse(second+"# currency=EUR\n","Testland");});
  auto bad=second;bad.replace(bad.find("class5"),6,"class1");rejects([&]{TollTariffs::parse(bad,"Testland");});
+ std::ifstream fixedFile(argv[2]);check(bool(fixedFile),"missing fixed charge CSV");std::ostringstream fixedBuffer;fixedBuffer<<fixedFile.rdbuf();
+ auto charges=TollTariffs::parse(fixedBuffer.str(),"Portugal");
+ check(charges.scheme=="fixed-crossing"&&!charges.estimate("A5",1000,1),"fixed charges cannot become road averages");
+ check(std::abs(*charges.fixedCharge("brisa:0501",1)-1.60)<1e-9,"published Oeiras I class1 crossing");
+ for(int c=2;c<=4;++c)check(std::abs(*charges.fixedCharge("brisa:0501",c)-3.10)<1e-9,"published Oeiras I heavy classes");
+ check(std::abs(*charges.sumFixedCharges({"brisa:0502","brisa:0503"},1)-1.60)<1e-9,"sum of identified crossings uses integer minor units");
+ check(std::abs(*charges.sumFixedCharges({"brisa:0502","brisa:0502"},1)-1.40)<1e-9,"a real repeated crossing must be charged again");
+ check(!charges.sumFixedCharges({"unknown"},1)&&!charges.fixedCharge("brisa:0501",5),"unknown charge/class is not zero");
+ check(!pt.fixedCharge("brisa:0501",1),"road and fixed providers are isolated");
+ rejects([&]{TollTariffs::parse(fixedBuffer.str()+"brisa:0501;A5;duplicate;1;2;3;4\n","Portugal");});
+ auto wrongScheme=fixedBuffer.str();wrongScheme.replace(wrongScheme.find("fixed-crossing"),14,"road-average");
+ rejects([&]{TollTariffs::parse(wrongScheme,"Portugal");});
  std::cout<<"Official tariff and country-policy tests passed\n";return 0;
  }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

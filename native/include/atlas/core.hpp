@@ -78,6 +78,11 @@ public:
   // graph-version-bound mapping. Routing never guesses these IDs from a ref.
   std::optional<double> sectionPrice(std::string_view road, std::string_view section,
                                      int vehicleClass) const;
+  // Fixed crossings are a separate scheme: these lookups never imply a route quote.
+  std::optional<double> fixedCharge(std::string_view chargeId, int vehicleClass) const;
+  std::optional<double> sumFixedCharges(const std::vector<std::string> &crossings,
+                                        int vehicleClass) const;
+  std::string scheme = "road-average";
   std::string country, currency, year, source, version;
   int fractionDigits = 2;
   std::vector<int> classes;
@@ -88,6 +93,7 @@ private:
   };
   std::unordered_map<std::string, RoadTotals> roadTotals_;
   std::unordered_map<std::string,std::unordered_map<int,double>> sectionPrices_;
+  std::unordered_map<std::string,std::unordered_map<int,int64_t>> fixedCharges_;
   bool restrictEstimates_ = false;
   std::unordered_set<std::string> estimateRoads_;
 };

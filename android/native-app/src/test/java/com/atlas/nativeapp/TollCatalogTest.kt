@@ -106,4 +106,34 @@ class TollCatalogTest {
         assertTrue(RouteChoices.tollLabel(known).contains("230"))
         assertFalse(RouteChoices.tollLabel(known).contains("230,00"))
     }
+    private fun chargeCsv(version:Long=1)=("# country=Testland\n# currency=JPY\n# year=2026\n# version=$version\n"+
+        "# scheme=fixed-crossing\n# fractionDigits=0\n# source=https://example.test/charges\n"+
+        "charge;road;name;class1;class5\ngate:1;T1;West gate;100;230\ngate:2;T1;East gate;0;0\n").toByteArray()
+    @Test fun fixedCrossingCatalogIsIsolatedFromRoadAverageCache() {
+        val root=temporary.newFolder()
+        val fixed=TollCatalogRepository(File(root,"charges"),{if(it=="Testland")chargeCsv() else null},expectedScheme="fixed-crossing")
+        val road=TollCatalogRepository(File(root,"roads"),{if(it=="Testland")csv() else null})
+        val c=fixed.load("Testland")!!
+        assertEquals("fixed-crossing",c.scheme);assertEquals(2,c.fixedCharges.size)
+        assertEquals(java.math.BigDecimal("230"),c.fixedCharges[0].amounts[5])
+        val two=chargeCsv(2)
+        val m=manifest(two).put("scheme","fixed-crossing").put("path","/toll-charges/Testland/2/table.csv")
+        fixed.install("Testland",m,two)
+        reject { road.install("Testland",m,two) }
+        assertEquals("road-average",road.load("Testland")!!.scheme)
+        assertEquals(1L,fixed.rollback("Testland").revision)
+        assertNull(fixed.load("Portugal"))
+    }
+    @Test fun fixedUpdaterUsesIndependentVersionedNamespace() {
+        val r=TollCatalogRepository(temporary.newFolder(),{chargeCsv()},expectedScheme="fixed-crossing")
+        val two=chargeCsv(2);val urls=mutableListOf<String>()
+        val updater=TollCatalogUpdater(r,"https://example.test",namespace="toll-charges") { url,_->
+            urls.add(url)
+            if(url.endsWith("manifest.json"))manifest(two).put("scheme","fixed-crossing")
+                .put("path","/toll-charges/Testland/2/table.csv").toString().toByteArray() else two
+        }
+        assertEquals(2L,updater.update("Testland").revision)
+        assertEquals(listOf("https://example.test/toll-charges/Testland/manifest.json",
+            "https://example.test/toll-charges/Testland/2/table.csv"),urls)
+    }
 }

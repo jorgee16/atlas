@@ -53,4 +53,15 @@ class TollCatalogAndroidTest {
             core.tariffs("Portugal",bytes)
         }
     }
+    @Test fun fixedChargeAssetUsesTheRealNativeParserWithoutChangingRoadTariffs() {
+        val context=InstrumentationRegistry.getInstrumentation().targetContext
+        val repository=TollTableAssets.repository(context,TollCatalogKind.FIXED_CROSSING)
+        val catalog=repository.load("Portugal")!!
+        assertEquals("fixed-crossing",catalog.scheme)
+        assertEquals(6,catalog.fixedCharges.count { it.road=="A5" })
+        assertEquals(java.math.BigDecimal("1.60"),catalog.fixedCharges.first { it.id=="brisa:0501" }.amounts[1])
+        NativeCore().use { it.tariffs("Portugal",catalog.csv) }
+        assertEquals("road-average",TollTableAssets.repository(context).load("Portugal")!!.scheme)
+        assertNull(repository.load("Spain"))
+    }
 }

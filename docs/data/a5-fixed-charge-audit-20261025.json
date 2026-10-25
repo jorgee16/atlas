@@ -1,0 +1,79 @@
+{
+  "reviewedAt": "2026-10-25",
+  "country": "Portugal",
+  "scheme": "fixed-crossing",
+  "source": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910",
+  "sourcePage": 13,
+  "officialCharges": 10,
+  "a5Charges": 6,
+  "catalogSha256": "b358ca19b761fd9f4b21d0c7652129cf31225f2eca54ff0eeb24ce3aec8d4464",
+  "legacyIndex": {
+    "path": "/region-packages/portugal/routing/mainland/toll-events.json",
+    "sha256": "dcd60236a3e2f93ceac7a00e99523c0dbcf8d4648b4a6b4ea1d49d3433cb3848",
+    "eventCount": 22,
+    "edgeCount": 30,
+    "a5Events": 0,
+    "graphDigestsPresent": false,
+    "completeCoveragePresent": false,
+    "embeddedTariffs": true,
+    "multiChargeEdgesRequiringReview": [
+      {
+        "edgeIndex": 1148923,
+        "eventIds": [
+          "A41:gantry:Freixieiro-Aeroporto",
+          "A41:gantry:Alfena-SantoTirso"
+        ],
+        "matchingDistances": [
+          45.4,
+          45.4
+        ]
+      },
+      {
+        "edgeIndex": 1148925,
+        "eventIds": [
+          "A41:gantry:Freixieiro-Aeroporto",
+          "A41:gantry:Alfena-SantoTirso"
+        ],
+        "matchingDistances": [
+          78.7,
+          78.7
+        ]
+      },
+      {
+        "edgeIndex": 1570398,
+        "eventIds": [
+          "A29:gantry:Salreu-Estarreja",
+          "A29:gantry:Estarreja-Ovar"
+        ],
+        "matchingDistances": [
+          0,
+          0
+        ]
+      },
+      {
+        "edgeIndex": 2832178,
+        "eventIds": [
+          "A29:gantry:Salreu-Estarreja",
+          "A29:gantry:Estarreja-Ovar"
+        ],
+        "matchingDistances": [
+          0.1,
+          0.1
+        ]
+      },
+      {
+        "edgeIndex": 4576965,
+        "eventIds": [
+          "A29:gantry:Arada-Maceda",
+          "A29:gantry:ER1-18-Miramar"
+        ],
+        "matchingDistances": [
+          0.2,
+          0.2
+        ]
+      }
+    ]
+  },
+  "routeExactEnabled": false,
+  "reason": "The current index has no A5 bindings, no graph digest binding and no reviewed completeness guarantee. Candidate geometry is not authoritative evidence."
+}

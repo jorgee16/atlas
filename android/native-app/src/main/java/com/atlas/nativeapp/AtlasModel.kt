@@ -241,14 +241,19 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     val canRollbackTolls:Boolean get()=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication()).canRollback(it)
     } ?: false
-    fun updateTollTariffs(rollback:Boolean=false) {
+    internal fun fixedTollCatalog():TollCatalog?=routingTariffCountry?.let {
+        TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(it)
+    }
+    internal fun updateTollTariffs(rollback:Boolean=false,kind:TollCatalogKind=TollCatalogKind.ROAD_AVERAGE) {
         val country=routingTariffCountry ?: run { status("Calculate a route to select its tariff country first.");return }
         if(state.value.navigating) { status("Update tariffs after ending navigation.");return }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val repository=TollTableAssets.repository(getApplication())
-                val catalog=if(rollback)repository.rollback(country) else TollCatalogUpdater(repository).update(country)
-                status("$country tariffs: version ${catalog.revision}. Applies to the next route calculation.")
+                val repository=TollTableAssets.repository(getApplication(),kind)
+                val catalog=if(rollback)repository.rollback(country) else TollCatalogUpdater(repository,namespace=kind.namespace).update(country)
+                status(if(kind==TollCatalogKind.FIXED_CROSSING)
+                    "$country plaza tariffs updated. Route totals remain estimates."
+                    else "$country tariffs: version ${catalog.revision}. Applies to the next route calculation.")
             } catch(e:Exception) {
                 status("Tariff update failed; last valid data retained: ${e.message}")
             }

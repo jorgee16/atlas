@@ -81,4 +81,16 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(1000,result['A5']['estimatedMeters'])
             self.assertEqual(2000,result['A2']['directedMeters']);self.assertEqual(0,result['A2']['estimatedMeters'])
 
+    def test_fixed_catalog_has_independent_namespace_and_no_distance_column(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            source=ROOT.parent/'android/native-app/src/main/assets/toll-charges/Portugal.csv'
+            result=pack.package(source,root,'toll-charges')
+            self.assertEqual('fixed-crossing',result['scheme']);self.assertEqual(10,result['chargeCount'])
+            self.assertTrue(result['path'].startswith('/toll-charges/Portugal/'))
+            storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-charges')
+            self.assertEqual('toll-charges/Portugal/manifest.json',storage.writes[-1])
+            self.assertTrue(all(k.startswith('toll-charges/') for k in storage.writes))
+            with self.assertRaises(ValueError): pack.package(source,root,'toll-tariffs')
+
 if __name__=='__main__': unittest.main()

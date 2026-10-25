@@ -40,3 +40,18 @@ test('web UI does not display unknown costs as zero or a foreign currency as EUR
   assert.equal(tollPriceLabel({ totalEuros:0, tolledDistanceMeters:0 }),'No toll roads');
   assert.doesNotMatch(tollPriceLabel({ totalEuros:100, tolledDistanceMeters:100, currency:'JPY', vehicleClass:5 }), /€/);
 });
+
+test('official plaza prices are independent of km and retain repeated real crossings', async () => {
+  const {countryTollCharges}=await import('../src/routing/country-toll-tariffs.js');
+  const c=countryTollCharges('Portugal');
+  assert.equal(c.scheme,'fixed-crossing');assert.equal(c.fixedCharges.length,10);
+  assert.equal(c.fixedCharges.filter(x=>x.road==='A5').length,6);
+  assert.equal(c.fixedCharge('brisa:0501',1),1.6);
+  for(const klass of [2,3,4]) assert.equal(c.fixedCharge('brisa:0501',klass),3.1);
+  assert.equal(c.sumFixedCharges(['brisa:0502','brisa:0503'],1),1.6);
+  assert.equal(c.sumFixedCharges(['brisa:0502','brisa:0502'],1),1.4);
+  assert.equal(c.sumFixedCharges(['unknown'],1),null);
+  assert.equal(c.estimate('A5',1000,1),null);
+  assert.equal(countryTollTariffs('Portugal').fixedCharge('brisa:0501',1),null);
+  assert.equal(countryTollCharges('Spain'),null);
+});

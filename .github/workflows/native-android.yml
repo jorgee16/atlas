@@ -103,6 +103,7 @@ jobs:
         run: |
           python3 tools/generate-toll-bundle.py --check
           python3 tools/toll-catalog.py
+          python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-charges --namespace toll-charges
           python3 -m unittest discover -s tools -p test_toll_catalog.py
           node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js
       - name: Generate fixtures with the existing Atlas packager
@@ -777,11 +778,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Prepare audited immutable country catalogs
-        run: python3 tools/toll-catalog.py
+        run: |
+          python3 tools/toll-catalog.py
+          python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-charges --namespace toll-charges
       - name: Install data publisher SDK
         run: python3 -m pip install 'boto3==1.40.58'
       - name: Publish immutable tariff payloads and replace current manifest last
-        run: python3 tools/publish-toll-catalogs.py
+        run: |
+          python3 tools/publish-toll-catalogs.py
+          python3 tools/publish-toll-catalogs.py --namespace toll-charges
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -830,7 +835,7 @@ jobs:
   toll-section-input-audit:
     if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[audit-toll-sections]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Inspect hash-verified existing toll events and official open-system tariffs
@@ -852,30 +857,17 @@ jobs:
           assert pdf.startswith(b'%PDF') and len(pdf)<8*1024*1024
           (root/'brisa-2026.pdf').write_bytes(pdf)
           (root/'sources.json').write_text(json.dumps({'events':entry,'brisaSource':source,'brisaSha256':hashlib.sha256(pdf).hexdigest()},indent=2))
+          print('VERIFIED_TOLL_SOURCES='+(root/'sources.json').read_text().replace('\n',''))
           if shutil.which('pdftotext'):
               subprocess.run(['pdftotext','-layout',str(root/'brisa-2026.pdf'),str(root/'brisa-2026.txt')],check=True)
               text=(root/'brisa-2026.txt').read_text()
               print('BRISA_OPEN_SYSTEM_PAGE='+text.split('\f')[-2])
           PYCODE
 
-      - name: Inspect public OSM charge points around A5
+      - name: Inspect original OSM charge points and directed ways
         run: |
-          python3 - <<'PYCODE'
-          import json,urllib.request,urllib.parse
-          from pathlib import Path
-          query='[out:json][timeout:35];(node[barrier=toll_booth](38.68,-9.48,38.78,-9.18);node[highway=toll_gantry](38.68,-9.48,38.78,-9.18););out body;'
-          data=None
-          for host in ['https://overpass.kumi.systems','https://overpass.private.coffee']:
-              url=host+'/api/interpreter?'+urllib.parse.urlencode({'data':query})
-              try:
-                  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Atlas-Toll-Geometry-Audit/1.0'}),timeout=60) as response: data=response.read(1024*1024)
-                  break
-              except Exception as error: print('OSM mirror failed:',host,str(error))
-          assert data is not None,'No public OSM source available; exact matching remains unverified'
-          result=json.loads(data);assert 'remark' not in result
-          Path('toll-section-audit/a5-osm-charge-points.json').write_bytes(data)
-          print('A5_OSM_CHARGE_POINTS='+json.dumps(result,ensure_ascii=False))
-          PYCODE
+          python3 -m pip install 'osmium==4.1.1'
+          python3 tools/audit-a5-charge-points.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

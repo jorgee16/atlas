@@ -27,7 +27,8 @@ CSV comments require country, currency (ISO-style three uppercase letters), year
 and HTTPS source. `version` is a positive increasing integer (max 16 digits).
 `fractionDigits` supports 0–3. The header is `road;section;km;class1;class2;...`.
 Duplicate sections/classes/metadata, invalid numbers and unsupported schemes fail.
-Only `scheme=road-average` is supported today. Optional `estimateRoads=A1,A5,...`
+Route totals currently use `scheme=road-average`; the separate `fixed-crossing`
+provider is described below. Optional `estimateRoads=A1,A5,...`
 restricts estimates while retaining other source rows for audit/section lookup.
 Future plaza/ticket/vignette providers need their own validated matching rules.
 
@@ -133,3 +134,67 @@ secrets and bucket, writes only the tariff prefix, checks remote revisions and
 immutable collisions, and replaces the current manifest with an ETag precondition.
 The publication receipt records commit/run/country/revision/hash. No APK Release
 is produced by this data publication job.
+
+## Fixed-crossing provider: official Brisa plazas
+
+A second catalog is now supported without replacing the road-average format:
+`android/native-app/src/main/assets/toll-charges/<country>.csv`.
+Its metadata explicitly declares `scheme=fixed-crossing`; its columns are
+`charge;road;name;class1;class2;...`. The charge ID is operator-scoped (for example
+`brisa:0501`). No distance column or invented kilometers are used for a fixed fee.
+The 2026 Brisa PDF, page 13, supplies ten open-system charges, including all six
+A5 codes. The audit is in `docs/data/a5-fixed-charge-audit-20261025.json`.
+
+These are different facts from the four A5 IMT section prices. For example,
+Oeiras I (0501) charges EUR1.60/3.10/3.10/3.10 per crossing, whereas Oeiras II
+(0505) charges EUR0.40/0.75/0.75/0.75. Summing motorway section prices cannot
+identify which open-system gate was crossed. The catalog contains published
+base charges, not a validated Lisbon–Cascais journey quote.
+
+`TollTariffs` and the common Kotlin/web catalog parsers dispatch on the declared
+scheme, never the country. Fixed prices are not eligible for distance estimates.
+The C++ fixed-charge accumulator uses integer minor units and preserves genuinely
+repeated crossings; unknown IDs or classes produce no amount. It does not label
+a route exact. Both providers use independent country caches, versions, current
+manifests and pointers, through the same repository/updater implementation.
+`/toll-charges/<country>/...` cannot replace `/toll-tariffs/<country>/...`.
+A manifest declares the fixed scheme; legacy road manifests remain byte-compatible.
+Older apps continue to consume their existing road-average endpoint unchanged.
+
+Settings → Published plaza tariffs displays the current routing country's
+published charges, selected vehicle class, currency, year and source. It explicitly
+states that the list is not a trip total. An optional update downloads the fixed
+catalog independently; its data remains available offline.
+
+## Directed crossing evidence and safe activation
+
+`native/include/atlas/toll_crossings.hpp` / `native/src/toll_crossings.cpp` implement
+a price-free matcher separately from the routing algorithm. Reviewed mappings bind
+all seven graph SHA-256 digests, country, certified road coverage, directed edge
+IDs, from/to node IDs and the crossing offset on that edge. Route traversal
+intervals are [begin,end): starting after a plaza does not charge it again, and
+real repeated crossings remain chargeable. Wrong graph/country/direction,
+disconnected traversal or ambiguous bindings are rejected. Uncovered tolled roads
+keep the result incomplete. The caller must compute hashes from the loaded graph;
+a region name or version number alone is insufficient proof.
+
+The existing v1 `toll-events.json` was downloaded and SHA-verified. It has 22
+charge IDs on 30 directed edges, no A5 events, no graph digests and no reviewed
+completeness statement. Five edges contain multiple different charge IDs and need
+physical review. Its embedded prices are not imported into the new price catalog.
+It is not sufficient evidence for exact route pricing. `TollCrossingMatcher` is
+therefore tested independently but deliberately not activated in route pricing.
+
+`tools/audit-a5-charge-points.py` inspects original OSM charge nodes and ways from
+a checksum-verified Geofabrik Portugal PBF (OpenStreetMap contributors, ODbL).
+Public Overpass endpoints failed with HTTP502/timeouts in the diagnostic runs.
+The audit records the source SHA-256 and labels its output unreviewed candidates;
+it never generates trusted bindings automatically. A5 exact pricing remains open
+until all six official plaza codes, physical directed crossings and complete
+route coverage have been reviewed against the actual graph.
+
+Tests distinguish official per-plaza prices from route totals, road/fixed cache
+isolation, independent updates and rollback, and synthetic crossing evidence from
+real Android validation. The Android instrumentation verifies the real fixed CSV
+through JNI and captures the published-plaza UI; it does not claim an exact A5
+journey or real-world driving validation.

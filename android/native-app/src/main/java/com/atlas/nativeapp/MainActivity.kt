@@ -1394,7 +1394,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         page=name;pageKey=null;pageLayer.removeAllViews();pageLayer.visibility=View.VISIBLE
         val header=ui.row().apply{setPadding(ui.dp(16),ui.dp(14),ui.dp(20),ui.dp(14));setBackgroundColor(ui.canvas)}
         header.addView(ui.iconButton("back","Back"){backPage()},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
-        val title=when(name){"diagnostics"->"Diagnostics";"search"->if(searchTarget=="origin")"Starting point" else "Find a place";"regions"->"Offline regions";"trips"->"Your trips";"bookmarks"->"Saved places";"nearby"->"Around you";"journeys"->"Public transport";"journey"->"Your journey";"appearance"->"Appearance";"vehicle"->"Vehicle class";else->"Settings"}
+        val title=when(name){"diagnostics"->"Diagnostics";"search"->if(searchTarget=="origin")"Starting point" else "Find a place";"regions"->"Offline regions";"trips"->"Your trips";"bookmarks"->"Saved places";"nearby"->"Around you";"journeys"->"Public transport";"journey"->"Your journey";"appearance"->"Appearance";"vehicle"->"Vehicle class";"tollcharges"->"Published plaza tariffs";else->"Settings"}
         header.addView(ui.text(title,21f,bold=true),LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=ui.dp(14)})
         if(name=="trips")header.addView(ui.iconButton("upload","Import trip"){importTrip.launch(arrayOf("application/json","text/*"))},LinearLayout.LayoutParams(ui.dp(42),ui.dp(42)))
         pageLayer.addView(header)
@@ -1415,7 +1415,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
     }
     private fun backPage(){when(page){
         "diagnostics" -> if(model.updates.value.navigating) closePage() else openPage("settings")
-        "appearance","vehicle" -> openPage("settings")
+        "appearance","vehicle","tollcharges" -> openPage("settings")
         "journey" -> openPage("journeys")
         else -> closePage()
     }}
@@ -1424,7 +1424,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         val currentPage=page?:return
         val key=listOf(currentPage,model.diagnosticsEnabled,s.results,s.exploreResults,s.searching,s.searchQuery,s.searchError,s.revision,s.downloading,s.downloadPercent,s.downloadError,s.journeys,s.journey,s.journeyLeg,s.journeyPhase,model.voice,model.vehicleClass,model.mapSourceMode)
         if(key==pageKey)return;pageKey=key
-        val content=when(currentPage){"diagnostics"->pages.diagnostics(s);"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();else->pages.settings()}
+        val content=when(currentPage){"diagnostics"->pages.diagnostics(s);"search"->pages.search(s);"nearby"->pages.nearby(s);"regions"->pages.regions(s);"bookmarks"->pages.bookmarks();"trips"->pages.trips();"journeys"->pages.journeys(s);"journey"->pages.journey(s);"appearance"->pages.appearance();"vehicle"->pages.vehicle();"tollcharges"->pages.tollCharges();else->pages.settings()}
         val oldScroll=if(currentPage!="search")pageBody.getChildAt(0)?.scrollY?:0 else 0
         pageBody.removeAllViews();pageBody.addView(content,FrameLayout.LayoutParams(-1,-1))
         if(oldScroll>0)content.post{content.scrollTo(0,oldScroll)}

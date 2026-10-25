@@ -9,8 +9,11 @@ import java.security.MessageDigest
 import java.util.Locale
 import java.util.UUID
 
+internal data class TollFixedCharge(val id:String,val road:String,val name:String,val amounts:Map<Int,java.math.BigDecimal>)
+
 internal data class TollCatalog(val country:String,val currency:String,val year:Int,val revision:Long,
-    val source:String,val fractionDigits:Int,val classes:List<Int>,val csv:ByteArray,val origin:String) {
+    val source:String,val fractionDigits:Int,val classes:List<Int>,val csv:ByteArray,val origin:String,
+    val scheme:String="road-average",val fixedCharges:List<TollFixedCharge> = emptyList()) {
     val sha256:String get()=digest(csv)
     companion object {
         const val MAX_BYTES=2*1024*1024
@@ -35,15 +38,31 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
                 require(it.matches(Regex("[1-9][0-9]{0,15}")));it.toLong()
             } ?: 0L
             val source=metadata["source"].orEmpty();require(source.startsWith("https://") && source.length<=2048)
-            require(metadata["scheme"]==null || metadata["scheme"]=="road-average")
+            val scheme=metadata["scheme"] ?: "road-average"
+            require(scheme in setOf("road-average","fixed-crossing"))
+            val fixed=scheme=="fixed-crossing"
             val digits=metadata["fractionDigits"]?.let { require(it.matches(Regex("[0-3]")));it.toInt() } ?: 2
-            require(rows.size in 2..30001 && rows.first().take(3)==listOf("road","section","km"))
+            require(rows.size in 2..30001 && rows.first().take(3)==(if(fixed)listOf("charge","road","name") else listOf("road","section","km")))
             val columns=rows.first().drop(3)
             require(columns.size in 1..32 && columns.all { it.matches(Regex("class[1-9][0-9]?")) })
             val classes=columns.map { it.removePrefix("class").toInt() };require(classes.toSet().size==classes.size)
             val identities=hashSetOf<Pair<String,String>>();val roads=hashSetOf<String>()
+            val charges=mutableListOf<TollFixedCharge>()
             for(row in rows.drop(1)) {
                 require(row.size==3+classes.size && row[0].isNotBlank() && row[1].isNotBlank())
+                if(fixed) {
+                    require(row[0].matches(Regex("[A-Za-z0-9:_-]{1,128}")) && row[2].isNotBlank())
+                    require(identities.add(row[0] to "")) { "Duplicate fixed charge" }
+                    val prices=row.drop(3).map { value ->
+                        require(value.matches(Regex("[0-9]+(?:\\.[0-9]+)?")))
+                        java.math.BigDecimal(value).also { amount ->
+                            require(amount>=java.math.BigDecimal.ZERO && amount<=java.math.BigDecimal("1000000000"))
+                            amount.setScale(digits,java.math.RoundingMode.UNNECESSARY)
+                        }
+                    }
+                    charges.add(TollFixedCharge(row[0],row[1],row[2],classes.zip(prices).toMap()))
+                    continue
+                }
                 val road=row[0].replace(Regex("\\s+"),"").uppercase(Locale.ROOT);roads.add(road)
                 require(identities.add(road to row[1])) { "Duplicate tariff section" }
                 for((index,value) in row.drop(2).withIndex()) {
@@ -51,10 +70,11 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
                     val n=value.toDouble();require(n.isFinite() && n>=0 && n<=1e9 && (index!=0 || n>0))
                 }
             }
+            require(!fixed || metadata["estimateRoads"]==null)
             metadata["estimateRoads"]?.split(',')?.filter { it.isNotBlank() }?.forEach {
                 require(it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) in roads)
             }
-            return TollCatalog(country,currency,year,revision,source,digits,classes,bytes.copyOf(),origin)
+            return TollCatalog(country,currency,year,revision,source,digits,classes,bytes.copyOf(),origin,scheme,charges)
         }
     }
 }
@@ -63,19 +83,23 @@ internal interface CountryTollProvider { fun load(country:String):TollCatalog? }
 /** Immutable table versions, atomic pointer, persistent rollback rejection.
  * Data updates never replace graph files or mutate an existing route. */
 internal class TollCatalogRepository(private val root:File,private val bundledReader:(String)->ByteArray?,
-    private val nativeValidator:(String,ByteArray)->Unit={_,_->}):CountryTollProvider {
+    private val nativeValidator:(String,ByteArray)->Unit={_,_->},
+    private val expectedScheme:String="road-average"):CountryTollProvider {
     init { require(root.mkdirs() || root.isDirectory) }
     private fun directory(country:String):File {
         require(TollTableAssets.safeCountry(country));return File(root,country)
     }
+    private fun parse(country:String,bytes:ByteArray,origin:String)=TollCatalog.parse(country,bytes,origin).also {
+        require(it.scheme==expectedScheme) { "Tariff store pricing scheme mismatch" }
+    }
     private fun bundled(country:String):TollCatalog?=try {
-        bundledReader(country)?.let { TollCatalog.parse(country,it,"bundled") }
+        bundledReader(country)?.let { parse(country,it,"bundled") }
     } catch(_:Exception){null}
     private fun cached(country:String,version:Long):TollCatalog?=try {
         val folder=File(directory(country),version.toString())
         if(File(folder,"disabled").exists())null else {
             val file=File(folder,"table.csv");require(file.length() in 1..TollCatalog.MAX_BYTES.toLong())
-            val catalog=TollCatalog.parse(country,file.readBytes(),"cache")
+            val catalog=parse(country,file.readBytes(),"cache")
             val manifestFile=File(folder,"manifest.json");require(manifestFile.length() in 1..65536)
             verify(JSONObject(manifestFile.readText()),catalog);require(catalog.revision==version);catalog
         }
@@ -98,6 +122,7 @@ internal class TollCatalogRepository(private val root:File,private val bundledRe
     }
     private fun verify(manifest:JSONObject,catalog:TollCatalog) {
         require(manifest.getInt("schemaVersion")==1 && manifest.getString("country")==catalog.country)
+        require(manifest.optString("scheme","road-average")==catalog.scheme)
         require(manifest.getLong("revision")==catalog.revision && catalog.revision>0)
         require(manifest.getLong("sizeBytes")==catalog.csv.size.toLong())
         require(manifest.getString("sha256").matches(Regex("[0-9a-fA-F]{64}")))
@@ -116,7 +141,7 @@ internal class TollCatalogRepository(private val root:File,private val bundledRe
         } finally { next.delete() }
     }
     @Synchronized fun install(country:String,manifest:JSONObject,bytes:ByteArray):TollCatalog {
-        val candidate=TollCatalog.parse(country,bytes,"cache");verify(manifest,candidate)
+        val candidate=parse(country,bytes,"cache");verify(manifest,candidate)
         nativeValidator(country,bytes)
         val before=load(country)
         if(before?.revision==candidate.revision) {
