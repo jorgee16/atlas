@@ -862,3 +862,59 @@ jobs:
           name: Atlas-toll-section-input-audit
           path: toll-section-audit/
           if-no-files-found: error
+
+  recorded-a5-toll-review:
+    # Inspect already validated Android evidence without another emulator run.
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[review-a5-tolls:') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - id: source
+        name: Require successful original Android validation
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PYCODE'
+          import json,os,re,urllib.request
+          match=re.search(r'\[review-a5-tolls:(\d+)\]',os.environ['MESSAGE'])
+          if not match: raise ValueError('Missing original evidence run')
+          run=match.group(1)
+          request=urllib.request.Request(f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{run}',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+          with urllib.request.urlopen(request,timeout=30) as response: source=json.load(response)
+          if source['conclusion']!='success' or source['head_branch']!='migration/native-core-kotlin': raise ValueError('Original Android run must have passed on the native branch')
+          if source['head_sha']!='4c25da8e518eae957907a4affbd5057cefd57642': raise ValueError('Unexpected application source; review the original run first')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('run='+run+'\n')
+          print('Original validated Android source:',source['head_sha'],source['html_url'])
+          PYCODE
+      - uses: actions/download-artifact@v4
+        with:
+          name: Atlas-native-ui-review
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.source.outputs.run }}
+          path: recorded-toll-review
+      - name: Setup pinned video tools (no apt mirror)
+        uses: ./.github/actions/setup-video-tools
+      - id: review
+        name: Validate original quotes and expose only the toll screenshot
+        run: |
+          python3 - <<'PYCODE'
+          import os,subprocess
+          from pathlib import Path
+          matches=sorted(Path('recorded-toll-review').rglob('a5-preview-route.json'))
+          preferred=[p for p in matches if p.parent.name=='toll-review']
+          if len(preferred)!=1: raise ValueError('Missing or ambiguous original toll evidence')
+          root=preferred[0].parent
+          subprocess.run(['python3','tools/verify-toll-android-proof.py',str(root)],check=True)
+          subprocess.run(['python3','tools/emit-native-replay-previews.py',str(root),'no-recordings'],check=True)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('directory='+str(root)+'\n')
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-a5-toll-visual-review
+          path: ${{ steps.review.outputs.directory }}
+          if-no-files-found: error
