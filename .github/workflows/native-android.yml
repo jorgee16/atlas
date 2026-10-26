@@ -1056,7 +1056,7 @@ jobs:
           import re
           from statistics import median
           
-          STATION=re.compile(r'^(\d{4})\s*[:–-]\s*(.+)$')
+          STATION=re.compile(r'^(\d{4})\s*[:–-]\s*(.*)$')
           PRICE=re.compile(r'^(\d+,\d{2})\s*€$')
           
           def extract_page(spans):
