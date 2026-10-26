@@ -1008,7 +1008,7 @@ jobs:
                     print('NATIONAL_TOLL_PREVIEW_END '+name+'-'+str(page_number+1),flush=True)
                     spans=[{'text':span['text'],'bbox':span['bbox'],'dir':line['dir']} for block in page.get_text('dict')['blocks'] if 'lines' in block for line in block['lines'] for span in line['spans']]
                     print('NATIONAL_TOLL_PDF_SPANS='+json.dumps({'page':page_number+1,'spans':spans}),flush=True)
-                print('NATIONAL_TOLL_PDF='+json.dumps({'name':name,'url':url,'sha256':hashlib.sha256(data).hexdigest(),'text':text}),flush=True)
+                print('NATIONAL_TOLL_PDF='+json.dumps({'name':name,'url':url,'sha256':hashlib.sha256(data).hexdigest(),'textLength':len(text)}),flush=True)
                 return name,True
               text=data.decode('utf-8','replace');(root/(name+'.txt')).write_text(text)
               report={'name':name,'url':url,'finalUrl':final,'sha256':hashlib.sha256(data).hexdigest()}
@@ -1054,6 +1054,7 @@ jobs:
           import json
           from pathlib import Path
           import re
+          from statistics import median
           
           STATION=re.compile(r'^(\d{4})\s*[:–-]\s*(.+)$')
           PRICE=re.compile(r'^(\d+,\d{2})\s*€$')
@@ -1077,6 +1078,8 @@ jobs:
               for s in columns+rows:
                   code,name=STATION.fullmatch(s['text'].strip()).groups()
                   if name not in stations.setdefault(code,[]): stations[code].append(name)
+              column_gap=median(b['bbox'][2]-a['bbox'][2] for a,b in zip(columns,columns[1:]))
+              row_gap=median(b['bbox'][1]-a['bbox'][1] for a,b in zip(rows,rows[1:]))
               occupied=set()
               for span in horizontal:
                   match=PRICE.fullmatch(span['text'].strip())
@@ -1085,7 +1088,7 @@ jobs:
                   col=sorted(columns,key=lambda s:abs(s['bbox'][2]-x))
                   row=sorted(rows,key=lambda s:abs((s['bbox'][1]+s['bbox'][3])/2-y))
                   dx=abs(col[0]['bbox'][2]-x);dy=abs((row[0]['bbox'][1]+row[0]['bbox'][3])/2-y)
-                  if dx>1.0 or dy>1.0: raise ValueError(f'Price outside a uniquely aligned cell: {span}')
+                  if dx>column_gap/4 or dy>row_gap/3: raise ValueError(f'Price outside source cell bounds: dx={dx}, dy={dy}, column={col[0]}, row={row[0]}, price={span}')
                   if len(col)>1 and abs(col[1]['bbox'][2]-x)<=dx+1: raise ValueError('Ambiguous destination column')
                   if len(row)>1 and abs((row[1]['bbox'][1]+row[1]['bbox'][3])/2-y)<=dy+1: raise ValueError('Ambiguous origin row')
                   origin=STATION.fullmatch(row[0]['text'].strip()).group(1)
@@ -1105,7 +1108,9 @@ jobs:
               for index,page in enumerate(document):
                   if index==12: continue  # The open-system table is a different scheme.
                   spans=[{'text':s['text'],'bbox':s['bbox'],'dir':line['dir']} for block in page.get_text('dict')['blocks'] if 'lines' in block for line in block['lines'] for s in line['spans']]
-                  cells,names=extract_page(spans)
+                  try: cells,names=extract_page(spans)
+                  except ValueError as error: raise ValueError(f'Page {index+1}: {error}') from error
+                  print('BRISA_PAGE_VERIFIED='+json.dumps({'page':index+1,'cells':len(cells)}),flush=True)
                   domain='north' if index<4 else 'center' if index<8 else 'south' if index<10 else 'brisal'
                   for a,b,vehicle,price in cells:
                       key=(domain,a,b)
@@ -1131,4 +1136,60 @@ jobs:
         with:
           name: Atlas-national-toll-source-audit
           path: national-toll-audit/
+          if-no-files-found: error
+
+  national-toll-geometry-census:
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[national-toll-geometry-census]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect original national charge-point identities and directed ways
+        run: |
+          python3 -m pip install 'osmium==4.1.1'
+          python3 - <<'PYCODE'
+          import hashlib,json,re,urllib.request,osmium
+          from pathlib import Path
+          root=Path('national-toll-geometry');root.mkdir()
+          url='https://download.geofabrik.de/europe/portugal-latest.osm.pbf'
+          with urllib.request.urlopen(url+'.md5',timeout=30) as response: expected=response.read(4096).decode().split()[0]
+          if not re.fullmatch('[0-9a-f]{32}',expected): raise ValueError('Invalid source checksum')
+          path=Path('/tmp/portugal-national-tolls.osm.pbf')
+          with urllib.request.urlopen(url,timeout=120) as source,path.open('wb') as target:
+            size=0
+            while chunk:=source.read(1024*1024):
+              size+=len(chunk)
+              if size>1500*1024*1024: raise ValueError('Source too large')
+              target.write(chunk)
+          with path.open('rb') as stream:
+            if hashlib.file_digest(stream,'md5').hexdigest()!=expected:raise ValueError('Source checksum mismatch')
+          class Census(osmium.SimpleHandler):
+            def __init__(self):super().__init__();self.points={};self.ways=[]
+            def node(self,n):
+              if n.tags.get('barrier')!='toll_booth' and n.tags.get('highway')!='toll_gantry':return
+              if not n.location.valid() or not(36<=n.location.lat<=43 and -10<=n.location.lon<=-6):return
+              self.points[n.id]={'id':n.id,'lat':n.location.lat,'lon':n.location.lon,'tags':dict(n.tags)}
+            def way(self,w):
+              nodes=[n.ref for n in w.nodes]
+              if any(n in self.points for n in nodes):self.ways.append({'id':w.id,'nodes':nodes,'tags':dict(w.tags)})
+          census=Census();census.apply_file(str(path),locations=False)
+          wanted={n for w in census.ways for n in w['nodes']}
+          class Coordinates(osmium.SimpleHandler):
+            def __init__(self):super().__init__();self.values={}
+            def node(self,n):
+              if n.id in wanted and n.location.valid():self.values[str(n.id)]=[n.location.lat,n.location.lon]
+          coordinates=Coordinates();coordinates.apply_file(str(path),locations=False)
+          if len(coordinates.values)!=len(wanted):raise ValueError('Incomplete source coordinates')
+          with path.open('rb') as stream:sha=hashlib.file_digest(stream,'sha256').hexdigest()
+          data={'source':url,'sourceSha256':sha,'attribution':'OpenStreetMap contributors, ODbL; Geofabrik extract',
+            'status':'unreviewed national candidates; no automatic exact-price certification',
+            'points':list(census.points.values()),'ways':census.ways,'coordinates':coordinates.values}
+          (root/'national-charge-points.json').write_text(json.dumps(data,ensure_ascii=False,indent=2))
+          print('NATIONAL_CHARGE_CENSUS='+json.dumps({k:v for k,v in data.items() if k!='coordinates'},ensure_ascii=False))
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-national-toll-geometry-census
+          path: national-toll-geometry/
           if-no-files-found: error
