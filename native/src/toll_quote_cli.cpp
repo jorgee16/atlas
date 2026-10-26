@@ -16,7 +16,7 @@ int main(int argc,char**argv){try{
  while(std::getline(cases,line)){
    auto c=fields(line);if(c.size()!=8)throw std::runtime_error("Bad real-route proof case");
    atlas::RouteOptions op;op.tariffs=&road;op.tariffCountry=argv[2];op.vehicleClass=std::stoi(c[5]);
-   auto route=atlas::routeFromPosition(graph,{std::stod(c[1]),std::stod(c[2])},{std::stod(c[3]),std::stod(c[4])},op);
+   auto route=atlas::routeFromPosition(graph,{std::stod(c[1]),std::stod(c[2])},{std::stod(c[3]),std::stod(c[4])},op,std::nullopt);
    if(!route)throw std::runtime_error("No real route for proof case "+c[0]);
    atlas::calibrateDriveEta(*route,graph);const auto before=atlas::routeJson(*route);
    const bool applied=atlas::applyFixedTollCharges(graph,*route,fixed,matcher,actual);

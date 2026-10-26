@@ -61,21 +61,22 @@ if __name__=='__main__':
         n,e,g,r,s=[maps[name] for name in ['nodes.bin','edges.bin','geometry.bin','roads.bin','strings.bin']]
         for b,magic in [(n,b'RNOD'),(e,b'REDG'),(g,b'RGEO'),(r,b'RROD'),(s,b'RSTR')]:
             if b[:4]!=magic or u32(b,4)!=6: raise ValueError('Unsupported graph format')
-        road_ok=[]
-        for index in range(u32(r,8)):
-            at=16+index*36;offset=12+u32(r,at+4);end=s.find(b'\0',offset)
-            if end<offset: raise ValueError('Invalid road reference')
-            road_ok.append(not(u32(r,at+32)&2) and config['road'] in refs(s[offset:end].decode()))
+        source_vertices={p for pair in pairs for p in pair}
+        eligible_nodes=bytearray(u32(n,8))
+        for node in range(u32(n,8)):
+            eligible_nodes[node]=point(n,16+node*12) in source_vertices
         arcpoints=24+u32(g,8)*8;start=20+(u32(e,8)+1)*4
         covered=[];bindings=[];matched=set();candidate_count=0;edge_info={}
         source_from=0
         gate_coords={nodes[node]:(node,charge) for node,charge in charge_ids.items()}
         for edge in range(u32(e,12)):
             at=start+edge*20;target,dm,attrs,geometry,road=struct.unpack_from('<IIIII',e,at)
-            if not geometry&0x20000000 or not road_ok[road]: continue
-            candidate_count+=1
-            # Recover the authoritative directed from-node from CSR offsets.
+            if not geometry&0x20000000: continue
+            # Road names/link flags may differ between graph vintages. Only
+            # original directed geometry certifies coverage, never those labels.
             while source_from+1<u32(n,8) and u32(e,20+(source_from+1)*4)<=edge: source_from+=1
+            if not eligible_nodes[source_from] or not eligible_nodes[target]: continue
+            candidate_count+=1
             arc=geometry&0x1fffffff;off,count=struct.unpack_from('<II',g,24+arc*8)
             shape=[point(g,arcpoints+(off+i)*8) for i in range(count)]
             if geometry&0x80000000: shape.reverse()
@@ -89,7 +90,8 @@ if __name__=='__main__':
                 if i: along+=distance(shape[i-1],p)
                 if p not in gate_coords or i==len(shape)-1: continue
                 node,charge=gate_coords[p];matched.add(node)
-                bindings.append({'edge':edge,'from':source_from,'to':target,'offset':along/total*length,'length':length,'chargeId':charge,'osmNodeId':node})
+                bindings.append({'edge':edge,'from':source_from,'to':target,'offset':along/total*length,'length':length,'chargeId':charge,'osmNodeId':node,'graphRoadFlags':u32(r,16+road*36+32)})
+        print('A5_BINDING_MATCH_DIAGNOSTIC='+json.dumps({'matched':sorted(matched),'missing':sorted(set(charge_ids)-matched),'candidateEdges':candidate_count,'certifiedEdges':len(covered),'bindings':bindings}))
         if matched!=set(charge_ids): raise ValueError('The loaded graph does not prove every reviewed charge point: '+str(set(charge_ids)-matched))
         if not covered or not bindings: raise ValueError('No certified directed graph coverage')
         identity={e['url'].rsplit('/',1)[1]:e['sha256'] for e in entries}
