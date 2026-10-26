@@ -949,6 +949,7 @@ jobs:
             'pttolls':'https://www.pttolls.com/',
             'lusoponte':'https://www.lusoponte.pt/',
             'ip-arcgis-app':'https://www.arcgis.com/sharing/rest/content/items/b2fe6aea0090417a9eb5a35799baae8e/data?f=json',
+            'ip-arcgis-webmap':'https://www.arcgis.com/sharing/rest/content/items/ae05bf33e2984256b36869f6ca0366d1/data?f=json',
             'ip-arcgis-current':'https://www.arcgis.com/sharing/rest/content/items/5832f1981abe4dbd95f19d5c867123e6/data?f=json',
             'ip-arcgis-metadata':'https://www.arcgis.com/sharing/rest/content/items/5832f1981abe4dbd95f19d5c867123e6?f=json'}
           class Page(HTMLParser):
@@ -975,7 +976,7 @@ jobs:
               issuers={'www.ascendi.pt':'EV','www.aeatlantico.pt':'DV','www.lusoponte.pt':'OV'}
               host=urllib.parse.urlparse(url).hostname
               if host in issuers:
-                issuer='https://crt.sectigo.com/SectigoPublicServerAuthenticationCA'+issuers[host]+'R36.crt'
+                issuer='http://crt.sectigo.com/SectigoPublicServerAuthenticationCA'+issuers[host]+'R36.crt'
                 with urllib.request.urlopen(issuer,timeout=30) as ca_response:der=ca_response.read(65536)
                 pem=subprocess.run(['openssl','x509','-inform','DER','-outform','PEM'],input=der,capture_output=True,check=True).stdout
                 ca=root/(host+'.ca.pem');ca.write_bytes(pem)
