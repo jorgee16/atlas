@@ -1,0 +1,90 @@
+{
+  "config": {
+    "country": "Portugal",
+    "region": "portugal",
+    "partition": "mainland",
+    "road": "A5",
+    "scope": "Main carriageways only; motorway links and ramps are not certified",
+    "reviewedAt": "2026-10-25",
+    "priceSource": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910",
+    "priceSourceSha256": "8fa27e9bcf2b3d5cf222a2411318523ca7fa0ec673759d7033aa90c22f77e29b",
+    "priceSourcePage": 13,
+    "physicalSource": "https://www.brisaconcessao.pt/",
+    "physicalEvidence": "Brisa notice of 2026-05-18 identifies the Carcavelos full-carriageway plaza at A5 km 14+940. The four OSM charge points below lie on the main carriageways at that plaza; ramp charge points are excluded.",
+    "chargePoints": {
+      "3950369827": "brisa:0501",
+      "3950370201": "brisa:0501",
+      "9588718309": "brisa:0501",
+      "9588718312": "brisa:0501"
+    },
+    "validationExpectedPrices": {
+      "1": 1.6,
+      "2": 3.1,
+      "3": 3.1,
+      "4": 3.1
+    },
+    "geometrySimplificationMeters": 2
+  },
+  "graphDigests": {
+    "nodes.bin": "a7daf7279381128c4f9304a5d27982850f80db0218dfb7978070182ee0f2a294",
+    "edges.bin": "237d893d8358c539a8ad28b656e928137acd07f674d86b6734b1b4158051ea9a",
+    "geometry.bin": "12bc479f95b0add7a32dcc9067b6c7b18caa08ed4c89105993c8666cbf85354f",
+    "roads.bin": "7d9014e15f2ccdbfeefb3586c57c6990567aac23f1d7127de6eba5862427ccbf",
+    "strings.bin": "e8e664f709a48d98d56cb816a098ac6b9e7ece9d0d0a597d3c91415bce0e757b",
+    "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
+    "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
+  },
+  "sourceOsmSha256": "df78e471f656ddb4738c5b298d59c3ec0d9408bee25d12fc239d7d5e88232147",
+  "candidateMainlineEdges": 300,
+  "certifiedDirectedEdges": 300,
+  "bindings": [
+    {
+      "edge": 4067701,
+      "from": 1578878,
+      "to": 2509265,
+      "offset": 123.50180759802197,
+      "length": 236.1,
+      "chargeId": "brisa:0501",
+      "osmNodeId": 9588718309,
+      "graphRoadFlags": 4,
+      "sourcePathVertices": 4
+    },
+    {
+      "edge": 4067702,
+      "from": 1578879,
+      "to": 1640459,
+      "offset": 0,
+      "length": 68.7,
+      "chargeId": "brisa:0501",
+      "osmNodeId": 3950370201,
+      "graphRoadFlags": 4,
+      "sourcePathVertices": 2
+    },
+    {
+      "edge": 4215672,
+      "from": 1640456,
+      "to": 1640457,
+      "offset": 0,
+      "length": 129.1,
+      "chargeId": "brisa:0501",
+      "osmNodeId": 3950369827,
+      "graphRoadFlags": 4,
+      "sourcePathVertices": 2
+    },
+    {
+      "edge": 4215677,
+      "from": 1640460,
+      "to": 2509266,
+      "offset": 130.13496054531728,
+      "length": 238,
+      "chargeId": "brisa:0501",
+      "osmNodeId": 9588718312,
+      "graphRoadFlags": 4,
+      "sourcePathVertices": 4
+    }
+  ],
+  "sha256": "5fb7a6d57924a39f36e009545910830c7a3b7f85766e90a12f40ac6761856783",
+  "validation": "Native real-graph routing proof: 21 cases passed. Android JNI/UI checks are mandatory in native-android.yml; consult the activation commit CI for their execution result.",
+  "nativeProofCommit": "0245291a5e32bdafd52c967c4db8bac5c9df21ca",
+  "nativeProofRun": "https://github.com/jorgee16/atlas/actions/runs/40379371726"
+}

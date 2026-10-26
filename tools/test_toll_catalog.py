@@ -114,4 +114,21 @@ class DirectedSourceGeometryTests(unittest.TestCase):
         self.assertIsNone(builder.source_path(a,b,{a:{p,q},p:{b},q:{b}},2.))
         self.assertIsNone(builder.source_path(a,b,{a:{p},p:{(38.,-8.99995)},(38.,-8.99995):{b}},2.))
 
+class ActivatedBindingIntegrityTests(unittest.TestCase):
+    def test_apk_proof_matches_reviewed_report_and_actual_region_identity(self):
+        asset=ROOT.parent/'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
+        report=json.loads((ROOT.parent/'docs/data/a5-mainline-binding-audit-20261026.json').read_text())
+        self.assertEqual(report['sha256'],hashlib.sha256(asset.read_bytes()).hexdigest())
+        text=asset.read_text()
+        self.assertEqual(report['certifiedDirectedEdges'],sum(x.startswith('coverage;') for x in text.splitlines()))
+        self.assertEqual(len(report['bindings']),sum(x.startswith('crossing;') for x in text.splitlines()))
+        regions=json.loads((ROOT.parent/'android/native-app/src/main/assets/regions.json').read_text())
+        region=next(r for r in regions['regions'] if r['id']=='portugal')
+        for name,digest in report['graphDigests'].items():
+            entry=next(e for e in region['package']['files'] if e['url'].endswith('/mainland/'+name))
+            self.assertEqual(entry['sha256'],digest)
+            self.assertIn('# graph.'+name+'='+digest,text)
+        self.assertEqual({'brisa:0501'},{b['chargeId'] for b in report['bindings']})
+        self.assertEqual({4},{b['graphRoadFlags'] for b in report['bindings']})
+
 if __name__=='__main__': unittest.main()

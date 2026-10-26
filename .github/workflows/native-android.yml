@@ -226,6 +226,7 @@ jobs:
           script: |
             bash tools/native-android-smoke.sh
             bash tools/native-android-gps-replay.sh camera
+            bash tools/native-android-gps-replay.sh tolls
             if [ "$ATLAS_ROUTE_VISUAL_REVIEW" = true ]; then bash tools/native-android-gps-replay.sh visual; fi
       - name: Require requested Android route visual evidence
         if: ${{ contains(github.event.head_commit.message, '[route-visual-review]') }}
@@ -767,8 +768,8 @@ jobs:
 
   toll-catalog-publish:
     # Separate data publication: no APK/Release, graph replacement or new keys.
-    needs: [core, android, toll-coverage]
-    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-tolls]') && github.ref == 'refs/heads/migration/native-core-kotlin' }}
+    needs: [core, android, toll-coverage, toll-section-input-audit]
+    if: ${{ always() && !cancelled() && github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-tolls]') && github.ref == 'refs/heads/migration/native-core-kotlin' && needs.core.result == 'success' && needs.android.result == 'success' && needs.toll-coverage.result == 'success' && (needs.toll-section-input-audit.result == 'success' || needs.toll-section-input-audit.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:

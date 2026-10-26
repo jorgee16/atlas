@@ -990,6 +990,107 @@ class NavigationGpsReplayTest {
         File(output,"export-probe.txt").writeText("ATLAS_EXPORT_PROBE")
         exportEvidence()
     }
+    /** Real installed Portugal graph, production JNI pricing, then the actual
+     * route preview. The fixture contains graph-node endpoints, not fake routes. */
+    @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
+        output.listFiles()?.forEach { it.delete() }
+        val cases=instrumentation.context.assets.open("tolls/a5-mainline-cases.csv")
+            .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
+            .map { it.split(';').also { row -> require(row.size==8) } }
+        assertTrue("Both carriageways, classes 1–4 and after-plaza starts are required",cases.size>=21)
+        val appModel=(context.applicationContext as AtlasApplication).model
+        val results=JSONArray()
+        var previewCase:List<String>?=null
+        val oldClass=appModel.vehicleClass
+        val oldSource=appModel.mapSourceMode
+        try {
+            NativeCore().use { core ->
+                val directory=appModel.regions.graph(Coordinate(38.7215,-9.147),Coordinate(38.728,-9.152))
+                assertTrue("Real Portugal graph must be installed",File(directory,"nodes.bin").isFile)
+                core.graph(directory.path)
+                core.tariffs("Portugal",TollTableAssets.read(context,"Portugal"))
+                core.fixedTariffs("Portugal",TollTableAssets.repository(context,TollCatalogKind.FIXED_CROSSING).load("Portugal")!!.csv)
+                for(row in cases) {
+                    core.tollBindings("Portugal",directory.path,null)
+                    val from=Coordinate(row[1].toDouble(),row[2].toDouble())
+                    val to=Coordinate(row[3].toDouble(),row[4].toDouble())
+                    val before=JSONObject(core.route(from,to,false,false,0.0,row[5].toInt()))
+                    val input=TollBindingAssets.loadForRoute(context,"Portugal",directory,before)
+                    if(row==cases.first() && input!=null) {
+                        val changed=input.actualHashes.copyOf()
+                        changed[0]=if(changed[0]=="0".repeat(64))"1".repeat(64) else "0".repeat(64)
+                        assertFalse("Another graph identity must be rejected by JNI",
+                            core.tollBindings("Portugal",directory.path,input.copy(actualHashes=changed)))
+                        assertNotEquals("exact",JSONObject(core.priceCurrentRoute()).getString("tollPricing"))
+                        assertFalse("Another routing country must not reuse the Portuguese proof",
+                            core.tollBindings("Elsewhere",directory.path,input))
+                    }
+                    val accepted=core.tollBindings("Portugal",directory.path,input)
+                    val after=if(accepted)JSONObject(core.priceCurrentRoute()) else before
+                    for(field in listOf("points","edgeIndexes","maneuvers","distanceMeters","durationSeconds","visualProtectedPoints"))
+                        assertEquals("Pricing must preserve authoritative navigation: ${row[0]} / $field",
+                            before.opt(field)?.toString(),after.opt(field)?.toString())
+                    if(row[6]=="exact") {
+                        assertTrue("Real route requires graph-bound crossing evidence: ${row[0]}",accepted)
+                        assertEquals(row[0],"exact",after.getString("tollPricing"))
+                        assertEquals(row[0],row[7].toDouble(),after.getDouble("tollAmount"),1e-9)
+                        if(row[7].toDouble()>0) {
+                            val charges=after.getJSONArray("tollRoads")
+                            assertEquals("One physical plaza, independent of lane",1,charges.length())
+                            assertEquals("brisa:0501",charges.getJSONObject(0).getString("chargeId"))
+                            assertEquals("Carcavelos PV",charges.getJSONObject(0).getString("name"))
+                            if(row[5]=="1" && previewCase==null)previewCase=row
+                        }
+                    } else {
+                        assertFalse("Unreviewed city approaches cannot become exact",accepted)
+                        assertNotEquals("exact",after.getString("tollPricing"))
+                    }
+                    results.put(JSONObject().put("id",row[0]).put("before",before).put("after",after))
+                    File(output,"a5-native-quotes.json").writeText(results.toString(2))
+                }
+            }
+            File(output,"a5-native-quotes.json").writeText(results.toString(2))
+            val row=checkNotNull(previewCase)
+            ActivityScenario.launch(MainActivity::class.java).use { s ->
+                attach(s)
+                s.onActivity {
+                    appModel.endNavigation();appModel.mode("drive");appModel.vehicleClass=1
+                    appModel.mapSourceMode=MapSourcePolicy.OFFLINE
+                    appModel.origin(Coordinate(row[1].toDouble(),row[2].toDouble()))
+                    appModel.select(JSONObject().put("id","toll-proof-destination").put("name","A5 Carcavelos toll review")
+                        .put("lat",row[3].toDouble()).put("lon",row[4].toDouble()))
+                    appModel.calculate(false)
+                }
+                await("Actual A5 route preview must finish",90) {
+                    !appModel.updates.value.busy && appModel.updates.value.route?.optString("tollPricing")=="exact"
+                }
+                val route=appModel.updates.value.route!!
+                assertEquals(1.60,route.getDouble("tollAmount"),1e-9)
+                assertFalse("This validates a route preview, not a GPS trip",appModel.updates.value.navigating)
+                await("MapLibre must finish loading the route preview",45){!snapshot(s).optBoolean("styleLoading",true)}
+                instrumentation.waitForIdleSync()
+                var visibleText=""
+                s.onActivity { a ->
+                    fun text(v:android.view.View):String = when(v) {
+                        is android.widget.TextView -> v.text.toString()
+                        is android.view.ViewGroup -> (0 until v.childCount).joinToString("\n") { text(v.getChildAt(it)) }
+                        else -> ""
+                    }
+                    visibleText=text(a.window.decorView)
+                }
+                assertTrue("Route preview must identify exact pricing: $visibleText",visibleText.contains("exact"))
+                File(output,"a5-preview-text.txt").writeText(visibleText)
+                File(output,"a5-preview-route.json").writeText(route.toString(2))
+                capture(s,"a5-exact-route-preview")
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                stateObserver?.cancel();appModel.endNavigation();appModel.origin(null)
+                appModel.vehicleClass=oldClass;appModel.mapSourceMode=oldSource
+            }
+            exportEvidence()
+        }
+    }
     @Test fun cameraModesAndStationaryWalkingThroughAndroidLocation() = runReplay(true)
     @Test fun portugalTripThroughAndroidLocationServiceJniAndMapLibre() = runReplay(false)
     @Suppress("DEPRECATION")

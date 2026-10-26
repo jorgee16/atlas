@@ -7,6 +7,10 @@ if [[ "$mode" == camera ]]; then
   collection=atlas-camera-smoke
   metrics_dir=ui-preview/camera-smoke
   method=cameraModesAndStationaryWalkingThroughAndroidLocation
+elif [[ "$mode" == tolls ]]; then
+  collection=atlas-toll-review
+  metrics_dir=ui-preview/toll-review
+  method=a5MainlineTollsThroughJniAndMapLibrePreview
 elif [[ "$mode" == full ]]; then
   collection=atlas-gps-replay
   metrics_dir=ui-preview/gps-replay
@@ -70,7 +74,9 @@ cleanup
 trap - EXIT
 python3 tools/emit-native-replay-previews.py "$metrics_dir" "ui-preview/$collection" || true
 if [[ "$result" -eq 0 ]]; then
-  if [[ "$mode" == visual ]]; then
+  if [[ "$mode" == tolls ]]; then
+    python3 tools/verify-toll-android-proof.py "$metrics_dir" || result=$?
+  elif [[ "$mode" == visual ]]; then
     python3 tools/analyze-route-visual-review.py "$metrics_dir" || result=$?
   else
     python3 tools/analyze-native-gps-replay.py "$mode" || result=$?
@@ -80,3 +86,4 @@ if [[ "$result" -eq 0 ]]; then
   fi
 fi
 exit "$result"
+

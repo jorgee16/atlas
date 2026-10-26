@@ -36,7 +36,7 @@ for name in preferred:
         'sintra-curves-light-offline-z18-before','sintra-curves-light-offline-z18-after',
         'lisbon-roundabout-light-offline-z18-after-progress-boundary',
         'lisbon-roundabout-dark-offline-z18-after-progress-boundary',
-        'a5-access-light-offline-z18-after','cril-motorway-join-light-offline-z18-after'} and root.name!='atlas-selected':
+        'a5-access-light-offline-z18-after','cril-motorway-join-light-offline-z18-after','a5-exact-route-preview'} and root.name!='atlas-selected':
         continue
     target=root/(name+'-preview.jpg')
     subprocess.run(['ffmpeg','-loglevel','error','-y','-i',str(source),
