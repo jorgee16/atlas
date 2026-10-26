@@ -24,6 +24,43 @@ def distance(a,b):
     return 12742000*math.atan2(math.sqrt(h),math.sqrt(1-h))
 def refs(text): return [re.sub(r'\s+','',x).upper() for x in re.split('[;,/]',text)]
 
+def source_path(a,b,adjacency,tolerance):
+    """Unique original directed path inside a simplified segment's corridor.
+    Both endpoints must be identical source vertices. Never nearest-road match.
+    Ambiguous branches, reversed progress and shortcuts beyond the packager's
+    documented simplification error are rejected.
+    """
+    scale=math.cos(a[0]*math.pi/180)*111320
+    dx=(b[1]-a[1])*scale;dy=(b[0]-a[0])*111320
+    length2=dx*dx+dy*dy
+    if length2<=0: return None
+    def projection(p):
+        x=(p[1]-a[1])*scale;y=(p[0]-a[0])*111320
+        t=(x*dx+y*dy)/length2
+        return t,math.hypot(x-t*dx,y-t*dy)
+    pending=[([a],0.)];found=[];visits=0
+    while pending:
+        path,progress=pending.pop();visits+=1
+        if visits>4096: return None
+        for node in adjacency.get(path[-1],()):
+            if node in path: continue
+            t,error=projection(node)
+            if t<progress-1e-9 or t>1+1e-9 or error>tolerance: continue
+            extended=path+[node]
+            if node==b:
+                found.append(extended)
+                if len(found)>1: return None
+            else: pending.append((extended,t))
+    return found[0] if found else None
+
+def quantization_radius(p):
+    # Half of a float32 cell diagonal in metres; include source and graph
+    # quantization when comparing against the packager's original-double bound.
+    def ulp(value):
+        bits=struct.unpack('<I',struct.pack('<f',abs(value)))[0]
+        return struct.unpack('<f',struct.pack('<I',bits+1))[0]-abs(value)
+    return math.hypot(ulp(p[0])*111320,ulp(p[1])*111320*math.cos(p[0]*math.pi/180))/2
+
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config',type=Path,required=True);parser.add_argument('--source',type=Path,required=True)
@@ -46,6 +83,10 @@ if __name__=='__main__':
             if pa==pb: continue
             if direction!='-1': pairs.add((pa,pb))
             if direction in ['-1','no','0','false']: pairs.add((pb,pa))
+    adjacency={}
+    for a,b in pairs: adjacency.setdefault(a,set()).add(b)
+    simplification=float(config['geometrySimplificationMeters'])
+    if not 0<=simplification<=2.0: raise ValueError('Unsupported graph simplification bound')
     if source_charge_ids!=set(charge_ids): raise ValueError('Reviewed source does not cover every main-carriageway charge point')
     catalog=json.loads((ROOT/'android/native-app/src/main/assets/regions.json').read_text())
     region=next(r for r in catalog['regions'] if r['id']==config['region'])
@@ -66,7 +107,7 @@ if __name__=='__main__':
         for node in range(u32(n,8)):
             eligible_nodes[node]=point(n,16+node*12) in source_vertices
         arcpoints=24+u32(g,8)*8;start=20+(u32(e,8)+1)*4
-        covered=[];bindings=[];matched=set();candidate_count=0;edge_info={}
+        covered=[];bindings=[];matched=set();candidate_count=0;edge_info={};diagnostics=[]
         source_from=0
         gate_coords={nodes[node]:(node,charge) for node,charge in charge_ids.items()}
         for edge in range(u32(e,12)):
@@ -82,16 +123,33 @@ if __name__=='__main__':
             if geometry&0x80000000: shape.reverse()
             shape=[point(n,16+source_from*12)]+shape+[point(n,16+target*12)]
             shape=[p for i,p in enumerate(shape) if i==0 or p!=shape[i-1]]
-            if len(shape)<2 or any((a,b) not in pairs for a,b in zip(shape,shape[1:])): continue
-            total=sum(distance(a,b) for a,b in zip(shape,shape[1:]));length=dm/10
-            if total<=0 or length<=0: continue
-            covered.append(edge);edge_info[edge]=(source_from,target,length);along=0
-            for i,p in enumerate(shape):
-                if i: along+=distance(shape[i-1],p)
-                if p not in gate_coords or i==len(shape)-1: continue
-                node,charge=gate_coords[p];matched.add(node)
-                bindings.append({'edge':edge,'from':source_from,'to':target,'offset':along/total*length,'length':length,'chargeId':charge,'osmNodeId':node,'graphRoadFlags':u32(r,16+road*36+32)})
+            if any(distance(p,q)<300 for p in shape for q in gate_coords):
+                diagnostics.append({'edge':edge,'from':source_from,'to':target,'graphPolyline':shape})
+            if len(shape)<2: continue
+            original=[shape[0]]
+            for a,b in zip(shape,shape[1:]):
+                tolerance=simplification+2*max(quantization_radius(a),quantization_radius(b))
+                chain=source_path(a,b,adjacency,tolerance)
+                if chain is None: break
+                original.extend(chain[1:])
+            else:
+                # Gates removed by Douglas–Peucker are recovered from the
+                # original uniquely witnessed source path, not projected onto
+                # a nearby road. Navigation geometry remains untouched.
+                shape=original
+                total=sum(distance(a,b) for a,b in zip(shape,shape[1:]));length=dm/10
+                if total<=0 or length<=0: continue
+                covered.append(edge);edge_info[edge]=(source_from,target,length);along=0
+                for i,p in enumerate(shape):
+                    if i: along+=distance(shape[i-1],p)
+                    if p not in gate_coords or i==len(shape)-1: continue
+                    node,charge=gate_coords[p];matched.add(node)
+                    bindings.append({'edge':edge,'from':source_from,'to':target,'offset':along/total*length,'length':length,'chargeId':charge,'osmNodeId':node,'graphRoadFlags':u32(r,16+road*36+32),'sourcePathVertices':len(shape)})
+                continue
+            continue
         print('A5_BINDING_MATCH_DIAGNOSTIC='+json.dumps({'matched':sorted(matched),'missing':sorted(set(charge_ids)-matched),'candidateEdges':candidate_count,'certifiedEdges':len(covered),'bindings':bindings}))
+        if matched!=set(charge_ids):
+            print('A5_GRAPH_GEOMETRY_DIAGNOSTIC='+json.dumps({'sourceChargeCoordinates':{k:nodes[k] for k in charge_ids},'nearbyEdges':diagnostics}))
         if matched!=set(charge_ids): raise ValueError('The loaded graph does not prove every reviewed charge point: '+str(set(charge_ids)-matched))
         if not covered or not bindings: raise ValueError('No certified directed graph coverage')
         identity={e['url'].rsplit('/',1)[1]:e['sha256'] for e in entries}
@@ -136,6 +194,7 @@ if __name__=='__main__':
             'certifiedDirectedEdges':len(covered),'bindings':bindings,'sha256':hashlib.sha256(text.encode()).hexdigest()}
         args.output.with_suffix('.audit.json').write_text(json.dumps(report,indent=2)+'\n')
         print('A5_BINDING_REPORT='+json.dumps(report));print('A5_BINDING_CSV='+json.dumps(text))
+        print('A5_BINDING_CASES='+json.dumps('\n'.join(cases)+'\n'))
     finally:
         for b in maps.values(): b.close()
         for stream in streams.values(): stream.close()

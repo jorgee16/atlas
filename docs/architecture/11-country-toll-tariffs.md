@@ -220,8 +220,15 @@ prevent an exact full-route quote, regardless of their OSM toll flags. The
 physical identity is the Carcavelos full-carriageway plaza (0501), confirmed from
 the visually reviewed Brisa PDF and its km14+940 notice; OSM fee tags are ignored.
 
-`tools/build-toll-bindings.py` requires every graph polyline segment to match
-original directed OSM motorway geometry exactly at the graph's float32 precision.
+`tools/build-toll-bindings.py` requires identical graph/source endpoints and a
+unique original directed OSM path for every graph polyline segment. The v6
+packager simplifies geometry using Douglas–Peucker at 2m; collinear toll-gantry
+nodes can therefore be absent from stored geometry. The witness may recover those
+nodes only along the unique original path inside that documented 2m corridor,
+plus the calculated float32 quantization bound. Ambiguous alternatives, opposite
+directions, backtracking and geometric shortcuts are rejected. This does not
+alter the graph or navigation geometry, and never selects a nearby road by name
+or proximity.
 It also requires every reviewed mainline charge point to be represented. Its
 case endpoints come from actual graph nodes upstream/downstream of those points;
 `atlas_toll_quote` performs actual route calculation. Classes 1–4, both carriageways,

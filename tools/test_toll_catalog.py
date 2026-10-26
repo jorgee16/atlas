@@ -93,4 +93,25 @@ class CatalogTests(unittest.TestCase):
             self.assertTrue(all(k.startswith('toll-charges/') for k in storage.writes))
             with self.assertRaises(ValueError): pack.package(source,root,'toll-tariffs')
 
+
+
+class DirectedSourceGeometryTests(unittest.TestCase):
+    def test_packager_removed_collinear_gate_is_recovered_from_original_path(self):
+        builder=module('build-toll-bindings')
+        a=(38.,-9.);gate=(38.,-8.9999);b=(38.,-8.9998)
+        self.assertEqual([a,gate,b],builder.source_path(a,b,{a:{gate},gate:{b}},2.))
+        self.assertIsNone(builder.source_path(b,a,{a:{gate},gate:{b}},2.))
+
+    def test_parallel_road_or_sharp_corner_cannot_certify_a_shortcut(self):
+        builder=module('build-toll-bindings')
+        a=(38.,-9.);off=(38.0001,-8.9999);b=(38.,-8.9998)
+        self.assertIsNone(builder.source_path(a,b,{a:{off},off:{b}},2.))
+        self.assertIsNone(builder.source_path(a,b,{(38.0001,-9.):{b}},2.))
+
+    def test_ambiguous_or_backtracking_source_paths_are_rejected(self):
+        builder=module('build-toll-bindings')
+        a=(38.,-9.);p=(38.,-8.9999);q=(38.000001,-8.9999);b=(38.,-8.9998)
+        self.assertIsNone(builder.source_path(a,b,{a:{p,q},p:{b},q:{b}},2.))
+        self.assertIsNone(builder.source_path(a,b,{a:{p},p:{(38.,-8.99995)},(38.,-8.99995):{b}},2.))
+
 if __name__=='__main__': unittest.main()
