@@ -918,3 +918,76 @@ jobs:
           name: Atlas-a5-toll-visual-review
           path: ${{ steps.review.outputs.directory }}
           if-no-files-found: error
+
+  national-toll-source-audit:
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[national-toll-source-audit]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect published national tariffs and public official map metadata
+        run: |
+          python3 - <<'PYCODE'
+          import concurrent.futures,hashlib,html,json,re,urllib.request
+          from html.parser import HTMLParser
+          from pathlib import Path
+          root=Path('national-toll-audit');root.mkdir()
+          sources={
+            'imt':'https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/',
+            'ip':'https://servicos.infraestruturasdeportugal.pt/portagens-ips',
+            'ascendi-electronic':'https://www.ascendi.pt/portagens-eletronicas/',
+            'ascendi-traditional':'https://www.ascendi.pt/portagens-tradicionais/',
+            'ascendi-map':'https://www.ascendi.pt/mapa/',
+            'brisa':'https://www.brisaconcessao.pt/',
+            'atlantico':'https://www.aeatlantico.pt/pt/clientes/downloads/',
+            'vialivre':'https://www.vialivre.pt/pt-pt/portagens/',
+            'pttolls':'https://www.pttolls.com/',
+            'lusoponte':'https://www.lusoponte.pt/',
+            'ip-arcgis-app':'https://www.arcgis.com/sharing/rest/content/items/0d5c6ec74cd4485aaf78ec7ca75d6118/data?f=json',
+            'ip-arcgis-metadata':'https://www.arcgis.com/sharing/rest/content/items/0d5c6ec74cd4485aaf78ec7ca75d6118?f=json'}
+          class Page(HTMLParser):
+            def __init__(self):super().__init__();self.links=[];self.rows=[];self.row=None;self.cell=None;self.scripts=[]
+            def handle_starttag(self,t,attrs):
+              attrs=dict(attrs)
+              if t=='a' and 'href' in attrs:self.links.append(attrs['href'])
+              if t=='script' and 'src' in attrs:self.scripts.append(attrs['src'])
+              if t=='tr':self.row=[]
+              if t in ('td','th') and self.row is not None:self.cell=[]
+            def handle_data(self,d):
+              if self.cell is not None:self.cell.append(d)
+            def handle_endtag(self,t):
+              if t in ('td','th') and self.cell is not None:
+                self.row.append(' '.join(' '.join(self.cell).split()));self.cell=None
+              if t=='tr' and self.row is not None:
+                if self.row:self.rows.append(self.row)
+                self.row=None
+          def get(entry):
+            name,url=entry
+            try:
+              request=urllib.request.Request(url,headers={'User-Agent':'Atlas-Official-Toll-Audit/1.0'})
+              with urllib.request.urlopen(request,timeout=45) as response:data=response.read(8*1024*1024+1);final=response.geturl()
+              if len(data)>8*1024*1024:raise ValueError('Source too large')
+              text=data.decode('utf-8','replace');(root/(name+'.txt')).write_text(text)
+              report={'name':name,'url':url,'finalUrl':final,'sha256':hashlib.sha256(data).hexdigest()}
+              if text.lstrip().startswith('{'):
+                report['json']=json.loads(text)
+              else:
+                page=Page();page.feed(text)
+                report['links']=sorted(set(urllib.parse.urljoin(final,x) for x in page.links if re.search(r'2026|\.pdf|\.xls|tarif|taxas|portag|mapa',x,re.I)))
+                report['scripts']=[urllib.parse.urljoin(final,x) for x in page.scripts]
+                report['rows']=page.rows
+              (root/(name+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2))
+              print('NATIONAL_TOLL_SOURCE='+json.dumps(report,ensure_ascii=False),flush=True)
+              return name,True
+            except Exception as error:
+              print('NATIONAL_TOLL_SOURCE_ERROR='+json.dumps({'name':name,'url':url,'error':str(error)}),flush=True);return name,False
+          results=dict(concurrent.futures.ThreadPoolExecutor(max_workers=6).map(get,sources.items()))
+          (root/'results.json').write_text(json.dumps(results,indent=2))
+          if not results['imt'] or not results['ip']:raise ValueError('Required official national sources unavailable')
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-national-toll-source-audit
+          path: national-toll-audit/
+          if-no-files-found: error
