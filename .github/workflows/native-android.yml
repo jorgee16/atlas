@@ -927,8 +927,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Inspect published national tariffs and public official map metadata
         run: |
-          python3 - <<'PYCODE'
-          import concurrent.futures,hashlib,html,json,re,urllib.request,urllib.parse,subprocess,ssl
+          python3 -m pip install 'pypdf==6.1.3' 'certifi==2025.10.5'
+          python3 - <<'PYCODE' 
+          import concurrent.futures,hashlib,html,json,re,urllib.request,urllib.parse,subprocess,ssl,certifi,io
+          from pypdf import PdfReader
           from html.parser import HTMLParser
           from pathlib import Path
           root=Path('national-toll-audit');root.mkdir()
@@ -946,8 +948,9 @@ jobs:
             'vialivre':'https://www.vialivre.pt/pt-pt/portagens/',
             'pttolls':'https://www.pttolls.com/',
             'lusoponte':'https://www.lusoponte.pt/',
-            'ip-arcgis-app':'https://www.arcgis.com/sharing/rest/content/items/0d5c6ec74cd4485aaf78ec7ca75d6118/data?f=json',
-            'ip-arcgis-metadata':'https://www.arcgis.com/sharing/rest/content/items/0d5c6ec74cd4485aaf78ec7ca75d6118?f=json'}
+            'ip-arcgis-app':'https://www.arcgis.com/sharing/rest/content/items/b2fe6aea0090417a9eb5a35799baae8e/data?f=json',
+            'ip-arcgis-current':'https://www.arcgis.com/sharing/rest/content/items/5832f1981abe4dbd95f19d5c867123e6/data?f=json',
+            'ip-arcgis-metadata':'https://www.arcgis.com/sharing/rest/content/items/5832f1981abe4dbd95f19d5c867123e6?f=json'}
           class Page(HTMLParser):
             def __init__(self):super().__init__();self.links=[];self.rows=[];self.row=None;self.cell=None;self.scripts=[]
             def handle_starttag(self,t,attrs):
@@ -968,12 +971,22 @@ jobs:
             name,url=entry
             try:
               request=urllib.request.Request(url,headers={'User-Agent':'Atlas-Official-Toll-Audit/1.0'})
-              with urllib.request.urlopen(request,timeout=45) as response:data=response.read(8*1024*1024+1);final=response.geturl()
+              context=ssl.create_default_context(cafile=certifi.where())
+              issuers={'www.ascendi.pt':'EV','www.aeatlantico.pt':'DV','www.lusoponte.pt':'OV'}
+              host=urllib.parse.urlparse(url).hostname
+              if host in issuers:
+                issuer='https://crt.sectigo.com/SectigoPublicServerAuthenticationCA'+issuers[host]+'R36.crt'
+                with urllib.request.urlopen(issuer,timeout=30) as ca_response:der=ca_response.read(65536)
+                pem=subprocess.run(['openssl','x509','-inform','DER','-outform','PEM'],input=der,capture_output=True,check=True).stdout
+                ca=root/(host+'.ca.pem');ca.write_bytes(pem)
+                subprocess.run(['openssl','verify','-CAfile',certifi.where(),str(ca)],check=True,capture_output=True)
+                context.load_verify_locations(cadata=pem.decode())
+              with urllib.request.urlopen(request,context=context,timeout=45) as response:data=response.read(8*1024*1024+1);final=response.geturl()
               if len(data)>8*1024*1024:raise ValueError('Source too large')
               if data.startswith(b'%PDF'):
                 pdf=root/(name+'.pdf');pdf.write_bytes(data)
-                subprocess.run(['pdftotext','-layout',str(pdf),str(root/(name+'.txt'))],check=True)
-                text=(root/(name+'.txt')).read_text()
+                text='\f'.join(page.extract_text(extraction_mode='layout') for page in PdfReader(io.BytesIO(data)).pages)
+                (root/(name+'.txt')).write_text(text)
                 print('NATIONAL_TOLL_PDF='+json.dumps({'name':name,'url':url,'sha256':hashlib.sha256(data).hexdigest(),'text':text}),flush=True)
                 return name,True
               text=data.decode('utf-8','replace');(root/(name+'.txt')).write_text(text)
