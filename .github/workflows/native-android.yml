@@ -937,6 +937,7 @@ jobs:
           sources={
             'imt':'https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/',
             'ip':'https://servicos.infraestruturasdeportugal.pt/portagens-ips',
+            'ip-simulator':'https://portagens.infraestruturasdeportugal.pt/',
             'ascendi-electronic':'https://www.ascendi.pt/portagens-eletronicas/',
             'ascendi-traditional':'https://www.ascendi.pt/portagens-tradicionais/',
             'ascendi-map':'https://www.ascendi.pt/mapa/',
@@ -1020,6 +1021,16 @@ jobs:
                 report['scripts']=[urllib.parse.urljoin(final,x).split('?')[0] for x in page.scripts]
                 report['dataLinks']=sorted(set(urllib.parse.urljoin(final,x) for x in page.links if 'arcgis' in x or 'download' in x or '.csv' in x))
                 report['inlineDataHints']=[text[max(0,m.start()-100):m.end()+250] for m in re.finditer('pontos_cobranca|pontosCobranca|taxas|portico|pórtico|drupalSettings',text,re.I)][-30:]
+                if name=='ip-simulator':
+                  report['publicScriptHints']=[]
+                  for index,script in enumerate(report['scripts']):
+                    if urllib.parse.urlparse(script).hostname!='portagens.infraestruturasdeportugal.pt':continue
+                    with urllib.request.urlopen(script,context=context,timeout=30) as response: javascript=response.read(2*1024*1024+1)
+                    if len(javascript)>2*1024*1024:raise ValueError('Public script exceeds audit bound')
+                    body=javascript.decode('utf-8','replace')
+                    (root/('ip-simulator-script-'+str(index)+'.js')).write_bytes(javascript)
+                    hints=[body[max(0,m.start()-120):m.end()+250] for m in re.finditer(r'tarifa|taxa|portico|pórtico|cobranca|cobrança|\\.json|\\.csv|api/',body,re.I)]
+                    report['publicScriptHints'].append({'url':script,'sha256':hashlib.sha256(javascript).hexdigest(),'hints':hints[:60]})
                 report['rows']=page.rows
                 if name=='ascendi-root':
                   report['allLinks']=page.links
