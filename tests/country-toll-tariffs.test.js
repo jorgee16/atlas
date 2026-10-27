@@ -59,3 +59,26 @@ test('official plaza prices are independent of km and retain repeated real cross
   assert.equal(countryTollTariffs('Portugal').fixedCharge('brisa:0501',1),null);
   assert.equal(countryTollCharges('Spain'),null);
 });
+
+
+test('statutory zero is explicit, class checked, country scoped and not an unknown-road default', () => {
+  const pt=countryTollTariffs('Portugal');
+  for(const ref of ['A22','A23','A24','A25','A 25;IP5']) for(const vehicleClass of [1,2,3,4]) {
+    assert.equal(pt.estimate(ref,50000,vehicleClass),0);assert.equal(pt.explicitlyFree(ref,vehicleClass),true);
+  }
+  for(const ref of ['A4','A13','A28','A25;A1','A1;A25','unknown'])assert.equal(pt.estimate(ref,1000,1),null);
+  assert.equal(pt.estimate('A25',1000,99),null);
+  const graph={edgeIsToll:()=>true,edgeRoad:()=>0,road:()=>({ref:'A25;IP5'}),edgeDistanceDecimeters:()=>10000};
+  const result=estimateRouteTolls(graph,{edgeIndexes:[0]},{tariffs:pt});
+  assert.equal(result.amount,0);assert.equal(result.pricing,'exact');assert.equal(result.estimated,false);
+  assert.match(result.source,/diariodarepublica/);
+  const bytes=readFileSync(new URL('../android/native-app/src/main/assets/tolls/Portugal.csv',import.meta.url),'utf8');
+  assert.throws(()=>parseTollTable('Portugal',bytes.replace('# freeRoadSource=https://','# freeRoadSource=http://')));
+  assert.throws(()=>parseTollTable('Portugal',bytes.replace('freeRoads=A22,A23,A24,A25','freeRoads=A22,A22')));
+});
+
+test('explicit zero prices use the exact label, not an estimate', async () => {
+  const {tollPriceLabel}=await import('../src/routing/toll-price-label.js');
+  assert.doesNotMatch(tollPriceLabel({totalEuros:0,tolledDistanceMeters:100,currency:'EUR',vehicleClass:1,pricing:'exact'}),/Est\./);
+  assert.match(tollPriceLabel({totalEuros:0,tolledDistanceMeters:100,currency:'EUR',vehicleClass:1,pricing:'exact'}),/exact/);
+});

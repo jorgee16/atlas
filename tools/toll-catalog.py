@@ -68,6 +68,12 @@ def package(source, output, namespace="toll-tariffs"):
                 raise ValueError('Invalid price/length')
             if fixed and Decimal(value)*10**int(digits) != (Decimal(value)*10**int(digits)).to_integral_value():
                 raise ValueError('Price exceeds currency precision')
+    free=metadata.get('freeRoads')
+    if free is not None:
+        refs=[''.join(r.split()).upper() for r in free.split(',')]
+        if fixed or not metadata.get('freeRoadSource','').startswith('https://') or not refs or len(set(refs))!=len(refs) or any(not re.fullmatch('[A-Z][A-Z0-9-]{0,31}',r) for r in refs):
+            raise ValueError('Invalid explicit free-road policy/provenance')
+    elif 'freeRoadSource' in metadata: raise ValueError('Free-road source without policy')
     allowed = metadata.get('estimateRoads')
     if fixed and allowed is not None: raise ValueError('Road estimate policy in fixed-charge catalog')
     if not re.fullmatch('toll-[a-z-]{1,40}',namespace) or (fixed != (namespace=='toll-charges')):

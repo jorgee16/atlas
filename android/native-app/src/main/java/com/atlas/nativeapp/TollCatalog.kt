@@ -70,6 +70,12 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
                     val n=value.toDouble();require(n.isFinite() && n>=0 && n<=1e9 && (index!=0 || n>0))
                 }
             }
+            metadata["freeRoads"]?.let { policy ->
+                require(!fixed && metadata["freeRoadSource"]?.startsWith("https://")==true)
+                val refs=policy.split(',').map { it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) }
+                require(refs.isNotEmpty() && refs.toSet().size==refs.size && refs.all { it.matches(Regex("[A-Z][A-Z0-9-]{0,31}")) })
+            }
+            require(metadata["freeRoads"]!=null || metadata["freeRoadSource"]==null)
             require(!fixed || metadata["estimateRoads"]==null)
             metadata["estimateRoads"]?.split(',')?.filter { it.isNotBlank() }?.forEach {
                 require(it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) in roads)

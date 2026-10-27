@@ -2,8 +2,10 @@
 # country=Portugal
 # currency=EUR
 # year=2026
-# version=2026102501
+# version=2026102601
 # fractionDigits=2
+# freeRoads=A22,A23,A24,A25
+# freeRoadSource=https://diariodarepublica.pt/dr/legislacao-consolidada/lei/2024-875716621
 # scheme=road-average
 # estimateRoads=A1,A3,A5,A6,A8,A9,A10,A14,A15,A21,A32,A43
 # A2/A12 need bridge/plaza and direction mapping; A4/A13 have mixed abolished sections.

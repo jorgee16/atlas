@@ -136,4 +136,17 @@ class TollCatalogTest {
         assertEquals(listOf("https://example.test/toll-charges/Testland/manifest.json",
             "https://example.test/toll-charges/Testland/2/table.csv"),urls)
     }
+    @org.junit.Test fun explicitFreeRoadsRequireIndependentProvenanceAndCannotEnterFixedStore() {
+        val csv="# country=Testland\n# currency=EUR\n# year=2026\n# version=1\n# source=https://example.test/prices\n"+
+            "# freeRoads=T2,T3\n# freeRoadSource=https://example.test/statute\n"+
+            "road;section;km;class1;class4\nT1;paid;1;0.20;0.40\n"
+        assertEquals("road-average",TollCatalog.parse("Testland",csv.toByteArray(),"fixture").scheme)
+        for(invalid in listOf(csv.replace("freeRoadSource=https://","freeRoadSource=http://"),
+            csv.replace("freeRoads=T2,T3","freeRoads=T2,T2"),csv.replace("freeRoads=T2,T3","freeRoads="))) {
+            var rejected=false
+            try { TollCatalog.parse("Testland",invalid.toByteArray(),"fixture") } catch(_:IllegalArgumentException) { rejected=true }
+            org.junit.Assert.assertTrue("Invalid explicit-free evidence must be rejected",rejected)
+        }
+    }
+
 }

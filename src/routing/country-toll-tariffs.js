@@ -50,6 +50,16 @@ export function parseTollTable(country, csv) {
     road.km += numbers[0]; classes.forEach((c, i) => road.prices.set(c, road.prices.get(c) + numbers[i + 1])); roads.set(ref, road);
   }
   if (fixed && metadata.has('estimateRoads')) throw new Error('Estimate policy in fixed catalog');
+  const freeRefs=metadata.has('freeRoads') ? metadata.get('freeRoads').split(',').map(normalize) : [];
+  if ((metadata.has('freeRoads') && (fixed || !metadata.get('freeRoadSource')?.startsWith('https://') ||
+      new Set(freeRefs).size!==freeRefs.length || freeRefs.some(r=>!/^[A-Z][A-Z0-9-]{0,31}$/.test(r)))) ||
+      (!metadata.has('freeRoads') && metadata.has('freeRoadSource'))) throw new Error('Invalid free-road policy/provenance');
+  const freeRoads=new Set(freeRefs);
+  const explicitlyFree=(ref,vehicleClass) => {
+    const tokens=String(ref??'').split(/[;,/]/).map(normalize);
+    return !fixed && classes.includes(vehicleClass) && tokens.some(r=>freeRoads.has(r)) &&
+      !tokens.some(r=>roads.has(r) && !freeRoads.has(r));
+  };
   const allowed = metadata.has('estimateRoads') ? new Set(metadata.get('estimateRoads').split(',').filter(x => x.trim()).map(normalize)) : null;
   if (allowed && [...allowed].some(ref => !roads.has(ref))) throw new Error('Invalid estimate policy');
   return Object.freeze({ country, currency: metadata.get('currency'), year: metadata.get('year'),
@@ -61,10 +71,13 @@ export function parseTollTable(country, csv) {
       for (const id of ids) { const n=charges.get(id)?.prices.get(vehicleClass);if(n===undefined || !Number.isSafeInteger(total+n))return null;total+=n; }
       return total/scale;
     },
+    explicitlyFree, freeRoadSource:metadata.get('freeRoadSource')??'',
     version, source: metadata.get('source'), fractionDigits: Number(digits), classes,
     estimate(ref, meters, vehicleClass) {
       if (fixed || !Number.isFinite(meters) || meters < 0 || !classes.includes(vehicleClass)) return null;
-      for (const token of String(ref ?? '').split(/[;,/]/)) {
+      const tokens=String(ref??'').split(/[;,/]/).map(normalize);
+      if(tokens.some(r=>freeRoads.has(r))) return explicitlyFree(ref,vehicleClass) ? 0 : null;
+      for (const token of tokens) {
         const key = normalize(token), road = roads.get(key); if (!road) continue;
         if (allowed && !allowed.has(key)) return null;
         const amount = meters / 1000 * road.prices.get(vehicleClass) / road.km;

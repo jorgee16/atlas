@@ -16,6 +16,8 @@ web/PWA uses the same canonical CSVs via `bundled-toll-tables.js`; regenerate wi
 `python3 tools/generate-toll-bundle.py`. CI `--check` prevents data drift.
 
 Only OSM toll-marked edges contribute costs. An untolled route costs zero.
+An explicit, sourced whole-road exemption can also override stale toll flags;
+this changes pricing only, not route selection or the graph.
 Missing table, unsupported class, excluded road or partial coverage yields
 `tollPricing=unavailable` and `tollAmount=null`, never a fictional zero. Available
 costs are section-average distance estimates: sum(section prices)/sum(lengths).
@@ -78,7 +80,8 @@ A1,A3,A5,A6,A8,A9,A10,A14,A15,A21,A32,A43. This measures source reference covera
 not complete graph or concession coverage. A2/A12 need directional bridge/plaza
 mapping; A4/A13 contain paid and abolished concessions; A17/A41 need other operator
 coverage. Those routes remain unavailable despite retaining official section rows.
-Unlisted roads remain unavailable. Bridges are not converted into motorway €/km.
+Unlisted roads remain unavailable unless a separately sourced whole-road exemption
+applies. Bridges are not converted into motorway €/km.
 Discounts, payment-method exceptions and conditional heavy exemptions are not modeled.
 
 Lei 37/2024 as revised for 2026 removes specific concessions/sections, including
@@ -98,6 +101,42 @@ Full graph distance coverage must be measured separately; 12/18 references is no
 an edge-distance coverage percentage.
 
 ## Exact correspondence: future validated boundary
+
+### Whole-road exemptions (revision 2026102601)
+
+The optional `freeRoads` metadata names references that are free for every class
+declared in that catalog. `freeRoadSource` is mandatory and must be HTTPS.
+This is a generic policy, not a Portugal branch in the engine. It is rejected in
+fixed-crossing catalogs. Unsupported classes and conflicting known paid/free
+aliases remain unavailable. A route consisting entirely of explicitly exempt
+toll-flagged edges returns `exact` zero with the legal source; mixed paid routes
+retain estimates or unavailable totals. No dummy lengths or average-rate zero
+rows are invented. The web bundle, Kotlin validator and C++ parser use the same
+policy. Old cached revisions lose to the newer APK fallback.
+
+Portugal declares A22, A23, A24 and A25 under Lei 37/2024, consolidated in 2026.
+The policy deliberately excludes A4, A13 and A28, which contain mixed concessions,
+and conditional vehicle/resident exemptions. The graph audit reports exempt
+directed meters separately from estimated meters; neither proves nationwide
+exact-price coverage. Publication requires the existing CI gates.
+
+### National expansion remains incomplete
+
+The current Brisa document is
+`TabelaEcadaTaxas_23iva_25082026_v7.pdf` (SHA-256
+`dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274`).
+Its published origin/destination matrices must not be replaced with sums of IMT
+section prices. For example, Maia PV–Braga Sul class 1 is EUR3.85 in the matrix;
+the EUR3.20 section-chain sum above is not that journey's exact fare.
+Matrix extraction is not activated until every source cell is unambiguous and
+physical entry/exit matching is verified. No missing cell is interpreted as zero.
+The existing fixed-charge IDs are stable internal identifiers; do not remap them
+silently when an operator document uses different external plaza codes.
+
+The national public IP map distinguishes traditional, electronic and free road
+segments, but does not provide complete price/entry/exit records. Full motorway
+coverage, bridge direction rules and remaining concession tariffs are still open.
+The validated A5 binding is a limited pilot, not a national completion claim.
 
 Graph v6 RROD records hold strings/flags; RNOD holds coordinates/components, not
 original OSM way/node or tariff entry/exit identifiers. Road refs cannot identify

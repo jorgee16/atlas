@@ -75,6 +75,8 @@ public:
   static TollTariffs parse(std::string_view csv, std::string country);
   std::optional<double> estimate(std::string_view roadRef,
                                  double meters, int vehicleClass) const;
+  bool explicitlyFree(std::string_view roadRef, int vehicleClass) const;
+  std::string freeRoadSource;
   // Section lookup is for authoritative section IDs supplied by a future,
   // graph-version-bound mapping. Routing never guesses these IDs from a ref.
   std::optional<double> sectionPrice(std::string_view road, std::string_view section,
@@ -99,6 +101,7 @@ private:
   std::unordered_map<std::string,TollFixedChargeInfo> fixedChargeInfo_;
   bool restrictEstimates_ = false;
   std::unordered_set<std::string> estimateRoads_;
+  std::unordered_set<std::string> freeRoads_;
 };
 /** Breakdown is metadata for explaining toll coverage, not an exact tariff.
  * Individual edges are grouped by their OSM road ref in encounter order. */

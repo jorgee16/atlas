@@ -131,4 +131,14 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual({'brisa:0501'},{b['chargeId'] for b in report['bindings']})
         self.assertEqual({4},{b['graphRoadFlags'] for b in report['bindings']})
 
+class ExplicitFreePolicyTests(unittest.TestCase):
+    def test_declared_free_roads_require_their_own_valid_source(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);source=root/'Testland.csv'
+            text=CatalogTests().fixture()+"# freeRoads=T2,T3\n# freeRoadSource=https://example.test/statute\n"
+            source.write_text(text);pack.package(source,root)
+            for invalid in [text.replace('freeRoadSource=https://','freeRoadSource=http://'),text.replace('freeRoads=T2,T3','freeRoads=T2,T2'),text.replace('freeRoads=T2,T3','freeRoads=')]:
+                source.write_text(invalid)
+                with self.assertRaises(ValueError): pack.package(source,root)
+
 if __name__=='__main__': unittest.main()

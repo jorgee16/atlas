@@ -19,8 +19,9 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def u32(data, offset): return struct.unpack_from('<I', data, offset)[0]
 
-def scan(paths, eligible):
-    totals=defaultdict(lambda: {'directedEdges':0,'directedMeters':0.0,'estimatedMeters':0.0})
+def scan(paths, eligible, explicitly_free=None):
+    explicitly_free=set(explicitly_free or ())
+    totals=defaultdict(lambda: {'directedEdges':0,'directedMeters':0.0,'estimatedMeters':0.0,'explicitlyFreeMeters':0.0})
     with paths['roads.bin'].open('rb') as rf, paths['strings.bin'].open('rb') as sf, paths['edges.bin'].open('rb') as ef:
         with mmap.mmap(rf.fileno(),0,access=mmap.ACCESS_READ) as roads, mmap.mmap(sf.fileno(),0,access=mmap.ACCESS_READ) as strings, mmap.mmap(ef.fileno(),0,access=mmap.ACCESS_READ) as edges:
             for data, magic in [(roads,b'RROD'),(strings,b'RSTR'),(edges,b'REDG')]:
@@ -49,7 +50,10 @@ def scan(paths, eligible):
                 if not tolled: continue
                 meters=u32(edges,at+4)/10
                 row=totals[ref];row['directedEdges']+=1;row['directedMeters']+=meters
-                if priced: row['estimatedMeters']+=meters
+                tokens=set(re.sub(r'\s+','',r).upper() for r in re.split('[;,/]',ref))
+                if tokens&explicitly_free:
+                    if not any(r in eligible and r not in explicitly_free for r in tokens):row['explicitlyFreeMeters']+=meters
+                elif priced: row['estimatedMeters']+=meters
     return totals
 
 def fetch(entry, cache):
@@ -90,14 +94,15 @@ if __name__=='__main__':
                 groups[entry['url'].rsplit('/',1)[0]][entry['url'].rsplit('/',1)[1]]=path;all_files.append(entry)
         for partition,paths in sorted(groups.items()):
             if len(paths)!=3: raise ValueError('Incomplete partition')
-            roads=scan(paths,eligible)
+            roads=scan(paths,eligible,set(metadata.get('freeRoads','').split(',')))
             reports.append({'region':region['id'],'version':region['version'],'partition':partition,'roads':dict(sorted(roads.items()))})
     if not reports: raise ValueError('No real routing partitions found')
     total=sum(v['directedMeters'] for p in reports for v in p['roads'].values())
     priced=sum(v['estimatedMeters'] for p in reports for v in p['roads'].values())
+    exempt=sum(v['explicitlyFreeMeters'] for p in reports for v in p['roads'].values())
     result={'country':country,'tariffRevision':metadata['version'],'tariffSha256':hashlib.sha256(csv.encode()).hexdigest(),
         'scope':'All Portugal routing partitions in the bundled region manifest; directed toll-marked driving edges, not unique physical road km or exact-price coverage',
-        'directedTolledMeters':total,'directedEstimatedMeters':priced,'estimatedPercent':100*priced/total if total else None,'partitions':reports,'verifiedGraphFiles':all_files}
+        'directedTolledMeters':total,'directedEstimatedMeters':priced,'estimatedPercent':100*priced/total if total else None,'directedExplicitlyFreeMeters':exempt,'knownPricePercent':100*(priced+exempt)/total if total else None,'partitions':reports,'verifiedGraphFiles':all_files}
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k not in ['partitions','verifiedGraphFiles']},ensure_ascii=False))
     for p in reports: print(p['partition'],len(p['roads']),'toll road refs')

@@ -89,6 +89,15 @@ int main(int argc, char **argv) {
     check(paidJson.find("\"tollRoads\"")!=std::string::npos &&
           paidJson.find("\"tollAmount\"")!=std::string::npos,
           "currency-neutral route total and ordered per-road explanation");
+    const auto freeTariffs=TollTariffs::parse(
+      "# country=Testland\n# currency=EUR\n# year=2026\n# source=https://example.test/prices\n"
+      "# freeRoads=A1\n# freeRoadSource=https://example.test/statute\n"
+      "road;section;km;class1\nT1;paid;10;1.00\n","Testland");
+    auto freeOptions=paid;freeOptions.tariffs=&freeTariffs;
+    const auto exempt=route(toll,0,2,freeOptions);
+    check(exempt&&exempt->tollEuros==0&&exempt->tollPriceExact&&exempt->tollPriceComplete,"explicit statutory zero overrides stale graph flags");
+    check(exempt->edges==tolled->edges&&exempt->meters==tolled->meters&&exempt->seconds==tolled->seconds,"free-road pricing never changes routing");
+    check(exempt->tollRoads.front().exact&&routeJson(*exempt).find("https://example.test/statute")!=std::string::npos,"zero price retains official provenance");
     // Synthetic graph fixtures verify pricing invariants; real A5 journeys
     // are validated separately against SHA-verified Portugal graph files.
     const auto fixedFixture=TollTariffs::parse(

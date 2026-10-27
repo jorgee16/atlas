@@ -468,9 +468,12 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         r.tollVehicleClasses=op.tariffs->classes;
       }
       std::unordered_map<std::string, std::size_t> tollRoadIndex;
+      bool allExplicitlyFree=true,anyExplicitlyFree=false;
       for(const auto &leg:r.legs)if(op.profile==Profile::drive &&
                                      (leg.road.flags & 4)){
         r.tolledMeters+=leg.distance;
+        const bool explicitlyFree=op.tariffs && op.tariffs->explicitlyFree(leg.road.ref,op.vehicleClass);
+        allExplicitlyFree=allExplicitlyFree&&explicitlyFree;anyExplicitlyFree=anyExplicitlyFree||explicitlyFree;
         const auto amount=op.tariffs
             ? op.tariffs->estimate(leg.road.ref,leg.distance,op.vehicleClass)
             : std::nullopt;
@@ -482,9 +485,10 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         auto found=tollRoadIndex.find(roadLabel);
         if(found==tollRoadIndex.end()){
           found=tollRoadIndex.emplace(roadLabel,r.tollRoads.size()).first;
-          TollRoadCharge item;item.road=roadLabel;r.tollRoads.push_back(std::move(item));
+          TollRoadCharge item;item.road=roadLabel;item.exact=true;r.tollRoads.push_back(std::move(item));
         }
         auto &breakdown=r.tollRoads[found->second];
+        breakdown.exact=breakdown.exact&&explicitlyFree;
         breakdown.meters+=leg.distance;
         if(amount){
           breakdown.pricedMeters+=leg.distance;
@@ -496,6 +500,8 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
           r.tollPriceComplete=false;
         }
       }
+      r.tollPriceExact=r.tolledMeters>0&&r.tollPriceComplete&&allExplicitlyFree;
+      if(anyExplicitlyFree && !op.tariffs->freeRoadSource.empty())r.tollSource+="\n"+op.tariffs->freeRoadSource;
       makeManeuvers(r, g);
       return r;
     }

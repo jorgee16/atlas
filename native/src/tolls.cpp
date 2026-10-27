@@ -103,6 +103,15 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
       table.fixedCharges_[charge.first][price.first]=int64_t(std::llround(scaled));
     }
   }
+  if(metadata.count("freeRoads")) {
+    if(fixed || metadata["freeRoadSource"].substr(0,8)!="https://")throw std::invalid_argument("Missing explicit free-road provenance");
+    table.freeRoadSource=metadata["freeRoadSource"];
+    for(const auto &ref:fields(metadata["freeRoads"],',')) {
+      const auto normalized=key(ref);
+      if(normalized.empty()||!std::isalpha(static_cast<unsigned char>(normalized[0]))||normalized.size()>32||!std::all_of(normalized.begin(),normalized.end(),[](unsigned char c){return std::isalnum(c)||c=='-';})||!table.freeRoads_.insert(normalized).second)
+        throw std::invalid_argument("Invalid/duplicate explicitly free road");
+    }
+  } else if(metadata.count("freeRoadSource"))throw std::invalid_argument("Free-road source without policy");
   table.restrictEstimates_=metadata.count("estimateRoads");
   if(table.restrictEstimates_)for(auto ref:fields(metadata["estimateRoads"],',')) {
     auto k=key(ref);if(k.empty())continue;
@@ -113,6 +122,12 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
 }
 std::optional<double> TollTariffs::estimate(std::string_view ref,double meters,int vehicleClass) const {
   if(scheme!="road-average"||!std::isfinite(meters)||meters<0||vehicleClass<1||vehicleClass>99)return std::nullopt;
+  bool free=false,paid=false;
+  for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
+    auto k=key(road);free=free||freeRoads_.count(k);paid=paid||(roadTotals_.count(k)&&!freeRoads_.count(k));
+  }
+  if(free&&paid)return std::nullopt;
+  if(free)return std::find(classes.begin(),classes.end(),vehicleClass)!=classes.end()?std::optional<double>(0.):std::nullopt;
   for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
     auto k=key(road);auto found=roadTotals_.find(k);
     if(found==roadTotals_.end())continue;
@@ -122,6 +137,16 @@ std::optional<double> TollTariffs::estimate(std::string_view ref,double meters,i
     return std::isfinite(amount)&&amount<=1e12?std::optional<double>(amount):std::nullopt;
   }
   return std::nullopt;
+}
+bool TollTariffs::explicitlyFree(std::string_view ref,int vehicleClass) const {
+  if(scheme!="road-average"||std::find(classes.begin(),classes.end(),vehicleClass)==classes.end())return false;
+  bool free=false;
+  for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
+    const auto k=key(road);
+    if(roadTotals_.count(k)&&!freeRoads_.count(k))return false;
+    free=free||freeRoads_.count(k);
+  }
+  return free;
 }
 std::optional<double> TollTariffs::sectionPrice(std::string_view road,std::string_view section,int vehicleClass) const {
   auto found=sectionPrices_.find(key(std::string(road))+"\n"+std::string(section));
