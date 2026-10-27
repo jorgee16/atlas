@@ -36,6 +36,27 @@ permissions:
   contents: read
   actions: read
 jobs:
+  national-toll-pdf-input:
+    if: ${{ contains(github.event.head_commit.message, '[national-toll-pdf-input]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Retrieve reviewed official PDF for deterministic local extraction
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, urllib.request
+          url='https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_25082026_v7.pdf'
+          with urllib.request.urlopen(url, timeout=45) as response:
+              data=response.read(1500000)
+          digest=hashlib.sha256(data).hexdigest()
+          if digest!='dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274':
+              raise ValueError('Official source changed; mandatory review before extraction')
+          encoded=base64.b64encode(data).decode()
+          print('BRISA_SOURCE_SHA256='+digest)
+          print('BRISA_SOURCE_BEGIN')
+          for offset in range(0,len(encoded),12000): print(encoded[offset:offset+12000])
+          print('BRISA_SOURCE_END')
+          PY
   release-identity:
     # Fail early on a missing/mismatched existing key while navigation tests run.
     # Never generates a keystore and never changes the pinned identity.
