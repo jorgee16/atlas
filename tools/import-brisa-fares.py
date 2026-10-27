@@ -56,7 +56,9 @@ def extract_page(spans):
 
 if __name__=='__main__':
     import pymupdf
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('pdf',type=Path);parser.add_argument('--out',type=Path,required=True);args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('pdf',type=Path);parser.add_argument('--out',type=Path,required=True)
+    parser.add_argument('--active-out',type=Path);parser.add_argument('--active-audit',type=Path);args=parser.parse_args()
+    if bool(args.active_out)!=bool(args.active_audit): parser.error('--active-out and --active-audit must be supplied together')
     data=args.pdf.read_bytes()
     source_sha=hashlib.sha256(data).hexdigest()
     if source_sha!='dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274':
@@ -92,3 +94,31 @@ if __name__=='__main__':
     report={'status':'candidate-not-active-in-routing','sourceEffectiveDates':{k:sorted(v) for k,v in dates.items()},'warnings':['South pages state 01-01-2025 in the current August 2026 PDF; operator clarification remains required','Physical entry/exit graph bindings are not nationally validated'],'sourceSha256':source_sha,'farePairs':len(fares),'stations':stations,'pages':counts,'csvSha256':hashlib.sha256(args.out.read_bytes()).hexdigest()}
     args.out.with_suffix('.audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print('NATIONAL_BRISA_FARES_REPORT='+json.dumps(report,ensure_ascii=False))
+
+    if args.active_out:
+        approved={'north','center','brisal'}
+        if any(dates[domain]!={'26-08-2026'} for domain in approved):
+            raise ValueError('Approved source effective dates changed')
+        selected={}
+        for (domain,a,b),prices in fares.items():
+            if domain not in approved: continue
+            if (a,b) in selected: raise ValueError('Ambiguous pair across published matrices')
+            selected[a,b]=prices
+        header=['# atlas-toll-fares-v1','# country=Portugal','# currency=EUR','# year=2026',
+            '# version=2026102701','# fractionDigits=2','# scheme=entry-exit','# status=active',
+            '# source=https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_25082026_v7.pdf',
+            '# sourceSha256='+source_sha,'# sourceEffectiveFrom=2026-08-26',
+            '# coverage=Published north, center and Brisal pairs only; south pages withheld because their source date states 2025',
+            'network;entry;exit;class1;class2;class3;class4']
+        for (a,b),prices in sorted(selected.items()):
+            header.append(';'.join(['brisa-published',a,b]+[f'{prices[v]:.2f}' for v in [1,2,3,4]]))
+        payload='\n'.join(header)+'\n'
+        args.active_out.parent.mkdir(parents=True,exist_ok=True);args.active_out.write_text(payload)
+        active_report={'country':'Portugal','revision':2026102701,'network':'brisa-published',
+            'sourceSha256':source_sha,'catalogSha256':hashlib.sha256(payload.encode()).hexdigest(),
+            'farePairs':len(selected),'sourceCells':4*len(selected),'includedDomains':sorted(approved),
+            'excludedDomains':{'south':'Source pages 9-10 state 01-01-2025'},
+            'routePricing':'Exact only with complete reviewed directed entry/exit crossing evidence; no national bindings are activated by this file'}
+        args.active_audit.parent.mkdir(parents=True,exist_ok=True)
+        args.active_audit.write_text(json.dumps(active_report,ensure_ascii=False,indent=2)+'\n')
+        print('BRISA_ACTIVE_CATALOG_REPORT='+json.dumps(active_report))

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { countryTollTariffs, parseTollTable } from '../src/routing/country-toll-tariffs.js';
+import { countryTollFares } from '../src/routing/country-toll-tariffs.js';
 import { estimateRouteTolls } from '../src/routing/portugal-toll-estimator.js';
 import { selectBalancedDriveRoute } from '../src/routing/drive-route-options.js';
 
@@ -14,6 +15,27 @@ test('web and native use identical official class prices and exclusions', () => 
   for (const ref of ['A2','A4','A12','A13','A17','A41','unknown']) assert.equal(web.estimate(ref,1000,1),null);
   assert.equal(countryTollTariffs('Spain'),null);
   assert.equal(web.estimate('A5',1000,5),null);
+});
+test('official entry/exit catalog is directed and cannot become a km estimate', () => {
+  const pt=countryTollFares('Portugal');
+  assert.equal(pt.scheme,'entry-exit');assert.equal(pt.estimate('A3',10000,1),null);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0311',exit:'0316'},1),3.85);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0311',exit:'0316'},4),9.60);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'1411',exit:'0117'},1),2.90);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0211',exit:'0222'},1),null);
+  assert.equal(countryTollFares('Spain'),null);
+});
+test('another country can supply asymmetric entry/exit fares without guessed reverse or zero cells', () => {
+  const csv='# country=Testland\n# currency=JPY\n# year=2026\n# version=1\n# fractionDigits=0\n# scheme=entry-exit\n# source=https://example.test/matrix\nnetwork;entry;exit;class1;class5\nn;a;b;125;271\nn;b;a;198;315\nn;a;a;500;900\n';
+  const t=parseTollTable('Testland',csv),a={network:'n',entry:'a',exit:'b'},b={network:'n',entry:'b',exit:'a'};
+  assert.equal(t.entryExitFare(a,5),271);assert.equal(t.entryExitFare(b,1),198);
+  assert.equal(t.entryExitFare({network:'n',entry:'a',exit:'a'},1),500);
+  assert.equal(t.sumEntryExitFares([a,a],1),250);
+  assert.equal(t.entryExitFare({...a,exit:'missing'},1),null);
+  assert.equal(t.entryExitFare(a,4),null);
+  assert.throws(()=>parseTollTable('Testland',csv+'n;a;b;1;2\n'));
+  assert.throws(()=>parseTollTable('Testland',csv.replace('125;271',';271')));
+  assert.throws(()=>parseTollTable('Testland',csv+'# status=candidate\n'));
 });
 test('another country needs only a table, with independent currency and classes', () => {
   const csv='# country=Testland\n# currency=JPY\n# year=2026\n# fractionDigits=0\n# source=https://example.test/fixture\nroad;section;km;class1;class5\nT1;paid;10;100;230\nT0;free;1;0;0\n';

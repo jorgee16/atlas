@@ -9,11 +9,14 @@ import java.security.MessageDigest
 import java.util.Locale
 import java.util.UUID
 
+internal data class TollEntryExitFare(val network:String,val entry:String,val exit:String,val amounts:Map<Int,java.math.BigDecimal>)
+
 internal data class TollFixedCharge(val id:String,val road:String,val name:String,val amounts:Map<Int,java.math.BigDecimal>)
 
 internal data class TollCatalog(val country:String,val currency:String,val year:Int,val revision:Long,
     val source:String,val fractionDigits:Int,val classes:List<Int>,val csv:ByteArray,val origin:String,
-    val scheme:String="road-average",val fixedCharges:List<TollFixedCharge> = emptyList()) {
+    val scheme:String="road-average",val fixedCharges:List<TollFixedCharge> = emptyList(),
+    val entryExitFares:List<TollEntryExitFare> = emptyList()) {
     val sha256:String get()=digest(csv)
     companion object {
         const val MAX_BYTES=2*1024*1024
@@ -39,20 +42,22 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
             } ?: 0L
             val source=metadata["source"].orEmpty();require(source.startsWith("https://") && source.length<=2048)
             val scheme=metadata["scheme"] ?: "road-average"
-            require(scheme in setOf("road-average","fixed-crossing"))
-            val fixed=scheme=="fixed-crossing"
+            require(scheme in setOf("road-average","fixed-crossing","entry-exit"))
+            require(metadata["status"]==null || metadata["status"]=="active") { "Unapproved tariff candidate" }
+            val fixed=scheme=="fixed-crossing";val ticket=scheme=="entry-exit"
             val digits=metadata["fractionDigits"]?.let { require(it.matches(Regex("[0-3]")));it.toInt() } ?: 2
-            require(rows.size in 2..30001 && rows.first().take(3)==(if(fixed)listOf("charge","road","name") else listOf("road","section","km")))
+            require(rows.size in 2..30001 && rows.first().take(3)==(if(ticket)listOf("network","entry","exit") else if(fixed)listOf("charge","road","name") else listOf("road","section","km")))
             val columns=rows.first().drop(3)
             require(columns.size in 1..32 && columns.all { it.matches(Regex("class[1-9][0-9]?")) })
             val classes=columns.map { it.removePrefix("class").toInt() };require(classes.toSet().size==classes.size)
             val identities=hashSetOf<Pair<String,String>>();val roads=hashSetOf<String>()
-            val charges=mutableListOf<TollFixedCharge>()
+            val charges=mutableListOf<TollFixedCharge>();val fares=mutableListOf<TollEntryExitFare>()
             for(row in rows.drop(1)) {
                 require(row.size==3+classes.size && row[0].isNotBlank() && row[1].isNotBlank())
-                if(fixed) {
-                    require(row[0].matches(Regex("[A-Za-z0-9:_-]{1,128}")) && row[2].isNotBlank())
-                    require(identities.add(row[0] to "")) { "Duplicate fixed charge" }
+                if(fixed || ticket) {
+                    if(ticket)require(row.take(3).all { it.matches(Regex("[A-Za-z0-9_-]{1,128}")) })
+                    else require(row[0].matches(Regex("[A-Za-z0-9:_-]{1,128}")) && row[2].isNotBlank())
+                    require(identities.add(row[0] to (if(ticket)row[1]+"\n"+row[2] else ""))) { "Duplicate directed fare/charge" }
                     val prices=row.drop(3).map { value ->
                         require(value.matches(Regex("[0-9]+(?:\\.[0-9]+)?")))
                         java.math.BigDecimal(value).also { amount ->
@@ -60,7 +65,8 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
                             amount.setScale(digits,java.math.RoundingMode.UNNECESSARY)
                         }
                     }
-                    charges.add(TollFixedCharge(row[0],row[1],row[2],classes.zip(prices).toMap()))
+                    if(ticket)fares.add(TollEntryExitFare(row[0],row[1],row[2],classes.zip(prices).toMap()))
+                    else charges.add(TollFixedCharge(row[0],row[1],row[2],classes.zip(prices).toMap()))
                     continue
                 }
                 val road=row[0].replace(Regex("\\s+"),"").uppercase(Locale.ROOT);roads.add(road)
@@ -71,16 +77,16 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
                 }
             }
             metadata["freeRoads"]?.let { policy ->
-                require(!fixed && metadata["freeRoadSource"]?.startsWith("https://")==true)
+                require(!fixed && !ticket && metadata["freeRoadSource"]?.startsWith("https://")==true)
                 val refs=policy.split(',').map { it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) }
                 require(refs.isNotEmpty() && refs.toSet().size==refs.size && refs.all { it.matches(Regex("[A-Z][A-Z0-9-]{0,31}")) })
             }
             require(metadata["freeRoads"]!=null || metadata["freeRoadSource"]==null)
-            require(!fixed || metadata["estimateRoads"]==null)
+            require((!fixed && !ticket) || metadata["estimateRoads"]==null)
             metadata["estimateRoads"]?.split(',')?.filter { it.isNotBlank() }?.forEach {
                 require(it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) in roads)
             }
-            return TollCatalog(country,currency,year,revision,source,digits,classes,bytes.copyOf(),origin,scheme,charges)
+            return TollCatalog(country,currency,year,revision,source,digits,classes,bytes.copyOf(),origin,scheme,charges,fares)
         }
     }
 }

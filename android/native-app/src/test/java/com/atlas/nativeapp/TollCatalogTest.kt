@@ -9,6 +9,27 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 class TollCatalogTest {
+    @Test fun entryExitCatalogUsesDirectedIndependentPricesAndAnIsolatedOfflineStore() {
+        fun ticket(version:Int)= ("# country=Testland\n# currency=JPY\n# year=2026\n# version=$version\n"+
+            "# fractionDigits=0\n# scheme=entry-exit\n# source=https://example.test/tickets\n"+
+            "network;entry;exit;class1;class5\nnetwork;a;b;125;271\nnetwork;b;a;198;315\n").toByteArray()
+        val one=ticket(1);val parsed=TollCatalog.parse("Testland",one,"fixture")
+        assertEquals("entry-exit",parsed.scheme);assertEquals(listOf(1,5),parsed.classes)
+        assertEquals(java.math.BigDecimal("271"),parsed.entryExitFares.first().amounts[5])
+        reject { TollCatalog.parse("Otherland",one,"fixture") }
+        reject { TollCatalog.parse("Testland",(String(one)+"network;a;b;1;2\n").toByteArray(),"fixture") }
+        reject { TollCatalog.parse("Testland",(String(one)+"# status=candidate\n").toByteArray(),"fixture") }
+        val root=temporary.newFolder()
+        fun repository()=TollCatalogRepository(root,{if(it=="Testland")one else null},expectedScheme="entry-exit")
+        val two=ticket(2)
+        val metadata=manifest(two).put("scheme","entry-exit").put("path","/toll-fares/Testland/2/table.csv")
+        repository().install("Testland",metadata,two)
+        assertEquals(2L,repository().load("Testland")!!.revision)
+        assertNull(repository().load("Spain"))
+        assertEquals(1L,repository().rollback("Testland").revision)
+        assertEquals(1L,repository().load("Testland")!!.revision)
+        reject { TollCatalogRepository(temporary.newFolder(),{one}).install("Testland",metadata,two) }
+    }
     @get:Rule val temporary=TemporaryFolder()
     private fun csv(version:Long=1,country:String="Testland",price:Int=230)=
         ("# country=$country\n# currency=JPY\n# year=2026\n# version=$version\n"+

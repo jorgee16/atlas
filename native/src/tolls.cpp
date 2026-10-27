@@ -34,8 +34,8 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
   if(csv.empty()||csv.size()>2*1024*1024||country.empty())throw std::invalid_argument("Invalid toll table");
   TollTariffs table;table.country=std::move(country);
   std::map<std::string,std::string> metadata;std::set<std::string> sections;
-  std::unordered_map<std::string,std::unordered_map<int,double>> rawFixedCharges;
-  std::istringstream in{std::string(csv)};std::string line;bool header=false;bool fixed=false;unsigned rows=0;
+  std::unordered_map<std::string,std::unordered_map<int,double>> rawPrices;
+  std::istringstream in{std::string(csv)};std::string line;bool header=false;bool fixed=false,ticket=false;unsigned rows=0;
   while(std::getline(in,line)) {
     line=trim(line);if(line.empty())continue;
     if(line[0]=='#') {
@@ -48,7 +48,8 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
     if(!header) {
       if(f.size()<4||f.size()>35)throw std::invalid_argument("Unsupported tariff columns");
       fixed=f[0]=="charge"&&f[1]=="road"&&f[2]=="name";
-      if(!fixed && !(f[0]=="road"&&f[1]=="section"&&f[2]=="km"))throw std::invalid_argument("Unsupported tariff columns");
+      ticket=f[0]=="network"&&f[1]=="entry"&&f[2]=="exit";
+      if(!fixed && !ticket && !(f[0]=="road"&&f[1]=="section"&&f[2]=="km"))throw std::invalid_argument("Unsupported tariff columns");
       for(std::size_t i=3;i<f.size();++i) {
         if(f[i].substr(0,5)!="class"||f[i].size()==5)throw std::invalid_argument("Invalid vehicle class column");
         auto suffix=f[i].substr(5);
@@ -60,13 +61,21 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
       header=true;continue;
     }
     if(f.size()!=3+table.classes.size()||f[0].empty()||f[1].empty())throw std::invalid_argument("Invalid toll section");
+    if(ticket) {
+      for(std::size_t i=0;i<3;++i)if(f[i].empty()||f[i].size()>128||!std::all_of(f[i].begin(),f[i].end(),[](unsigned char c){return (c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'||c=='-';}))throw std::invalid_argument("Invalid entry/exit identity");
+      const auto identity=f[0]+"\n"+f[1]+"\n"+f[2];
+      if(!sections.insert(identity).second)throw std::invalid_argument("Duplicate directed entry/exit fare");
+      for(std::size_t i=0;i<table.classes.size();++i)rawPrices[identity][table.classes[i]]=number(f[3+i]);
+      if(++rows>30000)throw std::invalid_argument("Tariff size overflow");
+      continue;
+    }
     if(fixed) {
       if(f[2].empty()||f[0].size()>128||!std::all_of(f[0].begin(),f[0].end(),[](unsigned char c){return std::isalnum(c)||c==':'||c=='-'||c=='_';}))throw std::invalid_argument("Invalid charge identity");
       if(!sections.insert(f[0]).second)throw std::invalid_argument("Duplicate fixed charge");
       // Delay conversion until currency precision metadata has been validated below.
       for(std::size_t i=0;i<table.classes.size();++i)number(f[3+i]);
       table.fixedChargeInfo_[f[0]]={f[0],f[1],f[2]};
-      auto &raw=rawFixedCharges[f[0]];
+      auto &raw=rawPrices[f[0]];
       for(std::size_t i=0;i<table.classes.size();++i)raw[table.classes[i]]=number(f[3+i]);
       if(++rows>30000)throw std::invalid_argument("Tariff size overflow");
       continue;
@@ -86,25 +95,27 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
   if(!header||!rows||metadata["country"]!=table.country)throw std::invalid_argument("Incomplete/cross-country tariff table");
   table.currency=metadata["currency"];table.year=metadata["year"];table.source=metadata["source"];table.version=metadata["version"];
   if(table.currency.size()!=3||!std::all_of(table.currency.begin(),table.currency.end(),[](unsigned char c){return c>='A'&&c<='Z';})||table.year.size()!=4||!std::all_of(table.year.begin(),table.year.end(),[](unsigned char c){return std::isdigit(c);})||table.source.substr(0,8)!="https://")throw std::invalid_argument("Invalid tariff provenance");
-  table.scheme=fixed?"fixed-crossing":"road-average";
-  if((metadata.count("scheme") && metadata["scheme"]!=table.scheme) || (fixed&&!metadata.count("scheme")))throw std::invalid_argument("Unsupported/mismatched pricing scheme");
+  if(metadata.count("status")&&metadata["status"]!="active")throw std::invalid_argument("Unapproved tariff candidate");
+  table.scheme=ticket?"entry-exit":fixed?"fixed-crossing":"road-average";
+  if((metadata.count("scheme") && metadata["scheme"]!=table.scheme) || ((fixed||ticket)&&!metadata.count("scheme")))throw std::invalid_argument("Unsupported/mismatched pricing scheme");
   if(metadata.count("fractionDigits")) {
     auto v=metadata["fractionDigits"];
     if(v.size()!=1||v[0]<'0'||v[0]>'3')throw std::invalid_argument("Invalid currency precision");
     table.fractionDigits=v[0]-'0';
   }
   if(!table.version.empty()&&(!std::all_of(table.version.begin(),table.version.end(),[](unsigned char c){return std::isdigit(c);})||table.version.size()>16))throw std::invalid_argument("Invalid tariff version");
-  if(fixed) {
-    if(metadata.count("estimateRoads"))throw std::invalid_argument("Road-average policy in fixed-charge table");
+  if(fixed||ticket) {
+    if(metadata.count("estimateRoads"))throw std::invalid_argument("Road-average policy in event-price catalog");
     const auto scale=std::pow(10.0,table.fractionDigits);
-    for(const auto &charge:rawFixedCharges)for(const auto &price:charge.second) {
+    for(const auto &charge:rawPrices)for(const auto &price:charge.second) {
       const auto scaled=price.second*scale;
       if(std::abs(scaled-std::round(scaled))>0.0001)throw std::invalid_argument("Price exceeds currency precision");
-      table.fixedCharges_[charge.first][price.first]=int64_t(std::llround(scaled));
+      auto &prices=ticket?table.entryExitFares_:table.fixedCharges_;
+      prices[charge.first][price.first]=int64_t(std::llround(scaled));
     }
   }
   if(metadata.count("freeRoads")) {
-    if(fixed || metadata["freeRoadSource"].substr(0,8)!="https://")throw std::invalid_argument("Missing explicit free-road provenance");
+    if(fixed || ticket || metadata["freeRoadSource"].substr(0,8)!="https://")throw std::invalid_argument("Missing explicit free-road provenance");
     table.freeRoadSource=metadata["freeRoadSource"];
     for(const auto &ref:fields(metadata["freeRoads"],',')) {
       const auto normalized=key(ref);
@@ -171,6 +182,21 @@ std::optional<double> TollTariffs::sumFixedCharges(const std::vector<std::string
     const auto charge=fixedCharges_.find(id);if(charge==fixedCharges_.end())return std::nullopt;
     const auto price=charge->second.find(vehicleClass);if(price==charge->second.end())return std::nullopt;
     if(total>std::numeric_limits<int64_t>::max()-price->second)return std::nullopt;
+    total+=price->second;
+  }
+  return total/std::pow(10.0,fractionDigits);
+}
+std::optional<double> TollTariffs::entryExitFare(const TollJourney &journey,int vehicleClass) const {
+  return sumEntryExitFares({journey},vehicleClass);
+}
+std::optional<double> TollTariffs::sumEntryExitFares(const std::vector<TollJourney> &journeys,int vehicleClass) const {
+  if(scheme!="entry-exit"||std::find(classes.begin(),classes.end(),vehicleClass)==classes.end())return std::nullopt;
+  int64_t total=0;
+  for(const auto &journey:journeys) {
+    const auto it=entryExitFares_.find(journey.network+"\n"+journey.entry+"\n"+journey.exit);
+    if(it==entryExitFares_.end())return std::nullopt;
+    const auto price=it->second.find(vehicleClass);
+    if(price==it->second.end()||total>std::numeric_limits<int64_t>::max()-price->second)return std::nullopt;
     total+=price->second;
   }
   return total/std::pow(10.0,fractionDigits);

@@ -35,14 +35,15 @@ def package(source, output, namespace="toll-tariffs"):
     if not re.fullmatch(r'[A-Z]{3}', metadata['currency']) or not re.fullmatch(r'[0-9]{4}', metadata['year']):
         raise ValueError('Invalid currency/year')
     scheme=metadata.get('scheme','road-average')
-    fixed=scheme=='fixed-crossing'
-    if scheme not in ('road-average','fixed-crossing') or not metadata['source'].startswith('https://'):
+    fixed=scheme=='fixed-crossing';ticket=scheme=='entry-exit'
+    if metadata.get('status','active')!='active': raise ValueError('Unapproved tariff candidate')
+    if scheme not in ('road-average','fixed-crossing','entry-exit') or not metadata['source'].startswith('https://'):
         raise ValueError('Invalid provenance/scheme')
     digits = metadata.get('fractionDigits', '2')
     if not re.fullmatch('[0-3]', digits):
         raise ValueError('Invalid currency precision')
     header, *sections = rows
-    expected=['charge','road','name'] if fixed else ['road','section','km']
+    expected=['network','entry','exit'] if ticket else ['charge','road','name'] if fixed else ['road','section','km']
     if header[:3] != expected or not 1 <= len(header[3:]) <= 32 or not 1 <= len(sections) <= 30000:
         raise ValueError('Invalid columns')
     if not all(re.fullmatch(r'class[1-9][0-9]?', c) for c in header[3:]):
@@ -57,26 +58,27 @@ def package(source, output, namespace="toll-tariffs"):
             raise ValueError('Invalid section')
         if fixed and (not re.fullmatch('[A-Za-z0-9:_-]{1,128}',row[0]) or not row[2]):
             raise ValueError('Invalid fixed charge')
+        if ticket and not all(re.fullmatch('[A-Za-z0-9_-]{1,128}',v) for v in row[:3]): raise ValueError('Invalid entry/exit identity')
         road = ''.join(row[1 if fixed else 0].split()).upper()
-        identity = (row[0], '') if fixed else (road,row[1])
+        identity = tuple(row[:3]) if ticket else (row[0], '') if fixed else (road,row[1])
         if identity in seen:
             raise ValueError('Duplicate section')
         seen.add(identity)
         roads.add(road)
-        for index, value in enumerate(row[3:] if fixed else row[2:]):
-            if not re.fullmatch(r'[0-9]+(?:\.[0-9]+)?', value) or not 0 <= float(value) <= 1e9 or (not fixed and index == 0 and float(value) == 0):
+        for index, value in enumerate(row[3:] if (fixed or ticket) else row[2:]):
+            if not re.fullmatch(r'[0-9]+(?:\.[0-9]+)?', value) or not 0 <= float(value) <= 1e9 or (not fixed and not ticket and index == 0 and float(value) == 0):
                 raise ValueError('Invalid price/length')
-            if fixed and Decimal(value)*10**int(digits) != (Decimal(value)*10**int(digits)).to_integral_value():
+            if (fixed or ticket) and Decimal(value)*10**int(digits) != (Decimal(value)*10**int(digits)).to_integral_value():
                 raise ValueError('Price exceeds currency precision')
     free=metadata.get('freeRoads')
     if free is not None:
         refs=[''.join(r.split()).upper() for r in free.split(',')]
-        if fixed or not metadata.get('freeRoadSource','').startswith('https://') or not refs or len(set(refs))!=len(refs) or any(not re.fullmatch('[A-Z][A-Z0-9-]{0,31}',r) for r in refs):
+        if fixed or ticket or not metadata.get('freeRoadSource','').startswith('https://') or not refs or len(set(refs))!=len(refs) or any(not re.fullmatch('[A-Z][A-Z0-9-]{0,31}',r) for r in refs):
             raise ValueError('Invalid explicit free-road policy/provenance')
     elif 'freeRoadSource' in metadata: raise ValueError('Free-road source without policy')
     allowed = metadata.get('estimateRoads')
-    if fixed and allowed is not None: raise ValueError('Road estimate policy in fixed-charge catalog')
-    if not re.fullmatch('toll-[a-z-]{1,40}',namespace) or (fixed != (namespace=='toll-charges')):
+    if (fixed or ticket) and allowed is not None: raise ValueError('Road estimate policy in fixed-charge catalog')
+    if namespace!={'road-average':'toll-tariffs','fixed-crossing':'toll-charges','entry-exit':'toll-fares'}[scheme]:
         raise ValueError('Wrong catalog namespace')
     if allowed is not None and any(''.join(r.split()).upper() not in roads for r in allowed.split(',') if r.strip()):
         raise ValueError('Invalid estimate policy')
@@ -85,8 +87,9 @@ def package(source, output, namespace="toll-tariffs"):
     manifest = dict(schemaVersion=1, country=country, revision=revision, currency=metadata['currency'],
         year=int(metadata['year']), fractionDigits=int(digits), vehicleClasses=classes,
         sizeBytes=len(data), sha256=hashlib.sha256(data).hexdigest(), path=path,
-        source=metadata['source'], pricing='fixed-crossing' if fixed else 'road-average-estimate', sectionCount=len(sections))
+        source=metadata['source'], pricing=scheme if (fixed or ticket) else 'road-average-estimate', sectionCount=len(sections))
     if fixed: manifest.update(scheme=scheme,chargeCount=len(sections))
+    if ticket: manifest.update(scheme=scheme,journeyCount=len(sections))
     destination = output/namespace/country
     version = destination/str(revision)
     version.mkdir(parents=True, exist_ok=True)

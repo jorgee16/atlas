@@ -13,7 +13,8 @@ import java.io.FileNotFoundException
  */
 internal enum class TollCatalogKind(val assetDirectory:String,val namespace:String,val scheme:String) {
     ROAD_AVERAGE("tolls","toll-tariffs","road-average"),
-    FIXED_CROSSING("toll-charges","toll-charges","fixed-crossing")
+    FIXED_CROSSING("toll-charges","toll-charges","fixed-crossing"),
+    ENTRY_EXIT("toll-fares","toll-fares","entry-exit")
 }
 
 internal object TollTableAssets {

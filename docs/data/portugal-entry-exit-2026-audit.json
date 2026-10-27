@@ -1,0 +1,18 @@
+{
+  "country": "Portugal",
+  "revision": 2026102701,
+  "network": "brisa-published",
+  "sourceSha256": "dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274",
+  "catalogSha256": "c9d37d8a30fadd6a2076efb6f52826065e45bb6cc33b9fa14297baf3f856a83a",
+  "farePairs": 3270,
+  "sourceCells": 13080,
+  "includedDomains": [
+    "brisal",
+    "center",
+    "north"
+  ],
+  "excludedDomains": {
+    "south": "Source pages 9-10 state 01-01-2025"
+  },
+  "routePricing": "Exact only with complete reviewed directed entry/exit crossing evidence; no national bindings are activated by this file"
+}

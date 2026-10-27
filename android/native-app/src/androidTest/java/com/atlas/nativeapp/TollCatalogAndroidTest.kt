@@ -13,6 +13,39 @@ import org.junit.runner.RunWith
 /** Real APK assets, Android private storage and JNI parsing, without touching GPS. */
 @RunWith(AndroidJUnit4::class)
 class TollCatalogAndroidTest {
+    @Test fun entryExitAssetLoadsThroughJniAndSurvivesOfflineRollbackWithoutCountryLeakage() {
+        val context=InstrumentationRegistry.getInstrumentation().targetContext
+        val bytes=context.assets.open("toll-fares/Portugal.csv").use { it.readBytes() }
+        val catalog=TollCatalog.parse("Portugal",bytes,"bundled")
+        assertEquals("entry-exit",catalog.scheme);assertEquals(3270,catalog.entryExitFares.size)
+        val braga=catalog.entryExitFares.first { it.network=="brisa-published"&&it.entry=="0311"&&it.exit=="0316" }
+        assertEquals(java.math.BigDecimal("3.85"),braga.amounts[1])
+        assertFalse(catalog.entryExitFares.any { it.entry=="0211"&&it.exit=="0222" })
+        NativeCore().use { core ->
+            core.tariffs("Portugal",null);core.entryExitTariffs("Portugal",bytes)
+            core.tariffs("Spain",null)
+            var rejected=false
+            try { core.entryExitTariffs("Portugal",bytes) } catch(_:Exception) { rejected=true }
+            assertTrue("A previous country cannot supply entry/exit prices",rejected)
+            core.entryExitTariffs("Spain",null)
+        }
+        val root=File(context.cacheDir,"ticket-test-"+UUID.randomUUID())
+        fun repository()=TollCatalogRepository(root,{if(it=="Portugal")bytes else null},
+            { country,data -> NativeCore().use { it.tariffs(country,data) } },"entry-exit")
+        try {
+            val updated=String(bytes,Charsets.UTF_8).replace("# version="+catalog.revision,"# version="+(catalog.revision+1)).toByteArray()
+            val next=TollCatalog.parse("Portugal",updated,"cache")
+            val manifest=JSONObject().put("schemaVersion",1).put("scheme","entry-exit").put("country","Portugal")
+                .put("revision",next.revision).put("currency",next.currency).put("year",next.year)
+                .put("fractionDigits",next.fractionDigits).put("vehicleClasses",JSONArray(next.classes))
+                .put("sha256",next.sha256).put("sizeBytes",updated.size)
+            repository().install("Portugal",manifest,updated)
+            assertEquals(next.sha256,repository().load("Portugal")!!.sha256)
+            assertEquals(catalog.sha256,repository().rollback("Portugal").sha256)
+            assertEquals(catalog.sha256,repository().load("Portugal")!!.sha256)
+            assertNull(repository().load("Spain"))
+        } finally { root.deleteRecursively() }
+    }
     @Test fun apkFallbackAndDownloadedCatalogSurviveOfflineRestartAndRollback() {
         val context=InstrumentationRegistry.getInstrumentation().targetContext
         val bundled=context.assets.open("tolls/Portugal.csv").use { it.readBytes() }
@@ -65,3 +98,4 @@ class TollCatalogAndroidTest {
         assertNull(repository.load("Spain"))
     }
 }
+

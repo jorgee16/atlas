@@ -13,6 +13,7 @@ class NativeCore : AutoCloseable {
     private external fun openSearch(handle: Long, directory: String)
     private external fun loadTariffs(handle: Long, country: String, csv: ByteArray)
     private external fun loadFixedTariffs(handle:Long,country:String,csv:ByteArray)
+    private external fun loadEntryExitTariffs(handle:Long,country:String,csv:ByteArray)
     private external fun priceCurrentRoute(handle:Long):ByteArray
     private external fun loadTollBindings(handle:Long,country:String,directory:String,csv:ByteArray,actualHashes:Array<String>)
     private external fun find(handle: Long, query: ByteArray, lat: Double, lon: Double, nearby: Boolean, category: String): ByteArray
@@ -26,6 +27,7 @@ class NativeCore : AutoCloseable {
     fun tariffs(country: String, csv: ByteArray?) =
         loadTariffs(handle, country, csv ?: byteArrayOf())
     internal fun fixedTariffs(country:String,csv:ByteArray?)=loadFixedTariffs(handle,country,csv ?: byteArrayOf())
+    internal fun entryExitTariffs(country:String,csv:ByteArray?)=loadEntryExitTariffs(handle,country,csv ?: byteArrayOf())
     internal fun tollBindings(country:String,directory:String,input:TollBindingInput?):Boolean=try {
         loadTollBindings(handle,country,directory,input?.csv ?: byteArrayOf(),input?.actualHashes ?: emptyArray())
         input!=null
@@ -53,5 +55,6 @@ data class Coordinate(val lat: Double, val lon: Double) {
 }
 data class Fix(val point: Coordinate, val accuracy: Double, val speed: Double, val bearing: Double?, val time: Double, val bearingAccuracy: Double? = null, val providerBearing: Double? = null, val providerSpeed: Double? = null,
                val motionConfirmed: Boolean? = null, val provider: String? = null)
+
 
 

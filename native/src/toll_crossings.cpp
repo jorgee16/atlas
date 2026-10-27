@@ -141,4 +141,50 @@ bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &pr
   route.tollSource=prices.source;route.tollVersion=prices.version;route.tollFractionDigits=prices.fractionDigits;route.tollVehicleClasses=prices.classes;
   return true;
 }
+std::optional<std::vector<TollJourney>> entryExitJourneys(const std::vector<std::string> &events) {
+  if(events.empty())return std::nullopt;
+  std::vector<TollJourney> result;
+  std::optional<TollJourney> open;
+  for(const auto &event:events) {
+    const auto a=event.find(':'),b=event.find(':',a==std::string::npos?0:a+1);
+    if(a==std::string::npos||b==std::string::npos||event.find(':',b+1)!=std::string::npos)return std::nullopt;
+    const auto kind=event.substr(0,a),network=event.substr(a+1,b-a-1),station=event.substr(b+1);
+    const auto valid=[](const std::string &s){return !s.empty()&&s.size()<=128&&std::all_of(s.begin(),s.end(),[](unsigned char c){return (c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='-'||c=='_';});};
+    if(!valid(network)||!valid(station))return std::nullopt;
+    if(kind=="entry") {
+      if(open)return std::nullopt;
+      open=TollJourney{network,station,{}};
+    } else if(kind=="exit") {
+      if(!open||open->network!=network)return std::nullopt;
+      open->exit=station;result.push_back(*open);open.reset();
+    } else return std::nullopt;
+  }
+  return open?std::nullopt:std::optional<std::vector<TollJourney>>(std::move(result));
+}
+bool applyEntryExitTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
+    const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph) {
+  if(prices.scheme!="entry-exit"||route.tolledMeters<=0||route.tollCountry!=prices.country)return false;
+  std::vector<TollEdgeTraversal> traversal;
+  for(const auto &leg:route.legs) {
+    const auto full=graph.edge(leg.edge).distanceDm/10.;
+    traversal.push_back({leg.edge,leg.from,leg.to,std::clamp(full-leg.distance,0.,full),full,leg.road.ref,(leg.road.flags&4)!=0});
+  }
+  const auto proof=matcher.match(actualGraph,prices.country,traversal);
+  if(!proof||!proof->complete)return false;
+  const auto journeys=entryExitJourneys(proof->chargeIds);if(!journeys)return false;
+  const auto total=prices.sumEntryExitFares(*journeys,route.tollVehicleClass);if(!total)return false;
+  std::vector<TollRoadCharge> charges;
+  for(const auto &journey:*journeys) {
+    const auto amount=prices.entryExitFare(journey,route.tollVehicleClass);if(!amount)return false;
+    TollRoadCharge charge;charge.road=journey.network;charge.name=journey.entry+" → "+journey.exit;
+    charge.chargeId=journey.network+":"+journey.entry+":"+journey.exit;
+    charge.amount=*amount;charge.exact=true;charges.push_back(std::move(charge));
+  }
+  // Reject incomplete evidence before touching any route metadata.
+  route.tollEuros=*total;route.tollPriceExact=true;route.tollPriceComplete=true;
+  route.pricedTollMeters=route.tolledMeters;route.tollRoads=std::move(charges);
+  route.tollCountry=prices.country;route.tollCurrency=prices.currency;route.tollYear=prices.year;
+  route.tollSource=prices.source;route.tollVersion=prices.version;route.tollFractionDigits=prices.fractionDigits;route.tollVehicleClasses=prices.classes;
+  return true;
+}
 } // namespace atlas

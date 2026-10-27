@@ -32,7 +32,8 @@ Duplicate sections/classes/metadata, invalid numbers and unsupported schemes fai
 Route totals currently use `scheme=road-average`; the separate `fixed-crossing`
 provider is described below. Optional `estimateRoads=A1,A5,...`
 restricts estimates while retaining other source rows for audit/section lookup.
-Future plaza/ticket/vignette providers need their own validated matching rules.
+Fixed-crossing and entry/exit providers have separate validated matching rules;
+future vignette providers must define their own rules.
 
 JSON retains legacy `tollEuros` as an alias of currency-neutral `tollAmount`.
 It adds `tollTariffVersion`, `tollFractionDigits`, `tollVehicleClass` and
@@ -42,6 +43,48 @@ source, year, version, known/unknown roads and incomplete coverage. Web price-ba
 alternative selection excludes unknown prices.
 
 ## Versioned offline updates
+
+### Entry/exit matrices (revision 2026102701)
+
+The third scheme is `entry-exit`, with columns
+`network;entry;exit;class1;class2;...`. Country, currency, precision, classes and
+identities remain data. Directed pairs are explicit; missing reverse/self pairs
+and missing class values are never synthesized. Fixed and matrix sums use
+integer minor units. A matrix cannot become a per-kilometer estimate.
+
+`TollCatalogKind.ENTRY_EXIT` uses `assets/toll-fares/<country>.csv` and the isolated
+`/toll-fares/<country>/...` cache/download/publication namespace. It reuses the
+existing SHA-256, native validation, atomic installation and rollback machinery.
+Settings provides optional entry/exit updates and rollback. Switching countries
+clears matrix, fixed and crossing state. The web bundle is generated from the
+same approved asset, with no independent price constants.
+
+Portugal bundles **3,270 pairs / 13,080 independently published class cells** from
+the Brisa north, center and Brisal matrices, effective 26 August 2026. The lookup
+namespace `brisa-published` identifies the published matrix, not a motorway or a
+guess at concession topology. All original matrix domains remain in the audit.
+The 900 southern pairs are withheld because their pages explicitly state 2025.
+`docs/data/portugal-entry-exit-2026-audit.json` binds the approved subset to the
+reviewed source PDF and CSV hashes. Reproduce it with `tools/import-brisa-fares.py`
+and its `--active-out` / `--active-audit` arguments. Candidate tables marked with
+an unapproved `status` are rejected by C++, Kotlin, web and the packager.
+
+JNI loads this provider before route calculation. Exact pricing requires a fully
+reviewed, graph-digest-bound crossing sequence using
+`entry:<network>:<station>` and `exit:<network>:<station>`. The sequencer rejects
+nested entries, missing entry/exit, different networks, unknown event types and
+uncovered traversal. Repeated complete journeys remain chargeable. No observed
+ticket events means **unavailable matching**, never a free route. Price failure
+leaves the previous estimate/unavailable result untouched. Both endpoints and
+all prices must be present before any monetary metadata is replaced.
+
+No national ticket bindings are activated in this increment. Existing A5 fixed
+bindings remain unchanged. Therefore bundling these matrices does **not** turn
+unmatched routes into exact quotes, increase graph-matching coverage, or prove
+Via Verde parity. The country-wide engine capability and offline price data are
+ready for reviewed bindings; remaining operators, bridge rules and full matching
+are still open. No navigation geometry, GPS processing, maneuver, distance or ETA
+is changed by either exact-price provider.
 
 `python3 tools/toll-catalog.py` generates immutable payloads for the existing R2
 origin under `/toll-tariffs/<country>/<revision>/table.csv`, a versioned manifest,
@@ -128,8 +171,9 @@ The current Brisa document is
 Its published origin/destination matrices must not be replaced with sums of IMT
 section prices. For example, Maia PV–Braga Sul class 1 is EUR3.85 in the matrix;
 the EUR3.20 section-chain sum above is not that journey's exact fare.
-Matrix extraction is not activated until every source cell is unambiguous and
-physical entry/exit matching is verified. No missing cell is interpreted as zero.
+The source matrix has now been extracted; the approved 2026 subset is described
+above. Exact route application still requires reviewed physical entry/exit
+matching. No missing cell is interpreted as zero.
 The existing fixed-charge IDs are stable internal identifiers; do not remap them
 silently when an operator document uses different external plaza codes.
 

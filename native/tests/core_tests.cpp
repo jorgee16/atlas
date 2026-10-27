@@ -124,6 +124,26 @@ int main(int argc, char **argv) {
     auto changedIdentity=identity;changedIdentity["edges.bin"]=std::string(64,'b');
     check(!applyFixedTollCharges(toll,exact,fixedFixture,fixedProof,changedIdentity),"another graph cannot reuse an exact proof");
 
+    const auto ticketFixture=TollTariffs::parse(
+      "# country=Testland\n# currency=JPY\n# year=2026\n# version=1\n# fractionDigits=0\n"
+      "# scheme=entry-exit\n# source=https://example.test/fixture\n"
+      "network;entry;exit;class1;class4\nnetwork;one;two;125;811\n","Testland");
+    const auto last=tolled->legs.back();const auto lastFull=toll.edge(last.edge).distanceDm/10.;
+    TollCrossingMatcher ticketProof(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/2,"exit:network:two",lastFull}},true);
+    ticketProof.validateGraph(toll);
+    auto ticketRoute=*tolled;ticketRoute.tollCountry="Testland";
+    check(applyEntryExitTollCharges(toll,ticketRoute,ticketFixture,ticketProof,identity),"complete directed entry/exit proof enables a published pair");
+    check(ticketRoute.tollPriceExact&&ticketRoute.tollEuros==125&&ticketRoute.tollCurrency=="JPY","ticket fares keep independent currency and class amounts");
+    check(ticketRoute.edges==tolled->edges&&ticketRoute.meters==tolled->meters&&ticketRoute.seconds==tolled->seconds&&ticketRoute.maneuvers.size()==tolled->maneuvers.size(),"ticket pricing never changes navigation");
+    for(std::size_t i=0;i<tolled->points.size();++i)check(ticketRoute.points[i].lat==tolled->points[i].lat&&ticketRoute.points[i].lon==tolled->points[i].lon,"ticket pricing preserves authoritative geometry");
+    auto incompleteTicket=*tolled;incompleteTicket.tollCountry="Testland";
+    const auto beforeIncomplete=routeJson(incompleteTicket);
+    TollCrossingMatcher exitOnly(identity,"Testland",certified,{{last.edge,last.from,last.to,lastFull/2,"exit:network:two",lastFull}},true);
+    check(!applyEntryExitTollCharges(toll,incompleteTicket,ticketFixture,exitOnly,identity)&&routeJson(incompleteTicket)==beforeIncomplete,"missing entry never publishes a partial or zero ticket price");
+    check(!applyEntryExitTollCharges(toll,ticketRoute,ticketFixture,ticketProof,changedIdentity),"ticket evidence is graph-version bound");
+
     const auto ukTariffs=TollTariffs::parse(
       "# country=United Kingdom\n# currency=GBP\n# year=2026\n"
       "# source=https://example.test/tariffs\n"

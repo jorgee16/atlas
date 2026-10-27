@@ -153,6 +153,31 @@ class ExplicitFreePolicyTests(unittest.TestCase):
                 with self.assertRaises(ValueError): pack.package(source,root)
 
 class OfficialMatrixCellTests(unittest.TestCase):
+    def test_approved_2026_pairs_have_their_own_publishable_namespace(self):
+        assets=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
+        audit=json.loads((ROOT.parent/'docs/data/portugal-entry-exit-2026-audit.json').read_text())
+        self.assertEqual(hashlib.sha256(assets.read_bytes()).hexdigest(),audit['catalogSha256'])
+        self.assertEqual(3270,audit['farePairs']);self.assertEqual(13080,audit['sourceCells'])
+        self.assertIn('south',audit['excludedDomains'])
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);manifest=pack.package(assets,root,'toll-fares')
+            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(3270,manifest['journeyCount'])
+            storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-fares')
+            self.assertEqual('toll-fares/Portugal/manifest.json',storage.writes[-1])
+            self.assertTrue(all(k.startswith('toll-fares/') for k in storage.writes))
+            with self.assertRaises(ValueError):pack.package(assets,root,'toll-tariffs')
+            with self.assertRaises(ValueError):pack.package(assets,root,'toll-charges')
+
+    def test_second_country_entry_exit_table_keeps_ids_and_precision_independent(self):
+        text='# country=Testland\n# currency=JPY\n# year=2026\n# version=1\n# fractionDigits=0\n# scheme=entry-exit\n# source=https://example.test/prices\nnetwork;entry;exit;class1;class5\nn;a;b;125;271\nn;b;a;198;315\n'
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);source=root/'Testland.csv';source.write_text(text)
+            manifest=pack.package(source,root,'toll-fares')
+            self.assertEqual('JPY',manifest['currency']);self.assertEqual([1,5],manifest['vehicleClasses'])
+            for invalid in [text+'n;a;b;1;2\n',text.replace('125;271',';271'),text+'# status=candidate\n',text.replace('125;271','1.25;271')]:
+                source.write_text(invalid)
+                with self.assertRaises(ValueError):pack.package(source,root,'toll-fares')
+
     def setUp(self):
         self.extractor=module('import-brisa-fares')
         self.fixture=json.loads((ROOT/'test-fixtures/brisa-matrix-cells.json').read_text())

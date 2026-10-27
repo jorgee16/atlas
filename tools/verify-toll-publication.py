@@ -19,7 +19,7 @@ def get(path,limit):
 
 if __name__=='__main__':
     receipts=[]
-    for folder,namespace,scheme in [('tolls','toll-tariffs','road-average'),('toll-charges','toll-charges','fixed-crossing')]:
+    for folder,namespace,scheme in [('tolls','toll-tariffs','road-average'),('toll-charges','toll-charges','fixed-crossing'),('toll-fares','toll-fares','entry-exit')]:
         for file in sorted((ASSETS/folder).glob('*.csv')):
             country=file.stem;encoded=urllib.parse.quote(country,safe='')
             manifest=json.loads(get(f'/{namespace}/{encoded}/manifest.json',65536))

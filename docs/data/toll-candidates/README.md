@@ -30,7 +30,9 @@ These are source matrix lookups, not independently verified Via Verde quotes or
 end-to-end Atlas route totals. The southern row has the source-date caveat above.
 
 This directory is outside Android assets and the web bundle. The production
-catalog packager rejects its entry-exit scheme. Activation requires reviewed
+catalog packager rejects its unapproved status. A separate approved 2026 subset
+contains 3,270 north/center/Brisal pairs in `assets/toll-fares/Portugal.csv`; the
+900 southern pairs remain withheld. Exact route pricing requires reviewed
 physical entry/exit bindings to the graph and resolution of effective-date
 questions. None of these rows is converted to a guessed per-kilometer rate.
 Remaining concessionaires and bridge direction/exemption rules are still open;

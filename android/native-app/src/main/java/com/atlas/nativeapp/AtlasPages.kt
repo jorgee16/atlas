@@ -227,6 +227,11 @@ class AtlasPages(
                 "Official charges per crossing · Current route country"){open("tollcharges")})
             addView(ui.rule());addView(rowAction("download","Update toll tariffs",
                 model.tollCountry?.let { "$it · Optional data download" } ?: "Calculate a route to select its country"){model.updateTollTariffs()})
+            addView(ui.rule());addView(rowAction("download","Update entry/exit tariffs",
+                model.tollCountry?.let { "$it · Published entry/exit prices" } ?: "Calculate a route to select its country"){
+                model.updateTollTariffs(kind=TollCatalogKind.ENTRY_EXIT)})
+            if(model.canRollbackEntryExitTolls){addView(ui.rule());addView(rowAction("download","Previous entry/exit tariffs",
+                "Restore the previous valid local table"){model.updateTollTariffs(true,TollCatalogKind.ENTRY_EXIT)})}
             if(model.canRollbackTolls){addView(ui.rule());addView(rowAction("download","Previous toll tariffs",
                 "Restore the previous valid local table"){model.updateTollTariffs(true)})}
             addView(ui.rule());addView(rowAction("layers","Map appearance",when(model.mapVisualStyle){
@@ -327,4 +332,5 @@ class AtlasPages(
         fun formatTime(seconds: Double): String {val minutes=kotlin.math.ceil(seconds/60).toInt().coerceAtLeast(1);return if(minutes<60)"$minutes min" else "${minutes/60} h ${minutes%60} min"}
     }
 }
+
 

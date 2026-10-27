@@ -8,7 +8,7 @@ using namespace atlas;
 void check(bool ok,const char* why){if(!ok)throw std::runtime_error(why);}
 template<class F> void rejects(F f){bool failed=false;try{f();}catch(const std::exception&){failed=true;}check(failed,"invalid table accepted");}
 int main(int argc,char** argv){try{
- check(argc==3,"production road and plaza CSVs required");std::ifstream file(argv[1]);check(bool(file),"missing production CSV");std::ostringstream buffer;buffer<<file.rdbuf();
+ check(argc==4,"production road, plaza and entry/exit CSVs required");std::ifstream file(argv[1]);check(bool(file),"missing production CSV");std::ostringstream buffer;buffer<<file.rdbuf();
  const auto csv=buffer.str();auto pt=TollTariffs::parse(csv,"Portugal");
  check(pt.classes==std::vector<int>({1,2,3,4}),"official classes");
  check(pt.version=="2026102601"&&pt.currency=="EUR"&&pt.year=="2026","provenance");
@@ -50,5 +50,16 @@ int main(int argc,char** argv){try{
  rejects([&]{TollTariffs::parse(fixedBuffer.str()+"brisa:0501;A5;duplicate;1;2;3;4\n","Portugal");});
  auto wrongScheme=fixedBuffer.str();wrongScheme.replace(wrongScheme.find("fixed-crossing"),14,"road-average");
  rejects([&]{TollTariffs::parse(wrongScheme,"Portugal");});
+ std::ifstream ticketFile(argv[3]);check(bool(ticketFile),"missing production ticket CSV");std::ostringstream ticketBuffer;ticketBuffer<<ticketFile.rdbuf();
+ auto tickets=TollTariffs::parse(ticketBuffer.str(),"Portugal");
+ check(tickets.scheme=="entry-exit"&&!tickets.estimate("A3",10000,1),"entry/exit prices cannot become km estimates");
+ check(tickets.entryExitFare({"brisa-published","0311","0316"},1)==3.85,"official Maia PV-Braga Sul published pair");
+ check(tickets.entryExitFare({"brisa-published","0311","0316"},4)==9.60,"official class4 independent price");
+ check(tickets.entryExitFare({"brisa-published","1411","0117"},1)==2.90,"official A14 pair");
+ check(!tickets.entryExitFare({"brisa-published","0211","0222"},1),"south source date discrepancy is withheld");
+ check(!tickets.entryExitFare({"other","0311","0316"},1)&&!tickets.entryExitFare({"brisa-published","0311","0316"},5),"network and class cannot fall back");
+ check(tickets.sumEntryExitFares({{"brisa-published","0311","0316"},{"brisa-published","0311","0316"}},1)==7.70,"repeated actual journeys are charged twice");
+ auto unapproved=ticketBuffer.str();unapproved.replace(unapproved.find("# status=active"),15,"# status=candidate");
+ rejects([&]{TollTariffs::parse(unapproved,"Portugal");});
  std::cout<<"Official tariff and country-policy tests passed\n";return 0;
  }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -23,5 +23,11 @@ int main(){try{
  check(q&&!q->complete&&q->chargeIds.size()==5,"uncertified edge makes total incomplete, genuine repeats preserved");
  rejects([&]{TollCrossingMatcher m(graph,"Testland",{7,8},{{7,1,2,30,"one",100},{7,1,2,30,"two",100}},true);});
  rejects([&]{TollCrossingMatcher m({},"Testland",{7,8},bindings,true);});
+ const auto journeys=entryExitJourneys({"entry:network:one","exit:network:two","entry:network:one","exit:network:two"});
+ check(journeys&&journeys->size()==2&&journeys->front().entry=="one"&&journeys->front().exit=="two","explicit repeated ticket journeys are preserved");
+ const std::vector<std::vector<std::string>> incomplete={ {},{"entry:n:a"},{"exit:n:b"},
+   {"entry:n:a","entry:n:b","exit:n:c"},{"entry:n:a","exit:other:b"},
+   {"gate:one"},{"entry:n:a","exit:n:b","entry:n:c"},{"entry:n:a:extra","exit:n:b"}};
+ for(const auto &events:incomplete)check(!entryExitJourneys(events),"incomplete, mixed or ambiguous ticket events cannot quote");
  std::cout<<"Directed toll-crossing evidence tests passed\n";return 0;
  }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -1,4 +1,5 @@
 #pragma once
+#include "atlas/core.hpp"
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -50,5 +51,10 @@ private:
   bool reviewed_=false;
 };
 bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
+    const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
+// Events are entry:<network>:<station> / exit:<network>:<station>.
+// No price is inferred for a route that starts or ends inside a ticket system.
+std::optional<std::vector<TollJourney>> entryExitJourneys(const std::vector<std::string> &events);
+bool applyEntryExitTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
     const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
 } // namespace atlas

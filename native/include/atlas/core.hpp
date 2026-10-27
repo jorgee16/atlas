@@ -70,6 +70,7 @@ struct Maneuver {
  * Real section prices are converted to road-average estimates until explicit
  * junction/plaza IDs exist in the road graph. No guessed default rate. */
 struct TollFixedChargeInfo { std::string id,road,name; };
+struct TollJourney { std::string network,entry,exit; };
 class TollTariffs {
 public:
   static TollTariffs parse(std::string_view csv, std::string country);
@@ -86,6 +87,9 @@ public:
   std::optional<TollFixedChargeInfo> fixedChargeInfo(std::string_view chargeId) const;
   std::optional<double> sumFixedCharges(const std::vector<std::string> &crossings,
                                         int vehicleClass) const;
+  // Explicit published directed pairs; never infer symmetry or missing-cell zero.
+  std::optional<double> entryExitFare(const TollJourney &journey,int vehicleClass) const;
+  std::optional<double> sumEntryExitFares(const std::vector<TollJourney> &journeys,int vehicleClass) const;
   std::string scheme = "road-average";
   std::string country, currency, year, source, version;
   int fractionDigits = 2;
@@ -98,6 +102,7 @@ private:
   std::unordered_map<std::string, RoadTotals> roadTotals_;
   std::unordered_map<std::string,std::unordered_map<int,double>> sectionPrices_;
   std::unordered_map<std::string,std::unordered_map<int,int64_t>> fixedCharges_;
+  std::unordered_map<std::string,std::unordered_map<int,int64_t>> entryExitFares_;
   std::unordered_map<std::string,TollFixedChargeInfo> fixedChargeInfo_;
   bool restrictEstimates_ = false;
   std::unordered_set<std::string> estimateRoads_;

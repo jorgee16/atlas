@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 
 def publish(client, bucket, root, namespace="toll-tariffs"):
-    if namespace not in ("toll-tariffs","toll-charges"): raise ValueError("Unsupported tariff namespace")
+    if namespace not in ("toll-tariffs","toll-charges","toll-fares"): raise ValueError("Unsupported tariff namespace")
     receipts=[]
     def read(key):
         try:
@@ -28,7 +28,7 @@ def publish(client, bucket, root, namespace="toll-tariffs"):
     for pointer in sorted((root/namespace).glob('*/manifest.json')):
         raw=pointer.read_bytes();manifest=json.loads(raw);country=manifest['country'];version=manifest['revision']
         key=f'{namespace}/{quote(country,safe="")}/manifest.json'
-        if manifest.get('scheme','road-average') != ('fixed-crossing' if namespace=='toll-charges' else 'road-average'): raise ValueError('Catalog scheme namespace mismatch')
+        if manifest.get('scheme','road-average') != {'toll-charges':'fixed-crossing','toll-tariffs':'road-average','toll-fares':'entry-exit'}[namespace]: raise ValueError('Catalog scheme namespace mismatch')
         table=root/namespace/country/str(version)/'table.csv'
         data=table.read_bytes()
         if hashlib.sha256(data).hexdigest()!=manifest['sha256'] or len(data)!=manifest['sizeBytes']: raise ValueError('Local integrity mismatch')
@@ -60,4 +60,4 @@ if __name__=='__main__':
     client=boto3.client('s3',endpoint_url='https://'+os.environ['R2_ACCOUNT_ID']+'.r2.cloudflarestorage.com',
         region_name='auto',aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
     receipts=publish(client,'atlas-regions',args.root,args.namespace)
-    (args.root/('publication-receipt.json' if args.namespace=='toll-tariffs' else 'publication-receipt-charges.json')).write_text(json.dumps(receipts,indent=2)+'\n')
+    (args.root/('publication-receipt.json' if args.namespace=='toll-tariffs' else 'publication-receipt-fares.json' if args.namespace=='toll-fares' else 'publication-receipt-charges.json')).write_text(json.dumps(receipts,indent=2)+'\n')

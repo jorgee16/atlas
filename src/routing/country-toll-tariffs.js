@@ -1,4 +1,4 @@
-import bundled, { fixedChargeTables } from './bundled-toll-tables.js';
+import bundled, { fixedChargeTables, entryExitTables } from './bundled-toll-tables.js';
 
 const normalize = value => String(value).replace(/\s+/g, '').toUpperCase();
 export function parseTollTable(country, csv) {
@@ -14,19 +14,32 @@ export function parseTollTable(country, csv) {
   }
   if (metadata.get('country') !== country || !/^[A-Z]{3}$/.test(metadata.get('currency')) ||
       !/^\d{4}$/.test(metadata.get('year')) || !metadata.get('source')?.startsWith('https://') ||
-      (metadata.has('scheme') && !['road-average','fixed-crossing'].includes(metadata.get('scheme')))) throw new Error('Invalid tariff provenance');
+      (metadata.has('scheme') && !['road-average','fixed-crossing','entry-exit'].includes(metadata.get('scheme')))) throw new Error('Invalid tariff provenance');
+  if (metadata.has('status') && metadata.get('status') !== 'active') throw new Error('Unapproved tariff candidate');
   const version = metadata.get('version') ?? '0', digits = metadata.get('fractionDigits') ?? '2';
   if (!/^\d{1,16}$/.test(version) || !/^[0-3]$/.test(digits)) throw new Error('Invalid tariff version/precision');
-  const fixed = metadata.get('scheme') === 'fixed-crossing';
+  const fixed = metadata.get('scheme') === 'fixed-crossing', ticket = metadata.get('scheme') === 'entry-exit';
   const header = rows.shift();
-  if (header?.slice(0, 3).join(';') !== (fixed ? 'charge;road;name' : 'road;section;km') || header.length < 4 || header.length > 35 ||
+  if (header?.slice(0, 3).join(';') !== (ticket ? 'network;entry;exit' : fixed ? 'charge;road;name' : 'road;section;km') || header.length < 4 || header.length > 35 ||
       !header.slice(3).every(x => /^class[1-9]\d?$/.test(x))) throw new Error('Invalid class columns');
   const classes = header.slice(3).map(x => Number(x.slice(5)));
   if (new Set(classes).size !== classes.length || !rows.length || rows.length > 30000) throw new Error('Invalid classes/rows');
-  const roads = new Map(), sections = new Set(), charges = new Map();
+  const roads = new Map(), sections = new Set(), charges = new Map(), fares = new Map();
   const scale = 10 ** Number(digits);
   for (const row of rows) {
     if (row.length !== header.length || !row[0] || !row[1]) throw new Error('Invalid tariff section');
+    if (ticket) {
+      if (!row.slice(0,3).every(x=>/^[A-Za-z0-9_-]{1,128}$/.test(x))) throw new Error('Invalid entry/exit identity');
+      const identity=row.slice(0,3).join('\n');
+      if (fares.has(identity)) throw new Error('Duplicate directed fare');
+      const prices=new Map();
+      row.slice(3).forEach((value,i)=> {
+        const n=Number(value), minor=Math.round(n*scale);
+        if(!/^\d+(\.\d+)?$/.test(value)||!Number.isFinite(n)||n<0||n>1e9||Math.abs(n*scale-minor)>.0001) throw new Error('Invalid fare precision');
+        prices.set(classes[i],minor);
+      });
+      fares.set(identity,prices);continue;
+    }
     if (fixed) {
       if (!/^[A-Za-z0-9:_-]{1,128}$/.test(row[0]) || !row[2] || charges.has(row[0])) throw new Error('Invalid/duplicate fixed charge');
       const prices = new Map();
@@ -49,21 +62,21 @@ export function parseTollTable(country, csv) {
     const road = roads.get(ref) ?? { km: 0, prices: new Map(classes.map(c => [c, 0])) };
     road.km += numbers[0]; classes.forEach((c, i) => road.prices.set(c, road.prices.get(c) + numbers[i + 1])); roads.set(ref, road);
   }
-  if (fixed && metadata.has('estimateRoads')) throw new Error('Estimate policy in fixed catalog');
+  if ((fixed || ticket) && metadata.has('estimateRoads')) throw new Error('Estimate policy in fixed catalog');
   const freeRefs=metadata.has('freeRoads') ? metadata.get('freeRoads').split(',').map(normalize) : [];
-  if ((metadata.has('freeRoads') && (fixed || !metadata.get('freeRoadSource')?.startsWith('https://') ||
+  if ((metadata.has('freeRoads') && (fixed || ticket || !metadata.get('freeRoadSource')?.startsWith('https://') ||
       new Set(freeRefs).size!==freeRefs.length || freeRefs.some(r=>!/^[A-Z][A-Z0-9-]{0,31}$/.test(r)))) ||
       (!metadata.has('freeRoads') && metadata.has('freeRoadSource'))) throw new Error('Invalid free-road policy/provenance');
   const freeRoads=new Set(freeRefs);
   const explicitlyFree=(ref,vehicleClass) => {
     const tokens=String(ref??'').split(/[;,/]/).map(normalize);
-    return !fixed && classes.includes(vehicleClass) && tokens.some(r=>freeRoads.has(r)) &&
+    return !fixed && !ticket && classes.includes(vehicleClass) && tokens.some(r=>freeRoads.has(r)) &&
       !tokens.some(r=>roads.has(r) && !freeRoads.has(r));
   };
   const allowed = metadata.has('estimateRoads') ? new Set(metadata.get('estimateRoads').split(',').filter(x => x.trim()).map(normalize)) : null;
   if (allowed && [...allowed].some(ref => !roads.has(ref))) throw new Error('Invalid estimate policy');
   return Object.freeze({ country, currency: metadata.get('currency'), year: metadata.get('year'),
-    scheme: fixed ? 'fixed-crossing' : 'road-average', fixedCharges:[...charges.values()].map(c => ({id:c.id,road:c.road,name:c.name})),
+    scheme: ticket ? 'entry-exit' : fixed ? 'fixed-crossing' : 'road-average', fixedCharges:[...charges.values()].map(c => ({id:c.id,road:c.road,name:c.name})),
     fixedCharge(id,vehicleClass) { const n=charges.get(id)?.prices.get(vehicleClass);return n===undefined ? null : n/scale; },
     sumFixedCharges(ids,vehicleClass) {
       if (!fixed || !classes.includes(vehicleClass)) return null;
@@ -71,10 +84,20 @@ export function parseTollTable(country, csv) {
       for (const id of ids) { const n=charges.get(id)?.prices.get(vehicleClass);if(n===undefined || !Number.isSafeInteger(total+n))return null;total+=n; }
       return total/scale;
     },
+    entryExitFare(journey,vehicleClass) {
+      const n=fares.get([journey.network,journey.entry,journey.exit].join('\n'))?.get(vehicleClass);
+      return n===undefined ? null : n/scale;
+    },
+    sumEntryExitFares(journeys,vehicleClass) {
+      if(!ticket||!classes.includes(vehicleClass))return null;
+      let total=0;
+      for(const j of journeys) { const n=fares.get([j.network,j.entry,j.exit].join('\n'))?.get(vehicleClass);if(n===undefined||!Number.isSafeInteger(total+n))return null;total+=n; }
+      return total/scale;
+    },
     explicitlyFree, freeRoadSource:metadata.get('freeRoadSource')??'',
     version, source: metadata.get('source'), fractionDigits: Number(digits), classes,
     estimate(ref, meters, vehicleClass) {
-      if (fixed || !Number.isFinite(meters) || meters < 0 || !classes.includes(vehicleClass)) return null;
+      if (fixed || ticket || !Number.isFinite(meters) || meters < 0 || !classes.includes(vehicleClass)) return null;
       const tokens=String(ref??'').split(/[;,/]/).map(normalize);
       if(tokens.some(r=>freeRoads.has(r))) return explicitlyFree(ref,vehicleClass) ? 0 : null;
       for (const token of tokens) {
@@ -105,4 +128,14 @@ export function countryTollCharges(country) {
     fixedCatalogs.set(country,table);
   }
   return fixedCatalogs.get(country);
+}
+
+const entryExitCatalogs=new Map();
+export function countryTollFares(country) {
+  if(!entryExitCatalogs.has(country)) {
+    let table=null;
+    try { if(Object.hasOwn(entryExitTables,country)) { const candidate=parseTollTable(country,entryExitTables[country]);if(candidate.scheme==='entry-exit')table=candidate; } } catch { }
+    entryExitCatalogs.set(country,table);
+  }
+  return entryExitCatalogs.get(country);
 }

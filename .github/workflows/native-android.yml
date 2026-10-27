@@ -104,6 +104,7 @@ jobs:
           python3 tools/generate-toll-bundle.py --check
           python3 tools/toll-catalog.py
           python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-charges --namespace toll-charges
+          python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-fares --namespace toll-fares
           python3 -m unittest discover -s tools -p test_toll_catalog.py
           node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js
       - name: Generate fixtures with the existing Atlas packager
@@ -782,12 +783,14 @@ jobs:
         run: |
           python3 tools/toll-catalog.py
           python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-charges --namespace toll-charges
+          python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-fares --namespace toll-fares
       - name: Install data publisher SDK
         run: python3 -m pip install 'boto3==1.40.58'
       - name: Publish immutable tariff payloads and replace current manifest last
         run: |
           python3 tools/publish-toll-catalogs.py
           python3 tools/publish-toll-catalogs.py --namespace toll-charges
+          python3 tools/publish-toll-catalogs.py --namespace toll-fares
       - name: Verify public HTTPS delivery of both independent catalog types
         run: python3 tools/verify-toll-publication.py
       - uses: actions/upload-artifact@v4
@@ -1056,9 +1059,11 @@ jobs:
           PYCODE
       - name: Validate original PDF origin/destination cells
         run: |
-          python3 tools/import-brisa-fares.py national-toll-audit/brisa-august-pdf.pdf --out national-toll-audit/Portugal-fares.csv
+          python3 tools/import-brisa-fares.py national-toll-audit/brisa-august-pdf.pdf --out national-toll-audit/Portugal-fares.csv --active-out national-toll-audit/Portugal-active.csv --active-audit national-toll-audit/Portugal-active.audit.json
           cmp docs/data/toll-candidates/Portugal.csv national-toll-audit/Portugal-fares.csv
           cmp docs/data/toll-candidates/Portugal.audit.json national-toll-audit/Portugal-fares.audit.json
+          cmp android/native-app/src/main/assets/toll-fares/Portugal.csv national-toll-audit/Portugal-active.csv
+          cmp docs/data/portugal-entry-exit-2026-audit.json national-toll-audit/Portugal-active.audit.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -1121,3 +1126,4 @@ jobs:
           name: Atlas-national-toll-geometry-census
           path: national-toll-geometry/
           if-no-files-found: error
+

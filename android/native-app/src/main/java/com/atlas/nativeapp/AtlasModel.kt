@@ -244,6 +244,9 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     internal val canRollbackFixedTolls:Boolean get()=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).canRollback(it)
     } ?: false
+    internal val canRollbackEntryExitTolls:Boolean get()=routingTariffCountry?.let {
+        TollTableAssets.repository(getApplication(),TollCatalogKind.ENTRY_EXIT).canRollback(it)
+    } ?: false
     internal fun fixedTollCatalog():TollCatalog?=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(it)
     }
@@ -333,6 +336,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     routingTariffCountry=country
                     core.tariffs(country,TollTableAssets.read(getApplication(),country))
                     core.fixedTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(country)?.csv)
+                    core.entryExitTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.ENTRY_EXIT).load(country)?.csv)
                     fun priced(nativeRoute:String):JSONObject {
                         val baseline=JSONObject(nativeRoute)
                         if(snapshot.walking||baseline.optString("tollPricing")=="exact")return baseline
@@ -788,4 +792,5 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         kotlinx.coroutines.CoroutineScope(worker).launch { core.close(); worker.close() }
     }
 }
+
 

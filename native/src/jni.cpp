@@ -22,6 +22,7 @@ struct Engine {
   std::optional<atlas::TollTariffs> tariffs;
   std::string tariffCountry;
   std::optional<atlas::TollTariffs> fixedTariffs;
+  std::optional<atlas::TollTariffs> entryExitTariffs;
   std::optional<atlas::TollCrossingMatcher> crossings;
   atlas::TollGraphDigests loadedGraphDigests;
 };
@@ -131,7 +132,7 @@ Java_com_atlas_nativeapp_NativeCore_loadTariffs(JNIEnv *env, jobject, jlong id,
     const auto name=string(env,country);
     // Clear even on parse failure: never leak the previous country's rates.
     e.tariffs.reset();
-    e.fixedTariffs.reset();e.crossings.reset();e.loadedGraphDigests.clear();
+    e.fixedTariffs.reset();e.entryExitTariffs.reset();e.crossings.reset();e.loadedGraphDigests.clear();
     e.tariffCountry=name;
     if(!payload || env->GetArrayLength(payload)==0) {
       e.tariffs.reset();
@@ -252,6 +253,8 @@ Java_com_atlas_nativeapp_NativeCore_calculate(JNIEnv *env, jobject, jlong id,
       atlas::calibrateDriveEta(*next, *e.graph);
     if(!walk && e.fixedTariffs && e.crossings)
       atlas::applyFixedTollCharges(*e.graph,*next,*e.fixedTariffs,*e.crossings,e.loadedGraphDigests);
+    if(!walk && e.entryExitTariffs && e.crossings)
+      atlas::applyEntryExitTollCharges(*e.graph,*next,*e.entryExitTariffs,*e.crossings,e.loadedGraphDigests);
     // The same native engine processes GPS across driving and walking
     // routes. Carrying an old car-motion anchor into a new walking route can
     // reject several genuine 1.5m/s fixes as impossible displacement.
@@ -394,13 +397,29 @@ Java_com_atlas_nativeapp_NativeCore_loadFixedTariffs(JNIEnv *env,jobject,jlong i
   } catch(const std::exception &errorValue) {error(env,errorValue);}
 }
 extern "C" JNIEXPORT void JNICALL
+Java_com_atlas_nativeapp_NativeCore_loadEntryExitTariffs(JNIEnv *env,jobject,jlong id,
+    jstring country,jbyteArray payload) {
+  try {
+    std::lock_guard<std::mutex> lock(gate);auto &e=engine(id);
+    e.entryExitTariffs.reset();e.crossings.reset();e.loadedGraphDigests.clear();
+    const auto name=string(env,country);
+    if(name!=e.tariffCountry)throw std::invalid_argument("Entry/exit country differs from selected routing country");
+    const auto size=payload?env->GetArrayLength(payload):0;if(!size)return;
+    if(size>2*1024*1024)throw std::invalid_argument("Entry/exit catalog too large");
+    std::string csv(size,'\0');env->GetByteArrayRegion(payload,0,size,reinterpret_cast<jbyte*>(csv.data()));
+    auto table=atlas::TollTariffs::parse(csv,name);
+    if(table.scheme!="entry-exit")throw std::invalid_argument("Expected entry-exit price catalog");
+    e.entryExitTariffs=std::move(table);
+  } catch(const std::exception &errorValue) {error(env,errorValue);}
+}
+extern "C" JNIEXPORT void JNICALL
 Java_com_atlas_nativeapp_NativeCore_loadTollBindings(JNIEnv *env,jobject,jlong id,
     jstring country,jstring directory,jbyteArray payload,jobjectArray actualHashes) {
   try {
     std::lock_guard<std::mutex> lock(gate);auto &e=engine(id);
     e.crossings.reset();e.loadedGraphDigests.clear();
     const auto size=payload?env->GetArrayLength(payload):0;if(!size)return;
-    if(!e.graph||!e.fixedTariffs||string(env,country)!=e.tariffCountry||string(env,directory)!=e.graphPath)
+    if(!e.graph||(!e.fixedTariffs&&!e.entryExitTariffs)||string(env,country)!=e.tariffCountry||string(env,directory)!=e.graphPath)
       throw std::invalid_argument("Crossing proof differs from loaded graph/country");
     if(size>2*1024*1024||!actualHashes||env->GetArrayLength(actualHashes)!=7)throw std::invalid_argument("Invalid crossing proof size/digests");
     const char *names[]={"nodes.bin","edges.bin","geometry.bin","roads.bin","strings.bin","restrictions.bin","spatial-index.bin"};
@@ -423,6 +442,9 @@ Java_com_atlas_nativeapp_NativeCore_priceCurrentRoute(JNIEnv *env,jobject,jlong 
     if(!e.route||!e.graph||e.routeGraphPath!=e.graphPath)throw std::invalid_argument("No current-graph route to price");
     if(e.fixedTariffs&&e.crossings)
       atlas::applyFixedTollCharges(*e.graph,*e.route,*e.fixedTariffs,*e.crossings,e.loadedGraphDigests);
+    if(e.entryExitTariffs&&e.crossings)
+      atlas::applyEntryExitTollCharges(*e.graph,*e.route,*e.entryExitTariffs,*e.crossings,e.loadedGraphDigests);
     return bytes(env,atlas::routeJson(*e.route));
   } catch(const std::exception &errorValue) {error(env,errorValue);return nullptr;}
 }
+
