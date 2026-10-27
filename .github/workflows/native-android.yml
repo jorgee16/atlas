@@ -1028,6 +1028,9 @@ jobs:
                     with urllib.request.urlopen(script,context=context,timeout=30) as response: javascript=response.read(2*1024*1024+1)
                     if len(javascript)>2*1024*1024:raise ValueError('Public script exceeds audit bound')
                     body=javascript.decode('utf-8','replace')
+                    if script.endswith('/javascript.js'):
+                      if len(javascript)>200000:raise ValueError('Calculator source exceeds local review bound')
+                      print('IP_PUBLIC_CALCULATOR_SOURCE='+json.dumps({'url':script,'text':body}),flush=True)
                     (root/('ip-simulator-script-'+str(index)+'.js')).write_bytes(javascript)
                     hints=[body[max(0,m.start()-120):m.end()+250] for m in re.finditer(r'tarifa|taxa|portico|pórtico|cobranca|cobrança|\\.json|\\.csv|api/',body,re.I)]
                     report['publicScriptHints'].append({'url':script,'sha256':hashlib.sha256(javascript).hexdigest(),'hints':hints[:60]})
