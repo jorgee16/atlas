@@ -80,6 +80,17 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual({'A5','A2'},set(result))
             self.assertEqual(1000,result['A5']['estimatedMeters'])
             self.assertEqual(2000,result['A2']['directedMeters']);self.assertEqual(0,result['A2']['estimatedMeters'])
+            free=graph_audit.scan({n:root/n for n in ['roads.bin','strings.bin','edges.bin']},{'A5':True,'A2':False},{'A2'})
+            self.assertEqual(2000,free['A2']['explicitlyFreeMeters'])
+            self.assertEqual(0,free['A2']['estimatedMeters'])
+            self.assertEqual(0,free['A5']['explicitlyFreeMeters'])
+            # An excluded paid reference must still block an ambiguous free alias.
+            strings=b'\0A25;A2\0A2\0N1\0'
+            (root/'strings.bin').write_bytes(b'RSTR'+struct.pack('<II',6,len(strings))+strings)
+            struct.pack_into('<I',roads,16+36+4,8);struct.pack_into('<I',roads,16+72+4,11)
+            (root/'roads.bin').write_bytes(roads)
+            ambiguous=graph_audit.scan({n:root/n for n in ['roads.bin','strings.bin','edges.bin']},{'A2':False},{'A25'})
+            self.assertEqual(0,ambiguous['A25;A2']['explicitlyFreeMeters'])
 
     def test_fixed_catalog_has_independent_namespace_and_no_distance_column(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -140,5 +151,38 @@ class ExplicitFreePolicyTests(unittest.TestCase):
             for invalid in [text.replace('freeRoadSource=https://','freeRoadSource=http://'),text.replace('freeRoads=T2,T3','freeRoads=T2,T2'),text.replace('freeRoads=T2,T3','freeRoads=')]:
                 source.write_text(invalid)
                 with self.assertRaises(ValueError): pack.package(source,root)
+
+class OfficialMatrixCellTests(unittest.TestCase):
+    def setUp(self):
+        self.extractor=module('import-brisa-fares')
+        self.fixture=json.loads((ROOT/'test-fixtures/brisa-matrix-cells.json').read_text())
+
+    def test_real_source_cell_positions_preserve_classes_direction_and_prefixed_station_ids(self):
+        for page in self.fixture['pages']:
+            cells,_=self.extractor.extract_page(page['spans'])
+            self.assertEqual(page['expected'],[[a,b,c,str(price)] for a,b,c,price in cells])
+        self.assertIn(['1011','0112',1,'23.20'],self.fixture['pages'][1]['expected'])
+        self.assertIn(['0211','0222',2,'41.65'],self.fixture['pages'][2]['expected'])
+
+    def test_unlocated_or_duplicate_prices_fail_instead_of_using_a_neighboring_cell(self):
+        spans=self.fixture['pages'][0]['spans']
+        price=next(s for s in spans if self.extractor.PRICE.fullmatch(s['text'].strip()))
+        with self.assertRaisesRegex(ValueError,'Duplicate fare cell'):
+            self.extractor.extract_page(spans+[price])
+        displaced=dict(price,bbox=[price['bbox'][0],5000,price['bbox'][2],5004])
+        with self.assertRaisesRegex(ValueError,'outside source cell bounds'):
+            self.extractor.extract_page([s for s in spans if s is not price]+[displaced])
+
+    def test_candidate_is_complete_per_class_and_keeps_inconsistent_source_dates_visible(self):
+        root=ROOT.parent/'docs/data/toll-candidates'
+        csv=(root/'Portugal.csv').read_bytes();report=json.loads((root/'Portugal.audit.json').read_text())
+        self.assertEqual(hashlib.sha256(csv).hexdigest(),report['csvSha256'])
+        self.assertEqual(4170,report['farePairs'])
+        self.assertEqual(['01-01-2025'],report['sourceEffectiveDates']['south'])
+        self.assertEqual('candidate-not-active-in-routing',report['status'])
+        rows=[r.split(';') for r in csv.decode().splitlines() if r and not r.startswith('#')]
+        self.assertEqual(4171,len(rows));self.assertTrue(all(len(r)==7 for r in rows))
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaises(ValueError): pack.package(root/'Portugal.csv',Path(temp))
 
 if __name__=='__main__': unittest.main()

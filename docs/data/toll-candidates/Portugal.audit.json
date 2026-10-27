@@ -1,0 +1,609 @@
+{
+  "status": "candidate-not-active-in-routing",
+  "sourceEffectiveDates": {
+    "north": [
+      "26-08-2026"
+    ],
+    "center": [
+      "26-08-2026"
+    ],
+    "south": [
+      "01-01-2025"
+    ],
+    "brisal": [
+      "26-08-2026"
+    ]
+  },
+  "warnings": [
+    "South pages state 01-01-2025 in the current August 2026 PDF; operator clarification remains required",
+    "Physical entry/exit graph bindings are not nationally validated"
+  ],
+  "sourceSha256": "dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274",
+  "farePairs": 4170,
+  "stations": {
+    "0311": [
+      "Maia pv"
+    ],
+    "0312": [
+      "Maia II"
+    ],
+    "0313": [
+      "Trofa-Sto. Tirso"
+    ],
+    "0315": [
+      "Cruz"
+    ],
+    "0316": [
+      "Braga Sul"
+    ],
+    "0317": [
+      "Braga Oeste"
+    ],
+    "0318": [
+      "Anais-V. Verde"
+    ],
+    "0319": [
+      "P.Lima S.Nasc."
+    ],
+    "0320": [
+      "P.Lima S.Poente"
+    ],
+    "0321": [
+      "P.Lima Norte"
+    ],
+    "0322": [
+      "EN303"
+    ],
+    "0323": [
+      "Valença pv"
+    ],
+    "0411": [
+      "Ermesinde pv",
+      "Ermesinde PV"
+    ],
+    "0412": [
+      "Ermesinde II"
+    ],
+    "0413": [
+      "Valongo"
+    ],
+    "0414": [
+      "Campo"
+    ],
+    "0415": [
+      "Parada-Baltar"
+    ],
+    "0416": [
+      "Paredes"
+    ],
+    "0417": [
+      "Guilhufe"
+    ],
+    "0418": [
+      "Penafiel"
+    ],
+    "0420": [
+      "Amarante pv"
+    ],
+    "0708": [
+      "EN206 PV"
+    ],
+    "0709": [
+      "EN206 Nó"
+    ],
+    "0710": [
+      "Nó Famalicão"
+    ],
+    "0712": [
+      "Seide"
+    ],
+    "0713": [
+      "Ave"
+    ],
+    "0714": [
+      "Guimarães"
+    ],
+    "0715": [
+      "Guimarães Sul"
+    ],
+    "0716": [
+      "Fafe"
+    ],
+    "0717": [
+      "Basto"
+    ],
+    "0718": [
+      "Ribeira da Pena PV"
+    ],
+    "0719": [
+      "Ribeira da Pena Nó"
+    ],
+    "1101": [
+      "N205 PV"
+    ],
+    "1102": [
+      "N205 Nó"
+    ],
+    "1103": [
+      "Barcelos"
+    ],
+    "1104": [
+      "Ferreiros"
+    ],
+    "1105": [
+      "Figueiredo PV"
+    ],
+    "1106": [
+      "Figueiredo Nó"
+    ],
+    "1107": [
+      "Vizela"
+    ],
+    "1108": [
+      "Felgueiras"
+    ],
+    "1109": [
+      "Lousada"
+    ],
+    "1110": [
+      "EN15"
+    ],
+    "1111": [
+      "EN211"
+    ],
+    "3201": [
+      "EN 224"
+    ],
+    "3202": [
+      "EN 227"
+    ],
+    "3203": [
+      "V Feira Mansores"
+    ],
+    "3204": [
+      "Gião/Louredo"
+    ],
+    "3205": [
+      "Canedo"
+    ],
+    "3206": [
+      "Olival PV"
+    ],
+    "4121": [
+      "Gandra PV"
+    ],
+    "4122": [
+      "ZIC"
+    ],
+    "4123": [
+      "Aguiar de Sousa"
+    ],
+    "4124": [
+      "Medas"
+    ],
+    "4125": [
+      "Sandim Nó"
+    ],
+    "4126": [
+      "Argoncilhe PV"
+    ],
+    "4301": [
+      "Gens PV"
+    ],
+    "0112": [
+      "Sta. M. Feira"
+    ],
+    "0113": [
+      "Estarreja"
+    ],
+    "0114": [
+      "Albergaria"
+    ],
+    "0115": [
+      "Aveiro Sul"
+    ],
+    "0116": [
+      "Mealhada-Cant."
+    ],
+    "0117": [
+      "Coimbra Norte"
+    ],
+    "0118": [
+      "Coimbra Sul"
+    ],
+    "0119": [
+      "Condeixa"
+    ],
+    "0120": [
+      "Pombal"
+    ],
+    "0121": [
+      "Leiria"
+    ],
+    "0122": [
+      "Fátima"
+    ],
+    "0123": [
+      "Torres Novas"
+    ],
+    "0124": [
+      "Santarém"
+    ],
+    "0125": [
+      "Aveiras de Cima"
+    ],
+    "0126": [
+      "Carregado"
+    ],
+    "0127": [
+      "V. F. Xira"
+    ],
+    "0128": [
+      "Alverca PV"
+    ],
+    "0129": [
+      "Alverca Nó"
+    ],
+    "0130": [
+      "V.F. Xira II NS"
+    ],
+    "0133": [
+      "IC 24 Sul"
+    ],
+    "0134": [
+      "Grijó PV"
+    ],
+    "0135": [
+      "Cartaxo"
+    ],
+    "0136": [
+      "PLLN"
+    ],
+    "0137": [
+      "Soure"
+    ],
+    "0911": [
+      "Queluz PV"
+    ],
+    "0912": [
+      "Queluz II"
+    ],
+    "0913": [
+      "Pontinha"
+    ],
+    "0914": [
+      "Odivelas"
+    ],
+    "0915": [
+      "Zambujal"
+    ],
+    "1011": [
+      "Arruda"
+    ],
+    "1013": [
+      "Benavente Nó"
+    ],
+    "1411": [
+      "Sta. Eulália PV"
+    ],
+    "1412": [
+      "Montemor Velho"
+    ],
+    "1413": [
+      "EN 335"
+    ],
+    "1414": [
+      "Ançã"
+    ],
+    "0131": [
+      "V.F. Xira II SN"
+    ],
+    "0132": [
+      "V.F. Xira I"
+    ],
+    "0811": [
+      "Loures"
+    ],
+    "0812": [
+      "Lousa"
+    ],
+    "0813": [
+      "Venda do Pinheiro"
+    ],
+    "0814": [
+      "Enxara"
+    ],
+    "0815": [
+      "Torres Vedras Sul"
+    ],
+    "0816": [
+      "Torres Vedras Norte"
+    ],
+    "0817": [
+      "Ramalhal"
+    ],
+    "0818": [
+      "Campelos"
+    ],
+    "0819": [
+      "Bombarral plena via"
+    ],
+    "1511": [
+      "A-dos-Negros pv"
+    ],
+    "1512": [
+      "A-dos-Negros nó"
+    ],
+    "1513": [
+      "A-dos-Francos"
+    ],
+    "1514": [
+      "Rio Maior Oeste"
+    ],
+    "1515": [
+      "Rio Maior Este"
+    ],
+    "1516": [
+      "Malaqueijo"
+    ],
+    "2101": [
+      "Ericeira"
+    ],
+    "2102": [
+      "Mafra Oeste"
+    ],
+    "2103": [
+      "Mafra Este"
+    ],
+    "2104": [
+      "Malveira"
+    ],
+    "1603": [
+      "Belas PV"
+    ],
+    "0211": [
+      "Coina PV"
+    ],
+    "0212": [
+      "Coina II"
+    ],
+    "0213": [
+      "Palmela"
+    ],
+    "0214": [
+      "Marateca"
+    ],
+    "0215": [
+      "Alcácer do Sal"
+    ],
+    "0216": [
+      "Grândola Norte"
+    ],
+    "0217": [
+      "Grândola Sul"
+    ],
+    "0218": [
+      "Aljustrel"
+    ],
+    "0219": [
+      "Castro Verde"
+    ],
+    "0220": [
+      "Almodôvar"
+    ],
+    "0221": [
+      "S.B. Messines"
+    ],
+    "0222": [
+      "Paderne PV"
+    ],
+    "0611": [
+      "Vendas Novas"
+    ],
+    "0612": [
+      "Montemor Oeste"
+    ],
+    "0613": [
+      "Montemor Este"
+    ],
+    "0614": [
+      "Évora Poente"
+    ],
+    "0615": [
+      "Évora Nascente"
+    ],
+    "0616": [
+      "Estremoz"
+    ],
+    "0617": [
+      "Borba"
+    ],
+    "0618": [
+      "Elvas PV"
+    ],
+    "1211": [
+      "Setúbal PV"
+    ],
+    "1212": [
+      "Pinhal Novo II"
+    ],
+    "1213": [
+      "Pinhal Novo PV"
+    ],
+    "1311": [
+      "Pegões"
+    ],
+    "1312": [
+      "Sto. Estevão"
+    ],
+    "1313": [
+      "S. Magos"
+    ],
+    "1314": [
+      "Almeirim PV"
+    ],
+    "0223": [
+      "Grandl A26"
+    ],
+    "1711": [
+      "Leiria Norte"
+    ],
+    "1712": [
+      "Monte Real"
+    ],
+    "1713": [
+      "Monte Redondo"
+    ],
+    "1714": [
+      "Guia"
+    ],
+    "1715": [
+      "Louriçal"
+    ],
+    "1716": [
+      "Marinha das Ondas"
+    ],
+    "1717": [
+      "Figueira da Foz"
+    ],
+    "1718": [
+      "Quiaios"
+    ],
+    "1719": [
+      "Tocha"
+    ],
+    "1720": [
+      "Mira Nó"
+    ],
+    "1721": [
+      "Mira PV"
+    ],
+    "0830": [
+      "Tornada PV"
+    ],
+    "0831": [
+      "Tornada Nó"
+    ],
+    "0832": [
+      "Alfeizerão"
+    ],
+    "0833": [
+      "Valado dos Frades"
+    ],
+    "0834": [
+      "Pataias"
+    ],
+    "0835": [
+      "Marinha Grande Sul"
+    ],
+    "0836": [
+      "Marinha Grande Este"
+    ],
+    "0837": [
+      "Leiria Sul"
+    ]
+  },
+  "pages": [
+    {
+      "page": 1,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        1
+      ],
+      "cells": 1077
+    },
+    {
+      "page": 2,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        2
+      ],
+      "cells": 1077
+    },
+    {
+      "page": 3,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        3
+      ],
+      "cells": 1077
+    },
+    {
+      "page": 4,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        4
+      ],
+      "cells": 1077
+    },
+    {
+      "page": 5,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        1
+      ],
+      "cells": 1995
+    },
+    {
+      "page": 6,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        2
+      ],
+      "cells": 1995
+    },
+    {
+      "page": 7,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        3
+      ],
+      "cells": 1995
+    },
+    {
+      "page": 8,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        4
+      ],
+      "cells": 1995
+    },
+    {
+      "page": 9,
+      "effectiveDate": "01-01-2025",
+      "classes": [
+        1,
+        2
+      ],
+      "cells": 1800
+    },
+    {
+      "page": 10,
+      "effectiveDate": "01-01-2025",
+      "classes": [
+        3,
+        4
+      ],
+      "cells": 1800
+    },
+    {
+      "page": 11,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        1,
+        2
+      ],
+      "cells": 396
+    },
+    {
+      "page": 12,
+      "effectiveDate": "26-08-2026",
+      "classes": [
+        3,
+        4
+      ],
+      "cells": 396
+    }
+  ],
+  "csvSha256": "64841c3e4a316e34778e72684c0cab3c4336a4fbd8090ee50054762c6ddca2c7"
+}
