@@ -237,6 +237,8 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     val tollCountry:String? get()=routingTariffCountry
     val tollVehicleClasses:List<Int> get()=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication()).load(it)?.classes
+            ?: TollTableAssets.repository(getApplication(),TollCatalogKind.ENTRY_EXIT).load(it)?.classes
+            ?: TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(it)?.classes
     } ?: (1..4).toList()
     val canRollbackTolls:Boolean get()=routingTariffCountry?.let {
         TollTableAssets.repository(getApplication()).canRollback(it)
