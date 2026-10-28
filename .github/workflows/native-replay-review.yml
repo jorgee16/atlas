@@ -20,6 +20,7 @@ permissions:
   actions: read
 jobs:
   review:
+    if: ${{ !contains(github.event.head_commit.message, '[inspect-release-replay]') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -120,3 +121,31 @@ jobs:
           if header[97]==2:data=gzip.decompress(data)
           print('ATLAS_VERIFIED_R2_PMTILES_METADATA',data.decode())
           PYCODE
+
+  release-replay-diagnostics:
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[inspect-release-replay]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download existing full trip (no emulator)
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: '40665483531'
+          name: Atlas-native-full-gps-review
+          path: recorded-trip
+      - name: Setup pinned video tools (no apt mirror)
+        uses: ./.github/actions/setup-video-tools
+      - name: Analyze complete recorded trip with compact logs
+        working-directory: recorded-trip
+        run: python3 "$GITHUB_WORKSPACE/tools/analyze-native-gps-replay.py" full
+      - name: Preserve analysis evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-release-replay-diagnostics
+          path: |
+            recorded-trip/ui-preview/gps-replay/*summary.json
+            recorded-trip/ui-preview/gps-replay/trajectory-failure.json
+          if-no-files-found: warn
