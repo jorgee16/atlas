@@ -999,7 +999,6 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             };card.addView(modes,linear(15))
             card.addView(ui.row().apply{
                 addView(ui.text("Starting point",12f,ui.muted).apply{setPadding(0,ui.dp(9),0,ui.dp(9));setOnClickListener{originOptions()}},LinearLayout.LayoutParams(0,-2,1f))
-                if(s.mode=="drive")addView(ui.text(if(s.avoidTolls)"Avoid tolls ✓" else "Toll options",12f,ui.blue,true).apply{setPadding(ui.dp(10),ui.dp(9),0,ui.dp(9));setOnClickListener{model.avoidTolls(!s.avoidTolls);model.calculate()}})
             },linear(3))
         }
         if(s.busy){
@@ -1011,64 +1010,56 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         }
         val route=s.route
         if(route!=null){
-            val stats="${AtlasPages.formatTime(route.getDouble("durationSeconds"))}  ·  ${AtlasPages.formatDistance(route.getDouble("distanceMeters"))}"
-            card.addView(ui.row().apply{
-                addView(ui.column().apply{
-                    addView(ui.text(stats,if(compact)15f else 18f,ui.green,true))
-                    addView(ui.space(5))
-                    addView(ui.text(if(s.walking)"Walking route"
-                        else RouteChoices.tollLabel(route),12f,ui.muted))
-                    if(!s.walking) {
+            if (compact || s.walking) {
+                val stats="${AtlasPages.formatTime(route.getDouble("durationSeconds"))} · ${AtlasPages.formatDistance(route.getDouble("distanceMeters"))}"
+                card.addView(ui.row().apply {
+                    addView(ui.column().apply {
+                        addView(ui.text(stats,if(compact)15f else 18f,ui.green,true))
                         addView(ui.space(5))
-                        addView(ui.text(RouteChoices.roadSummary(route),12f,ui.muted).apply{
-                            maxLines=2
-                        })
-                    }
-                },LinearLayout.LayoutParams(0,-2,1f))
-                if(compact)addView(ui.action("Start","navigate"){startNavigation()},LinearLayout.LayoutParams(ui.dp(112),ui.dp(48)))
-            },linear(15))
-            RoadsideArrivalNotice.text(route.optDouble("destinationAccessMeters",0.0))?.let { note ->
-                card.addView(ui.text(note,12f,ui.muted).apply{maxLines=3},linear(10))
+                        addView(ui.text(if(s.walking) "Walking route" else RouteChoices.previewTollLabel(route),12f,ui.muted))
+                    },LinearLayout.LayoutParams(0,-2,1f))
+                    if(compact)addView(ui.action("Start","navigate"){startNavigation()},LinearLayout.LayoutParams(ui.dp(112),ui.dp(48)))
+                },linear(15))
             }
             if(!compact){
-                if(!s.walking && route.optBoolean("hasTolls")) {
-                    val tollRoads=RouteChoices.tollRoadSummary(route)
-                    if(tollRoads.isNotEmpty()) {
-                        card.addView(ui.text(when(route.optString("tollPricing")){"exact"->"TOLL BREAKDOWN · EXACT";"estimate"->"TOLL BREAKDOWN · ESTIMATED";else->"TOLL BREAKDOWN · INCOMPLETE PRICES"},11f,ui.muted,true),linear(10))
-                        tollRoads.forEach { road ->
-                            card.addView(ui.text(road,12f,ui.muted),linear(3))
-                        }
-                        card.addView(ui.text(RouteChoices.tollProvenance(route),11f,ui.muted),linear(5))
-                    }
-                }
-                if(!s.walking && s.routeOptions.size>1) {
-                    card.addView(ui.text("ROUTE OPTIONS",12f,ui.muted,true),linear(13))
-                    s.routeOptions.forEach { choice ->
+                if(!s.walking) {
+                    val options=RouteChoices.previewOptions(s.routeOptions.ifEmpty { listOf(route) })
+                    options.forEachIndexed { index, choice ->
                         val selected=choice===route
-                        val label=choice.optString("label","Alternative")
+                        val label=if(!choice.optBoolean("hasTolls")) "No tolls"
+                            else if(index==0) "Recommended" else "Alternative"
                         val roads=RouteChoices.roadSummary(choice)
-                        val trip="${AtlasPages.formatTime(choice.optDouble("durationSeconds"))} · " +
-                            AtlasPages.formatDistance(choice.optDouble("distanceMeters"))
-                        val tollHint=RouteChoices.tollLabel(choice)
-                        card.addView(ui.row().apply {
-                            ui.ripple(this,if(selected) ui.soft else ui.surface,13)
-                            setPadding(ui.dp(12),ui.dp(11),ui.dp(12),ui.dp(11))
-                            addView(ui.column().apply {
-                                addView(ui.text(label,14f,ui.ink,true))
-                                addView(ui.space(4))
-                                addView(ui.text(roads,12f,ui.muted).apply{maxLines=2})
-                            },LinearLayout.LayoutParams(0,-2,1f))
-                            addView(ui.column().apply {
-                                addView(ui.text(trip,12f,if(selected)ui.blue else ui.ink,true))
-                                addView(ui.space(5))
-                                addView(ui.text(tollHint,11f,ui.muted))
-                            },LinearLayout.LayoutParams(-2,-2).apply{
-                                leftMargin=ui.dp(12)
+                        val trip="${AtlasPages.formatTime(choice.optDouble("durationSeconds"))} · ${AtlasPages.formatDistance(choice.optDouble("distanceMeters"))}"
+                        val price=RouteChoices.previewTollLabel(choice)
+                        card.addView(ui.column().apply {
+                            ui.ripple(this,if(selected)ui.soft else ui.surface,13)
+                            setPadding(ui.dp(12),ui.dp(10),ui.dp(12),ui.dp(10))
+                            addView(ui.row().apply {
+                                addView(ui.text(label,14f,ui.ink,true),LinearLayout.LayoutParams(0,-2,1f))
+                                addView(ui.text(price,12f,if(selected)ui.blue else ui.ink,true))
                             })
-                            contentDescription="$label, $roads, $trip, $tollHint"
+                            addView(ui.space(4))
+                            addView(ui.text("$trip · $roads",12f,ui.muted).apply {
+                                maxLines=1;ellipsize=android.text.TextUtils.TruncateAt.END
+                            })
+                            contentDescription="$label, $trip, $price, $roads"
+                            isSelected=selected
                             setOnClickListener { model.chooseRoute(choice) }
                         },linear(7))
                     }
+                    if(route.optBoolean("hasTolls")) {
+                        card.addView(ui.text("Toll details",12f,ui.blue).apply {
+                            setPadding(0,ui.dp(8),0,ui.dp(8))
+                            setOnClickListener {
+                                AlertDialog.Builder(this@MainActivity).setTitle("Toll details")
+                                    .setMessage(RouteChoices.previewTollDetails(route))
+                                    .setPositiveButton("Close",null).show()
+                            }
+                        },linear(2))
+                    }
+                }
+                RoadsideArrivalNotice.text(route.optDouble("destinationAccessMeters",0.0))?.let { note ->
+                    card.addView(ui.text(note,12f,ui.muted).apply{maxLines=3},linear(8))
                 }
                 card.addView(ui.action(if(s.origin==null)"Start navigation" else "View route","navigate"){if(s.origin==null)startNavigation()else atlasMap.overview()},linear(15))
             }
@@ -1562,4 +1553,3 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         super.onDestroy()
     }
 }
-

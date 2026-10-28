@@ -350,7 +350,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
                     core.remember(0)
                     primary.put("key",0)
-                        .put("label",if(snapshot.avoidTolls) "No tolls" else "Recommended")
+                        .put("label",if(!primary.optBoolean("hasTolls")) "No tolls" else "Recommended")
                         .put("avoidTolls",snapshot.avoidTolls)
                     val choices = mutableListOf(primary)
                     if (!snapshot.walking && !startAfter) {
@@ -358,12 +358,8 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         val baseMeters=primary.optDouble("distanceMeters")
                         fun addChoice(candidate: JSONObject, name: String,
                                       avoid: Boolean): Int? {
-                            val edges=RouteChoices.edgeIndexes(candidate)
-                            if(!RouteChoices.distinctEdges(edges,
-                                choices.map(RouteChoices::edgeIndexes)) ||
-                                !RouteChoices.reasonableDetour(baseSeconds,baseMeters,
-                                    candidate.optDouble("durationSeconds"),
-                                    candidate.optDouble("distanceMeters"))) return null
+                            if(!RouteChoices.acceptAlternative(candidate, choices,
+                                baseSeconds, baseMeters)) return null
                             val key=choices.size
                             core.remember(key)
                             candidate.put("key",key).put("label",name)
@@ -399,7 +395,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                             // Never fabricate an option if no distinct legal
                             // motorway corridor exists in the installed graph.
                             for (weight in listOf(110.0,300.0,550.0)) {
-                                if (tollAlternatives>=2) break
+                                if (tollAlternatives>=1) break
                                 val alternate=candidate(false,alternateSeed,weight) ?: continue
                                 if (!alternate.optBoolean("hasTolls")) continue
                                 val key=addChoice(alternate,
@@ -411,17 +407,19 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                             }
                         }
                         if(!snapshot.avoidTolls) {
-                            candidate(true)?.let { addChoice(it,"No tolls",true) }
+                            candidate(true)?.takeIf { !it.optBoolean("hasTolls") }
+                                ?.let { addChoice(it,"No tolls",true) }
                         }
                     }
+                    // Presentation order never changes native saved-route keys.
                     core.activate(0)
-                    Triple(choices,liveOrigin,routingHeading)
+                    Triple(RouteChoices.previewOptions(choices),liveOrigin,routingHeading)
                 }
                 if (generation == routeGeneration) {
                     preparedLiveRouteOrigin = if (snapshot.origin == null) liveOrigin else null
                     preparedLiveRouteHeading = if (snapshot.origin == null) routingHeading else null
                     lastSpoken = -1
-                    state.update { it.copy(route = choices.first(), routeOptions = choices, guidance = null, navigating = startAfter && snapshot.origin == null) }
+                    state.update { it.copy(route = choices.first { route -> route.optInt("key",-1)==0 }, routeOptions = choices, guidance = null, navigating = startAfter && snapshot.origin == null) }
                     if (startAfter && snapshot.origin == null) recordNavigation()
                 }
             } catch (e: Throwable) { failure(e) }
@@ -794,5 +792,3 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
         kotlinx.coroutines.CoroutineScope(worker).launch { core.close(); worker.close() }
     }
 }
-
-

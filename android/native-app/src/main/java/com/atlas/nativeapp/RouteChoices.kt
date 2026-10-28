@@ -29,6 +29,53 @@ internal object RouteChoices {
         return (if(pricing=="exact")"" else "≈ ")+money(amount,route)+
             (if(pricing=="exact")" · exact" else if(route.optString("tollPricingConfidence")=="low")" · low confidence" else " · estimate")
     }
+    /** Short customer-facing label; tariff provenance remains in the details sheet. */
+    fun previewTollLabel(route: JSONObject): String {
+        if (!route.optBoolean("hasTolls")) return "No tolls · " + money(0.0, route)
+        val field = if (route.has("tollAmount")) "tollAmount" else "tollEuros"
+        val amount = route.optDouble(field, Double.NaN)
+        val pricing = route.optString("tollPricing")
+        if (pricing !in listOf("estimate", "exact") || route.isNull(field) ||
+            !amount.isFinite() || amount < 0) return "Toll price unavailable"
+        return money(amount, route) + if (pricing == "exact") " · confirmed" else " · estimated"
+    }
+
+    fun previewTollDetails(route: JSONObject): String {
+        val metadata = listOf("Class ${route.optInt("tollVehicleClass",1)}",
+            route.optString("tollCountry"), route.optString("tollTariffYear"))
+            .filter { it.isNotBlank() }.joinToString(" · ")
+        val roads = tollRoadSummary(route).map { it.removeSuffix(" · low confidence") }
+        val notice = when {
+            route.optString("tollPricing") == "exact" -> "Published prices; special discounts are not included."
+            route.optString("tollPricingConfidence") == "low" ->
+                "Estimated price. Some roads do not yet have a verified tariff; the amount charged may differ."
+            route.optString("tollPricing") == "estimate" -> "Estimated price; the amount charged may differ."
+            else -> "A price is not available for all toll roads on this route."
+        }
+        return (listOf(previewTollLabel(route),metadata) + roads + notice).joinToString("\n\n")
+    }
+
+    /** Two real paid corridors, then a real free route; never invent alternatives. */
+    fun previewOptions(choices: List<JSONObject>): List<JSONObject> =
+        choices.filter { it.optBoolean("hasTolls") }.take(2) +
+            choices.filter { !it.optBoolean("hasTolls") }.take(1)
+
+    fun acceptAlternative(candidate: JSONObject, choices: List<JSONObject>,
+                          primarySeconds: Double, primaryMeters: Double): Boolean {
+        val edges = edgeIndexes(candidate)
+        val seconds = candidate.optDouble("durationSeconds", Double.NaN)
+        val meters = candidate.optDouble("distanceMeters", Double.NaN)
+        if (edges.isEmpty() || !seconds.isFinite() || seconds <= 0 ||
+            !meters.isFinite() || meters <= 0) return false
+        if (!candidate.optBoolean("hasTolls")) {
+            // A free route can legitimately be much slower, or share most of
+            // the journey except a short tolled bridge. Neither is a duplicate.
+            return choices.none { edgeIndexes(it) == edges }
+        }
+        return distinctEdges(edges, choices.map(::edgeIndexes)) &&
+            reasonableDetour(primarySeconds, primaryMeters, seconds, meters)
+    }
+
     fun tollProvenance(route:JSONObject):String {
         val parts=mutableListOf("Class "+route.optInt("tollVehicleClass",1))
         route.optString("tollCountry").takeIf { it.isNotBlank() }?.let { parts.add(it) }
@@ -90,4 +137,3 @@ internal object RouteChoices {
             alternateMeters <= maxOf(primaryMeters * 1.75, primaryMeters + 20000.0)
     }
 }
-
