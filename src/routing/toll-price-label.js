@@ -7,5 +7,6 @@ export function formatTollMoney(amount, tolls) {
 export function tollPriceLabel(tolls) {
   if (tolls?.tolledDistanceMeters === 0) return 'No toll roads';
   if (!Number.isFinite(tolls?.totalEuros) || tolls.totalEuros < 0) return 'Toll price unavailable';
-  return `${tolls.pricing==='exact' ? '' : 'Est. '}${formatTollMoney(tolls.totalEuros, tolls)} · Class ${tolls.vehicleClass}${tolls.pricing==='exact' ? ' · exact' : ''}`;
+  const exact=tolls.pricing==='exact',low=!exact&&tolls.pricingConfidence==='low';
+  return `${exact ? '' : low ? 'Est. (low confidence) ' : 'Est. '}${formatTollMoney(tolls.totalEuros, tolls)} · Class ${tolls.vehicleClass}${exact ? ' · exact' : low ? ' · incomplete tariff coverage' : ''}`;
 }

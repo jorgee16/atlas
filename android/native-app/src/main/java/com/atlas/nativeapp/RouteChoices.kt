@@ -27,7 +27,7 @@ internal object RouteChoices {
         if(pricing !in listOf("estimate","exact") || route.isNull(field) || !amount.isFinite() || amount<0)
             return "Toll roads · Price unavailable"
         return (if(pricing=="exact")"" else "≈ ")+money(amount,route)+
-            (if(pricing=="exact")" · exact" else " · estimate")
+            (if(pricing=="exact")" · exact" else if(route.optString("tollPricingConfidence")=="low")" · low confidence" else " · estimate")
     }
     fun tollProvenance(route:JSONObject):String {
         val parts=mutableListOf("Class "+route.optInt("tollVehicleClass",1))
@@ -35,10 +35,13 @@ internal object RouteChoices {
         route.optString("tollTariffYear").takeIf { it.isNotBlank() }?.let { parts.add("$it tariffs") }
         route.optString("tollTariffVersion").takeIf { it.isNotBlank() }?.let { parts.add("v$it") }
         val source=route.optString("tollTariffSource")
+        val reference=route.optDouble("referenceTollMeters",0.0)
         val missing=(route.optDouble("tolledMeters",0.0)-route.optDouble("pricedTollMeters",0.0)).coerceAtLeast(0.0)
         return parts.joinToString(" · ")+(if(source.isNotBlank())"\nSource: $source" else "")+
-            (if(missing>.1)"\nSome toll roads have no applicable price coverage." else "")+
+            (if(reference>0)"\nLow-confidence reference estimate: some roads have no verified tariff. Fixed fees and exemptions may change the actual charge."
+             else if(missing>.1)"\nSome toll roads have no applicable price coverage." else "")+
             (if(route.optString("tollPricing")=="exact")"\nPublished base tariffs exclude special discounts and exemptions."
+             else if(reference>0)"\nReference rates come from the available official country tables; this is not an official trip quote."
              else "\nSection-average estimates exclude special discounts and exemptions.")
     }
     fun tollRoadSummary(route:JSONObject):List<String> {
@@ -50,7 +53,8 @@ internal object RouteChoices {
             val amount=road.optDouble("amount",Double.NaN)
             if(road.optString("pricing") !in listOf("estimate","exact") || road.isNull("amount") || !amount.isFinite() || amount<0)
                 "$name · price unavailable"
-            else "$name · "+(if(road.optString("pricing")=="exact")"" else "≈ ")+money(amount,route)
+            else "$name · "+(if(road.optString("pricing")=="exact")"" else "≈ ")+money(amount,route)+
+                (if(road.optString("pricingConfidence")=="low")" · low confidence" else "")
         }
     }
 

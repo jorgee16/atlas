@@ -18,8 +18,9 @@ web/PWA uses the same canonical CSVs via `bundled-toll-tables.js`; regenerate wi
 Only OSM toll-marked edges contribute costs. An untolled route costs zero.
 An explicit, sourced whole-road exemption can also override stale toll flags;
 this changes pricing only, not route selection or the graph.
-Missing table, unsupported class, excluded road or partial coverage yields
-`tollPricing=unavailable` and `tollAmount=null`, never a fictional zero. Available
+Missing table or unsupported class yields `tollPricing=unavailable` and
+`tollAmount=null`, never a fictional zero. Unpriced roads also remain unavailable
+unless the country explicitly enables the low-confidence reference policy below. Available
 costs are section-average distance estimates: sum(section prices)/sum(lengths).
 C++ emits `exact` only with complete reviewed directed-crossing evidence. Avoid-tolls still uses graph flags independently.
 Navigation/GPS, map matching, geometry, distance and ETA algorithms are unchanged.
@@ -41,6 +42,47 @@ It adds `tollTariffVersion`, `tollFractionDigits`, `tollVehicleClass` and
 meters remain. Partial sums never appear as the trip total. Android shows class,
 source, year, version, known/unknown roads and incomplete coverage. Web price-based
 alternative selection excludes unknown prices.
+
+## National estimate coverage (revision 2026102801)
+
+Portugal explicitly enables `referenceEstimate=road-then-country-average`.
+This is an opt-in country-data policy, not a country branch or an implicit
+engine default. Countries without it retain `unavailable` for unpriced roads.
+
+When a marked toll edge has no usable road-average price, the engine first uses
+that road's published section totals if present, otherwise the distance-weighted
+class rate from `referenceSourceRoads`. Portugal's source list is the twelve
+previously approved roads. Each class has independent source prices; no vehicle
+multipliers or invented official fees are introduced. Cases with no positive source rate, an unsupported class, invalid data, or
+contradictory paid/free aliases remain unavailable. A known exemption continues to produce zero. `freeRoadClasses`
+adds data-driven per-class exemptions: A41 classes 3/4 under Lei 6/2026.
+It does not zero A8 or A19 wholesale under their partial-section exemptions.
+
+Reference amounts are always `tollPricing=estimate` with
+`tollPricingConfidence=low` and `tollEstimationMethod=road-or-country-reference`.
+`referenceTollMeters` and per-road `referenceMeters` are kept separate from
+`pricedTollMeters`, so estimated availability cannot masquerade as actual tariff
+coverage. Positive reference totals display at least one currency precision unit
+rather than rounding an unknown charge to zero. Rounded road subtotals can differ
+from the rounded trip total. Exact crossing providers clear reference metadata
+only after their full proof succeeds.
+
+Android labels these totals `low confidence` and explains missing tariffs,
+possible fixed-fee differences and exemptions. Web uses the same canonical data
+and labeling; low-confidence totals cannot drive the existing price-based
+Balanced recommendation. Routing edge costs, geometry, GPS, heading and ETAs
+are unchanged. This closes **estimated national availability**, not exact
+national tariff/gantry matching or guaranteed Via Verde parity.
+
+The coverage gate scans every SHA-verified Portugal partition, reports known,
+exempt, reference-estimated and unpriced distances separately, and rejects any
+unpriced directed driving edge when national coverage is requested. A separate
+native probe executes the real C++ router on representative toll-marked roads
+and four city trips for classes 1-4, compares navigation fields before/after
+reference pricing and verifies confidence/amount contracts. Its artifacts are
+`graph-coverage.json` and `national-route-probes.json`. These probes are real
+routing tests, not Android Location/GPS replay; existing Android/UI/camera/GPS
+smoke and real A5 quote tests remain enabled.
 
 ## Versioned offline updates
 
@@ -122,7 +164,8 @@ and two separately published bridge tariffs are in
 A1,A3,A5,A6,A8,A9,A10,A14,A15,A21,A32,A43. This measures source reference coverage,
 not complete graph or concession coverage. A2/A12 need directional bridge/plaza
 mapping; A4/A13 contain paid and abolished concessions; A17/A41 need other operator
-coverage. Those routes remain unavailable despite retaining official section rows.
+coverage. Those roads have no standard road-average quote; the national reference policy
+can now provide a separately labeled low-confidence estimate.
 Unlisted roads remain unavailable unless a separately sourced whole-road exemption
 applies. Bridges are not converted into motorway €/km.
 Discounts, payment-method exceptions and conditional heavy exemptions are not modeled.

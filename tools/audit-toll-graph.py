@@ -19,9 +19,9 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def u32(data, offset): return struct.unpack_from('<I', data, offset)[0]
 
-def scan(paths, eligible, explicitly_free=None):
+def scan(paths, eligible, explicitly_free=None, reference_estimates=False):
     explicitly_free=set(explicitly_free or ())
-    totals=defaultdict(lambda: {'directedEdges':0,'directedMeters':0.0,'estimatedMeters':0.0,'explicitlyFreeMeters':0.0})
+    totals=defaultdict(lambda: {'directedEdges':0,'directedMeters':0.0,'estimatedMeters':0.0,'explicitlyFreeMeters':0.0,'referenceEstimatedMeters':0.0,'unpricedEdges':0})
     with paths['roads.bin'].open('rb') as rf, paths['strings.bin'].open('rb') as sf, paths['edges.bin'].open('rb') as ef:
         with mmap.mmap(rf.fileno(),0,access=mmap.ACCESS_READ) as roads, mmap.mmap(sf.fileno(),0,access=mmap.ACCESS_READ) as strings, mmap.mmap(ef.fileno(),0,access=mmap.ACCESS_READ) as edges:
             for data, magic in [(roads,b'RROD'),(strings,b'RSTR'),(edges,b'REDG')]:
@@ -53,7 +53,10 @@ def scan(paths, eligible, explicitly_free=None):
                 tokens=set(re.sub(r'\s+','',r).upper() for r in re.split('[;,/]',ref))
                 if tokens&explicitly_free:
                     if not any(r in eligible and r not in explicitly_free for r in tokens):row['explicitlyFreeMeters']+=meters
+                    else:row['unpricedEdges']+=1
                 elif priced: row['estimatedMeters']+=meters
+                elif reference_estimates:row['referenceEstimatedMeters']+=meters
+                else:row['unpricedEdges']+=1
     return totals
 
 def fetch(entry, cache):
@@ -74,7 +77,7 @@ def fetch(entry, cache):
     return entry,path
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,default=Path('toll-coverage.json'));args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,default=Path('toll-coverage.json'));parser.add_argument('--require-estimated-coverage',action='store_true');args=parser.parse_args()
     catalog=json.loads((ROOT/'android/native-app/src/main/assets/regions.json').read_text())
     country='Portugal';csv=(ROOT/'android/native-app/src/main/assets/tolls'/f'{country}.csv').read_text()
     metadata={};known=set()
@@ -94,15 +97,18 @@ if __name__=='__main__':
                 groups[entry['url'].rsplit('/',1)[0]][entry['url'].rsplit('/',1)[1]]=path;all_files.append(entry)
         for partition,paths in sorted(groups.items()):
             if len(paths)!=3: raise ValueError('Incomplete partition')
-            roads=scan(paths,eligible,set(metadata.get('freeRoads','').split(',')))
+            roads=scan(paths,eligible,set(metadata.get('freeRoads','').split(',')),metadata.get('referenceEstimate')=='road-then-country-average')
             reports.append({'region':region['id'],'version':region['version'],'partition':partition,'roads':dict(sorted(roads.items()))})
     if not reports: raise ValueError('No real routing partitions found')
     total=sum(v['directedMeters'] for p in reports for v in p['roads'].values())
     priced=sum(v['estimatedMeters'] for p in reports for v in p['roads'].values())
     exempt=sum(v['explicitlyFreeMeters'] for p in reports for v in p['roads'].values())
-    result={'country':country,'tariffRevision':metadata['version'],'tariffSha256':hashlib.sha256(csv.encode()).hexdigest(),
+    reference=sum(v['referenceEstimatedMeters'] for p in reports for v in p['roads'].values())
+    unpriced=sum(v['unpricedEdges'] for p in reports for v in p['roads'].values())
+    result={'vehicleClass':1,'referenceEstimatedMeters':reference,'estimatedCoveragePercent':100*(priced+exempt+reference)/total if total else None,'unpricedDirectedEdges':unpriced,'country':country,'tariffRevision':metadata['version'],'tariffSha256':hashlib.sha256(csv.encode()).hexdigest(),
         'scope':'All Portugal routing partitions in the bundled region manifest; directed toll-marked driving edges, not unique physical road km or exact-price coverage',
         'directedTolledMeters':total,'directedEstimatedMeters':priced,'estimatedPercent':100*priced/total if total else None,'directedExplicitlyFreeMeters':exempt,'knownPricePercent':100*(priced+exempt)/total if total else None,'partitions':reports,'verifiedGraphFiles':all_files}
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k not in ['partitions','verifiedGraphFiles']},ensure_ascii=False))
     for p in reports: print(p['partition'],len(p['roads']),'toll road refs')
+    if args.require_estimated_coverage and unpriced:raise SystemExit('National estimated coverage incomplete: '+str(unpriced)+' directed edges remain unpriced')

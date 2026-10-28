@@ -9,6 +9,17 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 class TollCatalogTest {
+    @Test fun referencePolicyRequiresRealSourcesAndClassExemptionsAreValidated() {
+        val valid=String(csv())+"# referenceEstimate=road-then-country-average\n# referenceSourceRoads=T1\n"+
+            "# freeRoadClasses=T2:5\n# freeRoadClassSource=https://example.test/law\n"
+        assertEquals(listOf(1,5),TollCatalog.parse("Testland",valid.toByteArray(),"fixture").classes)
+        for(invalid in listOf(valid.replace("referenceSourceRoads=T1","referenceSourceRoads=missing"),
+            valid.replace("referenceSourceRoads=T1","referenceSourceRoads=T1,T1"),
+            valid.replace("freeRoadClasses=T2:5","freeRoadClasses=T2:4"),
+            valid.replace("freeRoadClassSource=https://","freeRoadClassSource=http://"))) {
+            reject { TollCatalog.parse("Testland",invalid.toByteArray(),"fixture") }
+        }
+    }
     @Test fun entryExitCatalogUsesDirectedIndependentPricesAndAnIsolatedOfflineStore() {
         fun ticket(version:Int)= ("# country=Testland\n# currency=JPY\n# year=2026\n# version=$version\n"+
             "# fractionDigits=0\n# scheme=entry-exit\n# source=https://example.test/tickets\n"+

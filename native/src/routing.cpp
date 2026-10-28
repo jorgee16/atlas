@@ -468,15 +468,18 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         r.tollVehicleClasses=op.tariffs->classes;
       }
       std::unordered_map<std::string, std::size_t> tollRoadIndex;
-      bool allExplicitlyFree=true,anyExplicitlyFree=false;
+      bool allExplicitlyFree=true;std::vector<std::string> freeSources;
       for(const auto &leg:r.legs)if(op.profile==Profile::drive &&
                                      (leg.road.flags & 4)){
         r.tolledMeters+=leg.distance;
         const bool explicitlyFree=op.tariffs && op.tariffs->explicitlyFree(leg.road.ref,op.vehicleClass);
-        allExplicitlyFree=allExplicitlyFree&&explicitlyFree;anyExplicitlyFree=anyExplicitlyFree||explicitlyFree;
-        const auto amount=op.tariffs
+        allExplicitlyFree=allExplicitlyFree&&explicitlyFree;
+        if(explicitlyFree){const auto source=op.tariffs->freeSourceFor(leg.road.ref,op.vehicleClass);if(!source.empty()&&std::find(freeSources.begin(),freeSources.end(),source)==freeSources.end())freeSources.push_back(source);}
+        const auto knownAmount=op.tariffs
             ? op.tariffs->estimate(leg.road.ref,leg.distance,op.vehicleClass)
             : std::nullopt;
+        const auto reference=(!knownAmount&&op.tariffs)?op.tariffs->referenceEstimate(leg.road.ref,leg.distance,op.vehicleClass):std::nullopt;
+        const auto amount=knownAmount?knownAmount:reference;
         // Road refs are a graph hint, not exact entry/exit tariff sections.
         // Report uncovered distances without pretending they are toll-free.
         const auto roadLabel=leg.road.ref.empty()
@@ -491,9 +494,9 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         breakdown.exact=breakdown.exact&&explicitlyFree;
         breakdown.meters+=leg.distance;
         if(amount){
-          breakdown.pricedMeters+=leg.distance;
+          if(reference){breakdown.referenceMeters+=leg.distance;r.referenceTollMeters+=leg.distance;}
+          else {breakdown.pricedMeters+=leg.distance;r.pricedTollMeters+=leg.distance;}
           breakdown.amount+=*amount;
-          r.pricedTollMeters+=leg.distance;
           r.tollEuros+=*amount;
         } else {
           breakdown.complete=false;
@@ -501,7 +504,7 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
         }
       }
       r.tollPriceExact=r.tolledMeters>0&&r.tollPriceComplete&&allExplicitlyFree;
-      if(anyExplicitlyFree && !op.tariffs->freeRoadSource.empty())r.tollSource+="\n"+op.tariffs->freeRoadSource;
+      for(const auto &source:freeSources)r.tollSource+="\n"+source;
       makeManeuvers(r, g);
       return r;
     }
@@ -695,18 +698,22 @@ std::vector<std::string> principalRoadRefs(const Route &r,
 }
 std::string routeJson(const Route &r) {
   const auto monetaryScale=std::pow(10.0,r.tollFractionDigits);
+  const auto roundedMoney=[&](double amount,double referenceMeters){
+    const double units=std::round(amount*monetaryScale);
+    return (referenceMeters>0&&amount>0?std::max(1.,units):units)/monetaryScale;
+  };
   std::ostringstream s;
   s.precision(12);
   s << "{\"destinationAccessMeters\":" << r.destinationAccessMeters
     << ",\"distanceMeters\":" << r.meters
     << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":";
   if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
-  else s << std::round(r.tollEuros*monetaryScale)/monetaryScale;
+  else s << roundedMoney(r.tollEuros,r.referenceTollMeters);
   // Currency-neutral result and itinerary order for future countries.
   // tollEuros remains for backward compatibility with older Android code.
   s << ",\"tollAmount\":";
   if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
-  else s << std::round(r.tollEuros*monetaryScale)/monetaryScale;
+  else s << roundedMoney(r.tollEuros,r.referenceTollMeters);
   s << ",\"tollRoads\":[";
   for(std::size_t i=0;i<r.tollRoads.size();++i){
     if(i)s << ',';
@@ -714,11 +721,13 @@ std::string routeJson(const Route &r) {
     s << "{\"road\":" << jsonString(road.road)
       << ",\"meters\":" << road.meters
       << ",\"pricedMeters\":" << road.pricedMeters
+      << ",\"referenceMeters\":" << road.referenceMeters
+      << ",\"pricingConfidence\":" << jsonString(!road.complete?"unavailable":road.exact?"exact":road.referenceMeters>0?"low":"standard")
       << ",\"pricing\":" << jsonString(road.complete?(road.exact?"exact":"estimate"):"unavailable")
       << ",\"chargeId\":" << jsonString(road.chargeId)
       << ",\"name\":" << jsonString(road.name)
       << ",\"amount\":";
-    if(road.complete)s << std::round(road.amount*monetaryScale)/monetaryScale;
+    if(road.complete)s << roundedMoney(road.amount,road.referenceMeters);
     else s << "null";
     s << '}';
   }
@@ -727,6 +736,9 @@ std::string routeJson(const Route &r) {
           r.tollPriceComplete?(r.tollPriceExact?"exact":"estimate"):"unavailable")
     << ",\"tolledMeters\":" << r.tolledMeters
     << ",\"pricedTollMeters\":" << r.pricedTollMeters
+    << ",\"referenceTollMeters\":" << r.referenceTollMeters
+    << ",\"tollPricingConfidence\":" << jsonString(r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.tollPriceExact?"exact":r.referenceTollMeters>0?"low":"standard")
+    << ",\"tollEstimationMethod\":" << jsonString(r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":r.tollPriceExact?"verified":"section-road-average")
     << ",\"tollCountry\":" << jsonString(r.tollCountry)
     << ",\"tollCurrency\":" << jsonString(r.tollCurrency)
     << ",\"tollTariffYear\":" << jsonString(r.tollYear)

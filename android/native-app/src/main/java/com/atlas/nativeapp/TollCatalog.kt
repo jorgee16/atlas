@@ -86,6 +86,27 @@ internal data class TollCatalog(val country:String,val currency:String,val year:
             metadata["estimateRoads"]?.split(',')?.filter { it.isNotBlank() }?.forEach {
                 require(it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) in roads)
             }
+            metadata["freeRoadClasses"]?.let { policy ->
+                require(!fixed && !ticket && metadata["freeRoadClassSource"]?.startsWith("https://")==true)
+                val used=hashSetOf<String>()
+                policy.split('|').forEach { rule ->
+                    val pair=rule.split(':');require(pair.size==2)
+                    val road=pair[0].replace(Regex("\\s+"),"").uppercase(Locale.ROOT)
+                    require(road.matches(Regex("[A-Z][A-Z0-9-]{0,31}")) && used.add(road))
+                    val ids=pair[1].split(',').map { it.trim().also { id -> require(id.matches(Regex("[1-9][0-9]?"))) }.toInt() }
+                    require(ids.isNotEmpty() && ids.toSet().size==ids.size && ids.all { it in classes })
+                }
+            }
+            require(metadata["freeRoadClasses"]!=null || metadata["freeRoadClassSource"]==null)
+            metadata["referenceEstimate"]?.let { method ->
+                require(!fixed && !ticket && method=="road-then-country-average")
+                val refs=metadata["referenceSourceRoads"]?.split(',')?.map { it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) }
+                    ?: throw IllegalArgumentException("Missing reference source roads")
+                val allowed=metadata["estimateRoads"]?.split(',')?.map { it.replace(Regex("\\s+"),"").uppercase(Locale.ROOT) }?.toSet()
+                require(refs.isNotEmpty() && refs.toSet().size==refs.size && refs.all { it in roads && (allowed==null || it in allowed) })
+                require(rows.drop(1).any { row -> row[0].replace(Regex("\\s+"),"").uppercase(Locale.ROOT) in refs && row.drop(3).any { it.toDouble()>0 } })
+            }
+            require(metadata["referenceEstimate"]!=null || metadata["referenceSourceRoads"]==null)
             return TollCatalog(country,currency,year,revision,source,digits,classes,bytes.copyOf(),origin,scheme,charges,fares)
         }
     }

@@ -1,0 +1,47 @@
+{
+  "country": "Portugal",
+  "revision": 2026102801,
+  "mode": "national estimates; not full official tariff coverage",
+  "roadTableSha256": "8f3cb850ad896868560ba6861e145533e8e59f9625f9a66186ab7b440a7786a8",
+  "source": "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",
+  "referenceSourceRoads": [
+    "A1",
+    "A3",
+    "A5",
+    "A6",
+    "A8",
+    "A9",
+    "A10",
+    "A14",
+    "A15",
+    "A21",
+    "A32",
+    "A43"
+  ],
+  "sourceKm": "852.6",
+  "referenceCurrencyPerKm": {
+    "1": "0.1014543748533896317147548675",
+    "2": "0.1781022753929157870044569552",
+    "3": "0.2271874266948158573774337321",
+    "4": "0.2519352568613652357494722027"
+  },
+  "priority": [
+    "reviewed exact crossing/entry-exit evidence",
+    "standard road-average table or explicit exemption",
+    "available partial road table (low confidence)",
+    "country weighted reference (low confidence)"
+  ],
+  "limitations": [
+    "Reference prices are not official journey quotes",
+    "Unmatched fixed fees and partial exemptions may alter actual charges",
+    "Graph toll flags remain authoritative for detecting a priced traversal",
+    "Unsupported classes, absent countries and ambiguous free/paid aliases remain unavailable"
+  ],
+  "classExemptions": {
+    "A41": [
+      3,
+      4
+    ]
+  },
+  "classExemptionSource": "https://diariodarepublica.pt/dr/detalhe/lei/6-2026-1058701611"
+}

@@ -48,7 +48,8 @@ test('another country needs only a table, with independent currency and classes'
 });
 test('unpriced tolls remain null and are never treated as a free alternative', () => {
   const graph={ edgeIsToll:()=>true,edgeRoad:()=>0,road:()=>({ref:'A404'}),edgeDistanceDecimeters:()=>10000 };
-  const result=estimateRouteTolls(graph,{edgeIndexes:[0]},{tariffs:countryTollTariffs('Portugal')});
+  const strictCsv=readFileSync(new URL('../android/native-app/src/main/assets/tolls/Portugal.csv',import.meta.url),'utf8').split('\n').filter(l=>!l.startsWith('# referenceEstimate=')&&!l.startsWith('# referenceSourceRoads=')).join('\n');
+  const result=estimateRouteTolls(graph,{edgeIndexes:[0]},{tariffs:parseTollTable('Portugal',strictCsv)});
   assert.equal(result.totalEuros,null);assert.equal(result.pricing,'unavailable');assert.equal(result.roads[0].euros,null);
   graph.edgeIsToll=()=>false;
   assert.equal(estimateRouteTolls(graph,{edgeIndexes:[0]}).totalEuros,0);
@@ -103,4 +104,24 @@ test('explicit zero prices use the exact label, not an estimate', async () => {
   const {tollPriceLabel}=await import('../src/routing/toll-price-label.js');
   assert.doesNotMatch(tollPriceLabel({totalEuros:0,tolledDistanceMeters:100,currency:'EUR',vehicleClass:1,pricing:'exact'}),/Est\./);
   assert.match(tollPriceLabel({totalEuros:0,tolledDistanceMeters:100,currency:'EUR',vehicleClass:1,pricing:'exact'}),/exact/);
+});
+
+test('national reference coverage is opt-in, low confidence, independent by class and never rounds unknown costs to zero', async()=> {
+ const pt=countryTollTariffs('Portugal');
+ const csv=readFileSync(new URL('../android/native-app/src/main/assets/tolls/Portugal.csv',import.meta.url),'utf8');
+ for(const vehicleClass of [1,2,3,4]) {
+  for(const ref of ['A2','A4','A7','A11','A12','A13','A13-1','A16','A17','A19','A28','A29','A33','A41','A42','PVG;IP1','']) {
+   const graph={edgeIsToll:()=>true,edgeRoad:()=>0,road:()=>({ref}),edgeDistanceDecimeters:()=>100000};
+   const r=estimateRouteTolls(graph,{edgeIndexes:[0]},{tariffs:pt,vehicleClass});
+   if(ref==='A41'&&vehicleClass>=3){assert.equal(r.amount,0);assert.equal(r.pricing,'exact');continue;}
+   assert.ok(r.amount>0,ref);assert.equal(r.pricing,'estimate');assert.equal(r.pricingConfidence,'low');
+   assert.equal(r.pricedTollMeters,0);assert.equal(r.referenceTollMeters,10000);
+  }
+ }
+ const graph={edgeIsToll:()=>true,edgeRoad:()=>0,road:()=>({ref:'unpriced'}),edgeDistanceDecimeters:()=>1};
+ const tiny=estimateRouteTolls(graph,{edgeIndexes:[0]},{tariffs:pt});assert.equal(tiny.amount,.01);
+ assert.equal(estimateRouteTolls(graph,{edgeIndexes:[0]},{tariffs:pt,vehicleClass:99}).amount,null);
+ assert.equal(pt.referenceEstimate('A25;A1',1000,1),null);
+ const {tollPriceLabel}=await import('../src/routing/toll-price-label.js');assert.match(tollPriceLabel(tiny),/low confidence/);
+ for(const invalid of [csv.replace('referenceEstimate=road-then-country-average','referenceEstimate=guess'),csv.replace('referenceSourceRoads=A1,','referenceSourceRoads=missing,'),csv.replace('freeRoadClasses=A41:3,4','freeRoadClasses=A41:3,3')])assert.throws(()=>parseTollTable('Portugal',invalid));
 });

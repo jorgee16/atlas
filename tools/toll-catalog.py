@@ -82,6 +82,24 @@ def package(source, output, namespace="toll-tariffs"):
         raise ValueError('Wrong catalog namespace')
     if allowed is not None and any(''.join(r.split()).upper() not in roads for r in allowed.split(',') if r.strip()):
         raise ValueError('Invalid estimate policy')
+    class_free=metadata.get('freeRoadClasses')
+    if class_free is not None:
+        if fixed or ticket or not metadata.get('freeRoadClassSource','').startswith('https://'):raise ValueError('Invalid class exemption provenance')
+        used=set()
+        for rule in class_free.split('|'):
+            pair=rule.split(':')
+            if len(pair)!=2:raise ValueError('Invalid class exemption')
+            ref=''.join(pair[0].split()).upper();ids=[v.strip() for v in pair[1].split(',')]
+            if not re.fullmatch('[A-Z][A-Z0-9-]{0,31}',ref) or ref in used or not ids or len(set(ids))!=len(ids) or any(not re.fullmatch('[1-9][0-9]?',v) or int(v) not in classes for v in ids):raise ValueError('Invalid class exemption road/classes')
+            used.add(ref)
+    elif 'freeRoadClassSource' in metadata:raise ValueError('Class exemption source without policy')
+    if 'referenceEstimate' in metadata:
+        if fixed or ticket or metadata['referenceEstimate']!='road-then-country-average' or 'referenceSourceRoads' not in metadata:raise ValueError('Invalid reference policy')
+        refs=[''.join(r.split()).upper() for r in metadata['referenceSourceRoads'].split(',')]
+        eligible=set(''.join(r.split()).upper() for r in allowed.split(',')) if allowed is not None else roads
+        if not refs or len(set(refs))!=len(refs) or any(r not in roads or r not in eligible for r in refs):raise ValueError('Invalid reference source road')
+        if not any(''.join(row[0].split()).upper() in refs and any(Decimal(v)>0 for v in row[3:]) for row in sections):raise ValueError('No positive reference rates')
+    elif 'referenceSourceRoads' in metadata:raise ValueError('Reference source without policy')
     revision = int(metadata['version'])
     path = f'/{namespace}/{quote(country, safe="")}/{revision}/table.csv'
     manifest = dict(schemaVersion=1, country=country, revision=revision, currency=metadata['currency'],

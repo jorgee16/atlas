@@ -759,7 +759,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Audit SHA-verified real Portugal routing partitions
-        run: python3 tools/audit-toll-graph.py --output toll-audit/graph-coverage.json
+        run: |
+          python3 tools/audit-toll-graph.py --output toll-audit/graph-coverage.json --require-estimated-coverage
+          g++ -O2 -std=c++17 -I native/include native/src/binary.cpp native/src/routing.cpp native/src/tolls.cpp native/src/toll_crossings.cpp native/src/search.cpp native/src/guidance.cpp native/src/motion.cpp native/src/national_toll_probe.cpp -o "$RUNNER_TEMP/atlas-national-toll-probe"
+          python3 tools/verify-national-toll-coverage.py --binary "$RUNNER_TEMP/atlas-national-toll-probe" --output toll-audit/national-route-probes.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -1130,4 +1133,5 @@ jobs:
           name: Atlas-national-toll-geometry-census
           path: national-toll-geometry/
           if-no-files-found: error
+
 

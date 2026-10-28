@@ -76,7 +76,10 @@ public:
   static TollTariffs parse(std::string_view csv, std::string country);
   std::optional<double> estimate(std::string_view roadRef,
                                  double meters, int vehicleClass) const;
+  // Optional, explicitly configured low-confidence reference, never an exact tariff.
+  std::optional<double> referenceEstimate(std::string_view roadRef,double meters,int vehicleClass) const;
   bool explicitlyFree(std::string_view roadRef, int vehicleClass) const;
+  std::string freeSourceFor(std::string_view roadRef,int vehicleClass) const;
   std::string freeRoadSource;
   // Section lookup is for authoritative section IDs supplied by a future,
   // graph-version-bound mapping. Routing never guesses these IDs from a ref.
@@ -107,12 +110,17 @@ private:
   bool restrictEstimates_ = false;
   std::unordered_set<std::string> estimateRoads_;
   std::unordered_set<std::string> freeRoads_;
+  std::unordered_map<std::string,std::unordered_set<int>> freeRoadClasses_;
+  std::string freeRoadClassSource_;
+  std::unordered_map<int,double> referenceRates_;
+  bool referenceEnabled_ = false;
+  bool freeForClass(const std::string &road,int vehicleClass) const;
 };
 /** Breakdown is metadata for explaining toll coverage, not an exact tariff.
  * Individual edges are grouped by their OSM road ref in encounter order. */
 struct TollRoadCharge {
   std::string road;
-  double meters = 0, pricedMeters = 0, amount = 0;
+  double meters = 0, pricedMeters = 0, amount = 0, referenceMeters = 0;
   bool complete = true;
   bool exact = false;
   std::string chargeId, name;
@@ -124,7 +132,7 @@ struct Route {
   std::vector<Leg> legs;
   std::vector<Maneuver> maneuvers;
   double meters = 0, seconds = 0, tollEuros = 0;
-  double tolledMeters = 0, pricedTollMeters = 0;
+  double tolledMeters = 0, pricedTollMeters = 0, referenceTollMeters = 0;
   bool tollPriceComplete = true;
   bool tollPriceExact = false;
   std::string tollCountry, tollCurrency, tollYear, tollSource, tollVersion;

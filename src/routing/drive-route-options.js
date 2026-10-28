@@ -17,9 +17,10 @@ export function selectBalancedDriveRoute(
   noTolls
 ) {
   const pool = (frontier ?? []).filter(
-    route => route !== fastest && route !== noTolls && Number.isFinite(route.tolls?.totalEuros)
+    route => route !== fastest && route !== noTolls && route.tolls?.pricingConfidence!=='low' && Number.isFinite(route.tolls?.totalEuros)
   );
 
+  if (fastest?.tolls?.pricingConfidence==='low' || noTolls?.tolls?.pricingConfidence==='low') return null;
   if (!pool.length) {
     return null;
   }

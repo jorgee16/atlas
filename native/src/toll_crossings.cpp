@@ -136,7 +136,7 @@ bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &pr
   // Only monetary metadata changes. Authoritative path, progress, geometry,
   // maneuver positions, distance and ETA remain untouched.
   route.tollEuros=*total;route.tollPriceExact=true;route.tollPriceComplete=true;
-  route.pricedTollMeters=route.tolledMeters;route.tollRoads=std::move(charges);
+  route.pricedTollMeters=route.tolledMeters;route.referenceTollMeters=0;route.tollRoads=std::move(charges);
   route.tollCountry=prices.country;route.tollCurrency=prices.currency;route.tollYear=prices.year;
   route.tollSource=prices.source;route.tollVersion=prices.version;route.tollFractionDigits=prices.fractionDigits;route.tollVehicleClasses=prices.classes;
   return true;
@@ -182,7 +182,7 @@ bool applyEntryExitTollCharges(const Graph &graph,Route &route,const TollTariffs
   }
   // Reject incomplete evidence before touching any route metadata.
   route.tollEuros=*total;route.tollPriceExact=true;route.tollPriceComplete=true;
-  route.pricedTollMeters=route.tolledMeters;route.tollRoads=std::move(charges);
+  route.pricedTollMeters=route.tolledMeters;route.referenceTollMeters=0;route.tollRoads=std::move(charges);
   route.tollCountry=prices.country;route.tollCurrency=prices.currency;route.tollYear=prices.year;
   route.tollSource=prices.source;route.tollVersion=prices.version;route.tollFractionDigits=prices.fractionDigits;route.tollVehicleClasses=prices.classes;
   return true;

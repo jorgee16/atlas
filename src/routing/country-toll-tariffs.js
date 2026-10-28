@@ -68,13 +68,34 @@ export function parseTollTable(country, csv) {
       new Set(freeRefs).size!==freeRefs.length || freeRefs.some(r=>!/^[A-Z][A-Z0-9-]{0,31}$/.test(r)))) ||
       (!metadata.has('freeRoads') && metadata.has('freeRoadSource'))) throw new Error('Invalid free-road policy/provenance');
   const freeRoads=new Set(freeRefs);
+  const freeRoadClasses=new Map();
+  if(metadata.has('freeRoadClasses')) {
+    if(fixed||ticket||!metadata.get('freeRoadClassSource')?.startsWith('https://'))throw new Error('Invalid class exemption provenance');
+    for(const rule of metadata.get('freeRoadClasses').split('|')) {
+      const pair=rule.split(':'),road=normalize(pair[0]);
+      if(pair.length!==2||!/^[A-Z][A-Z0-9-]{0,31}$/.test(road)||freeRoadClasses.has(road))throw new Error('Invalid class exemption road');
+      const values=pair[1].split(',').map(v=>v.trim());
+      if(!values.length||new Set(values).size!==values.length||values.some(v=>!/^[1-9][0-9]?$/.test(v)||!classes.includes(Number(v))))throw new Error('Invalid exempt class');
+      freeRoadClasses.set(road,new Set(values.map(Number)));
+    }
+  } else if(metadata.has('freeRoadClassSource'))throw new Error('Class exemption source without policy');
+  const freeForClass=(road,c)=>freeRoads.has(road)||freeRoadClasses.get(road)?.has(c);
   const explicitlyFree=(ref,vehicleClass) => {
     const tokens=String(ref??'').split(/[;,/]/).map(normalize);
-    return !fixed && !ticket && classes.includes(vehicleClass) && tokens.some(r=>freeRoads.has(r)) &&
-      !tokens.some(r=>roads.has(r) && !freeRoads.has(r));
+    return !fixed && !ticket && classes.includes(vehicleClass) && tokens.some(r=>freeForClass(r,vehicleClass)) &&
+      !tokens.some(r=>roads.has(r) && !freeForClass(r,vehicleClass));
   };
   const allowed = metadata.has('estimateRoads') ? new Set(metadata.get('estimateRoads').split(',').filter(x => x.trim()).map(normalize)) : null;
   if (allowed && [...allowed].some(ref => !roads.has(ref))) throw new Error('Invalid estimate policy');
+  const referenceRates=new Map();
+  if(metadata.has('referenceEstimate')) {
+    if(fixed||ticket||metadata.get('referenceEstimate')!=='road-then-country-average'||!metadata.has('referenceSourceRoads'))throw new Error('Invalid reference policy');
+    const refs=metadata.get('referenceSourceRoads').split(',').map(normalize);
+    if(!refs.length||new Set(refs).size!==refs.length||refs.some(r=>!roads.has(r)||(allowed&&!allowed.has(r))))throw new Error('Invalid reference source roads');
+    const km=refs.reduce((n,r)=>n+roads.get(r).km,0);
+    for(const c of classes) {const amount=refs.reduce((n,r)=>n+roads.get(r).prices.get(c),0);if(amount>0)referenceRates.set(c,amount/km);}
+    if(!referenceRates.size)throw new Error('No positive reference rates');
+  } else if(metadata.has('referenceSourceRoads'))throw new Error('Reference source without policy');
   return Object.freeze({ country, currency: metadata.get('currency'), year: metadata.get('year'),
     scheme: ticket ? 'entry-exit' : fixed ? 'fixed-crossing' : 'road-average', fixedCharges:[...charges.values()].map(c => ({id:c.id,road:c.road,name:c.name})),
     fixedCharge(id,vehicleClass) { const n=charges.get(id)?.prices.get(vehicleClass);return n===undefined ? null : n/scale; },
@@ -94,12 +115,26 @@ export function parseTollTable(country, csv) {
       for(const j of journeys) { const n=fares.get([j.network,j.entry,j.exit].join('\n'))?.get(vehicleClass);if(n===undefined||!Number.isSafeInteger(total+n))return null;total+=n; }
       return total/scale;
     },
+    referenceEstimate(ref,meters,vehicleClass) {
+      if(!metadata.has('referenceEstimate')||!Number.isFinite(meters)||meters<0||!classes.includes(vehicleClass))return null;
+      const tokens=String(ref??'').split(/[;,/]/).map(normalize);
+      if(tokens.some(r=>freeForClass(r,vehicleClass)))return null;
+      let rate;
+      for(const token of tokens) {const road=roads.get(token);if(road?.prices.get(vehicleClass)>0){rate=road.prices.get(vehicleClass)/road.km;break;}}
+      rate??=referenceRates.get(vehicleClass);
+      const amount=meters/1000*rate;
+      return Number.isFinite(amount)&&amount<=1e12?amount:null;
+    },
+    freeSourceFor(ref,vehicleClass) {
+      if(!explicitlyFree(ref,vehicleClass))return '';
+      return [...new Set(String(ref??'').split(/[;,/]/).map(normalize).map(r=>freeRoads.has(r)?metadata.get('freeRoadSource'):freeRoadClasses.get(r)?.has(vehicleClass)?metadata.get('freeRoadClassSource'):null).filter(Boolean))].join('\n');
+    },
     explicitlyFree, freeRoadSource:metadata.get('freeRoadSource')??'',
     version, source: metadata.get('source'), fractionDigits: Number(digits), classes,
     estimate(ref, meters, vehicleClass) {
       if (fixed || ticket || !Number.isFinite(meters) || meters < 0 || !classes.includes(vehicleClass)) return null;
       const tokens=String(ref??'').split(/[;,/]/).map(normalize);
-      if(tokens.some(r=>freeRoads.has(r))) return explicitlyFree(ref,vehicleClass) ? 0 : null;
+      if(tokens.some(r=>freeForClass(r,vehicleClass))) return explicitlyFree(ref,vehicleClass) ? 0 : null;
       for (const token of tokens) {
         const key = normalize(token), road = roads.get(key); if (!road) continue;
         if (allowed && !allowed.has(key)) return null;

@@ -80,6 +80,9 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual({'A5','A2'},set(result))
             self.assertEqual(1000,result['A5']['estimatedMeters'])
             self.assertEqual(2000,result['A2']['directedMeters']);self.assertEqual(0,result['A2']['estimatedMeters'])
+            reference=graph_audit.scan({n:root/n for n in ['roads.bin','strings.bin','edges.bin']},{'A5':True,'A2':False},reference_estimates=True)
+            self.assertEqual(2000,reference['A2']['referenceEstimatedMeters'])
+            self.assertEqual(0,reference['A2']['estimatedMeters']);self.assertEqual(0,reference['A2']['unpricedEdges'])
             free=graph_audit.scan({n:root/n for n in ['roads.bin','strings.bin','edges.bin']},{'A5':True,'A2':False},{'A2'})
             self.assertEqual(2000,free['A2']['explicitlyFreeMeters'])
             self.assertEqual(0,free['A2']['estimatedMeters'])
@@ -143,6 +146,14 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual({4},{b['graphRoadFlags'] for b in report['bindings']})
 
 class ExplicitFreePolicyTests(unittest.TestCase):
+    def test_reference_policy_is_opt_in_and_source_bound(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);source=root/'Testland.csv'
+            text=CatalogTests().fixture()+"# referenceEstimate=road-then-country-average\n# referenceSourceRoads=T1\n# freeRoadClasses=T2:5\n# freeRoadClassSource=https://example.test/statute\n"
+            source.write_text(text);pack.package(source,root)
+            for invalid in [text.replace('referenceSourceRoads=T1','referenceSourceRoads=missing'),text.replace('referenceSourceRoads=T1','referenceSourceRoads=T1,T1'),text.replace('freeRoadClasses=T2:5','freeRoadClasses=T2:4'),text.replace('freeRoadClassSource=https://','freeRoadClassSource=http://')]:
+                source.write_text(invalid)
+                with self.assertRaises(ValueError):pack.package(source,root)
     def test_declared_free_roads_require_their_own_valid_source(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);source=root/'Testland.csv'

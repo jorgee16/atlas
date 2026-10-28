@@ -123,19 +123,51 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
         throw std::invalid_argument("Invalid/duplicate explicitly free road");
     }
   } else if(metadata.count("freeRoadSource"))throw std::invalid_argument("Free-road source without policy");
+  if(metadata.count("freeRoadClasses")) {
+    if(fixed||ticket||metadata["freeRoadClassSource"].substr(0,8)!="https://")throw std::invalid_argument("Missing class exemption provenance");
+    table.freeRoadClassSource_=metadata["freeRoadClassSource"];
+    for(const auto &rule:fields(metadata["freeRoadClasses"],'|')) {
+      const auto at=rule.find(':');if(at==std::string::npos)throw std::invalid_argument("Invalid class exemption");
+      const auto road=key(rule.substr(0,at));
+      if(road.empty()||road.size()>32||!std::isalpha(static_cast<unsigned char>(road[0]))||!std::all_of(road.begin(),road.end(),[](unsigned char c){return std::isalnum(c)||c=='-';})||table.freeRoadClasses_.count(road))throw std::invalid_argument("Invalid/duplicate class exemption road");
+      auto &allowed=table.freeRoadClasses_[road];
+      for(const auto &value:fields(rule.substr(at+1),',')) {
+        if(value.empty()||value.size()>2||!std::all_of(value.begin(),value.end(),[](unsigned char c){return c>='0'&&c<='9';}))throw std::invalid_argument("Invalid exempt class");
+        const auto id=std::stoi(value);
+        if(value!=std::to_string(id)||std::find(table.classes.begin(),table.classes.end(),id)==table.classes.end()||!allowed.insert(id).second)throw std::invalid_argument("Unknown/duplicate exempt class");
+      }
+    }
+  } else if(metadata.count("freeRoadClassSource"))throw std::invalid_argument("Class exemption source without policy");
   table.restrictEstimates_=metadata.count("estimateRoads");
   if(table.restrictEstimates_)for(auto ref:fields(metadata["estimateRoads"],',')) {
     auto k=key(ref);if(k.empty())continue;
     if(!table.roadTotals_.count(k))throw std::invalid_argument("Estimate policy refers to an absent road");
     table.estimateRoads_.insert(k);
   }
+  if(metadata.count("referenceEstimate")) {
+    if(table.scheme!="road-average"||metadata["referenceEstimate"]!="road-then-country-average"||!metadata.count("referenceSourceRoads"))throw std::invalid_argument("Invalid reference estimation policy");
+    double km=0;std::unordered_map<int,double> totals;std::unordered_set<std::string> used;
+    for(const auto &ref:fields(metadata["referenceSourceRoads"],',')) {
+      const auto road=key(ref);const auto it=table.roadTotals_.find(road);
+      if(it==table.roadTotals_.end()||!used.insert(road).second||(table.restrictEstimates_&&!table.estimateRoads_.count(road)))throw std::invalid_argument("Invalid reference source road");
+      km+=it->second.km;for(const auto &p:it->second.prices)totals[p.first]+=p.second;
+    }
+    if(km<=0||!std::isfinite(km))throw std::invalid_argument("Empty reference source");
+    for(const auto &p:totals)if(p.second>0&&std::isfinite(p.second))table.referenceRates_[p.first]=p.second/km;
+    if(table.referenceRates_.empty())throw std::invalid_argument("Reference source has no positive class rate");
+    table.referenceEnabled_=true;
+  } else if(metadata.count("referenceSourceRoads"))throw std::invalid_argument("Reference source without policy");
   return table;
+}
+bool TollTariffs::freeForClass(const std::string &road,int vehicleClass) const {
+  const auto found=freeRoadClasses_.find(road);
+  return freeRoads_.count(road)||(found!=freeRoadClasses_.end()&&found->second.count(vehicleClass));
 }
 std::optional<double> TollTariffs::estimate(std::string_view ref,double meters,int vehicleClass) const {
   if(scheme!="road-average"||!std::isfinite(meters)||meters<0||vehicleClass<1||vehicleClass>99)return std::nullopt;
   bool free=false,paid=false;
   for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
-    auto k=key(road);free=free||freeRoads_.count(k);paid=paid||(roadTotals_.count(k)&&!freeRoads_.count(k));
+    auto k=key(road);free=free||freeForClass(k,vehicleClass);paid=paid||(roadTotals_.count(k)&&!freeForClass(k,vehicleClass));
   }
   if(free&&paid)return std::nullopt;
   if(free)return std::find(classes.begin(),classes.end(),vehicleClass)!=classes.end()?std::optional<double>(0.):std::nullopt;
@@ -154,10 +186,36 @@ bool TollTariffs::explicitlyFree(std::string_view ref,int vehicleClass) const {
   bool free=false;
   for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
     const auto k=key(road);
-    if(roadTotals_.count(k)&&!freeRoads_.count(k))return false;
-    free=free||freeRoads_.count(k);
+    if(roadTotals_.count(k)&&!freeForClass(k,vehicleClass))return false;
+    free=free||freeForClass(k,vehicleClass);
   }
   return free;
+}
+std::string TollTariffs::freeSourceFor(std::string_view ref,int vehicleClass) const {
+  if(!explicitlyFree(ref,vehicleClass))return {};
+  std::string result;
+  for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
+    const auto k=key(road);const auto classes=freeRoadClasses_.find(k);
+    const auto source=freeRoads_.count(k)?freeRoadSource:(classes!=freeRoadClasses_.end()&&classes->second.count(vehicleClass)?freeRoadClassSource_:std::string());
+    if(!source.empty()&&result.find(source)==std::string::npos){if(!result.empty())result+='\n';result+=source;}
+  }
+  return result;
+}
+std::optional<double> TollTariffs::referenceEstimate(std::string_view ref,double meters,int vehicleClass) const {
+  if(scheme!="road-average"||!referenceEnabled_||!std::isfinite(meters)||meters<0||std::find(classes.begin(),classes.end(),vehicleClass)==classes.end())return std::nullopt;
+  // An ambiguous free/paid alias must never become a paid reference estimate.
+  for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/'))if(freeForClass(key(road),vehicleClass))return std::nullopt;
+  double referenceRate=0;
+  for(auto token:fields(std::string(ref),';'))for(auto comma:fields(token,','))for(auto road:fields(comma,'/')) {
+    const auto known=roadTotals_.find(key(road));
+    if(referenceRate<=0&&known!=roadTotals_.end()) {
+      const auto p=known->second.prices.find(vehicleClass);
+      if(p!=known->second.prices.end()&&p->second>0){referenceRate=p->second/known->second.km;break;}
+    }
+  }
+  if(referenceRate<=0) {const auto rate=referenceRates_.find(vehicleClass);if(rate==referenceRates_.end())return std::nullopt;referenceRate=rate->second;}
+  const auto amount=meters/1000.*referenceRate;
+  return std::isfinite(amount)&&amount<=1e12?std::optional<double>(amount):std::nullopt;
 }
 std::optional<double> TollTariffs::sectionPrice(std::string_view road,std::string_view section,int vehicleClass) const {
   auto found=sectionPrices_.find(key(std::string(road))+"\n"+std::string(section));

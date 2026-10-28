@@ -11,7 +11,7 @@ int main(int argc,char** argv){try{
  check(argc==4,"production road, plaza and entry/exit CSVs required");std::ifstream file(argv[1]);check(bool(file),"missing production CSV");std::ostringstream buffer;buffer<<file.rdbuf();
  const auto csv=buffer.str();auto pt=TollTariffs::parse(csv,"Portugal");
  check(pt.classes==std::vector<int>({1,2,3,4}),"official classes");
- check(pt.version=="2026102601"&&pt.currency=="EUR"&&pt.year=="2026","provenance");
+ check(pt.version=="2026102801"&&pt.currency=="EUR"&&pt.year=="2026","provenance");
  check(std::abs(*pt.sectionPrice("A5","Estádio Nacional / Oeiras",1)-.4)<1e-9,"official class1");
  check(std::abs(*pt.estimate("A5",23800,1)-2.5)<1e-9,"A5 published section chain");
  for(int c=2;c<=4;++c)check(std::abs(*pt.estimate("A5",23800,c)-4.8)<1e-9,"classes are source prices, not multipliers");
@@ -24,6 +24,15 @@ int main(int argc,char** argv){try{
  check(!pt.estimate("A25",1000,99),"unsupported class cannot silently acquire a price");
  check(!pt.estimate("unknown",100,1)&&!pt.estimate("A5",100,5),"unknown never free");
  check(!pt.estimate("A5",-1,1)&&!pt.estimate("A5",NAN,1)&&!pt.estimate("A5",INFINITY,1),"invalid distances");
+ for(int c=1;c<=4;++c)for(const auto &ref:{"A2","A4","A7","A11","A12","A13","A16","A17","A19","A28","A29","A33","A42","PVG;IP1",""}) {
+   const auto value=pt.referenceEstimate(ref,1000,c);
+   check(value&&*value>0,"national reference estimation is positive and class-specific");
+ }
+ check(std::abs(*pt.referenceEstimate("A2",225200,1)-23.80)<1e-8,"partial road sources take precedence over country averages");
+ check(!pt.referenceEstimate("A25;A1",1000,1)&&!pt.referenceEstimate("A5",1000,99),"reference estimates cannot bypass ambiguous free aliases or unsupported classes");
+ for(int c:{3,4})check(pt.explicitlyFree("A41",c)&&pt.estimate("A41",10000,c)==0.,"statutory class-specific A41 exemption");
+ check(pt.freeSourceFor("A41",3).find("1058701611")!=std::string::npos,"class exemption keeps its legal source");
+ check(!pt.explicitlyFree("A41",1)&&pt.referenceEstimate("A41",1000,1).value_or(0)>0,"heavy exemption must not make light vehicles free");
  check(pt.estimate(" EN6 ; A 5",1000,1).has_value(),"OSM multiple references");
  rejects([&]{TollTariffs::parse(csv,"Spain");});
  for(const std::string policy:{"# freeRoads=T2,T2\n# freeRoadSource=https://example.test/law\n", "# freeRoads=\n# freeRoadSource=https://example.test/law\n", "# freeRoads=T2\n# freeRoadSource=http://example.test/law\n", "# freeRoadSource=https://example.test/law\n"}) {

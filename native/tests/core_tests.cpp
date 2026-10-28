@@ -98,6 +98,16 @@ int main(int argc, char **argv) {
     check(exempt&&exempt->tollEuros==0&&exempt->tollPriceExact&&exempt->tollPriceComplete,"explicit statutory zero overrides stale graph flags");
     check(exempt->edges==tolled->edges&&exempt->meters==tolled->meters&&exempt->seconds==tolled->seconds,"free-road pricing never changes routing");
     check(exempt->tollRoads.front().exact&&routeJson(*exempt).find("https://example.test/statute")!=std::string::npos,"zero price retains official provenance");
+    const auto referenceTable=TollTariffs::parse(
+      "# country=Testland\n# currency=JPY\n# year=2026\n# fractionDigits=0\n# source=https://example.test/prices\n"
+      "# referenceEstimate=road-then-country-average\n# referenceSourceRoads=T1\n"
+      "road;section;km;class1;class5\nT1;published;10;100;271\n","Testland");
+    auto referenceOptions=paid;referenceOptions.tariffs=&referenceTable;
+    const auto referenceRoute=route(toll,0,2,referenceOptions);
+    check(referenceRoute&&referenceRoute->tollPriceComplete&&!referenceRoute->tollPriceExact&&referenceRoute->tollEuros>0,"opt-in reference can supply an estimated total but never exact");
+    check(referenceRoute->pricedTollMeters==0&&referenceRoute->referenceTollMeters==referenceRoute->tolledMeters,"reference coverage is separate from actual tariff coverage");
+    check(routeJson(*referenceRoute).find("\"tollPricingConfidence\":\"low\"")!=std::string::npos,"low confidence is explicit in native JSON");
+    check(referenceRoute->edges==tolled->edges&&referenceRoute->meters==tolled->meters&&referenceRoute->seconds==tolled->seconds,"reference estimates never alter route selection, geometry length or ETA");
     // Synthetic graph fixtures verify pricing invariants; real A5 journeys
     // are validated separately against SHA-verified Portugal graph files.
     const auto fixedFixture=TollTariffs::parse(
