@@ -1167,18 +1167,13 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
             if (trusted && tunnelRecoveryPending &&
                 TunnelRecoveryPolicy.confirmedConsecutiveFixes(
                     s.previousFix,fix,s.guidance)) {
-                val confirmedAlong=s.guidance!!.optDouble("along",Double.NaN)
-                if(confirmedAlong.isFinite()) {
-                    val coordinate=s.guidance.coordinate()
-                    renderInterpolator.synchronizeConfirmedGps(
-                        confirmedAlong,coordinate,fix.time)
-                    presentedPosition.reset()
-                    freePosition.reset()
-                    lastRenderedMarker=null
-                    desiredDisplayed=coordinate
-                    tunnelRecoveryPending=false
-                    if(follow)cameraState.viewportChanged()
-                }
+                // acceptGps above has already installed the confirmed target.
+                // Recovery while active is not a new visual epoch: retain
+                // route-constrained interpolation and the final frame budget.
+                // Resetting them here teleported the cursor when JNI arrived
+                // after two fresh fixes (69.6 m in the full Portugal replay).
+                // Explicit foreground/start synchronization remains separate.
+                tunnelRecoveryPending=false
             }
             if(trusted && !wasRouteRendering && !initialAlignment &&
                 StationaryMapPosition.visualSpeed(fix)<(if(s.walking).45 else 1.2)) {
