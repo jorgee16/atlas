@@ -72,7 +72,6 @@ bash android/gradlew -p android -PnativeOnly :native-app:connectedDebugAndroidTe
   --stacktrace || result=$?
 cleanup
 trap - EXIT
-python3 tools/emit-native-replay-previews.py "$metrics_dir" "ui-preview/$collection" || true
 if [[ "$result" -eq 0 ]]; then
   if [[ "$mode" == tolls ]]; then
     python3 tools/verify-toll-android-proof.py "$metrics_dir" || result=$?
@@ -85,5 +84,8 @@ if [[ "$result" -eq 0 ]]; then
     fi
   fi
 fi
+# Keep diagnostic/assertion output ahead of large image previews so bounded
+# log readers retain the failure reason.
+python3 tools/emit-native-replay-previews.py "$metrics_dir" "ui-preview/$collection" || true
 exit "$result"
 

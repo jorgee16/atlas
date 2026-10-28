@@ -21,10 +21,14 @@ class NavigationCameraBehaviorTest {
     @Test fun compassToggleSettlesInSixHundredMillisecondsWithoutSnapping() {
         val rate=NavigationCameraBehavior.rotationRate(0.0)
         assertEquals(14.0,rate,0.001)
-        val initialDifference=180.0
-        val residual=initialDifference*kotlin.math.exp(-rate*0.6)
-        assertTrue("north-up compass should settle below 1 degree in 600 ms",
-            residual < 1.0)
+        for(fps in listOf(10,15,30,60)) {
+            var residual=180.0
+            repeat((fps*.6).toInt()) {
+                residual-=NavigationCameraBehavior.rotationDelta(residual,rate,1.0/fps)
+            }
+            assertTrue("north-up compass should settle below 1 degree in 600 ms at $fps FPS",
+                residual < 1.0)
+        }
         assertEquals(2.8,NavigationCameraBehavior.rotationRate(1.0),0.001)
         assertEquals(2.8,NavigationCameraBehavior.rotationRate(Double.POSITIVE_INFINITY),0.001)
     }
@@ -102,4 +106,26 @@ class NavigationCameraBehaviorTest {
             raw=0.0,rawAccuracy=30.0)!!,0.001)
     }
 
+
+    @Test fun confirmedUTurnCannotFlipCameraOnADelayedFrame() {
+        val error=AtlasHeading.signedDelta(185.25933968699348,355.8562316894531)
+        val delta=NavigationCameraBehavior.rotationDelta(error,8.0,.128079)
+        assertEquals(48.0,delta,.001)
+        assertEquals(-48.0,NavigationCameraBehavior.rotationDelta(-error,8.0,.128079),.001)
+        assertEquals(0.0,NavigationCameraBehavior.rotationDelta(error,8.0,0.0),.001)
+        assertEquals(0.0,NavigationCameraBehavior.rotationDelta(Double.NaN,8.0,.1),.001)
+    }
+
+    @Test fun confirmedUTurnStillSettlesWithoutFreezingAtDifferentFrameRates() {
+        for(fps in listOf(10,15,30,60)) {
+            var residual=180.0
+            repeat(fps*2) {
+                val rate=NavigationCameraBehavior.rotationRate(10.0,residual,8.0)
+                val step=NavigationCameraBehavior.rotationDelta(residual,rate,1.0/fps)
+                assertTrue("no instantaneous camera jump",kotlin.math.abs(step)<60.0)
+                residual-=step
+            }
+            assertTrue("confirmed turn must complete at $fps FPS",residual<2.0)
+        }
+    }
 }

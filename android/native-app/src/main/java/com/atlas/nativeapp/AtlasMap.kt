@@ -271,9 +271,10 @@ class AtlasMap(private val context: Context, private val regions: RegionStore, v
                 time-compassChangedAt,
                 AtlasHeading.signedDelta(camera.bearing,desiredHeading),
                 speed,roundaboutActive)
-            val easing = 1-kotlin.math.exp(-turnRate*deltaTime)
             val angle = AtlasHeading.normalize(camera.bearing+
-                AtlasHeading.signedDelta(camera.bearing,desiredHeading)*easing)
+                NavigationCameraBehavior.rotationDelta(
+                    AtlasHeading.signedDelta(camera.bearing,desiredHeading),
+                    turnRate,deltaTime))
             followingAngle = angle
             val framing = visualFraming(s,roundaboutActive)
             val cameraEasing = 1-kotlin.math.exp(-1.6*deltaTime)

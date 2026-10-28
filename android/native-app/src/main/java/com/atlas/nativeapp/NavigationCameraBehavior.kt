@@ -68,6 +68,20 @@ internal object NavigationCameraBehavior {
         }
     }
 
+    /** Bound yaw independently of exponential damping. At a slow 100ms
+     * frame, damping alone moved a confirmed U-turn by 94 degrees at once.
+     * 480 degrees/s keeps the existing sub-second turn/compass response
+     * while preventing a single delayed frame from flipping the map.
+     */
+    fun rotationDelta(angularError: Double, rate: Double, seconds: Double): Double {
+        if(!angularError.isFinite() || !rate.isFinite() || rate<=0.0 ||
+            !seconds.isFinite() || seconds<=0.0)return 0.0
+        val dt=seconds.coerceAtMost(.1)
+        val damped=angularError*(1-kotlin.math.exp(-rate*dt))
+        val budget=480.0*dt
+        return damped.coerceIn(-budget,budget)
+    }
+
     fun shouldContinueFrame(follow: Boolean, markerActive: Boolean,
                             centerErrorMeters: Double, angularError: Double,
                             zoomError: Double, tiltError: Double): Boolean =
