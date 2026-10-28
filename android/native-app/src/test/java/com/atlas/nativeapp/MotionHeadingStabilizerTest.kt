@@ -143,4 +143,37 @@ class MotionHeadingStabilizerTest {
         for(i in 1..2)assertEquals(0.0,filter.resolve(
             fix(i+1.0,180.0,lat=38.72+i*8.0/111320),null,true),.001)
     }
+
+    @Test fun longGapCannotMakeTwoInvertedFixesOverrideConfirmedCourse() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,325.0,accuracy=20.0,speed=8.0)
+            .copy(providerBearing=325.0),null,true,325.0,true)
+        // Full replay: a camera checkpoint pauses delivery for over 20s.
+        // Native heading remains north-west while two provider fixes invert.
+        for(i in 0..1) {
+            val reacquired=fix(24.0+i,328.0,accuracy=20.0,
+                directionError=5.0,speed=8.0,lat=38.72+i*8.0/111320.0)
+                .copy(providerBearing=145.0)
+            assertEquals(325.0,filter.resolve(reacquired,null,true),1.0)
+        }
+        assertEquals(325.0,filter.resolve(fix(26.0,325.0,accuracy=20.0,
+            speed=8.0).copy(providerBearing=325.0),null,true),1.0)
+    }
+
+    @Test fun realTurnAfterLongGapCommitsWithFreshDisplacement() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,0.0,speed=8.0),null,true)
+        assertEquals(0.0,filter.resolve(fix(24.0,180.0,speed=8.0),null,true),.001)
+        assertEquals(180.0,filter.resolve(fix(25.0,180.0,speed=8.0,
+            lat=38.72-8.0/111320.0),null,true),.001)
+    }
+
+    @Test fun sustainedTurnAfterLongGapDoesNotFreezeWithoutDisplacementEvidence() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,0.0,speed=8.0),null,true)
+        assertEquals(0.0,filter.resolve(fix(24.0,180.0,speed=8.0),null,true),.001)
+        assertEquals(0.0,filter.resolve(fix(25.0,180.0,speed=8.0),null,true),.001)
+        assertTrue(AtlasHeading.angleDifference(0.0,
+            filter.resolve(fix(26.0,180.0,speed=8.0),null,true))>20.0)
+    }
 }

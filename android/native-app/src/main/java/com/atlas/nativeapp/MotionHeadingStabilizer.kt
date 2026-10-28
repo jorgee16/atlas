@@ -113,7 +113,12 @@ internal class MotionHeadingStabilizer {
         if (!f.time.isFinite() || f.time <= lastTime) return
         val elapsed = f.time - lastTime
         if (elapsed > 20.0) {
-            course = null; turnCandidate = null; turnCount = 0
+            // A delivery gap invalidates an unfinished turn, not the last
+            // observed direction. Clearing course made one uncorroborated
+            // reacquired GNSS bearing authoritative, bypassing confirmation.
+            // New trips explicitly reset(); real turns still commit from
+            // fresh displacement or the normal consecutive-fix policy.
+            turnCandidate = null; turnCount = 0
         }
         val previous = lastPoint
         val previousAccuracy = lastAccuracy
