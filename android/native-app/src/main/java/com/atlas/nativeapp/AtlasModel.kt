@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.Executors
@@ -138,6 +139,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     // when JNI processing temporarily falls behind the Android location rate.
     private val locationFixes = Channel<Fix>(Channel.CONFLATED)
     private var lastQueuedFixTime = Double.NEGATIVE_INFINITY
+    @Volatile private var newestReceivedFix: Fix? = null
     private val recentRealFixTimes = java.util.ArrayDeque<Double>()
     // The preview may have been planned minutes before Start was pressed.
     // Keep the origin used for graph calculation rather than assuming that
@@ -353,6 +355,9 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         .put("label",if(!primary.optBoolean("hasTolls")) "No tolls" else "Recommended")
                         .put("avoidTolls",snapshot.avoidTolls)
                     val choices = mutableListOf(primary)
+                    // Let queued GPS filtering run between native searches.
+                    // Busy navigation never projects onto temporary candidates.
+                    yield()
                     if (!snapshot.walking && !startAfter) {
                         val baseSeconds=primary.optDouble("durationSeconds")
                         val baseMeters=primary.optDouble("distanceMeters")
@@ -367,11 +372,14 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                             choices.add(candidate)
                             return key
                         }
-                        fun candidate(avoid: Boolean, seed: Int = -1,
+                        suspend fun candidate(avoid: Boolean, seed: Int = -1,
                                       penalty: Double = 0.0): JSONObject? = try {
-                            priced(core.route(liveOrigin,destination.coordinate(),
+                            yield()
+                            val result=core.route(liveOrigin,destination.coordinate(),
                                 false,avoid,0.0,vehicleClass,routingHeading,
-                                seed,penalty))
+                                seed,penalty)
+                            yield()
+                            priced(result)
                         } catch (e: IllegalStateException) {
                             if (e.message?.contains("cancel",true)==true) throw e
                             null
@@ -512,11 +520,19 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
     fun fix(fix: Fix) {
         if (!fix.time.isFinite() || fix.time <= lastQueuedFixTime) return
         lastQueuedFixTime = fix.time
+        newestReceivedFix = fix
         locationFixes.trySend(fix)
     }
 
     private suspend fun processLocationFix(fix: Fix) {
-        val trusted = withContext(worker) { core.filter(fix) }
+        val trusted = withContext(worker) {
+            // Channel conflation cannot replace the fix already taken by the
+            // consumer while it waits behind routing. Re-sample at execution,
+            // so an old visual position is never replayed after the wait.
+            val newest = newestReceivedFix?.takeIf { it.time >= fix.time } ?: fix
+            val acceptedTime = state.value.fix?.time ?: Double.NEGATIVE_INFINITY
+            if (newest.time <= acceptedTime) null else core.filter(newest)
+        } ?: return
         recentRealFixTimes.addLast(trusted.time)
         while(recentRealFixTimes.isNotEmpty() &&
             (recentRealFixTimes.size>12 ||

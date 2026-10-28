@@ -2,6 +2,13 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p ui-preview
+# A boot-time Quickstep ANR can cover every application window and make
+# Espresso fail for lack of focus. Reset only the emulator launcher; Atlas
+# crashes/ANRs remain visible and still fail the unchanged instrumentation.
+adb shell dumpsys activity lastanr > ui-preview/emulator-launcher-before-tests.txt || true
+adb shell input keyevent KEYCODE_WAKEUP || true
+adb shell wm dismiss-keyguard || true
+adb shell am force-stop com.android.launcher3 || true
 adb emu geo fix -9.1393 38.7223 || true
 # Capture native crashes even if the instrumented test process terminates.
 adb logcat -c || true
@@ -16,5 +23,3 @@ if [[ "$atlas_smoke_exit" -ne 0 ]]; then
   grep -n -A 16 -B 5 -E 'Fatal signal|FATAL EXCEPTION|SIGSEGV|libGLESv2_enc|libmaplibre.so|am_crash' ui-preview/device-logcat.txt | tail -120 || true
 fi
 exit "$atlas_smoke_exit"
-
-
