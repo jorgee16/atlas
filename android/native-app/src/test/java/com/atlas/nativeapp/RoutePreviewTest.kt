@@ -25,7 +25,7 @@ class RoutePreviewTest {
         assertTrue(RouteChoices.acceptAlternative(paid,listOf(free),900.0,11000.0))
         assertFalse(RouteChoices.acceptAlternative(paid,listOf(paid),600.0,10000.0))
         assertFalse(RouteChoices.acceptAlternative(
-            route(false,Double.NaN,11000.0,11),listOf(paid),600.0,10000.0))
+            route(false,600.0,11000.0,11).put("durationSeconds",JSONObject.NULL),listOf(paid),600.0,10000.0))
     }
 
     @Test fun paidPaidFreeOrderingPreservesNativeRouteKeysAndObjects() {
