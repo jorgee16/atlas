@@ -1051,9 +1051,15 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                         card.addView(ui.text("Toll details",12f,ui.blue).apply {
                             setPadding(0,ui.dp(8),0,ui.dp(8))
                             setOnClickListener {
-                                AlertDialog.Builder(this@MainActivity).setTitle("Toll details")
+                                val dialog=AlertDialog.Builder(this@MainActivity).setTitle("Toll details")
                                     .setMessage(RouteChoices.previewTollDetails(route))
-                                    .setPositiveButton("Close",null).show()
+                                    .setPositiveButton("Close",null)
+                                route.optString("tollTariffSource").takeIf { it.startsWith("https://") }?.let { source ->
+                                    dialog.setNeutralButton("Source") { _,_ ->
+                                        startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(source)))
+                                    }
+                                }
+                                dialog.show()
                             }
                         },linear(2))
                     }

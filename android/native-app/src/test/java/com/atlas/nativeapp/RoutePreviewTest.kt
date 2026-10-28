@@ -22,6 +22,7 @@ class RoutePreviewTest {
         val paid=route(true,600.0,10000.0,1,2,3,4,5,6,7,8,9,10)
         val free=route(false,900.0,11000.0,1,2,3,4,5,6,7,8,9,11)
         assertTrue(RouteChoices.acceptAlternative(free,listOf(paid),600.0,10000.0))
+        assertTrue(RouteChoices.acceptAlternative(paid,listOf(free),900.0,11000.0))
         assertFalse(RouteChoices.acceptAlternative(paid,listOf(paid),600.0,10000.0))
         assertFalse(RouteChoices.acceptAlternative(
             route(false,Double.NaN,11000.0,11),listOf(paid),600.0,10000.0))

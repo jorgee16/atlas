@@ -17,7 +17,7 @@ for checkpoint in sorted(root.glob('*.json')):
 if not shutil.which('ffmpeg'):
     print('Visual previews unavailable: ffmpeg not installed; see original artifact PNGs.')
     raise SystemExit(0)
-preferred=['cursor-bitmap','drive-0','pan-before','pan-after','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
+preferred=['route-options-light','route-options-dark','cursor-bitmap','drive-0','pan-before','pan-after','manual-zoom','drive-recenter','north-up-recenter','recreated-recenter','checking-recenter',
            'reroute-recenter','walking-compass-recenter','walking-stop','walk-15','walk-arrived']
 preferred += sorted(p.stem for pattern in ['camera-*.png','drive-*.png','deviation-*.png','lisbon-*.png','sintra-*.png','a5-*.png','cril-*.png','09-*.png','10-*.png'] for p in root.glob(pattern) if p.stem not in preferred)
 def emit(name,target):
@@ -51,4 +51,3 @@ for number,movie in enumerate(movies,1):
         print('ATLAS_VIDEO_DECODE_FAILURE '+str(movie),flush=True)
 for target in sorted(root.glob('video-*.jpg')):
     emit(target.stem,target)
-

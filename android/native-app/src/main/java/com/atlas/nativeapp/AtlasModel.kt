@@ -384,24 +384,21 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                                 fastestKey=addChoice(it,"Recommended",false)
                             }
                         }
-                        val fastest=choices.firstOrNull {
-                            it.optInt("key",-1)==fastestKey
-                        }
-                        if (fastestKey!=null && fastest?.optBoolean("hasTolls")==true) {
-                            var tollAlternatives=0
+                        if (fastestKey!=null) {
+                            var paidRoutes=choices.count { it.optBoolean("hasTolls") }
                             var alternateSeed=fastestKey!!
                             // A* penalizes overlapping edges in its SEARCH
                             // cost only; arrival time and roads stay factual.
                             // Never fabricate an option if no distinct legal
                             // motorway corridor exists in the installed graph.
                             for (weight in listOf(110.0,300.0,550.0)) {
-                                if (tollAlternatives>=1) break
+                                if (paidRoutes>=2) break
                                 val alternate=candidate(false,alternateSeed,weight) ?: continue
                                 if (!alternate.optBoolean("hasTolls")) continue
                                 val key=addChoice(alternate,
-                                    "Toll alternative ${tollAlternatives+1}",false)
+                                    "Alternative",false)
                                 if(key!=null) {
-                                    tollAlternatives++
+                                    paidRoutes++
                                     alternateSeed=key
                                 }
                             }

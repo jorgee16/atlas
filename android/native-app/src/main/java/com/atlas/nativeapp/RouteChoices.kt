@@ -72,7 +72,8 @@ internal object RouteChoices {
             // the journey except a short tolled bridge. Neither is a duplicate.
             return choices.none { edgeIndexes(it) == edges }
         }
-        return distinctEdges(edges, choices.map(::edgeIndexes)) &&
+        return choices.none { edgeIndexes(it) == edges } &&
+            distinctEdges(edges, choices.filter { it.optBoolean("hasTolls") }.map(::edgeIndexes)) &&
             reasonableDetour(primarySeconds, primaryMeters, seconds, meters)
     }
 
