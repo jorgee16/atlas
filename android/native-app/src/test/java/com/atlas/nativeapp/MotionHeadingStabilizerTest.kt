@@ -176,4 +176,21 @@ class MotionHeadingStabilizerTest {
         assertTrue(AtlasHeading.angleDifference(0.0,
             filter.resolve(fix(26.0,180.0,speed=8.0),null,true))>20.0)
     }
+
+    @Test fun thirteenSecondDeliveryGapCanConfirmTurnWithPhysicalDisplacement() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(0.0,313.0,speed=8.0),null,true)
+        filter.resolve(fix(1.0,181.0,speed=8.0),null,true)
+        val moved=fix(14.6,181.0,speed=8.0,lat=38.72-8.0/111320.0)
+            .copy(providerBearing=181.0)
+        assertEquals(181.0,filter.resolve(moved,null,true),1.0)
+    }
+
+    @Test fun thirteenSecondDeliveryGapDoesNotConfirmInvertedBearingAgainstMovement() {
+        val filter=MotionHeadingStabilizer()
+        filter.resolve(fix(1.0,0.0,speed=8.0),null,true)
+        for(i in 1..2)assertEquals(0.0,filter.resolve(
+            fix(1.0+i*13.6,180.0,speed=8.0,lat=38.72+i*8.0/111320.0)
+                .copy(providerBearing=180.0),null,true),.001)
+    }
 }

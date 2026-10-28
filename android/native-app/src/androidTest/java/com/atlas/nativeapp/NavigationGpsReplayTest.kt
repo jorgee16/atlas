@@ -49,8 +49,7 @@ class NavigationGpsReplayTest {
     private var enforceTrajectory=false
     private var previousFrame:JSONObject?=null
     @Volatile private var trajectoryFailure:String?=null
-    private data class Truth(val heading:Double,val stableSince:Double,val fixTime:Double)
-    @Volatile private var latestTruth:Truth?=null
+    private val headingTruth=ReplayTruthTimeline()
 
     private fun map(activity: MainActivity): AtlasMap {
         val field=MainActivity::class.java.getDeclaredField("atlasMap").apply{isAccessible=true}
@@ -75,7 +74,7 @@ class NavigationGpsReplayTest {
             map(a).onDebugFrame={ frame ->
                 frame.put("phase",phase)
                 val now=frame.getDouble("time")
-                latestTruth?.let {
+                headingTruth.forFix(frame.optDouble("fixTime",Double.NaN))?.let {
                     frame.put("truthHeading",it.heading).put("truthFixTime",it.fixTime)
                         .put("truthStableFor",now-it.stableSince)
                 }
@@ -136,11 +135,8 @@ class NavigationGpsReplayTest {
             time=System.currentTimeMillis(); elapsedRealtimeNanos=SystemClock.elapsedRealtimeNanos()
             altitude=0.0
         }
-        val previous=latestTruth
         val fixTime=l.elapsedRealtimeNanos/1e9
-        latestTruth=Truth(truthHeading,
-            if(previous==null || AtlasHeading.angleDifference(previous.heading,truthHeading)>45.0)
-                fixTime else previous.stableSince,fixTime)
+        headingTruth.record(fixTime,truthHeading)
         locations.setTestProviderLocation(LocationManager.GPS_PROVIDER,l)
         fixes.add(JSONObject().put("time",l.elapsedRealtimeNanos/1e9).put("lat",point.lat)
             .put("lon",point.lon).put("speed",speed).put("accuracy",accuracy)
