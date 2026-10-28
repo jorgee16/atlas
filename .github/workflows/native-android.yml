@@ -941,6 +941,10 @@ jobs:
             'imt':'https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/',
             'ip':'https://servicos.infraestruturasdeportugal.pt/portagens-ips',
             'ip-simulator':'https://portagens.infraestruturasdeportugal.pt/',
+            'ip-service-documentation':'https://portagens.infraestruturasdeportugal.pt/Portagens.asmx',
+            'ip-service-wsdl':'https://portagens.infraestruturasdeportugal.pt/Portagens.asmx?WSDL',
+            'ascendi-electronic-no-www':'https://ascendi.pt/portagens-eletronicas/',
+            'vialivre-a28':'https://www.vialivre.pt/pt-pt/portagens/portagens-na-a28-2/',
             'ascendi-electronic':'https://www.ascendi.pt/portagens-eletronicas/',
             'ascendi-traditional':'https://www.ascendi.pt/portagens-tradicionais/',
             'ascendi-map':'https://www.ascendi.pt/mapa/',
@@ -1038,7 +1042,7 @@ jobs:
                     hints=[body[max(0,m.start()-120):m.end()+250] for m in re.finditer(r'tarifa|taxa|portico|pórtico|cobranca|cobrança|\\.json|\\.csv|api/',body,re.I)]
                     report['publicScriptHints'].append({'url':script,'sha256':hashlib.sha256(javascript).hexdigest(),'hints':hints[:60]})
                 report['rows']=page.rows
-                if name=='ascendi-root':
+                if name in ('ascendi-root','ip-service-documentation','ip-service-wsdl'):
                   report['allLinks']=page.links
                   report['bodyText']=re.sub('<[^>]+>',' ',text)
               (root/(name+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2))
