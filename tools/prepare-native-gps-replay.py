@@ -33,27 +33,27 @@ def download(e):
     def valid():
         return path.is_file() and path.stat().st_size == e['sizeBytes'] and hashlib.file_digest(path.open('rb'),'sha256').hexdigest() == e['sha256']
     if not valid():
-        try:
-            request=urllib.request.Request(ORIGIN+url, headers={'User-Agent':'Atlas-Native-GPS-Replay/1.0'})
-            with urllib.request.urlopen(request, timeout=120) as source, path.open('wb') as target:
-                while data := source.read(1024*1024):
-                    target.write(data)
-        except urllib.error.HTTPError as error:
-            (report/(path.name+'.http-error.txt')).write_text(
-                f'{ORIGIN+url}\nHTTP {error.code}\n'+error.read(4096).decode('utf-8','replace'))
-            # Use the same configured identity/bucket as the repository's R2
-            # publishing workflows. This performs object GETs only, never writes.
-            account=os.environ.get('R2_ACCOUNT_ID','')
-            key=os.environ.get('R2_ACCESS_KEY_ID','')
-            secret=os.environ.get('R2_SECRET_ACCESS_KEY','')
-            if not all((account,key,secret)):
-                raise RuntimeError('Public R2 asset unavailable and existing R2 read credentials are not configured') from error
+        account=os.environ.get('R2_ACCOUNT_ID','')
+        key=os.environ.get('R2_ACCESS_KEY_ID','')
+        secret=os.environ.get('R2_SECRET_ACCESS_KEY','')
+        print(f'Reading verified fixture {url} ({e["sizeBytes"]} bytes)',flush=True)
+        if all((account,key,secret)):
+            # CI already has this repository's object-read identity. Prefer
+            # the S3 endpoint for large fixtures: public r2.dev throttling
+            # stalled parallel emulator preparation for over ten minutes.
+            # No remote writes; identical manifest/hash checks below.
             environment=dict(os.environ,AWS_ACCESS_KEY_ID=key,AWS_SECRET_ACCESS_KEY=secret,
-                AWS_DEFAULT_REGION='auto',AWS_EC2_METADATA_DISABLED='true')
+                AWS_DEFAULT_REGION='auto',AWS_EC2_METADATA_DISABLED='true',
+                AWS_RETRY_MODE='standard',AWS_MAX_ATTEMPTS='3')
             subprocess.run(['aws','--endpoint-url',f'https://{account}.r2.cloudflarestorage.com',
                 's3','cp','s3://atlas-regions/'+url.lstrip('/'),str(path),'--only-show-errors'],
-                env=environment,check=True)
-            print(f'Read {url} using configured R2 identity (public HTTP {error.code})')
+                env=environment,check=True,timeout=300)
+            print(f'Read fixture {url} with configured object-read identity',flush=True)
+        else:
+            request=urllib.request.Request(ORIGIN+url, headers={'User-Agent':'Atlas-Native-GPS-Replay/1.0'})
+            with urllib.request.urlopen(request, timeout=60) as source, path.open('wb') as target:
+                while data := source.read(1024*1024):
+                    target.write(data)
     assert valid(), f'Invalid real Portugal asset: {url}'
     return e, path
 
