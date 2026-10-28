@@ -15,7 +15,10 @@ internal class ReplayTruthTimeline {
         require(fixTime.isFinite() && heading.isFinite())
         val previous=entries.lastEntry()?.value
         require(previous==null || fixTime>previous.fixTime)
-        val stableSince=if(previous==null ||
+        // Match the heading gate's existing 1.5s freshness window. A
+        // delivery blackout cannot accumulate four seconds of stable GPS
+        // evidence while no new observations reach Android.
+        val stableSince=if(previous==null || fixTime-previous.fixTime>=1.5 ||
             AtlasHeading.angleDifference(previous.heading,heading)>45.0)
                 fixTime else previous.stableSince
         entries[fixTime]=Truth(heading,stableSince,fixTime)
