@@ -84,6 +84,13 @@ reference pricing and verifies confidence/amount contracts. Its artifacts are
 routing tests, not Android Location/GPS replay; existing Android/UI/camera/GPS
 smoke and real A5 quote tests remain enabled.
 
+The measured evidence is recorded in `docs/data/portugal-national-coverage-20261028.json`.
+CI run 40658679661 found 100% estimated-or-exempt availability for class 1 across
+all bundled Portugal partitions, with zero unpriced directed toll edges. Only
+46.73% of audited distance had its own standard tariff or explicit exemption;
+53.27% used low-confidence references. All 260 real routing/class probes passed
+without changes to navigation fields. This is not full official-price coverage.
+
 ## Versioned offline updates
 
 ### Entry/exit matrices (revision 2026102701)
@@ -166,14 +173,17 @@ not complete graph or concession coverage. A2/A12 need directional bridge/plaza
 mapping; A4/A13 contain paid and abolished concessions; A17/A41 need other operator
 coverage. Those roads have no standard road-average quote; the national reference policy
 can now provide a separately labeled low-confidence estimate.
-Unlisted roads remain unavailable unless a separately sourced whole-road exemption
-applies. Bridges are not converted into motorway €/km.
-Discounts, payment-method exceptions and conditional heavy exemptions are not modeled.
+Unlisted roads use the explicitly enabled, low-confidence country reference;
+without that policy they remain unavailable. Unmatched bridge/fixed-fee estimates
+are not official bridge charges. Discounts, payment-method exceptions and
+conditional heavy exemptions are not modeled; the unconditional A41 class 3/4
+exemption is explicit country data.
 
 Lei 37/2024 as revised for 2026 removes specific concessions/sections, including
 additional A25/Costa de Prata sections. It does not justify zeroing entire A4,
-A13 or A28 references. OSM flags may lag legislation; ambiguous flagged sections
-remain unavailable, not declared free. No road graph or toll flags are changed.
+A13 or A28 references. OSM flags may lag legislation. Partly exempt roads are not declared wholly free;
+without section matching their reference estimates may overstate the charge.
+Contradictory free/paid aliases remain unavailable. No graph or toll flags change.
 
 Published section-chain sums, **not exact route/Via Verde quotes**:
 - A5 four sections: class 1 EUR2.50; classes 2/3/4 EUR4.80.

@@ -1,0 +1,70 @@
+{
+  "country": "Portugal",
+  "revision": 2026102801,
+  "implementationCommit": "c4ceac289e69eeb7eeffda06c2954ddde5b6fa4b",
+  "workflowRun": "https://github.com/jorgee16/atlas/actions/runs/40658679661",
+  "graphEvidence": "https://github.com/jorgee16/atlas/actions/runs/40658679661/artifacts/12803076494",
+  "scope": "All SHA-verified bundled Portugal routing partitions; directed toll-marked driving edges, not unique physical road km or exact-price coverage",
+  "graphScan": {
+    "vehicleClass": 1,
+    "directedTolledMeters": 3628168.5,
+    "standardEstimatedMeters": 1667882.0,
+    "explicitlyFreeMeters": 27630.9,
+    "referenceEstimatedMeters": 1932655.6,
+    "knownTariffOrExemptPercent": 46.731922731813604,
+    "estimateOrExemptPercent": 100.0,
+    "unpricedDirectedEdges": 0,
+    "mainlandRawRoadReferences": 61,
+    "islandTollReferences": 0
+  },
+  "nativeRouting": {
+    "roadReferences": 61,
+    "classes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "routeClassCases": 260,
+    "cityTrips": [
+      "Lisboa-Cascais",
+      "Lisboa-Faro",
+      "Porto-Braga",
+      "Figueira-Coimbra"
+    ],
+    "comparedFields": [
+      "points",
+      "edgeIndexes",
+      "maneuvers",
+      "distanceMeters",
+      "durationSeconds",
+      "visualProtectedPoints"
+    ],
+    "navigationFieldsUnchanged": true
+  },
+  "limitations": [
+    "This is national estimated availability, not full official section/gantry matching",
+    "Reference estimates are low confidence and are never exact quotes",
+    "OSM toll flags and graph coverage can omit or misclassify physical tolls",
+    "Unmatched fixed fees, partial exemptions and discounts may change actual charges",
+    "These routing probes are not Android GPS replay or real-world driving validation"
+  ],
+  "validation": {
+    "workflowConclusion": "success",
+    "nativeCpp": "passed",
+    "kotlinJniLint": "passed",
+    "androidInstrumentedUiAndFocusedGpsCamera": "passed",
+    "fullGpsReplay": "not run; toll-only change",
+    "publicCatalogVerification": "passed"
+  },
+  "publication": {
+    "roadRevision": 2026102801,
+    "roadSha256": "8f3cb850ad896868560ba6861e145533e8e59f9625f9a66186ab7b440a7786a8",
+    "manifest": "https://pub-75539028275a4826aa383fdb89292ed7.r2.dev/toll-tariffs/Portugal/manifest.json",
+    "fixedCrossingRevision": 2026102501,
+    "entryExitRevision": 2026102701,
+    "publicHttpsAndPayloadIntegrityVerified": true,
+    "receiptArtifact": "https://github.com/jorgee16/atlas/actions/runs/40658679661/artifacts/12802784255",
+    "releaseApkPublished": false
+  }
+}
