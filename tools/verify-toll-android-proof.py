@@ -33,6 +33,6 @@ if route['tollPricing'] != 'exact' or abs(route['tollAmount'] - 1.60) > 1e-9:
 png = root / 'a5-exact-route-preview.png'
 if not png.is_file() or png.read_bytes()[:8] != b'\x89PNG\r\n\x1a\n':
     raise ValueError('Missing Android MapLibre screenshot')
-if 'exact' not in (root / 'a5-preview-text.txt').read_text():
-    raise ValueError('Exact pricing is absent from the Android UI')
+if 'confirmed' not in (root / 'a5-preview-text.txt').read_text():
+    raise ValueError('Confirmed pricing is absent from the Android UI')
 print(f'Validated {len(cases)} actual Portugal JNI quotes and Android preview evidence')

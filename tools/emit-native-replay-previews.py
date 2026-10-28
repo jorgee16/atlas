@@ -13,7 +13,12 @@ import sys
 root=Path(sys.argv[1] if len(sys.argv)>1 else 'ui-preview/gps-replay')
 movies_root=Path(sys.argv[2] if len(sys.argv)>2 else 'ui-preview/atlas-gps-replay')
 for checkpoint in sorted(root.glob('*.json')):
-    print('ATLAS_CHECKPOINT '+checkpoint.name+' '+checkpoint.read_text().replace('\n',' '),flush=True)
+    if checkpoint.stat().st_size > 131072:
+        # Full native route geometry remains in the artifact. Dumping several
+        # long itineraries here hides later assertions from bounded log readers.
+        print('ATLAS_CHECKPOINT_ARTIFACT '+checkpoint.name+' bytes='+str(checkpoint.stat().st_size),flush=True)
+    else:
+        print('ATLAS_CHECKPOINT '+checkpoint.name+' '+checkpoint.read_text().replace('\n',' '),flush=True)
 if not shutil.which('ffmpeg'):
     print('Visual previews unavailable: ffmpeg not installed; see original artifact PNGs.')
     raise SystemExit(0)
