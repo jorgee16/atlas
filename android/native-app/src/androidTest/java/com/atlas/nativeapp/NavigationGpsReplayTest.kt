@@ -1000,6 +1000,7 @@ class NavigationGpsReplayTest {
         val oldClass=appModel.vehicleClass
         val oldSource=appModel.mapSourceMode
         try {
+            verifyIkeaLouresRoutingPricingParity()
             NativeCore().use { core ->
                 val directory=appModel.regions.graph(Coordinate(38.7215,-9.147),Coordinate(38.728,-9.152))
                 assertTrue("Real Portugal graph must be installed",File(directory,"nodes.bin").isFile)
@@ -1074,7 +1075,7 @@ class NavigationGpsReplayTest {
                     }
                     visibleText=text(a.window.decorView)
                 }
-                assertTrue("Route preview must identify exact pricing: $visibleText",visibleText.contains("exact"))
+                assertTrue("Route preview must identify confirmed pricing: $visibleText",visibleText.contains("confirmed"))
                 File(output,"a5-preview-text.txt").writeText(visibleText)
                 File(output,"a5-preview-route.json").writeText(route.toString(2))
                 capture(s,"a5-exact-route-preview")
@@ -1086,6 +1087,41 @@ class NavigationGpsReplayTest {
             }
             exportEvidence()
         }
+    }
+    /** OSM way 151733489 centre; reproducible origins, not the user's actual fix.
+     * https://www.openstreetmap.org/way/151733489
+     * Uses the real Portugal graph; adding tariffs must not alter connectivity,
+     * route geometry, legal maneuvers, ETA or distance. */
+    private fun verifyIkeaLouresRoutingPricingParity() {
+        val ikea=Coordinate(38.81741,-9.14814)
+        val origins=listOf(
+            "Lisbon" to Coordinate(38.7215,-9.147),
+            "Torres Vedras" to Coordinate(39.0911,-9.2586),
+            "Caldas da Rainha" to Coordinate(39.403,-9.137))
+        val appModel=(context.applicationContext as AtlasApplication).model
+        val report=JSONArray()
+        NativeCore().use { core ->
+            for ((name,from) in origins) {
+                core.graph(appModel.regions.graph(from,ikea).path)
+                for (avoid in listOf(false,true)) {
+                    Log.i("ATLAS_GPS_REPLAY","ATLAS_IKEA_ROUTING_START from=$name avoid=$avoid")
+                    core.tariffs("Portugal",null)
+                    val baseline=JSONObject(core.route(from,ikea,false,avoid,0.0,1))
+                    core.tariffs("Portugal",TollTableAssets.read(context,"Portugal"))
+                    core.fixedTariffs("Portugal",TollTableAssets.repository(context,TollCatalogKind.FIXED_CROSSING).load("Portugal")?.csv)
+                    core.entryExitTariffs("Portugal",TollTableAssets.repository(context,TollCatalogKind.ENTRY_EXIT).load("Portugal")?.csv)
+                    val priced=JSONObject(core.route(from,ikea,false,avoid,0.0,1))
+                    for(field in listOf("points","edgeIndexes","maneuvers","distanceMeters","durationSeconds","visualProtectedPoints"))
+                        assertEquals("Tariffs changed routing: $name, avoid=$avoid, $field",
+                            baseline.opt(field)?.toString(),priced.opt(field)?.toString())
+                    assertTrue(priced.getDouble("distanceMeters")>0)
+                    report.put(JSONObject().put("from",name).put("avoidTolls",avoid)
+                        .put("baseline",baseline).put("priced",priced))
+                    Log.i("ATLAS_GPS_REPLAY","ATLAS_IKEA_ROUTING_PARITY from=$name avoid=$avoid meters=${priced.getDouble("distanceMeters")} seconds=${priced.getDouble("durationSeconds")}")
+                }
+            }
+        }
+        File(output,"ikea-loures-routing-parity.json").writeText(report.toString(2))
     }
     @Test fun cameraModesAndStationaryWalkingThroughAndroidLocation() = runReplay(true)
     @Test fun portugalTripThroughAndroidLocationServiceJniAndMapLibre() = runReplay(false)
@@ -1186,4 +1222,3 @@ class NavigationGpsReplayTest {
         }
     }
 }
-
