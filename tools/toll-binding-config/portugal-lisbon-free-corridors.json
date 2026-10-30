@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "region": "portugal",
+  "partition": "mainland",
+  "reviewed": true,
+  "reviewedOn": "2026-10-30",
+  "geometrySimplificationMeters": 2.0,
+  "sourceSha256": "d23977232a7af79565a6b9f1ef3f6a366ae7dc6bb08410b92f72f079810c6c38",
+  "seedSha256": "5fb7a6d57924a39f36e009545910830c7a3b7f85766e90a12f40ac6761856783",
+  "scope": "Specific reviewed directed free approach geometries and IC17/A8 south-of-Loures corridor, added to the unchanged A5 Carcavelos seed. Other paths remain incomplete.",
+  "sources": [
+    "https://www.openstreetmap.org/relation/6038949",
+    "https://sigip.infraestruturasdeportugal.pt/pub/rest/services/MOBILE_DRR/IPSIG_MOBILE_REDE_NOVO/MapServer/0",
+    "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",
+    "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910"
+  ],
+  "ways": [
+    {
+      "wayId": 14813726,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 14813727,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 14813731,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "A 36;IC 17;CRIL",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 21637693,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 21637694,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 21637697,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 22114948,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 22634661,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 23698120,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 23698121,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 23819710,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 23844660,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Cascais/Alcabideche A5 entry ramp: toll=yes is an approach/network flag, no collection facility on this directed way; the reviewed full-carriageway Carcavelos crossing remains chargeable downstream."
+    },
+    {
+      "wayId": 24649290,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 24825500,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 24825504,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 28286848,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Autoestrada da Costa do Estoril",
+      "ref": "A 5",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 53862312,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 53893548,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 75464737,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 75534967,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada da Ribeira",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 75601907,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 75601908,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 75601909,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 93673395,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 93676331,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 93676339,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 95207740,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 95207786,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 95210483,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 95273611,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 95598970,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 121667822,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 151730421,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua 28 de Setembro",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 151730428,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 151730437,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 151730455,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua 28 de Setembro",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 151730469,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua 28 de Setembro",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 151730484,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Ramal de Frielas",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 151730488,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 151733487,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua do Bom Jardim",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 151736994,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 151737022,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Ramal de Frielas",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 169793323,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Cidade de Lisboa",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 169793911,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 169793912,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 172456285,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada da Ribeira",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 182891202,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 194561492,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 194561503,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 194566248,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 319259005,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 319259008,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 319265582,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 365093478,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 365093480,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 402800919,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800923,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800924,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800926,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800928,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800929,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800931,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800933,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 402800935,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 416777785,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 416813736,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Ramal de Frielas",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 416813748,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Ramal de Frielas",
+      "ref": "",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 416820308,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 416836008,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 416836021,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 417353614,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 417357952,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 417357972,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 417358012,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 417365610,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 417417150,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Autoestrada da Costa do Estoril",
+      "ref": "A 5",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 432773024,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 686463871,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 940248882,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 940248883,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 940248884,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 940248885,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 970349467,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "A 36;IC 17;CRIL",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 991368533,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 991368534,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 991368537,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 991368546,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 991372703,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 991372707,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 1004168117,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua 28 de Setembro",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 1156907269,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 1189675516,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 1246971111,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "IC 17;A 36",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 1275025322,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 1275025326,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 1298845996,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 9",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    },
+    {
+      "wayId": 1307223928,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "A 36;IC 17;CRIL",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 1343827377,
+      "reviewed": true,
+      "kind": "explicit-free-corridor",
+      "name": "Circular Regional Interior de Lisboa (CRIL)",
+      "ref": "A 36;IC 17;CRIL",
+      "reason": "Published OSM toll=no on this specific directed geometry, checked against the charge-point census; IC17 additionally corroborated by IP toll attributes."
+    },
+    {
+      "wayId": 1357194787,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua 28 de Setembro",
+      "ref": "EN 250",
+      "reason": "Reviewed local public street, junction or motorway connector in the Manique/Alcabideche, A5-IC17 or Frielas approach; no collection facility on this specific source geometry. This is not a whole-road or country exemption."
+    }
+  ]
+}

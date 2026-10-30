@@ -109,6 +109,7 @@ jobs:
           python3 -m unittest discover -s tools -p test_toll_quote_observations.py
           python3 tools/import-toll-evidence.py --check
           python3 -m unittest discover -s tools -p test_toll_evidence.py
+          python3 -m unittest discover -s tools -p test_toll_free_geometry.py
           node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js tests/drive-eta.test.js
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
@@ -217,6 +218,8 @@ jobs:
           R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
         run: python3 tools/prepare-native-gps-replay.py
+      - name: Reproduce reviewed free-corridor evidence against the installed graph
+        run: python3 tools/build-free-toll-corridors.py --graph .native-gps-routing --check --report ui-preview/free-toll-corridor-proof.json
       - name: Enable hardware acceleration
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -868,6 +871,9 @@ jobs:
           python3 -m pip install 'osmium==4.1.1'
           python3 tools/audit-a5-charge-points.py
           python3 tools/build-toll-bindings.py --config tools/toll-binding-config/portugal-a5-mainline.json --source toll-section-audit/a5-osm-charge-points.json --output toll-section-audit/Portugal-mainland.csv
+          python3 tools/build-free-toll-corridors.py --graph .toll-binding-graph/graph --check --report toll-section-audit/free-corridor-proof.json
+          cp android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv toll-section-audit/Portugal-mainland.csv
+          cp android/native-app/src/androidTest/assets/tolls/a5-mainline-cases.csv toll-section-audit/real-route-cases.csv
           cmake -S native -B /tmp/atlas-toll-proof -DCMAKE_BUILD_TYPE=Release
           cmake --build /tmp/atlas-toll-proof --target atlas_toll_quote -j2
           python3 tools/verify-toll-route-proof.py --binary /tmp/atlas-toll-proof/atlas_toll_quote

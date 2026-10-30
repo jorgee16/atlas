@@ -368,8 +368,9 @@ access and edge lengths before accepting the proof.
 
 Repricing occurs after C++ calculates the authoritative route. Only monetary
 fields change; the real-route verifier compares points, edge IDs, maneuvers,
-visual anchors, distance and ETA before/after. The first pilot is deliberately
-restricted to certified A5 main carriageways. Uncertified ramps and city approaches
+visual anchors, distance and ETA before/after. The initial pilot was restricted
+to certified A5 main carriageways. The reviewed free-corridor extension below
+also certifies specific approaches; other uncertified ramps and city roads still
 prevent an exact full-route quote, regardless of their OSM toll flags. The
 physical identity is the Carcavelos full-carriageway plaza (0501), confirmed from
 the visually reviewed Brisa PDF and its km14+940 notice; OSM fee tags are ignored.

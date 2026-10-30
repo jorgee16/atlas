@@ -24,4 +24,4 @@ if __name__=='__main__':
         elif case['applied'] or after['tollPricing']=='exact':
             raise ValueError('Unreviewed approaches were incorrectly certified exact')
         print('REAL_TOLL_ROUTE='+json.dumps({'case':case['id'],'pricing':after['tollPricing'],'amount':after['tollAmount'],'vehicleClass':after['tollVehicleClass'],'meters':after['distanceMeters']}))
-    print('Verified',len(cases),'actual native A5 route/class/after-plaza and incomplete-coverage cases')
+    print('Verified',len(cases),'actual native route/class/after-plaza, full IKEA approach and incomplete-coverage cases')
