@@ -11,7 +11,7 @@ on:
         description: 'Small batch of existing Android captures to inspect'
         type: choice
         default: styles
-        options: [diagnostics, styles, lisbon, sintra, a5, icons]
+        options: [diagnostics, styles, lisbon, sintra, a5, icons, route-comparison]
   push:
     branches: ['migration/native-core-kotlin']
     paths: ['.github/workflows/native-replay-review.yml']
@@ -20,7 +20,7 @@ permissions:
   actions: read
 jobs:
   review:
-    if: ${{ !contains(github.event.head_commit.message, '[inspect-release-replay]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[inspect-release-replay]') && !contains(github.event.head_commit.message, '[route-comparison-audit]') && inputs.review_group != 'route-comparison' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -149,3 +149,112 @@ jobs:
             recorded-trip/ui-preview/gps-replay/*summary.json
             recorded-trip/ui-preview/gps-replay/trajectory-failure.json
           if-no-files-found: warn
+
+  route-comparison:
+    if: ${{ contains(github.event.head_commit.message, '[route-comparison-audit]') || inputs.review_group == 'route-comparison' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build existing native core for read-only route diagnosis
+        run: |
+          cmake -S native -B /tmp/atlas-route-audit-build -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/atlas-route-audit-build --target atlas_core -j2
+      - name: Read hash-verified Portugal graph without map or emulator downloads
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          python3 - <<'PYCODE'
+          import concurrent.futures, hashlib, json, os, subprocess, urllib.request
+          from pathlib import Path
+          region=next(r for r in json.loads(Path('android/native-app/src/main/assets/regions.json').read_text())['regions'] if r['id']=='portugal')
+          entries=[e for e in region['package']['files'] if '/routing/mainland/' in e['url']]
+          assert len(entries)==7, 'Require every signed-manifest routing file'
+          root=Path('route-audit-graph');root.mkdir()
+          Path('audit').mkdir(exist_ok=True)
+          Path('audit/manifest.json').write_text(json.dumps({'sourceCommit':os.environ['GITHUB_SHA'],'regionVersion':region['version'],'files':entries,'scope':'Real native routing/ETA/tariff diagnostic. Two approximate public postal-code points; not the precise phone fix. No GPS, camera, app or routing algorithm changed.'},indent=2))
+          def download(e):
+              target=root/e['url'].rsplit('/',1)[1]
+              account=os.environ.get('R2_ACCOUNT_ID','');key=os.environ.get('R2_ACCESS_KEY_ID','');secret=os.environ.get('R2_SECRET_ACCESS_KEY','')
+              if account and key and secret:
+                  env=dict(os.environ,AWS_ACCESS_KEY_ID=key,AWS_SECRET_ACCESS_KEY=secret,AWS_DEFAULT_REGION='auto',AWS_EC2_METADATA_DISABLED='true',AWS_RETRY_MODE='standard',AWS_MAX_ATTEMPTS='3')
+                  subprocess.run(['aws','--endpoint-url',f'https://{account}.r2.cloudflarestorage.com','s3','cp','s3://atlas-regions/'+e['url'].lstrip('/'),str(target),'--only-show-errors'],env=env,check=True,timeout=300)
+              else:
+                  with urllib.request.urlopen('https://pub-75539028275a4826aa383fdb89292ed7.r2.dev'+e['url'],timeout=90) as source,target.open('wb') as out:
+                      while data:=source.read(1024*1024):out.write(data)
+              assert target.stat().st_size==e['sizeBytes'] and hashlib.file_digest(target.open('rb'),'sha256').hexdigest()==e['sha256'], 'Graph identity mismatch: '+e['url']
+              print('Verified graph file',target.name,target.stat().st_size,flush=True)
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:list(pool.map(download,entries))
+          PYCODE
+      - name: Diagnose 2645-575 to IKEA Loures using unchanged route and ETA code
+        run: |
+          cat > /tmp/atlas-route-audit.cpp <<'CPPCODE'
+          #include "atlas/core.hpp"
+          #include <algorithm>
+          #include <filesystem>
+          #include <fstream>
+          #include <iostream>
+          #include <iomanip>
+          #include <map>
+          #include <set>
+          #include <sstream>
+          #include <stdexcept>
+          using namespace atlas;
+          std::string read(const std::string&p){std::ifstream f(p);if(!f)throw std::runtime_error("Missing input "+p);std::ostringstream s;s<<f.rdbuf();return s.str();}
+          bool tolled(const Route&r){return std::any_of(r.legs.begin(),r.legs.end(),[](auto&l){return(l.road.flags&4)!=0;});}
+          bool distinct(const Route&r,const std::vector<Route>&choices){std::set<uint32_t>a(r.edges.begin(),r.edges.end());for(auto&o:choices){std::set<uint32_t>b(o.edges.begin(),o.edges.end());size_t common=0;for(auto n:a)common+=b.count(n);if(!a.empty()&&!b.empty()&&double(common)/std::min(a.size(),b.size())>=.82)return false;}return !a.empty();}
+          Route report(const std::string&label,const Route&raw,const Graph&g){
+           auto r=raw;calibrateDriveEta(r,g);
+           const double shortCaps[]={35,110,90,55,50,45,28,18,12,35},longCaps[]={35,110,90,65,60,50,28,18,12,40};
+           struct Stats{double meters=0,raw=0,cap=0,transition=0;unsigned legs=0,changes=0;};
+           std::map<unsigned,Stats>classes;double caps=0,transitions=0;unsigned changes=0;
+           std::ofstream legs("audit/"+label+"-legs.jsonl");
+           for(size_t i=0;i<r.legs.size();++i){
+            auto&e=r.legs[i];auto edge=g.edge(e.edge);unsigned cls=(edge.attributes>>24)&127;
+            double cap=(r.meters<=15000?shortCaps:longCaps)[cls<=9?cls:0]/3.6;
+            double addCap=std::max(0.,e.distance/cap-raw.legs[i].duration);
+            double endpoints=r.meters<=15000?((i==0?10:0)+(i+1==r.legs.size()?10:0)):0;
+            double transition=e.duration-raw.legs[i].duration-addCap-endpoints;
+            bool changed=i>0&&g.edge(r.legs[i-1].edge).road!=edge.road;
+            auto&n=classes[cls];n.meters+=e.distance;n.raw+=raw.legs[i].duration;n.cap+=addCap;n.transition+=transition;n.legs++;n.changes+=changed;
+            caps+=addCap;transitions+=transition;changes+=changed;
+            legs<<"{\"index\":"<<i<<",\"edge\":"<<e.edge<<",\"roadIndex\":"<<edge.road<<",\"class\":"<<cls<<",\"ref\":"<<jsonString(e.road.ref)<<",\"name\":"<<jsonString(e.road.name)<<",\"meters\":"<<e.distance<<",\"rawSeconds\":"<<raw.legs[i].duration<<",\"capAddedSeconds\":"<<addCap<<",\"transitionAddedSeconds\":"<<transition<<"}\n";
+           }
+           std::ofstream file("audit/"+label+"-route.json");file<<routeJson(r);
+           std::ostringstream s;s<<std::setprecision(12)<<"{\"case\":"<<jsonString(label)<<",\"meters\":"<<r.meters<<",\"rawSeconds\":"<<raw.seconds<<",\"calibratedSeconds\":"<<r.seconds<<",\"capAddedSeconds\":"<<caps<<",\"transitionAddedSeconds\":"<<transitions<<",\"wayIdChanges\":"<<changes<<",\"tollAmount\":"<<r.tollEuros<<",\"referenceTollMeters\":"<<r.referenceTollMeters<<",\"pricedTollMeters\":"<<r.pricedTollMeters<<",\"tolledMeters\":"<<r.tolledMeters<<",\"mainRoads\":[";
+           bool comma=false;for(auto&n:principalRoadRefs(r)){if(comma)s<<',';comma=true;s<<jsonString(n);}s<<"],\"classes\":[";
+           comma=false;for(auto&entry:classes){auto&n=entry.second;if(comma)s<<',';comma=true;s<<"{\"class\":"<<entry.first<<",\"meters\":"<<n.meters<<",\"rawSeconds\":"<<n.raw<<",\"capAddedSeconds\":"<<n.cap<<",\"transitionAddedSeconds\":"<<n.transition<<",\"wayIdChanges\":"<<n.changes<<'}';}
+           s<<"]}";std::ofstream("audit/"+label+"-summary.json")<<s.str();std::cout<<"ATLAS_ROUTE_AUDIT "<<s.str()<<'\n';return r;
+          }
+          int main(int argc,char**argv){try{
+           if(argc!=3)throw std::runtime_error("graph-directory tariff-file required");
+           std::filesystem::create_directories("audit");Graph g(argv[1]);auto tariffs=TollTariffs::parse(read(argv[2]),"Portugal");
+           const Point destination{38.81741,-9.14814};
+           for(auto origin:std::vector<std::pair<std::string,Point>>{{"2645-575-south",{38.7195949,-9.4135005}},{"2645-575-north",{38.725065,-9.414258}}}){
+            RouteOptions op;op.tariffs=&tariffs;op.tariffCountry="Portugal";op.vehicleClass=1;
+            auto primary=routeFromPosition(g,origin.second,destination,op,std::nullopt);if(!primary)throw std::runtime_error("No route "+origin.first);
+            std::vector<Route>choices{report(origin.first+"-recommended",*primary,g)};
+            for(double weight:{110.,300.,550.}){
+             if(choices.size()>=2)break;
+             auto altOp=op;altOp.discouragedEdges.insert(choices.front().edges.begin(),choices.front().edges.end());altOp.sharedEdgePenaltySecondsPerKm=weight;
+             auto raw=routeFromPosition(g,origin.second,destination,altOp,std::nullopt);if(!raw)continue;
+             auto c=report(origin.first+"-paid-attempt-"+std::to_string(int(weight)),*raw,g);
+             bool valid=tolled(c)&&distinct(c,choices)&&c.seconds<=std::max(choices.front().seconds*1.65,choices.front().seconds+1200)&&c.meters<=std::max(choices.front().meters*1.75,choices.front().meters+20000);
+             std::cout<<"ATLAS_ROUTE_ELIGIBLE "<<origin.first<<" weight="<<weight<<" eligible="<<valid<<'\n';if(valid)choices.push_back(c);
+            }
+            op.avoidTolls=true;auto free=routeFromPosition(g,origin.second,destination,op,std::nullopt);if(!free)throw std::runtime_error("No avoiding-tolls route "+origin.first);report(origin.first+"-no-tolls",*free,g);
+           }
+           return 0;
+          }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
+          CPPCODE
+          g++ -std=c++17 -O2 -I native/include /tmp/atlas-route-audit.cpp /tmp/atlas-route-audit-build/libatlas_core.a -o /tmp/atlas-route-audit
+          /tmp/atlas-route-audit route-audit-graph android/native-app/src/main/assets/tolls/Portugal.csv | tee audit/route-audit.log
+      - name: Preserve route, per-segment speed and tariff evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atlas-2645-575-IKEA-route-audit
+          path: audit/
+          if-no-files-found: error
