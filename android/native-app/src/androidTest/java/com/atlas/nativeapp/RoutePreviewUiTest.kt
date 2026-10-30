@@ -77,12 +77,13 @@ class RoutePreviewUiTest {
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
-                    assertEquals(2,values.count { it.endsWith(" · estimated") })
+                    assertEquals(2,values.count { it=="Toll price not confirmed" })
+                    assertFalse(values.any { it.contains("estimated") || it.contains("5,80") || it.contains("6,20") })
                     assertTrue(values.any { it.startsWith("No tolls · ") })
                     assertFalse(values.any { it.contains("Source:") || it.contains("confidence") ||
                         it.contains("BREAKDOWN") || it.contains("tariffs") })
                     // Prices must retain enough horizontal space on a narrow phone.
-                    labels.filter { it.text.endsWith(" · estimated") }.forEach { price ->
+                    labels.filter { it.text.toString()=="Toll price not confirmed" }.forEach { price ->
                         assertTrue("Price clipped: ${price.text}",price.width >= price.paint.measureText(price.text.toString()))
                     }
                 }

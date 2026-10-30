@@ -1,6 +1,8 @@
 #include "atlas/core.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cctype>
+#include <set>
 #include <stdexcept>
 namespace atlas {
 namespace {
@@ -117,6 +119,68 @@ double carHeading(double gps, double route, double speed, double accuracy,
   weight = std::clamp(weight, .12, .84);
   return normalizeHeading(gps + delta(gps, route) * weight);
 }
+namespace {
+std::set<std::string> etaRefs(const std::string &ref) {
+  std::set<std::string> out;
+  std::string token;
+  for (unsigned char c : ref + ";") {
+    if (c == ';' || c == ',' || c == '/') {
+      if (!token.empty()) out.insert(token);
+      token.clear();
+    } else if (!std::isspace(c)) token += char(std::toupper(c));
+  }
+  return out;
+}
+bool etaSameRoad(const Road &a, const Road &b) {
+  const auto ar=etaRefs(a.ref), br=etaRefs(b.ref);
+  if (!ar.empty() || !br.empty()) {
+    for (const auto &ref:ar) if (br.count(ref)) return true;
+    return false;
+  }
+  return !a.name.empty() && a.name==b.name;
+}
+std::optional<double> etaLegBearing(const Route &r, const Leg &leg, bool atEnd) {
+  if (leg.first>=leg.last || leg.last>=r.points.size()) return std::nullopt;
+  if (atEnd) {
+    for (auto i=leg.last; i>leg.first; --i)
+      if (distance(r.points[i-1],r.points[leg.last])>.1)
+        return bearing(r.points[i-1],r.points[leg.last]);
+  } else {
+    for (auto i=leg.first+1; i<=leg.last; ++i)
+      if (distance(r.points[leg.first],r.points[i])>.1)
+        return bearing(r.points[leg.first],r.points[i]);
+  }
+  return std::nullopt;
+}
+bool etaContinuesRoad(const Route &r, std::size_t i, const Graph &g,
+                      unsigned cls, unsigned previousClass) {
+  const auto &previous=r.legs[i-1], &current=r.legs[i];
+  if (previous.to!=current.from || previous.from==current.to) return false;
+  if ((previous.road.flags^current.road.flags)&(2|4|8)) return false;
+  const bool previousCircle=previous.road.flags&1, currentCircle=current.road.flags&1;
+  // Circulating inside one connected roundabout does not incur another
+  // entry/exit delay for each OSM way. Entry and exit still retain their delay.
+  if (previousCircle && currentCircle) return true;
+  if (previousCircle!=currentCircle || cls!=previousClass ||
+      bool(previous.road.flags&2)!=bool(current.road.flags&2) ||
+      !etaSameRoad(previous.road,current.road)) return false;
+  const auto incoming=etaLegBearing(r,previous,true);
+  const auto outgoing=etaLegBearing(r,current,false);
+  if (!incoming || !outgoing || std::abs(delta(*incoming,*outgoing))>25) return false;
+  // Mainline motorway/trunk continuation past a slip road is not a stop.
+  // For local roads retain the existing junction allowance at branches and
+  // restricted nodes, even when the street name/ref stays the same.
+  if (cls>2) {
+    if (g.restricted(current.from)) return false;
+    for (auto edge=g.offset(current.from);edge<g.offset(current.from+1);++edge) {
+      const auto next=g.edge(edge);
+      if (next.allows(Profile::drive) && next.target!=previous.from &&
+          next.target!=current.to) return false;
+    }
+  }
+  return true;
+}
+}
 void calibrateDriveEta(Route &r, const Graph &g) {
   static const double shortCaps[] = {35, 110, 90, 55, 50, 45, 28, 18, 12, 35};
   static const double longCaps[] = {35, 110, 90, 65, 60, 50, 28, 18, 12, 40};
@@ -131,7 +195,7 @@ void calibrateDriveEta(Route &r, const Graph &g) {
     if (i > 0) {
       auto prev = g.edge(r.legs[i - 1].edge);
       auto pc = (prev.attributes >> 24) & 127;
-      if (prev.road != edge.road)
+      if (prev.road != edge.road && !etaContinuesRoad(r,i,g,cls,pc))
         transition = (leg.road.flags & 1) || (r.legs[i - 1].road.flags & 1) ? 7
                      : std::min(cls, pc) <= 2                               ? 2
                      : std::min(cls, pc) <= 4                               ? 4

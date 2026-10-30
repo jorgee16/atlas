@@ -106,7 +106,8 @@ jobs:
           python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-charges --namespace toll-charges
           python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-fares --namespace toll-fares
           python3 -m unittest discover -s tools -p test_toll_catalog.py
-          node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js
+          python3 -m unittest discover -s tools -p test_toll_quote_observations.py
+          node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js tests/drive-eta.test.js
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
       - name: Generate search expectations from the original app
@@ -1133,5 +1134,3 @@ jobs:
           name: Atlas-national-toll-geometry-census
           path: national-toll-geometry/
           if-no-files-found: error
-
-

@@ -18,40 +18,27 @@ internal object RouteChoices {
             catch(_:Exception) { code }
         return if(symbol.isBlank())number else "$symbol $number"
     }
-    /** Unknown amounts never become zero, including legacy JSON. */
-    fun tollLabel(route:JSONObject):String {
-        if(!route.optBoolean("hasTolls"))return "No toll roads · "+money(0.0,route)
-        val pricing=route.optString("tollPricing")
-        val field=if(route.has("tollAmount"))"tollAmount" else "tollEuros"
-        val amount=route.optDouble(field,Double.NaN)
-        if(pricing !in listOf("estimate","exact") || route.isNull(field) || !amount.isFinite() || amount<0)
-            return "Toll roads · Price unavailable"
-        return (if(pricing=="exact")"" else "≈ ")+money(amount,route)+
-            (if(pricing=="exact")" · exact" else if(route.optString("tollPricingConfidence")=="low")" · low confidence" else " · estimate")
-    }
+    /** Customer-visible labels never promote an internal estimate into a quote. */
+    fun tollLabel(route:JSONObject):String = previewTollLabel(route)
     /** Short customer-facing label; tariff provenance remains in the details sheet. */
     fun previewTollLabel(route: JSONObject): String {
         if (!route.optBoolean("hasTolls")) return "No tolls · " + money(0.0, route)
         val field = if (route.has("tollAmount")) "tollAmount" else "tollEuros"
         val amount = route.optDouble(field, Double.NaN)
         val pricing = route.optString("tollPricing")
-        if (pricing !in listOf("estimate", "exact") || route.isNull(field) ||
-            !amount.isFinite() || amount < 0) return "Toll price unavailable"
-        return money(amount, route) + if (pricing == "exact") " · confirmed" else " · estimated"
+        if (pricing != "exact" || route.isNull(field) ||
+            !amount.isFinite() || amount < 0) return "Toll price not confirmed"
+        return money(amount, route) + " · confirmed"
     }
 
     fun previewTollDetails(route: JSONObject): String {
         val metadata = listOf("Class ${route.optInt("tollVehicleClass",1)}",
             route.optString("tollCountry"), route.optString("tollTariffYear"))
             .filter { it.isNotBlank() }.joinToString(" · ")
-        val roads = tollRoadSummary(route).map { it.removeSuffix(" · low confidence") }
-        val notice = when {
-            route.optString("tollPricing") == "exact" -> "Published prices; special discounts are not included."
-            route.optString("tollPricingConfidence") == "low" ->
-                "Estimated price. Some roads do not yet have a verified tariff; the amount charged may differ."
-            route.optString("tollPricing") == "estimate" -> "Estimated price; the amount charged may differ."
-            else -> "A price is not available for all toll roads on this route."
-        }
+        val confirmed=route.optString("tollPricing")=="exact"
+        val roads=if(confirmed) tollRoadSummary(route) else emptyList()
+        val notice=if(confirmed) "Published prices; special discounts are not included."
+            else "The toll price for this route has not been confirmed yet."
         return (listOf(previewTollLabel(route),metadata) + roads + notice).joinToString("\n\n")
     }
 
@@ -99,15 +86,15 @@ internal object RouteChoices {
             val ref=road.optString("road").takeIf { it.isNotBlank() } ?: return@mapNotNull null
             val name=road.optString("name").takeIf { it.isNotBlank() }?.let { "$ref · $it" } ?: ref
             val amount=road.optDouble("amount",Double.NaN)
-            if(road.optString("pricing") !in listOf("estimate","exact") || road.isNull("amount") || !amount.isFinite() || amount<0)
-                "$name · price unavailable"
+            if(road.optString("pricing") != "exact" || road.isNull("amount") || !amount.isFinite() || amount<0)
+                "$name · price not confirmed"
             else "$name · "+(if(road.optString("pricing")=="exact")"" else "≈ ")+money(amount,route)+
                 (if(road.optString("pricingConfidence")=="low")" · low confidence" else "")
         }
     }
 
     fun roadSummary(route: JSONObject): String {
-        val array = route.optJSONArray("mainRoads") ?: return roads(emptyList())
+        val array = route.optJSONArray("displayMainRoads") ?: route.optJSONArray("mainRoads") ?: return roads(emptyList())
         return roads((0 until array.length()).map { array.optString(it) }
             .filter { it.isNotBlank() })
     }

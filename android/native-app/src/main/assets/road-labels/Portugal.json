@@ -1,0 +1,12 @@
+{
+  "country": "Portugal",
+  "aliases": {
+    "IC15": "A5",
+    "A36": "IC17",
+    "A37": "IC19"
+  },
+  "sources": [
+    "https://apambiente.pt/ar-e-ruido/planos-de-acao",
+    "https://diariodarepublica.pt/dr/detalhe/decreto-lei/242-2006-552345"
+  ]
+}

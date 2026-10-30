@@ -86,3 +86,29 @@ await fs.writeFile(raw,JSON.stringify({type:'FeatureCollection',features:[
 ]}));
 await normalizeRegion({rawGeoJson:raw,outputDir:`${root}/search`,config:{id:'test',name:'Test',country:'Portugal',bbox:[-9,39,-7,41],categories:{cafe:[{key:'amenity',values:['cafe']}],museum:[{key:'tourism',values:['museum']}]}}});
 console.log(root);
+
+// Same physical road, different OSM ways: geometry and junction evidence,
+// rather than a road record ID, decide whether ETA needs a transition delay.
+for(const name of ['single','split','turn','ramp','toll-gate','local','junction','restricted']) {
+ const local=['local','junction','restricted'].includes(name);
+ const cls=local?6:1;
+ const secondName=local?'Rua Continua':'Autoestrada';
+ const sameRef=local?'':'A5';
+ const nodes=[{lat:40,lon:-8},{lat:40,lon:-7.999},
+   name==='turn'?{lat:40.001,lon:-7.999}:{lat:40,lon:-7.998},
+   {lat:40.001,lon:-7.999}];
+ const roads=[{name:secondName,ref:sameRef},
+   {name:secondName,ref:sameRef,link:name==='ramp',toll:name==='toll-gate'},
+   {name:'Side street'}];
+ const road=name==='single'?0:1;
+ const edges=[{from:0,to:1,road:0,roadClass:cls,distanceDecimeters:850,durationCentiseconds:local?1020:300},
+  {from:1,to:0,road:0,roadClass:cls,distanceDecimeters:850,durationCentiseconds:local?1020:300},
+  {from:1,to:2,road,roadClass:cls,distanceDecimeters:850,durationCentiseconds:local?1020:300},
+  {from:2,to:1,road,roadClass:cls,distanceDecimeters:850,durationCentiseconds:local?1020:300}];
+ if(name==='junction')edges.push({from:1,to:3,road:2,roadClass:6,distanceDecimeters:1000,durationCentiseconds:1500});
+ const restrictions=name==='restricted'?[{viaNode:1,fromRoad:0,toRoad:2,only:false}]:[];
+ const buffers=createRoutingBuffers({nodes,edges,roads,restrictions});
+ const directory=`${root}/eta-${name}`;await fs.mkdir(directory,{recursive:true});
+ for(const [key,value] of Object.entries(buffers))if(value instanceof ArrayBuffer)
+  await fs.writeFile(`${directory}/${key==='spatialIndex'?'spatial-index':key}.bin`,Buffer.from(value));
+}

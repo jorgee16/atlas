@@ -341,12 +341,15 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     core.tariffs(country,TollTableAssets.read(getApplication(),country))
                     core.fixedTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(country)?.csv)
                     core.entryExitTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.ENTRY_EXIT).load(country)?.csv)
+                    val roadLabels=CountryRoadLabels.read(getApplication(),country)
+                    fun displayed(route:JSONObject):JSONObject = route.put("displayMainRoads",
+                        org.json.JSONArray(roadLabels.resolve(route.optJSONArray("mainRoads"))))
                     fun priced(nativeRoute:String):JSONObject {
                         val baseline=JSONObject(nativeRoute)
-                        if(snapshot.walking||baseline.optString("tollPricing")=="exact")return baseline
+                        if(snapshot.walking||baseline.optString("tollPricing")=="exact")return displayed(baseline)
                         val evidence=TollBindingAssets.loadForRoute(getApplication(),country,graphDirectory,baseline)
-                        return if(evidence!=null && core.tollBindings(country,graphDirectory.path,evidence))
-                            JSONObject(core.priceCurrentRoute()) else baseline
+                        return displayed(if(evidence!=null && core.tollBindings(country,graphDirectory.path,evidence))
+                            JSONObject(core.priceCurrentRoute()) else baseline)
                     }
                     val primary = priced(core.route(liveOrigin, destination.coordinate(),
                         snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))

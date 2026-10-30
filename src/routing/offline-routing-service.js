@@ -166,7 +166,7 @@ export class OfflineRoutingService {
 
     const calibratedRoute =
       profile === 'drive'
-        ? calibrateDriveEta(route)
+        ? calibrateDriveEta(route, dataset.graph)
         : route;
 
     calibratedRoute.cumulativeDistances =
@@ -373,4 +373,3 @@ export class OfflineRoutingService {
     }
   }
 }
-
