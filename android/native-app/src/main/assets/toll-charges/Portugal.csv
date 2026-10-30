@@ -2,12 +2,16 @@
 # country=Portugal
 # currency=EUR
 # year=2026
-# version=2026102501
+# version=2026103001
 # fractionDigits=2
 # scheme=fixed-crossing
-# source=https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910
 # Published open-system charges, page 13. Each row prices ONE verified plaza crossing.
 # These rows are not motorway section prices and do not establish route coverage.
+# source=https://github.com/jorgee16/atlas/blob/migration/native-core-kotlin/docs/data/toll-evidence/Portugal/2026-10-30/README.md
+# source.brisa=https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910
+# source.ascendiTraditional=https://ascendi.pt/portagens-tradicionais/
+# source.ascendiElectronic=https://ascendi.pt/portagens-eletronicas/
+# evidenceSha256=5449a7310643619fe04ea08a44a8ab517558400f70f66d3a1f0116e6e653d6c1
 charge;road;name;class1;class2;class3;class4
 brisa:0102;A1;Grijó Nó;0.70;1.25;1.60;1.80
 brisa:0201;A2;Coina I;0.90;1.55;2.00;2.20
@@ -19,3 +23,25 @@ brisa:0504;A5;Oeiras I;0.40;0.75;0.75;0.75
 brisa:0506;A5;Estoril;0.50;0.95;0.95;0.95
 brisa:0901;A9;Queluz I;0.35;0.65;0.85;0.95
 brisa:1201;A12;Pinhal Novo I;1.10;1.95;2.50;2.75
+ascendi:grande-lisboa:01;A16;Idanha / IC16/CREL (A. Colaride);0.65;1.15;1.50;1.65
+ascendi:grande-lisboa:02;A16;Sacotes / Telhal;0.65;1.10;1.45;1.60
+ascendi:grande-lisboa:03;A16;Ranholas / Linhó;1.20;2.10;2.70;2.95
+ascendi:costa-de-prata:01;A17;Mira / Ponte Vagos;0.65;1.10;1.40;1.60
+ascendi:costa-de-prata:02;A17;Vagos / Ílhavo;0.35;0.55;0.70;0.80
+ascendi:costa-de-prata:03;A17;Aveiro Sul / S. Bernardo;0.40;0.70;0.90;1.05
+ascendi:costa-de-prata:04;A29;Salreu / Estarreja S/N;0.65;1.10;1.45;1.65
+ascendi:costa-de-prata:05;A29;Estarreja N/S / Ovar;0.50;0.85;1.05;1.20
+ascendi:costa-de-prata:06;A29;Arada / Maceda;0.45;0.85;1.05;1.15
+ascendi:costa-de-prata:07;A29;ER1-18 / Miramar;0.30;0.55;0.70;0.75
+ascendi:grande-porto:01;A4;Custóias / Via Norte O/E;0.15;0.25;0.35;0.35
+ascendi:grande-porto:02;A4;Via Norte E/O / Ponte Pedra;0.15;0.30;0.40;0.40
+ascendi:grande-porto:03;A41;Freixieiro / Aeroporto;0.15;0.25;0.00;0.00
+ascendi:grande-porto:04;A41;Lipor / EN 13 O/E;0.15;0.25;0.00;0.00
+ascendi:grande-porto:05;A41;EN 13 E/O / EN 14 O/E;0.10;0.20;0.00;0.00
+ascendi:grande-porto:06;A41;EN 14 E/O / EN 107;0.25;0.50;0.00;0.00
+ascendi:grande-porto:07;A41;Maia / Alfena E/O;0.10;0.20;0.00;0.00
+ascendi:grande-porto:08;A41;Alfena O/E / Santo Tirso;0.45;0.75;0.00;0.00
+ascendi:grande-porto:09;A41;Ermida / IC24/IC25 O/E;0.05;0.10;0.00;0.00
+ascendi:grande-porto:10;A42;IC24/IC25 E/O / Lordelo;0.35;0.65;0.80;0.90
+ascendi:grande-porto:11;A42;Paços Ferreira / EN 106 Sul O/E;0.35;0.60;0.75;0.85
+ascendi:grande-porto:12;A42;EN 106 Norte E/O / Lousada;0.35;0.65;0.85;1.00

@@ -55,6 +55,12 @@ int main(int argc,char** argv){try{
  check(std::abs(*charges.sumFixedCharges({"brisa:0502","brisa:0503"},1)-1.60)<1e-9,"sum of identified crossings uses integer minor units");
  check(std::abs(*charges.sumFixedCharges({"brisa:0502","brisa:0502"},1)-1.40)<1e-9,"a real repeated crossing must be charged again");
  check(!charges.sumFixedCharges({"unknown"},1)&&!charges.fixedCharge("brisa:0501",5),"unknown charge/class is not zero");
+ check(charges.fixedCharge("ascendi:grande-lisboa:01",1)==0.65,"published A16 Idanha price");
+ check(charges.fixedCharge("ascendi:grande-lisboa:02",2)==1.10,"published A16 Sacotes independent class2 price");
+ check(charges.fixedCharge("ascendi:grande-lisboa:03",4)==2.95,"published A16 Ranholas class4 price");
+ check(charges.fixedCharge("ascendi:costa-de-prata:01",3)==1.40,"published A17 Mira gantry price");
+ check(charges.fixedCharge("ascendi:grande-porto:03",3)==0.,"explicit published A41 heavy zero price");
+ check(!charges.fixedCharge("ascendi:grande-lisboa:01",5)&&!charges.fixedCharge("A16",1),"no motorcycle eligibility or road-name crossing inference");
  check(!pt.fixedCharge("brisa:0501",1),"road and fixed providers are isolated");
  rejects([&]{TollTariffs::parse(fixedBuffer.str()+"brisa:0501;A5;duplicate;1;2;3;4\n","Portugal");});
  auto wrongScheme=fixedBuffer.str();wrongScheme.replace(wrongScheme.find("fixed-crossing"),14,"road-average");

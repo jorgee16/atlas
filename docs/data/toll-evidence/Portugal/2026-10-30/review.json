@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "currency": "EUR",
+  "year": 2026,
+  "revision": 2026103001,
+  "sourceBundleVersion": "2026.10.30-initial",
+  "checkedOn": "2026-10-30",
+  "inputSha256": {
+    "tarifas_portagens_2026.csv": "5449a7310643619fe04ea08a44a8ab517558400f70f66d3a1f0116e6e653d6c1",
+    "excecoes_zero_2026.csv": "0811854a6dfce8155b369eaa08b6efe7734864b250b9c7ebba1211a9b0d46365"
+  },
+  "sourceArchiveSha256": "b3024f6733545726e18db6e17c5195fdab4b97003199b4c09442b2dac7c35679",
+  "priceReviews": [
+    {
+      "chargeId": "ascendi:grande-lisboa:01",
+      "sourceRecordId": "70eca09c1599f0ed",
+      "officialNumber": 1,
+      "operator": "Grande Lisboa",
+      "road": "A16",
+      "origin": "Idanha",
+      "destination": "IC16/CREL (A. Colaride)",
+      "source": "https://ascendi.pt/portagens-tradicionais/",
+      "kind": "praça/sublanço",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-lisboa:02",
+      "sourceRecordId": "36169f0110a67132",
+      "officialNumber": 2,
+      "operator": "Grande Lisboa",
+      "road": "A16",
+      "origin": "Sacotes",
+      "destination": "Telhal",
+      "source": "https://ascendi.pt/portagens-tradicionais/",
+      "kind": "praça/sublanço",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-lisboa:03",
+      "sourceRecordId": "13556bb0742b2326",
+      "officialNumber": 3,
+      "operator": "Grande Lisboa",
+      "road": "A16",
+      "origin": "Ranholas",
+      "destination": "Linhó",
+      "source": "https://ascendi.pt/portagens-tradicionais/",
+      "kind": "praça/sublanço",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:01",
+      "sourceRecordId": "b554e96d17c1dc98",
+      "officialNumber": 1,
+      "operator": "Costa de Prata",
+      "road": "A17",
+      "origin": "Mira",
+      "destination": "Ponte Vagos",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:02",
+      "sourceRecordId": "254a3dba9de5e3a1",
+      "officialNumber": 2,
+      "operator": "Costa de Prata",
+      "road": "A17",
+      "origin": "Vagos",
+      "destination": "Ílhavo",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:03",
+      "sourceRecordId": "c22e497f2521d3ff",
+      "officialNumber": 3,
+      "operator": "Costa de Prata",
+      "road": "A17",
+      "origin": "Aveiro Sul",
+      "destination": "S. Bernardo",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:04",
+      "sourceRecordId": "9b5c3b8f59e19505",
+      "officialNumber": 4,
+      "operator": "Costa de Prata",
+      "road": "A29",
+      "origin": "Salreu",
+      "destination": "Estarreja S/N",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:05",
+      "sourceRecordId": "ca505744c4380d0a",
+      "officialNumber": 5,
+      "operator": "Costa de Prata",
+      "road": "A29",
+      "origin": "Estarreja N/S",
+      "destination": "Ovar",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:06",
+      "sourceRecordId": "429e299ed9356940",
+      "officialNumber": 6,
+      "operator": "Costa de Prata",
+      "road": "A29",
+      "origin": "Arada",
+      "destination": "Maceda",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:costa-de-prata:07",
+      "sourceRecordId": "07b5c6a2a188c5b3",
+      "officialNumber": 7,
+      "operator": "Costa de Prata",
+      "road": "A29",
+      "origin": "ER1-18",
+      "destination": "Miramar",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:01",
+      "sourceRecordId": "f1ba2f3debead83e",
+      "officialNumber": 1,
+      "operator": "Grande Porto",
+      "road": "A4",
+      "origin": "Custóias",
+      "destination": "Via Norte O/E",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:02",
+      "sourceRecordId": "c74b40f0eec78f52",
+      "officialNumber": 2,
+      "operator": "Grande Porto",
+      "road": "A4",
+      "origin": "Via Norte E/O",
+      "destination": "Ponte Pedra",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:03",
+      "sourceRecordId": "d8e09ad70288937c",
+      "officialNumber": 3,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "Freixieiro",
+      "destination": "Aeroporto",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:04",
+      "sourceRecordId": "5a6b46a27d995e24",
+      "officialNumber": 4,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "Lipor",
+      "destination": "EN 13 O/E",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:05",
+      "sourceRecordId": "87cd72417e29f0be",
+      "officialNumber": 5,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "EN 13 E/O",
+      "destination": "EN 14 O/E",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:06",
+      "sourceRecordId": "b690c8c4529b786d",
+      "officialNumber": 6,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "EN 14 E/O",
+      "destination": "EN 107",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:07",
+      "sourceRecordId": "627258304c590865",
+      "officialNumber": 7,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "Maia",
+      "destination": "Alfena E/O",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:08",
+      "sourceRecordId": "64fcf7c4eaab5d86",
+      "officialNumber": 8,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "Alfena O/E",
+      "destination": "Santo Tirso",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:09",
+      "sourceRecordId": "d2311aaa1602d11c",
+      "officialNumber": 9,
+      "operator": "Grande Porto",
+      "road": "A41",
+      "origin": "Ermida",
+      "destination": "IC24/IC25 O/E",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:10",
+      "sourceRecordId": "3ad5374c4baf7eae",
+      "officialNumber": 10,
+      "operator": "Grande Porto",
+      "road": "A42",
+      "origin": "IC24/IC25 E/O",
+      "destination": "Lordelo",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:11",
+      "sourceRecordId": "53ae22dbe8792b95",
+      "officialNumber": 11,
+      "operator": "Grande Porto",
+      "road": "A42",
+      "origin": "Paços Ferreira",
+      "destination": "EN 106 Sul O/E",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    },
+    {
+      "chargeId": "ascendi:grande-porto:12",
+      "sourceRecordId": "05bb652f4002c58b",
+      "officialNumber": 12,
+      "operator": "Grande Porto",
+      "road": "A42",
+      "origin": "EN 106 Norte E/O",
+      "destination": "Lousada",
+      "source": "https://ascendi.pt/portagens-eletronicas/",
+      "kind": "portico",
+      "reviewedClasses": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "geometryReviewed": false,
+      "directionReviewed": false
+    }
+  ],
+  "retainedBrisaCharges": 10,
+  "notes": [
+    "Price-only review against official Ascendi 2026 public tables; no geographic bindings created",
+    "Do not replace the newer August Brisa matrix with January observations",
+    "A41 conflicting IMT/AEDL source observations remain quarantined; retain existing independently sourced statutory exemption",
+    "Class 5 only applies to electronically identified motorcycles; not enabled by this class1-4 catalog"
+  ],
+  "catalogSource": "https://github.com/jorgee16/atlas/blob/migration/native-core-kotlin/docs/data/toll-evidence/Portugal/2026-10-30/README.md",
+  "publishedSources": {
+    "brisa": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910",
+    "ascendiTraditional": "https://ascendi.pt/portagens-tradicionais/",
+    "ascendiElectronic": "https://ascendi.pt/portagens-eletronicas/"
+  }
+}

@@ -93,6 +93,24 @@ without changes to navigation fields. This is not full official-price coverage.
 
 ## Versioned offline updates
 
+### Official evidence intake, 2026-10-30
+
+The supplied Portugal bundle is imported by `tools/import-toll-evidence.py`,
+outside the routing engine. Its original hashes, country/year, class prices,
+source identities and price-only reviews live in
+[`docs/data/toll-evidence/Portugal/2026-10-30`](../data/toll-evidence/Portugal/2026-10-30/README.md).
+The existing fixed-crossing provider gains 22 Ascendi price records (3 A16
+plazas and 19 electronic gantries), revision 2026103001. Its ten Brisa records
+and the newer entry/exit matrix are preserved. Mixed-operator catalog provenance
+points to the source index with the individual official URLs in metadata.
+
+This does not grant geographic or directional coverage. Source conflicts,
+motorcycle-only class 5, sections, bridge rules and scoped exemptions are kept
+separate. No new graph bindings or journey totals are activated by importing
+this bundle. Existing Android confirmed-only preview and exact crossing gates
+remain authoritative; GPS, map matching, routing weights and route geometry
+are not changed by the evidence intake.
+
 ### Entry/exit matrices (revision 2026102701)
 
 The third scheme is `entry-exit`, with columns

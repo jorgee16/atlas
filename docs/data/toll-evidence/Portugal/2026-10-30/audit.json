@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "year": 2026,
+  "revision": 2026103001,
+  "sourceRows": 967,
+  "sourceRoadLabels": [
+    "A1",
+    "A10",
+    "A11",
+    "A12",
+    "A12 / Ponte Vasco da Gama",
+    "A13",
+    "A14",
+    "A15",
+    "A16",
+    "A17",
+    "A2",
+    "A2 / Ponte 25 de Abril",
+    "A21",
+    "A29",
+    "A3",
+    "A32",
+    "A4",
+    "A41",
+    "A42",
+    "A43",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9"
+  ],
+  "schemes": {
+    "bridge": 8,
+    "entry-exit": 24,
+    "gantry": 95,
+    "plaza": 15,
+    "section": 825
+  },
+  "classes": {
+    "1": 225,
+    "2": 225,
+    "3": 225,
+    "4": 225,
+    "5": 67
+  },
+  "quarantinedConflictRows": 36,
+  "restrictedMotorcycleRows": 67,
+  "legalScopeRecords": 8,
+  "imtClassValuesConsistent": 600,
+  "brisaDirectedClassValuesConsistent": 24,
+  "retainedSectionsAbsentFromInput": [
+    {
+      "road": "A1",
+      "section": "Ligação PLLN"
+    }
+  ],
+  "newFixedChargePrices": 22,
+  "newFixedClassValues": 88,
+  "newReviewedGraphCrossings": 0,
+  "newlyConfirmedJourneys": 0,
+  "runtimeEligibility": "Requires existing independent reviewed directed graph bindings; source evidence alone is ineligible",
+  "coverage": "Incomplete: missing paid A28/A33/A19 sections and nationwide entry/exit/gantry bindings",
+  "inputSha256": {
+    "tarifas_portagens_2026.csv": "5449a7310643619fe04ea08a44a8ab517558400f70f66d3a1f0116e6e653d6c1",
+    "excecoes_zero_2026.csv": "0811854a6dfce8155b369eaa08b6efe7734864b250b9c7ebba1211a9b0d46365"
+  }
+}

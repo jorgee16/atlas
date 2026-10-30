@@ -67,13 +67,20 @@ test('web UI does not display unknown costs as zero or a foreign currency as EUR
 test('official plaza prices are independent of km and retain repeated real crossings', async () => {
   const {countryTollCharges}=await import('../src/routing/country-toll-tariffs.js');
   const c=countryTollCharges('Portugal');
-  assert.equal(c.scheme,'fixed-crossing');assert.equal(c.fixedCharges.length,10);
+  assert.equal(c.scheme,'fixed-crossing');assert.equal(c.fixedCharges.length,32);
   assert.equal(c.fixedCharges.filter(x=>x.road==='A5').length,6);
   assert.deepEqual(Object.fromEntries(c.fixedCharges.filter(x=>x.road==='A5').map(x=>[x.id,x.name])),{
     'brisa:0505':'Oeiras II','brisa:0501':'Carcavelos PV','brisa:0502':'Carcavelos I',
     'brisa:0503':'Carcavelos II','brisa:0504':'Oeiras I','brisa:0506':'Estoril'
   });
   assert.equal(c.fixedCharge('brisa:0501',1),1.6);
+  assert.equal(c.fixedCharge('ascendi:grande-lisboa:01',1),0.65);
+  assert.equal(c.fixedCharge('ascendi:grande-lisboa:02',2),1.10);
+  assert.equal(c.fixedCharge('ascendi:grande-lisboa:03',4),2.95);
+  assert.equal(c.fixedCharge('ascendi:costa-de-prata:01',3),1.40);
+  assert.equal(c.fixedCharge('ascendi:grande-porto:03',3),0);
+  assert.equal(c.fixedCharge('ascendi:grande-lisboa:01',5),null);
+  assert.equal(c.fixedCharge('A16',1),null);
   for(const klass of [2,3,4]) assert.equal(c.fixedCharge('brisa:0501',klass),3.1);
   assert.equal(c.sumFixedCharges(['brisa:0502','brisa:0503'],1),1.6);
   assert.equal(c.sumFixedCharges(['brisa:0502','brisa:0502'],1),1.4);

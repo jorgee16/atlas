@@ -107,9 +107,17 @@ jobs:
           python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-fares --namespace toll-fares
           python3 -m unittest discover -s tools -p test_toll_catalog.py
           python3 -m unittest discover -s tools -p test_toll_quote_observations.py
+          python3 tools/import-toll-evidence.py --check
+          python3 -m unittest discover -s tools -p test_toll_evidence.py
           node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js tests/drive-eta.test.js
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Atlas-toll-source-evidence
+          path: dist/toll-evidence/
+          if-no-files-found: error
       - name: Generate search expectations from the original app
         run: node native/tests/generate-search-fixtures.mjs /tmp/atlas-search-parity
       - name: Build native C++ core

@@ -93,6 +93,12 @@ class TollCatalogAndroidTest {
         assertEquals("fixed-crossing",catalog.scheme)
         assertEquals(6,catalog.fixedCharges.count { it.road=="A5" })
         assertEquals(java.math.BigDecimal("1.60"),catalog.fixedCharges.first { it.id=="brisa:0501" }.amounts[1])
+        assertEquals(32,catalog.fixedCharges.size)
+        assertEquals(3,catalog.fixedCharges.count { it.road=="A16" })
+        val idanha=catalog.fixedCharges.first { it.id=="ascendi:grande-lisboa:01" }
+        assertEquals(java.math.BigDecimal("0.65"),idanha.amounts[1])
+        assertEquals(java.math.BigDecimal("1.65"),idanha.amounts[4])
+        assertFalse("Motorcycle-only prices must not leak into unrestricted classes",idanha.amounts.containsKey(5))
         NativeCore().use { it.tariffs("Portugal",catalog.csv) }
         assertEquals("road-average",TollTableAssets.repository(context).load("Portugal")!!.scheme)
         assertNull(repository.load("Spain"))

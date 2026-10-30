@@ -1,0 +1,48 @@
+{
+  "name": "Atlas Portugal Toll Tariff Tables",
+  "version": "2026.10.30-initial",
+  "status": "incomplete-national-coverage",
+  "sources_checked_on": "2026-10-30",
+  "files": [
+    {
+      "name": "tarifas_portagens_2026.csv",
+      "bytes": 449185,
+      "sha256": "5449a7310643619fe04ea08a44a8ab517558400f70f66d3a1f0116e6e653d6c1"
+    },
+    {
+      "name": "tarifas_portagens_2026.json",
+      "bytes": 1030916,
+      "sha256": "e875e5750e729545907d581c2de0204585fbfab3c82c119399526272641c9c97"
+    },
+    {
+      "name": "excecoes_zero_2026.csv",
+      "bytes": 2255,
+      "sha256": "0811854a6dfce8155b369eaa08b6efe7734864b250b9c7ebba1211a9b0d46365"
+    },
+    {
+      "name": "portagens_2026.xlsx",
+      "bytes": 122769,
+      "sha256": "0a6de7c764c0a0d6f7920599e02403d3069b41ba6cb21f0af1d0ee1e1c000cb1"
+    },
+    {
+      "name": "HANDOFF_CODEX_ATLAS.md",
+      "bytes": 9077,
+      "sha256": "ec1783673849e4f42b354fff4e6cb92f1b2ed82356a7dea8fb843e28b529c9a2"
+    },
+    {
+      "name": "validar_tabela.py",
+      "bytes": 1368,
+      "sha256": "9d75f3a2dfc6260b5f844b3bdaa0aaad92524f948a760d24aadc9a180f13ac4e"
+    },
+    {
+      "name": "build_data.py",
+      "bytes": 21159,
+      "sha256": "c525f494c00424dd3d607d3e79b43bcc7abfffad4d9f6a61c98141e123ede801"
+    },
+    {
+      "name": "resumo.json",
+      "bytes": 528,
+      "sha256": "ef19a66248e8d8a08581e4814bb22bf059540a3ce1aa9787283ddf209f6fd928"
+    }
+  ]
+}

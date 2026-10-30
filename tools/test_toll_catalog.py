@@ -100,7 +100,7 @@ class CatalogTests(unittest.TestCase):
             root=Path(temp)
             source=ROOT.parent/'android/native-app/src/main/assets/toll-charges/Portugal.csv'
             result=pack.package(source,root,'toll-charges')
-            self.assertEqual('fixed-crossing',result['scheme']);self.assertEqual(10,result['chargeCount'])
+            self.assertEqual('fixed-crossing',result['scheme']);self.assertEqual(32,result['chargeCount'])
             self.assertTrue(result['path'].startswith('/toll-charges/Portugal/'))
             storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-charges')
             self.assertEqual('toll-charges/Portugal/manifest.json',storage.writes[-1])
