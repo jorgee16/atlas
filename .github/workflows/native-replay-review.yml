@@ -20,7 +20,7 @@ permissions:
   actions: read
 jobs:
   review:
-    if: ${{ !contains(github.event.head_commit.message, '[inspect-release-replay]') && !contains(github.event.head_commit.message, '[route-comparison-audit]') && inputs.review_group != 'route-comparison' }}
+    if: ${{ !contains(github.event.head_commit.message, '[inspect-release-replay]') && !contains(github.event.head_commit.message, '[route-comparison-audit]') && !contains(github.event.head_commit.message, '[route-comparison-details]') && inputs.review_group != 'route-comparison' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -259,3 +259,36 @@ jobs:
           name: Atlas-2645-575-IKEA-route-audit
           path: audit/
           if-no-files-found: error
+
+  route-comparison-details:
+    if: ${{ contains(github.event.head_commit.message, '[route-comparison-details]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect already generated real routes without rebuilding or downloading graph
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: '41019127812'
+          name: Atlas-2645-575-IKEA-route-audit
+          path: recorded-route-audit
+      - name: Separate actual road corridors, aliases and toll coverage
+        run: |
+          python3 - <<'PYCODE'
+          import collections,json
+          from pathlib import Path
+          for summary in sorted(Path('recorded-route-audit').rglob('*-summary.json')):
+              s=json.loads(summary.read_text());name=s['case']
+              path=summary.with_name(name+'-legs.jsonl')
+              legs=[json.loads(l) for l in path.read_text().splitlines()]
+              byref=collections.defaultdict(lambda:{'meters':0,'rawSeconds':0,'transitionSeconds':0,'pieces':0})
+              same_ref_delay=0;previous=None
+              for leg in legs:
+                  ref=leg['ref'] or '(no ref) '+leg['name']
+                  row=byref[ref];row['meters']+=leg['meters'];row['rawSeconds']+=leg['rawSeconds'];row['transitionSeconds']+=leg['transitionAddedSeconds'];row['pieces']+=1
+                  if previous and previous['roadIndex']!=leg['roadIndex'] and leg['ref'] and previous['ref']==leg['ref'] and previous['class']==leg['class']:
+                      same_ref_delay+=leg['transitionAddedSeconds']
+                  previous=leg
+              route=json.loads(summary.with_name(name+'-route.json').read_text())
+              print('ATLAS_CORRIDOR_DETAIL',json.dumps({'case':name,'roadDistances':sorted([dict(ref=k,**v) for k,v in byref.items()],key=lambda x:-x['meters'])[:12],'sameRefChangedIdDelaySeconds':same_ref_delay,'tollRoads':route['tollRoads']}),flush=True)
+          PYCODE
