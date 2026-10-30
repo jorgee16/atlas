@@ -175,7 +175,7 @@ jobs:
           assert required <= {e['url'].rsplit('/',1)[1] for e in entries}, 'Require every binary routing file in the signed manifest'
           root=Path('route-audit-graph');root.mkdir()
           Path('audit').mkdir(exist_ok=True)
-          Path('audit/manifest.json').write_text(json.dumps({'sourceCommit':os.environ['GITHUB_SHA'],'regionVersion':region['version'],'files':entries,'scope':'Real native routing/ETA/tariff diagnostic. Two approximate public postal-code points; not the precise phone fix. No GPS, camera, app or routing algorithm changed.'},indent=2))
+          Path('audit/manifest.json').write_text(json.dumps({'sourceCommit':os.environ['GITHUB_SHA'],'regionVersion':region['version'],'files':entries,'scope':'Real native routing/ETA/tariff diagnostic. Two approximate public postal-code points; not the precise phone fix. This audit does not modify GPS, camera, route geometry or country tariff data.'},indent=2))
           def download(e):
               target=root/e['url'].rsplit('/',1)[1]
               account=os.environ.get('R2_ACCOUNT_ID','');key=os.environ.get('R2_ACCESS_KEY_ID','');secret=os.environ.get('R2_SECRET_ACCESS_KEY','')
@@ -189,7 +189,7 @@ jobs:
               print('Verified graph file',target.name,target.stat().st_size,flush=True)
           with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:list(pool.map(download,entries))
           PYCODE
-      - name: Diagnose 2645-575 to IKEA Loures using unchanged route and ETA code
+      - name: Measure 2645-575 to IKEA Loures with current route and ETA code
         run: |
           cat > /tmp/atlas-route-audit.cpp <<'CPPCODE'
           #include "atlas/core.hpp"
