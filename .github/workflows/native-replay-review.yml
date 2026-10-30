@@ -172,7 +172,7 @@ jobs:
           region=next(r for r in json.loads(Path('android/native-app/src/main/assets/regions.json').read_text())['regions'] if r['id']=='portugal')
           entries=[e for e in region['package']['files'] if '/routing/mainland/' in e['url']]
           required={'nodes.bin','edges.bin','geometry.bin','roads.bin','strings.bin','restrictions.bin','spatial-index.bin'}
-assert required <= {e['url'].rsplit('/',1)[1] for e in entries}, 'Require every binary routing file in the signed manifest'
+          assert required <= {e['url'].rsplit('/',1)[1] for e in entries}, 'Require every binary routing file in the signed manifest'
           root=Path('route-audit-graph');root.mkdir()
           Path('audit').mkdir(exist_ok=True)
           Path('audit/manifest.json').write_text(json.dumps({'sourceCommit':os.environ['GITHUB_SHA'],'regionVersion':region['version'],'files':entries,'scope':'Real native routing/ETA/tariff diagnostic. Two approximate public postal-code points; not the precise phone fix. No GPS, camera, app or routing algorithm changed.'},indent=2))
