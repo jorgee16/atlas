@@ -990,10 +990,12 @@ class NavigationGpsReplayTest {
      * route preview. The fixture contains graph-node endpoints, not fake routes. */
     @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
         output.listFiles()?.forEach { it.delete() }
-        val cases=instrumentation.context.assets.open("tolls/a5-mainline-cases.csv")
-            .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
-            .map { it.split(';').also { row -> require(row.size==8) } }
-        assertTrue("Both carriageways, classes 1–4, after-plaza starts and full IKEA approaches are required",cases.size>=29)
+        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv").flatMap { name ->
+            instrumentation.context.assets.open("tolls/$name")
+                .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
+                .map { it.split(';').also { row -> require(row.size==8) } }
+        }
+        assertTrue("A5/IKEA and A28 carriageways, classes and after-gate starts are required",cases.size>=57)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         var previewCase:List<String>?=null
@@ -1033,10 +1035,16 @@ class NavigationGpsReplayTest {
                         assertEquals(row[0],row[7].toDouble(),after.getDouble("tollAmount"),1e-9)
                         if(row[7].toDouble()>0) {
                             val charges=after.getJSONArray("tollRoads")
-                            assertEquals("One physical plaza, independent of lane",1,charges.length())
-                            assertEquals("brisa:0501",charges.getJSONObject(0).getString("chargeId"))
-                            assertEquals("Carcavelos PV",charges.getJSONObject(0).getString("name"))
-                            if(row[5]=="1" && (previewCase==null || row[0]=="ikea-loures-2645-575-south-class-1"))previewCase=row
+                            if(row[0].startsWith("a28-")) {
+                                assertEquals(if(row[0].startsWith("a28-both-"))2 else 1,charges.length())
+                                for(i in 0 until charges.length())
+                                    assertTrue(charges.getJSONObject(i).getString("chargeId").startsWith("vialivre:a28:"))
+                            } else {
+                                assertEquals("One physical plaza, independent of lane",1,charges.length())
+                                assertEquals("brisa:0501",charges.getJSONObject(0).getString("chargeId"))
+                                assertEquals("Carcavelos PV",charges.getJSONObject(0).getString("name"))
+                                if(row[5]=="1" && (previewCase==null || row[0]=="ikea-loures-2645-575-south-class-1"))previewCase=row
+                            }
                         }
                     } else {
                         assertFalse("Unreviewed city approaches cannot become exact",accepted)
@@ -1068,8 +1076,34 @@ class NavigationGpsReplayTest {
                 assertFalse("This validates a route preview, not a GPS trip",appModel.updates.value.navigating)
                 await("MapLibre must finish loading the route preview",45){!snapshot(s).optBoolean("styleLoading",true)}
                 instrumentation.waitForIdleSync()
+                s.onActivity { a ->
+                    fun expand(v:android.view.View):Boolean {
+                        if(v.isShown && v.contentDescription=="Expand route") { v.performClick(); return true }
+                        if(v is android.view.ViewGroup)for(i in 0 until v.childCount)if(expand(v.getChildAt(i)))return true
+                        return false
+                    }
+                    expand(a.window.decorView)
+                }
+                instrumentation.waitForIdleSync()
                 var visibleText=""
                 s.onActivity { a ->
+                    val allViews=mutableListOf<android.view.View>()
+                    fun collect(v:android.view.View) {
+                        allViews.add(v)
+                        if(v is android.view.ViewGroup)for(i in 0 until v.childCount)collect(v.getChildAt(i))
+                    }
+                    collect(a.window.decorView)
+                    val price=allViews.filterIsInstance<android.widget.TextView>()
+                        .first { it.text.toString().contains("1,60") && it.text.toString().contains("confirmed") }
+                    val priceBounds=android.graphics.Rect()
+                    assertTrue("Confirmed price must be visible",price.getGlobalVisibleRect(priceBounds))
+                    val mapActions=setOf("Recenter on my location","Full map","Switch to heading up","Switch to north up")
+                    allViews.filter { it.contentDescription?.toString() in mapActions ||
+                        it.contentDescription?.toString()?.startsWith("Map appearance:")==true }.forEach { control ->
+                        val bounds=android.graphics.Rect()
+                        if(control.isShown && control.getGlobalVisibleRect(bounds))assertFalse("Map action covers the route price",
+                            android.graphics.Rect.intersects(priceBounds,bounds))
+                    }
                     fun text(v:android.view.View):String = when(v) {
                         is android.widget.TextView -> v.text.toString()
                         is android.view.ViewGroup -> (0 until v.childCount).joinToString("\n") { text(v.getChildAt(it)) }
@@ -1078,6 +1112,8 @@ class NavigationGpsReplayTest {
                     visibleText=text(a.window.decorView)
                 }
                 assertTrue("Route preview must identify confirmed pricing: $visibleText",visibleText.contains("confirmed"))
+                assertTrue("Expanded preview must expose the paid alternative",visibleText.contains("Alternative"))
+                assertTrue("Expanded preview must expose the free alternative",visibleText.contains("No tolls"))
                 File(output,"a5-preview-text.txt").writeText(visibleText)
                 File(output,"a5-preview-route.json").writeText(route.toString(2))
                 capture(s,"a5-exact-route-preview")

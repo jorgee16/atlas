@@ -37,6 +37,12 @@ cache, rollback and independent crossing-proof requirements remain in place.
 The source URL for this mixed-operator catalog points to this source index;
 individual official URLs are retained as catalog metadata.
 
+This describes the October 30 intake. The later
+[A28 review](../2026-11-01/README.md) adds a separately audited operator and
+geographic proof; this older importer preserves those rows and cannot overwrite
+a newer catalog revision. Brisa's pre-existing keys are legacy internal
+identities, with the official-code alignment documented in that later review.
+
 This is a **price-only extension**, not newly certified journey coverage.
 No OSM IDs, graph coverage rows, geometry, entry/exit bindings or directed
 crossing evidence were added. A16's Idanha class 1 price of EUR 0.65 does not

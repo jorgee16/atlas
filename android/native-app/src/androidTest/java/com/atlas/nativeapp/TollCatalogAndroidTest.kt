@@ -93,7 +93,9 @@ class TollCatalogAndroidTest {
         assertEquals("fixed-crossing",catalog.scheme)
         assertEquals(6,catalog.fixedCharges.count { it.road=="A5" })
         assertEquals(java.math.BigDecimal("1.60"),catalog.fixedCharges.first { it.id=="brisa:0501" }.amounts[1])
-        assertEquals(32,catalog.fixedCharges.size)
+        assertEquals(34,catalog.fixedCharges.size)
+        assertEquals(java.math.BigDecimal("0.55"),catalog.fixedCharges.first { it.id=="vialivre:a28:angeiras" }.amounts[1])
+        assertEquals(java.math.BigDecimal("1.95"),catalog.fixedCharges.first { it.id=="vialivre:a28:povoa" }.amounts[4])
         assertEquals(3,catalog.fixedCharges.count { it.road=="A16" })
         val idanha=catalog.fixedCharges.first { it.id=="ascendi:grande-lisboa:01" }
         assertEquals(java.math.BigDecimal("0.65"),idanha.amounts[1])

@@ -67,7 +67,9 @@ test('web UI does not display unknown costs as zero or a foreign currency as EUR
 test('official plaza prices are independent of km and retain repeated real crossings', async () => {
   const {countryTollCharges}=await import('../src/routing/country-toll-tariffs.js');
   const c=countryTollCharges('Portugal');
-  assert.equal(c.scheme,'fixed-crossing');assert.equal(c.fixedCharges.length,32);
+  assert.equal(c.scheme,'fixed-crossing');assert.equal(c.fixedCharges.length,34);
+  assert.equal(c.fixedCharge('vialivre:a28:angeiras',1),0.55);
+  assert.equal(c.fixedCharge('vialivre:a28:povoa',4),1.95);
   assert.equal(c.fixedCharges.filter(x=>x.road==='A5').length,6);
   assert.deepEqual(Object.fromEntries(c.fixedCharges.filter(x=>x.road==='A5').map(x=>[x.id,x.name])),{
     'brisa:0505':'Oeiras II','brisa:0501':'Carcavelos PV','brisa:0502':'Carcavelos I',

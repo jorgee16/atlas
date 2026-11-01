@@ -175,7 +175,7 @@ def check_catalog(path, review, additions):
     by_id = {r[0]: r for r in current}
     if len(by_id) != len(current) or any(by_id.get(r[0]) != r for r in additions):
         raise ValueError('Canonical catalog differs from reviewed source prices')
-    if len(current) - len(additions) != review['retainedBrisaCharges']:
+    if sum(r[0].startswith('brisa:') for r in current) != review['retainedBrisaCharges']:
         raise ValueError('Unexpected pre-existing charges; review before merging')
     if (metadata.get('source') != review['catalogSource']
             or any(metadata.get('source.' + key) != url for key, url in review['publishedSources'].items())
@@ -193,7 +193,7 @@ def update_catalog(path, review, additions):
         raise ValueError('Cannot overwrite a newer tariff revision')
     added_ids = {r[0] for r in additions}
     retained = [r for r in current if r[0] not in added_ids]
-    if len(retained) != review['retainedBrisaCharges']:
+    if sum(r[0].startswith('brisa:') for r in retained) != review['retainedBrisaCharges']:
         raise ValueError('Unexpected retained price coverage')
     comments = [line for line in lines if line.startswith('#')]
     comments = [f'# version={review["revision"]}' if line.startswith('# version=') else line for line in comments]

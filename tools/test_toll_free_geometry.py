@@ -72,7 +72,7 @@ class ReviewTests(unittest.TestCase):
         review, source, seed, _, shapes = corridors.inputs(*self.paths())
         self.assertEqual(99, len(shapes))
         self.assertEqual(735, len(source['chargeCandidates']))
-        asset = TOOLS.parent / 'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
+        asset = TOOLS / 'toll-binding-config/portugal-lisbon-reviewed.csv'
         charged = lambda lines: [line for line in lines if line.startswith('crossing;')]
         self.assertEqual(charged(seed), charged(asset.read_text().splitlines()))
         self.assertEqual(4, len(charged(seed)))

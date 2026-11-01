@@ -104,13 +104,19 @@ class EvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'Portugal.csv'
             path.write_bytes(canonical.read_bytes())
+            # Reproduce the original intake revision; later operator updates
+            # must not be overwritten by this older adapter.
+            lines = path.read_text().splitlines()
+            path.write_text('\n'.join(f'# version={self.review["revision"]}' if line.startswith('# version=') else line for line in lines)+'\n')
             evidence.update_catalog(path, self.review, additions)
             first = path.read_bytes()
             evidence.update_catalog(path, self.review, additions)
             self.assertEqual(first, path.read_bytes())
             _, _, _, merged = evidence.catalog_parts(path)
             self.assertEqual(brisa, [r for r in merged if r[0].startswith('brisa:')])
-            self.assertEqual(32, len(merged))
+            self.assertEqual(len(original), len(merged))
+            self.assertEqual([r for r in original if r[0].startswith('vialivre:')],
+                [r for r in merged if r[0].startswith('vialivre:')])
             text = path.read_text().replace(str(self.review['revision']), str(self.review['revision'] + 1))
             path.write_text(text)
             with self.assertRaisesRegex(ValueError, 'newer'):

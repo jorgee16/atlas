@@ -162,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--review', type=Path, default=CONFIG / 'portugal-lisbon-free-corridors.json')
     parser.add_argument('--source', type=Path, default=CONFIG / 'portugal-lisbon-free-corridors.source.json')
     parser.add_argument('--seed', type=Path, default=CONFIG / 'portugal-a5-reviewed-seed.csv')
-    parser.add_argument('--output', type=Path, default=ROOT / 'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv')
+    parser.add_argument('--output', type=Path, default=CONFIG / 'portugal-lisbon-reviewed.csv')
     parser.add_argument('--report', type=Path, default=ROOT / 'dist/free-toll-corridors.json')
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()

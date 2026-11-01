@@ -591,9 +591,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
             bottomMargin=if(landscape||fromTop)0 else bottomInset+
                 if(state.navigating)ui.dp(178) else ui.dp(118)
         }.also{controls.layoutParams=it}
-        controls.visibility=if(page!=null ||
-            (model.updates.value.tab=="Trail"&&trailExpanded&&!landscape))
-            View.GONE else View.VISIBLE
+        controls.visibility=if(mapControlsVisible(model.updates.value))View.VISIBLE else View.GONE
         (credit.layoutParams as FrameLayout.LayoutParams).apply {
             gravity=Gravity.BOTTOM or if(landscape)Gravity.END else Gravity.START
             leftMargin=if(landscape)0 else leftInset+ui.dp(22)
@@ -730,12 +728,18 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
         if(!hasLocation())info.addView(ui.chip("Enable location","locate"){enableLocation()},LinearLayout.LayoutParams(-2,-2).apply{leftMargin=ui.dp(9)})
         top.addView(info)
     }
+    private fun mapControlsVisible(s:AtlasState):Boolean {
+        val expandedRoute=s.tab=="Navigation" && !s.navigating && s.route!=null &&
+            s.destination!=null && !previewCollapsed && !landscape && !fullMap
+        return page==null && !expandedRoute && !(s.tab=="Trail" && trailExpanded && !landscape)
+    }
     private fun renderControls(s: AtlasState) {
         controls.removeAllViews()
         // Expanding Trail prioritises the library: map controls remain available
         // again on collapse and cannot overlap the expanded sheet.
-        controls.visibility=if(page!=null || (s.tab=="Trail" && trailExpanded && !landscape))
-            View.GONE else View.VISIBLE
+        // Map actions return when the route sheet collapses; the expanded
+        // options must leave their prices readable and tappable.
+        controls.visibility=if(mapControlsVisible(s))View.VISIBLE else View.GONE
         fun add(name:String,label:String,selected:Boolean=false,click:()->Unit){controls.addView(ui.iconButton(name,label,selected,click),LinearLayout.LayoutParams(ui.dp(48),ui.dp(48)).apply{topMargin=ui.dp(10)})}
         add("compass",if(atlasMap.headingUp)"Switch to north up" else "Switch to heading up"){atlasMap.compass();rebuildChrome()}
         add("layers","Map appearance: ${mapVisualLabel()}"){showMapLayersOptions()}

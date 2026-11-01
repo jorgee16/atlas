@@ -93,6 +93,26 @@ without changes to navigation fields. This is not full official-price coverage.
 
 ## Versioned offline updates
 
+### A28 directed fixed corridors, 2026-11-01
+
+The fixed catalog now has 34 records, revision 2026110101. Two independently
+published ViaLivre charges are associated with four original directed collection
+nodes. The generic `build-fixed-toll-corridors.py` consumes country review data
+and the previously reproduced Lisbon evidence; no country branch is added to
+the engine. It certifies clipped original geometry, accounts for collection
+points removed by graph simplification, rejects ambiguous progress, and requires
+every reviewed collection node to match exactly once. Existing A5 rows remain
+unchanged. Price data, physical evidence and route coverage remain separate.
+
+The deterministic generation pipeline first reproduces
+`tools/toll-binding-config/portugal-lisbon-reviewed.csv` with the free-corridor
+compiler, then builds the final APK country bindings with the fixed-corridor
+compiler. CI checks both stages against the installed graph. Android JNI runs
+the existing 29 cases plus 28 A28 cases, including both charged facilities over
+22 km in each direction and all vehicle classes. Unreviewed accesses still
+cannot receive a confirmed quote. Sources and limits are recorded in
+[`the A28 evidence review`](../data/toll-evidence/Portugal/2026-11-01/README.md).
+
 ### Official evidence intake, 2026-10-30
 
 The supplied Portugal bundle is imported by `tools/import-toll-evidence.py`,

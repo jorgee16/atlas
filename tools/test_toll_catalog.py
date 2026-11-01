@@ -100,7 +100,7 @@ class CatalogTests(unittest.TestCase):
             root=Path(temp)
             source=ROOT.parent/'android/native-app/src/main/assets/toll-charges/Portugal.csv'
             result=pack.package(source,root,'toll-charges')
-            self.assertEqual('fixed-crossing',result['scheme']);self.assertEqual(32,result['chargeCount'])
+            self.assertEqual('fixed-crossing',result['scheme']);self.assertEqual(34,result['chargeCount'])
             self.assertTrue(result['path'].startswith('/toll-charges/Portugal/'))
             storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-charges')
             self.assertEqual('toll-charges/Portugal/manifest.json',storage.writes[-1])
@@ -130,7 +130,7 @@ class DirectedSourceGeometryTests(unittest.TestCase):
 
 class ActivatedBindingIntegrityTests(unittest.TestCase):
     def test_apk_proof_matches_reviewed_report_and_actual_region_identity(self):
-        asset=ROOT.parent/'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
+        asset=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
         report=json.loads((ROOT.parent/'docs/data/a5-mainline-binding-audit-20261026.json').read_text())
         seed=ROOT/'toll-binding-config/portugal-a5-reviewed-seed.csv'
         extension=json.loads((ROOT.parent/'docs/data/portugal-lisbon-free-corridors-20261030.json').read_text())
@@ -154,6 +154,22 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
             self.assertIn('# graph.'+name+'='+digest,text)
         self.assertEqual({'brisa:0501'},{b['chargeId'] for b in report['bindings']})
         self.assertEqual({4},{b['graphRoadFlags'] for b in report['bindings']})
+
+    def test_fixed_corridor_extension_preserves_all_existing_evidence(self):
+        asset=ROOT.parent/'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
+        seed=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
+        report=json.loads((ROOT.parent/'docs/data/portugal-a28-binding-audit-20261101.json').read_text())
+        self.assertEqual(report['bindingsSha256'],hashlib.sha256(asset.read_bytes()).hexdigest())
+        self.assertEqual(report['seedSha256'],hashlib.sha256(seed.read_bytes()).hexdigest())
+        lines=asset.read_text().splitlines()
+        old=seed.read_text().splitlines()
+        old_edges={int(s.split(';')[1]) for s in old if s.startswith('coverage;')}
+        new_edges={int(s.split(';')[1]) for s in lines if s.startswith('coverage;')}
+        self.assertEqual(old_edges|{int(e) for e in report['edgeWitnesses']},new_edges)
+        old_events=[s for s in old if s.startswith('crossing;')]
+        self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
+        self.assertEqual(4,len(report['crossings']))
+        self.assertEqual({'vialivre:a28:angeiras','vialivre:a28:povoa'}, {e['chargeId'] for e in report['crossings']})
 
 class ExplicitFreePolicyTests(unittest.TestCase):
     def test_reference_policy_is_opt_in_and_source_bound(self):

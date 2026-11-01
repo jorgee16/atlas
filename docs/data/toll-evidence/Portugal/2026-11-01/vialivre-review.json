@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "currency": "EUR",
+  "year": 2026,
+  "revision": 2026110101,
+  "reviewed": true,
+  "reviewedOn": "2026-11-01",
+  "sourceUrl": "https://www.vialivre.pt/pt-pt/portagens/portagens-na-a28-2/",
+  "sourceSha256": "1c99f79668a7b87dfef9644e71a402c20bc0b615bbdd452daed374799628a32a",
+  "sourceModified": "2026-10-21T10:30:05Z",
+  "sourceRetrievedOn": "2026-10-28",
+  "chargeIds": {
+    "Angeiras": "vialivre:a28:angeiras",
+    "Póvoa": "vialivre:a28:povoa"
+  },
+  "scope": "Current public standard class 1–4 tariffs. No historical OSM fee tags, discounts, administrative fees or 2025 map prices."
+}
