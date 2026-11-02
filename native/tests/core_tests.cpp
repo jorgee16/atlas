@@ -129,6 +129,17 @@ int main(int argc, char **argv) {
           "pricing never changes path, distance or ETA");
     for(std::size_t i=0;i<originalPoints.size();++i)check(exact.points[i].lat==originalPoints[i].lat && exact.points[i].lon==originalPoints[i].lon,"pricing never changes geographic geometry");
     check(routeJson(exact).find("\"tollPricing\":\"exact\"")!=std::string::npos,"exact quote is serialized only after full evidence");
+    auto staleFlags=*tolled;staleFlags.tollCountry="Testland";staleFlags.tolledMeters=0;
+    for(auto &leg:staleFlags.legs)leg.road.flags&=~4u;
+    check(applyFixedTollCharges(toll,staleFlags,fixedFixture,fixedProof,identity),"proven collection overrides an old untolled flag for pricing");
+    check(routeJson(staleFlags).find("\"hasTolls\":true")!=std::string::npos,"known paid plaza is not shown as free");
+    staleFlags.tollVehicleClass=99;
+    check(!applyFixedTollCharges(toll,staleFlags,fixedFixture,fixedProof,identity),"unsupported collection class cannot be priced");
+    const auto missingPrice=routeJson(staleFlags);
+    check(staleFlags.tollRoads.empty(),"a previous class price must not remain in unavailable breakdowns");
+    check(missingPrice.find("\"tollPricing\":\"unavailable\"")!=std::string::npos &&
+          missingPrice.find("\"tollAmount\":null")!=std::string::npos &&
+          missingPrice.find("\"hasTolls\":true")!=std::string::npos,"known collection with unknown price never becomes zero/free");
     auto foreign=*tolled;foreign.tollCountry="Otherland";
     check(!applyFixedTollCharges(toll,foreign,fixedFixture,fixedProof,identity),"cross-country price application rejected");
     auto changedIdentity=identity;changedIdentity["edges.bin"]=std::string(64,'b');

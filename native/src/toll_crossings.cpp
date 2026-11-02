@@ -124,8 +124,15 @@ bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &pr
   // A reviewed collection point remains chargeable when an old graph marks
   // its outgoing piece toll=no. Pure free traversals retain their none state.
   if(route.tolledMeters<=0&&proof->chargeIds.empty())return false;
+  route.tollCrossingsVerified=!proof->chargeIds.empty();
   const auto total=prices.sumFixedCharges(proof->chargeIds,route.tollVehicleClass);
-  if(!total)return false;
+  if(!total) {
+    // Missing class/updated catalog cannot turn a proven collection point
+    // into a free journey merely because the old road flag says toll=no.
+    route.tollPriceComplete=false;route.tollPriceExact=false;
+    route.tollRoads.clear();route.pricedTollMeters=0;route.referenceTollMeters=0;
+    return false;
+  }
   std::vector<TollRoadCharge> charges;
   for(const auto &id:proof->chargeIds) {
     const auto info=prices.fixedChargeInfo(id);const auto amount=prices.fixedCharge(id,route.tollVehicleClass);

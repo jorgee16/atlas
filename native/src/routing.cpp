@@ -698,6 +698,7 @@ std::vector<std::string> principalRoadRefs(const Route &r,
 }
 std::string routeJson(const Route &r) {
   const auto monetaryScale=std::pow(10.0,r.tollFractionDigits);
+  const bool noTollEvidence=r.tolledMeters==0&&!r.tollCrossingsVerified;
   const auto roundedMoney=[&](double amount,double referenceMeters){
     const double units=std::round(amount*monetaryScale);
     return (referenceMeters>0&&amount>0?std::max(1.,units):units)/monetaryScale;
@@ -707,12 +708,12 @@ std::string routeJson(const Route &r) {
   s << "{\"destinationAccessMeters\":" << r.destinationAccessMeters
     << ",\"distanceMeters\":" << r.meters
     << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":";
-  if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
+  if(!noTollEvidence && !r.tollPriceComplete) s << "null";
   else s << roundedMoney(r.tollEuros,r.referenceTollMeters);
   // Currency-neutral result and itinerary order for future countries.
   // tollEuros remains for backward compatibility with older Android code.
   s << ",\"tollAmount\":";
-  if(r.tolledMeters>0 && !r.tollPriceComplete) s << "null";
+  if(!noTollEvidence && !r.tollPriceComplete) s << "null";
   else s << roundedMoney(r.tollEuros,r.referenceTollMeters);
   s << ",\"tollRoads\":[";
   for(std::size_t i=0;i<r.tollRoads.size();++i){
@@ -732,13 +733,13 @@ std::string routeJson(const Route &r) {
     s << '}';
   }
   s << ']';
-  s << ",\"tollPricing\":" << jsonString(r.tollPriceExact?"exact":r.tolledMeters==0?"none":
+  s << ",\"tollPricing\":" << jsonString(r.tollPriceExact?"exact":noTollEvidence?"none":
           r.tollPriceComplete?"estimate":"unavailable")
     << ",\"tolledMeters\":" << r.tolledMeters
     << ",\"pricedTollMeters\":" << r.pricedTollMeters
     << ",\"referenceTollMeters\":" << r.referenceTollMeters
-    << ",\"tollPricingConfidence\":" << jsonString(r.tollPriceExact?"exact":r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"low":"standard")
-    << ",\"tollEstimationMethod\":" << jsonString(r.tollPriceExact?"verified":r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":"section-road-average")
+    << ",\"tollPricingConfidence\":" << jsonString(r.tollPriceExact?"exact":noTollEvidence?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"low":"standard")
+    << ",\"tollEstimationMethod\":" << jsonString(r.tollPriceExact?"verified":noTollEvidence?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":"section-road-average")
     << ",\"tollCountry\":" << jsonString(r.tollCountry)
     << ",\"tollCurrency\":" << jsonString(r.tollCurrency)
     << ",\"tollTariffYear\":" << jsonString(r.tollYear)
@@ -783,7 +784,7 @@ std::string routeJson(const Route &r) {
     if (i) s << ',';
     s << jsonString(roadRefs[i]);
   }
-  const bool hasTolls = (r.tollPriceExact&&r.tollEuros>0)||std::any_of(r.legs.begin(),r.legs.end(),
+  const bool hasTolls = r.tollCrossingsVerified||std::any_of(r.legs.begin(),r.legs.end(),
       [](const Leg &leg) {return (leg.road.flags & 4) != 0;});
   s << "],\"hasTolls\":" << (hasTolls?"true":"false")
     << ",\"edgeIndexes\":[";

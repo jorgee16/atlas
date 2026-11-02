@@ -135,6 +135,7 @@ struct Route {
   double tolledMeters = 0, pricedTollMeters = 0, referenceTollMeters = 0;
   bool tollPriceComplete = true;
   bool tollPriceExact = false;
+  bool tollCrossingsVerified = false; // physical collection, independent of graph toll flags/prices
   std::string tollCountry, tollCurrency, tollYear, tollSource, tollVersion;
   int tollFractionDigits = 2, tollVehicleClass = 1;
   std::vector<int> tollVehicleClasses;

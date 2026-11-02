@@ -87,6 +87,13 @@ traversals. Broader correction of graph toll flags requires a separately
 validated data update; a confirmed positive charge is no longer displayed as
 free. A9 entry/exit pricing and full national collection matching remain open.
 
+Collection evidence is also independent of tariff availability. If an updated
+table omits a proven collection ID, or a vehicle class is unsupported, the
+result must retain `hasTolls=true`, `tollPricing=unavailable` and a null amount.
+It must not fall back to the old untolled flag and display zero. The route keeps
+a dedicated physical-evidence flag for this monetary distinction; graph toll
+meters, navigation geometry and progress are not fabricated.
+
 ## Regression evidence
 
 There are **91 real C++/JNI cases**: 29 A5/IKEA, 28 A28, and 34 A16. A16 adds
@@ -102,3 +109,9 @@ Its UI assertion also checks that floating map actions do not overlap the
 confirmed price in the expanded route-options sheet. GPS/camera smoke and
 existing C++/Kotlin suites remain mandatory. These are pricing and focused
 Android checks, not a claim of another full GPS trip or Via Verde comparison.
+
+Two additional real JNI failure cases remove Ranholas from the fixed table and
+request unsupported class 99. Both require unavailable/null, preserve the known
+collection and all navigation fields, and export
+`unavailable-crossing-quotes.json`. This makes 93 instrumented price cases,
+including the 91 ordinary route/class scenarios.

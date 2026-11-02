@@ -69,6 +69,16 @@ if a28_cases != set(a28_expected):
     raise ValueError('Missing A28 class/direction/after-gantry cases')
 if a16_cases != set(a16_expected):
     raise ValueError('Missing A16 class/direction/after-plaza/unflagged crossing cases')
+unavailable = json.loads((root / 'unavailable-crossing-quotes.json').read_text())
+if len(unavailable) != 2 or {r['id'] for r in unavailable} != {'ranholas-missing-tariff','ranholas-unsupported-class'}:
+    raise ValueError('Missing real JNI unavailable-price regressions')
+for case in unavailable:
+    before, after = case['before'], case['after']
+    if not after['hasTolls'] or after['tollPricing'] != 'unavailable' or after['tollAmount'] is not None:
+        raise ValueError('A missing tariff/class was represented as a free journey')
+    for field in ['points','edgeIndexes','maneuvers','distanceMeters','durationSeconds','visualProtectedPoints']:
+        if before.get(field) != after.get(field):
+            raise ValueError('Unavailable pricing changed navigation: '+field)
 route = json.loads((root / 'a5-preview-route.json').read_text())
 if route['tollPricing'] != 'exact' or abs(route['tollAmount'] - 1.60) > 1e-9 or route['distanceMeters']<30000:
     raise ValueError('Route preview differs from the validated class-1 quote')
@@ -80,4 +90,4 @@ if not ikea_png.is_file() or ikea_png.read_bytes()[:8]!=b'\x89PNG\r\n\x1a\n':
     raise ValueError('Missing full IKEA route Android screenshot')
 if 'confirmed' not in (root / 'a5-preview-text.txt').read_text():
     raise ValueError('Confirmed pricing is absent from the Android UI')
-print(f'Validated {len(cases)} actual Portugal JNI quotes and Android preview evidence')
+print(f'Validated {len(cases)+len(unavailable)} actual Portugal JNI price cases and Android preview evidence')

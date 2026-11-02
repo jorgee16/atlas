@@ -998,6 +998,7 @@ class NavigationGpsReplayTest {
         assertTrue("A5/IKEA, A28 and A16 carriageways, classes and after-gate starts are required",cases.size>=91)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
+        val unavailableResults=JSONArray()
         var previewCase:List<String>?=null
         val oldClass=appModel.vehicleClass
         val oldSource=appModel.mapSourceMode
@@ -1008,7 +1009,8 @@ class NavigationGpsReplayTest {
                 assertTrue("Real Portugal graph must be installed",File(directory,"nodes.bin").isFile)
                 core.graph(directory.path)
                 core.tariffs("Portugal",TollTableAssets.read(context,"Portugal"))
-                core.fixedTariffs("Portugal",TollTableAssets.repository(context,TollCatalogKind.FIXED_CROSSING).load("Portugal")!!.csv)
+                val fixedCsv=TollTableAssets.repository(context,TollCatalogKind.FIXED_CROSSING).load("Portugal")!!.csv
+                core.fixedTariffs("Portugal",fixedCsv)
                 for(row in cases) {
                     core.tollBindings("Portugal",directory.path,null)
                     val from=Coordinate(row[1].toDouble(),row[2].toDouble())
@@ -1066,6 +1068,31 @@ class NavigationGpsReplayTest {
                     }
                     results.put(JSONObject().put("id",row[0]).put("before",before).put("after",after))
                     File(output,"a5-native-quotes.json").writeText(results.toString(2))
+                    if(row[0]=="a16-unflagged-ranholas-class-1") {
+                        fun unavailableCase(id:String,csv:ByteArray,vehicle:Int) {
+                            core.tollBindings("Portugal",directory.path,null)
+                            core.fixedTariffs("Portugal",csv)
+                            val raw=JSONObject(core.route(from,to,false,false,0.0,vehicle))
+                            val evidence=TollBindingAssets.loadForRoute(context,"Portugal",directory,raw)
+                            assertTrue("Known collection evidence must load despite the stale untolled flag",
+                                core.tollBindings("Portugal",directory.path,evidence))
+                            val unknown=JSONObject(core.priceCurrentRoute())
+                            for(field in listOf("points","edgeIndexes","maneuvers","distanceMeters","durationSeconds","visualProtectedPoints"))
+                                assertEquals("Unknown pricing must preserve navigation: $id / $field",
+                                    raw.opt(field)?.toString(),unknown.opt(field)?.toString())
+                            assertTrue("Missing prices cannot hide a known collection point",unknown.getBoolean("hasTolls"))
+                            assertEquals("unavailable",unknown.getString("tollPricing"))
+                            assertTrue("Unknown amount must be null, not zero",unknown.isNull("tollAmount"))
+                            unavailableResults.put(JSONObject().put("id",id).put("before",raw).put("after",unknown))
+                            File(output,"unavailable-crossing-quotes.json").writeText(unavailableResults.toString(2))
+                        }
+                        val missing=fixedCsv.toString(Charsets.UTF_8).lineSequence()
+                            .filterNot { it.startsWith("ascendi:grande-lisboa:03;") }
+                            .joinToString("\n").toByteArray(Charsets.UTF_8)
+                        unavailableCase("ranholas-missing-tariff",missing,1)
+                        unavailableCase("ranholas-unsupported-class",fixedCsv,99)
+                        core.fixedTariffs("Portugal",fixedCsv)
+                    }
                 }
             }
             File(output,"a5-native-quotes.json").writeText(results.toString(2))
