@@ -7,13 +7,16 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 57:
+if len(cases) < 91:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 classes = set()
 ikea_cases = set()
 a28_expected = {r['id']: r for r in csv.DictReader((Path(__file__).resolve().parents[1] /
     'android/native-app/src/androidTest/assets/tolls/a28-mainline-cases.csv').open(), delimiter=';')}
 a28_cases = set()
+a16_expected = {r['id']: r for r in csv.DictReader((Path(__file__).resolve().parents[1] /
+    'android/native-app/src/androidTest/assets/tolls/a16-mainline-cases.csv').open(), delimiter=';')}
+a16_cases = set()
 for case in cases:
     before, after = case['before'], case['after']
     for field in ['points', 'edgeIndexes', 'maneuvers', 'distanceMeters',
@@ -46,6 +49,15 @@ for case in cases:
             if after['distanceMeters'] < 20000 or {r['chargeId'] for r in after['tollRoads']} != {'vialivre:a28:angeiras','vialivre:a28:povoa'}:
                 raise ValueError('Both A28 collection facilities and the real intervening route are required')
         a28_cases.add(case['id'])
+    elif case['id'].startswith('a16-'):
+        expected = a16_expected[case['id']]
+        if (after['tollPricing'] != expected['expectedPricing'] or abs(after['tollAmount'] - float(expected['expectedAmount'])) > 1e-9
+                or after['tollVehicleClass'] != int(expected['class'])):
+            raise ValueError('Incorrect A16 physical crossing quote: '+case['id'])
+        if case['id'].startswith('a16-unflagged-'):
+            if before['hasTolls'] or before['tolledMeters'] != 0 or not after['hasTolls'] or after['tollPricing'] != 'exact':
+                raise ValueError('A verified Ranholas crossing was hidden by a stale graph flag')
+        a16_cases.add(case['id'])
     elif after['tollPricing'] == 'exact':
         raise ValueError('Unreviewed city approaches were certified')
 if classes != {1, 2, 3, 4}:
@@ -55,6 +67,8 @@ if ikea_cases!=expected_ikea:
     raise ValueError('Missing full IKEA origins/classes')
 if a28_cases != set(a28_expected):
     raise ValueError('Missing A28 class/direction/after-gantry cases')
+if a16_cases != set(a16_expected):
+    raise ValueError('Missing A16 class/direction/after-plaza/unflagged crossing cases')
 route = json.loads((root / 'a5-preview-route.json').read_text())
 if route['tollPricing'] != 'exact' or abs(route['tollAmount'] - 1.60) > 1e-9 or route['distanceMeters']<30000:
     raise ValueError('Route preview differs from the validated class-1 quote')

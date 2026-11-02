@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "seed": "portugal-lisbon-reviewed.csv",
+  "corridors": [
+    {
+      "review": "portugal-a28.json",
+      "source": "portugal-a28.source.json"
+    },
+    {
+      "review": "portugal-a16.json",
+      "source": "portugal-a16.source.json"
+    }
+  ]
+}

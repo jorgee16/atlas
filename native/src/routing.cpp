@@ -732,13 +732,13 @@ std::string routeJson(const Route &r) {
     s << '}';
   }
   s << ']';
-  s << ",\"tollPricing\":" << jsonString(r.tolledMeters==0?"none":
-          r.tollPriceComplete?(r.tollPriceExact?"exact":"estimate"):"unavailable")
+  s << ",\"tollPricing\":" << jsonString(r.tollPriceExact?"exact":r.tolledMeters==0?"none":
+          r.tollPriceComplete?"estimate":"unavailable")
     << ",\"tolledMeters\":" << r.tolledMeters
     << ",\"pricedTollMeters\":" << r.pricedTollMeters
     << ",\"referenceTollMeters\":" << r.referenceTollMeters
-    << ",\"tollPricingConfidence\":" << jsonString(r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.tollPriceExact?"exact":r.referenceTollMeters>0?"low":"standard")
-    << ",\"tollEstimationMethod\":" << jsonString(r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":r.tollPriceExact?"verified":"section-road-average")
+    << ",\"tollPricingConfidence\":" << jsonString(r.tollPriceExact?"exact":r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"low":"standard")
+    << ",\"tollEstimationMethod\":" << jsonString(r.tollPriceExact?"verified":r.tolledMeters==0?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":"section-road-average")
     << ",\"tollCountry\":" << jsonString(r.tollCountry)
     << ",\"tollCurrency\":" << jsonString(r.tollCurrency)
     << ",\"tollTariffYear\":" << jsonString(r.tollYear)
@@ -783,7 +783,7 @@ std::string routeJson(const Route &r) {
     if (i) s << ',';
     s << jsonString(roadRefs[i]);
   }
-  const bool hasTolls = std::any_of(r.legs.begin(),r.legs.end(),
+  const bool hasTolls = (r.tollPriceExact&&r.tollEuros>0)||std::any_of(r.legs.begin(),r.legs.end(),
       [](const Leg &leg) {return (leg.road.flags & 4) != 0;});
   s << "],\"hasTolls\":" << (hasTolls?"true":"false")
     << ",\"edgeIndexes\":[";

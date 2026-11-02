@@ -21,6 +21,9 @@ if __name__=='__main__':
         if case['expectedPricing']=='exact':
             if not case['applied'] or after['tollPricing']!='exact' or abs(after['tollAmount']-case['expectedAmount'])>1e-9:
                 raise ValueError('Unverified/incorrect actual toll quote: '+json.dumps(case))
+        elif case['expectedPricing']=='none':
+            if case['applied'] or after['tollPricing']!='none' or after['tollAmount']!=0 or after['tolledMeters']!=0:
+                raise ValueError('A truly free traversal was charged')
         elif case['applied'] or after['tollPricing']=='exact':
             raise ValueError('Unreviewed approaches were incorrectly certified exact')
         print('REAL_TOLL_ROUTE='+json.dumps({'case':case['id'],'pricing':after['tollPricing'],'amount':after['tollAmount'],'vehicleClass':after['tollVehicleClass'],'meters':after['distanceMeters']}))

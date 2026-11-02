@@ -20,7 +20,7 @@ internal object TollBindingAssets {
                 input.readBytes().also { require(it.size in 1..2*1024*1024) }
             }
             val edges=route.optJSONArray("edgeIndexes") ?: return null
-            if(edges.length()==0 || !route.optBoolean("hasTolls"))return null
+            if(edges.length()==0)return null
             val coverage=bytes.toString(Charsets.UTF_8).lineSequence().filter { it.startsWith("coverage;") }
                 .mapNotNull { it.split(';').getOrNull(1)?.toIntOrNull() }.toHashSet()
             // This is only a cheap negative prefilter. JNI verifies all graph

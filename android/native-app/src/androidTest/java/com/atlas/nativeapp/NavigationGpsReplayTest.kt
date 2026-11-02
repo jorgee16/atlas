@@ -990,12 +990,12 @@ class NavigationGpsReplayTest {
      * route preview. The fixture contains graph-node endpoints, not fake routes. */
     @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
         output.listFiles()?.forEach { it.delete() }
-        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv").flatMap { name ->
+        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv").flatMap { name ->
             instrumentation.context.assets.open("tolls/$name")
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("A5/IKEA and A28 carriageways, classes and after-gate starts are required",cases.size>=57)
+        assertTrue("A5/IKEA, A28 and A16 carriageways, classes and after-gate starts are required",cases.size>=91)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         var previewCase:List<String>?=null
@@ -1039,6 +1039,15 @@ class NavigationGpsReplayTest {
                                 assertEquals(if(row[0].startsWith("a28-both-"))2 else 1,charges.length())
                                 for(i in 0 until charges.length())
                                     assertTrue(charges.getJSONObject(i).getString("chargeId").startsWith("vialivre:a28:"))
+                            } else if(row[0].startsWith("a16-")) {
+                                assertEquals(1,charges.length())
+                                assertTrue(charges.getJSONObject(0).getString("chargeId").startsWith("ascendi:grande-lisboa:"))
+                                if(row[0].startsWith("a16-unflagged-")) {
+                                    assertFalse("The graph fixture must reproduce the stale untolled flag",before.getBoolean("hasTolls"))
+                                    assertEquals(0.0,before.getDouble("tolledMeters"),1e-9)
+                                    assertTrue("A proven paid crossing cannot be presented as free",after.getBoolean("hasTolls"))
+                                    assertEquals("ascendi:grande-lisboa:03",charges.getJSONObject(0).getString("chargeId"))
+                                }
                             } else {
                                 assertEquals("One physical plaza, independent of lane",1,charges.length())
                                 assertEquals("brisa:0501",charges.getJSONObject(0).getString("chargeId"))
@@ -1046,6 +1055,11 @@ class NavigationGpsReplayTest {
                                 if(row[5]=="1" && (previewCase==null || row[0]=="ikea-loures-2645-575-south-class-1"))previewCase=row
                             }
                         }
+                    } else if(row[6]=="none") {
+                        assertFalse("A free traversal must retain its none state",accepted)
+                        assertEquals("none",after.getString("tollPricing"))
+                        assertEquals(0.0,after.getDouble("tollAmount"),1e-9)
+                        assertEquals(0.0,after.getDouble("tolledMeters"),1e-9)
                     } else {
                         assertFalse("Unreviewed city approaches cannot become exact",accepted)
                         assertNotEquals("exact",after.getString("tollPricing"))

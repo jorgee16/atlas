@@ -112,7 +112,7 @@ void TollCrossingMatcher::validateGraph(const Graph &graph) const {
 }
 bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
     const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph) {
-  if(prices.scheme!="fixed-crossing"||route.tolledMeters<=0||route.tollCountry!=prices.country)return false;
+  if(prices.scheme!="fixed-crossing"||route.tollCountry!=prices.country)return false;
   std::vector<TollEdgeTraversal> traversal;
   traversal.reserve(route.legs.size());
   for(const auto &leg:route.legs) {
@@ -121,6 +121,9 @@ bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &pr
   }
   const auto proof=matcher.match(actualGraph,prices.country,traversal);
   if(!proof||!proof->complete)return false;
+  // A reviewed collection point remains chargeable when an old graph marks
+  // its outgoing piece toll=no. Pure free traversals retain their none state.
+  if(route.tolledMeters<=0&&proof->chargeIds.empty())return false;
   const auto total=prices.sumFixedCharges(proof->chargeIds,route.tollVehicleClass);
   if(!total)return false;
   std::vector<TollRoadCharge> charges;

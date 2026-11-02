@@ -158,18 +158,22 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
     def test_fixed_corridor_extension_preserves_all_existing_evidence(self):
         asset=ROOT.parent/'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
         seed=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
-        report=json.loads((ROOT.parent/'docs/data/portugal-a28-binding-audit-20261101.json').read_text())
+        report=json.loads((ROOT.parent/'docs/data/portugal-fixed-binding-audit-20261101.json').read_text())
         self.assertEqual(report['bindingsSha256'],hashlib.sha256(asset.read_bytes()).hexdigest())
         self.assertEqual(report['seedSha256'],hashlib.sha256(seed.read_bytes()).hexdigest())
         lines=asset.read_text().splitlines()
         old=seed.read_text().splitlines()
         old_edges={int(s.split(';')[1]) for s in old if s.startswith('coverage;')}
         new_edges={int(s.split(';')[1]) for s in lines if s.startswith('coverage;')}
-        self.assertEqual(old_edges|{int(e) for e in report['edgeWitnesses']},new_edges)
+        self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage['edgeWitnesses']},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual(4,len(report['crossings']))
-        self.assertEqual({'vialivre:a28:angeiras','vialivre:a28:povoa'}, {e['chargeId'] for e in report['crossings']})
+        self.assertEqual([4,6],[len(s['crossings']) for s in report['stages']])
+        self.assertEqual({'vialivre:a28:angeiras','vialivre:a28:povoa'}, {e['chargeId'] for e in report['stages'][0]['crossings']})
+        self.assertEqual({'ascendi:grande-lisboa:01','ascendi:grande-lisboa:02','ascendi:grande-lisboa:03'},
+            {e['chargeId'] for e in report['stages'][1]['crossings']})
+        self.assertEqual(report['stages'][0]['bindingsSha256'],report['stages'][1]['seedSha256'])
+        self.assertEqual(report['bindingsSha256'],report['stages'][-1]['bindingsSha256'])
 
 class ExplicitFreePolicyTests(unittest.TestCase):
     def test_reference_policy_is_opt_in_and_source_bound(self):

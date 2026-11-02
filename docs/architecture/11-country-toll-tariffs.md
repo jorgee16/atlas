@@ -95,6 +95,13 @@ without changes to navigation fields. This is not full official-price coverage.
 
 ### A28 directed fixed corridors, 2026-11-01
 
+The subsequent A16 extension composes country review stages without adding a
+checked-in intermediate CSV per motorway. The final proof has 1,762 edges,
+14 crossings and 91 real C++/JNI cases. It also fixes a confirmed Ranholas
+charge hidden by an old untolled graph flag, changing monetary presentation
+only. See [the current fixed-corridor architecture](14-reviewed-fixed-toll-corridors.md)
+for the active scope, stale-flag regression and remaining route-selection limit.
+
 The fixed catalog now has 34 records, revision 2026110101. Two independently
 published ViaLivre charges are associated with four original directed collection
 nodes. The generic `build-fixed-toll-corridors.py` consumes country review data

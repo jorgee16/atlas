@@ -13,6 +13,7 @@ import math
 import mmap
 from pathlib import Path
 import struct
+import tempfile
 
 from toll_free_geometry import clipped_way_witness, _project, _projections
 
@@ -158,7 +159,7 @@ def generate(graph, review_path, source_path, seed_path):
     if set(matched) != set(gates) or len(matched) != len(gates):
         raise ValueError('Each physical gate must match exactly once: ' + str(matched))
     comments = [line for line in seed if line.startswith('#')]
-    comments += ['# fixedCorridorSourceSha256=' + free.digest(source_path), '# fixedCorridorReviewSha256=' + free.digest(review_path)]
+    comments += ['# reviewedCorridor.' + free.digest(review_path) + '=' + free.digest(source_path)]
     lines = comments + ['kind;edge;from;to;offsetMeters;edgeLengthMeters;chargeId']
     lines += ['coverage;' + str(edge) + ';;;;;' for edge in sorted(seed_edges | set(covered))]
     old_events = [line for line in seed if line.startswith('crossing;')]
@@ -172,17 +173,46 @@ def generate(graph, review_path, source_path, seed_path):
     return text, report
 
 
+def generate_catalog(graph, catalog_path):
+    """Compose reviewed corridors; keep each stage hash-bound and reproducible."""
+    catalog = json.loads(catalog_path.read_text())
+    if catalog['schemaVersion'] != 1 or not catalog['corridors']:
+        raise ValueError('Invalid country corridor catalog')
+    directory = catalog_path.parent
+    seed = directory / catalog['seed']
+    seed_hash = free.digest(seed)
+    stages = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for i, entry in enumerate(catalog['corridors']):
+            review, source = directory / entry['review'], directory / entry['source']
+            if json.loads(review.read_text())['country'] != catalog['country']:
+                raise ValueError('Cross-country corridor composition')
+            text, stage = generate(graph, review, source, seed)
+            stages.append(stage)
+            seed = Path(tmp) / (str(i) + '.csv')
+            seed.write_text(text)
+    report = dict(country=catalog['country'], catalogSha256=free.digest(catalog_path), seedSha256=seed_hash,
+        seedCoveredEdges=stages[0]['seedCoveredEdges'],
+        additionalCoveredEdges=sum(s['additionalCoveredEdges'] for s in stages),
+        bindingsSha256=stages[-1]['bindingsSha256'], stages=stages)
+    return text, report
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--graph', type=Path, required=True)
-    parser.add_argument('--review', type=Path, default=CONFIG / 'portugal-a28.json')
-    parser.add_argument('--source', type=Path, default=CONFIG / 'portugal-a28.source.json')
+    parser.add_argument('--catalog', type=Path, default=CONFIG / 'portugal-fixed-corridors.json')
+    parser.add_argument('--review', type=Path)
+    parser.add_argument('--source', type=Path)
     parser.add_argument('--seed', type=Path, default=CONFIG / 'portugal-lisbon-reviewed.csv')
     parser.add_argument('--output', type=Path, default=ROOT / 'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv')
     parser.add_argument('--report', type=Path, default=ROOT / 'dist/fixed-toll-corridors.json')
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    output, report = generate(args.graph, args.review, args.source, args.seed)
+    if bool(args.review) != bool(args.source):
+        parser.error('--review and --source are required together')
+    output, report = (generate(args.graph, args.review, args.source, args.seed) if args.review
+        else generate_catalog(args.graph, args.catalog))
     if args.check:
         if args.output.read_text() != output:
             raise ValueError('Shipped fixed bindings differ from verified geometry')
@@ -190,4 +220,4 @@ if __name__ == '__main__':
         args.output.write_text(output)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    print(json.dumps({k: v for k, v in report.items() if k != 'edgeWitnesses'}, ensure_ascii=False))
+    print(json.dumps({k: v for k, v in report.items() if k not in ('edgeWitnesses', 'stages')}, ensure_ascii=False))

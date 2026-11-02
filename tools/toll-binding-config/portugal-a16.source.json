@@ -1,0 +1,9359 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "sourceUrl": "https://api.openstreetmap.org/api/0.6/relation/7301331/full.json",
+  "retrievedOn": "2026-10-30",
+  "rawSha256": "0ccf2a538161b51eeba22b292208433d1f8041e6d0381940309a22a1d8d7e217",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; https://www.openstreetmap.org/copyright",
+  "ways": [
+    {
+      "id": 4812560,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 22,
+      "nodes": [
+        520526393,
+        3654947134,
+        3654947011,
+        3654946713,
+        3654946965,
+        3654946854,
+        3654947339
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 23837797,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 16,
+      "nodes": [
+        3655470931,
+        3655471203,
+        3655468505,
+        3655471183,
+        3655470979,
+        3655470887
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 23837801,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 13,
+      "nodes": [
+        3655471024,
+        3655471167,
+        3655471108,
+        3655468510,
+        3655470982,
+        3655471131,
+        3655471068,
+        890215215,
+        3655471165,
+        3655468518,
+        258313775,
+        3655470955,
+        3655471053,
+        3655471048,
+        258313776,
+        3655471206,
+        3655471055,
+        3655471010,
+        3655471171,
+        258313792,
+        3655471103,
+        3655471159,
+        3655471031
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 23837802,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 15,
+      "nodes": [
+        3655387033,
+        3655470876,
+        3655471172,
+        3655471162,
+        3655471024
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 23844618,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 17,
+      "nodes": [
+        258384627,
+        258384632
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt",
+        "width": "11.5"
+      }
+    },
+    {
+      "id": 23844625,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 14,
+      "nodes": [
+        258384730,
+        256348212,
+        10957871073,
+        256348214,
+        13009960949,
+        256348217,
+        1076986307
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing"
+      }
+    },
+    {
+      "id": 23844627,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 11,
+      "nodes": [
+        258384727,
+        258384730
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing"
+      }
+    },
+    {
+      "id": 26537038,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 17,
+      "nodes": [
+        30482063,
+        1935927633
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 26537039,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 15,
+      "nodes": [
+        30482115,
+        9514484758,
+        1935927567
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 39229866,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 18,
+      "nodes": [
+        12120753653,
+        1935927697,
+        30482117,
+        1935927804,
+        1935927689,
+        30482118,
+        1935927775,
+        1935927448,
+        30482121,
+        1935927621,
+        1935927552,
+        1935927474,
+        1935927808,
+        1935927603,
+        7627963049,
+        30482112,
+        30482113,
+        1935927543,
+        1935927709,
+        1935927681,
+        30482114,
+        1935927502,
+        1935927645,
+        1935927562,
+        9514484759,
+        1935927811,
+        1935927545,
+        30482115
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 39229867,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 9,
+      "nodes": [
+        30482128,
+        4182561883
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 41845651,
+      "timestamp": "2026-09-12T00:45:29Z",
+      "version": 21,
+      "nodes": [
+        2812434007,
+        2812433499,
+        2812433495,
+        2812433972,
+        517257242,
+        4192739508
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 41845655,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 11,
+      "nodes": [
+        517256484,
+        517256485
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "destination": "Cascais;Sintra;Agualva;Cacém",
+        "destination:ref": "A 16",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 41845719,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 6,
+      "nodes": [
+        517257355,
+        517257358
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 41845721,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 8,
+      "nodes": [
+        517257358,
+        10824104936,
+        517257362
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 41845822,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 18,
+      "nodes": [
+        13076514253,
+        13076514252,
+        9514441566,
+        9514441565,
+        30482061,
+        1806123055,
+        9514441564,
+        9514426358,
+        517323562,
+        504814312
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "no",
+        "turn:lanes": "through|through|through;right"
+      }
+    },
+    {
+      "id": 41845829,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 15,
+      "nodes": [
+        30482073,
+        517257643,
+        517274025
+      ],
+      "tags": {
+        "destination": "Lisboa;Cascais",
+        "destination:ref:to": "A 5",
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 41846037,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 13,
+      "nodes": [
+        3655387100,
+        3655388649,
+        3655387123,
+        3655387073,
+        3655388658,
+        3655388530,
+        3655388595,
+        3655388554,
+        3655388606,
+        3655387057,
+        3655388650,
+        3655388527,
+        3655388540,
+        3655388653,
+        3655387063,
+        3655387080,
+        3655388637,
+        3655387033
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 41846044,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 14,
+      "nodes": [
+        256348221,
+        3692593677,
+        3692593661,
+        3692593779,
+        3692593757,
+        3692593896,
+        3692593749,
+        3692593685,
+        3692593748,
+        3692593916,
+        3692593687,
+        3692592292,
+        3692592272,
+        3692593733,
+        3692592291,
+        3692592299,
+        3692593751,
+        3692593853,
+        3692592302,
+        3692592266
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30"
+      }
+    },
+    {
+      "id": 41846395,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 11,
+      "nodes": [
+        30482083,
+        4182561884
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 42066742,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 23,
+      "nodes": [
+        30482109,
+        517324126,
+        9514484752,
+        1806123039,
+        1806123043,
+        1935927754,
+        9514484751,
+        1935927484,
+        517323292,
+        9514484748,
+        517323516,
+        9514484747,
+        9514484746,
+        3802585733,
+        9514484745,
+        30482111,
+        9514484744,
+        9514484743,
+        9514484742,
+        9514484741,
+        517322604
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 42067025,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        522463981,
+        10824104937,
+        522463986
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 42067045,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        522463986,
+        522463989
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 42067050,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 18,
+      "nodes": [
+        522463989,
+        13009960950,
+        522463992,
+        13009960951,
+        10734941134,
+        10734941135,
+        522463994,
+        10734941136,
+        10734941137,
+        522463997,
+        2276085772,
+        2276085800,
+        522464000,
+        10824104979,
+        10824104978,
+        522464005,
+        10824104977,
+        2276085786
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 42136284,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 10,
+      "nodes": [
+        517257521,
+        9514441596,
+        9514441595,
+        1369470953,
+        9514441594,
+        9514441593,
+        9514441591,
+        9514441592,
+        524167408,
+        524167391,
+        30482059
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 75281924,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 12,
+      "nodes": [
+        3654976671,
+        520526495,
+        3654977135,
+        3654976649,
+        3654976703,
+        3654976654,
+        520526504,
+        3654976652,
+        520526515,
+        3654976694,
+        520526523,
+        3654977102,
+        3654977104,
+        520526557,
+        520526571,
+        2454047332,
+        520526583,
+        2454047338,
+        520526597,
+        520526605,
+        2454047337,
+        520526623,
+        913929999
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 75281927,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 11,
+      "nodes": [
+        889028787,
+        4341522257,
+        4341522231,
+        13076514251
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 77693495,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        913929999,
+        913930201
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 77693536,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 11,
+      "nodes": [
+        913930201,
+        2454047336,
+        520526637,
+        4341522132,
+        4341522187,
+        4341522235,
+        520526653,
+        3161974079
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 77693550,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        913930178,
+        913929509
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 77923468,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 10,
+      "nodes": [
+        3692592273,
+        3692592305,
+        3692592308,
+        3692592310,
+        3692593791,
+        3692593783
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 77923470,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 11,
+      "nodes": [
+        3692593783,
+        3692611733,
+        3692611777,
+        3692593842,
+        3692611814,
+        3692611811,
+        258384353,
+        258384354,
+        1076986326
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 77923475,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 9,
+      "nodes": [
+        3692611740,
+        3692610524,
+        3692611779,
+        3692610478,
+        3692610482,
+        3692611728,
+        256348221
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing"
+      }
+    },
+    {
+      "id": 92879671,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        1076986307,
+        1076986311
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing"
+      }
+    },
+    {
+      "id": 92879672,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        1076986311,
+        890263984
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30"
+      }
+    },
+    {
+      "id": 92879673,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 9,
+      "nodes": [
+        1076986326,
+        1076986327
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 92879674,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 9,
+      "nodes": [
+        1076986327,
+        12812455000,
+        12812454999,
+        258384356,
+        10957871077,
+        10957871076,
+        258384358,
+        10957871075,
+        258384359,
+        10957871074,
+        258384627
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt",
+        "width": "11.5"
+      }
+    },
+    {
+      "id": 94950489,
+      "timestamp": "2025-12-06T12:44:50Z",
+      "version": 9,
+      "nodes": [
+        30482103,
+        13357445878,
+        1935927500,
+        1935927710,
+        1935927556,
+        1935927769,
+        1935927805,
+        30482064,
+        1935927716,
+        1935927797,
+        1935927730,
+        30482065,
+        30482085,
+        1935927548,
+        1935927722,
+        1935927568,
+        1935927655,
+        30482066,
+        1935927563,
+        1935927569,
+        30482093,
+        1935927630,
+        1935927770,
+        30482067,
+        1935927739,
+        1935927749,
+        1935927665,
+        1935927490,
+        1935927687,
+        30482068,
+        1935927648,
+        1935927789,
+        30482069,
+        469970319,
+        30482095,
+        1935927547,
+        1935927530,
+        1935927540,
+        1935927752,
+        30482071
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 159001166,
+      "timestamp": "2026-09-12T00:44:15Z",
+      "version": 9,
+      "nodes": [
+        1711103502,
+        1581019391
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159001172,
+      "timestamp": "2026-09-12T00:44:29Z",
+      "version": 13,
+      "nodes": [
+        1711103495,
+        3807693917,
+        9514915773,
+        522464080,
+        9514915768,
+        9514915771,
+        522464081
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159001173,
+      "timestamp": "2026-09-12T00:44:39Z",
+      "version": 8,
+      "nodes": [
+        1581020107,
+        1711103502
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159001176,
+      "timestamp": "2026-09-12T00:44:33Z",
+      "version": 8,
+      "nodes": [
+        1711103492,
+        1711103495
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159854422,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        524127019,
+        1719487367,
+        517257298,
+        1719487634,
+        517257301,
+        524131979,
+        517257304,
+        1719487595,
+        517257310,
+        517257313,
+        13009960956,
+        13009960955,
+        10819355050,
+        517257317
+      ],
+      "tags": {
+        "foot": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159854445,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 14,
+      "nodes": [
+        1719487654,
+        13009960958,
+        13009960959,
+        522464036,
+        13009960957,
+        6196126408,
+        522464039,
+        10824108549,
+        522464042,
+        10824108550,
+        522464047,
+        6196126378,
+        1937037564,
+        1937037755,
+        522464050,
+        1937038017,
+        3807693914,
+        9517015745,
+        524111681
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "9.04",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 183225923,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        1935927633,
+        290854015,
+        1935927527,
+        1935927611
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 183225924,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        1935927567,
+        1935927564
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 183225928,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 9,
+      "nodes": [
+        1935927719,
+        9514484754,
+        9514484753,
+        30482109
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 183225931,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        1935927611,
+        1935927613,
+        30482103
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 218367278,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        2276085804,
+        522464008,
+        10819355047,
+        522464010,
+        10819355044,
+        522464013
+      ],
+      "tags": {
+        "foot": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 218367279,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        2276085786,
+        2276085804
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 218367280,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        2276085795,
+        2276085803
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 218367283,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        2276085803,
+        10824104980,
+        517257335,
+        2276085783,
+        517257338,
+        10824104913,
+        2276085775,
+        10824104914,
+        10734941140,
+        517257342,
+        10824104915,
+        10734941139,
+        10824104916,
+        517257345,
+        10824104917,
+        10734941142,
+        517257353,
+        13009960952,
+        10734941141,
+        517257355
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 223700977,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        2327126741,
+        13076514243
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 223700978,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        2325894559,
+        2325894561,
+        2325894563,
+        2325894565,
+        2325894567,
+        2325894569,
+        2325894570,
+        2325894571,
+        2325894572,
+        2325894573,
+        2327002934
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 223700979,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        2325894557,
+        2327143698,
+        2325894559
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "5",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 223838755,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        517257369,
+        2327002703,
+        2327002707,
+        2327002710,
+        2327002712,
+        2327002714,
+        2327002716,
+        2327002718,
+        2327002721,
+        2327002723,
+        2327002725,
+        2327002727,
+        2327002729,
+        2327002731,
+        2327002733,
+        2327002735,
+        2327002738,
+        2327002740,
+        2325894846,
+        2327002741,
+        2327002744,
+        2327002746,
+        2327002749,
+        2327002751,
+        2327002753,
+        2327002755,
+        2327002757,
+        2327002759,
+        2276967330,
+        2327002761,
+        2327002763,
+        2327002765,
+        2327002767,
+        2327002769,
+        2327002771,
+        2327002783,
+        2327002785,
+        2327002787,
+        2327002789,
+        2327002791,
+        2327002793,
+        2327002795,
+        2327002797,
+        2327002800,
+        2327002802,
+        2327002804,
+        2327002806,
+        2327002808,
+        2327002810,
+        2327002812,
+        2327002814,
+        2327002816,
+        2327002820,
+        2327002822,
+        2327002824,
+        2327002826,
+        2327002828,
+        2327002830,
+        2327002833,
+        2327002835,
+        2327002837,
+        2327002839,
+        2327002841,
+        2327002843,
+        2327002845,
+        2327002847,
+        2327002849,
+        2327002851,
+        2327002853,
+        2327002855,
+        2327002857,
+        2327002859,
+        2327002861,
+        2327002863,
+        2327002865,
+        2327002867,
+        2327002869
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 223838756,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        2327002891,
+        2327002893
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|slight_right"
+      }
+    },
+    {
+      "id": 223838757,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        2327002889,
+        2327143697,
+        2327002891
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "5",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 223838759,
+      "timestamp": "2025-10-10T20:40:40Z",
+      "version": 5,
+      "nodes": [
+        2327002934,
+        13207597630,
+        2325894574
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16"
+      }
+    },
+    {
+      "id": 223838760,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        13076514240,
+        2325894603,
+        2325894605,
+        2325894607,
+        2325894610,
+        2325894612,
+        2325894614,
+        2325894616,
+        2325894618,
+        2325894621,
+        2325894624,
+        2325894626,
+        2325894629,
+        2325894631,
+        2325894633,
+        2325894635,
+        2325894637,
+        2325894639,
+        2325894641,
+        2325894643,
+        2325894645,
+        2325894647,
+        2325894649,
+        2325894652,
+        2325894654,
+        2325894656,
+        2325894658,
+        2325894660,
+        2325894662,
+        2325894664,
+        2325894666,
+        2325894667,
+        2325894720,
+        2325894668,
+        2325894669,
+        2325894671,
+        2325894672,
+        2325894675,
+        2325894677,
+        2325894680,
+        2325894682,
+        2325894684,
+        2325894691,
+        2325894693,
+        2325894695,
+        2325894697,
+        2325894699,
+        2325894701,
+        2325894703,
+        2325894705,
+        2325894707,
+        2325894709,
+        2325894711,
+        2325894713,
+        2325894715,
+        522463978
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 223838761,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        2327002869,
+        2327002936
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16"
+      }
+    },
+    {
+      "id": 223838762,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 3,
+      "nodes": [
+        2327002936,
+        2327002871,
+        2327002873,
+        2327002875,
+        2327002877,
+        2327002879,
+        2327002881,
+        2327002883,
+        2327002885,
+        2327002887,
+        2327002889
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 223855391,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 6,
+      "nodes": [
+        2327126682,
+        2327126761,
+        2327126680,
+        9514801182,
+        9514801183,
+        9514801185,
+        9514801184,
+        9514801186,
+        9514801187,
+        2327126613,
+        9514801188,
+        2327126616,
+        9514801189,
+        2327126618,
+        9514801190,
+        2327126620,
+        2327126622,
+        9514801191,
+        9514801193,
+        9514441604,
+        9514801192,
+        2327126624,
+        2327126630,
+        9514801194,
+        9514441603,
+        2327126633,
+        9514801195,
+        2327126635,
+        517257513,
+        9514441602,
+        2327126639,
+        2327126641,
+        9514441601,
+        2327126644,
+        2327126646,
+        9514441600,
+        2327126648,
+        9514441599,
+        2327126650,
+        2327126654,
+        9514441598,
+        2327126655,
+        9514441597,
+        2327126767
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 223855392,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        2327126681,
+        2327126682
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 223855393,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        2327126683,
+        2327126741
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 223855397,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 9,
+      "nodes": [
+        522463892,
+        2327126765,
+        9514475526,
+        2327126769
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 223855398,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        2327126767,
+        2327126768,
+        2327126766,
+        517257521
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 223855399,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        9514801173,
+        9514801174,
+        2327126664,
+        9514801175,
+        2327126667,
+        2327126668,
+        2327126670,
+        2327126671,
+        2327126672,
+        2327126673,
+        2327126674,
+        2327126675,
+        2327126676,
+        9514801176
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 223863447,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        517257362,
+        2327186626,
+        2327186619,
+        2327186620,
+        2327186618,
+        2327186627,
+        517257369
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16"
+      }
+    },
+    {
+      "id": 223863448,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        522463978,
+        2327186628,
+        2327186622,
+        2327186623,
+        2327186624,
+        2327186625,
+        522463981
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16"
+      }
+    },
+    {
+      "id": 232429242,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 9,
+      "nodes": [
+        3655471031,
+        3655471052,
+        3655470909,
+        3655470962,
+        3655471067,
+        3655471152,
+        3655470961,
+        3655470908,
+        3655470919,
+        3865951910
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 232429244,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        890263984,
+        1935068597,
+        3692611812,
+        3692611833,
+        3692610521,
+        3692610473,
+        3692611740
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30"
+      }
+    },
+    {
+      "id": 232429245,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 11,
+      "nodes": [
+        3659067303,
+        3671780382,
+        3671780383,
+        891141750,
+        3865951911
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "width": "14.5"
+      }
+    },
+    {
+      "id": 237515281,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 6,
+      "nodes": [
+        3654976646,
+        3654977033,
+        3654976690,
+        3654977193,
+        3654976691,
+        3654977036,
+        3654976716,
+        3654976686,
+        3654977148,
+        3654977153,
+        3654977078,
+        3654977037,
+        3654977049,
+        3654977040,
+        3654976665,
+        3654977175,
+        3654977038,
+        2454013767,
+        3654976696,
+        3654977144,
+        3654977142,
+        3654976707,
+        3654976678,
+        3654977063,
+        3670108571
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276657730,
+      "timestamp": "2026-09-12T00:42:44Z",
+      "version": 10,
+      "nodes": [
+        524123037,
+        9516324070,
+        9516324072,
+        3807693916,
+        9516324073,
+        517257262,
+        9516324074,
+        9517015768,
+        9516324078,
+        9516324079,
+        9517015767,
+        3088362538,
+        9517015766,
+        9517015765,
+        9517015764,
+        3807693915,
+        9517015763,
+        517257268,
+        9517015762,
+        9517015761,
+        9517015760,
+        9517015759,
+        9517015758,
+        9517015757,
+        9517015756,
+        517257271
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight:signed": "no",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276657731,
+      "timestamp": "2026-09-12T00:43:18Z",
+      "version": 9,
+      "nodes": [
+        522464078,
+        9517033161,
+        2812439022,
+        9517033162,
+        1581019585
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276657851,
+      "timestamp": "2026-09-12T00:43:50Z",
+      "version": 5,
+      "nodes": [
+        1581019391,
+        4192739520
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276657852,
+      "timestamp": "2026-09-12T00:43:45Z",
+      "version": 5,
+      "nodes": [
+        1581019585,
+        4192739521
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 276657853,
+      "timestamp": "2026-09-12T00:45:12Z",
+      "version": 9,
+      "nodes": [
+        1581019577,
+        9514915772,
+        3807693919,
+        13076514238
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "80",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276657854,
+      "timestamp": "2026-09-12T00:44:56Z",
+      "version": 7,
+      "nodes": [
+        1581019623,
+        3807693918,
+        9514970435,
+        517257255
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no",
+        "destination": "Cascais;Sintra;Agualva-Cacém",
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276658126,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 10,
+      "nodes": [
+        524111681,
+        9517015746,
+        9517015747,
+        9517015748,
+        9517015749,
+        9517015750,
+        522464056,
+        9517015751,
+        522464059,
+        9517015752,
+        9517015753,
+        522464071,
+        9517033156,
+        9517033157,
+        522464074,
+        9517033158,
+        2812439024,
+        9516324077,
+        9516324076,
+        9517033160,
+        4192739525
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "5.53",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 276658127,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 6,
+      "nodes": [
+        517257271,
+        517257275,
+        9517015754,
+        1937037894,
+        517257279,
+        1937037750,
+        1937038214,
+        6196126431,
+        517257288,
+        6196126400,
+        517257289,
+        10824108548,
+        517257290,
+        10824108547,
+        10824108546,
+        517257291,
+        10824108545,
+        1719487362
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 310738415,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        3161974082,
+        3161974080
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 310738416,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        3161974079,
+        3161974081
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 310738418,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        3161974080,
+        4341522234,
+        517257664,
+        4341522123,
+        4341522173,
+        517257667,
+        2454047333,
+        913930178
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 310738419,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        13076514244,
+        4341522093,
+        13076514246,
+        4341522226,
+        520526731,
+        13076514250
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 362752933,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 3,
+      "nodes": [
+        3670108580,
+        3654977174,
+        889028789
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 362752936,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        3670108571,
+        517257713,
+        3670108580
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "5.26",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 362752940,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        3654947339,
+        3654947333,
+        3654947013,
+        3654946724,
+        3654947130,
+        3654947151,
+        3654946912,
+        3654947207,
+        3654947196,
+        3654976693,
+        3654976642,
+        3654976673,
+        3654977191,
+        3654977046,
+        3654976662,
+        3654976680,
+        3654977099,
+        3654977082,
+        3654977195,
+        3654976669,
+        3654977178,
+        3654976639,
+        3654977060,
+        3654976635,
+        3654977130,
+        3654977156,
+        3654977113,
+        3654976671
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "7.27",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 365211748,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 7,
+      "nodes": [
+        3692592290,
+        3692593755,
+        3692593787,
+        3692593826,
+        3692593931,
+        3692593903,
+        3692593953,
+        3692593806,
+        3692593738,
+        3692593861,
+        888463952,
+        3692593898,
+        3692593626,
+        3692593679,
+        3692593644,
+        3692593864,
+        3692593914,
+        3692593857,
+        3692593689,
+        3692593700,
+        3692593734,
+        3692593697,
+        3692593771,
+        3692593688,
+        3692593652,
+        3692592323,
+        3692593648,
+        3692593811,
+        3692592276,
+        3692593888,
+        3692593691,
+        3692593745,
+        3692593710,
+        3692592307,
+        3692593838,
+        3692592273
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 383348510,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        3865951909,
+        3655471087,
+        3655470833,
+        3655471198,
+        3655471158,
+        3655470861,
+        258384727
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 383348515,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 6,
+      "nodes": [
+        3865951910,
+        3865951909
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 383348519,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        3865951911,
+        258384570,
+        3865951912
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "4",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "width": "14.5"
+      }
+    },
+    {
+      "id": 383348523,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        12812454996,
+        3655484345,
+        3655484339,
+        3655484344,
+        3655484347,
+        3655470871,
+        3655470922,
+        258384343,
+        3655470972,
+        3655470959,
+        890250881,
+        3655471194,
+        3655471186,
+        3655471160,
+        3655471041,
+        3655471147,
+        258313758,
+        3655470878,
+        3655471139,
+        3655470893,
+        3655471121,
+        3655468513,
+        3655470974,
+        3655471109,
+        3655468506,
+        3655470901,
+        3655470931
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "width": "11.5"
+      }
+    },
+    {
+      "id": 400579505,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 3,
+      "nodes": [
+        913929509,
+        4031272336,
+        4031272308,
+        4031272335,
+        4031272305,
+        4031272338,
+        4031272369,
+        4031272348,
+        4031272355,
+        4031272345,
+        4031272366,
+        4031272361,
+        4031272373,
+        4031272344,
+        4031272358,
+        4031272367,
+        4031272314,
+        4031272339,
+        4031272320,
+        4031272356,
+        4031272342,
+        4031272351,
+        4031272372,
+        4031272365,
+        4031272337,
+        4031272331,
+        4031272347,
+        4031272350,
+        4031272322,
+        4031272321,
+        4031272357,
+        4031272379,
+        4031272329,
+        4031272332,
+        4031272326,
+        4031272349,
+        4031272377,
+        4031272364,
+        4031272324,
+        4031272315,
+        4031272354,
+        4031272330,
+        4031272307,
+        4031272333,
+        4031272352,
+        4031272341,
+        4031272370,
+        4031272376,
+        4031272343,
+        4031272340,
+        4031272346,
+        4031272319,
+        3654976681,
+        4031272323,
+        3654977140,
+        3654977182,
+        517257697,
+        3654977123,
+        3654977042,
+        3654977111,
+        3654977066,
+        3654977112,
+        3654976646
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 417767540,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        4182561872,
+        4182561874
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 417767553,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        4341522182,
+        30482129,
+        30482130
+      ],
+      "tags": {
+        "destination": "Lisboa;Sintra;Norte",
+        "destination:ref:to": "A 9",
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 417767569,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        4182561874,
+        469969984
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 417767585,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        4182561884,
+        30482073
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 417767599,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 6,
+      "nodes": [
+        4182561873,
+        889028787
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 417767610,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        469970704,
+        4182561872
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 417767623,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 3,
+      "nodes": [
+        30482071,
+        1935927682
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no",
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 417767637,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        517274025,
+        889028784
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 417767648,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        30482080,
+        30482083
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through;right"
+      }
+    },
+    {
+      "id": 417767663,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        469969984,
+        30482128
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 417767675,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 8,
+      "nodes": [
+        4182561883,
+        10827393927
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 417767692,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 5,
+      "nodes": [
+        889028784,
+        4182561873
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 417767704,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        1935927682,
+        30482081,
+        1935927538
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 417767718,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        1935927538,
+        1935927732,
+        30482080
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 417767729,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        30482130,
+        469969959,
+        1935927782,
+        469971270
+      ],
+      "tags": {
+        "destination": "Lisboa;Sintra;Norte",
+        "destination:ref:to": "A 9",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 419132383,
+      "timestamp": "2026-09-12T00:46:15Z",
+      "version": 6,
+      "nodes": [
+        4192712932,
+        517256487
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132384,
+      "timestamp": "2026-09-12T00:45:47Z",
+      "version": 4,
+      "nodes": [
+        1935980300,
+        2812434009
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132385,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 4,
+      "nodes": [
+        1957635593,
+        4192712929
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132386,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 4,
+      "nodes": [
+        4192712929,
+        1957635576
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132387,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 4,
+      "nodes": [
+        4192712931,
+        1957635593
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132390,
+      "timestamp": "2026-09-12T00:45:44Z",
+      "version": 4,
+      "nodes": [
+        1935980391,
+        1935980300
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132394,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        1935980338,
+        4192712930,
+        4192712932
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132395,
+      "timestamp": "2026-09-12T00:46:04Z",
+      "version": 5,
+      "nodes": [
+        517256487,
+        2812434007
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "8",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132396,
+      "timestamp": "2026-09-12T00:45:51Z",
+      "version": 5,
+      "nodes": [
+        2812434009,
+        522464085
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132398,
+      "timestamp": "2026-09-12T00:46:11Z",
+      "version": 7,
+      "nodes": [
+        522464085,
+        4192712931
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419132424,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 6,
+      "nodes": [
+        517256485,
+        9514935656,
+        1935980338
+      ],
+      "tags": {
+        "destination": "Cascais;Sintra;Agualva;Cacém",
+        "destination:ref": "A 16",
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135542,
+      "timestamp": "2026-09-12T00:45:22Z",
+      "version": 4,
+      "nodes": [
+        4192739509,
+        1581019577
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "lit": "yes",
+        "maxspeed": "80",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135543,
+      "timestamp": "2026-09-12T00:45:20Z",
+      "version": 3,
+      "nodes": [
+        522464081,
+        4192739509
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135544,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        4192739525,
+        522464078
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135545,
+      "timestamp": "2026-09-12T00:43:22Z",
+      "version": 4,
+      "nodes": [
+        4192739522,
+        524123037
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 419135546,
+      "timestamp": "2026-09-12T00:44:27Z",
+      "version": 5,
+      "nodes": [
+        517257255,
+        9514970437,
+        9514970436,
+        9516311975
+      ],
+      "tags": {
+        "destination": "Cascais;Sintra;Agualva-Cacém",
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135547,
+      "timestamp": "2026-09-12T00:44:02Z",
+      "version": 6,
+      "nodes": [
+        4192739521,
+        4192739519
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "level": "1",
+        "lit": "yes",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 419135548,
+      "timestamp": "2026-09-12T00:44:10Z",
+      "version": 6,
+      "nodes": [
+        522464079,
+        9516311978,
+        9514915775,
+        9516311979,
+        1711103492
+      ],
+      "tags": {
+        "destination": "Lisboa;CREL",
+        "destination:ref:to": "A 9",
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135549,
+      "timestamp": "2026-09-12T00:43:42Z",
+      "version": 3,
+      "nodes": [
+        517257258,
+        4192739522
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135550,
+      "timestamp": "2026-09-12T00:44:07Z",
+      "version": 5,
+      "nodes": [
+        4192739519,
+        4192739517
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "lit": "yes",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 419135552,
+      "timestamp": "2026-09-12T00:45:09Z",
+      "version": 3,
+      "nodes": [
+        4192739510,
+        1581019623
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 419135553,
+      "timestamp": "2026-09-12T00:45:06Z",
+      "version": 4,
+      "nodes": [
+        4192739508,
+        9514970438,
+        517257251
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 419135554,
+      "timestamp": "2026-09-12T00:44:02Z",
+      "version": 4,
+      "nodes": [
+        4192739520,
+        517257258
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "level": "1",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 419135555,
+      "timestamp": "2026-09-12T00:45:17Z",
+      "version": 3,
+      "nodes": [
+        517257251,
+        4192739510
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 419135556,
+      "timestamp": "2016-05-18T02:50:16Z",
+      "version": 1,
+      "nodes": [
+        4192739517,
+        522464079
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no|no",
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 436279195,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        1369470981,
+        9514475521,
+        9514475522,
+        30482105,
+        9514475523,
+        9514475524,
+        522463884,
+        9514475525,
+        9514475520,
+        13076514254
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 693481902,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        522464013,
+        6510696055,
+        10819355048,
+        6510696053,
+        6510696056
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 693481903,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        6510696056,
+        522464014,
+        13009960954,
+        1719487706,
+        1719487701,
+        1719487383,
+        522464018,
+        1719487419,
+        522464021,
+        524110118,
+        522464026,
+        522464030,
+        522464033,
+        1719487379,
+        1719487489,
+        13076514239
+      ],
+      "tags": {
+        "foot": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 693481904,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        517257322,
+        10819355045,
+        10819355046,
+        517257328,
+        517257331,
+        2276085795
+      ],
+      "tags": {
+        "foot": "no",
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 693481905,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 4,
+      "nodes": [
+        517257317,
+        10819355049,
+        13009960953,
+        6510696052,
+        517257322
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 953267886,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        3692592319,
+        4317291598,
+        13076514249
+      ],
+      "tags": {
+        "bicycle": "no",
+        "destination": "Sintra;Alcabideche;Norte",
+        "destination:ref": "A 16",
+        "destination:ref:to": "A 9",
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1032650740,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 4,
+      "nodes": [
+        1935927564,
+        9514484757,
+        1935927719
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 1032874547,
+      "timestamp": "2026-09-12T00:44:42Z",
+      "version": 3,
+      "nodes": [
+        9516311975,
+        1581020107
+      ],
+      "tags": {
+        "bridge": "yes",
+        "destination": "Cascais;Sintra;Agualva-Cacém",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "yes",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1164196869,
+      "timestamp": "2025-07-18T22:30:57Z",
+      "version": 3,
+      "nodes": [
+        10827393927,
+        4341522182
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 1275025321,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 4,
+      "nodes": [
+        3692592284,
+        3692592260,
+        3692593643,
+        3692593764,
+        3692592290
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1275025328,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        3692592266,
+        3692593863,
+        3692593646,
+        3692593819,
+        3692593874,
+        3692593899,
+        3692593830,
+        3692593629,
+        3692593628,
+        3692593641,
+        3692593673,
+        3692593822,
+        3692593868,
+        3692592293,
+        3692593920,
+        3692592313,
+        3692592281,
+        3692592254
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30"
+      }
+    },
+    {
+      "id": 1308867738,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 5,
+      "nodes": [
+        469971270,
+        1935927612,
+        30482122,
+        1935927714,
+        1935927660,
+        1935927686,
+        30482124,
+        469969964,
+        1935927505,
+        30482125,
+        1935927466,
+        469969966,
+        1935927807,
+        1935927624,
+        30482116,
+        1935927553,
+        1935927695,
+        7627962998,
+        1935927617,
+        12120753653
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "5.81",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 1331113369,
+      "timestamp": "2025-10-10T20:22:52Z",
+      "version": 4,
+      "nodes": [
+        3655470903,
+        3655471107,
+        3655471062,
+        3655470852,
+        3654947053,
+        258313634,
+        520526370
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1331113370,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        520526370,
+        520526378,
+        3654947337,
+        3654947357,
+        520526386,
+        13076514248,
+        13076514247,
+        520526404,
+        3654946752,
+        3654947195,
+        520526393
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1331113373,
+      "timestamp": "2025-10-10T20:22:52Z",
+      "version": 5,
+      "nodes": [
+        3654977071,
+        3654977185,
+        3654977062,
+        517257720,
+        3654977121,
+        3654976660
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1331113374,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 4,
+      "nodes": [
+        3654976660,
+        3654977181,
+        3654977164,
+        3654977180,
+        3654977186,
+        517257722,
+        3654977088,
+        3655387071,
+        258313556,
+        258313557,
+        3655388592,
+        3655387098,
+        3655388591,
+        3655387100
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1383860747,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        3671780384,
+        3659067303
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "width": "14.5"
+      }
+    },
+    {
+      "id": 1383860748,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        3865951912,
+        3655484334,
+        3655484341,
+        12812454996
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no",
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "width": "11.5"
+      }
+    },
+    {
+      "id": 1383860749,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        12812454997,
+        3671780381,
+        3671780384
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "placement": "middle_of:2",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "turn:lanes": "through|through|through;right|",
+        "width": "14.5"
+      }
+    },
+    {
+      "id": 1383860750,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 3,
+      "nodes": [
+        258384632,
+        12812454997
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lane_markings": "yes",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "width": "11.5"
+      }
+    },
+    {
+      "id": 1422902996,
+      "timestamp": "2026-09-12T00:45:37Z",
+      "version": 2,
+      "nodes": [
+        13076514238,
+        522464084,
+        2812433074,
+        1935980391
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422902997,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514239,
+        1719487654
+      ],
+      "tags": {
+        "foot": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422902998,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        2325894574,
+        2325894575,
+        2325894576,
+        2325894577,
+        2325894578,
+        2325894579,
+        2325894580,
+        2325894581,
+        2325894582,
+        10786798344,
+        2325894583,
+        2325894584,
+        2325894585,
+        2325894586,
+        2325894587,
+        2325894588,
+        2325894589,
+        2325894590,
+        2325894592,
+        2325894593,
+        2325894595,
+        2325894597,
+        2325894599,
+        2325894601,
+        13076514240
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1422902999,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514241,
+        2325894557
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903000,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514242,
+        13076514241
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "80",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903001,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514243,
+        13076514242
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903002,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514245,
+        520526668,
+        13076514244
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "80",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903003,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        3161974081,
+        13076514245
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903004,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514249,
+        4317291601,
+        3692592284
+      ],
+      "tags": {
+        "bicycle": "no",
+        "destination": "Sintra;Alcabideche;Norte",
+        "destination:ref": "A 16",
+        "destination:ref:to": "A 9",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "source": "bing",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1422903005,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        3692592254,
+        6516497178,
+        3692592286
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30"
+      }
+    },
+    {
+      "id": 1422903006,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514250,
+        4341522221,
+        520526744,
+        469970704
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "6",
+        "maxspeed": "60",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903007,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514251,
+        517257647,
+        517257651
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903008,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        517257651,
+        4341522256,
+        517257655,
+        3161974082
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903009,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        504814312,
+        1935927565,
+        9514426359,
+        1935927574,
+        1806123044,
+        1806123041,
+        1935927809,
+        1935927609,
+        438186085,
+        30482063
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 1422903010,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        30482059,
+        9514441573,
+        9514441572,
+        9514441571,
+        1369470967,
+        9514441570,
+        9514441569,
+        30482060,
+        517323176,
+        3802585736,
+        3802585734,
+        13076514253
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "toll": "no",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 1422903011,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        2327002893,
+        2327126681
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1422903012,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        1719487362,
+        517257292,
+        1719487450,
+        517257293,
+        524127019
+      ],
+      "tags": {
+        "foot": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "toll": "yes",
+        "turn:lanes": "through|through|slight_right"
+      }
+    },
+    {
+      "id": 1422903013,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        9514801176,
+        2327126678,
+        9514801177,
+        2327126677,
+        3701043274,
+        9514801178,
+        9514801179,
+        9514801180,
+        9514801181,
+        3701043275,
+        3701043277,
+        2327126679,
+        2327126684,
+        2327126683
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 1422903014,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        2327126769,
+        2327126657,
+        2327126762,
+        9514801172,
+        9514801171,
+        2327126659,
+        9514801173
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "120",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "|||merge_to_left"
+      }
+    },
+    {
+      "id": 1422903015,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        524079320,
+        9514475527,
+        522463892
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 1422903016,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        13076514254,
+        522463890,
+        9514475528,
+        524079320
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16",
+        "surface": "asphalt",
+        "toll": "no"
+      }
+    },
+    {
+      "id": 1422903018,
+      "timestamp": "2025-08-17T19:45:47Z",
+      "version": 1,
+      "nodes": [
+        517322604,
+        1935796888,
+        30482110,
+        1935796708,
+        9514484740,
+        1935796867,
+        13076514255,
+        1369470981
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt",
+        "toll": "no",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 1437006423,
+      "timestamp": "2025-10-10T20:22:52Z",
+      "version": 1,
+      "nodes": [
+        889028789,
+        3654977089,
+        517257717,
+        524169956,
+        3654977071
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1437006424,
+      "timestamp": "2025-10-10T20:22:52Z",
+      "version": 1,
+      "nodes": [
+        3655470887,
+        3655471190,
+        3655470837,
+        3655471193,
+        3655471060,
+        3655471054,
+        3655470973,
+        3655470868,
+        3655471116,
+        3655470900,
+        3655470949,
+        3655471021,
+        3655471187,
+        3655471119,
+        3655470913,
+        3655470848,
+        3655471009,
+        3655470903
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "name": "Circular Exterior da Área Metropolitana de Lisboa",
+        "oneway": "yes",
+        "ref": "A 16;IC 30",
+        "surface": "asphalt"
+      }
+    }
+  ],
+  "coordinates": {
+    "30482059": [
+      38.8080586,
+      -9.3582026
+    ],
+    "30482060": [
+      38.8066174,
+      -9.3593479
+    ],
+    "30482061": [
+      38.8048663,
+      -9.3615991
+    ],
+    "30482063": [
+      38.8018069,
+      -9.3636417
+    ],
+    "30482064": [
+      38.7988176,
+      -9.3632861
+    ],
+    "30482065": [
+      38.797722,
+      -9.3626091
+    ],
+    "30482066": [
+      38.7925765,
+      -9.3585261
+    ],
+    "30482067": [
+      38.7905788,
+      -9.357973
+    ],
+    "30482068": [
+      38.7885571,
+      -9.3582586
+    ],
+    "30482069": [
+      38.7877656,
+      -9.3586212
+    ],
+    "30482071": [
+      38.7857345,
+      -9.3603775
+    ],
+    "30482073": [
+      38.7824727,
+      -9.3627561
+    ],
+    "30482080": [
+      38.7837686,
+      -9.3621255
+    ],
+    "30482081": [
+      38.7850119,
+      -9.3611341
+    ],
+    "30482083": [
+      38.7830435,
+      -9.3625295
+    ],
+    "30482085": [
+      38.7950341,
+      -9.3603733
+    ],
+    "30482093": [
+      38.79177,
+      -9.3581911
+    ],
+    "30482095": [
+      38.787258,
+      -9.3589382
+    ],
+    "30482103": [
+      38.8002506,
+      -9.3636938
+    ],
+    "30482105": [
+      38.80812,
+      -9.3579277
+    ],
+    "30482109": [
+      38.8018174,
+      -9.3634012
+    ],
+    "30482110": [
+      38.8061861,
+      -9.3595074
+    ],
+    "30482111": [
+      38.8049388,
+      -9.3611973
+    ],
+    "30482112": [
+      38.7951161,
+      -9.3601755
+    ],
+    "30482113": [
+      38.7978545,
+      -9.3624639
+    ],
+    "30482114": [
+      38.7987774,
+      -9.3630516
+    ],
+    "30482115": [
+      38.8002804,
+      -9.3634937
+    ],
+    "30482116": [
+      38.7887711,
+      -9.3579602
+    ],
+    "30482117": [
+      38.7904937,
+      -9.3577435
+    ],
+    "30482118": [
+      38.7916431,
+      -9.3579163
+    ],
+    "30482121": [
+      38.7924021,
+      -9.3582045
+    ],
+    "30482122": [
+      38.7852177,
+      -9.3606194
+    ],
+    "30482124": [
+      38.7866577,
+      -9.3591515
+    ],
+    "30482125": [
+      38.7874304,
+      -9.3585728
+    ],
+    "30482128": [
+      38.7823839,
+      -9.362566
+    ],
+    "30482129": [
+      38.7832321,
+      -9.362177
+    ],
+    "30482130": [
+      38.7836795,
+      -9.3619335
+    ],
+    "256348212": [
+      38.7375036,
+      -9.4085514
+    ],
+    "256348214": [
+      38.7371686,
+      -9.4094221
+    ],
+    "256348217": [
+      38.7366297,
+      -9.4104346
+    ],
+    "256348221": [
+      38.7328764,
+      -9.4155674
+    ],
+    "258313556": [
+      38.744998,
+      -9.3922586
+    ],
+    "258313557": [
+      38.7444204,
+      -9.3925527
+    ],
+    "258313634": [
+      38.7451714,
+      -9.3919957
+    ],
+    "258313758": [
+      38.7408684,
+      -9.3958764
+    ],
+    "258313775": [
+      38.7409319,
+      -9.3960539
+    ],
+    "258313776": [
+      38.7407044,
+      -9.3966283
+    ],
+    "258313792": [
+      38.7404531,
+      -9.3974212
+    ],
+    "258384343": [
+      38.7402904,
+      -9.3975558
+    ],
+    "258384353": [
+      38.7336732,
+      -9.4147169
+    ],
+    "258384354": [
+      38.734112,
+      -9.4141536
+    ],
+    "258384356": [
+      38.7365229,
+      -9.410362
+    ],
+    "258384358": [
+      38.7370633,
+      -9.4093259
+    ],
+    "258384359": [
+      38.7373749,
+      -9.4085204
+    ],
+    "258384570": [
+      38.73858,
+      -9.40403
+    ],
+    "258384627": [
+      38.737557,
+      -9.407911
+    ],
+    "258384632": [
+      38.7376414,
+      -9.4075996
+    ],
+    "258384727": [
+      38.7378009,
+      -9.407492
+    ],
+    "258384730": [
+      38.7377187,
+      -9.4078031
+    ],
+    "290854015": [
+      38.8010938,
+      -9.3637352
+    ],
+    "438186085": [
+      38.8018709,
+      -9.363622
+    ],
+    "469969959": [
+      38.7842179,
+      -9.3615695
+    ],
+    "469969964": [
+      38.7869366,
+      -9.3589321
+    ],
+    "469969966": [
+      38.7879308,
+      -9.3583079
+    ],
+    "469969984": [
+      38.7807394,
+      -9.3632409
+    ],
+    "469970319": [
+      38.7874936,
+      -9.3587748
+    ],
+    "469970704": [
+      38.778564,
+      -9.3641154
+    ],
+    "469971270": [
+      38.7845547,
+      -9.3612807
+    ],
+    "504814312": [
+      38.8037173,
+      -9.3627573
+    ],
+    "517256484": [
+      38.7699012,
+      -9.2712315
+    ],
+    "517256485": [
+      38.7699897,
+      -9.2714771
+    ],
+    "517256487": [
+      38.7713042,
+      -9.2749489
+    ],
+    "517257242": [
+      38.7725035,
+      -9.2783733
+    ],
+    "517257251": [
+      38.772769,
+      -9.279042
+    ],
+    "517257255": [
+      38.7734729,
+      -9.2800952
+    ],
+    "517257258": [
+      38.7758012,
+      -9.2825367
+    ],
+    "517257262": [
+      38.7780159,
+      -9.2853969
+    ],
+    "517257268": [
+      38.7809585,
+      -9.2889988
+    ],
+    "517257271": [
+      38.7824265,
+      -9.2918848
+    ],
+    "517257275": [
+      38.7825912,
+      -9.2921423
+    ],
+    "517257279": [
+      38.7834155,
+      -9.2932267
+    ],
+    "517257288": [
+      38.7860456,
+      -9.2961771
+    ],
+    "517257289": [
+      38.7876504,
+      -9.2981083
+    ],
+    "517257290": [
+      38.7880041,
+      -9.2986818
+    ],
+    "517257291": [
+      38.7885001,
+      -9.2997144
+    ],
+    "517257292": [
+      38.7890273,
+      -9.3014685
+    ],
+    "517257293": [
+      38.7894131,
+      -9.3027447
+    ],
+    "517257298": [
+      38.7901842,
+      -9.3043194
+    ],
+    "517257301": [
+      38.7909138,
+      -9.3052278
+    ],
+    "517257304": [
+      38.7915913,
+      -9.3057964
+    ],
+    "517257310": [
+      38.7920592,
+      -9.3060737
+    ],
+    "517257313": [
+      38.7922997,
+      -9.3061919
+    ],
+    "517257317": [
+      38.7934218,
+      -9.3065545
+    ],
+    "517257322": [
+      38.7945187,
+      -9.3065927
+    ],
+    "517257328": [
+      38.7953454,
+      -9.3064472
+    ],
+    "517257331": [
+      38.7959934,
+      -9.3061852
+    ],
+    "517257335": [
+      38.7975234,
+      -9.3054042
+    ],
+    "517257338": [
+      38.7982128,
+      -9.3052151
+    ],
+    "517257342": [
+      38.7993301,
+      -9.3052434
+    ],
+    "517257345": [
+      38.8002817,
+      -9.305581
+    ],
+    "517257353": [
+      38.8010453,
+      -9.3061165
+    ],
+    "517257355": [
+      38.8016263,
+      -9.3067384
+    ],
+    "517257358": [
+      38.8018415,
+      -9.3070559
+    ],
+    "517257362": [
+      38.802269,
+      -9.3078379
+    ],
+    "517257369": [
+      38.8031623,
+      -9.3097712
+    ],
+    "517257513": [
+      38.8137532,
+      -9.3539374
+    ],
+    "517257521": [
+      38.8114481,
+      -9.3565538
+    ],
+    "517257643": [
+      38.7815359,
+      -9.3631549
+    ],
+    "517257647": [
+      38.7772943,
+      -9.3650186
+    ],
+    "517257651": [
+      38.7768608,
+      -9.3652206
+    ],
+    "517257655": [
+      38.7752909,
+      -9.3660714
+    ],
+    "517257664": [
+      38.7732119,
+      -9.3673371
+    ],
+    "517257667": [
+      38.770981,
+      -9.36889
+    ],
+    "517257697": [
+      38.7572956,
+      -9.3857086
+    ],
+    "517257713": [
+      38.7529597,
+      -9.3885451
+    ],
+    "517257717": [
+      38.7506842,
+      -9.3894368
+    ],
+    "517257720": [
+      38.748537,
+      -9.3904396
+    ],
+    "517257722": [
+      38.7457956,
+      -9.391851
+    ],
+    "517274025": [
+      38.7812755,
+      -9.3632686
+    ],
+    "517322604": [
+      38.805799,
+      -9.3600132
+    ],
+    "517323176": [
+      38.8065607,
+      -9.3594085
+    ],
+    "517323292": [
+      38.8035921,
+      -9.3625788
+    ],
+    "517323516": [
+      38.8038817,
+      -9.3623335
+    ],
+    "517323562": [
+      38.8039182,
+      -9.3625695
+    ],
+    "517324126": [
+      38.8020164,
+      -9.3633461
+    ],
+    "520526370": [
+      38.7457547,
+      -9.3917001
+    ],
+    "520526378": [
+      38.7463126,
+      -9.3914146
+    ],
+    "520526386": [
+      38.74797,
+      -9.3905593
+    ],
+    "520526393": [
+      38.7498828,
+      -9.3896241
+    ],
+    "520526404": [
+      38.749122,
+      -9.3899821
+    ],
+    "520526495": [
+      38.7571308,
+      -9.385724
+    ],
+    "520526504": [
+      38.7580051,
+      -9.3840419
+    ],
+    "520526515": [
+      38.7586135,
+      -9.3828282
+    ],
+    "520526523": [
+      38.7592329,
+      -9.3816008
+    ],
+    "520526557": [
+      38.7600504,
+      -9.3799735
+    ],
+    "520526571": [
+      38.7606386,
+      -9.378895
+    ],
+    "520526583": [
+      38.7616327,
+      -9.3774504
+    ],
+    "520526597": [
+      38.7626703,
+      -9.3762796
+    ],
+    "520526605": [
+      38.7636413,
+      -9.3753102
+    ],
+    "520526623": [
+      38.7675074,
+      -9.3715666
+    ],
+    "520526637": [
+      38.770935,
+      -9.3687438
+    ],
+    "520526653": [
+      38.77377,
+      -9.3668007
+    ],
+    "520526668": [
+      38.7752593,
+      -9.3659118
+    ],
+    "520526731": [
+      38.7770626,
+      -9.3649229
+    ],
+    "520526744": [
+      38.7782223,
+      -9.3642765
+    ],
+    "522463884": [
+      38.8088036,
+      -9.3575966
+    ],
+    "522463890": [
+      38.810436,
+      -9.3568873
+    ],
+    "522463892": [
+      38.8113073,
+      -9.3563494
+    ],
+    "522463978": [
+      38.8029831,
+      -9.3099218
+    ],
+    "522463981": [
+      38.8020803,
+      -9.3079856
+    ],
+    "522463986": [
+      38.8017257,
+      -9.3073198
+    ],
+    "522463989": [
+      38.8015076,
+      -9.3069891
+    ],
+    "522463992": [
+      38.8009513,
+      -9.306371
+    ],
+    "522463994": [
+      38.7997917,
+      -9.3056538
+    ],
+    "522463997": [
+      38.7987882,
+      -9.305467
+    ],
+    "522464000": [
+      38.7981665,
+      -9.3055178
+    ],
+    "522464005": [
+      38.7975363,
+      -9.3057113
+    ],
+    "522464008": [
+      38.7957743,
+      -9.3065447
+    ],
+    "522464010": [
+      38.7951092,
+      -9.3067769
+    ],
+    "522464013": [
+      38.7945381,
+      -9.3068758
+    ],
+    "522464014": [
+      38.7933421,
+      -9.3068498
+    ],
+    "522464018": [
+      38.7912134,
+      -9.3058101
+    ],
+    "522464021": [
+      38.7905739,
+      -9.305196
+    ],
+    "522464026": [
+      38.7899048,
+      -9.3043184
+    ],
+    "522464030": [
+      38.7896449,
+      -9.3038509
+    ],
+    "522464033": [
+      38.7894566,
+      -9.3034509
+    ],
+    "522464036": [
+      38.7884353,
+      -9.3001038
+    ],
+    "522464039": [
+      38.7879126,
+      -9.298921
+    ],
+    "522464042": [
+      38.7875852,
+      -9.2983792
+    ],
+    "522464047": [
+      38.786725,
+      -9.2973191
+    ],
+    "522464050": [
+      38.7832732,
+      -9.29335
+    ],
+    "522464056": [
+      38.7808355,
+      -9.289168
+    ],
+    "522464059": [
+      38.7805338,
+      -9.2886454
+    ],
+    "522464071": [
+      38.7800135,
+      -9.2878891
+    ],
+    "522464074": [
+      38.7794724,
+      -9.28726
+    ],
+    "522464078": [
+      38.7773021,
+      -9.2848248
+    ],
+    "522464079": [
+      38.7756108,
+      -9.2826295
+    ],
+    "522464080": [
+      38.7733292,
+      -9.2802383
+    ],
+    "522464081": [
+      38.7727034,
+      -9.2793597
+    ],
+    "522464084": [
+      38.7722363,
+      -9.2784056
+    ],
+    "522464085": [
+      38.7710606,
+      -9.2751133
+    ],
+    "524079320": [
+      38.8108821,
+      -9.3566135
+    ],
+    "524110118": [
+      38.7900485,
+      -9.3045359
+    ],
+    "524111681": [
+      38.7820124,
+      -9.2915592
+    ],
+    "524123037": [
+      38.7768766,
+      -9.2839358
+    ],
+    "524127019": [
+      38.7896081,
+      -9.3032212
+    ],
+    "524131979": [
+      38.7913634,
+      -9.3056137
+    ],
+    "524167391": [
+      38.8083631,
+      -9.3580172
+    ],
+    "524167408": [
+      38.8085973,
+      -9.3579049
+    ],
+    "524169956": [
+      38.7503239,
+      -9.3895938
+    ],
+    "888463952": [
+      38.7301719,
+      -9.4155237
+    ],
+    "889028784": [
+      38.7809156,
+      -9.3634257
+    ],
+    "889028787": [
+      38.7786576,
+      -9.3644471
+    ],
+    "889028789": [
+      38.7514141,
+      -9.3891329
+    ],
+    "890215215": [
+      38.7411193,
+      -9.3956661
+    ],
+    "890250881": [
+      38.7405618,
+      -9.3966593
+    ],
+    "890263984": [
+      38.7342018,
+      -9.4143174
+    ],
+    "891141750": [
+      38.7384888,
+      -9.4043878
+    ],
+    "913929509": [
+      38.7684639,
+      -9.3709176
+    ],
+    "913929999": [
+      38.7683909,
+      -9.3707891
+    ],
+    "913930178": [
+      38.7686554,
+      -9.3707538
+    ],
+    "913930201": [
+      38.7685833,
+      -9.3706302
+    ],
+    "1076986307": [
+      38.7349841,
+      -9.413076
+    ],
+    "1076986311": [
+      38.7346753,
+      -9.4135591
+    ],
+    "1076986326": [
+      38.7347075,
+      -9.4132325
+    ],
+    "1076986327": [
+      38.7350246,
+      -9.4127263
+    ],
+    "1369470953": [
+      38.8108541,
+      -9.3568846
+    ],
+    "1369470967": [
+      38.8072564,
+      -9.3587565
+    ],
+    "1369470981": [
+      38.8072746,
+      -9.3584502
+    ],
+    "1581019391": [
+      38.7752009,
+      -9.2818463
+    ],
+    "1581019577": [
+      38.7726003,
+      -9.2791901
+    ],
+    "1581019585": [
+      38.7761259,
+      -9.283267
+    ],
+    "1581019623": [
+      38.7729814,
+      -9.2794105
+    ],
+    "1581020107": [
+      38.7747729,
+      -9.2813994
+    ],
+    "1711103492": [
+      38.7747359,
+      -9.2816561
+    ],
+    "1711103495": [
+      38.7743869,
+      -9.2813178
+    ],
+    "1711103502": [
+      38.774904,
+      -9.2815275
+    ],
+    "1719487362": [
+      38.7887786,
+      -9.3005086
+    ],
+    "1719487367": [
+      38.7898867,
+      -9.3038095
+    ],
+    "1719487379": [
+      38.7892738,
+      -9.3029649
+    ],
+    "1719487383": [
+      38.7915714,
+      -9.3060815
+    ],
+    "1719487419": [
+      38.7908566,
+      -9.3054952
+    ],
+    "1719487450": [
+      38.7892083,
+      -9.3021316
+    ],
+    "1719487489": [
+      38.7891168,
+      -9.3024522
+    ],
+    "1719487595": [
+      38.7917628,
+      -9.3058944
+    ],
+    "1719487634": [
+      38.7905522,
+      -9.3048059
+    ],
+    "1719487654": [
+      38.7888641,
+      -9.3015482
+    ],
+    "1719487701": [
+      38.7920076,
+      -9.3063528
+    ],
+    "1719487706": [
+      38.7925621,
+      -9.3066082
+    ],
+    "1806123039": [
+      38.802423,
+      -9.3632095
+    ],
+    "1806123041": [
+      38.8025523,
+      -9.3633924
+    ],
+    "1806123043": [
+      38.8026146,
+      -9.3631293
+    ],
+    "1806123044": [
+      38.802786,
+      -9.3632877
+    ],
+    "1806123055": [
+      38.8046661,
+      -9.3618368
+    ],
+    "1935068597": [
+      38.7337935,
+      -9.4148031
+    ],
+    "1935796708": [
+      38.8063703,
+      -9.359295
+    ],
+    "1935796867": [
+      38.8067673,
+      -9.3588871
+    ],
+    "1935796888": [
+      38.8060136,
+      -9.3597223
+    ],
+    "1935927448": [
+      38.7920826,
+      -9.3580747
+    ],
+    "1935927466": [
+      38.7876852,
+      -9.3584312
+    ],
+    "1935927474": [
+      38.7932303,
+      -9.3586655
+    ],
+    "1935927484": [
+      38.8032471,
+      -9.3628
+    ],
+    "1935927490": [
+      38.7892513,
+      -9.3580573
+    ],
+    "1935927500": [
+      38.7999612,
+      -9.3636458
+    ],
+    "1935927502": [
+      38.798959,
+      -9.3631336
+    ],
+    "1935927505": [
+      38.7871584,
+      -9.3587589
+    ],
+    "1935927527": [
+      38.8008642,
+      -9.3637409
+    ],
+    "1935927530": [
+      38.786813,
+      -9.3592904
+    ],
+    "1935927538": [
+      38.784524,
+      -9.3615854
+    ],
+    "1935927540": [
+      38.7865125,
+      -9.3595502
+    ],
+    "1935927543": [
+      38.7980857,
+      -9.3626369
+    ],
+    "1935927545": [
+      38.8000763,
+      -9.3634633
+    ],
+    "1935927547": [
+      38.7870536,
+      -9.3590891
+    ],
+    "1935927548": [
+      38.7938028,
+      -9.3593502
+    ],
+    "1935927552": [
+      38.79296,
+      -9.3584934
+    ],
+    "1935927553": [
+      38.789205,
+      -9.3578539
+    ],
+    "1935927556": [
+      38.799618,
+      -9.3635778
+    ],
+    "1935927562": [
+      38.7993881,
+      -9.3632964
+    ],
+    "1935927563": [
+      38.7923297,
+      -9.3584066
+    ],
+    "1935927564": [
+      38.8008386,
+      -9.3635229
+    ],
+    "1935927565": [
+      38.8034679,
+      -9.3629096
+    ],
+    "1935927567": [
+      38.8006249,
+      -9.3635191
+    ],
+    "1935927568": [
+      38.7931811,
+      -9.3588846
+    ],
+    "1935927569": [
+      38.7920742,
+      -9.3582984
+    ],
+    "1935927574": [
+      38.803018,
+      -9.3631707
+    ],
+    "1935927603": [
+      38.7939041,
+      -9.3591755
+    ],
+    "1935927609": [
+      38.8021346,
+      -9.3635345
+    ],
+    "1935927611": [
+      38.8006081,
+      -9.3637375
+    ],
+    "1935927612": [
+      38.7849211,
+      -9.3609408
+    ],
+    "1935927613": [
+      38.8003959,
+      -9.363721
+    ],
+    "1935927617": [
+      38.7899494,
+      -9.3577488
+    ],
+    "1935927621": [
+      38.7927654,
+      -9.3583823
+    ],
+    "1935927624": [
+      38.7885317,
+      -9.3580479
+    ],
+    "1935927630": [
+      38.791263,
+      -9.3580723
+    ],
+    "1935927633": [
+      38.8013151,
+      -9.3637164
+    ],
+    "1935927645": [
+      38.7991704,
+      -9.3632218
+    ],
+    "1935927648": [
+      38.7881669,
+      -9.3584191
+    ],
+    "1935927655": [
+      38.7928559,
+      -9.3586874
+    ],
+    "1935927660": [
+      38.7861547,
+      -9.3596323
+    ],
+    "1935927665": [
+      38.7896358,
+      -9.3580072
+    ],
+    "1935927681": [
+      38.7985259,
+      -9.3629012
+    ],
+    "1935927682": [
+      38.7853097,
+      -9.3608349
+    ],
+    "1935927686": [
+      38.7864473,
+      -9.3593467
+    ],
+    "1935927687": [
+      38.7888918,
+      -9.3581499
+    ],
+    "1935927689": [
+      38.7911311,
+      -9.3578184
+    ],
+    "1935927695": [
+      38.789388,
+      -9.3578159
+    ],
+    "1935927697": [
+      38.7901888,
+      -9.3577374
+    ],
+    "1935927709": [
+      38.7983402,
+      -9.3627939
+    ],
+    "1935927710": [
+      38.7997515,
+      -9.3636042
+    ],
+    "1935927714": [
+      38.7856202,
+      -9.3601758
+    ],
+    "1935927716": [
+      38.7985431,
+      -9.3631603
+    ],
+    "1935927719": [
+      38.8013274,
+      -9.3634891
+    ],
+    "1935927722": [
+      38.7934662,
+      -9.3590862
+    ],
+    "1935927730": [
+      38.7979998,
+      -9.3628258
+    ],
+    "1935927732": [
+      38.7842771,
+      -9.3617563
+    ],
+    "1935927739": [
+      38.790262,
+      -9.3579641
+    ],
+    "1935927749": [
+      38.789972,
+      -9.3579755
+    ],
+    "1935927752": [
+      38.7861999,
+      -9.359884
+    ],
+    "1935927754": [
+      38.8028018,
+      -9.3630372
+    ],
+    "1935927769": [
+      38.7994059,
+      -9.3635113
+    ],
+    "1935927770": [
+      38.7908492,
+      -9.3579988
+    ],
+    "1935927775": [
+      38.7918818,
+      -9.357993
+    ],
+    "1935927782": [
+      38.7843684,
+      -9.3614394
+    ],
+    "1935927789": [
+      38.7879988,
+      -9.3584957
+    ],
+    "1935927797": [
+      38.7983054,
+      -9.3630199
+    ],
+    "1935927804": [
+      38.790794,
+      -9.3577643
+    ],
+    "1935927805": [
+      38.7992024,
+      -9.3634449
+    ],
+    "1935927807": [
+      38.7882069,
+      -9.3581753
+    ],
+    "1935927808": [
+      38.7936041,
+      -9.358931
+    ],
+    "1935927809": [
+      38.8023536,
+      -9.3634654
+    ],
+    "1935927811": [
+      38.7998343,
+      -9.3634191
+    ],
+    "1935980300": [
+      38.7716632,
+      -9.2768422
+    ],
+    "1935980338": [
+      38.7702775,
+      -9.2721915
+    ],
+    "1935980391": [
+      38.7719347,
+      -9.277612
+    ],
+    "1937037564": [
+      38.7845381,
+      -9.2948119
+    ],
+    "1937037750": [
+      38.7839213,
+      -9.2937765
+    ],
+    "1937037755": [
+      38.7837102,
+      -9.2938597
+    ],
+    "1937037894": [
+      38.7831201,
+      -9.2928618
+    ],
+    "1937038017": [
+      38.7828759,
+      -9.2928646
+    ],
+    "1937038214": [
+      38.7845423,
+      -9.2945061
+    ],
+    "1957635576": [
+      38.7699507,
+      -9.2717499
+    ],
+    "1957635593": [
+      38.7703111,
+      -9.2728282
+    ],
+    "2276085772": [
+      38.7986375,
+      -9.3054725
+    ],
+    "2276085775": [
+      38.7987048,
+      -9.3051729
+    ],
+    "2276085783": [
+      38.7978873,
+      -9.3052818
+    ],
+    "2276085786": [
+      38.7967634,
+      -9.3060686
+    ],
+    "2276085795": [
+      38.7965969,
+      -9.3058579
+    ],
+    "2276085800": [
+      38.7983308,
+      -9.3054959
+    ],
+    "2276085803": [
+      38.7967078,
+      -9.305806
+    ],
+    "2276085804": [
+      38.7966522,
+      -9.3061245
+    ],
+    "2276967330": [
+      38.8097866,
+      -9.312773
+    ],
+    "2325894557": [
+      38.817624,
+      -9.3333515
+    ],
+    "2325894559": [
+      38.8181971,
+      -9.3300098
+    ],
+    "2325894561": [
+      38.8182424,
+      -9.3297133
+    ],
+    "2325894563": [
+      38.8182779,
+      -9.3294062
+    ],
+    "2325894565": [
+      38.8183056,
+      -9.329089
+    ],
+    "2325894567": [
+      38.8183234,
+      -9.3287693
+    ],
+    "2325894569": [
+      38.8183313,
+      -9.3284623
+    ],
+    "2325894570": [
+      38.8183274,
+      -9.3281476
+    ],
+    "2325894571": [
+      38.8183175,
+      -9.3278304
+    ],
+    "2325894572": [
+      38.8182977,
+      -9.3275158
+    ],
+    "2325894573": [
+      38.8182661,
+      -9.3271986
+    ],
+    "2325894574": [
+      38.8182144,
+      -9.3268045
+    ],
+    "2325894575": [
+      38.8181514,
+      -9.3264475
+    ],
+    "2325894576": [
+      38.8180862,
+      -9.3261379
+    ],
+    "2325894577": [
+      38.8180091,
+      -9.3258283
+    ],
+    "2325894578": [
+      38.817924,
+      -9.3255263
+    ],
+    "2325894579": [
+      38.8178311,
+      -9.325232
+    ],
+    "2325894580": [
+      38.8177244,
+      -9.3249376
+    ],
+    "2325894581": [
+      38.8176117,
+      -9.3246585
+    ],
+    "2325894582": [
+      38.8174891,
+      -9.3243692
+    ],
+    "2325894583": [
+      38.8173606,
+      -9.3240977
+    ],
+    "2325894584": [
+      38.8172222,
+      -9.3238313
+    ],
+    "2325894585": [
+      38.8170719,
+      -9.3235572
+    ],
+    "2325894586": [
+      38.8169217,
+      -9.3233086
+    ],
+    "2325894587": [
+      38.8167674,
+      -9.3230599
+    ],
+    "2325894588": [
+      38.8166112,
+      -9.3228112
+    ],
+    "2325894589": [
+      38.8160695,
+      -9.3219459
+    ],
+    "2325894590": [
+      38.8159133,
+      -9.3216845
+    ],
+    "2325894592": [
+      38.815771,
+      -9.3214333
+    ],
+    "2325894593": [
+      38.8156286,
+      -9.3211745
+    ],
+    "2325894595": [
+      38.8154922,
+      -9.3209081
+    ],
+    "2325894597": [
+      38.8153617,
+      -9.3206416
+    ],
+    "2325894599": [
+      38.8152371,
+      -9.3203777
+    ],
+    "2325894601": [
+      38.8151106,
+      -9.320096
+    ],
+    "2325894603": [
+      38.81499,
+      -9.3198093
+    ],
+    "2325894605": [
+      38.8148793,
+      -9.3195327
+    ],
+    "2325894607": [
+      38.8147745,
+      -9.3192485
+    ],
+    "2325894610": [
+      38.8146717,
+      -9.3189618
+    ],
+    "2325894612": [
+      38.8145234,
+      -9.3185202
+    ],
+    "2325894614": [
+      38.8140943,
+      -9.317221
+    ],
+    "2325894616": [
+      38.8139361,
+      -9.3168049
+    ],
+    "2325894618": [
+      38.8138175,
+      -9.3165207
+    ],
+    "2325894621": [
+      38.813689,
+      -9.3162466
+    ],
+    "2325894624": [
+      38.8135526,
+      -9.3159878
+    ],
+    "2325894626": [
+      38.8134043,
+      -9.3157264
+    ],
+    "2325894629": [
+      38.8132461,
+      -9.3154727
+    ],
+    "2325894631": [
+      38.81308,
+      -9.3152367
+    ],
+    "2325894633": [
+      38.81291,
+      -9.3150083
+    ],
+    "2325894635": [
+      38.81273,
+      -9.3147952
+    ],
+    "2325894637": [
+      38.8125422,
+      -9.3145871
+    ],
+    "2325894639": [
+      38.8123445,
+      -9.3143841
+    ],
+    "2325894641": [
+      38.8121408,
+      -9.3141988
+    ],
+    "2325894643": [
+      38.8119292,
+      -9.3140238
+    ],
+    "2325894645": [
+      38.8117038,
+      -9.3138512
+    ],
+    "2325894647": [
+      38.8114765,
+      -9.313704
+    ],
+    "2325894649": [
+      38.811251,
+      -9.3135746
+    ],
+    "2325894652": [
+      38.8110217,
+      -9.3134528
+    ],
+    "2325894654": [
+      38.8107884,
+      -9.3133437
+    ],
+    "2325894656": [
+      38.8105452,
+      -9.3132498
+    ],
+    "2325894658": [
+      38.8103059,
+      -9.3131686
+    ],
+    "2325894660": [
+      38.8100587,
+      -9.3131026
+    ],
+    "2325894662": [
+      38.8098195,
+      -9.3130544
+    ],
+    "2325894664": [
+      38.8095545,
+      -9.3130138
+    ],
+    "2325894666": [
+      38.8092856,
+      -9.312991
+    ],
+    "2325894667": [
+      38.8090562,
+      -9.3129834
+    ],
+    "2325894668": [
+      38.807676,
+      -9.3129986
+    ],
+    "2325894669": [
+      38.8074249,
+      -9.312991
+    ],
+    "2325894671": [
+      38.8071421,
+      -9.3129681
+    ],
+    "2325894672": [
+      38.8069029,
+      -9.3129352
+    ],
+    "2325894675": [
+      38.8065707,
+      -9.3128641
+    ],
+    "2325894677": [
+      38.8063354,
+      -9.3127981
+    ],
+    "2325894680": [
+      38.8061159,
+      -9.312722
+    ],
+    "2325894682": [
+      38.8058647,
+      -9.3126256
+    ],
+    "2325894684": [
+      38.8056314,
+      -9.3125215
+    ],
+    "2325894691": [
+      38.805404,
+      -9.3124023
+    ],
+    "2325894693": [
+      38.8051805,
+      -9.3122703
+    ],
+    "2325894695": [
+      38.8049571,
+      -9.3121231
+    ],
+    "2325894697": [
+      38.8047435,
+      -9.3119684
+    ],
+    "2325894699": [
+      38.8045359,
+      -9.3118085
+    ],
+    "2325894701": [
+      38.8043236,
+      -9.3116245
+    ],
+    "2325894703": [
+      38.8041345,
+      -9.3114482
+    ],
+    "2325894705": [
+      38.8039525,
+      -9.3112477
+    ],
+    "2325894707": [
+      38.8037686,
+      -9.3110371
+    ],
+    "2325894709": [
+      38.8035986,
+      -9.3108214
+    ],
+    "2325894711": [
+      38.8034246,
+      -9.3105854
+    ],
+    "2325894713": [
+      38.8032664,
+      -9.310357
+    ],
+    "2325894715": [
+      38.8031101,
+      -9.310121
+    ],
+    "2325894720": [
+      38.8084554,
+      -9.31299
+    ],
+    "2325894846": [
+      38.8064395,
+      -9.3125552
+    ],
+    "2327002703": [
+      38.8032778,
+      -9.3099591
+    ],
+    "2327002707": [
+      38.8034311,
+      -9.3101916
+    ],
+    "2327002710": [
+      38.8035992,
+      -9.3104344
+    ],
+    "2327002712": [
+      38.8038596,
+      -9.3107805
+    ],
+    "2327002714": [
+      38.8040371,
+      -9.3109903
+    ],
+    "2327002716": [
+      38.8042286,
+      -9.3111971
+    ],
+    "2327002718": [
+      38.8044271,
+      -9.3113948
+    ],
+    "2327002721": [
+      38.8046362,
+      -9.3115746
+    ],
+    "2327002723": [
+      38.8048452,
+      -9.3117395
+    ],
+    "2327002725": [
+      38.8050799,
+      -9.3119103
+    ],
+    "2327002727": [
+      38.8052492,
+      -9.3120197
+    ],
+    "2327002729": [
+      38.8054617,
+      -9.3121455
+    ],
+    "2327002731": [
+      38.8056579,
+      -9.3122489
+    ],
+    "2327002733": [
+      38.8058248,
+      -9.3123268
+    ],
+    "2327002735": [
+      38.8060093,
+      -9.3124078
+    ],
+    "2327002738": [
+      38.806202,
+      -9.3124827
+    ],
+    "2327002740": [
+      38.806416,
+      -9.3125497
+    ],
+    "2327002741": [
+      38.8067239,
+      -9.3126295
+    ],
+    "2327002744": [
+      38.8069586,
+      -9.3126745
+    ],
+    "2327002746": [
+      38.8071548,
+      -9.3127014
+    ],
+    "2327002749": [
+      38.8073685,
+      -9.3127224
+    ],
+    "2327002751": [
+      38.807623,
+      -9.3127344
+    ],
+    "2327002753": [
+      38.8079943,
+      -9.3127329
+    ],
+    "2327002755": [
+      38.8089952,
+      -9.31271
+    ],
+    "2327002757": [
+      38.8092392,
+      -9.3127175
+    ],
+    "2327002759": [
+      38.8094867,
+      -9.3127325
+    ],
+    "2327002761": [
+      38.8099748,
+      -9.3128104
+    ],
+    "2327002763": [
+      38.8102165,
+      -9.3128689
+    ],
+    "2327002765": [
+      38.8104605,
+      -9.3129438
+    ],
+    "2327002767": [
+      38.8106975,
+      -9.3130262
+    ],
+    "2327002769": [
+      38.8109345,
+      -9.3131281
+    ],
+    "2327002771": [
+      38.8111342,
+      -9.313221
+    ],
+    "2327002783": [
+      38.8113957,
+      -9.3133618
+    ],
+    "2327002785": [
+      38.8116211,
+      -9.3135012
+    ],
+    "2327002787": [
+      38.8118382,
+      -9.3136465
+    ],
+    "2327002789": [
+      38.8120496,
+      -9.3138054
+    ],
+    "2327002791": [
+      38.8122562,
+      -9.3139777
+    ],
+    "2327002793": [
+      38.8124559,
+      -9.314159
+    ],
+    "2327002795": [
+      38.8126555,
+      -9.3143538
+    ],
+    "2327002797": [
+      38.8128423,
+      -9.3145561
+    ],
+    "2327002800": [
+      38.8130221,
+      -9.3147733
+    ],
+    "2327002802": [
+      38.8131973,
+      -9.3149951
+    ],
+    "2327002804": [
+      38.8133607,
+      -9.3152258
+    ],
+    "2327002806": [
+      38.8135137,
+      -9.3154716
+    ],
+    "2327002808": [
+      38.813662,
+      -9.3157188
+    ],
+    "2327002810": [
+      38.8138021,
+      -9.315981
+    ],
+    "2327002812": [
+      38.813934,
+      -9.3162492
+    ],
+    "2327002814": [
+      38.8140578,
+      -9.316525
+    ],
+    "2327002816": [
+      38.8141687,
+      -9.3168052
+    ],
+    "2327002820": [
+      38.8142749,
+      -9.3170973
+    ],
+    "2327002822": [
+      38.8147104,
+      -9.3184084
+    ],
+    "2327002824": [
+      38.8148598,
+      -9.318846
+    ],
+    "2327002826": [
+      38.8150116,
+      -9.319273
+    ],
+    "2327002828": [
+      38.8151786,
+      -9.3196971
+    ],
+    "2327002830": [
+      38.8152988,
+      -9.3199803
+    ],
+    "2327002833": [
+      38.8154226,
+      -9.3202575
+    ],
+    "2327002835": [
+      38.8156012,
+      -9.3206291
+    ],
+    "2327002837": [
+      38.815732,
+      -9.3208928
+    ],
+    "2327002839": [
+      38.8159398,
+      -9.3212809
+    ],
+    "2327002841": [
+      38.8162608,
+      -9.3218293
+    ],
+    "2327002843": [
+      38.8165691,
+      -9.3223268
+    ],
+    "2327002845": [
+      38.8171078,
+      -9.3231831
+    ],
+    "2327002847": [
+      38.817254,
+      -9.3234308
+    ],
+    "2327002849": [
+      38.8173973,
+      -9.3236856
+    ],
+    "2327002851": [
+      38.8175338,
+      -9.3239528
+    ],
+    "2327002853": [
+      38.8177241,
+      -9.3243528
+    ],
+    "2327002855": [
+      38.8178896,
+      -9.3247633
+    ],
+    "2327002857": [
+      38.8179806,
+      -9.3250111
+    ],
+    "2327002859": [
+      38.8180771,
+      -9.3252977
+    ],
+    "2327002861": [
+      38.8181639,
+      -9.3255897
+    ],
+    "2327002863": [
+      38.8182425,
+      -9.3258852
+    ],
+    "2327002865": [
+      38.8183142,
+      -9.3261878
+    ],
+    "2327002867": [
+      38.8183735,
+      -9.3264869
+    ],
+    "2327002869": [
+      38.8184175,
+      -9.3267509
+    ],
+    "2327002871": [
+      38.8184673,
+      -9.3271204
+    ],
+    "2327002873": [
+      38.818499,
+      -9.3274336
+    ],
+    "2327002875": [
+      38.8185224,
+      -9.3277539
+    ],
+    "2327002877": [
+      38.8185348,
+      -9.3280689
+    ],
+    "2327002879": [
+      38.8185403,
+      -9.3283857
+    ],
+    "2327002881": [
+      38.8185321,
+      -9.3287131
+    ],
+    "2327002883": [
+      38.8185183,
+      -9.329021
+    ],
+    "2327002885": [
+      38.8184948,
+      -9.3293448
+    ],
+    "2327002887": [
+      38.8184576,
+      -9.3296704
+    ],
+    "2327002889": [
+      38.8184039,
+      -9.3300562
+    ],
+    "2327002891": [
+      38.8178266,
+      -9.3334053
+    ],
+    "2327002893": [
+      38.8173784,
+      -9.335969
+    ],
+    "2327002934": [
+      38.8182348,
+      -9.3269474
+    ],
+    "2327002936": [
+      38.8184376,
+      -9.326894
+    ],
+    "2327126613": [
+      38.8148574,
+      -9.3504425
+    ],
+    "2327126616": [
+      38.8147453,
+      -9.3510561
+    ],
+    "2327126618": [
+      38.8146808,
+      -9.351371
+    ],
+    "2327126620": [
+      38.8146084,
+      -9.3516861
+    ],
+    "2327126622": [
+      38.8145642,
+      -9.3518637
+    ],
+    "2327126624": [
+      38.8143294,
+      -9.3526307
+    ],
+    "2327126630": [
+      38.8142442,
+      -9.3528626
+    ],
+    "2327126633": [
+      38.8140044,
+      -9.3534353
+    ],
+    "2327126635": [
+      38.8138554,
+      -9.3537444
+    ],
+    "2327126639": [
+      38.8134628,
+      -9.3544352
+    ],
+    "2327126641": [
+      38.8133265,
+      -9.3546455
+    ],
+    "2327126644": [
+      38.8130445,
+      -9.3550389
+    ],
+    "2327126646": [
+      38.8129284,
+      -9.355188
+    ],
+    "2327126648": [
+      38.8127025,
+      -9.3554517
+    ],
+    "2327126650": [
+      38.8124082,
+      -9.3557647
+    ],
+    "2327126654": [
+      38.8123128,
+      -9.3558583
+    ],
+    "2327126655": [
+      38.8121061,
+      -9.3560501
+    ],
+    "2327126657": [
+      38.8119906,
+      -9.3558239
+    ],
+    "2327126659": [
+      38.8128793,
+      -9.3549013
+    ],
+    "2327126664": [
+      38.813394,
+      -9.3541855
+    ],
+    "2327126667": [
+      38.8136894,
+      -9.3536582
+    ],
+    "2327126668": [
+      38.813821,
+      -9.3533899
+    ],
+    "2327126670": [
+      38.8139482,
+      -9.353099
+    ],
+    "2327126671": [
+      38.8140623,
+      -9.3528134
+    ],
+    "2327126672": [
+      38.8141674,
+      -9.3525224
+    ],
+    "2327126673": [
+      38.8142641,
+      -9.3522191
+    ],
+    "2327126674": [
+      38.8143519,
+      -9.3519144
+    ],
+    "2327126675": [
+      38.8144303,
+      -9.3516001
+    ],
+    "2327126676": [
+      38.8144986,
+      -9.3512891
+    ],
+    "2327126677": [
+      38.8148005,
+      -9.3495547
+    ],
+    "2327126678": [
+      38.814616,
+      -9.3506565
+    ],
+    "2327126679": [
+      38.8156181,
+      -9.3448616
+    ],
+    "2327126680": [
+      38.8158227,
+      -9.3449121
+    ],
+    "2327126681": [
+      38.8169285,
+      -9.3385403
+    ],
+    "2327126682": [
+      38.816813,
+      -9.3392216
+    ],
+    "2327126683": [
+      38.8165938,
+      -9.3392394
+    ],
+    "2327126684": [
+      38.8160312,
+      -9.342468
+    ],
+    "2327126741": [
+      38.8166965,
+      -9.3385598
+    ],
+    "2327126761": [
+      38.8164119,
+      -9.3415059
+    ],
+    "2327126762": [
+      38.8121957,
+      -9.3556339
+    ],
+    "2327126765": [
+      38.8114564,
+      -9.3562552
+    ],
+    "2327126766": [
+      38.8115585,
+      -9.3564765
+    ],
+    "2327126767": [
+      38.8118984,
+      -9.3562192
+    ],
+    "2327126768": [
+      38.8117306,
+      -9.3563504
+    ],
+    "2327126769": [
+      38.8117642,
+      -9.3560237
+    ],
+    "2327143697": [
+      38.8181151,
+      -9.3317333
+    ],
+    "2327143698": [
+      38.8179116,
+      -9.3316743
+    ],
+    "2327186618": [
+      38.8029461,
+      -9.3093842
+    ],
+    "2327186619": [
+      38.8026095,
+      -9.3086472
+    ],
+    "2327186620": [
+      38.8027971,
+      -9.3090705
+    ],
+    "2327186622": [
+      38.8027736,
+      -9.3095378
+    ],
+    "2327186623": [
+      38.8026276,
+      -9.3092303
+    ],
+    "2327186624": [
+      38.8024334,
+      -9.308801
+    ],
+    "2327186625": [
+      38.8022479,
+      -9.3083643
+    ],
+    "2327186626": [
+      38.8023821,
+      -9.3081165
+    ],
+    "2327186627": [
+      38.8030776,
+      -9.3096328
+    ],
+    "2327186628": [
+      38.8029097,
+      -9.3097928
+    ],
+    "2454013767": [
+      38.7550193,
+      -9.3878402
+    ],
+    "2454047332": [
+      38.7611409,
+      -9.3781113
+    ],
+    "2454047333": [
+      38.7697622,
+      -9.3698309
+    ],
+    "2454047336": [
+      38.7697244,
+      -9.3696763
+    ],
+    "2454047337": [
+      38.7667161,
+      -9.3722999
+    ],
+    "2454047338": [
+      38.7621529,
+      -9.3768262
+    ],
+    "2812433074": [
+      38.7719666,
+      -9.2777084
+    ],
+    "2812433495": [
+      38.772225,
+      -9.2776216
+    ],
+    "2812433499": [
+      38.7720005,
+      -9.2769731
+    ],
+    "2812433972": [
+      38.7722443,
+      -9.2776787
+    ],
+    "2812434007": [
+      38.7716977,
+      -9.2760971
+    ],
+    "2812434009": [
+      38.7714359,
+      -9.276196
+    ],
+    "2812439022": [
+      38.7767594,
+      -9.2841088
+    ],
+    "2812439024": [
+      38.7789929,
+      -9.2867491
+    ],
+    "3088362538": [
+      38.7799675,
+      -9.2875232
+    ],
+    "3161974079": [
+      38.7743044,
+      -9.3664855
+    ],
+    "3161974080": [
+      38.7743566,
+      -9.3666266
+    ],
+    "3161974081": [
+      38.7744936,
+      -9.3663671
+    ],
+    "3161974082": [
+      38.7745451,
+      -9.3665063
+    ],
+    "3654946713": [
+      38.7506042,
+      -9.3893043
+    ],
+    "3654946724": [
+      38.7542297,
+      -9.3879543
+    ],
+    "3654946752": [
+      38.7494037,
+      -9.3898495
+    ],
+    "3654946854": [
+      38.7512971,
+      -9.3890138
+    ],
+    "3654946912": [
+      38.7547962,
+      -9.3877596
+    ],
+    "3654946965": [
+      38.750839,
+      -9.3892042
+    ],
+    "3654947011": [
+      38.7503076,
+      -9.3894349
+    ],
+    "3654947013": [
+      38.7539724,
+      -9.3880375
+    ],
+    "3654947053": [
+      38.7446998,
+      -9.3922385
+    ],
+    "3654947130": [
+      38.7544639,
+      -9.3878765
+    ],
+    "3654947134": [
+      38.7499855,
+      -9.3895797
+    ],
+    "3654947151": [
+      38.7546264,
+      -9.3878194
+    ],
+    "3654947195": [
+      38.7496802,
+      -9.3897194
+    ],
+    "3654947196": [
+      38.7550705,
+      -9.3876512
+    ],
+    "3654947207": [
+      38.7549305,
+      -9.3877094
+    ],
+    "3654947333": [
+      38.7534892,
+      -9.3881984
+    ],
+    "3654947337": [
+      38.7468115,
+      -9.3911566
+    ],
+    "3654947339": [
+      38.7520255,
+      -9.3887248
+    ],
+    "3654947357": [
+      38.7473966,
+      -9.3908577
+    ],
+    "3654976635": [
+      38.7567146,
+      -9.3863611
+    ],
+    "3654976639": [
+      38.756508,
+      -9.3866112
+    ],
+    "3654976642": [
+      38.7553053,
+      -9.3875419
+    ],
+    "3654976646": [
+      38.7567878,
+      -9.3864898
+    ],
+    "3654976649": [
+      38.7573241,
+      -9.3853791
+    ],
+    "3654976652": [
+      38.7583383,
+      -9.3833751
+    ],
+    "3654976654": [
+      38.7576775,
+      -9.3846913
+    ],
+    "3654976660": [
+      38.747966,
+      -9.3907346
+    ],
+    "3654976662": [
+      38.7557775,
+      -9.3872623
+    ],
+    "3654976665": [
+      38.7553597,
+      -9.3876868
+    ],
+    "3654976669": [
+      38.7563067,
+      -9.3868252
+    ],
+    "3654976671": [
+      38.7570283,
+      -9.3859024
+    ],
+    "3654976673": [
+      38.7554271,
+      -9.3874789
+    ],
+    "3654976678": [
+      38.7543361,
+      -9.3880836
+    ],
+    "3654976680": [
+      38.7558946,
+      -9.3871765
+    ],
+    "3654976681": [
+      38.7578331,
+      -9.3846745
+    ],
+    "3654976686": [
+      38.7561137,
+      -9.3871883
+    ],
+    "3654976690": [
+      38.7566189,
+      -9.3866943
+    ],
+    "3654976691": [
+      38.7564134,
+      -9.386919
+    ],
+    "3654976693": [
+      38.7551939,
+      -9.3875949
+    ],
+    "3654976694": [
+      38.7589024,
+      -9.3822534
+    ],
+    "3654976696": [
+      38.7548973,
+      -9.387889
+    ],
+    "3654976703": [
+      38.7574555,
+      -9.3851281
+    ],
+    "3654976707": [
+      38.7545182,
+      -9.3880232
+    ],
+    "3654976716": [
+      38.7562042,
+      -9.3871117
+    ],
+    "3654977033": [
+      38.7567041,
+      -9.3865944
+    ],
+    "3654977036": [
+      38.7563004,
+      -9.3870263
+    ],
+    "3654977037": [
+      38.7556965,
+      -9.3874936
+    ],
+    "3654977038": [
+      38.7551165,
+      -9.3878014
+    ],
+    "3654977040": [
+      38.7554889,
+      -9.3876163
+    ],
+    "3654977042": [
+      38.7571245,
+      -9.3860043
+    ],
+    "3654977046": [
+      38.7556604,
+      -9.3873401
+    ],
+    "3654977049": [
+      38.7555955,
+      -9.3875547
+    ],
+    "3654977060": [
+      38.7565995,
+      -9.3865032
+    ],
+    "3654977062": [
+      38.7490134,
+      -9.390204
+    ],
+    "3654977063": [
+      38.7537516,
+      -9.3882748
+    ],
+    "3654977066": [
+      38.7569589,
+      -9.3862539
+    ],
+    "3654977071": [
+      38.7499679,
+      -9.3897538
+    ],
+    "3654977078": [
+      38.7558026,
+      -9.3874259
+    ],
+    "3654977082": [
+      38.7560834,
+      -9.3870291
+    ],
+    "3654977088": [
+      38.7453643,
+      -9.3920684
+    ],
+    "3654977089": [
+      38.7510469,
+      -9.3892855
+    ],
+    "3654977099": [
+      38.7559822,
+      -9.3871097
+    ],
+    "3654977102": [
+      38.7595047,
+      -9.3810616
+    ],
+    "3654977104": [
+      38.7598443,
+      -9.3803901
+    ],
+    "3654977111": [
+      38.7570404,
+      -9.3861351
+    ],
+    "3654977112": [
+      38.7568738,
+      -9.3863762
+    ],
+    "3654977113": [
+      38.757019,
+      -9.3859171
+    ],
+    "3654977121": [
+      38.7481945,
+      -9.390618
+    ],
+    "3654977123": [
+      38.7572058,
+      -9.3858679
+    ],
+    "3654977130": [
+      38.756815,
+      -9.3862243
+    ],
+    "3654977135": [
+      38.7572289,
+      -9.3855516
+    ],
+    "3654977140": [
+      38.7575566,
+      -9.3852222
+    ],
+    "3654977142": [
+      38.7546638,
+      -9.3879735
+    ],
+    "3654977144": [
+      38.7547956,
+      -9.3879265
+    ],
+    "3654977148": [
+      38.7560089,
+      -9.3872718
+    ],
+    "3654977153": [
+      38.7558987,
+      -9.3873574
+    ],
+    "3654977156": [
+      38.7569279,
+      -9.3860607
+    ],
+    "3654977164": [
+      38.7472499,
+      -9.3911013
+    ],
+    "3654977174": [
+      38.7517831,
+      -9.3889863
+    ],
+    "3654977175": [
+      38.75524,
+      -9.3877451
+    ],
+    "3654977178": [
+      38.7564155,
+      -9.3867098
+    ],
+    "3654977180": [
+      38.7467954,
+      -9.3913343
+    ],
+    "3654977181": [
+      38.7477296,
+      -9.3908554
+    ],
+    "3654977182": [
+      38.757425,
+      -9.3854754
+    ],
+    "3654977185": [
+      38.7494899,
+      -9.389976
+    ],
+    "3654977186": [
+      38.7463193,
+      -9.3915777
+    ],
+    "3654977191": [
+      38.7555412,
+      -9.3874125
+    ],
+    "3654977193": [
+      38.7565159,
+      -9.3868117
+    ],
+    "3654977195": [
+      38.7561855,
+      -9.3869391
+    ],
+    "3655387033": [
+      38.7419312,
+      -9.3944105
+    ],
+    "3655387057": [
+      38.7426612,
+      -9.3936567
+    ],
+    "3655387063": [
+      38.7421576,
+      -9.3941475
+    ],
+    "3655387071": [
+      38.7450464,
+      -9.3922335
+    ],
+    "3655387073": [
+      38.7433015,
+      -9.3931723
+    ],
+    "3655387080": [
+      38.7420488,
+      -9.3942708
+    ],
+    "3655387098": [
+      38.7440173,
+      -9.3927608
+    ],
+    "3655387100": [
+      38.7436595,
+      -9.3929566
+    ],
+    "3655387123": [
+      38.7433729,
+      -9.3931282
+    ],
+    "3655388527": [
+      38.7424379,
+      -9.3938637
+    ],
+    "3655388530": [
+      38.7430676,
+      -9.3933319
+    ],
+    "3655388540": [
+      38.7423375,
+      -9.3939597
+    ],
+    "3655388554": [
+      38.7428635,
+      -9.3934868
+    ],
+    "3655388591": [
+      38.7438583,
+      -9.3928466
+    ],
+    "3655388592": [
+      38.7441972,
+      -9.3926696
+    ],
+    "3655388595": [
+      38.7429615,
+      -9.3934097
+    ],
+    "3655388606": [
+      38.7427577,
+      -9.3935735
+    ],
+    "3655388637": [
+      38.7419522,
+      -9.3943844
+    ],
+    "3655388649": [
+      38.7434838,
+      -9.3930585
+    ],
+    "3655388650": [
+      38.7425578,
+      -9.3937498
+    ],
+    "3655388653": [
+      38.7422496,
+      -9.3940509
+    ],
+    "3655388658": [
+      38.7431826,
+      -9.3932507
+    ],
+    "3655468505": [
+      38.7416556,
+      -9.3945344
+    ],
+    "3655468506": [
+      38.7414275,
+      -9.3948662
+    ],
+    "3655468510": [
+      38.74144,
+      -9.3951023
+    ],
+    "3655468513": [
+      38.741199,
+      -9.3952387
+    ],
+    "3655468518": [
+      38.7409915,
+      -9.395922
+    ],
+    "3655470833": [
+      38.7384474,
+      -9.4050331
+    ],
+    "3655470837": [
+      38.7419187,
+      -9.3942033
+    ],
+    "3655470848": [
+      38.7433063,
+      -9.3929947
+    ],
+    "3655470852": [
+      38.74417,
+      -9.3925113
+    ],
+    "3655470861": [
+      38.7379208,
+      -9.4070251
+    ],
+    "3655470868": [
+      38.7424313,
+      -9.3936669
+    ],
+    "3655470871": [
+      38.7398882,
+      -9.3990773
+    ],
+    "3655470876": [
+      38.7418538,
+      -9.3945037
+    ],
+    "3655470878": [
+      38.7409233,
+      -9.3957675
+    ],
+    "3655470887": [
+      38.7418211,
+      -9.3943197
+    ],
+    "3655470893": [
+      38.7410505,
+      -9.3955096
+    ],
+    "3655470900": [
+      38.742644,
+      -9.3934809
+    ],
+    "3655470901": [
+      38.7415094,
+      -9.3947442
+    ],
+    "3655470903": [
+      38.7435319,
+      -9.3928575
+    ],
+    "3655470908": [
+      38.7390086,
+      -9.4028776
+    ],
+    "3655470909": [
+      38.7397726,
+      -9.3999972
+    ],
+    "3655470913": [
+      38.7431889,
+      -9.3930718
+    ],
+    "3655470919": [
+      38.7388447,
+      -9.4035113
+    ],
+    "3655470922": [
+      38.7401669,
+      -9.3980185
+    ],
+    "3655470931": [
+      38.7415965,
+      -9.3946164
+    ],
+    "3655470949": [
+      38.7427475,
+      -9.3933937
+    ],
+    "3655470955": [
+      38.7408706,
+      -9.3961966
+    ],
+    "3655470959": [
+      38.7404645,
+      -9.3969557
+    ],
+    "3655470961": [
+      38.7391661,
+      -9.4022946
+    ],
+    "3655470962": [
+      38.7395697,
+      -9.4007643
+    ],
+    "3655470972": [
+      38.7403777,
+      -9.3972514
+    ],
+    "3655470973": [
+      38.7423318,
+      -9.3937621
+    ],
+    "3655470974": [
+      38.741279,
+      -9.3951023
+    ],
+    "3655470979": [
+      38.7417586,
+      -9.3943972
+    ],
+    "3655470982": [
+      38.7413522,
+      -9.3952444
+    ],
+    "3655471009": [
+      38.7434144,
+      -9.3929295
+    ],
+    "3655471010": [
+      38.7405481,
+      -9.3971024
+    ],
+    "3655471021": [
+      38.7428518,
+      -9.3933101
+    ],
+    "3655471024": [
+      38.7417052,
+      -9.3947054
+    ],
+    "3655471031": [
+      38.7401182,
+      -9.3986966
+    ],
+    "3655471041": [
+      38.7407836,
+      -9.3960732
+    ],
+    "3655471048": [
+      38.7407594,
+      -9.3964762
+    ],
+    "3655471052": [
+      38.7400153,
+      -9.3990772
+    ],
+    "3655471053": [
+      38.7408135,
+      -9.3963365
+    ],
+    "3655471054": [
+      38.7422267,
+      -9.3938658
+    ],
+    "3655471055": [
+      38.7405936,
+      -9.3969617
+    ],
+    "3655471060": [
+      38.7421304,
+      -9.393965
+    ],
+    "3655471062": [
+      38.74376,
+      -9.3927312
+    ],
+    "3655471067": [
+      38.73945,
+      -9.4012146
+    ],
+    "3655471068": [
+      38.7411892,
+      -9.3955325
+    ],
+    "3655471087": [
+      38.7386451,
+      -9.4042801
+    ],
+    "3655471103": [
+      38.7402965,
+      -9.3980145
+    ],
+    "3655471107": [
+      38.7436489,
+      -9.392791
+    ],
+    "3655471108": [
+      38.7415275,
+      -9.3949651
+    ],
+    "3655471109": [
+      38.7413518,
+      -9.3949812
+    ],
+    "3655471116": [
+      38.7425362,
+      -9.3935734
+    ],
+    "3655471119": [
+      38.7430794,
+      -9.3931471
+    ],
+    "3655471121": [
+      38.7411237,
+      -9.3953728
+    ],
+    "3655471131": [
+      38.7412627,
+      -9.3953954
+    ],
+    "3655471139": [
+      38.7409902,
+      -9.3956307
+    ],
+    "3655471147": [
+      38.7408267,
+      -9.3959662
+    ],
+    "3655471152": [
+      38.7392894,
+      -9.4018318
+    ],
+    "3655471158": [
+      38.7380818,
+      -9.4064168
+    ],
+    "3655471159": [
+      38.7401701,
+      -9.3984924
+    ],
+    "3655471160": [
+      38.7407412,
+      -9.3961751
+    ],
+    "3655471162": [
+      38.7417492,
+      -9.3946405
+    ],
+    "3655471165": [
+      38.7410551,
+      -9.3957928
+    ],
+    "3655471167": [
+      38.7416116,
+      -9.3948367
+    ],
+    "3655471171": [
+      38.7405,
+      -9.3972645
+    ],
+    "3655471172": [
+      38.741802,
+      -9.3945712
+    ],
+    "3655471183": [
+      38.7417068,
+      -9.3944656
+    ],
+    "3655471186": [
+      38.7406962,
+      -9.3962932
+    ],
+    "3655471187": [
+      38.7429525,
+      -9.3932354
+    ],
+    "3655471190": [
+      38.7418392,
+      -9.3942999
+    ],
+    "3655471193": [
+      38.7420338,
+      -9.3940746
+    ],
+    "3655471194": [
+      38.7406288,
+      -9.3964702
+    ],
+    "3655471198": [
+      38.738244,
+      -9.4058028
+    ],
+    "3655471203": [
+      38.7416154,
+      -9.3945896
+    ],
+    "3655471206": [
+      38.7406437,
+      -9.396809
+    ],
+    "3655484334": [
+      38.7386752,
+      -9.403678
+    ],
+    "3655484339": [
+      38.7391988,
+      -9.4016884
+    ],
+    "3655484341": [
+      38.7387964,
+      -9.4032184
+    ],
+    "3655484344": [
+      38.7394394,
+      -9.4007805
+    ],
+    "3655484345": [
+      38.7389566,
+      -9.4026037
+    ],
+    "3655484347": [
+      38.7396899,
+      -9.3998276
+    ],
+    "3659067303": [
+      38.7380267,
+      -9.406141
+    ],
+    "3670108571": [
+      38.7533065,
+      -9.3884274
+    ],
+    "3670108580": [
+      38.7521529,
+      -9.3888472
+    ],
+    "3671780381": [
+      38.7377981,
+      -9.4070043
+    ],
+    "3671780382": [
+      38.7381936,
+      -9.4054952
+    ],
+    "3671780383": [
+      38.7383588,
+      -9.4048755
+    ],
+    "3671780384": [
+      38.7379774,
+      -9.4063208
+    ],
+    "3692592254": [
+      38.7289202,
+      -9.4155319
+    ],
+    "3692592260": [
+      38.7289005,
+      -9.4153495
+    ],
+    "3692592266": [
+      38.7309971,
+      -9.4158698
+    ],
+    "3692592272": [
+      38.7317413,
+      -9.4159182
+    ],
+    "3692592273": [
+      38.7328752,
+      -9.4153903
+    ],
+    "3692592276": [
+      38.7321745,
+      -9.4156854
+    ],
+    "3692592281": [
+      38.7290042,
+      -9.4155274
+    ],
+    "3692592284": [
+      38.7288147,
+      -9.4153575
+    ],
+    "3692592286": [
+      38.7281452,
+      -9.4157038
+    ],
+    "3692592290": [
+      38.7291055,
+      -9.415345
+    ],
+    "3692592291": [
+      38.7315635,
+      -9.4159216
+    ],
+    "3692592292": [
+      38.7318487,
+      -9.4159074
+    ],
+    "3692592293": [
+      38.7292227,
+      -9.4155292
+    ],
+    "3692592299": [
+      38.7314553,
+      -9.4159181
+    ],
+    "3692592302": [
+      38.7311185,
+      -9.4158886
+    ],
+    "3692592305": [
+      38.7329032,
+      -9.4153736
+    ],
+    "3692592307": [
+      38.7326668,
+      -9.415505
+    ],
+    "3692592308": [
+      38.7329715,
+      -9.4153287
+    ],
+    "3692592310": [
+      38.7330474,
+      -9.4152766
+    ],
+    "3692592313": [
+      38.7290658,
+      -9.4155265
+    ],
+    "3692592319": [
+      38.7281492,
+      -9.4155094
+    ],
+    "3692592323": [
+      38.7318508,
+      -9.4157438
+    ],
+    "3692593626": [
+      38.7304301,
+      -9.4155855
+    ],
+    "3692593628": [
+      38.7295994,
+      -9.415564
+    ],
+    "3692593629": [
+      38.7296945,
+      -9.4155779
+    ],
+    "3692593641": [
+      38.7295743,
+      -9.4155608
+    ],
+    "3692593643": [
+      38.7289821,
+      -9.4153441
+    ],
+    "3692593644": [
+      38.7306853,
+      -9.4156472
+    ],
+    "3692593646": [
+      38.7307272,
+      -9.4158135
+    ],
+    "3692593648": [
+      38.7319512,
+      -9.4157303
+    ],
+    "3692593652": [
+      38.7317566,
+      -9.4157545
+    ],
+    "3692593661": [
+      38.7326835,
+      -9.4156713
+    ],
+    "3692593673": [
+      38.7294969,
+      -9.4155506
+    ],
+    "3692593677": [
+      38.7327854,
+      -9.4156217
+    ],
+    "3692593679": [
+      38.7305577,
+      -9.4156177
+    ],
+    "3692593685": [
+      38.7322086,
+      -9.415843
+    ],
+    "3692593687": [
+      38.7319512,
+      -9.415894
+    ],
+    "3692593688": [
+      38.7316625,
+      -9.4157598
+    ],
+    "3692593689": [
+      38.7311749,
+      -9.4157357
+    ],
+    "3692593691": [
+      38.7323634,
+      -9.4156284
+    ],
+    "3692593697": [
+      38.7314396,
+      -9.4157597
+    ],
+    "3692593700": [
+      38.7312545,
+      -9.4157464
+    ],
+    "3692593710": [
+      38.732558,
+      -9.415556
+    ],
+    "3692593733": [
+      38.7316594,
+      -9.4159223
+    ],
+    "3692593734": [
+      38.7313425,
+      -9.415755
+    ],
+    "3692593738": [
+      38.7299467,
+      -9.4154702
+    ],
+    "3692593745": [
+      38.7324576,
+      -9.4155962
+    ],
+    "3692593748": [
+      38.732127,
+      -9.4158618
+    ],
+    "3692593749": [
+      38.732309,
+      -9.4158135
+    ],
+    "3692593751": [
+      38.7313633,
+      -9.4159127
+    ],
+    "3692593755": [
+      38.729161,
+      -9.4153462
+    ],
+    "3692593757": [
+      38.7325049,
+      -9.4157455
+    ],
+    "3692593764": [
+      38.7290658,
+      -9.4153441
+    ],
+    "3692593771": [
+      38.7315491,
+      -9.4157617
+    ],
+    "3692593779": [
+      38.7325992,
+      -9.4157077
+    ],
+    "3692593783": [
+      38.7332305,
+      -9.4151435
+    ],
+    "3692593787": [
+      38.7292698,
+      -9.4153535
+    ],
+    "3692593791": [
+      38.7331395,
+      -9.4152095
+    ],
+    "3692593806": [
+      38.7298149,
+      -9.4154407
+    ],
+    "3692593811": [
+      38.7320579,
+      -9.4157116
+    ],
+    "3692593819": [
+      38.73061,
+      -9.4157867
+    ],
+    "3692593822": [
+      38.7294001,
+      -9.415541
+    ],
+    "3692593826": [
+      38.7293641,
+      -9.4153629
+    ],
+    "3692593830": [
+      38.729773,
+      -9.4155935
+    ],
+    "3692593838": [
+      38.7327773,
+      -9.4154476
+    ],
+    "3692593842": [
+      38.733492,
+      -9.4149101
+    ],
+    "3692593853": [
+      38.7312335,
+      -9.415902
+    ],
+    "3692593857": [
+      38.7310557,
+      -9.4157169
+    ],
+    "3692593861": [
+      38.7300702,
+      -9.4154997
+    ],
+    "3692593863": [
+      38.7308653,
+      -9.415843
+    ],
+    "3692593864": [
+      38.7308086,
+      -9.4156723
+    ],
+    "3692593868": [
+      38.72931,
+      -9.4155348
+    ],
+    "3692593874": [
+      38.7299886,
+      -9.4156418
+    ],
+    "3692593888": [
+      38.7322713,
+      -9.4156579
+    ],
+    "3692593896": [
+      38.7324131,
+      -9.4157805
+    ],
+    "3692593898": [
+      38.7303101,
+      -9.4155571
+    ],
+    "3692593899": [
+      38.7298651,
+      -9.4156123
+    ],
+    "3692593903": [
+      38.7295722,
+      -9.4153951
+    ],
+    "3692593914": [
+      38.7309301,
+      -9.4156955
+    ],
+    "3692593916": [
+      38.7320454,
+      -9.4158779
+    ],
+    "3692593920": [
+      38.7291474,
+      -9.4155265
+    ],
+    "3692593931": [
+      38.729458,
+      -9.4153756
+    ],
+    "3692593953": [
+      38.7296935,
+      -9.4154165
+    ],
+    "3692610473": [
+      38.7333083,
+      -9.4152715
+    ],
+    "3692610478": [
+      38.7330727,
+      -9.4154433
+    ],
+    "3692610482": [
+      38.7330237,
+      -9.4154765
+    ],
+    "3692610521": [
+      38.733402,
+      -9.4151913
+    ],
+    "3692610524": [
+      38.7331941,
+      -9.4153602
+    ],
+    "3692611728": [
+      38.7329492,
+      -9.4155238
+    ],
+    "3692611733": [
+      38.7333147,
+      -9.4150753
+    ],
+    "3692611740": [
+      38.7332316,
+      -9.4153313
+    ],
+    "3692611777": [
+      38.7334078,
+      -9.4149891
+    ],
+    "3692611779": [
+      38.7331292,
+      -9.4154058
+    ],
+    "3692611811": [
+      38.733582,
+      -9.4148208
+    ],
+    "3692611812": [
+      38.7335986,
+      -9.4150043
+    ],
+    "3692611814": [
+      38.7335443,
+      -9.4148582
+    ],
+    "3692611833": [
+      38.7334942,
+      -9.4151089
+    ],
+    "3701043274": [
+      38.8149102,
+      -9.3489228
+    ],
+    "3701043275": [
+      38.8153318,
+      -9.3465031
+    ],
+    "3701043277": [
+      38.8154662,
+      -9.345732
+    ],
+    "3802585733": [
+      38.8045954,
+      -9.3616272
+    ],
+    "3802585734": [
+      38.8060129,
+      -9.3600954
+    ],
+    "3802585736": [
+      38.8063713,
+      -9.359626
+    ],
+    "3807693914": [
+      38.7823719,
+      -9.2921542
+    ],
+    "3807693915": [
+      38.7806588,
+      -9.2884846
+    ],
+    "3807693916": [
+      38.777638,
+      -9.2849377
+    ],
+    "3807693917": [
+      38.7737444,
+      -9.2806892
+    ],
+    "3807693918": [
+      38.7731836,
+      -9.2797362
+    ],
+    "3807693919": [
+      38.7723317,
+      -9.2786428
+    ],
+    "3865951909": [
+      38.73868,
+      -9.4041451
+    ],
+    "3865951910": [
+      38.7387205,
+      -9.4039823
+    ],
+    "3865951911": [
+      38.7385642,
+      -9.4040967
+    ],
+    "3865951912": [
+      38.7386064,
+      -9.4039298
+    ],
+    "4031272305": [
+      38.7678929,
+      -9.3714154
+    ],
+    "4031272307": [
+      38.7604334,
+      -9.3795374
+    ],
+    "4031272308": [
+      38.7682154,
+      -9.3711314
+    ],
+    "4031272314": [
+      38.7625915,
+      -9.3765638
+    ],
+    "4031272315": [
+      38.7606548,
+      -9.3791441
+    ],
+    "4031272319": [
+      38.7580362,
+      -9.3842751
+    ],
+    "4031272320": [
+      38.7623131,
+      -9.37686
+    ],
+    "4031272321": [
+      38.7614147,
+      -9.3779638
+    ],
+    "4031272322": [
+      38.7614935,
+      -9.3778558
+    ],
+    "4031272323": [
+      38.7576982,
+      -9.3849407
+    ],
+    "4031272324": [
+      38.7607304,
+      -9.3790144
+    ],
+    "4031272326": [
+      38.7610493,
+      -9.378501
+    ],
+    "4031272329": [
+      38.7612047,
+      -9.378267
+    ],
+    "4031272330": [
+      38.7605066,
+      -9.379406
+    ],
+    "4031272331": [
+      38.7617333,
+      -9.3775417
+    ],
+    "4031272332": [
+      38.7611271,
+      -9.3783831
+    ],
+    "4031272333": [
+      38.7603581,
+      -9.3796769
+    ],
+    "4031272335": [
+      38.7681001,
+      -9.3712324
+    ],
+    "4031272336": [
+      38.7683343,
+      -9.3710304
+    ],
+    "4031272337": [
+      38.7617988,
+      -9.377457
+    ],
+    "4031272338": [
+      38.7677049,
+      -9.3715856
+    ],
+    "4031272339": [
+      38.7624199,
+      -9.3767443
+    ],
+    "4031272340": [
+      38.7593332,
+      -9.3816939
+    ],
+    "4031272341": [
+      38.7602197,
+      -9.3799434
+    ],
+    "4031272342": [
+      38.7621313,
+      -9.3770627
+    ],
+    "4031272343": [
+      38.7599523,
+      -9.3804708
+    ],
+    "4031272344": [
+      38.7632649,
+      -9.3758852
+    ],
+    "4031272345": [
+      38.7668767,
+      -9.37235
+    ],
+    "4031272346": [
+      38.7587162,
+      -9.3829224
+    ],
+    "4031272347": [
+      38.7616573,
+      -9.3776399
+    ],
+    "4031272348": [
+      38.7672866,
+      -9.3719665
+    ],
+    "4031272349": [
+      38.7609688,
+      -9.3786255
+    ],
+    "4031272350": [
+      38.7615769,
+      -9.377745
+    ],
+    "4031272351": [
+      38.7620429,
+      -9.3771649
+    ],
+    "4031272352": [
+      38.7602891,
+      -9.3798083
+    ],
+    "4031272354": [
+      38.760584,
+      -9.3792665
+    ],
+    "4031272355": [
+      38.7670733,
+      -9.372165
+    ],
+    "4031272356": [
+      38.7622213,
+      -9.3769608
+    ],
+    "4031272357": [
+      38.7613273,
+      -9.3780865
+    ],
+    "4031272358": [
+      38.7629763,
+      -9.3761695
+    ],
+    "4031272361": [
+      38.7657612,
+      -9.3734362
+    ],
+    "4031272364": [
+      38.7608096,
+      -9.3788815
+    ],
+    "4031272365": [
+      38.7618639,
+      -9.3773756
+    ],
+    "4031272366": [
+      38.7664731,
+      -9.372739
+    ],
+    "4031272367": [
+      38.7627755,
+      -9.3763733
+    ],
+    "4031272369": [
+      38.767496,
+      -9.3717751
+    ],
+    "4031272370": [
+      38.7601591,
+      -9.3800641
+    ],
+    "4031272372": [
+      38.7619515,
+      -9.3772719
+    ],
+    "4031272373": [
+      38.7644696,
+      -9.374705
+    ],
+    "4031272376": [
+      38.7600925,
+      -9.3801946
+    ],
+    "4031272377": [
+      38.7608848,
+      -9.3787605
+    ],
+    "4031272379": [
+      38.7612602,
+      -9.3781842
+    ],
+    "4182561872": [
+      38.7797113,
+      -9.3636734
+    ],
+    "4182561873": [
+      38.7797301,
+      -9.3639283
+    ],
+    "4182561874": [
+      38.7799957,
+      -9.3635474
+    ],
+    "4182561883": [
+      38.7825044,
+      -9.362506
+    ],
+    "4182561884": [
+      38.7825681,
+      -9.362718
+    ],
+    "4192712929": [
+      38.7701228,
+      -9.2722517
+    ],
+    "4192712930": [
+      38.7703914,
+      -9.2725224
+    ],
+    "4192712931": [
+      38.7705353,
+      -9.2736101
+    ],
+    "4192712932": [
+      38.7707691,
+      -9.2734566
+    ],
+    "4192739508": [
+      38.7726046,
+      -9.2786472
+    ],
+    "4192739509": [
+      38.7726796,
+      -9.2793268
+    ],
+    "4192739510": [
+      38.7728445,
+      -9.279182
+    ],
+    "4192739517": [
+      38.7756358,
+      -9.2826566
+    ],
+    "4192739519": [
+      38.7757341,
+      -9.2827731
+    ],
+    "4192739520": [
+      38.7757041,
+      -9.2824223
+    ],
+    "4192739521": [
+      38.7759142,
+      -9.2829968
+    ],
+    "4192739522": [
+      38.7762488,
+      -9.2831035
+    ],
+    "4192739525": [
+      38.7777237,
+      -9.2853507
+    ],
+    "4317291598": [
+      38.7283236,
+      -9.4154444
+    ],
+    "4317291601": [
+      38.7284986,
+      -9.4153836
+    ],
+    "4341522093": [
+      38.7760142,
+      -9.3654926
+    ],
+    "4341522123": [
+      38.7725787,
+      -9.3677556
+    ],
+    "4341522132": [
+      38.7716985,
+      -9.3681912
+    ],
+    "4341522173": [
+      38.7717828,
+      -9.3683094
+    ],
+    "4341522182": [
+      38.7830161,
+      -9.3622619
+    ],
+    "4341522187": [
+      38.772448,
+      -9.3676695
+    ],
+    "4341522221": [
+      38.7776797,
+      -9.3645731
+    ],
+    "4341522226": [
+      38.7768121,
+      -9.3650677
+    ],
+    "4341522231": [
+      38.7780048,
+      -9.364726
+    ],
+    "4341522234": [
+      38.7738647,
+      -9.3669182
+    ],
+    "4341522235": [
+      38.7732104,
+      -9.3671564
+    ],
+    "4341522256": [
+      38.7760846,
+      -9.3656272
+    ],
+    "4341522257": [
+      38.7783735,
+      -9.3645726
+    ],
+    "6196126378": [
+      38.7857508,
+      -9.2962397
+    ],
+    "6196126400": [
+      38.7875175,
+      -9.2979218
+    ],
+    "6196126408": [
+      38.7881643,
+      -9.2994409
+    ],
+    "6196126431": [
+      38.7853811,
+      -9.295461
+    ],
+    "6510696052": [
+      38.7940952,
+      -9.3065917
+    ],
+    "6510696053": [
+      38.7937011,
+      -9.3068897
+    ],
+    "6510696055": [
+      38.7940578,
+      -9.3068944
+    ],
+    "6510696056": [
+      38.7933893,
+      -9.3068565
+    ],
+    "6516497178": [
+      38.7285259,
+      -9.4155799
+    ],
+    "7627962998": [
+      38.7896698,
+      -9.3577753
+    ],
+    "7627963049": [
+      38.7945168,
+      -9.359681
+    ],
+    "9514426358": [
+      38.8043382,
+      -9.3621906
+    ],
+    "9514426359": [
+      38.8032405,
+      -9.363048
+    ],
+    "9514441564": [
+      38.8045021,
+      -9.3620242
+    ],
+    "9514441565": [
+      38.8051244,
+      -9.3612697
+    ],
+    "9514441566": [
+      38.8053749,
+      -9.3609346
+    ],
+    "9514441569": [
+      38.8068565,
+      -9.3591079
+    ],
+    "9514441570": [
+      38.8070571,
+      -9.3589245
+    ],
+    "9514441571": [
+      38.8074739,
+      -9.3585882
+    ],
+    "9514441572": [
+      38.8076872,
+      -9.358435
+    ],
+    "9514441573": [
+      38.8079077,
+      -9.3582961
+    ],
+    "9514441591": [
+      38.8095383,
+      -9.3574828
+    ],
+    "9514441592": [
+      38.8090664,
+      -9.357693
+    ],
+    "9514441593": [
+      38.8100281,
+      -9.3572657
+    ],
+    "9514441594": [
+      38.8105006,
+      -9.3570512
+    ],
+    "9514441595": [
+      38.8110933,
+      -9.356757
+    ],
+    "9514441596": [
+      38.8112171,
+      -9.3566869
+    ],
+    "9514441597": [
+      38.8120008,
+      -9.3561411
+    ],
+    "9514441598": [
+      38.8122074,
+      -9.3559561
+    ],
+    "9514441599": [
+      38.8125141,
+      -9.3556555
+    ],
+    "9514441600": [
+      38.8128209,
+      -9.3553128
+    ],
+    "9514441601": [
+      38.8131909,
+      -9.3548394
+    ],
+    "9514441602": [
+      38.8136075,
+      -9.354197
+    ],
+    "9514441603": [
+      38.8140813,
+      -9.3532612
+    ],
+    "9514441604": [
+      38.8144251,
+      -9.3523442
+    ],
+    "9514475520": [
+      38.8099645,
+      -9.3570921
+    ],
+    "9514475521": [
+      38.8076762,
+      -9.3581931
+    ],
+    "9514475522": [
+      38.807901,
+      -9.3580531
+    ],
+    "9514475523": [
+      38.8083508,
+      -9.3578106
+    ],
+    "9514475524": [
+      38.8085794,
+      -9.3577005
+    ],
+    "9514475525": [
+      38.8091534,
+      -9.3574401
+    ],
+    "9514475526": [
+      38.8115879,
+      -9.3561605
+    ],
+    "9514475527": [
+      38.8111159,
+      -9.3564786
+    ],
+    "9514475528": [
+      38.8106666,
+      -9.3567749
+    ],
+    "9514484740": [
+      38.8065624,
+      -9.3590881
+    ],
+    "9514484741": [
+      38.8055973,
+      -9.3603036
+    ],
+    "9514484742": [
+      38.8054276,
+      -9.3605378
+    ],
+    "9514484743": [
+      38.8052639,
+      -9.3607611
+    ],
+    "9514484744": [
+      38.805094,
+      -9.3609914
+    ],
+    "9514484745": [
+      38.8047654,
+      -9.3614176
+    ],
+    "9514484746": [
+      38.8044508,
+      -9.3617931
+    ],
+    "9514484747": [
+      38.8043002,
+      -9.3619489
+    ],
+    "9514484748": [
+      38.8037313,
+      -9.3624725
+    ],
+    "9514484751": [
+      38.8030495,
+      -9.3629132
+    ],
+    "9514484752": [
+      38.8021929,
+      -9.3632889
+    ],
+    "9514484753": [
+      38.80167,
+      -9.3634292
+    ],
+    "9514484754": [
+      38.8015636,
+      -9.3634512
+    ],
+    "9514484757": [
+      38.8011099,
+      -9.363507
+    ],
+    "9514484758": [
+      38.8004109,
+      -9.3635047
+    ],
+    "9514484759": [
+      38.799625,
+      -9.3633682
+    ],
+    "9514801171": [
+      38.8126694,
+      -9.3551372
+    ],
+    "9514801172": [
+      38.8123572,
+      -9.3554716
+    ],
+    "9514801173": [
+      38.8130789,
+      -9.3546456
+    ],
+    "9514801174": [
+      38.8132287,
+      -9.3544385
+    ],
+    "9514801175": [
+      38.8135442,
+      -9.35393
+    ],
+    "9514801176": [
+      38.8145598,
+      -9.3509739
+    ],
+    "9514801177": [
+      38.8147206,
+      -9.3500264
+    ],
+    "9514801178": [
+      38.814992,
+      -9.3484548
+    ],
+    "9514801179": [
+      38.8150755,
+      -9.3479764
+    ],
+    "9514801180": [
+      38.8151561,
+      -9.3475141
+    ],
+    "9514801181": [
+      38.8152399,
+      -9.3470295
+    ],
+    "9514801182": [
+      38.8156308,
+      -9.3460144
+    ],
+    "9514801183": [
+      38.8153621,
+      -9.3475526
+    ],
+    "9514801184": [
+      38.8152516,
+      -9.3481882
+    ],
+    "9514801185": [
+      38.8153067,
+      -9.3478698
+    ],
+    "9514801186": [
+      38.8150525,
+      -9.3493301
+    ],
+    "9514801187": [
+      38.8149135,
+      -9.3501229
+    ],
+    "9514801188": [
+      38.8148054,
+      -9.350734
+    ],
+    "9514801189": [
+      38.8147163,
+      -9.3512024
+    ],
+    "9514801190": [
+      38.8146455,
+      -9.3515296
+    ],
+    "9514801191": [
+      38.8144982,
+      -9.3521009
+    ],
+    "9514801192": [
+      38.8143797,
+      -9.3524826
+    ],
+    "9514801193": [
+      38.8144627,
+      -9.352222
+    ],
+    "9514801194": [
+      38.8141674,
+      -9.3530562
+    ],
+    "9514801195": [
+      38.8139421,
+      -9.3535664
+    ],
+    "9514915768": [
+      38.7731507,
+      -9.2800178
+    ],
+    "9514915771": [
+      38.7730065,
+      -9.2798252
+    ],
+    "9514915772": [
+      38.7724392,
+      -9.2788768
+    ],
+    "9514915773": [
+      38.7735143,
+      -9.2804489
+    ],
+    "9514915775": [
+      38.7751017,
+      -9.2820338
+    ],
+    "9514935656": [
+      38.7701622,
+      -9.2719582
+    ],
+    "9514970435": [
+      38.7733041,
+      -9.2798917
+    ],
+    "9514970436": [
+      38.7737624,
+      -9.2804269
+    ],
+    "9514970437": [
+      38.7736207,
+      -9.2802715
+    ],
+    "9514970438": [
+      38.7727063,
+      -9.2789012
+    ],
+    "9516311975": [
+      38.7745462,
+      -9.2811983
+    ],
+    "9516311978": [
+      38.7752958,
+      -9.2822462
+    ],
+    "9516311979": [
+      38.7749379,
+      -9.2818618
+    ],
+    "9516324070": [
+      38.777275,
+      -9.2844783
+    ],
+    "9516324072": [
+      38.7774591,
+      -9.2847152
+    ],
+    "9516324073": [
+      38.7778236,
+      -9.2851678
+    ],
+    "9516324074": [
+      38.7782097,
+      -9.2856175
+    ],
+    "9516324076": [
+      38.7783136,
+      -9.2860277
+    ],
+    "9516324077": [
+      38.7785984,
+      -9.2863341
+    ],
+    "9516324078": [
+      38.7788958,
+      -9.2863645
+    ],
+    "9516324079": [
+      38.7794257,
+      -9.2869061
+    ],
+    "9517015745": [
+      38.7822103,
+      -9.2918982
+    ],
+    "9517015746": [
+      38.7818454,
+      -9.2912395
+    ],
+    "9517015747": [
+      38.7816365,
+      -9.290826
+    ],
+    "9517015748": [
+      38.7814386,
+      -9.2904113
+    ],
+    "9517015749": [
+      38.78111,
+      -9.2897154
+    ],
+    "9517015750": [
+      38.7809765,
+      -9.2894377
+    ],
+    "9517015751": [
+      38.7806709,
+      -9.2888716
+    ],
+    "9517015752": [
+      38.7803721,
+      -9.2883919
+    ],
+    "9517015753": [
+      38.7802,
+      -9.2881396
+    ],
+    "9517015754": [
+      38.7828516,
+      -9.292513
+    ],
+    "9517015756": [
+      38.7822708,
+      -9.2916322
+    ],
+    "9517015757": [
+      38.7821164,
+      -9.2913612
+    ],
+    "9517015758": [
+      38.7819039,
+      -9.2909524
+    ],
+    "9517015759": [
+      38.7815675,
+      -9.2902525
+    ],
+    "9517015760": [
+      38.7813669,
+      -9.289829
+    ],
+    "9517015761": [
+      38.7812369,
+      -9.2895528
+    ],
+    "9517015762": [
+      38.7811009,
+      -9.2892767
+    ],
+    "9517015763": [
+      38.7807881,
+      -9.2886961
+    ],
+    "9517015764": [
+      38.7804941,
+      -9.2882289
+    ],
+    "9517015765": [
+      38.7803218,
+      -9.2879849
+    ],
+    "9517015766": [
+      38.7801525,
+      -9.287754
+    ],
+    "9517015767": [
+      38.7797733,
+      -9.2872964
+    ],
+    "9517015768": [
+      38.7784982,
+      -9.2859439
+    ],
+    "9517033156": [
+      38.77984,
+      -9.2876754
+    ],
+    "9517033157": [
+      38.7796626,
+      -9.2874681
+    ],
+    "9517033158": [
+      38.7791836,
+      -9.2869527
+    ],
+    "9517033160": [
+      38.7780226,
+      -9.2857019
+    ],
+    "9517033161": [
+      38.7770344,
+      -9.2844693
+    ],
+    "9517033162": [
+      38.7764155,
+      -9.2836495
+    ],
+    "10734941134": [
+      38.8004101,
+      -9.3059603
+    ],
+    "10734941135": [
+      38.800079,
+      -9.3057774
+    ],
+    "10734941136": [
+      38.7994205,
+      -9.3055466
+    ],
+    "10734941137": [
+      38.7991276,
+      -9.3054977
+    ],
+    "10734941139": [
+      38.7997611,
+      -9.3053676
+    ],
+    "10734941140": [
+      38.7990752,
+      -9.3052033
+    ],
+    "10734941141": [
+      38.8014946,
+      -9.3065806
+    ],
+    "10734941142": [
+      38.8008311,
+      -9.3059361
+    ],
+    "10786798344": [
+      38.8173921,
+      -9.3241642
+    ],
+    "10819355044": [
+      38.7948917,
+      -9.3068268
+    ],
+    "10819355045": [
+      38.7949388,
+      -9.3065414
+    ],
+    "10819355046": [
+      38.7951437,
+      -9.3065029
+    ],
+    "10819355047": [
+      38.7954543,
+      -9.3066715
+    ],
+    "10819355048": [
+      38.7938848,
+      -9.3068991
+    ],
+    "10819355049": [
+      38.7937675,
+      -9.3065854
+    ],
+    "10819355050": [
+      38.7930913,
+      -9.3064982
+    ],
+    "10824104913": [
+      38.7984914,
+      -9.3051768
+    ],
+    "10824104914": [
+      38.7988942,
+      -9.3051827
+    ],
+    "10824104915": [
+      38.799523,
+      -9.3052873
+    ],
+    "10824104916": [
+      38.8000298,
+      -9.3054603
+    ],
+    "10824104917": [
+      38.8005471,
+      -9.305734
+    ],
+    "10824104936": [
+      38.8020832,
+      -9.3074786
+    ],
+    "10824104937": [
+      38.8019231,
+      -9.3076613
+    ],
+    "10824104977": [
+      38.7973314,
+      -9.3057867
+    ],
+    "10824104978": [
+      38.7977962,
+      -9.3056178
+    ],
+    "10824104979": [
+      38.7979914,
+      -9.3055581
+    ],
+    "10824104980": [
+      38.7971506,
+      -9.305577
+    ],
+    "10824108545": [
+      38.7886276,
+      -9.3000408
+    ],
+    "10824108546": [
+      38.7883792,
+      -9.2994255
+    ],
+    "10824108547": [
+      38.7881733,
+      -9.299
+    ],
+    "10824108548": [
+      38.7878348,
+      -9.2983908
+    ],
+    "10824108549": [
+      38.7877314,
+      -9.2986179
+    ],
+    "10824108550": [
+      38.7874161,
+      -9.2981367
+    ],
+    "10827393927": [
+      38.7829784,
+      -9.3622784
+    ],
+    "10957871073": [
+      38.7373455,
+      -9.40898
+    ],
+    "10957871074": [
+      38.7374136,
+      -9.4084017
+    ],
+    "10957871075": [
+      38.737205,
+      -9.4089828
+    ],
+    "10957871076": [
+      38.7369527,
+      -9.4095671
+    ],
+    "10957871077": [
+      38.7367498,
+      -9.4099638
+    ],
+    "12120753653": [
+      38.7901057,
+      -9.3577414
+    ],
+    "12812454996": [
+      38.7388881,
+      -9.402874
+    ],
+    "12812454997": [
+      38.7376796,
+      -9.4074445
+    ],
+    "12812454999": [
+      38.7361264,
+      -9.4109997
+    ],
+    "12812455000": [
+      38.7357279,
+      -9.4116267
+    ],
+    "13009960949": [
+      38.7369121,
+      -9.4099389
+    ],
+    "13009960950": [
+      38.8012558,
+      -9.3066823
+    ],
+    "13009960951": [
+      38.8006829,
+      -9.3061479
+    ],
+    "13009960952": [
+      38.8012561,
+      -9.3063201
+    ],
+    "13009960953": [
+      38.7939267,
+      -9.3065911
+    ],
+    "13009960954": [
+      38.7929027,
+      -9.306727
+    ],
+    "13009960955": [
+      38.7928295,
+      -9.3064171
+    ],
+    "13009960956": [
+      38.7925319,
+      -9.3062954
+    ],
+    "13009960957": [
+      38.7883082,
+      -9.2997795
+    ],
+    "13009960958": [
+      38.7886485,
+      -9.300768
+    ],
+    "13009960959": [
+      38.7885433,
+      -9.3004306
+    ],
+    "13076514238": [
+      38.7722805,
+      -9.2785155
+    ],
+    "13076514239": [
+      38.7890647,
+      -9.302266
+    ],
+    "13076514240": [
+      38.8150537,
+      -9.3199608
+    ],
+    "13076514241": [
+      38.8174357,
+      -9.3344086
+    ],
+    "13076514242": [
+      38.8170408,
+      -9.3366267
+    ],
+    "13076514243": [
+      38.8168349,
+      -9.3377825
+    ],
+    "13076514244": [
+      38.7758526,
+      -9.3655823
+    ],
+    "13076514245": [
+      38.7752225,
+      -9.3659337
+    ],
+    "13076514246": [
+      38.7766192,
+      -9.3651704
+    ],
+    "13076514247": [
+      38.7486949,
+      -9.3901831
+    ],
+    "13076514248": [
+      38.7483811,
+      -9.3903413
+    ],
+    "13076514249": [
+      38.7283891,
+      -9.4154216
+    ],
+    "13076514250": [
+      38.7775743,
+      -9.3646328
+    ],
+    "13076514251": [
+      38.7773593,
+      -9.3649918
+    ],
+    "13076514252": [
+      38.80565,
+      -9.3605541
+    ],
+    "13076514253": [
+      38.8058737,
+      -9.3602733
+    ],
+    "13076514254": [
+      38.8100791,
+      -9.3570423
+    ],
+    "13076514255": [
+      38.8070149,
+      -9.3586631
+    ],
+    "13207597630": [
+      38.8182226,
+      -9.3268622
+    ],
+    "13357445878": [
+      38.8001967,
+      -9.3636849
+    ]
+  },
+  "chargeCandidates": [
+    {
+      "id": 469970704,
+      "lat": 38.778564,
+      "lon": -9.3641154,
+      "timestamp": "2013-08-23T12:53:02Z",
+      "version": 3,
+      "tags": {
+        "barrier": "toll_booth"
+      }
+    },
+    {
+      "id": 517256487,
+      "lat": 38.7713042,
+      "lon": -9.2749489,
+      "timestamp": "2022-02-17T21:11:22Z",
+      "version": 6,
+      "tags": {
+        "barrier": "toll_booth"
+      }
+    },
+    {
+      "id": 522464085,
+      "lat": 38.7710606,
+      "lon": -9.2751133,
+      "timestamp": "2022-02-17T21:11:22Z",
+      "version": 10,
+      "tags": {
+        "barrier": "toll_booth"
+      }
+    },
+    {
+      "id": 889028787,
+      "lat": 38.7786576,
+      "lon": -9.3644471,
+      "timestamp": "2016-08-08T18:14:18Z",
+      "version": 3,
+      "tags": {
+        "barrier": "toll_booth"
+      }
+    },
+    {
+      "id": 2327143697,
+      "lat": 38.8181151,
+      "lon": -9.3317333,
+      "timestamp": "2013-05-31T13:18:26Z",
+      "version": 1,
+      "tags": {
+        "barrier": "toll_booth"
+      }
+    },
+    {
+      "id": 2327143698,
+      "lat": 38.8179116,
+      "lon": -9.3316743,
+      "timestamp": "2013-05-31T13:18:26Z",
+      "version": 1,
+      "tags": {
+        "barrier": "toll_booth"
+      }
+    }
+  ]
+}
