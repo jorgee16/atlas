@@ -71,7 +71,10 @@ int main(int argc,char** argv){try{
  check(tickets.entryExitFare({"brisa-published","0311","0316"},1)==3.85,"official Maia PV-Braga Sul published pair");
  check(tickets.entryExitFare({"brisa-published","0311","0316"},4)==9.60,"official class4 independent price");
  check(tickets.entryExitFare({"brisa-published","1411","0117"},1)==2.90,"official A14 pair");
- check(!tickets.entryExitFare({"brisa-published","0211","0222"},1),"south source date discrepancy is withheld");
+ check(tickets.entryExitFare({"brisa-published","0211","0222"},1)==23.80,"independently 2026-corroborated Coina-Paderne class1 fare");
+ check(tickets.entryExitFare({"brisa-published","0211","0222"},2)==41.65,"South class2 is published independently");
+ check(tickets.entryExitFare({"brisa-published","0211","0222"},3)==53.50,"South class3 is published independently");
+ check(tickets.entryExitFare({"brisa-published","0222","0211"},4)==59.50,"reverse South pair is independently present");
  check(!tickets.entryExitFare({"other","0311","0316"},1)&&!tickets.entryExitFare({"brisa-published","0311","0316"},5),"network and class cannot fall back");
  check(tickets.sumEntryExitFares({{"brisa-published","0311","0316"},{"brisa-published","0311","0316"}},1)==7.70,"repeated actual journeys are charged twice");
  auto unapproved=ticketBuffer.str();unapproved.replace(unapproved.find("# status=active"),15,"# status=candidate");

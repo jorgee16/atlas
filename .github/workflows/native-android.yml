@@ -101,6 +101,7 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Validate common offline country tariffs and web pricing
         run: |
+          python3 -m pip install 'PyMuPDF==1.26.5'
           python3 tools/generate-toll-bundle.py --check
           python3 tools/toll-catalog.py
           python3 tools/toll-catalog.py --source android/native-app/src/main/assets/toll-charges --namespace toll-charges
@@ -506,6 +507,11 @@ jobs:
           cd dist/android-validated
           sha256sum --check "Atlas-v$RELEASE_VERSION.apk.sha256"
           tag="atlas-android-v$RELEASE_VERSION"
+          release_notes="$GITHUB_WORKSPACE/docs/releases/Atlas-v$RELEASE_VERSION.md"
+          if [[ ! -f "$release_notes" ]]; then
+            release_notes="$RUNNER_TEMP/atlas-release-notes.md"
+            printf '%s\n' "Signed Android Release (versionCode $RELEASE_CODE). Native C++ tests, Android navigation/GPS emulator tests, certificate and in-place-upgrade checks passed. Preserve this signing key for future updates." > "$release_notes"
+          fi
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "::error::Refusing to overwrite existing release $tag"
             exit 1
@@ -517,7 +523,7 @@ jobs:
           for attempt in 1 2 3; do
             if gh release create "$tag" "Atlas-v$RELEASE_VERSION.apk" "Atlas-v$RELEASE_VERSION.apk.sha256" release-manifest.json \
                 --target "$GITHUB_SHA" --title "Atlas v$RELEASE_VERSION" \
-                --notes "Signed Android Release (versionCode $RELEASE_CODE). Native C++ tests, Android navigation/GPS emulator tests, certificate and in-place-upgrade checks passed. Preserve this signing key for future updates." \
+                --notes-file "$release_notes" \
                 --prerelease; then
               published=true
               break
@@ -1088,7 +1094,7 @@ jobs:
           PYCODE
       - name: Validate original PDF origin/destination cells
         run: |
-          python3 tools/import-brisa-fares.py national-toll-audit/brisa-august-pdf.pdf --out national-toll-audit/Portugal-fares.csv --active-out national-toll-audit/Portugal-active.csv --active-audit national-toll-audit/Portugal-active.audit.json
+          python3 tools/import-brisa-fares.py national-toll-audit/brisa-august-pdf.pdf --out national-toll-audit/Portugal-fares.csv --south-corroboration docs/data/toll-evidence/Portugal/2026-11-02/brisa-march-2026.pdf --active-out national-toll-audit/Portugal-active.csv --active-audit national-toll-audit/Portugal-active.audit.json
           cmp docs/data/toll-candidates/Portugal.csv national-toll-audit/Portugal-fares.csv
           cmp docs/data/toll-candidates/Portugal.audit.json national-toll-audit/Portugal-fares.audit.json
           cmp android/native-app/src/main/assets/toll-fares/Portugal.csv national-toll-audit/Portugal-active.csv

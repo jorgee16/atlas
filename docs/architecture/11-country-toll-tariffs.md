@@ -138,7 +138,7 @@ this bundle. Existing Android confirmed-only preview and exact crossing gates
 remain authoritative; GPS, map matching, routing weights and route geometry
 are not changed by the evidence intake.
 
-### Entry/exit matrices (revision 2026102701)
+### Entry/exit matrices (revision 2026110201)
 
 The third scheme is `entry-exit`, with columns
 `network;entry;exit;class1;class2;...`. Country, currency, precision, classes and
@@ -153,14 +153,20 @@ Settings provides optional entry/exit updates and rollback. Switching countries
 clears matrix, fixed and crossing state. The web bundle is generated from the
 same approved asset, with no independent price constants.
 
-Portugal bundles **3,270 pairs / 13,080 independently published class cells** from
-the Brisa north, center and Brisal matrices, effective 26 August 2026. The lookup
+Portugal bundles **4,166 pairs / 16,664 independently published class values** from
+the Brisa north, center, Brisal and South matrices. North/center/Brisal use the
+26 August 2026 publication. South's 900 directed pairs are independently
+corroborated cell-for-cell against the March publication, whose pages 9–10
+explicitly state 8 January 2026; four overlapping pairs agree and are deduplicated.
+The [South source review](../data/toll-evidence/Portugal/2026-11-02/README.md)
+preserves the original PDF, hashes, provenance, validation and limits. The lookup
 namespace `brisa-published` identifies the published matrix, not a motorway or a
 guess at concession topology. All original matrix domains remain in the audit.
-The 900 southern pairs are withheld because their pages explicitly state 2025.
+The primary August South heading still states 2025; it is never the sole basis
+for activation. All 3,600 South class cells must agree with the pinned explicit-2026 source.
 `docs/data/portugal-entry-exit-2026-audit.json` binds the approved subset to the
 reviewed source PDF and CSV hashes. Reproduce it with `tools/import-brisa-fares.py`
-and its `--active-out` / `--active-audit` arguments. Candidate tables marked with
+and its `--south-corroboration`, `--active-out` / `--active-audit` arguments. Candidate tables marked with
 an unapproved `status` are rejected by C++, Kotlin, web and the packager.
 
 JNI loads this provider before route calculation. Exact pricing requires a fully

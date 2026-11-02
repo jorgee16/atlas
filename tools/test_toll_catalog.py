@@ -198,11 +198,14 @@ class OfficialMatrixCellTests(unittest.TestCase):
         assets=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
         audit=json.loads((ROOT.parent/'docs/data/portugal-entry-exit-2026-audit.json').read_text())
         self.assertEqual(hashlib.sha256(assets.read_bytes()).hexdigest(),audit['catalogSha256'])
-        self.assertEqual(3270,audit['farePairs']);self.assertEqual(13080,audit['sourceCells'])
-        self.assertIn('south',audit['excludedDomains'])
+        self.assertEqual(4166,audit['farePairs']);self.assertEqual(16664,audit['sourceCells'])
+        self.assertEqual({},audit['excludedDomains'])
+        self.assertEqual(3600,audit['southCorroboration']['matchedClassCells'])
+        self.assertEqual(4,audit['consistentOverlappingPairs'])
+        self.assertEqual(896,audit['newPublishedPairs'])
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);manifest=pack.package(assets,root,'toll-fares')
-            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(3270,manifest['journeyCount'])
+            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(4166,manifest['journeyCount'])
             storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-fares')
             self.assertEqual('toll-fares/Portugal/manifest.json',storage.writes[-1])
             self.assertTrue(all(k.startswith('toll-fares/') for k in storage.writes))
@@ -218,6 +221,41 @@ class OfficialMatrixCellTests(unittest.TestCase):
             for invalid in [text+'n;a;b;1;2\n',text.replace('125;271',';271'),text+'# status=candidate\n',text.replace('125;271','1.25;271')]:
                 source.write_text(invalid)
                 with self.assertRaises(ValueError):pack.package(source,root,'toll-fares')
+
+    def test_all_south_cells_require_independent_2026_pdf_corroboration(self):
+        import csv
+        from decimal import Decimal
+        assets=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
+        rows=csv.DictReader([s for s in assets.read_text().splitlines() if s and not s.startswith('#')],delimiter=';')
+        expected={('south',r['entry'],r['exit']):{c:Decimal(r['class'+str(c)]) for c in (1,2,3,4)} for r in rows}
+        pdf=ROOT.parent/'docs/data/toll-evidence/Portugal/2026-11-02/brisa-march-2026.pdf'
+        # Compare against the full active catalog after selecting the actual
+        # source domain. No missing pair or class can be inferred from a road.
+        import pymupdf
+        cells=[]
+        document=pymupdf.open(pdf)
+        for page in (document[8],document[9]):
+            spans=[{'text':s['text'],'bbox':s['bbox'],'dir':line['dir']} for block in page.get_text('dict')['blocks'] if 'lines' in block for line in block['lines'] for s in line['spans']]
+            values,_=self.extractor.extract_page(spans);cells.extend(values)
+        keys={(a,b) for a,b,_,_ in cells}
+        expected={key:v for key,v in expected.items() if key[1:] in keys}
+        result=self.extractor.read_south_corroboration(pdf,expected)
+        self.assertEqual(3600,result['matchedClassCells'])
+        self.assertEqual(900,result['publishedDirectedPairs'])
+        for failure in ('missing','duplicate','price','direction'):
+            wrong=list(cells)
+            if failure=='missing':wrong.pop()
+            elif failure=='duplicate':wrong[-1]=wrong[0]
+            elif failure=='price':
+                a,b,c,p=wrong[0];wrong[0]=(a,b,c,p+Decimal('.05'))
+            else:
+                a,b,c,p=wrong[0];wrong[0]=('unpublished',b,c,p)
+            with self.subTest(failure=failure),self.assertRaises(ValueError):
+                self.extractor.corroborate_south(wrong,expected)
+        with tempfile.TemporaryDirectory() as tmp:
+            corrupt=Path(tmp)/'changed.pdf';corrupt.write_bytes(pdf.read_bytes()+b'\n')
+            with self.assertRaisesRegex(ValueError,'changed'):
+                self.extractor.read_south_corroboration(corrupt,expected)
 
     def setUp(self):
         self.extractor=module('import-brisa-fares')

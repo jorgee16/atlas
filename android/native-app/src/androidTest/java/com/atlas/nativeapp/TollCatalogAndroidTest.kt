@@ -17,10 +17,14 @@ class TollCatalogAndroidTest {
         val context=InstrumentationRegistry.getInstrumentation().targetContext
         val bytes=context.assets.open("toll-fares/Portugal.csv").use { it.readBytes() }
         val catalog=TollCatalog.parse("Portugal",bytes,"bundled")
-        assertEquals("entry-exit",catalog.scheme);assertEquals(3270,catalog.entryExitFares.size)
+        assertEquals("entry-exit",catalog.scheme);assertEquals(4166,catalog.entryExitFares.size)
         val braga=catalog.entryExitFares.first { it.network=="brisa-published"&&it.entry=="0311"&&it.exit=="0316" }
         assertEquals(java.math.BigDecimal("3.85"),braga.amounts[1])
-        assertFalse(catalog.entryExitFares.any { it.entry=="0211"&&it.exit=="0222" })
+        val south=catalog.entryExitFares.first { it.network=="brisa-published"&&it.entry=="0211"&&it.exit=="0222" }
+        assertEquals(java.math.BigDecimal("23.80"),south.amounts[1])
+        assertEquals(java.math.BigDecimal("41.65"),south.amounts[2])
+        assertEquals(java.math.BigDecimal("53.50"),south.amounts[3])
+        assertEquals(java.math.BigDecimal("59.50"),south.amounts[4])
         NativeCore().use { core ->
             core.tariffs("Portugal",null);core.entryExitTariffs("Portugal",bytes)
             core.tariffs("Spain",null)

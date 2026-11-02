@@ -1,18 +1,31 @@
 {
   "country": "Portugal",
-  "revision": 2026102701,
+  "revision": 2026110201,
   "network": "brisa-published",
   "sourceSha256": "dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274",
-  "catalogSha256": "c9d37d8a30fadd6a2076efb6f52826065e45bb6cc33b9fa14297baf3f856a83a",
-  "farePairs": 3270,
-  "sourceCells": 13080,
+  "catalogSha256": "5ba77770f12caa2c21ce1fffc701780c558813b3f7e0b5820ecd10ed640b5fc7",
+  "farePairs": 4166,
+  "sourceCells": 16664,
   "includedDomains": [
     "brisal",
     "center",
-    "north"
+    "north",
+    "south"
   ],
-  "excludedDomains": {
-    "south": "Source pages 9-10 state 01-01-2025"
+  "excludedDomains": {},
+  "routePricing": "Exact only with complete reviewed directed entry/exit crossing evidence; no national bindings are activated by this file",
+  "southCorroboration": {
+    "source": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_04032026_v4.pdf",
+    "sourceSha256": "83e2d5b9f539f52057dd4f58261419c600c9656fd58cd48782eb73f2f60b9752",
+    "effectiveFrom": "2026-01-08",
+    "pages": [
+      9,
+      10
+    ],
+    "matchedClassCells": 3600,
+    "publishedDirectedPairs": 900
   },
-  "routePricing": "Exact only with complete reviewed directed entry/exit crossing evidence; no national bindings are activated by this file"
+  "consistentOverlappingPairs": 4,
+  "observedSourceClassCells": 16680,
+  "newPublishedPairs": 896
 }

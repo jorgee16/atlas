@@ -22,7 +22,9 @@ test('official entry/exit catalog is directed and cannot become a km estimate', 
   assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0311',exit:'0316'},1),3.85);
   assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0311',exit:'0316'},4),9.60);
   assert.equal(pt.entryExitFare({network:'brisa-published',entry:'1411',exit:'0117'},1),2.90);
-  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0211',exit:'0222'},1),null);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0211',exit:'0222'},1),23.8);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0211',exit:'0222'},2),41.65);
+  assert.equal(pt.entryExitFare({network:'brisa-published',entry:'0222',exit:'0211'},4),59.5);
   assert.equal(countryTollFares('Spain'),null);
 });
 test('another country can supply asymmetric entry/exit fares without guessed reverse or zero cells', () => {
