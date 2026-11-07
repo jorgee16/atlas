@@ -286,9 +286,10 @@ bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
   if(proof->chargeIds.empty()&&!needsTickets&&route.tolledMeters<=0){route.tollPricingReason.clear();return false;}
   route.tollEuros=double(units)/scale;route.tollPriceExact=true;route.tollPriceComplete=true;
   route.tollPricingReason.clear();route.pricedTollMeters=route.tolledMeters;route.referenceTollMeters=0;
-  route.tollRoads=std::move(breakdown);route.tollCountry=identity->country;route.tollCurrency=identity->currency;
-  route.tollYear=identity->year;route.tollFractionDigits=identity->fractionDigits;
-  route.tollVehicleClasses=identity->classes;route.tollSource=identity->source;route.tollVersion=identity->version;
+  const auto *usedIdentity=needsTickets&&fixedIds.empty()?fares:fixed?fixed:fares;
+  route.tollRoads=std::move(breakdown);route.tollCountry=usedIdentity->country;route.tollCurrency=usedIdentity->currency;
+  route.tollYear=usedIdentity->year;route.tollFractionDigits=usedIdentity->fractionDigits;
+  route.tollVehicleClasses=usedIdentity->classes;route.tollSource=usedIdentity->source;route.tollVersion=usedIdentity->version;
   if(fixed&&fares&&!fixedIds.empty()&&needsTickets){route.tollSource=fixed->source+"\n"+fares->source;
     route.tollVersion=fixed->version+"+"+fares->version;}
   return true;

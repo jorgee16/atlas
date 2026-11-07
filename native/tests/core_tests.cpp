@@ -190,6 +190,10 @@ int main(int argc, char **argv) {
        {first.edge,first.from,first.to,full/2,"fixed:one",full},
        {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,
       {{first.edge,first.from,first.to,full/3,full,"network"},{last.edge,last.from,last.to,0,lastFull/3,"network"}});
+    auto pureTicket=*tolled;pureTicket.tollCountry="Testland";
+    check(applyTollCharges(toll,pureTicket,&fixedYen,&ticketFixture,ticketProof,identity)&&
+          pureTicket.tollSource==ticketFixture.source&&pureTicket.tollVersion==ticketFixture.version,
+          "a ticket-only trip reports the fare provider actually used, not the unrelated fixed catalog");
     auto combined=*tolled;combined.tollCountry="Testland";
     check(applyTollCharges(toll,combined,&fixedYen,&ticketFixture,mixed,identity)&&combined.tollEuros==165,
           "one ordered proof composes fixed and ticket charges exactly once");
