@@ -1058,10 +1058,13 @@ class NavigationGpsReplayTest {
                             }
                         }
                     } else if(row[6]=="none") {
-                        assertFalse("A free traversal must retain its none state",accepted)
+                        // This Boolean validates the graph evidence, not a
+                        // charge. Valid reviewed free geometry must load too.
+                        assertTrue("Reviewed free traversal evidence must validate",accepted)
                         assertEquals("none",after.getString("tollPricing"))
                         assertEquals(0.0,after.getDouble("tollAmount"),1e-9)
                         assertEquals(0.0,after.getDouble("tolledMeters"),1e-9)
+                        assertFalse("Valid evidence must not invent a toll",after.getBoolean("hasTolls"))
                     } else {
                         assertFalse("Unreviewed city approaches cannot become exact",accepted)
                         assertNotEquals("exact",after.getString("tollPricing"))
