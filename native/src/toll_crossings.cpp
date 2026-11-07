@@ -212,6 +212,15 @@ bool applyEntryExitTollCharges(const Graph &graph,Route &route,const TollTariffs
     const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph) {
   return applyTollCharges(graph,route,nullptr,&prices,matcher,actualGraph);
 }
+void invalidateTollQuote(Route &route,const std::string &reason,bool dropGraphEvidence) {
+  route.tollPricingReason=reason;route.tollPriceComplete=false;route.tollPriceExact=false;
+  route.tollRoads.clear();route.pricedTollMeters=0;route.referenceTollMeters=0;
+  if(dropGraphEvidence){
+    route.tollCoverageVerified=false;route.tollCrossingsVerified=false;
+    route.tollNetworkTraversal=false;route.tollFlagsDisproved=false;
+    route.tollUnreviewedEdges=0;route.firstUnreviewedTollEdge=-1;
+  }
+}
 bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
     const TollTariffs *fares,const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph) {
   if(!fixed&&!fares)return false;
@@ -220,8 +229,7 @@ bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
   route.tollCoverageVerified=false;route.tollCrossingsVerified=false;
   route.tollNetworkTraversal=false;route.tollFlagsDisproved=false;route.tollUnreviewedEdges=0;route.firstUnreviewedTollEdge=-1;
   const auto fail=[&](std::string reason){
-    route.tollPricingReason=reason;route.tollPriceComplete=false;route.tollPriceExact=false;
-    route.tollRoads.clear();route.pricedTollMeters=0;route.referenceTollMeters=0;
+    invalidateTollQuote(route,reason);
     return false;
   };
   if(identity->country!=route.tollCountry)return fail("country");

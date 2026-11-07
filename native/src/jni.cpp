@@ -25,6 +25,7 @@ struct Engine {
   std::optional<atlas::TollTariffs> entryExitTariffs;
   std::optional<atlas::TollCrossingMatcher> crossings;
   atlas::TollGraphDigests loadedGraphDigests;
+  std::string tollEvidenceFailure="missing_mapping";
 };
 std::mutex gate;
 std::map<jlong, std::unique_ptr<Engine>> engines;
@@ -423,7 +424,7 @@ Java_com_atlas_nativeapp_NativeCore_loadTollBindings(JNIEnv *env,jobject,jlong i
     jstring country,jstring directory,jbyteArray payload,jobjectArray actualHashes) {
   try {
     std::lock_guard<std::mutex> lock(gate);auto &e=engine(id);
-    e.crossings.reset();e.loadedGraphDigests.clear();
+    e.crossings.reset();e.loadedGraphDigests.clear();e.tollEvidenceFailure="missing_mapping";
     const auto size=payload?env->GetArrayLength(payload):0;if(!size)return;
     if(!e.graph||(!e.fixedTariffs&&!e.entryExitTariffs)||string(env,country)!=e.tariffCountry||string(env,directory)!=e.graphPath)
       throw std::invalid_argument("Crossing proof differs from loaded graph/country");
@@ -436,7 +437,8 @@ Java_com_atlas_nativeapp_NativeCore_loadTollBindings(JNIEnv *env,jobject,jlong i
     }
     std::string csv(size,'\0');env->GetByteArrayRegion(payload,0,size,reinterpret_cast<jbyte*>(csv.data()));
     auto proof=atlas::TollCrossingMatcher::parse(csv);
-    if(!proof.match(actual,e.tariffCountry,{}))throw std::invalid_argument("Unreviewed/mismatched graph crossing evidence");
+    if(!proof.match(actual,e.tariffCountry,{},&e.tollEvidenceFailure))
+      throw std::invalid_argument("Unreviewed/mismatched graph crossing evidence");
     proof.validateGraph(*e.graph);
     e.crossings=std::move(proof);e.loadedGraphDigests=std::move(actual);
   } catch(const std::exception &errorValue) {error(env,errorValue);}
@@ -449,6 +451,8 @@ Java_com_atlas_nativeapp_NativeCore_priceCurrentRoute(JNIEnv *env,jobject,jlong 
     if(e.crossings)
       atlas::applyTollCharges(*e.graph,*e.route,e.fixedTariffs?&*e.fixedTariffs:nullptr,
           e.entryExitTariffs?&*e.entryExitTariffs:nullptr,*e.crossings,e.loadedGraphDigests);
+    else if(e.route->tollCoverageVerified||e.route->tollCrossingsVerified||e.route->tollNetworkTraversal||e.route->tollFlagsDisproved)
+      atlas::invalidateTollQuote(*e.route,e.tollEvidenceFailure.empty()?"missing_mapping":e.tollEvidenceFailure,true);
     return bytes(env,atlas::routeJson(*e.route));
   } catch(const std::exception &errorValue) {error(env,errorValue);return nullptr;}
 }

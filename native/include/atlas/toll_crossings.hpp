@@ -69,6 +69,8 @@ bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &pr
 std::optional<std::vector<TollJourney>> entryExitJourneys(const std::vector<std::string> &events);
 bool applyEntryExitTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
     const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
+// Invalidates financial state only; route points, legs and guidance are retained.
+void invalidateTollQuote(Route &route,const std::string &reason,bool dropGraphEvidence=false);
 bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
     const TollTariffs *fares,const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
 } // namespace atlas

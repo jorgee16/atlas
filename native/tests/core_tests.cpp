@@ -133,6 +133,12 @@ int main(int argc, char **argv) {
           "pricing never changes path, distance or ETA");
     for(std::size_t i=0;i<originalPoints.size();++i)check(exact.points[i].lat==originalPoints[i].lat && exact.points[i].lon==originalPoints[i].lon,"pricing never changes geographic geometry");
     check(routeJson(exact).find("\"tollPricing\":\"exact\"")!=std::string::npos,"exact quote is serialized only after full evidence");
+    auto revoked=exact;
+    invalidateTollQuote(revoked,"graph_hash",true);
+    check(!revoked.tollCoverageVerified&&!revoked.tollPriceExact&&revoked.edges==exact.edges&&
+          revoked.meters==exact.meters&&revoked.seconds==exact.seconds&&
+          routeJson(revoked).find("\"tollAmount\":null")!=std::string::npos,
+          "revoking graph proof clears an old exact amount while retaining the actual navigation route");
     auto partlyReviewed=*tolled;partlyReviewed.tollCountry="Testland";
     partlyReviewed.legs.front().distance=full/4;
     for(size_t i=1;i<partlyReviewed.legs.size();++i)partlyReviewed.legs[i].road.flags&=~4u;

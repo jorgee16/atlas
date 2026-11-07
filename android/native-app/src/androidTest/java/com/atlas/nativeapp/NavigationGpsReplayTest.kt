@@ -1013,6 +1013,8 @@ class NavigationGpsReplayTest {
                 core.fixedTariffs("Portugal",fixedCsv)
                 core.entryExitTariffs("Portugal",TollTableAssets.repository(context,TollCatalogKind.ENTRY_EXIT).load("Portugal")!!.csv)
                 for(row in cases) {
+                    val caseBegan=SystemClock.elapsedRealtime()
+                    Log.i("ATLAS_GPS_REPLAY","ATLAS_TOLL_CASE_START id=${row[0]} timeMs=$caseBegan")
                     core.tollBindings("Portugal",directory.path,null)
                     val from=Coordinate(row[1].toDouble(),row[2].toDouble())
                     val to=Coordinate(row[3].toDouble(),row[4].toDouble())
@@ -1075,7 +1077,33 @@ class NavigationGpsReplayTest {
                         assertNotEquals("exact",after.getString("tollPricing"))
                         assertNotEquals("complete",after.getString("tollEvidenceStatus"))
                     }
-                    results.put(JSONObject().put("id",row[0]).put("before",before).put("after",after))
+                    if(row==cases.first() && input!=null) {
+                        // Rejecting evidence after a successful quote must also
+                        // invalidate cached/saved confirmations, not only the
+                        // initial unpriced route tested above.
+                        core.remember(3)
+                        val badHashes=input.actualHashes.copyOf()
+                        badHashes[0]=if(badHashes[0]=="0".repeat(64))"1".repeat(64) else "0".repeat(64)
+                        assertFalse(core.tollBindings("Portugal",directory.path,input.copy(actualHashes=badHashes)))
+                        fun rejectedQuote() {
+                            val rejected=JSONObject(core.priceCurrentRoute())
+                            assertNotEquals("Rejected graph cannot retain exact pricing","exact",rejected.getString("tollPricing"))
+                            assertTrue("Rejected graph cannot retain a monetary total",rejected.isNull("tollAmount"))
+                            assertEquals("graph_hash",rejected.getString("tollPricingReason"))
+                            for(field in listOf("points","edgeIndexes","maneuvers","distanceMeters","durationSeconds","visualProtectedPoints"))
+                                assertEquals("Invalidating financial evidence changed navigation: $field",
+                                    after.opt(field)?.toString(),rejected.opt(field)?.toString())
+                        }
+                        rejectedQuote();core.activate(3);rejectedQuote()
+                        assertTrue(core.tollBindings("Portugal",directory.path,input))
+                        val restored=JSONObject(core.priceCurrentRoute())
+                        assertEquals("exact",restored.getString("tollPricing"))
+                        assertEquals(after.getDouble("tollAmount"),restored.getDouble("tollAmount"),1e-9)
+                    }
+                    val caseMillis=SystemClock.elapsedRealtime()-caseBegan
+                    Log.i("ATLAS_GPS_REPLAY","ATLAS_TOLL_CASE_END id=${row[0]} elapsedMs=$caseMillis pricing=${after.optString("tollPricing")}")
+                    results.put(JSONObject().put("id",row[0]).put("elapsedMs",caseMillis)
+                        .put("before",before).put("after",after))
                     File(output,"a5-native-quotes.json").writeText(results.toString(2))
                     if(row[0]=="a16-unflagged-ranholas-class-1") {
                         fun unavailableCase(id:String,csv:ByteArray,vehicle:Int) {
