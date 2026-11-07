@@ -158,17 +158,26 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
     def test_fixed_corridor_extension_preserves_all_existing_evidence(self):
         asset=ROOT.parent/'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
         seed=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
-        report=json.loads((ROOT.parent/'docs/data/portugal-fixed-binding-audit-20261101.json').read_text())
+        report=json.loads((ROOT.parent/'docs/data/issue-2/composed-binding-proof.json').read_text())
+        original=json.loads((ROOT.parent/'docs/data/portugal-fixed-binding-audit-20261101.json').read_text())
+        self.assertEqual(original['bindingsSha256'], report['stages'][1]['bindingsSha256'])
         self.assertEqual(report['bindingsSha256'],hashlib.sha256(asset.read_bytes()).hexdigest())
         self.assertEqual(report['seedSha256'],hashlib.sha256(seed.read_bytes()).hexdigest())
         lines=asset.read_text().splitlines()
         old=seed.read_text().splitlines()
         old_edges={int(s.split(';')[1]) for s in old if s.startswith('coverage;')}
         new_edges={int(s.split(';')[1]) for s in lines if s.startswith('coverage;')}
-        self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage['edgeWitnesses']},new_edges)
+        self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage.get('edgeWitnesses',stage.get('freeEdgeWitnesses',{}))},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual([4,6],[len(s['crossings']) for s in report['stages']])
+        self.assertEqual([4,6,2,0],[len(s.get('crossings',[])) for s in report['stages']])
+        self.assertEqual(410,report['stages'][2]['additionalCoveredEdges'])
+        self.assertEqual(408,len(report['stages'][2]['networks']))
+        self.assertEqual({'entry:brisa-published:0117','exit:brisa-published:0122'},
+            {v['chargeId'] for v in report['stages'][2]['crossings']})
+        self.assertEqual(284,report['stages'][3]['additionalFreeEdges'])
+        for previous,stage in zip(report['stages'],report['stages'][1:]):
+            self.assertEqual(previous['bindingsSha256'],stage['seedSha256'])
         self.assertEqual({'vialivre:a28:angeiras','vialivre:a28:povoa'}, {e['chargeId'] for e in report['stages'][0]['crossings']})
         self.assertEqual({'ascendi:grande-lisboa:01','ascendi:grande-lisboa:02','ascendi:grande-lisboa:03'},
             {e['chargeId'] for e in report['stages'][1]['crossings']})

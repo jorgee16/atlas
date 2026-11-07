@@ -7,8 +7,9 @@
 std::string read(const char*path){std::ifstream f(path);if(!f)throw std::runtime_error("Missing proof input");std::ostringstream s;s<<f.rdbuf();return s.str();}
 std::vector<std::string> fields(const std::string &line){std::vector<std::string> c;std::istringstream in(line);std::string s;while(std::getline(in,s,';'))c.push_back(s);return c;}
 int main(int argc,char**argv){try{
- if(argc!=8)throw std::runtime_error("graph country road-prices fixed-prices bindings actual-digests cases required");
+ if(argc!=9)throw std::runtime_error("graph country road-prices fixed-prices bindings actual-digests cases ticket-prices required");
  atlas::Graph graph(argv[1]);auto road=atlas::TollTariffs::parse(read(argv[3]),argv[2]);auto fixed=atlas::TollTariffs::parse(read(argv[4]),argv[2]);
+ auto fares=atlas::TollTariffs::parse(read(argv[8]),argv[2]);
  auto matcher=atlas::TollCrossingMatcher::parse(read(argv[5]));matcher.validateGraph(graph);
  atlas::TollGraphDigests actual;std::istringstream hashes(read(argv[6]));std::string line;
  while(std::getline(hashes,line)){auto c=fields(line);if(c.size()!=2)throw std::runtime_error("Bad actual digest row");actual[c[0]]=c[1];}
@@ -19,7 +20,7 @@ int main(int argc,char**argv){try{
    auto route=atlas::routeFromPosition(graph,{std::stod(c[1]),std::stod(c[2])},{std::stod(c[3]),std::stod(c[4])},op,std::nullopt);
    if(!route)throw std::runtime_error("No real route for proof case "+c[0]);
    atlas::calibrateDriveEta(*route,graph);const auto before=atlas::routeJson(*route);
-   const bool applied=atlas::applyFixedTollCharges(graph,*route,fixed,matcher,actual);
+   const bool applied=atlas::applyTollCharges(graph,*route,&fixed,&fares,matcher,actual);
    if(comma)std::cout<<',';
    comma=true;
    std::cout<<"{\"id\":"<<atlas::jsonString(c[0])<<",\"expectedPricing\":"<<atlas::jsonString(c[6])<<",\"expectedAmount\":"<<c[7]

@@ -990,12 +990,12 @@ class NavigationGpsReplayTest {
      * route preview. The fixture contains graph-node endpoints, not fake routes. */
     @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
         output.listFiles()?.forEach { it.delete() }
-        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv").flatMap { name ->
+        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","issue-2-approach-cases.csv").flatMap { name ->
             instrumentation.context.assets.open("tolls/$name")
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("A5/IKEA, A28 and A16 carriageways, classes and after-gate starts are required",cases.size>=91)
+        assertTrue("The original 93 cases plus reviewed approaches and A1 ticket cases are required",cases.size>=104)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         val unavailableResults=JSONArray()
@@ -1011,6 +1011,7 @@ class NavigationGpsReplayTest {
                 core.tariffs("Portugal",TollTableAssets.read(context,"Portugal"))
                 val fixedCsv=TollTableAssets.repository(context,TollCatalogKind.FIXED_CROSSING).load("Portugal")!!.csv
                 core.fixedTariffs("Portugal",fixedCsv)
+                core.entryExitTariffs("Portugal",TollTableAssets.repository(context,TollCatalogKind.ENTRY_EXIT).load("Portugal")!!.csv)
                 for(row in cases) {
                     core.tollBindings("Portugal",directory.path,null)
                     val from=Coordinate(row[1].toDouble(),row[2].toDouble())
@@ -1050,6 +1051,10 @@ class NavigationGpsReplayTest {
                                     assertTrue("A proven paid crossing cannot be presented as free",after.getBoolean("hasTolls"))
                                     assertEquals("ascendi:grande-lisboa:03",charges.getJSONObject(0).getString("chargeId"))
                                 }
+                            } else if(row[0].startsWith("a1-")) {
+                                assertEquals(1,charges.length())
+                                assertEquals("brisa-published:0117:0122",charges.getJSONObject(0).getString("chargeId"))
+                                assertTrue(after.getBoolean("tollFreeVerified").not())
                             } else {
                                 assertEquals("One physical plaza, independent of lane",1,charges.length())
                                 assertEquals("brisa:0501",charges.getJSONObject(0).getString("chargeId"))
@@ -1066,8 +1071,9 @@ class NavigationGpsReplayTest {
                         assertEquals(0.0,after.getDouble("tolledMeters"),1e-9)
                         assertFalse("Valid evidence must not invent a toll",after.getBoolean("hasTolls"))
                     } else {
-                        assertFalse("Unreviewed city approaches cannot become exact",accepted)
+                        assertTrue("The graph proof loads independently of route completeness",accepted)
                         assertNotEquals("exact",after.getString("tollPricing"))
+                        assertNotEquals("complete",after.getString("tollEvidenceStatus"))
                     }
                     results.put(JSONObject().put("id",row[0]).put("before",before).put("after",after))
                     File(output,"a5-native-quotes.json").writeText(results.toString(2))
@@ -1157,11 +1163,43 @@ class NavigationGpsReplayTest {
                 }
                 assertTrue("Route preview must identify confirmed pricing: $visibleText",visibleText.contains("confirmed"))
                 assertTrue("Expanded preview must expose the paid alternative",visibleText.contains("Alternative"))
-                assertTrue("Expanded preview must expose the free alternative",visibleText.contains("No tolls"))
+                assertTrue("Expanded preview must expose the avoidance alternative with honest confidence",
+                    visibleText.contains("No tolls")||visibleText.contains("Avoid tolls"))
                 File(output,"a5-preview-text.txt").writeText(visibleText)
                 File(output,"a5-preview-route.json").writeText(route.toString(2))
                 capture(s,"a5-exact-route-preview")
                 capture(s,"ikea-loures-exact-route-preview")
+                File(output,"issue-2-ui-options.json").writeText(JSONArray(appModel.updates.value.routeOptions).toString(2))
+                var openedDetails=false
+                s.onActivity { a ->
+                    fun open(v:android.view.View):Boolean {
+                        if(v is android.widget.TextView && v.isShown && v.text.toString()=="Toll details") {
+                            v.performClick();return true
+                        }
+                        if(v is android.view.ViewGroup)for(i in 0 until v.childCount)if(open(v.getChildAt(i)))return true
+                        return false
+                    }
+                    openedDetails=open(a.window.decorView)
+                }
+                assertTrue("Published fare details must be accessible",openedDetails)
+                instrumentation.waitForIdleSync()
+                capture(s,"issue-2-confirmed-toll-details")
+                androidx.test.espresso.Espresso.pressBack()
+                val a1=cases.first { it[0]=="a1-coimbra-norte-fatima-class-1" }
+                s.onActivity {
+                    appModel.origin(Coordinate(a1[1].toDouble(),a1[2].toDouble()))
+                    appModel.select(JSONObject().put("id","a1-ticket-proof").put("name","Fátima")
+                        .put("lat",a1[3].toDouble()).put("lon",a1[4].toDouble()))
+                    appModel.calculate(false)
+                }
+                await("Actual A1 ticket preview must finish",90) {
+                    !appModel.updates.value.busy && appModel.updates.value.route?.optString("tollPricing")=="exact"
+                }
+                assertEquals(7.65,appModel.updates.value.route!!.getDouble("tollAmount"),1e-9)
+                await("MapLibre must finish the A1 preview",45){!snapshot(s).optBoolean("styleLoading",true)}
+                instrumentation.waitForIdleSync()
+                File(output,"issue-2-a1-preview.json").writeText(appModel.updates.value.route!!.toString(2))
+                capture(s,"issue-2-a1-ticket-preview")
             }
         } finally {
             instrumentation.runOnMainSync {

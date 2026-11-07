@@ -27,9 +27,17 @@ struct TollEdgeTraversal {
   std::string road;
   bool tolled=false;
 };
+struct TollNetworkBinding {
+  uint32_t edge=0,from=0,to=0;
+  double beginMeters=0,endMeters=0;
+  std::string network;
+};
 struct TollCrossingSequence {
   std::vector<std::string> chargeIds;
+  std::vector<uint32_t> unreviewedEdges;
+  std::unordered_set<std::string> networks;
   bool complete=false;
+  bool ticketCoverageComplete=true;
 };
 /** Only reviewed, complete mappings can certify crossings. The caller supplies
  * SHA-256 values computed from the loaded graph, not a region name/version.
@@ -38,16 +46,20 @@ class TollCrossingMatcher {
 public:
   TollCrossingMatcher(TollGraphDigests boundGraph,std::string country,
       std::unordered_set<uint32_t> coveredEdges,std::vector<TollChargeBinding> bindings,
-      bool reviewed);
+      bool reviewed,std::vector<TollNetworkBinding> networks = {});
   static TollCrossingMatcher parse(std::string_view csv);
   void validateGraph(const Graph &graph) const;
   std::optional<TollCrossingSequence> match(const TollGraphDigests &loadedGraph,
-      const std::string &country,const std::vector<TollEdgeTraversal> &traversals) const;
+      const std::string &country,const std::vector<TollEdgeTraversal> &traversals,
+      std::string *reason=nullptr) const;
+  bool allowsAvoidance(uint32_t edge,uint32_t from,double begin,double end,
+      bool graphToll,const TollTariffs *fixed,int vehicleClass) const;
 private:
   TollGraphDigests graph_;
   std::string country_;
   std::unordered_set<uint32_t> coveredEdges_;
   std::unordered_map<uint32_t,std::vector<TollChargeBinding>> bindings_;
+  std::unordered_map<uint32_t,std::vector<TollNetworkBinding>> networks_;
   bool reviewed_=false;
 };
 bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
@@ -57,4 +69,6 @@ bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &pr
 std::optional<std::vector<TollJourney>> entryExitJourneys(const std::vector<std::string> &events);
 bool applyEntryExitTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,
     const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
+bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
+    const TollTariffs *fares,const TollCrossingMatcher &matcher,const TollGraphDigests &actualGraph);
 } // namespace atlas

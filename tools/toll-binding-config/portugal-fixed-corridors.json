@@ -10,6 +10,15 @@
     {
       "review": "portugal-a16.json",
       "source": "portugal-a16.source.json"
+    },
+    {
+      "review": "portugal-a1-coimbra-fatima.json",
+      "source": "portugal-a1-coimbra-fatima.source.json"
+    },
+    {
+      "kind": "free",
+      "review": "portugal-cascais-approaches.json",
+      "source": "portugal-cascais-approaches.source.json"
     }
   ]
 }

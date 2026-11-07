@@ -523,8 +523,30 @@ std::optional<Route> route(const Graph &g, uint32_t start, uint32_t goal,
       if (!e.allows(op.profile))
         continue;
       auto flags = g.roadFlags(e.road);
+      bool tollAllowed=(flags&4)==0;
+      if(op.avoidTolls&&op.tollTraversalAllowed){
+        double begin=0;
+        if(currentNode==start&&item.state==start&&op.initialEdge&&*op.initialEdge==i&&op.initialSnap){
+          std::vector<Point> shape{g.point(uint32_t(currentNode))};g.appendGeometry(e,shape);
+          double total=0,along=0,best=std::numeric_limits<double>::infinity(),nearestAlong=0;
+          const double mx=111320*std::max(std::cos(op.initialSnap->lat*3.141592653589793/180),.01);
+          for(std::size_t k=1;k<shape.size();++k){
+            const auto a=shape[k-1],b=shape[k];const double dx=(b.lon-a.lon)*mx,dy=(b.lat-a.lat)*111320.;
+            const double x=(a.lon-op.initialSnap->lon)*mx,y=(a.lat-op.initialSnap->lat)*111320.;
+            const double den=dx*dx+dy*dy,t=den>0?std::clamp(-(x*dx+y*dy)/den,0.,1.):0.;
+            const Point snapped{a.lat+(b.lat-a.lat)*t,a.lon+(b.lon-a.lon)*t};
+            const double d=distance(snapped,*op.initialSnap),segment=distance(a,b);
+            if(d<best){best=d;nearestAlong=along+distance(a,snapped);}
+            along+=segment;
+          }
+          total=along;if(best<=8&&total>1)begin=e.distanceDm/10.*std::clamp(nearestAlong/total,0.,1.);
+        }
+        tollAllowed=op.tollTraversalAllowed(i,uint32_t(currentNode),begin,e.distanceDm/10.);
+      }
+      if(op.avoidTolls&&!tollAllowed&&op.tariffs&&
+          op.tariffs->explicitlyFree(g.road(e.road).ref,op.vehicleClass))tollAllowed=true;
       if (op.profile == Profile::drive &&
-          ((op.avoidTolls && (flags & 4)) ||
+          ((op.avoidTolls && !tollAllowed) ||
            !g.turnAllowed(currentNode, incomingRoad, e.road, incomingFrom,
                           e.target)))
         continue;
@@ -698,7 +720,10 @@ std::vector<std::string> principalRoadRefs(const Route &r,
 }
 std::string routeJson(const Route &r) {
   const auto monetaryScale=std::pow(10.0,r.tollFractionDigits);
-  const bool noTollEvidence=r.tolledMeters==0&&!r.tollCrossingsVerified;
+  const bool freeVerified=r.tollPriceComplete&&((r.tollPriceExact&&r.tollEuros==0)||
+      (r.tollCoverageVerified&&!r.tollCrossingsVerified&&!r.tollNetworkTraversal));
+  const bool noTollEvidence=(r.tolledMeters==0||r.tollFlagsDisproved)&&!r.tollCrossingsVerified&&!r.tollNetworkTraversal;
+  const bool unverifiedFree=noTollEvidence&&!freeVerified;
   const auto roundedMoney=[&](double amount,double referenceMeters){
     const double units=std::round(amount*monetaryScale);
     return (referenceMeters>0&&amount>0?std::max(1.,units):units)/monetaryScale;
@@ -708,12 +733,12 @@ std::string routeJson(const Route &r) {
   s << "{\"destinationAccessMeters\":" << r.destinationAccessMeters
     << ",\"distanceMeters\":" << r.meters
     << ",\"durationSeconds\":" << r.seconds << ",\"tollEuros\":";
-  if(!noTollEvidence && !r.tollPriceComplete) s << "null";
+  if(unverifiedFree||(!noTollEvidence && !r.tollPriceComplete)) s << "null";
   else s << roundedMoney(r.tollEuros,r.referenceTollMeters);
   // Currency-neutral result and itinerary order for future countries.
   // tollEuros remains for backward compatibility with older Android code.
   s << ",\"tollAmount\":";
-  if(!noTollEvidence && !r.tollPriceComplete) s << "null";
+  if(unverifiedFree||(!noTollEvidence && !r.tollPriceComplete)) s << "null";
   else s << roundedMoney(r.tollEuros,r.referenceTollMeters);
   s << ",\"tollRoads\":[";
   for(std::size_t i=0;i<r.tollRoads.size();++i){
@@ -733,13 +758,18 @@ std::string routeJson(const Route &r) {
     s << '}';
   }
   s << ']';
-  s << ",\"tollPricing\":" << jsonString(r.tollPriceExact?"exact":noTollEvidence?"none":
+  s << ",\"tollFreeVerified\":" << (freeVerified?"true":"false")
+    << ",\"tollEvidenceStatus\":" << jsonString(r.tollCoverageVerified?"complete":freeVerified?"legal_exemption":r.tollPricingReason=="unreviewed_edge"?"incomplete":"unverified")
+    << ",\"tollPricingReason\":" << jsonString(freeVerified?"":r.tollPricingReason)
+    << ",\"tollUnreviewedEdges\":" << r.tollUnreviewedEdges
+    << ",\"firstUnreviewedTollEdge\":" << r.firstUnreviewedTollEdge;
+  s << ",\"tollPricing\":" << jsonString(unverifiedFree?"unavailable":r.tollPriceExact?"exact":noTollEvidence?"none":
           r.tollPriceComplete?"estimate":"unavailable")
     << ",\"tolledMeters\":" << r.tolledMeters
     << ",\"pricedTollMeters\":" << r.pricedTollMeters
     << ",\"referenceTollMeters\":" << r.referenceTollMeters
-    << ",\"tollPricingConfidence\":" << jsonString(r.tollPriceExact?"exact":noTollEvidence?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"low":"standard")
-    << ",\"tollEstimationMethod\":" << jsonString(r.tollPriceExact?"verified":noTollEvidence?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":"section-road-average")
+    << ",\"tollPricingConfidence\":" << jsonString(unverifiedFree?"unverified":r.tollPriceExact?"exact":noTollEvidence?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"low":"standard")
+    << ",\"tollEstimationMethod\":" << jsonString(unverifiedFree?"unavailable":r.tollPriceExact?"verified":noTollEvidence?"none":!r.tollPriceComplete?"unavailable":r.referenceTollMeters>0?"road-or-country-reference":"section-road-average")
     << ",\"tollCountry\":" << jsonString(r.tollCountry)
     << ",\"tollCurrency\":" << jsonString(r.tollCurrency)
     << ",\"tollTariffYear\":" << jsonString(r.tollYear)
@@ -784,8 +814,8 @@ std::string routeJson(const Route &r) {
     if (i) s << ',';
     s << jsonString(roadRefs[i]);
   }
-  const bool hasTolls = r.tollCrossingsVerified||std::any_of(r.legs.begin(),r.legs.end(),
-      [](const Leg &leg) {return (leg.road.flags & 4) != 0;});
+  const bool hasTolls = !freeVerified&&(r.tollCrossingsVerified||r.tollNetworkTraversal||(!r.tollFlagsDisproved&&std::any_of(r.legs.begin(),r.legs.end(),
+      [](const Leg &leg) {return (leg.road.flags & 4) != 0;})));
   s << "],\"hasTolls\":" << (hasTolls?"true":"false")
     << ",\"edgeIndexes\":[";
   for (std::size_t i = 0; i < r.edges.size(); ++i) {
