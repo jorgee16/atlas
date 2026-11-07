@@ -90,6 +90,12 @@ class RoutePreviewUiTest {
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
+                    labels.filter { it.text.toString() in listOf("Recommended","Alternative","No tolls","Avoid tolls") }.forEach { title ->
+                        val layout=checkNotNull(title.layout)
+                        assertEquals("Route title must remain on one line",1,layout.lineCount)
+                        assertEquals("Route title clipped",title.text.length,layout.getLineEnd(0))
+                        assertEquals("Route title ellipsized",0,layout.getEllipsisCount(0))
+                    }
                     val prices=labels.filter { it.text.toString().startsWith("≈ ") }
                     assertEquals("Both useful estimates must be shown",2,prices.size)
                     assertTrue(values.any { it.contains("5,80") && it.endsWith("estimate (not confirmed)") })
@@ -115,7 +121,7 @@ class RoutePreviewUiTest {
                 automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use {
                     java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                 }
-                automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}.png").use {
+                automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}${if(verifiedFree)"" else "-unverified"}.png").use {
                     java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                 }
                 onView(withText("Toll details")).inRoot(plannerRoot).perform(click())

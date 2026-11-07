@@ -1039,11 +1039,11 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                             ui.ripple(this,if(selected)ui.soft else ui.surface,13)
                             setPadding(ui.dp(12),ui.dp(10),ui.dp(12),ui.dp(10))
                             addView(ui.row().apply {
-                                addView(ui.text(label,14f,ui.ink,true),LinearLayout.LayoutParams(0,-2,1f))
+                                addView(ui.text(label,14f,ui.ink,true).apply { maxLines=1 },
+                                    LinearLayout.LayoutParams(-2,-2).apply { marginEnd=ui.dp(8) })
                                 addView(ui.text(price,12f,if(selected)ui.blue else ui.ink,true).apply {
-                                    maxWidth=((resources.displayMetrics.widthPixels-ui.dp(96))*0.58).toInt()
                                     textAlignment=android.view.View.TEXT_ALIGNMENT_VIEW_END
-                                })
+                                },LinearLayout.LayoutParams(0,-2,1f))
                             })
                             addView(ui.space(4))
                             addView(ui.text("$trip · $roads",12f,ui.muted).apply {
