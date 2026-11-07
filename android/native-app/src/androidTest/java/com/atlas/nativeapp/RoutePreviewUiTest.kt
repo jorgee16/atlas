@@ -43,7 +43,9 @@ class RoutePreviewUiTest {
     @Test fun lightPreviewShowsTwoPaidAndOneFreeWithoutTariffJargon() = preview(false)
     @Test fun darkPreviewShowsTwoPaidAndOneFreeWithoutTariffJargon() = preview(true)
 
-    private fun preview(dark:Boolean) {
+    @Test fun unverifiedAvoidanceNeverShowsACertifiedZero() = preview(false,false)
+
+    private fun preview(dark:Boolean,verifiedFree:Boolean=true) {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             var dialog:Dialog?=null
             var card:View?=null
@@ -59,6 +61,10 @@ class RoutePreviewUiTest {
                     val paid=route(0,true,2520,64400,"A8",5.80)
                     val alternate=route(1,true,2820,68000,"A1",6.20)
                     val free=route(2,false,5280,73700,"EN8",0.0)
+                        // Presentation-only explicit evidence. A graph flag or
+                        // this artificial fixture is never routing proof.
+                        .put("tollFreeVerified",verifiedFree)
+                    if(!verifiedFree)free.put("tollAmount",JSONObject.NULL).put("tollPricing","unavailable")
                     val state=AtlasState(destination=JSONObject().put("name","IKEA Loures"),
                         route=paid,routeOptions=listOf(paid,alternate,free),tab="Navigate")
                     val planner=MainActivity::class.java.getDeclaredMethod("planner",AtlasState::class.java)
@@ -72,19 +78,30 @@ class RoutePreviewUiTest {
                 }
                 onView(withText("Recommended")).check(matches(isDisplayed()))
                 onView(withText("Alternative")).check(matches(isDisplayed()))
-                onView(withText("No tolls")).check(matches(isDisplayed()))
+                onView(withText(if(verifiedFree)"No tolls" else "Avoid tolls")).check(matches(isDisplayed()))
                 onView(withText("Start navigation")).check(matches(isDisplayed()))
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
-                    assertEquals(2,values.count { it=="Toll price not confirmed" })
-                    assertFalse(values.any { it.contains("estimated") || it.contains("5,80") || it.contains("6,20") })
-                    assertTrue(values.any { it.startsWith("No tolls · ") })
+                    val prices=labels.filter { it.text.toString().startsWith("≈ ") }
+                    assertEquals("Both useful estimates must be shown",2,prices.size)
+                    assertTrue(values.any { it.contains("5,80") && it.endsWith("estimate (not confirmed)") })
+                    assertTrue(values.any { it.contains("6,20") && it.endsWith("estimate (not confirmed)") })
+                    assertFalse(values.any { it.contains("· confirmed") })
+                    if(verifiedFree)assertTrue(values.any { it=="No tolls · € 0,00" })
+                    else {
+                        assertTrue(values.any { it=="No tolls detected / not verified" })
+                        assertFalse(values.any { it.contains("0,00") })
+                    }
                     assertFalse(values.any { it.contains("Source:") || it.contains("confidence") ||
                         it.contains("BREAKDOWN") || it.contains("tariffs") })
-                    // Prices must retain enough horizontal space on a narrow phone.
-                    labels.filter { it.text.toString()=="Toll price not confirmed" }.forEach { price ->
-                        assertTrue("Price clipped: ${price.text}",price.width >= price.paint.measureText(price.text.toString()))
+                    // Wrapped prices must be complete and visible on a 320dp
+                    // dialog, rather than forcing the route title off-screen.
+                    prices.forEach { price ->
+                        val layout=checkNotNull(price.layout)
+                        assertEquals("Price text truncated",price.text.length,layout.getLineEnd(layout.lineCount-1))
+                        for(line in 0 until layout.lineCount)assertEquals("Price ellipsized",0,layout.getEllipsisCount(line))
+                        assertTrue("Price height clipped",price.height>=layout.height)
                     }
                 }
                 val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
