@@ -7,8 +7,12 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 91:
+if len(cases) < 104:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
+fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
+new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv')
+              for r in csv.DictReader((fixture_root/name).open(),delimiter=';')}
+new_cases=set()
 classes = set()
 ikea_cases = set()
 a28_expected = {r['id']: r for r in csv.DictReader((Path(__file__).resolve().parents[1] /
@@ -58,8 +62,20 @@ for case in cases:
             if before['hasTolls'] or before['tolledMeters'] != 0 or not after['hasTolls'] or after['tollPricing'] != 'exact':
                 raise ValueError('A verified Ranholas crossing was hidden by a stale graph flag')
         a16_cases.add(case['id'])
+    elif case['id'] in new_expected:
+        expected=new_expected[case['id']]
+        if expected['expectedPricing']=='exact':
+            if after['tollPricing']!='exact' or abs(after['tollAmount']-float(expected['expectedAmount']))>1e-9:
+                raise ValueError('Incorrect reviewed approach/ticket quote: '+case['id'])
+            if case['id'].startswith('a1-') and [v['chargeId'] for v in after['tollRoads']]!=['brisa-published:0117:0122']:
+                raise ValueError('The A1 ticket must follow the mapped 0117->0122 itinerary')
+        elif after['tollPricing']!='unavailable' or after['tollAmount'] is not None:
+            raise ValueError('Starting inside a paid network cannot invent an entry or zero')
+        new_cases.add(case['id'])
     elif after['tollPricing'] == 'exact':
         raise ValueError('Unreviewed city approaches were certified')
+if new_cases!=set(new_expected):
+    raise ValueError('Missing A1/approach proof cases')
 if classes != {1, 2, 3, 4}:
     raise ValueError('Missing vehicle classes')
 expected_ikea={f'ikea-loures-2645-575-{origin}-class-{klass}' for origin in ('south','north') for klass in (1,2,3,4)}

@@ -143,11 +143,15 @@ def generate(graph, review_path, source_path, seed_path):
         for stream in streams:
             stream.close()
     comments = [line for line in seed if line.startswith('#')]
-    comments += ['# freeCorridorSourceSha256=' + digest(source_path), '# freeCorridorReviewSha256=' + digest(review_path)]
+    if 'freeCorridorSourceSha256' in metadata:
+        comments += ['# freeCorridor.' + digest(review_path) + '=' + digest(source_path)]
+    else:
+        comments += ['# freeCorridorSourceSha256=' + digest(source_path), '# freeCorridorReviewSha256=' + digest(review_path)]
     crossings = [line for line in seed if line.startswith('crossing;')]
     lines = comments + ['kind;edge;from;to;offsetMeters;edgeLengthMeters;chargeId']
     lines += ['coverage;' + str(edge) + ';;;;;' for edge in sorted(seed_coverage | set(covered))]
     lines += crossings
+    lines += [line for line in seed if line.startswith('network;')]
     text = '\n'.join(lines) + '\n'
     report = dict(country=review['country'], reviewedSourceWays=len(shapes), sourceSha256=digest(source_path),
         reviewSha256=digest(review_path), seedSha256=digest(seed_path), graphDigests=hashes,

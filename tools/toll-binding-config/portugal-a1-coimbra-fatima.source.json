@@ -1,0 +1,9509 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "retrievedOn": "2026-11-07",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; https://www.openstreetmap.org/copyright",
+  "sources": [
+    {
+      "url": "https://api.openstreetmap.org/api/0.6/relation/1502233/full.json",
+      "rawSha256": "6f8c95e42af43c997475726f1b99bd1ec4e423e652f504bfda13bcd5019a02b2"
+    },
+    {
+      "url": "https://api.openstreetmap.org/api/0.6/map.json?bbox=-8.493,40.255,-8.46,40.28",
+      "rawSha256": "066f6a390586a0328d8fba5331c96305a2bbc9ad3eec1943e312c1bfa75e8172"
+    },
+    {
+      "url": "https://api.openstreetmap.org/api/0.6/map.json?bbox=-8.706,39.614,-8.675,39.64",
+      "rawSha256": "06169156a2aa05d3f61ae1163f06f536c4fdc799495aa12abce2ddffa32bf846"
+    }
+  ],
+  "ways": [
+    {
+      "id": 12188645,
+      "version": 11,
+      "timestamp": "2025-07-25T21:29:47Z",
+      "nodes": [
+        319839669,
+        7265438394,
+        7265438395,
+        110447987,
+        7265438396,
+        7265438397,
+        7265438398,
+        110447988,
+        7265438399,
+        7265438400,
+        110447989,
+        7265438401,
+        7265438402,
+        110447991,
+        7265438403,
+        7265438404,
+        110447992,
+        7265438405,
+        7265438406,
+        7265438407,
+        110447993,
+        7265438408,
+        7265438409,
+        110447994,
+        7265438410,
+        7265438411,
+        7265438412,
+        7265438413,
+        110447995,
+        7265438414,
+        7265438415,
+        7265438416,
+        7265438417,
+        319886077,
+        7265438363,
+        7265438364,
+        110447997,
+        7265438365,
+        7265438366,
+        110447998
+      ],
+      "tags": {
+        "destination": "Fátima;Batalha;Ourém;Tomar",
+        "destination:ref": "EN 356",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "lit": "yes",
+        "maxspeed": "60",
+        "oneway": "yes",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 12643010,
+      "version": 24,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        185513688,
+        115402327
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "4",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "middle_of:2",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|right"
+      }
+    },
+    {
+      "id": 12643402,
+      "version": 27,
+      "timestamp": "2025-05-01T18:04:31Z",
+      "nodes": [
+        115404777,
+        115404615
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 17914733,
+      "version": 17,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        185513686,
+        185513688
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "4",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "middle_of:2",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 19931949,
+      "version": 15,
+      "timestamp": "2025-05-01T18:27:42Z",
+      "nodes": [
+        7186802874,
+        7273326734,
+        115410241,
+        7186802875,
+        2653573812,
+        2653573816,
+        319836243,
+        2653573817,
+        2653573811,
+        2653573819,
+        2653573818,
+        115410224,
+        2653573820,
+        2653573810,
+        115410263,
+        7186802878,
+        115410259,
+        7186802877,
+        7186802876,
+        115410501,
+        7273326733,
+        7273326732,
+        115415178,
+        115415188,
+        7273326731,
+        115415152,
+        7186802879
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 21118376,
+      "version": 13,
+      "timestamp": "2025-05-01T18:01:19Z",
+      "nodes": [
+        3961002600,
+        115402211,
+        3961002599,
+        115402239,
+        3961002598,
+        185528167,
+        185528168,
+        115402223,
+        115402256,
+        1108961490
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 21118380,
+      "version": 13,
+      "timestamp": "2026-03-11T10:51:32Z",
+      "nodes": [
+        227133827,
+        209250826
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29075521,
+      "version": 11,
+      "timestamp": "2026-02-28T18:31:21Z",
+      "nodes": [
+        208729438,
+        13570701352,
+        13570701353,
+        13570701365,
+        1108961085,
+        13570701368,
+        13570701369,
+        115402317
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lane_markings": "yes",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "width": "7.75"
+      }
+    },
+    {
+      "id": 29075523,
+      "version": 11,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        13594114384,
+        208729439,
+        208736489,
+        115402299
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076785,
+      "version": 12,
+      "timestamp": "2025-05-01T18:17:31Z",
+      "nodes": [
+        1662824633,
+        7579235108
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076795,
+      "version": 11,
+      "timestamp": "2025-05-01T18:19:51Z",
+      "nodes": [
+        7579235108,
+        115409938,
+        1662824583,
+        7579235110,
+        7579235109,
+        115409881,
+        7579110204,
+        1662824173,
+        7579110203,
+        1662824103,
+        7579110202,
+        7579110199,
+        1662823929,
+        1662823892,
+        7579110197,
+        7579110195,
+        115409991,
+        7579110191,
+        7579110192,
+        115410003,
+        7579110188,
+        115409946,
+        7579110187,
+        115410657,
+        7579110185,
+        7579110184,
+        115410635,
+        7579110182,
+        115410370,
+        7579110179,
+        7579110178,
+        115410387,
+        7579110176,
+        7579110172,
+        115410348,
+        7579110171,
+        115410314,
+        7579110168,
+        115410298,
+        7579110167,
+        115410533,
+        7579110166,
+        115410466,
+        7579110164,
+        115410432,
+        7579110162,
+        115410418,
+        7579110160,
+        7579110158,
+        115409495,
+        7579110157,
+        7579110154,
+        115410443,
+        7579110153,
+        115410449,
+        7579110151,
+        115410413,
+        7579110147,
+        115410428,
+        7579110145,
+        115410516,
+        7579110142,
+        319836203,
+        7579110141,
+        7579110139,
+        115410543,
+        7579110138,
+        115410487,
+        7579110136,
+        7579110135,
+        7579110134,
+        115410300,
+        7579110131,
+        7579110130,
+        115410304,
+        7579110126,
+        115410286,
+        115410454,
+        7579110125,
+        115410470,
+        115410493,
+        7579110122,
+        115410550,
+        7579110120,
+        7579110119,
+        7579110115,
+        115410297,
+        7579110117,
+        7579110100,
+        115410310,
+        7579110097,
+        7579110096,
+        7579110095,
+        115410326,
+        7579110094,
+        7579110093,
+        7579110089,
+        115410357,
+        115410378,
+        7579110088,
+        115409573,
+        115410022,
+        115410035,
+        7579110085,
+        115410052,
+        7579110083,
+        115410254,
+        7579110080,
+        7579110079,
+        115410269,
+        7579110077,
+        7579110074,
+        7579110071,
+        7579110073,
+        115410212,
+        7579110069,
+        7579110066,
+        7579110065,
+        115410237,
+        7579110063,
+        115410219,
+        7579110061,
+        115410175,
+        7579110058,
+        115410161,
+        319836205,
+        115410460,
+        115410495,
+        115410475,
+        115410557
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076805,
+      "version": 9,
+      "timestamp": "2025-05-01T18:23:01Z",
+      "nodes": [
+        319836211,
+        115410015
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076806,
+      "version": 12,
+      "timestamp": "2025-05-01T18:23:15Z",
+      "nodes": [
+        115410015,
+        7273326876,
+        319836213,
+        7273326875,
+        7273326874,
+        7273326873,
+        115410027,
+        7273326872,
+        7273326871,
+        115410064,
+        7273326868,
+        7273326867,
+        319836214,
+        7273326866,
+        7273326865,
+        7273326864,
+        115410071,
+        7273326863,
+        7273326862,
+        115410057,
+        7273326861,
+        7273326860,
+        115410083,
+        7273326859,
+        7273326858,
+        115410077,
+        7273326857,
+        7273326856,
+        7273326855,
+        115410086,
+        7273326854,
+        7273326853,
+        115410091,
+        7273326852,
+        7273326851,
+        115410127,
+        7273326850
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxheight": "default",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076812,
+      "version": 9,
+      "timestamp": "2025-05-01T18:24:07Z",
+      "nodes": [
+        319836219,
+        7273326828,
+        7273326829,
+        7273326824,
+        7273326827,
+        115409652,
+        7273326821,
+        7273326820,
+        319836221,
+        7273326817,
+        115409603,
+        115409713,
+        7273326815,
+        319836223
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076814,
+      "version": 12,
+      "timestamp": "2025-05-01T18:26:39Z",
+      "nodes": [
+        319836223,
+        115409661,
+        7273326813,
+        115409700,
+        7273326812,
+        115409980,
+        7273326811,
+        115409970,
+        7273326810,
+        319836225,
+        7273326809,
+        115409988,
+        7273326808,
+        7273326807,
+        115410006,
+        7273326806,
+        115410002,
+        7273326805,
+        7273326804,
+        115409858,
+        7273326803,
+        7273326802,
+        115409924,
+        7273326801,
+        7273326800,
+        115409916,
+        7273326799,
+        7273326798,
+        115409931,
+        7273326797,
+        7273326796,
+        115410059,
+        7273326795,
+        7273326794,
+        319836227,
+        7273326793,
+        7273326792,
+        7273326791,
+        115410040,
+        7273326790,
+        7273326789,
+        319836229,
+        7273326788,
+        7273326787,
+        115410010,
+        115410095,
+        7273326786,
+        7273326785,
+        115409671,
+        7273326784,
+        7273326783,
+        7273326782,
+        115409624,
+        7273326781,
+        7273326780,
+        7273326779,
+        319836231,
+        7273326778,
+        7273326777,
+        7273326776,
+        115409646,
+        7273326775,
+        7273326774,
+        115409580,
+        7273326773,
+        7273326772,
+        115409596,
+        7273326771,
+        115409811,
+        7273326770,
+        7273326769,
+        115409833,
+        7273326768,
+        7273326767,
+        115409773,
+        7273326766,
+        7273326765,
+        7273326764,
+        319836233,
+        7273326763,
+        115409733,
+        319836235,
+        7273326762,
+        115409756,
+        7273326761,
+        7273326760,
+        319836237,
+        7273326759,
+        7273326758,
+        115409724,
+        7273326757,
+        115410122,
+        7273326756,
+        115410102,
+        7273326755,
+        7273326754,
+        115410135,
+        7273326753,
+        7273326752,
+        7273326751,
+        115410167,
+        7273326750,
+        7273326749,
+        7273326748,
+        319836239,
+        7273326747,
+        7273326746,
+        115410190
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxheight": "default",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076825,
+      "version": 11,
+      "timestamp": "2025-05-01T18:26:56Z",
+      "nodes": [
+        115410190,
+        7273326745,
+        7273326744,
+        115410179,
+        7273326743,
+        7273326742,
+        7273326741,
+        319836241,
+        7273326740,
+        7273326735,
+        7273326736,
+        115410217,
+        7273326737,
+        7273326739,
+        7273326738,
+        115410203
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076826,
+      "version": 15,
+      "timestamp": "2025-05-01T18:27:00Z",
+      "nodes": [
+        115410203,
+        7186802874
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076829,
+      "version": 8,
+      "timestamp": "2025-06-20T20:11:22Z",
+      "nodes": [
+        319836275,
+        319836276
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29076830,
+      "version": 16,
+      "timestamp": "2025-06-20T20:11:18Z",
+      "nodes": [
+        319836276,
+        7273326676
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 29081197,
+      "version": 5,
+      "timestamp": "2025-07-25T21:29:47Z",
+      "nodes": [
+        110447998,
+        110447999
+      ],
+      "tags": {
+        "bridge": "yes",
+        "destination": "Fátima;Batalha;Ourém;Tomar",
+        "destination:ref": "EN 356",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "layer": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 35235475,
+      "version": 15,
+      "timestamp": "2025-05-01T18:04:35Z",
+      "nodes": [
+        115404615,
+        196162978,
+        115404721,
+        115404699,
+        115404681,
+        115404662,
+        1699693483
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 54111784,
+      "version": 8,
+      "timestamp": "2025-07-25T21:29:47Z",
+      "nodes": [
+        1827966080,
+        110448003,
+        7265438347
+      ],
+      "tags": {
+        "destination": "Fátima;Batalha;Ourém",
+        "destination:ref": "EN 356",
+        "destination:ref:to": "IC 9;EN 113",
+        "highway": "motorway_link",
+        "lanes": "2",
+        "lit": "yes",
+        "oneway": "yes",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 88824683,
+      "version": 12,
+      "timestamp": "2026-02-27T01:39:56Z",
+      "nodes": [
+        249585515,
+        1712101311,
+        1030766316,
+        1030766341
+      ],
+      "tags": {
+        "destination": "Lisboa;Condeixa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 88824894,
+      "version": 18,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1712101249,
+        8501324147,
+        111381857,
+        111381858,
+        208717270,
+        1712101234,
+        111381859,
+        1712101233,
+        111381862,
+        111381863,
+        1712101218,
+        111381864,
+        208717271,
+        5538644268,
+        111381865,
+        5538644274,
+        5538644270,
+        5538644272,
+        208717273,
+        5538644277,
+        5538644276,
+        111381866,
+        208717697,
+        111381867,
+        208718587,
+        208725096,
+        111381868,
+        208725498,
+        208725733,
+        111381869,
+        5538644293,
+        5538644295,
+        111381870,
+        5538644284,
+        208726221,
+        5538644282,
+        111381871,
+        5538644280,
+        208726363,
+        111381875,
+        1104747262
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxheight": "default",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 88824896,
+      "version": 10,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1030766347,
+        3929311428,
+        1030766334,
+        3929311424,
+        1030766322,
+        3929311418,
+        3929311414,
+        1030766325
+      ],
+      "tags": {
+        "destination": "Lisboa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 88824901,
+      "version": 10,
+      "timestamp": "2026-02-27T01:39:56Z",
+      "nodes": [
+        1030766319,
+        12118429602,
+        1030774916,
+        12118429601,
+        1030766347
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "destination": "Lisboa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "layer": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95221564,
+      "version": 19,
+      "timestamp": "2025-11-19T10:39:23Z",
+      "nodes": [
+        115404579,
+        115404518,
+        115404543,
+        115404637,
+        115404586,
+        115404608,
+        115404728,
+        115404691,
+        115404760,
+        115404732,
+        115404829,
+        115404790,
+        115404925,
+        115404885
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95221570,
+      "version": 10,
+      "timestamp": "2025-11-19T10:39:24Z",
+      "nodes": [
+        1104579339,
+        115405012,
+        1104579342,
+        115405047,
+        1104579332,
+        115404686
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95230993,
+      "version": 11,
+      "timestamp": "2025-11-19T10:39:26Z",
+      "nodes": [
+        1104656528,
+        115404359,
+        1360521554,
+        1360521583
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95230995,
+      "version": 10,
+      "timestamp": "2025-11-19T10:39:28Z",
+      "nodes": [
+        1104656529,
+        1104656528
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95239569,
+      "version": 11,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1104747262,
+        115402335,
+        208727173,
+        115402353,
+        208727257,
+        1104747264
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95239571,
+      "version": 12,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1104747264,
+        208727409,
+        208727556,
+        208728211,
+        208728343,
+        115402291,
+        208728881
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95395644,
+      "version": 11,
+      "timestamp": "2025-05-01T18:17:11Z",
+      "nodes": [
+        115410353,
+        7579235177
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95395655,
+      "version": 9,
+      "timestamp": "2025-05-01T18:17:07Z",
+      "nodes": [
+        1106195861,
+        115410353
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95640607,
+      "version": 10,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        115402299,
+        185526349
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95640612,
+      "version": 12,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        185526349,
+        1108961353,
+        115402281,
+        3961002607
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95640636,
+      "version": 12,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        185526351,
+        115402296
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through;right"
+      }
+    },
+    {
+      "id": 95640675,
+      "version": 13,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1108960817,
+        115402311,
+        3961002605,
+        185526351
+      ],
+      "tags": {
+        "bridge": "viaduct",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95640690,
+      "version": 8,
+      "timestamp": "2025-05-01T18:01:30Z",
+      "nodes": [
+        1108961490,
+        1108961203
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95640694,
+      "version": 15,
+      "timestamp": "2026-07-17T18:07:53Z",
+      "nodes": [
+        1108961203,
+        115402269,
+        115402264,
+        185530117,
+        115402287,
+        185530118,
+        115402300,
+        185530120,
+        115402321,
+        185530121,
+        185530122,
+        115402330,
+        115402336,
+        185530124,
+        115402356,
+        185530126,
+        115402214,
+        185530128,
+        115402219,
+        185531533,
+        185531534,
+        185531535,
+        115402234,
+        115402245,
+        1341735505,
+        185531536,
+        1341735494,
+        115402253,
+        1341735540,
+        185531537,
+        1341735491,
+        115402266,
+        185531538,
+        115402305,
+        115402294,
+        115402279,
+        115402357,
+        185531542,
+        185841352,
+        185841354,
+        115402345,
+        185841356,
+        185841357,
+        115402228,
+        115404488,
+        185842385,
+        115404513,
+        115404754,
+        115404737,
+        1699693703
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95695066,
+      "version": 10,
+      "timestamp": "2026-02-27T01:39:56Z",
+      "nodes": [
+        1030766341,
+        12118351200,
+        12118351196,
+        12118351197,
+        1030766343
+      ],
+      "tags": {
+        "bridge": "yes",
+        "destination": "Lisboa;Condeixa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "layer": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95695068,
+      "version": 10,
+      "timestamp": "2026-02-27T01:39:56Z",
+      "nodes": [
+        1030766343,
+        1109418322,
+        1030766338,
+        1030766336,
+        1030766319
+      ],
+      "tags": {
+        "destination": "Lisboa;Condeixa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 121017638,
+      "version": 14,
+      "timestamp": "2025-11-19T10:39:30Z",
+      "nodes": [
+        1699693483,
+        115405073,
+        115405085,
+        115405023
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 121552275,
+      "version": 9,
+      "timestamp": "2025-11-19T10:39:26Z",
+      "nodes": [
+        1360521583,
+        115404344,
+        1360521575
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 121552278,
+      "version": 10,
+      "timestamp": "2025-11-19T10:39:24Z",
+      "nodes": [
+        1360521575,
+        1360521585,
+        1360521574,
+        115404336,
+        1360521571,
+        115404326,
+        1360521549,
+        115404319,
+        1104588542,
+        1104588545,
+        1104588540,
+        115404305,
+        1104588539,
+        115404292,
+        1104579346,
+        115404281,
+        115405110,
+        1104579336,
+        115405135,
+        1104579345,
+        115405159,
+        1104579341,
+        115405189,
+        1104579339
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 127934171,
+      "version": 11,
+      "timestamp": "2025-11-19T10:39:29Z",
+      "nodes": [
+        115404393,
+        115404382
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 127934176,
+      "version": 10,
+      "timestamp": "2025-11-19T10:39:27Z",
+      "nodes": [
+        115404382,
+        115404333,
+        115404348,
+        115404339,
+        115404274,
+        115404298,
+        115404547,
+        115404575,
+        115404530,
+        1359875708,
+        1104656529
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 127934893,
+      "version": 12,
+      "timestamp": "2025-11-19T10:39:29Z",
+      "nodes": [
+        115405153,
+        1699693407,
+        115405184,
+        115404899,
+        115404935,
+        115404895,
+        115405007,
+        115404972,
+        115404407,
+        115404398,
+        115404424,
+        115404416,
+        115404393
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 127934895,
+      "version": 10,
+      "timestamp": "2025-11-19T10:39:30Z",
+      "nodes": [
+        115405023,
+        115405153
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 132455063,
+      "version": 8,
+      "timestamp": "2025-05-01T18:14:36Z",
+      "nodes": [
+        115409706,
+        115409828
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 132455067,
+      "version": 13,
+      "timestamp": "2025-05-01T18:16:59Z",
+      "nodes": [
+        115409529,
+        7579292711,
+        115409567,
+        7579292709,
+        115409555,
+        115409559,
+        7579292708,
+        115409450,
+        7579292705,
+        115409443,
+        7579292704,
+        115409456,
+        7579292702,
+        115409430,
+        7579292700,
+        115409425,
+        7579292697,
+        115409438,
+        7579292695,
+        115409433,
+        7579292694,
+        115409372,
+        7579292693,
+        115409350,
+        7579292692,
+        115409407,
+        7579292690,
+        115409392,
+        7579292689,
+        7579292687,
+        115410677,
+        7579292686,
+        115410690,
+        7579263183,
+        7579263182,
+        115410638,
+        7579263180,
+        7579263177,
+        115410651,
+        7579263176,
+        115410663,
+        7579263170,
+        115410586,
+        7579263169,
+        115410592,
+        7579284500,
+        7579284497,
+        115410603,
+        7579284496,
+        115410479,
+        7579284493,
+        115410537,
+        7579284492,
+        7579284489,
+        115410508,
+        115410400,
+        1106195861
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxheight": "default",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 153646171,
+      "version": 7,
+      "timestamp": "2025-05-01T18:11:22Z",
+      "nodes": [
+        115404770,
+        115404481,
+        115404876,
+        115404911,
+        115404941
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 153646176,
+      "version": 10,
+      "timestamp": "2025-05-01T18:14:13Z",
+      "nodes": [
+        115404950,
+        115404993,
+        115404852,
+        115404870,
+        115404796,
+        115409358,
+        115409362,
+        115409398,
+        115409411,
+        115409381,
+        115409397,
+        115409540,
+        115409536,
+        115409475,
+        7579292754,
+        115409463,
+        7579292752,
+        115409893,
+        7579292750,
+        115409875,
+        7579292747,
+        115409861,
+        7579292746,
+        115409823,
+        7579292743,
+        115409846,
+        115409791,
+        7579292742,
+        115409751,
+        7579292740,
+        115409727,
+        115409702,
+        115409668,
+        7579292739,
+        7579292738,
+        115409683,
+        7579292735,
+        7579292733,
+        115409637,
+        7579292731,
+        115409632,
+        7579292729,
+        115409655,
+        7579292727,
+        7579292725,
+        115409586,
+        115409706
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxheight": "default",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 157714148,
+      "version": 7,
+      "timestamp": "2025-05-01T18:04:12Z",
+      "nodes": [
+        1699693703,
+        1699693693
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 157714150,
+      "version": 7,
+      "timestamp": "2025-05-01T18:04:15Z",
+      "nodes": [
+        1699693693,
+        115404849,
+        115404814,
+        115404777
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 171823552,
+      "version": 6,
+      "timestamp": "2025-07-25T21:29:47Z",
+      "nodes": [
+        110447999,
+        1827966031,
+        1827966080
+      ],
+      "tags": {
+        "destination": "Fátima;Batalha;Ourém;Tomar",
+        "destination:ref": "EN 356",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 189725160,
+      "version": 7,
+      "timestamp": "2025-05-01T18:11:15Z",
+      "nodes": [
+        115405059,
+        115405171,
+        115405142,
+        115404918,
+        115404857,
+        115404882,
+        115404998,
+        115404629,
+        115404597,
+        115404802,
+        115404818,
+        115404770
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 189725164,
+      "version": 8,
+      "timestamp": "2025-05-01T18:10:44Z",
+      "nodes": [
+        2003101345,
+        115405059
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 256427193,
+      "version": 9,
+      "timestamp": "2025-07-17T01:52:58Z",
+      "nodes": [
+        249585499,
+        1712101303
+      ],
+      "tags": {
+        "change:lanes": "no|no",
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "2",
+        "lit": "yes",
+        "name": "Autoestrada do Baixo Mondego",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through;left|through"
+      }
+    },
+    {
+      "id": 256427196,
+      "version": 9,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        3929311412,
+        1712101258,
+        111381856
+      ],
+      "tags": {
+        "destination": "Lisboa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "1",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 282429567,
+      "version": 7,
+      "timestamp": "2025-05-01T18:10:40Z",
+      "nodes": [
+        115404766,
+        115405103,
+        115405032,
+        2003101345
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 282429572,
+      "version": 9,
+      "timestamp": "2025-05-01T18:10:38Z",
+      "nodes": [
+        2863416508,
+        2863416735,
+        4974214263,
+        4974214258,
+        115404766
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 319624703,
+      "version": 6,
+      "timestamp": "2025-07-17T01:52:58Z",
+      "nodes": [
+        1712101303,
+        249585515
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no",
+        "destination:lanes": "Lisboa;Condeixa|Figueira|Figueira",
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "3",
+        "lit": "yes",
+        "name": "Autoestrada do Baixo Mondego",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "left|through;left|through"
+      }
+    },
+    {
+      "id": 389767770,
+      "version": 6,
+      "timestamp": "2025-07-17T01:52:58Z",
+      "nodes": [
+        1712101268,
+        12118351190,
+        1712101269,
+        8501324169
+      ],
+      "tags": {
+        "destination:lanes": "Figueira da Foz|Figueira da Foz|Porto",
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "3",
+        "maxspeed:type": "PT:motorway",
+        "name": "Autoestrada do Baixo Mondego",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 389767780,
+      "version": 10,
+      "timestamp": "2026-02-27T01:39:56Z",
+      "nodes": [
+        111381856,
+        3929311410,
+        208714741,
+        1712101249
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "right_of:1",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|merge_to_left"
+      }
+    },
+    {
+      "id": 389767788,
+      "version": 8,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1030766325,
+        1030751221,
+        1030751218,
+        3929311412
+      ],
+      "tags": {
+        "destination": "Lisboa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "junction:ref": "8",
+        "lanes": "2",
+        "lit": "yes",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "merge_to_right|through"
+      }
+    },
+    {
+      "id": 392905851,
+      "version": 9,
+      "timestamp": "2026-03-11T10:51:32Z",
+      "nodes": [
+        209250826,
+        185839392
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 392905853,
+      "version": 10,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        3961002602,
+        185513686
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left|yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "4",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "middle_of:2",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 392905860,
+      "version": 9,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        3961002607,
+        1108960817
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 392905863,
+      "version": 9,
+      "timestamp": "2026-03-11T10:51:32Z",
+      "nodes": [
+        115402327,
+        227133827
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 392905864,
+      "version": 9,
+      "timestamp": "2025-05-01T18:01:14Z",
+      "nodes": [
+        185839392,
+        8149135733,
+        115402339,
+        3961002600
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "4",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "middle_of:2",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 397996165,
+      "version": 8,
+      "timestamp": "2025-06-20T20:18:09Z",
+      "nodes": [
+        4007708195,
+        319839669
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|slight_right"
+      }
+    },
+    {
+      "id": 405959987,
+      "version": 8,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        115402296,
+        3961002602
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|not_left",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through;right"
+      }
+    },
+    {
+      "id": 601156271,
+      "version": 7,
+      "timestamp": "2025-06-20T20:17:12Z",
+      "nodes": [
+        1787598306,
+        7273326599,
+        5714287268,
+        7273326598,
+        319839632,
+        7273326597,
+        7273326596,
+        319839633,
+        319839634,
+        7273326595,
+        319839635,
+        7273326594,
+        319839636,
+        7273326593,
+        319839637,
+        319839638,
+        7273326592,
+        7273326591,
+        319839639,
+        7273326590,
+        319839640,
+        7273326589,
+        319839641,
+        7273326588,
+        7273326587,
+        319839642,
+        7273326586,
+        7273326585,
+        319839643,
+        7273325984,
+        7273325983,
+        319839644,
+        7273325982,
+        7273325981,
+        319839645,
+        319839646,
+        7273325980,
+        7273325979,
+        7273325978,
+        319839647,
+        7273325977,
+        7273325976,
+        319839648,
+        7273325975,
+        7273325974,
+        319839649,
+        7273325973,
+        319839650,
+        7273325972,
+        7273325970,
+        7273325971,
+        319839651,
+        7273325969,
+        7273325968,
+        319839652,
+        7273325967,
+        7273325966,
+        7273325965,
+        319839653,
+        7273325964,
+        7273325963,
+        7273325962,
+        319839655,
+        7273325961,
+        319839656,
+        7273325960,
+        319839659,
+        7273325959,
+        319839660,
+        7273325958,
+        319839661,
+        319839662,
+        7273325957,
+        7273325956,
+        319839663,
+        7273325955,
+        319839664,
+        7273325954,
+        319839665,
+        7273325953
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 601156274,
+      "version": 6,
+      "timestamp": "2025-06-20T20:15:10Z",
+      "nodes": [
+        1787598246,
+        1787598306
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778460822,
+      "version": 5,
+      "timestamp": "2025-07-25T21:29:47Z",
+      "nodes": [
+        319886078,
+        7265438314
+      ],
+      "tags": {
+        "destination": "Fátima;Batalha;Ourém",
+        "destination:ref": "EN 356",
+        "destination:ref:to": "IC 9;EN 113",
+        "highway": "motorway_link",
+        "lanes": "5",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "oneway": "yes",
+        "smoothness": "excellent",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 778460824,
+      "version": 5,
+      "timestamp": "2025-07-25T21:29:47Z",
+      "nodes": [
+        7265438347,
+        5566473532,
+        319886078
+      ],
+      "tags": {
+        "destination": "Fátima;Batalha;Ourém",
+        "destination:ref": "EN 356",
+        "destination:ref:to": "IC 9;EN 113",
+        "highway": "motorway_link",
+        "lanes": "5",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "oneway": "yes",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981066,
+      "version": 6,
+      "timestamp": "2025-06-20T20:18:05Z",
+      "nodes": [
+        7273325953,
+        319839668,
+        4007708197,
+        4007708195
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;slight_right"
+      }
+    },
+    {
+      "id": 778981067,
+      "version": 7,
+      "timestamp": "2025-06-20T20:14:28Z",
+      "nodes": [
+        319836310,
+        7273326621,
+        7273326620,
+        319839621,
+        7273326619,
+        7273326617,
+        7273326618,
+        319839622,
+        7273326616,
+        7273326614,
+        7273326615,
+        319839623,
+        7273326612,
+        7273326613,
+        7273326611,
+        319839624,
+        7273326610,
+        7273326609,
+        7273326608,
+        319839625,
+        7273326607,
+        7273326606,
+        319839626
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981068,
+      "version": 6,
+      "timestamp": "2025-06-20T20:13:53Z",
+      "nodes": [
+        7273326623,
+        319836309,
+        7273326622,
+        319836310
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "none|none|merge_to_left"
+      }
+    },
+    {
+      "id": 778981069,
+      "version": 8,
+      "timestamp": "2025-06-20T20:12:48Z",
+      "nodes": [
+        7273326628,
+        319836295,
+        7273326629,
+        7273326630,
+        319836296,
+        7273326631,
+        7273326632,
+        319836297,
+        7273326633,
+        319836298,
+        7273326634,
+        7273326635,
+        319836299,
+        7273326636,
+        7273326637,
+        7273326638,
+        319836300,
+        7273326639,
+        7273326640,
+        7273326641,
+        319836301,
+        7273326643,
+        7273326642,
+        319836302,
+        7273326644,
+        11791983375
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981070,
+      "version": 8,
+      "timestamp": "2025-06-20T20:11:58Z",
+      "nodes": [
+        7273326658,
+        319836287,
+        7273326650,
+        7273326651,
+        319836288,
+        7273326649,
+        7273326652,
+        7273326648,
+        7273326653,
+        319836289
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981071,
+      "version": 5,
+      "timestamp": "2025-06-20T20:12:02Z",
+      "nodes": [
+        7273326655,
+        319836285,
+        7273326656,
+        7273326657,
+        319836286,
+        7273326659,
+        7273326658
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "right_of:1",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "none|none|merge_to_left"
+      }
+    },
+    {
+      "id": 778981072,
+      "version": 6,
+      "timestamp": "2025-06-20T20:11:29Z",
+      "nodes": [
+        7273326676,
+        319836282
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;slight_right"
+      }
+    },
+    {
+      "id": 778981073,
+      "version": 6,
+      "timestamp": "2025-06-20T20:11:38Z",
+      "nodes": [
+        7273326670,
+        319836283,
+        7273326669,
+        319836284,
+        1191623931
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981075,
+      "version": 7,
+      "timestamp": "2025-06-20T20:10:50Z",
+      "nodes": [
+        11791993476,
+        319836263,
+        7273326703,
+        7273326702,
+        319836264,
+        7273326701,
+        7273326700,
+        319836265,
+        7273326699,
+        7273326698,
+        319836266,
+        7273326697,
+        7273326696,
+        319836267,
+        7273326695,
+        7273326694,
+        7273326693,
+        319836268,
+        7273326692,
+        7273326690,
+        7273326691,
+        7273326689,
+        319836269,
+        7273326688,
+        7273326686,
+        7273326687,
+        7273326685,
+        319836270,
+        7273326684,
+        7273326683,
+        319836271,
+        7273326682,
+        7273326681,
+        7273326680,
+        319836272,
+        7273326679,
+        7273326678,
+        319836274,
+        7273326677,
+        319836275
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981076,
+      "version": 6,
+      "timestamp": "2025-06-20T20:09:17Z",
+      "nodes": [
+        7273326724,
+        7273326723,
+        115883009,
+        7273326722,
+        115883010
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981077,
+      "version": 6,
+      "timestamp": "2025-06-20T20:09:24Z",
+      "nodes": [
+        115883010,
+        7273326721,
+        7273326720,
+        319836255,
+        7273326719,
+        319836256,
+        7273326718
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "none|none|merge_to_left"
+      }
+    },
+    {
+      "id": 778981078,
+      "version": 6,
+      "timestamp": "2025-06-20T20:09:11Z",
+      "nodes": [
+        115883007,
+        7273326724
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "4",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "none|none|none|merge_to_left"
+      }
+    },
+    {
+      "id": 778981079,
+      "version": 5,
+      "timestamp": "2025-01-03T11:07:59Z",
+      "nodes": [
+        115415171,
+        115415183,
+        7273326727,
+        115415133,
+        7273326728,
+        115415158,
+        7273326729,
+        115882999,
+        115883001,
+        1828929350,
+        7273326730,
+        115883003,
+        115883004,
+        115883006,
+        115883007
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 778981080,
+      "version": 6,
+      "timestamp": "2025-05-01T18:27:46Z",
+      "nodes": [
+        7186802879,
+        115415166,
+        7186883613,
+        115415173,
+        7186883612,
+        7186883611,
+        7273326726,
+        7186883610,
+        7273326725,
+        115415171
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through;slight_right"
+      }
+    },
+    {
+      "id": 810629860,
+      "version": 5,
+      "timestamp": "2025-05-01T18:17:24Z",
+      "nodes": [
+        7579235143,
+        115410299,
+        7579235176,
+        7579235175,
+        319836197
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed:lanes": "120|120|80",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "none|none|slight_right"
+      }
+    },
+    {
+      "id": 810629861,
+      "version": 5,
+      "timestamp": "2025-05-01T18:17:34Z",
+      "nodes": [
+        319836197,
+        1662824633
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 810629864,
+      "version": 5,
+      "timestamp": "2025-05-01T18:17:16Z",
+      "nodes": [
+        7579235177,
+        115410392,
+        115410375,
+        7579235143
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;slight_right"
+      }
+    },
+    {
+      "id": 915196793,
+      "version": 4,
+      "timestamp": "2025-07-17T01:52:58Z",
+      "nodes": [
+        8501324167,
+        249585499
+      ],
+      "tags": {
+        "change:lanes": "not_right|not_right|no",
+        "destination:lanes": "Lisboa;Condeixa;Figueira da Foz;Cantanhede|Figueira da Foz;Cantanhede|Porto;Mealhada",
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "3",
+        "maxheight:signed": "no",
+        "name": "Autoestrada do Baixo Mondego",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|right"
+      }
+    },
+    {
+      "id": 915196794,
+      "version": 3,
+      "timestamp": "2025-07-17T01:52:58Z",
+      "nodes": [
+        8501324169,
+        1712101277,
+        8501324167
+      ],
+      "tags": {
+        "change:lanes": "not_right|yes|yes",
+        "destination:lanes": "Lisboa;Condeixa;Figueira da Foz;Cantanhede|Figueira da Foz;Cantanhede|Porto;Mealhada",
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "3",
+        "name": "Autoestrada do Baixo Mondego",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|right"
+      }
+    },
+    {
+      "id": 915196805,
+      "version": 3,
+      "timestamp": "2025-07-17T01:52:58Z",
+      "nodes": [
+        8501324193,
+        1712101268
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "3",
+        "name": "Autoestrada do Baixo Mondego",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 915196807,
+      "version": 4,
+      "timestamp": "2025-08-29T13:58:45Z",
+      "nodes": [
+        8501324194,
+        8501324193
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "2",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 915196808,
+      "version": 4,
+      "timestamp": "2025-08-29T13:58:45Z",
+      "nodes": [
+        8501324198,
+        8501324197
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "2",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 915196809,
+      "version": 4,
+      "timestamp": "2025-11-19T10:39:37Z",
+      "nodes": [
+        8501324197,
+        8501324196,
+        8501324195,
+        8501324194
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "3",
+        "maxheight:signed": "no",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "surface": "asphalt"
+      }
+    },
+    {
+      "id": 1177920931,
+      "version": 4,
+      "timestamp": "2025-06-20T20:11:36Z",
+      "nodes": [
+        1191623873,
+        7273326670
+      ],
+      "tags": {
+        "change:lanes": "no|no",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1177920932,
+      "version": 4,
+      "timestamp": "2025-06-20T20:11:26Z",
+      "nodes": [
+        319836282,
+        10942422606
+      ],
+      "tags": {
+        "change:lanes": "no|no",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;slight_right"
+      }
+    },
+    {
+      "id": 1177920941,
+      "version": 5,
+      "timestamp": "2025-06-20T20:11:53Z",
+      "nodes": [
+        1191623931,
+        7273326655
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "right_of:1",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1177920942,
+      "version": 4,
+      "timestamp": "2025-06-20T20:11:33Z",
+      "nodes": [
+        10942422606,
+        1191623873
+      ],
+      "tags": {
+        "change:lanes": "no|not_left|yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "placement": "right_of:1",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "none|none|slight_right"
+      }
+    },
+    {
+      "id": 1269867636,
+      "version": 5,
+      "timestamp": "2025-06-20T20:09:34Z",
+      "nodes": [
+        7273326718,
+        7273326717,
+        7273326716,
+        319836258,
+        7273326715,
+        7273326714,
+        7273326713,
+        319836259,
+        319836260,
+        7273326712,
+        7273326710,
+        7273326711,
+        319836261,
+        7273326709,
+        7273326708,
+        7273326707,
+        319836262,
+        7273326706,
+        7273326705,
+        7273326704,
+        11791993476
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1269867645,
+      "version": 6,
+      "timestamp": "2025-06-20T20:12:29Z",
+      "nodes": [
+        319836289,
+        7273326624,
+        7273326625,
+        319836290,
+        7273326626,
+        319836291,
+        319836292,
+        7273326627,
+        319836293,
+        7273326628
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1269867646,
+      "version": 5,
+      "timestamp": "2025-06-20T20:13:41Z",
+      "nodes": [
+        11791983375,
+        319836303,
+        319836304,
+        319836305,
+        7273326645,
+        319836306,
+        7273326646,
+        319836307,
+        7273326647,
+        319836308,
+        7273326623
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1269867681,
+      "version": 6,
+      "timestamp": "2025-06-20T20:14:59Z",
+      "nodes": [
+        319839626,
+        7273326605,
+        319839627,
+        7273326604,
+        7273326603,
+        319839628,
+        7273326602
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1269867687,
+      "version": 5,
+      "timestamp": "2025-06-20T20:15:07Z",
+      "nodes": [
+        7273326602,
+        7273326601,
+        319839629,
+        7273326600,
+        319839630,
+        1787598246
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1315737647,
+      "version": 5,
+      "timestamp": "2025-05-01T18:23:42Z",
+      "nodes": [
+        7273326850,
+        115410117,
+        7273326849,
+        115410197,
+        7273326848
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxheight": "default",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1315737648,
+      "version": 4,
+      "timestamp": "2025-05-01T18:23:46Z",
+      "nodes": [
+        7273326848,
+        7273326847,
+        115410185,
+        7273326846,
+        7273326845,
+        115410156,
+        7273326844,
+        7273326843,
+        319836217,
+        7273326842,
+        7273326841,
+        115410231,
+        7273326840,
+        115409741,
+        7273326839,
+        7273326838,
+        115409762,
+        7273326837,
+        7273326836,
+        7273326835,
+        115409817,
+        7273326834,
+        115409838,
+        7273326833,
+        7273326832,
+        115409787,
+        319836219
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1346395427,
+      "version": 5,
+      "timestamp": "2026-09-17T16:58:52Z",
+      "nodes": [
+        115404941,
+        115404953,
+        115404976,
+        115404387,
+        115404378,
+        1457063199,
+        115404372,
+        115404366,
+        1662827496,
+        115404430,
+        115404421,
+        115404409,
+        115404404
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1346396384,
+      "version": 4,
+      "timestamp": "2025-05-01T18:15:20Z",
+      "nodes": [
+        115409828,
+        1662825474,
+        7579292723,
+        115409640,
+        115409619,
+        115409711,
+        7579292719,
+        115409704,
+        7579292717,
+        115409548,
+        7579292716,
+        115409468,
+        7579292713,
+        115409529
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1346397518,
+      "version": 5,
+      "timestamp": "2025-05-01T18:22:55Z",
+      "nodes": [
+        115410557,
+        7579110056,
+        115410521,
+        7579110055,
+        115410575,
+        7579110052,
+        115410582,
+        115410599,
+        319836206,
+        7579110051,
+        115410609,
+        115410613,
+        7579110048,
+        115410626,
+        115410631,
+        115410642,
+        115410652,
+        115410670,
+        115410684,
+        115410208,
+        7579110046,
+        7579110043,
+        115410248,
+        115410275,
+        115410110,
+        7579110041,
+        115410141,
+        7579110039,
+        115410151,
+        7579110038,
+        115410181,
+        7579110036,
+        115410446,
+        7579110034,
+        7579110032,
+        115409769,
+        7579110030,
+        115409746,
+        7579110029,
+        115409918,
+        7579110027,
+        115409928,
+        7579110026,
+        115409933,
+        115409941,
+        115409870,
+        7579110022,
+        7579110020,
+        115409888,
+        115409904,
+        7579110019,
+        115409911,
+        7579110018,
+        115409997,
+        7579110015,
+        115409954,
+        7579110014,
+        7579110011,
+        115409963,
+        7579110008,
+        7579110007,
+        115409561,
+        7579110003,
+        7579110001,
+        7579110002,
+        115409375,
+        7579110000,
+        115409361,
+        7579109999,
+        7579109998,
+        115409367,
+        7579109994,
+        7579109995,
+        115409403,
+        115409386,
+        115409428,
+        115409414,
+        7579109991,
+        7579109989,
+        115409418,
+        7579109987,
+        115409958,
+        7579069184,
+        7579109985,
+        7579069183,
+        115409977,
+        7273326884,
+        7273326883,
+        319836209,
+        7273326882,
+        7273326881,
+        7273326880,
+        7579069174,
+        115410031,
+        7273326879,
+        7273326878,
+        115410047,
+        7273326877,
+        319836211
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxheight": "default",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757363,
+      "version": 2,
+      "timestamp": "2025-11-19T10:39:23Z",
+      "nodes": [
+        115404686,
+        115405067,
+        115404501,
+        115404442,
+        115404467,
+        115404460,
+        115404551,
+        115404579
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757364,
+      "version": 2,
+      "timestamp": "2025-11-19T10:39:23Z",
+      "nodes": [
+        115404885,
+        115404986,
+        115404495,
+        115404672,
+        115404652,
+        115404633,
+        115404604,
+        1699691235,
+        115404523,
+        115404536,
+        115404583,
+        115404556
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757365,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        115404556,
+        115404463,
+        115404473,
+        115404452,
+        115404506,
+        115405077,
+        13274292083
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757366,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        13274292083,
+        115405202,
+        115405181,
+        115405129,
+        115404624,
+        115404584,
+        115404783,
+        115404620,
+        115404593
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757367,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        115404593,
+        115404645,
+        115404676,
+        115404657,
+        13274292084
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757368,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        13274292084,
+        115404714,
+        115405017,
+        115404806,
+        9604274611,
+        9604274610,
+        115404840,
+        115404647,
+        115404670
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757369,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        115404670,
+        115404707,
+        115405039,
+        115405063,
+        115405107,
+        115405121,
+        115405148,
+        115405176,
+        13274292085
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757370,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        13274292085,
+        115404890,
+        115404863,
+        115405003,
+        115404980,
+        115404965,
+        115404353
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757371,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        115404353,
+        115404962,
+        115404946,
+        115404928,
+        115404823
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1446757372,
+      "version": 1,
+      "timestamp": "2025-11-01T18:06:32Z",
+      "nodes": [
+        115404823,
+        115404845,
+        4974214266,
+        115404811,
+        2863416508
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1476658039,
+      "version": 5,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        13544560599,
+        115402284,
+        13594114385
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1476658040,
+      "version": 3,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        208728881,
+        13544560599
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1482373632,
+      "version": 2,
+      "timestamp": "2026-02-28T18:31:21Z",
+      "nodes": [
+        115402317,
+        13594114384
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1482373634,
+      "version": 2,
+      "timestamp": "2026-02-28T18:31:21Z",
+      "nodes": [
+        13594114385,
+        13570701350,
+        13570701347,
+        208729438
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1559949874,
+      "version": 1,
+      "timestamp": "2026-09-17T16:58:52Z",
+      "nodes": [
+        115404404,
+        115404312,
+        115404287,
+        115404568,
+        115405139,
+        115405165,
+        115405026,
+        115405053,
+        115405082,
+        115404950
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 01;E 80",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Norte",
+        "oneway": "yes",
+        "operator": "Brisa",
+        "ref": "A 1",
+        "smoothness": "excellent",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    }
+  ],
+  "coordinates": {
+    "110447987": [
+      39.6260131,
+      -8.6964798
+    ],
+    "110447988": [
+      39.6256033,
+      -8.6963813
+    ],
+    "110447989": [
+      39.6253007,
+      -8.6963989
+    ],
+    "110447991": [
+      39.6248066,
+      -8.6965399
+    ],
+    "110447992": [
+      39.6244526,
+      -8.6966609
+    ],
+    "110447993": [
+      39.6241684,
+      -8.696674
+    ],
+    "110447994": [
+      39.6239737,
+      -8.6965977
+    ],
+    "110447995": [
+      39.6237518,
+      -8.6963297
+    ],
+    "110447997": [
+      39.623702,
+      -8.6956688
+    ],
+    "110447998": [
+      39.6239034,
+      -8.695207
+    ],
+    "110447999": [
+      39.6242427,
+      -8.6945079
+    ],
+    "110448003": [
+      39.6263894,
+      -8.6901008
+    ],
+    "111381856": [
+      40.2702329,
+      -8.4833734
+    ],
+    "111381857": [
+      40.2675187,
+      -8.4833478
+    ],
+    "111381858": [
+      40.2663554,
+      -8.4831338
+    ],
+    "111381859": [
+      40.2635747,
+      -8.4831508
+    ],
+    "111381862": [
+      40.2613266,
+      -8.4838827
+    ],
+    "111381863": [
+      40.2602393,
+      -8.4845007
+    ],
+    "111381864": [
+      40.2585993,
+      -8.4857752
+    ],
+    "111381865": [
+      40.2571865,
+      -8.4868013
+    ],
+    "111381866": [
+      40.2536563,
+      -8.4876532
+    ],
+    "111381867": [
+      40.2518222,
+      -8.4875906
+    ],
+    "111381868": [
+      40.2487467,
+      -8.4878388
+    ],
+    "111381869": [
+      40.2455333,
+      -8.4885207
+    ],
+    "111381870": [
+      40.2441852,
+      -8.4887379
+    ],
+    "111381871": [
+      40.2422445,
+      -8.48874
+    ],
+    "111381875": [
+      40.2388016,
+      -8.4879075
+    ],
+    "115402211": [
+      40.1946623,
+      -8.4872534
+    ],
+    "115402214": [
+      40.1687506,
+      -8.4936205
+    ],
+    "115402219": [
+      40.165926,
+      -8.4934106
+    ],
+    "115402223": [
+      40.1889196,
+      -8.4887466
+    ],
+    "115402228": [
+      40.1397013,
+      -8.4948439
+    ],
+    "115402234": [
+      40.161012,
+      -8.4946437
+    ],
+    "115402239": [
+      40.1926939,
+      -8.4873885
+    ],
+    "115402245": [
+      40.1599586,
+      -8.4949095
+    ],
+    "115402253": [
+      40.1572962,
+      -8.4951687
+    ],
+    "115402256": [
+      40.1876473,
+      -8.4898195
+    ],
+    "115402264": [
+      40.1849326,
+      -8.4917853
+    ],
+    "115402266": [
+      40.1542144,
+      -8.4947149
+    ],
+    "115402269": [
+      40.1861326,
+      -8.4911067
+    ],
+    "115402279": [
+      40.1487429,
+      -8.4927545
+    ],
+    "115402281": [
+      40.2073327,
+      -8.4889235
+    ],
+    "115402284": [
+      40.2180352,
+      -8.4871521
+    ],
+    "115402287": [
+      40.1823107,
+      -8.4924178
+    ],
+    "115402291": [
+      40.2255522,
+      -8.4874268
+    ],
+    "115402294": [
+      40.1498886,
+      -8.493098
+    ],
+    "115402296": [
+      40.2028807,
+      -8.4889481
+    ],
+    "115402299": [
+      40.211077,
+      -8.4879685
+    ],
+    "115402300": [
+      40.1802518,
+      -8.4928709
+    ],
+    "115402305": [
+      40.151122,
+      -8.4935701
+    ],
+    "115402311": [
+      40.205327,
+      -8.4891664
+    ],
+    "115402317": [
+      40.2147023,
+      -8.4871748
+    ],
+    "115402321": [
+      40.1778539,
+      -8.4939707
+    ],
+    "115402327": [
+      40.2004984,
+      -8.4883776
+    ],
+    "115402330": [
+      40.1743062,
+      -8.4949475
+    ],
+    "115402335": [
+      40.2358728,
+      -8.4872551
+    ],
+    "115402336": [
+      40.1733998,
+      -8.4949205
+    ],
+    "115402339": [
+      40.1965519,
+      -8.4873807
+    ],
+    "115402345": [
+      40.1429985,
+      -8.4930845
+    ],
+    "115402353": [
+      40.2339202,
+      -8.4870835
+    ],
+    "115402356": [
+      40.1712861,
+      -8.4944412
+    ],
+    "115402357": [
+      40.1473628,
+      -8.4925821
+    ],
+    "115404274": [
+      40.1246314,
+      -8.5117389
+    ],
+    "115404281": [
+      40.1078786,
+      -8.5280516
+    ],
+    "115404287": [
+      40.0102875,
+      -8.6016325
+    ],
+    "115404292": [
+      40.1100717,
+      -8.5275693
+    ],
+    "115404298": [
+      40.1243901,
+      -8.5123439
+    ],
+    "115404305": [
+      40.1125146,
+      -8.5263621
+    ],
+    "115404312": [
+      40.0113151,
+      -8.6010312
+    ],
+    "115404319": [
+      40.1151263,
+      -8.5241794
+    ],
+    "115404326": [
+      40.1168847,
+      -8.5220502
+    ],
+    "115404333": [
+      40.1252515,
+      -8.509667
+    ],
+    "115404336": [
+      40.1184495,
+      -8.520143
+    ],
+    "115404339": [
+      40.124898,
+      -8.5109448
+    ],
+    "115404344": [
+      40.1203204,
+      -8.5181142
+    ],
+    "115404348": [
+      40.1250664,
+      -8.5103995
+    ],
+    "115404353": [
+      40.0483996,
+      -8.5704473
+    ],
+    "115404359": [
+      40.1220402,
+      -8.5162977
+    ],
+    "115404366": [
+      40.0152453,
+      -8.5993061
+    ],
+    "115404372": [
+      40.0158165,
+      -8.5989049
+    ],
+    "115404378": [
+      40.0165738,
+      -8.5982495
+    ],
+    "115404382": [
+      40.1254377,
+      -8.5088097
+    ],
+    "115404387": [
+      40.0171792,
+      -8.5976069
+    ],
+    "115404393": [
+      40.1255587,
+      -8.5081143
+    ],
+    "115404398": [
+      40.125871,
+      -8.5053951
+    ],
+    "115404404": [
+      40.0121896,
+      -8.6006558
+    ],
+    "115404407": [
+      40.1259886,
+      -8.5044771
+    ],
+    "115404409": [
+      40.0124494,
+      -8.6005529
+    ],
+    "115404416": [
+      40.1256779,
+      -8.507237
+    ],
+    "115404421": [
+      40.013871,
+      -8.6000268
+    ],
+    "115404424": [
+      40.1257674,
+      -8.5064639
+    ],
+    "115404430": [
+      40.014393,
+      -8.5997792
+    ],
+    "115404442": [
+      40.0931868,
+      -8.5341782
+    ],
+    "115404452": [
+      40.0736915,
+      -8.5386674
+    ],
+    "115404460": [
+      40.092042,
+      -8.5340536
+    ],
+    "115404463": [
+      40.0756436,
+      -8.5376789
+    ],
+    "115404467": [
+      40.0925434,
+      -8.5341095
+    ],
+    "115404473": [
+      40.074569,
+      -8.5381487
+    ],
+    "115404481": [
+      40.0254827,
+      -8.5896328
+    ],
+    "115404488": [
+      40.1387263,
+      -8.4954297
+    ],
+    "115404495": [
+      40.083524,
+      -8.5371991
+    ],
+    "115404501": [
+      40.0937907,
+      -8.5341975
+    ],
+    "115404506": [
+      40.0727197,
+      -8.5394338
+    ],
+    "115404513": [
+      40.1374675,
+      -8.4959022
+    ],
+    "115404518": [
+      40.0905497,
+      -8.5339698
+    ],
+    "115404523": [
+      40.0792313,
+      -8.5372788
+    ],
+    "115404530": [
+      40.1237866,
+      -8.5136262
+    ],
+    "115404536": [
+      40.0784602,
+      -8.53723
+    ],
+    "115404543": [
+      40.0900935,
+      -8.5340128
+    ],
+    "115404547": [
+      40.1241722,
+      -8.5128304
+    ],
+    "115404551": [
+      40.0916194,
+      -8.5339939
+    ],
+    "115404556": [
+      40.0766926,
+      -8.5373835
+    ],
+    "115404568": [
+      40.0094536,
+      -8.602249
+    ],
+    "115404575": [
+      40.1239631,
+      -8.5132892
+    ],
+    "115404579": [
+      40.0910455,
+      -8.533957
+    ],
+    "115404583": [
+      40.0777591,
+      -8.5372439
+    ],
+    "115404584": [
+      40.0677413,
+      -8.5435711
+    ],
+    "115404586": [
+      40.0891743,
+      -8.5341716
+    ],
+    "115404593": [
+      40.0647492,
+      -8.5455083
+    ],
+    "115404597": [
+      40.0314442,
+      -8.5861283
+    ],
+    "115404604": [
+      40.0810281,
+      -8.5375158
+    ],
+    "115404608": [
+      40.0887178,
+      -8.5343133
+    ],
+    "115404615": [
+      40.1324579,
+      -8.4962383
+    ],
+    "115404620": [
+      40.0655478,
+      -8.5448552
+    ],
+    "115404624": [
+      40.0686721,
+      -8.5430676
+    ],
+    "115404629": [
+      40.0326812,
+      -8.5852846
+    ],
+    "115404633": [
+      40.0816484,
+      -8.5375327
+    ],
+    "115404637": [
+      40.0896338,
+      -8.5340686
+    ],
+    "115404645": [
+      40.063945,
+      -8.5463365
+    ],
+    "115404647": [
+      40.058545,
+      -8.5539599
+    ],
+    "115404652": [
+      40.0822858,
+      -8.5374798
+    ],
+    "115404657": [
+      40.0628287,
+      -8.5478016
+    ],
+    "115404662": [
+      40.1304343,
+      -8.4970549
+    ],
+    "115404670": [
+      40.0572219,
+      -8.5559091
+    ],
+    "115404672": [
+      40.0828531,
+      -8.5373829
+    ],
+    "115404676": [
+      40.0633021,
+      -8.5471295
+    ],
+    "115404681": [
+      40.1307829,
+      -8.496834
+    ],
+    "115404686": [
+      40.0956073,
+      -8.5339866
+    ],
+    "115404691": [
+      40.0877783,
+      -8.5346956
+    ],
+    "115404699": [
+      40.1313439,
+      -8.4965966
+    ],
+    "115404707": [
+      40.0564557,
+      -8.5571568
+    ],
+    "115404714": [
+      40.0615512,
+      -8.5497848
+    ],
+    "115404721": [
+      40.1319424,
+      -8.4963874
+    ],
+    "115404728": [
+      40.0882582,
+      -8.5344764
+    ],
+    "115404732": [
+      40.0868213,
+      -8.5352547
+    ],
+    "115404737": [
+      40.1357283,
+      -8.4961524
+    ],
+    "115404754": [
+      40.1366604,
+      -8.4960567
+    ],
+    "115404760": [
+      40.0873316,
+      -8.5349402
+    ],
+    "115404766": [
+      40.0410583,
+      -8.576734
+    ],
+    "115404770": [
+      40.027034,
+      -8.5886279
+    ],
+    "115404777": [
+      40.1328683,
+      -8.4961601
+    ],
+    "115404783": [
+      40.066324,
+      -8.5443518
+    ],
+    "115404790": [
+      40.085864,
+      -8.5359155
+    ],
+    "115404796": [
+      40.0001579,
+      -8.6089705
+    ],
+    "115404802": [
+      40.0301582,
+      -8.5869123
+    ],
+    "115404806": [
+      40.0603567,
+      -8.5515446
+    ],
+    "115404811": [
+      40.0422503,
+      -8.5750381
+    ],
+    "115404814": [
+      40.1338521,
+      -8.4960654
+    ],
+    "115404818": [
+      40.0287684,
+      -8.5876541
+    ],
+    "115404823": [
+      40.0438455,
+      -8.5732934
+    ],
+    "115404829": [
+      40.0862838,
+      -8.5356107
+    ],
+    "115404840": [
+      40.0596392,
+      -8.5525115
+    ],
+    "115404845": [
+      40.0433603,
+      -8.573788
+    ],
+    "115404849": [
+      40.1347706,
+      -8.4960738
+    ],
+    "115404852": [
+      40.0025198,
+      -8.6080147
+    ],
+    "115404857": [
+      40.0357161,
+      -8.5828297
+    ],
+    "115404863": [
+      40.0510709,
+      -8.5678166
+    ],
+    "115404870": [
+      40.0011113,
+      -8.6085532
+    ],
+    "115404876": [
+      40.0239765,
+      -8.5907467
+    ],
+    "115404882": [
+      40.0349476,
+      -8.5835121
+    ],
+    "115404885": [
+      40.0848621,
+      -8.5365916
+    ],
+    "115404890": [
+      40.0516722,
+      -8.5669468
+    ],
+    "115404895": [
+      40.126491,
+      -8.5023611
+    ],
+    "115404899": [
+      40.1270219,
+      -8.5010262
+    ],
+    "115404911": [
+      40.0224461,
+      -8.5919875
+    ],
+    "115404918": [
+      40.0363828,
+      -8.5822048
+    ],
+    "115404925": [
+      40.0853654,
+      -8.5362638
+    ],
+    "115404928": [
+      40.0446678,
+      -8.572641
+    ],
+    "115404935": [
+      40.1267428,
+      -8.5016695
+    ],
+    "115404941": [
+      40.021079,
+      -8.5932485
+    ],
+    "115404946": [
+      40.0456004,
+      -8.5720286
+    ],
+    "115404950": [
+      40.0040117,
+      -8.6072609
+    ],
+    "115404953": [
+      40.0200666,
+      -8.5942594
+    ],
+    "115404962": [
+      40.0475775,
+      -8.5709539
+    ],
+    "115404965": [
+      40.0490465,
+      -8.5699569
+    ],
+    "115404972": [
+      40.1261284,
+      -8.5037261
+    ],
+    "115404976": [
+      40.0188938,
+      -8.5955366
+    ],
+    "115404980": [
+      40.0497684,
+      -8.5693248
+    ],
+    "115404986": [
+      40.0843166,
+      -8.5368802
+    ],
+    "115404993": [
+      40.0032703,
+      -8.6076639
+    ],
+    "115404998": [
+      40.0335396,
+      -8.5846603
+    ],
+    "115405003": [
+      40.0503925,
+      -8.5686521
+    ],
+    "115405007": [
+      40.1263015,
+      -8.5030115
+    ],
+    "115405012": [
+      40.0985252,
+      -8.5325263
+    ],
+    "115405017": [
+      40.0610281,
+      -8.5505852
+    ],
+    "115405023": [
+      40.128417,
+      -8.4988628
+    ],
+    "115405026": [
+      40.006019,
+      -8.6057698
+    ],
+    "115405032": [
+      40.0397224,
+      -8.5785175
+    ],
+    "115405039": [
+      40.0553278,
+      -8.5591802
+    ],
+    "115405047": [
+      40.0970875,
+      -8.5334323
+    ],
+    "115405053": [
+      40.0053424,
+      -8.6063282
+    ],
+    "115405059": [
+      40.0386622,
+      -8.5798079
+    ],
+    "115405063": [
+      40.0547002,
+      -8.5604247
+    ],
+    "115405067": [
+      40.0944609,
+      -8.5341847
+    ],
+    "115405073": [
+      40.129882,
+      -8.4974392
+    ],
+    "115405077": [
+      40.0720759,
+      -8.5400615
+    ],
+    "115405082": [
+      40.0047735,
+      -8.6067716
+    ],
+    "115405085": [
+      40.1288365,
+      -8.4983535
+    ],
+    "115405103": [
+      40.0403521,
+      -8.577704
+    ],
+    "115405107": [
+      40.054118,
+      -8.5616463
+    ],
+    "115405110": [
+      40.1057479,
+      -8.5282372
+    ],
+    "115405121": [
+      40.0531463,
+      -8.5639417
+    ],
+    "115405129": [
+      40.0694737,
+      -8.5425441
+    ],
+    "115405135": [
+      40.1036081,
+      -8.5287398
+    ],
+    "115405139": [
+      40.0084197,
+      -8.6031975
+    ],
+    "115405142": [
+      40.0371391,
+      -8.5814478
+    ],
+    "115405148": [
+      40.0526208,
+      -8.5651872
+    ],
+    "115405153": [
+      40.1281178,
+      -8.499194
+    ],
+    "115405159": [
+      40.1019642,
+      -8.5295756
+    ],
+    "115405165": [
+      40.0066232,
+      -8.605189
+    ],
+    "115405171": [
+      40.0379179,
+      -8.5806355
+    ],
+    "115405176": [
+      40.0521756,
+      -8.5661068
+    ],
+    "115405181": [
+      40.0702616,
+      -8.5419037
+    ],
+    "115405184": [
+      40.1274164,
+      -8.5002794
+    ],
+    "115405189": [
+      40.1000955,
+      -8.5311049
+    ],
+    "115405202": [
+      40.0709982,
+      -8.5412023
+    ],
+    "115409350": [
+      39.9569837,
+      -8.6676145
+    ],
+    "115409358": [
+      39.9993824,
+      -8.6093616
+    ],
+    "115409361": [
+      39.8457945,
+      -8.7179779
+    ],
+    "115409362": [
+      39.9987408,
+      -8.6097969
+    ],
+    "115409367": [
+      39.8442032,
+      -8.7183228
+    ],
+    "115409372": [
+      39.9575496,
+      -8.6670759
+    ],
+    "115409375": [
+      39.8471921,
+      -8.7177352
+    ],
+    "115409381": [
+      39.9952824,
+      -8.6130531
+    ],
+    "115409386": [
+      39.8412674,
+      -8.7192261
+    ],
+    "115409392": [
+      39.9560148,
+      -8.6683573
+    ],
+    "115409397": [
+      39.9945468,
+      -8.6137241
+    ],
+    "115409398": [
+      39.9977323,
+      -8.6105701
+    ],
+    "115409403": [
+      39.8427865,
+      -8.718713
+    ],
+    "115409407": [
+      39.9565413,
+      -8.6679819
+    ],
+    "115409411": [
+      39.9971016,
+      -8.6111534
+    ],
+    "115409414": [
+      39.8387521,
+      -8.7203303
+    ],
+    "115409418": [
+      39.8370749,
+      -8.7210205
+    ],
+    "115409425": [
+      39.9599505,
+      -8.6638978
+    ],
+    "115409428": [
+      39.8399052,
+      -8.7197884
+    ],
+    "115409430": [
+      39.9606723,
+      -8.6629607
+    ],
+    "115409433": [
+      39.958039,
+      -8.6665352
+    ],
+    "115409438": [
+      39.9585686,
+      -8.6658617
+    ],
+    "115409443": [
+      39.9618981,
+      -8.661722
+    ],
+    "115409450": [
+      39.9625587,
+      -8.6611846
+    ],
+    "115409456": [
+      39.9612071,
+      -8.6623704
+    ],
+    "115409463": [
+      39.9907833,
+      -8.6162107
+    ],
+    "115409468": [
+      39.9672918,
+      -8.6569487
+    ],
+    "115409475": [
+      39.9915597,
+      -8.6156806
+    ],
+    "115409495": [
+      39.9172692,
+      -8.6845929
+    ],
+    "115409529": [
+      39.9667674,
+      -8.657689
+    ],
+    "115409536": [
+      39.9932666,
+      -8.6146449
+    ],
+    "115409540": [
+      39.9940321,
+      -8.614134
+    ],
+    "115409548": [
+      39.9678487,
+      -8.6560126
+    ],
+    "115409555": [
+      39.9652663,
+      -8.6592411
+    ],
+    "115409559": [
+      39.9644479,
+      -8.6598718
+    ],
+    "115409561": [
+      39.8482899,
+      -8.7174626
+    ],
+    "115409567": [
+      39.9661276,
+      -8.6584289
+    ],
+    "115409573": [
+      39.8962775,
+      -8.6901755
+    ],
+    "115409580": [
+      39.7797525,
+      -8.7389923
+    ],
+    "115409586": [
+      39.9775856,
+      -8.6314331
+    ],
+    "115409596": [
+      39.778547,
+      -8.7401682
+    ],
+    "115409603": [
+      39.8053854,
+      -8.7229952
+    ],
+    "115409619": [
+      39.9695664,
+      -8.6512764
+    ],
+    "115409624": [
+      39.7830877,
+      -8.7373137
+    ],
+    "115409632": [
+      39.9788768,
+      -8.6290701
+    ],
+    "115409637": [
+      39.9795368,
+      -8.6282011
+    ],
+    "115409640": [
+      39.9701287,
+      -8.6496183
+    ],
+    "115409646": [
+      39.7807451,
+      -8.7382769
+    ],
+    "115409652": [
+      39.8070369,
+      -8.722396
+    ],
+    "115409655": [
+      39.9781415,
+      -8.6302916
+    ],
+    "115409661": [
+      39.8035317,
+      -8.7242941
+    ],
+    "115409668": [
+      39.9817221,
+      -8.6260814
+    ],
+    "115409671": [
+      39.7842122,
+      -8.7371467
+    ],
+    "115409683": [
+      39.9804281,
+      -8.6272006
+    ],
+    "115409700": [
+      39.8027064,
+      -8.7249966
+    ],
+    "115409702": [
+      39.9836597,
+      -8.6246828
+    ],
+    "115409704": [
+      39.968338,
+      -8.6549822
+    ],
+    "115409706": [
+      39.9763158,
+      -8.6344664
+    ],
+    "115409711": [
+      39.9687255,
+      -8.6539756
+    ],
+    "115409713": [
+      39.8048852,
+      -8.7232717
+    ],
+    "115409724": [
+      39.7686871,
+      -8.7445507
+    ],
+    "115409727": [
+      39.9843335,
+      -8.6241395
+    ],
+    "115409733": [
+      39.773793,
+      -8.7437907
+    ],
+    "115409741": [
+      39.8140435,
+      -8.7227865
+    ],
+    "115409746": [
+      39.8588537,
+      -8.7086077
+    ],
+    "115409751": [
+      39.9851362,
+      -8.6233448
+    ],
+    "115409756": [
+      39.772331,
+      -8.7441137
+    ],
+    "115409762": [
+      39.8128462,
+      -8.7228305
+    ],
+    "115409769": [
+      39.8600545,
+      -8.7078403
+    ],
+    "115409773": [
+      39.7756273,
+      -8.7429476
+    ],
+    "115409787": [
+      39.8086123,
+      -8.7222628
+    ],
+    "115409791": [
+      39.9856677,
+      -8.6227322
+    ],
+    "115409811": [
+      39.7772881,
+      -8.7415472
+    ],
+    "115409817": [
+      39.8113424,
+      -8.7226771
+    ],
+    "115409823": [
+      39.9879382,
+      -8.6192419
+    ],
+    "115409828": [
+      39.9717193,
+      -8.6456244
+    ],
+    "115409833": [
+      39.7764654,
+      -8.74233
+    ],
+    "115409838": [
+      39.8097703,
+      -8.722411
+    ],
+    "115409846": [
+      39.9861607,
+      -8.6220821
+    ],
+    "115409858": [
+      39.7957415,
+      -8.7308386
+    ],
+    "115409861": [
+      39.9884354,
+      -8.6185559
+    ],
+    "115409870": [
+      39.8541607,
+      -8.7124572
+    ],
+    "115409875": [
+      39.989171,
+      -8.6176676
+    ],
+    "115409881": [
+      39.9372463,
+      -8.6801441
+    ],
+    "115409888": [
+      39.8528483,
+      -8.7138027
+    ],
+    "115409893": [
+      39.9900139,
+      -8.6168362
+    ],
+    "115409904": [
+      39.8520521,
+      -8.7147004
+    ],
+    "115409911": [
+      39.8513706,
+      -8.7154514
+    ],
+    "115409916": [
+      39.7932422,
+      -8.7343054
+    ],
+    "115409918": [
+      39.8578399,
+      -8.7093239
+    ],
+    "115409924": [
+      39.7942887,
+      -8.7329845
+    ],
+    "115409928": [
+      39.8569938,
+      -8.7099535
+    ],
+    "115409931": [
+      39.7923915,
+      -8.7351335
+    ],
+    "115409933": [
+      39.8559046,
+      -8.7108441
+    ],
+    "115409938": [
+      39.9391375,
+      -8.67935
+    ],
+    "115409941": [
+      39.8547841,
+      -8.711846
+    ],
+    "115409946": [
+      39.9284909,
+      -8.6801308
+    ],
+    "115409954": [
+      39.8501257,
+      -8.7165261
+    ],
+    "115409958": [
+      39.8365058,
+      -8.7211812
+    ],
+    "115409963": [
+      39.8492856,
+      -8.7170351
+    ],
+    "115409970": [
+      39.8003741,
+      -8.7267575
+    ],
+    "115409977": [
+      39.8355494,
+      -8.7213282
+    ],
+    "115409980": [
+      39.8015492,
+      -8.7259054
+    ],
+    "115409988": [
+      39.7984734,
+      -8.7279983
+    ],
+    "115409991": [
+      39.930547,
+      -8.6801575
+    ],
+    "115409997": [
+      39.85087,
+      -8.715928
+    ],
+    "115410002": [
+      39.7966695,
+      -8.72961
+    ],
+    "115410003": [
+      39.9291918,
+      -8.6801127
+    ],
+    "115410006": [
+      39.7975096,
+      -8.7287474
+    ],
+    "115410010": [
+      39.7870415,
+      -8.7371173
+    ],
+    "115410015": [
+      39.831176,
+      -8.7200637
+    ],
+    "115410022": [
+      39.8948131,
+      -8.689876
+    ],
+    "115410027": [
+      39.8287164,
+      -8.7183252
+    ],
+    "115410031": [
+      39.833207,
+      -8.7210643
+    ],
+    "115410035": [
+      39.8935034,
+      -8.6896035
+    ],
+    "115410040": [
+      39.7891503,
+      -8.7368559
+    ],
+    "115410047": [
+      39.8322847,
+      -8.7207113
+    ],
+    "115410052": [
+      39.892479,
+      -8.6894365
+    ],
+    "115410057": [
+      39.8252886,
+      -8.7174573
+    ],
+    "115410059": [
+      39.7914469,
+      -8.7358343
+    ],
+    "115410064": [
+      39.8281342,
+      -8.7180334
+    ],
+    "115410071": [
+      39.8262502,
+      -8.7175026
+    ],
+    "115410077": [
+      39.8233815,
+      -8.7178165
+    ],
+    "115410083": [
+      39.8243132,
+      -8.7175649
+    ],
+    "115410086": [
+      39.8223858,
+      -8.7182597
+    ],
+    "115410091": [
+      39.8215307,
+      -8.7187984
+    ],
+    "115410095": [
+      39.7855275,
+      -8.7371155
+    ],
+    "115410102": [
+      39.7636086,
+      -8.7449627
+    ],
+    "115410110": [
+      39.86656,
+      -8.7049508
+    ],
+    "115410117": [
+      39.8195482,
+      -8.7203574
+    ],
+    "115410122": [
+      39.7655997,
+      -8.7447353
+    ],
+    "115410127": [
+      39.8204639,
+      -8.719618
+    ],
+    "115410135": [
+      39.7617737,
+      -8.7452899
+    ],
+    "115410141": [
+      39.8650033,
+      -8.7054595
+    ],
+    "115410151": [
+      39.8636281,
+      -8.7059987
+    ],
+    "115410156": [
+      39.8168583,
+      -8.7220315
+    ],
+    "115410161": [
+      39.8855521,
+      -8.6922355
+    ],
+    "115410167": [
+      39.7607422,
+      -8.7456474
+    ],
+    "115410175": [
+      39.8863581,
+      -8.6914462
+    ],
+    "115410179": [
+      39.757276,
+      -8.7478868
+    ],
+    "115410181": [
+      39.8626435,
+      -8.7064408
+    ],
+    "115410185": [
+      39.817806,
+      -8.7215645
+    ],
+    "115410190": [
+      39.7585731,
+      -8.7469782
+    ],
+    "115410197": [
+      39.8186281,
+      -8.7210466
+    ],
+    "115410203": [
+      39.7548743,
+      -8.748981
+    ],
+    "115410208": [
+      39.8714329,
+      -8.7034571
+    ],
+    "115410212": [
+      39.8893008,
+      -8.6897206
+    ],
+    "115410217": [
+      39.755687,
+      -8.7487176
+    ],
+    "115410219": [
+      39.8871601,
+      -8.6907988
+    ],
+    "115410224": [
+      39.7514206,
+      -8.7488681
+    ],
+    "115410231": [
+      39.8147817,
+      -8.7226753
+    ],
+    "115410237": [
+      39.8879159,
+      -8.690314
+    ],
+    "115410241": [
+      39.7537678,
+      -8.7491643
+    ],
+    "115410248": [
+      39.8696763,
+      -8.7041002
+    ],
+    "115410254": [
+      39.8915511,
+      -8.6893744
+    ],
+    "115410259": [
+      39.7475239,
+      -8.7473917
+    ],
+    "115410263": [
+      39.7497624,
+      -8.7482057
+    ],
+    "115410269": [
+      39.8905042,
+      -8.6894398
+    ],
+    "115410275": [
+      39.8685265,
+      -8.7044425
+    ],
+    "115410286": [
+      39.90652,
+      -8.6867658
+    ],
+    "115410297": [
+      39.9017106,
+      -8.6897168
+    ],
+    "115410298": [
+      39.9214671,
+      -8.6825942
+    ],
+    "115410299": [
+      39.9411098,
+      -8.6779779
+    ],
+    "115410300": [
+      39.9083766,
+      -8.685569
+    ],
+    "115410304": [
+      39.907469,
+      -8.6861126
+    ],
+    "115410310": [
+      39.9006143,
+      -8.6900563
+    ],
+    "115410314": [
+      39.9226447,
+      -8.6819055
+    ],
+    "115410326": [
+      39.8994539,
+      -8.6902736
+    ],
+    "115410348": [
+      39.9237127,
+      -8.6813558
+    ],
+    "115410353": [
+      39.9431487,
+      -8.6757859
+    ],
+    "115410357": [
+      39.8979251,
+      -8.690339
+    ],
+    "115410370": [
+      39.9260407,
+      -8.6805164
+    ],
+    "115410375": [
+      39.9418124,
+      -8.6773071
+    ],
+    "115410378": [
+      39.8974307,
+      -8.6903152
+    ],
+    "115410387": [
+      39.9249598,
+      -8.6808504
+    ],
+    "115410392": [
+      39.9424617,
+      -8.6766016
+    ],
+    "115410400": [
+      39.9440252,
+      -8.6746785
+    ],
+    "115410413": [
+      39.9138379,
+      -8.6846057
+    ],
+    "115410418": [
+      39.9181875,
+      -8.6843476
+    ],
+    "115410428": [
+      39.9125592,
+      -8.6845634
+    ],
+    "115410432": [
+      39.9188918,
+      -8.6840687
+    ],
+    "115410443": [
+      39.9161556,
+      -8.6847071
+    ],
+    "115410446": [
+      39.8613648,
+      -8.7070955
+    ],
+    "115410449": [
+      39.9153814,
+      -8.6846996
+    ],
+    "115410454": [
+      39.9057174,
+      -8.6873501
+    ],
+    "115410460": [
+      39.8847305,
+      -8.6931798
+    ],
+    "115410466": [
+      39.9195985,
+      -8.6837101
+    ],
+    "115410470": [
+      39.90482,
+      -8.6879985
+    ],
+    "115410475": [
+      39.8829019,
+      -8.6953366
+    ],
+    "115410479": [
+      39.9463763,
+      -8.6720399
+    ],
+    "115410487": [
+      39.909397,
+      -8.6851137
+    ],
+    "115410493": [
+      39.9040171,
+      -8.6885433
+    ],
+    "115410495": [
+      39.8837416,
+      -8.6943808
+    ],
+    "115410501": [
+      39.7462671,
+      -8.7469596
+    ],
+    "115410508": [
+      39.944982,
+      -8.6734819
+    ],
+    "115410516": [
+      39.9117188,
+      -8.6845938
+    ],
+    "115410521": [
+      39.8811989,
+      -8.6970817
+    ],
+    "115410533": [
+      39.9204364,
+      -8.683228
+    ],
+    "115410537": [
+      39.9457762,
+      -8.6726004
+    ],
+    "115410543": [
+      39.9101409,
+      -8.6848757
+    ],
+    "115410550": [
+      39.9030384,
+      -8.6891185
+    ],
+    "115410557": [
+      39.8820369,
+      -8.6962545
+    ],
+    "115410575": [
+      39.8802746,
+      -8.6979338
+    ],
+    "115410582": [
+      39.8795499,
+      -8.6985677
+    ],
+    "115410586": [
+      39.9488652,
+      -8.6704918
+    ],
+    "115410592": [
+      39.9479659,
+      -8.670928
+    ],
+    "115410599": [
+      39.8789764,
+      -8.6990365
+    ],
+    "115410603": [
+      39.9470071,
+      -8.6715387
+    ],
+    "115410609": [
+      39.8776642,
+      -8.7000276
+    ],
+    "115410613": [
+      39.8768448,
+      -8.7005977
+    ],
+    "115410626": [
+      39.8759541,
+      -8.7011745
+    ],
+    "115410631": [
+      39.8751072,
+      -8.7016885
+    ],
+    "115410635": [
+      39.9269049,
+      -8.6803268
+    ],
+    "115410638": [
+      39.9532498,
+      -8.6695216
+    ],
+    "115410642": [
+      39.874426,
+      -8.7020615
+    ],
+    "115410651": [
+      39.9505713,
+      -8.6699928
+    ],
+    "115410652": [
+      39.873694,
+      -8.7024378
+    ],
+    "115410657": [
+      39.9276998,
+      -8.6802019
+    ],
+    "115410663": [
+      39.9495931,
+      -8.6702386
+    ],
+    "115410670": [
+      39.8727453,
+      -8.7028932
+    ],
+    "115410677": [
+      39.9552146,
+      -8.668826
+    ],
+    "115410684": [
+      39.8721501,
+      -8.703168
+    ],
+    "115410690": [
+      39.9544215,
+      -8.6691816
+    ],
+    "115415133": [
+      39.7412187,
+      -8.7423239
+    ],
+    "115415152": [
+      39.7440731,
+      -8.7457755
+    ],
+    "115415158": [
+      39.7409452,
+      -8.7417788
+    ],
+    "115415166": [
+      39.7435654,
+      -8.7453545
+    ],
+    "115415171": [
+      39.7417361,
+      -8.7432394
+    ],
+    "115415173": [
+      39.7430613,
+      -8.7448874
+    ],
+    "115415178": [
+      39.7452267,
+      -8.7464864
+    ],
+    "115415183": [
+      39.7414882,
+      -8.7428136
+    ],
+    "115415188": [
+      39.7447065,
+      -8.7462019
+    ],
+    "115882999": [
+      39.7407176,
+      -8.7412443
+    ],
+    "115883001": [
+      39.7405115,
+      -8.7406854
+    ],
+    "115883003": [
+      39.7400759,
+      -8.7392086
+    ],
+    "115883004": [
+      39.7399428,
+      -8.7386607
+    ],
+    "115883006": [
+      39.7395657,
+      -8.7369849
+    ],
+    "115883007": [
+      39.7395386,
+      -8.7368688
+    ],
+    "115883009": [
+      39.7391105,
+      -8.7352829
+    ],
+    "115883010": [
+      39.738862,
+      -8.7345994
+    ],
+    "185513686": [
+      40.202064,
+      -8.4888002
+    ],
+    "185513688": [
+      40.2013439,
+      -8.4886219
+    ],
+    "185526349": [
+      40.2099152,
+      -8.4883076
+    ],
+    "185526351": [
+      40.2037092,
+      -8.4890683
+    ],
+    "185528167": [
+      40.1909399,
+      -8.4877612
+    ],
+    "185528168": [
+      40.1900668,
+      -8.4880944
+    ],
+    "185530117": [
+      40.1835097,
+      -8.4922071
+    ],
+    "185530118": [
+      40.1812012,
+      -8.4926147
+    ],
+    "185530120": [
+      40.1788125,
+      -8.4935066
+    ],
+    "185530121": [
+      40.1767757,
+      -8.4944416
+    ],
+    "185530122": [
+      40.1756384,
+      -8.4947619
+    ],
+    "185530124": [
+      40.1722129,
+      -8.4947037
+    ],
+    "185530126": [
+      40.1699945,
+      -8.4939892
+    ],
+    "185530128": [
+      40.1673047,
+      -8.4934241
+    ],
+    "185531533": [
+      40.1645995,
+      -8.4936062
+    ],
+    "185531534": [
+      40.1632168,
+      -8.4939846
+    ],
+    "185531535": [
+      40.1621186,
+      -8.4943116
+    ],
+    "185531536": [
+      40.1585147,
+      -8.4951593
+    ],
+    "185531537": [
+      40.1559394,
+      -8.4950718
+    ],
+    "185531538": [
+      40.1529298,
+      -8.4943101
+    ],
+    "185531542": [
+      40.1462868,
+      -8.4925143
+    ],
+    "185839392": [
+      40.1974627,
+      -8.4875437
+    ],
+    "185841352": [
+      40.145602,
+      -8.4925507
+    ],
+    "185841354": [
+      40.1444593,
+      -8.4927004
+    ],
+    "185841356": [
+      40.1417193,
+      -8.493624
+    ],
+    "185841357": [
+      40.1404893,
+      -8.4943424
+    ],
+    "185842385": [
+      40.1380374,
+      -8.4957184
+    ],
+    "196162978": [
+      40.1324127,
+      -8.4962561
+    ],
+    "208714741": [
+      40.2692797,
+      -8.4835005
+    ],
+    "208717270": [
+      40.2655568,
+      -8.4830467
+    ],
+    "208717271": [
+      40.2581031,
+      -8.4861669
+    ],
+    "208717273": [
+      40.255373,
+      -8.4875026
+    ],
+    "208717697": [
+      40.2529161,
+      -8.4876678
+    ],
+    "208718587": [
+      40.2508985,
+      -8.4876077
+    ],
+    "208725096": [
+      40.2497818,
+      -8.48771
+    ],
+    "208725498": [
+      40.2476419,
+      -8.4880776
+    ],
+    "208725733": [
+      40.2465742,
+      -8.4883071
+    ],
+    "208726221": [
+      40.2432269,
+      -8.4887846
+    ],
+    "208726363": [
+      40.2411954,
+      -8.488563
+    ],
+    "208727173": [
+      40.2347917,
+      -8.487135
+    ],
+    "208727257": [
+      40.232839,
+      -8.4870406
+    ],
+    "208727409": [
+      40.2315809,
+      -8.4870921
+    ],
+    "208727556": [
+      40.2304932,
+      -8.4871521
+    ],
+    "208728211": [
+      40.2280293,
+      -8.4872981
+    ],
+    "208728343": [
+      40.2267645,
+      -8.4873839
+    ],
+    "208728881": [
+      40.2217833,
+      -8.4873407
+    ],
+    "208729438": [
+      40.216776,
+      -8.4870911
+    ],
+    "208729439": [
+      40.2139061,
+      -8.4872895
+    ],
+    "208736489": [
+      40.2127648,
+      -8.4875052
+    ],
+    "209250826": [
+      40.1994368,
+      -8.4880646
+    ],
+    "227133827": [
+      40.1995989,
+      -8.4881146
+    ],
+    "249585499": [
+      40.2723408,
+      -8.4780913
+    ],
+    "249585515": [
+      40.2728874,
+      -8.4793832
+    ],
+    "319836197": [
+      39.9401404,
+      -8.6787392
+    ],
+    "319836203": [
+      39.9112252,
+      -8.6846523
+    ],
+    "319836205": [
+      39.8853514,
+      -8.6924518
+    ],
+    "319836206": [
+      39.8787276,
+      -8.6992327
+    ],
+    "319836209": [
+      39.8343607,
+      -8.7213036
+    ],
+    "319836211": [
+      39.8316335,
+      -8.7203756
+    ],
+    "319836213": [
+      39.8298634,
+      -8.7190959
+    ],
+    "319836214": [
+      39.827253,
+      -8.7177047
+    ],
+    "319836217": [
+      39.8158395,
+      -8.7224143
+    ],
+    "319836219": [
+      39.8082623,
+      -8.7222591
+    ],
+    "319836221": [
+      39.8060923,
+      -8.7226749
+    ],
+    "319836223": [
+      39.8041513,
+      -8.7237838
+    ],
+    "319836225": [
+      39.799453,
+      -8.7273608
+    ],
+    "319836227": [
+      39.7904207,
+      -8.7363977
+    ],
+    "319836229": [
+      39.7882518,
+      -8.737019
+    ],
+    "319836231": [
+      39.7818411,
+      -8.7377117
+    ],
+    "319836233": [
+      39.7743902,
+      -8.743591
+    ],
+    "319836235": [
+      39.7734351,
+      -8.743894
+    ],
+    "319836237": [
+      39.7705315,
+      -8.7443779
+    ],
+    "319836239": [
+      39.7596314,
+      -8.7462275
+    ],
+    "319836241": [
+      39.7563749,
+      -8.748419
+    ],
+    "319836243": [
+      39.7526168,
+      -8.7491239
+    ],
+    "319836255": [
+      39.7382991,
+      -8.7333847
+    ],
+    "319836256": [
+      39.7378292,
+      -8.7325934
+    ],
+    "319836258": [
+      39.7372212,
+      -8.7317556
+    ],
+    "319836259": [
+      39.7361277,
+      -8.7305987
+    ],
+    "319836260": [
+      39.7350471,
+      -8.7295962
+    ],
+    "319836261": [
+      39.7335592,
+      -8.7280891
+    ],
+    "319836262": [
+      39.7327694,
+      -8.7270984
+    ],
+    "319836263": [
+      39.7317735,
+      -8.7255628
+    ],
+    "319836264": [
+      39.7309585,
+      -8.7239622
+    ],
+    "319836265": [
+      39.7301953,
+      -8.7222251
+    ],
+    "319836266": [
+      39.7292263,
+      -8.7201575
+    ],
+    "319836267": [
+      39.7285652,
+      -8.7190513
+    ],
+    "319836268": [
+      39.7275986,
+      -8.7178409
+    ],
+    "319836269": [
+      39.7265806,
+      -8.7169253
+    ],
+    "319836270": [
+      39.7254656,
+      -8.7162271
+    ],
+    "319836271": [
+      39.7243491,
+      -8.7157517
+    ],
+    "319836272": [
+      39.721871,
+      -8.7149923
+    ],
+    "319836274": [
+      39.7202286,
+      -8.7144289
+    ],
+    "319836275": [
+      39.7187964,
+      -8.7138645
+    ],
+    "319836276": [
+      39.7183432,
+      -8.7136705
+    ],
+    "319836282": [
+      39.715623,
+      -8.712334
+    ],
+    "319836283": [
+      39.7128332,
+      -8.7106678
+    ],
+    "319836284": [
+      39.7116292,
+      -8.7099119
+    ],
+    "319836285": [
+      39.7098556,
+      -8.70891
+    ],
+    "319836286": [
+      39.7085391,
+      -8.7081606
+    ],
+    "319836287": [
+      39.7072358,
+      -8.7072034
+    ],
+    "319836288": [
+      39.7060303,
+      -8.7060996
+    ],
+    "319836289": [
+      39.7046311,
+      -8.7044323
+    ],
+    "319836290": [
+      39.7038799,
+      -8.7033054
+    ],
+    "319836291": [
+      39.70299,
+      -8.7017074
+    ],
+    "319836292": [
+      39.7021793,
+      -8.7001683
+    ],
+    "319836293": [
+      39.7015705,
+      -8.6991292
+    ],
+    "319836295": [
+      39.7010056,
+      -8.6983377
+    ],
+    "319836296": [
+      39.7003226,
+      -8.6975714
+    ],
+    "319836297": [
+      39.6993051,
+      -8.6966837
+    ],
+    "319836298": [
+      39.6987754,
+      -8.6963395
+    ],
+    "319836299": [
+      39.6976262,
+      -8.6957326
+    ],
+    "319836300": [
+      39.6961201,
+      -8.6949601
+    ],
+    "319836301": [
+      39.6949576,
+      -8.6941613
+    ],
+    "319836302": [
+      39.6938897,
+      -8.6932585
+    ],
+    "319836303": [
+      39.6928466,
+      -8.6923536
+    ],
+    "319836304": [
+      39.6915475,
+      -8.6913302
+    ],
+    "319836305": [
+      39.6904302,
+      -8.6905419
+    ],
+    "319836306": [
+      39.689111,
+      -8.6896995
+    ],
+    "319836307": [
+      39.6877857,
+      -8.6888847
+    ],
+    "319836308": [
+      39.6860104,
+      -8.6876288
+    ],
+    "319836309": [
+      39.6845071,
+      -8.6864297
+    ],
+    "319836310": [
+      39.6834839,
+      -8.6855834
+    ],
+    "319839621": [
+      39.6824088,
+      -8.6848263
+    ],
+    "319839622": [
+      39.6813545,
+      -8.6842618
+    ],
+    "319839623": [
+      39.6801989,
+      -8.6838752
+    ],
+    "319839624": [
+      39.6790129,
+      -8.6837173
+    ],
+    "319839625": [
+      39.6776716,
+      -8.6838052
+    ],
+    "319839626": [
+      39.6762374,
+      -8.6841758
+    ],
+    "319839627": [
+      39.6740604,
+      -8.6849965
+    ],
+    "319839628": [
+      39.6725507,
+      -8.6855148
+    ],
+    "319839629": [
+      39.6705845,
+      -8.6861385
+    ],
+    "319839630": [
+      39.6700555,
+      -8.6863459
+    ],
+    "319839632": [
+      39.6671273,
+      -8.6880588
+    ],
+    "319839633": [
+      39.6657919,
+      -8.689144
+    ],
+    "319839634": [
+      39.6646981,
+      -8.6900252
+    ],
+    "319839635": [
+      39.663146,
+      -8.6911683
+    ],
+    "319839636": [
+      39.6616592,
+      -8.6922361
+    ],
+    "319839637": [
+      39.6604315,
+      -8.6932287
+    ],
+    "319839638": [
+      39.6593176,
+      -8.6941243
+    ],
+    "319839639": [
+      39.657974,
+      -8.6950511
+    ],
+    "319839640": [
+      39.6570397,
+      -8.6955274
+    ],
+    "319839641": [
+      39.6560274,
+      -8.6959135
+    ],
+    "319839642": [
+      39.655015,
+      -8.6961593
+    ],
+    "319839643": [
+      39.6539335,
+      -8.6962916
+    ],
+    "319839644": [
+      39.6527166,
+      -8.6962802
+    ],
+    "319839645": [
+      39.651375,
+      -8.6961628
+    ],
+    "319839646": [
+      39.6503039,
+      -8.6960672
+    ],
+    "319839647": [
+      39.64899,
+      -8.6961453
+    ],
+    "319839648": [
+      39.6479335,
+      -8.6964091
+    ],
+    "319839649": [
+      39.6470284,
+      -8.6967997
+    ],
+    "319839650": [
+      39.6459751,
+      -8.6974418
+    ],
+    "319839651": [
+      39.6447571,
+      -8.6982491
+    ],
+    "319839652": [
+      39.6438639,
+      -8.698706
+    ],
+    "319839653": [
+      39.6426853,
+      -8.69909
+    ],
+    "319839655": [
+      39.6414102,
+      -8.699245
+    ],
+    "319839656": [
+      39.6405631,
+      -8.6992016
+    ],
+    "319839659": [
+      39.639326,
+      -8.6990367
+    ],
+    "319839660": [
+      39.6379567,
+      -8.6988956
+    ],
+    "319839661": [
+      39.636762,
+      -8.6988276
+    ],
+    "319839662": [
+      39.6350762,
+      -8.698811
+    ],
+    "319839663": [
+      39.6332196,
+      -8.6987773
+    ],
+    "319839664": [
+      39.631639,
+      -8.6985969
+    ],
+    "319839665": [
+      39.6300621,
+      -8.6982263
+    ],
+    "319839668": [
+      39.6284712,
+      -8.6976607
+    ],
+    "319839669": [
+      39.6265197,
+      -8.696722
+    ],
+    "319886077": [
+      39.6236669,
+      -8.6959309
+    ],
+    "319886078": [
+      39.6276648,
+      -8.6874916
+    ],
+    "1030751218": [
+      40.2711227,
+      -8.4833636
+    ],
+    "1030751221": [
+      40.2714653,
+      -8.4834685
+    ],
+    "1030766316": [
+      40.2731433,
+      -8.4800894
+    ],
+    "1030766319": [
+      40.2735908,
+      -8.4834115
+    ],
+    "1030766322": [
+      40.2724849,
+      -8.4839744
+    ],
+    "1030766325": [
+      40.2719779,
+      -8.4837715
+    ],
+    "1030766334": [
+      40.2728224,
+      -8.4839869
+    ],
+    "1030766336": [
+      40.2737619,
+      -8.4830692
+    ],
+    "1030766338": [
+      40.2738315,
+      -8.4827241
+    ],
+    "1030766341": [
+      40.2734931,
+      -8.4810181
+    ],
+    "1030766343": [
+      40.2738018,
+      -8.4819714
+    ],
+    "1030766347": [
+      40.2731616,
+      -8.483865
+    ],
+    "1030774916": [
+      40.2734118,
+      -8.4836548
+    ],
+    "1104579332": [
+      40.0963497,
+      -8.5337695
+    ],
+    "1104579336": [
+      40.1046605,
+      -8.5284602
+    ],
+    "1104579339": [
+      40.0987704,
+      -8.532363
+    ],
+    "1104579341": [
+      40.101023,
+      -8.5302618
+    ],
+    "1104579342": [
+      40.0978278,
+      -8.5330261
+    ],
+    "1104579345": [
+      40.1027896,
+      -8.5291142
+    ],
+    "1104579346": [
+      40.1089525,
+      -8.5278585
+    ],
+    "1104588539": [
+      40.1113101,
+      -8.5270366
+    ],
+    "1104588540": [
+      40.1139418,
+      -8.5253265
+    ],
+    "1104588542": [
+      40.1148379,
+      -8.5244758
+    ],
+    "1104588545": [
+      40.114673,
+      -8.5246453
+    ],
+    "1104656528": [
+      40.1226595,
+      -8.5155172
+    ],
+    "1104656529": [
+      40.1229089,
+      -8.5151434
+    ],
+    "1104747262": [
+      40.2378269,
+      -8.4876904
+    ],
+    "1104747264": [
+      40.2320636,
+      -8.4870723
+    ],
+    "1106195861": [
+      39.9434762,
+      -8.6753816
+    ],
+    "1108960817": [
+      40.2063854,
+      -8.4890917
+    ],
+    "1108961085": [
+      40.2157158,
+      -8.4871034
+    ],
+    "1108961203": [
+      40.1872094,
+      -8.490253
+    ],
+    "1108961353": [
+      40.2089391,
+      -8.4885639
+    ],
+    "1108961490": [
+      40.1874749,
+      -8.4899902
+    ],
+    "1109418322": [
+      40.2738447,
+      -8.4822979
+    ],
+    "1191623873": [
+      39.7145192,
+      -8.7117255
+    ],
+    "1191623931": [
+      39.7111729,
+      -8.709644
+    ],
+    "1341735491": [
+      40.154951,
+      -8.4949108
+    ],
+    "1341735494": [
+      40.1579865,
+      -8.4951693
+    ],
+    "1341735505": [
+      40.1591045,
+      -8.4950876
+    ],
+    "1341735540": [
+      40.1566537,
+      -8.4951445
+    ],
+    "1359875708": [
+      40.1234738,
+      -8.514211
+    ],
+    "1360521549": [
+      40.1161232,
+      -8.5230332
+    ],
+    "1360521554": [
+      40.1213226,
+      -8.5171187
+    ],
+    "1360521571": [
+      40.1177706,
+      -8.520938
+    ],
+    "1360521574": [
+      40.118986,
+      -8.519532
+    ],
+    "1360521575": [
+      40.119775,
+      -8.518686
+    ],
+    "1360521583": [
+      40.1204197,
+      -8.5180156
+    ],
+    "1360521585": [
+      40.1196236,
+      -8.5188447
+    ],
+    "1457063199": [
+      40.0160545,
+      -8.5987516
+    ],
+    "1662823892": [
+      39.932718,
+      -8.6803693
+    ],
+    "1662823929": [
+      39.9340851,
+      -8.6804729
+    ],
+    "1662824103": [
+      39.9353734,
+      -8.6804742
+    ],
+    "1662824173": [
+      39.9361632,
+      -8.6803754
+    ],
+    "1662824583": [
+      39.9385948,
+      -8.6796106
+    ],
+    "1662824633": [
+      39.9400369,
+      -8.6788048
+    ],
+    "1662825474": [
+      39.9708888,
+      -8.6476387
+    ],
+    "1662827496": [
+      40.0146327,
+      -8.5996572
+    ],
+    "1699691235": [
+      40.0805036,
+      -8.5374655
+    ],
+    "1699693407": [
+      40.1277578,
+      -8.4997342
+    ],
+    "1699693483": [
+      40.1302149,
+      -8.4972232
+    ],
+    "1699693693": [
+      40.1352751,
+      -8.4961372
+    ],
+    "1699693703": [
+      40.1354367,
+      -8.4961485
+    ],
+    "1712101218": [
+      40.259186,
+      -8.485281
+    ],
+    "1712101233": [
+      40.2626342,
+      -8.4833742
+    ],
+    "1712101234": [
+      40.264686,
+      -8.4830255
+    ],
+    "1712101249": [
+      40.2687148,
+      -8.4835012
+    ],
+    "1712101258": [
+      40.2707177,
+      -8.4833425
+    ],
+    "1712101268": [
+      40.2714293,
+      -8.4755531
+    ],
+    "1712101269": [
+      40.2716217,
+      -8.4763231
+    ],
+    "1712101277": [
+      40.2719625,
+      -8.4772572
+    ],
+    "1712101303": [
+      40.2726424,
+      -8.4787902
+    ],
+    "1712101311": [
+      40.2729674,
+      -8.479661
+    ],
+    "1787598246": [
+      39.6696108,
+      -8.6865441
+    ],
+    "1787598306": [
+      39.6690829,
+      -8.6868048
+    ],
+    "1827966031": [
+      39.6249465,
+      -8.6930775
+    ],
+    "1827966080": [
+      39.6251967,
+      -8.6925374
+    ],
+    "1828929350": [
+      39.7402912,
+      -8.7399854
+    ],
+    "2003101345": [
+      40.039237,
+      -8.5791083
+    ],
+    "2653573810": [
+      39.7505963,
+      -8.7485569
+    ],
+    "2653573811": [
+      39.7520057,
+      -8.7490129
+    ],
+    "2653573812": [
+      39.7531931,
+      -8.749167
+    ],
+    "2653573816": [
+      39.7528987,
+      -8.7491577
+    ],
+    "2653573817": [
+      39.7522994,
+      -8.7490746
+    ],
+    "2653573818": [
+      39.751711,
+      -8.7489497
+    ],
+    "2653573819": [
+      39.7518612,
+      -8.7489821
+    ],
+    "2653573820": [
+      39.7510132,
+      -8.7487264
+    ],
+    "2863416508": [
+      40.0416559,
+      -8.5758674
+    ],
+    "2863416735": [
+      40.0414398,
+      -8.5761785
+    ],
+    "3929311410": [
+      40.2696921,
+      -8.4834613
+    ],
+    "3929311412": [
+      40.2709633,
+      -8.4833444
+    ],
+    "3929311414": [
+      40.2720917,
+      -8.4838056
+    ],
+    "3929311418": [
+      40.2722905,
+      -8.4839157
+    ],
+    "3929311424": [
+      40.2726573,
+      -8.4839917
+    ],
+    "3929311428": [
+      40.2729911,
+      -8.4839455
+    ],
+    "3961002598": [
+      40.1918179,
+      -8.4875542
+    ],
+    "3961002599": [
+      40.1935826,
+      -8.4872884
+    ],
+    "3961002600": [
+      40.1955462,
+      -8.4872793
+    ],
+    "3961002602": [
+      40.2024337,
+      -8.4888659
+    ],
+    "3961002605": [
+      40.2045219,
+      -8.4891481
+    ],
+    "3961002607": [
+      40.2068353,
+      -8.4890128
+    ],
+    "4007708195": [
+      39.6274474,
+      -8.6971954
+    ],
+    "4007708197": [
+      39.6277781,
+      -8.6973533
+    ],
+    "4974214258": [
+      40.0411115,
+      -8.5766604
+    ],
+    "4974214263": [
+      40.0411399,
+      -8.5766188
+    ],
+    "4974214266": [
+      40.0426372,
+      -8.5745412
+    ],
+    "5538644268": [
+      40.2576254,
+      -8.4865294
+    ],
+    "5538644270": [
+      40.2564048,
+      -8.4871666
+    ],
+    "5538644272": [
+      40.2559686,
+      -8.4873308
+    ],
+    "5538644274": [
+      40.2568383,
+      -8.4869801
+    ],
+    "5538644276": [
+      40.2545882,
+      -8.4876144
+    ],
+    "5538644277": [
+      40.2549785,
+      -8.48757
+    ],
+    "5538644280": [
+      40.2417203,
+      -8.4886745
+    ],
+    "5538644282": [
+      40.2427731,
+      -8.488777
+    ],
+    "5538644284": [
+      40.2437189,
+      -8.4887743
+    ],
+    "5538644293": [
+      40.244967,
+      -8.488629
+    ],
+    "5538644295": [
+      40.2445756,
+      -8.4886907
+    ],
+    "5566473532": [
+      39.6273917,
+      -8.6880815
+    ],
+    "5714287268": [
+      39.6680647,
+      -8.6873967
+    ],
+    "7186802874": [
+      39.7543506,
+      -8.7490802
+    ],
+    "7186802875": [
+      39.7534945,
+      -8.7491729
+    ],
+    "7186802876": [
+      39.7467953,
+      -8.7471478
+    ],
+    "7186802877": [
+      39.7471815,
+      -8.747277
+    ],
+    "7186802878": [
+      39.7486447,
+      -8.7477806
+    ],
+    "7186802879": [
+      39.7439649,
+      -8.7456962
+    ],
+    "7186883610": [
+      39.7423057,
+      -8.7440238
+    ],
+    "7186883611": [
+      39.7426692,
+      -8.7444672
+    ],
+    "7186883612": [
+      39.7428554,
+      -8.744673
+    ],
+    "7186883613": [
+      39.7433042,
+      -8.745124
+    ],
+    "7265438314": [
+      39.6280565,
+      -8.6867111
+    ],
+    "7265438347": [
+      39.6270366,
+      -8.6887914
+    ],
+    "7265438363": [
+      39.6236712,
+      -8.695832
+    ],
+    "7265438364": [
+      39.6236858,
+      -8.6957363
+    ],
+    "7265438365": [
+      39.6237406,
+      -8.6955567
+    ],
+    "7265438366": [
+      39.6237988,
+      -8.6954161
+    ],
+    "7265438394": [
+      39.6262118,
+      -8.6965726
+    ],
+    "7265438395": [
+      39.6261138,
+      -8.6965244
+    ],
+    "7265438396": [
+      39.6259348,
+      -8.6964483
+    ],
+    "7265438397": [
+      39.6258259,
+      -8.6964202
+    ],
+    "7265438398": [
+      39.6257111,
+      -8.6963972
+    ],
+    "7265438399": [
+      39.6255006,
+      -8.6963821
+    ],
+    "7265438400": [
+      39.6253959,
+      -8.6963896
+    ],
+    "7265438401": [
+      39.6252043,
+      -8.6964152
+    ],
+    "7265438402": [
+      39.6250096,
+      -8.6964713
+    ],
+    "7265438403": [
+      39.6246324,
+      -8.6966067
+    ],
+    "7265438404": [
+      39.6245452,
+      -8.6966338
+    ],
+    "7265438405": [
+      39.6243708,
+      -8.6966755
+    ],
+    "7265438406": [
+      39.6243052,
+      -8.696681
+    ],
+    "7265438407": [
+      39.6242409,
+      -8.6966828
+    ],
+    "7265438408": [
+      39.6241039,
+      -8.6966581
+    ],
+    "7265438409": [
+      39.6240402,
+      -8.6966341
+    ],
+    "7265438410": [
+      39.6239251,
+      -8.6965597
+    ],
+    "7265438411": [
+      39.6238802,
+      -8.6965158
+    ],
+    "7265438412": [
+      39.6238386,
+      -8.6964654
+    ],
+    "7265438413": [
+      39.6237891,
+      -8.6963976
+    ],
+    "7265438414": [
+      39.6237203,
+      -8.6962548
+    ],
+    "7265438415": [
+      39.6236964,
+      -8.6961746
+    ],
+    "7265438416": [
+      39.6236816,
+      -8.6961025
+    ],
+    "7265438417": [
+      39.6236688,
+      -8.6960149
+    ],
+    "7273325953": [
+      39.6292038,
+      -8.697941
+    ],
+    "7273325954": [
+      39.630909,
+      -8.6984423
+    ],
+    "7273325955": [
+      39.6324611,
+      -8.6987063
+    ],
+    "7273325956": [
+      39.6340998,
+      -8.6988085
+    ],
+    "7273325957": [
+      39.6347396,
+      -8.6988126
+    ],
+    "7273325958": [
+      39.6373741,
+      -8.6988568
+    ],
+    "7273325959": [
+      39.6388359,
+      -8.6989863
+    ],
+    "7273325960": [
+      39.6399394,
+      -8.699123
+    ],
+    "7273325961": [
+      39.6409992,
+      -8.6992358
+    ],
+    "7273325962": [
+      39.6418252,
+      -8.6992203
+    ],
+    "7273325963": [
+      39.6422456,
+      -8.6991734
+    ],
+    "7273325964": [
+      39.6424957,
+      -8.6991288
+    ],
+    "7273325965": [
+      39.6430756,
+      -8.6989879
+    ],
+    "7273325966": [
+      39.6433476,
+      -8.698908
+    ],
+    "7273325967": [
+      39.6436404,
+      -8.6987985
+    ],
+    "7273325968": [
+      39.6443066,
+      -8.6984988
+    ],
+    "7273325969": [
+      39.6445384,
+      -8.6983765
+    ],
+    "7273325970": [
+      39.6452683,
+      -8.6979254
+    ],
+    "7273325971": [
+      39.6449736,
+      -8.6981161
+    ],
+    "7273325972": [
+      39.6456374,
+      -8.6976726
+    ],
+    "7273325973": [
+      39.6467828,
+      -8.6969319
+    ],
+    "7273325974": [
+      39.6473189,
+      -8.6966623
+    ],
+    "7273325975": [
+      39.6476562,
+      -8.6965145
+    ],
+    "7273325976": [
+      39.6483129,
+      -8.6962984
+    ],
+    "7273325977": [
+      39.6486449,
+      -8.6962159
+    ],
+    "7273325978": [
+      39.6493768,
+      -8.6960993
+    ],
+    "7273325979": [
+      39.6497698,
+      -8.6960671
+    ],
+    "7273325980": [
+      39.6500186,
+      -8.6960621
+    ],
+    "7273325981": [
+      39.6519413,
+      -8.696223
+    ],
+    "7273325982": [
+      39.6523157,
+      -8.6962554
+    ],
+    "7273325983": [
+      39.6533326,
+      -8.6963002
+    ],
+    "7273325984": [
+      39.6536451,
+      -8.6963011
+    ],
+    "7273326585": [
+      39.6542372,
+      -8.6962662
+    ],
+    "7273326586": [
+      39.6546449,
+      -8.6962207
+    ],
+    "7273326587": [
+      39.6553836,
+      -8.6960831
+    ],
+    "7273326588": [
+      39.6556933,
+      -8.6960078
+    ],
+    "7273326589": [
+      39.6565676,
+      -8.6957189
+    ],
+    "7273326590": [
+      39.6573458,
+      -8.6953832
+    ],
+    "7273326591": [
+      39.6585267,
+      -8.6946911
+    ],
+    "7273326592": [
+      39.6589598,
+      -8.6943927
+    ],
+    "7273326593": [
+      39.661049,
+      -8.6927103
+    ],
+    "7273326594": [
+      39.6623953,
+      -8.6916864
+    ],
+    "7273326595": [
+      39.6639719,
+      -8.6905699
+    ],
+    "7273326596": [
+      39.6664523,
+      -8.6885936
+    ],
+    "7273326597": [
+      39.6668092,
+      -8.6883041
+    ],
+    "7273326598": [
+      39.6675213,
+      -8.6877617
+    ],
+    "7273326599": [
+      39.6685677,
+      -8.6870826
+    ],
+    "7273326600": [
+      39.6702284,
+      -8.6862721
+    ],
+    "7273326601": [
+      39.671022,
+      -8.6859857
+    ],
+    "7273326602": [
+      39.6717905,
+      -8.6857431
+    ],
+    "7273326603": [
+      39.6732155,
+      -8.6852923
+    ],
+    "7273326604": [
+      39.6736276,
+      -8.6851498
+    ],
+    "7273326605": [
+      39.6757791,
+      -8.6843364
+    ],
+    "7273326606": [
+      39.6768943,
+      -8.6839891
+    ],
+    "7273326607": [
+      39.6774593,
+      -8.6838456
+    ],
+    "7273326608": [
+      39.6782017,
+      -8.6837397
+    ],
+    "7273326609": [
+      39.6784391,
+      -8.6837255
+    ],
+    "7273326610": [
+      39.6788584,
+      -8.6837178
+    ],
+    "7273326611": [
+      39.6794347,
+      -8.6837518
+    ],
+    "7273326612": [
+      39.6798261,
+      -8.6838054
+    ],
+    "7273326613": [
+      39.6796398,
+      -8.6837766
+    ],
+    "7273326614": [
+      39.6806699,
+      -8.6840057
+    ],
+    "7273326615": [
+      39.6804282,
+      -8.6839364
+    ],
+    "7273326616": [
+      39.6810099,
+      -8.6841267
+    ],
+    "7273326617": [
+      39.6818941,
+      -8.6845359
+    ],
+    "7273326618": [
+      39.6816275,
+      -8.6843948
+    ],
+    "7273326619": [
+      39.6821561,
+      -8.6846811
+    ],
+    "7273326620": [
+      39.6827334,
+      -8.6850433
+    ],
+    "7273326621": [
+      39.6832729,
+      -8.6854267
+    ],
+    "7273326622": [
+      39.6836622,
+      -8.6857252
+    ],
+    "7273326623": [
+      39.6857345,
+      -8.6874237
+    ],
+    "7273326624": [
+      39.7042612,
+      -8.7039012
+    ],
+    "7273326625": [
+      39.7040604,
+      -8.7035915
+    ],
+    "7273326626": [
+      39.7034135,
+      -8.7024976
+    ],
+    "7273326627": [
+      39.7018794,
+      -8.6996487
+    ],
+    "7273326628": [
+      39.7012971,
+      -8.6987217
+    ],
+    "7273326629": [
+      39.7007138,
+      -8.6979869
+    ],
+    "7273326630": [
+      39.7005092,
+      -8.6977615
+    ],
+    "7273326631": [
+      39.6999676,
+      -8.6972275
+    ],
+    "7273326632": [
+      39.6996657,
+      -8.6969732
+    ],
+    "7273326633": [
+      39.699047,
+      -8.6965116
+    ],
+    "7273326634": [
+      39.6982257,
+      -8.6960331
+    ],
+    "7273326635": [
+      39.697892,
+      -8.6958652
+    ],
+    "7273326636": [
+      39.696898,
+      -8.6953802
+    ],
+    "7273326637": [
+      39.6965746,
+      -8.6952098
+    ],
+    "7273326638": [
+      39.6963134,
+      -8.6950688
+    ],
+    "7273326639": [
+      39.6958825,
+      -8.6948222
+    ],
+    "7273326640": [
+      39.6955354,
+      -8.6945858
+    ],
+    "7273326641": [
+      39.6952442,
+      -8.6943883
+    ],
+    "7273326642": [
+      39.6944135,
+      -8.6937173
+    ],
+    "7273326643": [
+      39.6946946,
+      -8.6939569
+    ],
+    "7273326644": [
+      39.6933693,
+      -8.6927928
+    ],
+    "7273326645": [
+      39.6898113,
+      -8.6901486
+    ],
+    "7273326646": [
+      39.6884484,
+      -8.689298
+    ],
+    "7273326647": [
+      39.6869071,
+      -8.6882744
+    ],
+    "7273326648": [
+      39.7053077,
+      -8.7052959
+    ],
+    "7273326649": [
+      39.7056715,
+      -8.7057177
+    ],
+    "7273326650": [
+      39.7066343,
+      -8.7066893
+    ],
+    "7273326651": [
+      39.7063287,
+      -8.7063996
+    ],
+    "7273326652": [
+      39.7055213,
+      -8.7055503
+    ],
+    "7273326653": [
+      39.7049412,
+      -8.7048412
+    ],
+    "7273326655": [
+      39.710543,
+      -8.7092853
+    ],
+    "7273326656": [
+      39.709293,
+      -8.7085906
+    ],
+    "7273326657": [
+      39.7089414,
+      -8.7083974
+    ],
+    "7273326658": [
+      39.7078563,
+      -8.7076876
+    ],
+    "7273326659": [
+      39.7082211,
+      -8.7079507
+    ],
+    "7273326669": [
+      39.7121251,
+      -8.7102029
+    ],
+    "7273326670": [
+      39.7139845,
+      -8.711391
+    ],
+    "7273326676": [
+      39.7171515,
+      -8.7131152
+    ],
+    "7273326677": [
+      39.7195416,
+      -8.7141628
+    ],
+    "7273326678": [
+      39.720796,
+      -8.7146363
+    ],
+    "7273326679": [
+      39.7213521,
+      -8.7148268
+    ],
+    "7273326680": [
+      39.7225059,
+      -8.7151889
+    ],
+    "7273326681": [
+      39.7234289,
+      -8.7154578
+    ],
+    "7273326682": [
+      39.7238876,
+      -8.7155958
+    ],
+    "7273326683": [
+      39.7249239,
+      -8.7159751
+    ],
+    "7273326684": [
+      39.7252126,
+      -8.7161029
+    ],
+    "7273326685": [
+      39.7258551,
+      -8.7164383
+    ],
+    "7273326686": [
+      39.7262433,
+      -8.7166853
+    ],
+    "7273326687": [
+      39.7260547,
+      -8.7165636
+    ],
+    "7273326688": [
+      39.7263769,
+      -8.7167785
+    ],
+    "7273326689": [
+      39.7267912,
+      -8.7170949
+    ],
+    "7273326690": [
+      39.7270876,
+      -8.7173427
+    ],
+    "7273326691": [
+      39.7269435,
+      -8.7172188
+    ],
+    "7273326692": [
+      39.7273582,
+      -8.7175927
+    ],
+    "7273326693": [
+      39.7278334,
+      -8.7181051
+    ],
+    "7273326694": [
+      39.7281732,
+      -8.7185103
+    ],
+    "7273326695": [
+      39.7283747,
+      -8.7187808
+    ],
+    "7273326696": [
+      39.7287755,
+      -8.7193738
+    ],
+    "7273326697": [
+      39.7290139,
+      -8.7197692
+    ],
+    "7273326698": [
+      39.7294408,
+      -8.7205775
+    ],
+    "7273326699": [
+      39.729829,
+      -8.7213951
+    ],
+    "7273326700": [
+      39.7305762,
+      -8.7231062
+    ],
+    "7273326701": [
+      39.730746,
+      -8.7234967
+    ],
+    "7273326702": [
+      39.7312221,
+      -8.7245205
+    ],
+    "7273326703": [
+      39.7314944,
+      -8.7250542
+    ],
+    "7273326704": [
+      39.7319436,
+      -8.7258516
+    ],
+    "7273326705": [
+      39.7321549,
+      -8.7261953
+    ],
+    "7273326706": [
+      39.7324683,
+      -8.7266701
+    ],
+    "7273326707": [
+      39.7329581,
+      -8.727348
+    ],
+    "7273326708": [
+      39.7331638,
+      -8.727614
+    ],
+    "7273326709": [
+      39.7333918,
+      -8.72789
+    ],
+    "7273326710": [
+      39.7340204,
+      -8.7285912
+    ],
+    "7273326711": [
+      39.7337994,
+      -8.7283634
+    ],
+    "7273326712": [
+      39.734531,
+      -8.7291089
+    ],
+    "7273326713": [
+      39.7364532,
+      -8.730916
+    ],
+    "7273326714": [
+      39.736684,
+      -8.7311561
+    ],
+    "7273326715": [
+      39.7370206,
+      -8.7315175
+    ],
+    "7273326716": [
+      39.7373843,
+      -8.7319618
+    ],
+    "7273326717": [
+      39.7375539,
+      -8.7321864
+    ],
+    "7273326718": [
+      39.7377046,
+      -8.7323971
+    ],
+    "7273326719": [
+      39.737957,
+      -8.7327992
+    ],
+    "7273326720": [
+      39.7385915,
+      -8.7339795
+    ],
+    "7273326721": [
+      39.7387721,
+      -8.7343645
+    ],
+    "7273326722": [
+      39.7389794,
+      -8.7349054
+    ],
+    "7273326723": [
+      39.7392667,
+      -8.7358079
+    ],
+    "7273326724": [
+      39.7393205,
+      -8.7360151
+    ],
+    "7273326725": [
+      39.742014,
+      -8.7436387
+    ],
+    "7273326726": [
+      39.7424785,
+      -8.7442401
+    ],
+    "7273326727": [
+      39.7413589,
+      -8.7425884
+    ],
+    "7273326728": [
+      39.7410744,
+      -8.742046
+    ],
+    "7273326729": [
+      39.740828,
+      -8.7415089
+    ],
+    "7273326730": [
+      39.7401828,
+      -8.7396059
+    ],
+    "7273326731": [
+      39.7443953,
+      -8.7460066
+    ],
+    "7273326732": [
+      39.7456486,
+      -8.7466988
+    ],
+    "7273326733": [
+      39.7459091,
+      -8.7468176
+    ],
+    "7273326734": [
+      39.7540894,
+      -8.7491276
+    ],
+    "7273326735": [
+      39.7560378,
+      -8.7485755
+    ],
+    "7273326736": [
+      39.7558624,
+      -8.7486501
+    ],
+    "7273326737": [
+      39.7554593,
+      -8.7487993
+    ],
+    "7273326738": [
+      39.7551572,
+      -8.7488973
+    ],
+    "7273326739": [
+      39.7553137,
+      -8.7488501
+    ],
+    "7273326740": [
+      39.7562256,
+      -8.7484919
+    ],
+    "7273326741": [
+      39.7565434,
+      -8.7483312
+    ],
+    "7273326742": [
+      39.7568506,
+      -8.7481555
+    ],
+    "7273326743": [
+      39.7570812,
+      -8.748014
+    ],
+    "7273326744": [
+      39.757743,
+      -8.7475664
+    ],
+    "7273326745": [
+      39.7581594,
+      -8.7472696
+    ],
+    "7273326746": [
+      39.7590363,
+      -8.7466368
+    ],
+    "7273326747": [
+      39.7593283,
+      -8.7464321
+    ],
+    "7273326748": [
+      39.7598971,
+      -8.746079
+    ],
+    "7273326749": [
+      39.760218,
+      -8.745898
+    ],
+    "7273326750": [
+      39.7605227,
+      -8.745745
+    ],
+    "7273326751": [
+      39.7609988,
+      -8.745544
+    ],
+    "7273326752": [
+      39.7612592,
+      -8.7454509
+    ],
+    "7273326753": [
+      39.7615625,
+      -8.7453508
+    ],
+    "7273326754": [
+      39.7621207,
+      -8.7452136
+    ],
+    "7273326755": [
+      39.7626972,
+      -8.7451054
+    ],
+    "7273326756": [
+      39.7646062,
+      -8.7448436
+    ],
+    "7273326757": [
+      39.7680148,
+      -8.744595
+    ],
+    "7273326758": [
+      39.7694657,
+      -8.7444863
+    ],
+    "7273326759": [
+      39.7700485,
+      -8.744436
+    ],
+    "7273326760": [
+      39.7713149,
+      -8.7442701
+    ],
+    "7273326761": [
+      39.7718419,
+      -8.7441945
+    ],
+    "7273326762": [
+      39.7730864,
+      -8.7439719
+    ],
+    "7273326763": [
+      39.7741734,
+      -8.7436753
+    ],
+    "7273326764": [
+      39.7747256,
+      -8.7434431
+    ],
+    "7273326765": [
+      39.7751505,
+      -8.7432291
+    ],
+    "7273326766": [
+      39.7753989,
+      -8.7430909
+    ],
+    "7273326767": [
+      39.7760763,
+      -8.7426362
+    ],
+    "7273326768": [
+      39.7762788,
+      -8.7424779
+    ],
+    "7273326769": [
+      39.7768149,
+      -8.7420164
+    ],
+    "7273326770": [
+      39.7770814,
+      -8.7417585
+    ],
+    "7273326771": [
+      39.7779666,
+      -8.7408191
+    ],
+    "7273326772": [
+      39.7789905,
+      -8.7397118
+    ],
+    "7273326773": [
+      39.7793557,
+      -8.739355
+    ],
+    "7273326774": [
+      39.7801572,
+      -8.7386816
+    ],
+    "7273326775": [
+      39.7804917,
+      -8.7384437
+    ],
+    "7273326776": [
+      39.7810659,
+      -8.7380951
+    ],
+    "7273326777": [
+      39.7813672,
+      -8.7379355
+    ],
+    "7273326778": [
+      39.7815901,
+      -8.7378259
+    ],
+    "7273326779": [
+      39.7821612,
+      -8.7375905
+    ],
+    "7273326780": [
+      39.7825751,
+      -8.7374544
+    ],
+    "7273326781": [
+      39.7828226,
+      -8.7373818
+    ],
+    "7273326782": [
+      39.7833717,
+      -8.73726
+    ],
+    "7273326783": [
+      39.7837726,
+      -8.7372011
+    ],
+    "7273326784": [
+      39.7840135,
+      -8.737167
+    ],
+    "7273326785": [
+      39.7846585,
+      -8.7371346
+    ],
+    "7273326786": [
+      39.7851458,
+      -8.7371216
+    ],
+    "7273326787": [
+      39.7876343,
+      -8.7370854
+    ],
+    "7273326788": [
+      39.7880082,
+      -8.7370533
+    ],
+    "7273326789": [
+      39.7886324,
+      -8.7369661
+    ],
+    "7273326790": [
+      39.7889371,
+      -8.7369029
+    ],
+    "7273326791": [
+      39.7895037,
+      -8.736754
+    ],
+    "7273326792": [
+      39.7898334,
+      -8.7366368
+    ],
+    "7273326793": [
+      39.7901341,
+      -8.7365253
+    ],
+    "7273326794": [
+      39.7909497,
+      -8.7361298
+    ],
+    "7273326795": [
+      39.7912106,
+      -8.735982
+    ],
+    "7273326796": [
+      39.7917651,
+      -8.7356134
+    ],
+    "7273326797": [
+      39.7921355,
+      -8.7353471
+    ],
+    "7273326798": [
+      39.7927367,
+      -8.7348157
+    ],
+    "7273326799": [
+      39.7930203,
+      -8.7345422
+    ],
+    "7273326800": [
+      39.7935503,
+      -8.733946
+    ],
+    "7273326801": [
+      39.7940577,
+      -8.7333014
+    ],
+    "7273326802": [
+      39.7948989,
+      -8.7320983
+    ],
+    "7273326803": [
+      39.79541,
+      -8.7313229
+    ],
+    "7273326804": [
+      39.7960875,
+      -8.7303469
+    ],
+    "7273326805": [
+      39.7964102,
+      -8.7299292
+    ],
+    "7273326806": [
+      39.7969962,
+      -8.7292532
+    ],
+    "7273326807": [
+      39.7978542,
+      -8.7284622
+    ],
+    "7273326808": [
+      39.7981391,
+      -8.7282371
+    ],
+    "7273326809": [
+      39.7988971,
+      -8.727715
+    ],
+    "7273326810": [
+      39.7999082,
+      -8.7270706
+    ],
+    "7273326811": [
+      39.8009643,
+      -8.7263361
+    ],
+    "7273326812": [
+      39.8021392,
+      -8.7254544
+    ],
+    "7273326813": [
+      39.803156,
+      -8.7246144
+    ],
+    "7273326815": [
+      39.8046238,
+      -8.7234411
+    ],
+    "7273326817": [
+      39.8057503,
+      -8.722819
+    ],
+    "7273326820": [
+      39.8062803,
+      -8.7226069
+    ],
+    "7273326821": [
+      39.8066938,
+      -8.7224854
+    ],
+    "7273326824": [
+      39.8074743,
+      -8.7223236
+    ],
+    "7273326827": [
+      39.807249,
+      -8.7223577
+    ],
+    "7273326828": [
+      39.8078364,
+      -8.7222839
+    ],
+    "7273326829": [
+      39.8076635,
+      -8.7223016
+    ],
+    "7273326832": [
+      39.8090383,
+      -8.7223043
+    ],
+    "7273326833": [
+      39.8093755,
+      -8.7223492
+    ],
+    "7273326834": [
+      39.8106157,
+      -8.7225537
+    ],
+    "7273326835": [
+      39.8120535,
+      -8.7227659
+    ],
+    "7273326836": [
+      39.8124684,
+      -8.7228079
+    ],
+    "7273326837": [
+      39.8126759,
+      -8.722824
+    ],
+    "7273326838": [
+      39.813335,
+      -8.7228287
+    ],
+    "7273326839": [
+      39.8137097,
+      -8.7228112
+    ],
+    "7273326840": [
+      39.8144701,
+      -8.7227297
+    ],
+    "7273326841": [
+      39.8151798,
+      -8.7225916
+    ],
+    "7273326842": [
+      39.815543,
+      -8.7225017
+    ],
+    "7273326843": [
+      39.8162515,
+      -8.7222784
+    ],
+    "7273326844": [
+      39.8166152,
+      -8.7221405
+    ],
+    "7273326845": [
+      39.8173684,
+      -8.7217992
+    ],
+    "7273326846": [
+      39.8176271,
+      -8.721671
+    ],
+    "7273326847": [
+      39.8181939,
+      -8.7213273
+    ],
+    "7273326848": [
+      39.8184212,
+      -8.7211869
+    ],
+    "7273326849": [
+      39.8190919,
+      -8.7207104
+    ],
+    "7273326850": [
+      39.8200097,
+      -8.7199841
+    ],
+    "7273326851": [
+      39.820963,
+      -8.7192166
+    ],
+    "7273326852": [
+      39.8212478,
+      -8.7190039
+    ],
+    "7273326853": [
+      39.8219175,
+      -8.7185339
+    ],
+    "7273326854": [
+      39.8221553,
+      -8.718392
+    ],
+    "7273326855": [
+      39.8227279,
+      -8.7180888
+    ],
+    "7273326856": [
+      39.8230584,
+      -8.7179478
+    ],
+    "7273326857": [
+      39.8232367,
+      -8.7178725
+    ],
+    "7273326858": [
+      39.8237166,
+      -8.71771
+    ],
+    "7273326859": [
+      39.8240288,
+      -8.7176254
+    ],
+    "7273326860": [
+      39.8246338,
+      -8.7175156
+    ],
+    "7273326861": [
+      39.8249992,
+      -8.7174744
+    ],
+    "7273326862": [
+      39.8256293,
+      -8.7174594
+    ],
+    "7273326863": [
+      39.8259537,
+      -8.7174725
+    ],
+    "7273326864": [
+      39.8265522,
+      -8.7175481
+    ],
+    "7273326865": [
+      39.826859,
+      -8.7176095
+    ],
+    "7273326866": [
+      39.8270458,
+      -8.7176498
+    ],
+    "7273326867": [
+      39.8275313,
+      -8.7177942
+    ],
+    "7273326868": [
+      39.8278652,
+      -8.7179186
+    ],
+    "7273326871": [
+      39.8283224,
+      -8.7181249
+    ],
+    "7273326872": [
+      39.8285277,
+      -8.7182239
+    ],
+    "7273326873": [
+      39.8290347,
+      -8.7185214
+    ],
+    "7273326874": [
+      39.8293276,
+      -8.7187108
+    ],
+    "7273326875": [
+      39.8296076,
+      -8.7189046
+    ],
+    "7273326876": [
+      39.8305262,
+      -8.7195882
+    ],
+    "7273326877": [
+      39.8321047,
+      -8.7206244
+    ],
+    "7273326878": [
+      39.8326503,
+      -8.7208685
+    ],
+    "7273326879": [
+      39.8329333,
+      -8.7209737
+    ],
+    "7273326880": [
+      39.8335676,
+      -8.7211618
+    ],
+    "7273326881": [
+      39.8339046,
+      -8.7212297
+    ],
+    "7273326882": [
+      39.8341776,
+      -8.7212824
+    ],
+    "7273326883": [
+      39.834672,
+      -8.7213326
+    ],
+    "7273326884": [
+      39.8351097,
+      -8.7213435
+    ],
+    "7579069174": [
+      39.8333917,
+      -8.7211164
+    ],
+    "7579069183": [
+      39.8357432,
+      -8.7213111
+    ],
+    "7579069184": [
+      39.8361376,
+      -8.7212541
+    ],
+    "7579109985": [
+      39.8359491,
+      -8.7212826
+    ],
+    "7579109987": [
+      39.8367638,
+      -8.7211147
+    ],
+    "7579109989": [
+      39.8375095,
+      -8.7208653
+    ],
+    "7579109991": [
+      39.8377497,
+      -8.7207712
+    ],
+    "7579109994": [
+      39.8433986,
+      -8.7185325
+    ],
+    "7579109995": [
+      39.8430836,
+      -8.7186198
+    ],
+    "7579109998": [
+      39.8449675,
+      -8.7181358
+    ],
+    "7579109999": [
+      39.8453922,
+      -8.718051
+    ],
+    "7579110000": [
+      39.8465481,
+      -8.7178507
+    ],
+    "7579110001": [
+      39.847788,
+      -8.7176033
+    ],
+    "7579110002": [
+      39.8475057,
+      -8.7176692
+    ],
+    "7579110003": [
+      39.8481128,
+      -8.7175169
+    ],
+    "7579110007": [
+      39.8486696,
+      -8.7173175
+    ],
+    "7579110008": [
+      39.848991,
+      -8.7171792
+    ],
+    "7579110011": [
+      39.8495237,
+      -8.7169087
+    ],
+    "7579110014": [
+      39.8498683,
+      -8.7166999
+    ],
+    "7579110015": [
+      39.850359,
+      -8.7163525
+    ],
+    "7579110018": [
+      39.8511416,
+      -8.7156766
+    ],
+    "7579110019": [
+      39.8515495,
+      -8.7152606
+    ],
+    "7579110020": [
+      39.8533556,
+      -8.7132553
+    ],
+    "7579110022": [
+      39.8536862,
+      -8.7129257
+    ],
+    "7579110026": [
+      39.856438,
+      -8.7104017
+    ],
+    "7579110027": [
+      39.8574034,
+      -8.7096416
+    ],
+    "7579110029": [
+      39.8583177,
+      -8.7089745
+    ],
+    "7579110030": [
+      39.8594709,
+      -8.7082007
+    ],
+    "7579110032": [
+      39.8606336,
+      -8.7075044
+    ],
+    "7579110034": [
+      39.8609902,
+      -8.7073029
+    ],
+    "7579110036": [
+      39.8619863,
+      -8.7067711
+    ],
+    "7579110038": [
+      39.863143,
+      -8.706213
+    ],
+    "7579110039": [
+      39.8644601,
+      -8.7056635
+    ],
+    "7579110041": [
+      39.8658712,
+      -8.7051643
+    ],
+    "7579110043": [
+      39.8702219,
+      -8.7039106
+    ],
+    "7579110046": [
+      39.8708945,
+      -8.7036692
+    ],
+    "7579110048": [
+      39.876405,
+      -8.700889
+    ],
+    "7579110051": [
+      39.8781864,
+      -8.6996461
+    ],
+    "7579110052": [
+      39.8799742,
+      -8.6982041
+    ],
+    "7579110055": [
+      39.8810257,
+      -8.6972498
+    ],
+    "7579110056": [
+      39.8816267,
+      -8.696667
+    ],
+    "7579110058": [
+      39.8859542,
+      -8.6918295
+    ],
+    "7579110061": [
+      39.8867827,
+      -8.6910895
+    ],
+    "7579110063": [
+      39.8873626,
+      -8.6906668
+    ],
+    "7579110065": [
+      39.8883135,
+      -8.6901172
+    ],
+    "7579110066": [
+      39.8886421,
+      -8.6899665
+    ],
+    "7579110069": [
+      39.8889761,
+      -8.6898328
+    ],
+    "7579110071": [
+      39.8897828,
+      -8.689581
+    ],
+    "7579110073": [
+      39.8895347,
+      -8.6896508
+    ],
+    "7579110074": [
+      39.8900999,
+      -8.6895088
+    ],
+    "7579110077": [
+      39.8902985,
+      -8.6894697
+    ],
+    "7579110079": [
+      39.8910029,
+      -8.6893963
+    ],
+    "7579110080": [
+      39.8912782,
+      -8.6893777
+    ],
+    "7579110083": [
+      39.8920598,
+      -8.6894008
+    ],
+    "7579110085": [
+      39.8930607,
+      -8.6895216
+    ],
+    "7579110088": [
+      39.8968612,
+      -8.690253
+    ],
+    "7579110089": [
+      39.8984655,
+      -8.6903422
+    ],
+    "7579110093": [
+      39.898777,
+      -8.6903279
+    ],
+    "7579110094": [
+      39.8991614,
+      -8.6902992
+    ],
+    "7579110095": [
+      39.899869,
+      -8.690208
+    ],
+    "7579110096": [
+      39.9001992,
+      -8.6901475
+    ],
+    "7579110097": [
+      39.9004186,
+      -8.6901019
+    ],
+    "7579110100": [
+      39.9009915,
+      -8.6899557
+    ],
+    "7579110115": [
+      39.9020421,
+      -8.6895867
+    ],
+    "7579110117": [
+      39.9013888,
+      -8.6898301
+    ],
+    "7579110119": [
+      39.9025532,
+      -8.6893634
+    ],
+    "7579110120": [
+      39.9028017,
+      -8.6892425
+    ],
+    "7579110122": [
+      39.9035773,
+      -8.6888125
+    ],
+    "7579110125": [
+      39.9052828,
+      -8.6876697
+    ],
+    "7579110126": [
+      39.9069804,
+      -8.6864392
+    ],
+    "7579110130": [
+      39.9078757,
+      -8.6858561
+    ],
+    "7579110131": [
+      39.9081214,
+      -8.6857126
+    ],
+    "7579110134": [
+      39.9087076,
+      -8.6854089
+    ],
+    "7579110135": [
+      39.9090335,
+      -8.6852613
+    ],
+    "7579110136": [
+      39.9092082,
+      -8.6851875
+    ],
+    "7579110138": [
+      39.9097749,
+      -8.6849885
+    ],
+    "7579110139": [
+      39.9105517,
+      -8.6847754
+    ],
+    "7579110141": [
+      39.9108531,
+      -8.6847154
+    ],
+    "7579110142": [
+      39.9114625,
+      -8.6846169
+    ],
+    "7579110145": [
+      39.9121083,
+      -8.6845756
+    ],
+    "7579110147": [
+      39.9129798,
+      -8.6845679
+    ],
+    "7579110151": [
+      39.9146136,
+      -8.684663
+    ],
+    "7579110153": [
+      39.915783,
+      -8.6847154
+    ],
+    "7579110154": [
+      39.9165893,
+      -8.6846781
+    ],
+    "7579110157": [
+      39.9169477,
+      -8.6846449
+    ],
+    "7579110158": [
+      39.9176872,
+      -8.6844944
+    ],
+    "7579110160": [
+      39.9179456,
+      -8.684421
+    ],
+    "7579110162": [
+      39.9185263,
+      -8.6842189
+    ],
+    "7579110164": [
+      39.9192393,
+      -8.6838992
+    ],
+    "7579110166": [
+      39.9200072,
+      -8.6834825
+    ],
+    "7579110167": [
+      39.920959,
+      -8.6829097
+    ],
+    "7579110168": [
+      39.9220899,
+      -8.6822257
+    ],
+    "7579110171": [
+      39.9232198,
+      -8.6815971
+    ],
+    "7579110172": [
+      39.9242334,
+      -8.6811285
+    ],
+    "7579110176": [
+      39.9245802,
+      -8.6809894
+    ],
+    "7579110178": [
+      39.9255157,
+      -8.6806646
+    ],
+    "7579110179": [
+      39.9257823,
+      -8.6805851
+    ],
+    "7579110182": [
+      39.9264564,
+      -8.6804189
+    ],
+    "7579110184": [
+      39.9272715,
+      -8.6802617
+    ],
+    "7579110185": [
+      39.9274743,
+      -8.6802291
+    ],
+    "7579110187": [
+      39.9280902,
+      -8.6801609
+    ],
+    "7579110188": [
+      39.928829,
+      -8.6801164
+    ],
+    "7579110191": [
+      39.9298108,
+      -8.680115
+    ],
+    "7579110192": [
+      39.9294951,
+      -8.6801058
+    ],
+    "7579110195": [
+      39.9314866,
+      -8.6802342
+    ],
+    "7579110197": [
+      39.9321167,
+      -8.6803018
+    ],
+    "7579110199": [
+      39.9343694,
+      -8.6804762
+    ],
+    "7579110202": [
+      39.9349105,
+      -8.6804833
+    ],
+    "7579110203": [
+      39.9357981,
+      -8.6804342
+    ],
+    "7579110204": [
+      39.9365966,
+      -8.6802996
+    ],
+    "7579235108": [
+      39.9396957,
+      -8.6790229
+    ],
+    "7579235109": [
+      39.937935,
+      -8.679891
+    ],
+    "7579235110": [
+      39.9382857,
+      -8.6797487
+    ],
+    "7579235143": [
+      39.9415689,
+      -8.6775496
+    ],
+    "7579235175": [
+      39.9405927,
+      -8.6784081
+    ],
+    "7579235176": [
+      39.9408184,
+      -8.6782252
+    ],
+    "7579235177": [
+      39.9425254,
+      -8.6765271
+    ],
+    "7579263169": [
+      39.9483925,
+      -8.6707084
+    ],
+    "7579263170": [
+      39.9492153,
+      -8.6703622
+    ],
+    "7579263176": [
+      39.9500729,
+      -8.6701067
+    ],
+    "7579263177": [
+      39.9512679,
+      -8.6698651
+    ],
+    "7579263180": [
+      39.9527165,
+      -8.6696272
+    ],
+    "7579263182": [
+      39.9538656,
+      -8.6693591
+    ],
+    "7579263183": [
+      39.9541574,
+      -8.6692703
+    ],
+    "7579284489": [
+      39.9453243,
+      -8.6730869
+    ],
+    "7579284492": [
+      39.9455494,
+      -8.6728401
+    ],
+    "7579284493": [
+      39.9460619,
+      -8.6723284
+    ],
+    "7579284496": [
+      39.9466639,
+      -8.6718046
+    ],
+    "7579284497": [
+      39.9474281,
+      -8.6712462
+    ],
+    "7579284500": [
+      39.9476889,
+      -8.6710906
+    ],
+    "7579292686": [
+      39.9548388,
+      -8.6690053
+    ],
+    "7579292687": [
+      39.9555732,
+      -8.6686292
+    ],
+    "7579292689": [
+      39.9558055,
+      -8.6684902
+    ],
+    "7579292690": [
+      39.9563045,
+      -8.6681561
+    ],
+    "7579292692": [
+      39.9567717,
+      -8.6677952
+    ],
+    "7579292693": [
+      39.9572712,
+      -8.6673452
+    ],
+    "7579292694": [
+      39.9577989,
+      -8.6668055
+    ],
+    "7579292695": [
+      39.9583176,
+      -8.6661894
+    ],
+    "7579292697": [
+      39.9592572,
+      -8.6648918
+    ],
+    "7579292700": [
+      39.9603264,
+      -8.6633917
+    ],
+    "7579292702": [
+      39.9609443,
+      -8.6626535
+    ],
+    "7579292704": [
+      39.9615595,
+      -8.6620342
+    ],
+    "7579292705": [
+      39.9622284,
+      -8.6614443
+    ],
+    "7579292708": [
+      39.9630301,
+      -8.6608481
+    ],
+    "7579292709": [
+      39.9656877,
+      -8.658859
+    ],
+    "7579292711": [
+      39.9664613,
+      -8.6580589
+    ],
+    "7579292713": [
+      39.9670296,
+      -8.6573279
+    ],
+    "7579292716": [
+      39.9675806,
+      -8.6564776
+    ],
+    "7579292717": [
+      39.9681026,
+      -8.6554974
+    ],
+    "7579292719": [
+      39.9685364,
+      -8.6544759
+    ],
+    "7579292723": [
+      39.9705088,
+      -8.6486165
+    ],
+    "7579292725": [
+      39.9778336,
+      -8.6309044
+    ],
+    "7579292727": [
+      39.9779899,
+      -8.630586
+    ],
+    "7579292729": [
+      39.9784331,
+      -8.629783
+    ],
+    "7579292731": [
+      39.9791788,
+      -8.6286477
+    ],
+    "7579292733": [
+      39.9798197,
+      -8.6278455
+    ],
+    "7579292735": [
+      39.9801147,
+      -8.6275231
+    ],
+    "7579292738": [
+      39.9808597,
+      -8.6268048
+    ],
+    "7579292739": [
+      39.9812621,
+      -8.6264476
+    ],
+    "7579292740": [
+      39.9846693,
+      -8.6238156
+    ],
+    "7579292742": [
+      39.9854089,
+      -8.6230355
+    ],
+    "7579292743": [
+      39.9865485,
+      -8.6214755
+    ],
+    "7579292746": [
+      39.9881776,
+      -8.6189034
+    ],
+    "7579292747": [
+      39.9887744,
+      -8.6181298
+    ],
+    "7579292750": [
+      39.9895775,
+      -8.6172504
+    ],
+    "7579292752": [
+      39.9905678,
+      -8.6163709
+    ],
+    "7579292754": [
+      39.99116,
+      -8.6159457
+    ],
+    "8149135733": [
+      40.1971813,
+      -8.4874964
+    ],
+    "8501324147": [
+      40.2683709,
+      -8.4834865
+    ],
+    "8501324167": [
+      40.2721277,
+      -8.4776382
+    ],
+    "8501324169": [
+      40.2717759,
+      -8.4767755
+    ],
+    "8501324193": [
+      40.2713135,
+      -8.4747989
+    ],
+    "8501324194": [
+      40.2713398,
+      -8.4742874
+    ],
+    "8501324195": [
+      40.2712754,
+      -8.4738132
+    ],
+    "8501324196": [
+      40.2711935,
+      -8.4732909
+    ],
+    "8501324197": [
+      40.2710121,
+      -8.4725671
+    ],
+    "8501324198": [
+      40.2707629,
+      -8.472006
+    ],
+    "9604274610": [
+      40.0600905,
+      -8.5519033
+    ],
+    "9604274611": [
+      40.0601529,
+      -8.5518193
+    ],
+    "10942422606": [
+      39.7151289,
+      -8.7120745
+    ],
+    "11791983375": [
+      39.6931246,
+      -8.6925872
+    ],
+    "11791993476": [
+      39.7318166,
+      -8.7256359
+    ],
+    "12118351190": [
+      40.271521,
+      -8.4759463
+    ],
+    "12118351196": [
+      40.2736463,
+      -8.4814552
+    ],
+    "12118351197": [
+      40.2737271,
+      -8.4817052
+    ],
+    "12118351200": [
+      40.2735704,
+      -8.4812317
+    ],
+    "12118429601": [
+      40.2732912,
+      -8.4837673
+    ],
+    "12118429602": [
+      40.273507,
+      -8.4835371
+    ],
+    "13274292083": [
+      40.0713923,
+      -8.5407851
+    ],
+    "13274292084": [
+      40.0625638,
+      -8.5482128
+    ],
+    "13274292085": [
+      40.0519694,
+      -8.5664509
+    ],
+    "13544560599": [
+      40.2203697,
+      -8.4872808
+    ],
+    "13570701347": [
+      40.2171045,
+      -8.4870981
+    ],
+    "13570701350": [
+      40.2174491,
+      -8.4871122
+    ],
+    "13570701352": [
+      40.2164711,
+      -8.4870873
+    ],
+    "13570701353": [
+      40.2161874,
+      -8.48709
+    ],
+    "13570701365": [
+      40.2159693,
+      -8.4870939
+    ],
+    "13570701368": [
+      40.2154665,
+      -8.4871148
+    ],
+    "13570701369": [
+      40.2151792,
+      -8.4871329
+    ],
+    "13594114384": [
+      40.2143336,
+      -8.4872279
+    ],
+    "13594114385": [
+      40.2176179,
+      -8.4871237
+    ]
+  },
+  "chargeCandidates": [
+    {
+      "id": 319886078,
+      "lat": 39.6276648,
+      "lon": -8.6874916,
+      "tags": {
+        "barrier": "toll_booth",
+        "name": "Fátima"
+      }
+    },
+    {
+      "id": 8501324196,
+      "lat": 40.2711935,
+      "lon": -8.4732909,
+      "tags": {
+        "barrier": "toll_booth",
+        "name": "Coimbra Norte",
+        "opening_hours": "24/7",
+        "operator": "Brisa"
+      }
+    }
+  ]
+}

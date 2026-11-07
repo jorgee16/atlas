@@ -68,6 +68,30 @@ class FixedCorridorTests(unittest.TestCase):
             with self.subTest(failure=failure), self.assertRaises(ValueError):
                 fixed.source_shapes(r, s)
 
+    def test_paid_interval_is_bounded_by_the_actual_gate(self):
+        source = [(40., -8.), (40., -7.9995), (40., -7.999)]
+        graph = [source[0], source[-1]]
+        witness = fixed.clipped_way_witness(graph, source)
+        first,last=fixed.network_offsets(graph,source,[1,2,3],witness,100,{'beginNode':2})
+        self.assertAlmostEqual(50.,first,places=8);self.assertEqual(100.,last)
+        first,last=fixed.network_offsets(graph,source,[1,2,3],witness,100,{'endNode':2})
+        self.assertEqual(0.,first);self.assertAlmostEqual(50.,last,places=8)
+        after = [source[1],source[2]]
+        self.assertIsNone(fixed.network_offsets(after,source,[1,2,3],
+            fixed.clipped_way_witness(after,source),50,{'endNode':2}))
+
+    def test_only_reviewed_node_connected_directed_chains_are_allowed(self):
+        cfg=ROOT / 'tools/toll-binding-config'
+        review=json.loads((cfg/'portugal-a1-coimbra-fatima.json').read_text())
+        source=json.loads((cfg/'portugal-a1-coimbra-fatima.source.json').read_text())
+        shapes,gates,_=fixed.source_shapes(review,source)
+        self.assertIn('chain:392905851+392905864',shapes)
+        self.assertEqual({'entry:brisa-published:0117','exit:brisa-published:0122'},set(gates.values()))
+        for ids in ([392905864,392905851],[392905851,392905851],[392905851,999]):
+            bad=copy.deepcopy(review);bad['directedChains']=[dict(wayIds=ids)]
+            with self.subTest(ids=ids),self.assertRaises(ValueError):
+                fixed.source_shapes(bad,source)
+
     def test_published_independent_classes_and_corrupt_source(self):
         review, rows = prices.reviewed_prices()
         self.assertEqual(['0.55', '1.05', '1.35', '1.50'], rows[0][3:])

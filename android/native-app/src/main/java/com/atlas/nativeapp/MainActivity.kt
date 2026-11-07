@@ -1030,7 +1030,7 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                     val options=RouteChoices.previewOptions(s.routeOptions.ifEmpty { listOf(route) })
                     options.forEachIndexed { index, choice ->
                         val selected=choice===route
-                        val label=if(!choice.optBoolean("hasTolls")) "No tolls"
+                        val label=if(!choice.optBoolean("hasTolls")) RouteChoices.freeRouteName(choice)
                             else if(index==0) "Recommended" else "Alternative"
                         val roads=RouteChoices.roadSummary(choice)
                         val trip="${AtlasPages.formatTime(choice.optDouble("durationSeconds"))} · ${AtlasPages.formatDistance(choice.optDouble("distanceMeters"))}"
@@ -1040,7 +1040,10 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                             setPadding(ui.dp(12),ui.dp(10),ui.dp(12),ui.dp(10))
                             addView(ui.row().apply {
                                 addView(ui.text(label,14f,ui.ink,true),LinearLayout.LayoutParams(0,-2,1f))
-                                addView(ui.text(price,12f,if(selected)ui.blue else ui.ink,true))
+                                addView(ui.text(price,12f,if(selected)ui.blue else ui.ink,true).apply {
+                                    maxWidth=((resources.displayMetrics.widthPixels-ui.dp(96))*0.58).toInt()
+                                    textAlignment=android.view.View.TEXT_ALIGNMENT_VIEW_END
+                                })
                             })
                             addView(ui.space(4))
                             addView(ui.text("$trip · $roads",12f,ui.muted).apply {

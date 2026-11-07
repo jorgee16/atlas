@@ -1,0 +1,6 @@
+id;fromLat;fromLon;toLat;toLon;class;expectedPricing;expectedAmount
+a1-coimbra-norte-fatima-class-1;40.2707629;-8.472006;39.6280565;-8.6867111;1;exact;7.65
+a1-coimbra-norte-fatima-class-2;40.2707629;-8.472006;39.6280565;-8.6867111;2;exact;13.35
+a1-coimbra-norte-fatima-class-3;40.2707629;-8.472006;39.6280565;-8.6867111;3;exact;17.25
+a1-coimbra-norte-fatima-class-4;40.2707629;-8.472006;39.6280565;-8.6867111;4;exact;19.05
+a1-start-inside-paid-network;40.1955451965;-8.48727893829;39.6280565;-8.6867111;1;unavailable;null

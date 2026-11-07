@@ -136,6 +136,12 @@ struct Route {
   bool tollPriceComplete = true;
   bool tollPriceExact = false;
   bool tollCrossingsVerified = false; // physical collection, independent of graph toll flags/prices
+  bool tollCoverageVerified = false;
+  bool tollNetworkTraversal = false;
+  bool tollFlagsDisproved = false;
+  std::string tollPricingReason = "missing_mapping";
+  uint32_t tollUnreviewedEdges = 0;
+  int64_t firstUnreviewedTollEdge = -1;
   std::string tollCountry, tollCurrency, tollYear, tollSource, tollVersion;
   int tollFractionDigits = 2, tollVehicleClass = 1;
   std::vector<int> tollVehicleClasses;
@@ -190,6 +196,9 @@ struct RouteOptions {
   std::unordered_set<uint32_t> discouragedEdges;
   double sharedEdgePenaltySecondsPerKm = 0;
   std::function<bool()> cancelled;
+  // Pricing evidence may override stale toll flags only for Avoid tolls.
+  // Arguments are edge, source node, and actual clipped traversal interval.
+  std::function<bool(uint32_t,uint32_t,double,double)> tollTraversalAllowed;
 };
 std::vector<std::string> principalRoadRefs(const Route &route,
                                            std::size_t limit = 4);
