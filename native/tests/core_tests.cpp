@@ -207,6 +207,9 @@ int main(int argc, char **argv) {
           routeJson(inside).find("\"tollAmount\":null")!=std::string::npos&&
           routeJson(inside).find("\"hasTolls\":true")!=std::string::npos,
           "starting inside a ticket network without observed gates is unavailable, never certified free");
+    check(routeJson(inside).find("\"tollGeometryVerified\":true")!=std::string::npos&&
+          routeJson(inside).find("\"tollEvidenceStatus\":\"incomplete\"")!=std::string::npos,
+          "complete geometry without an observed ticket entry is incomplete pricing evidence");
     check(!applyEntryExitTollCharges(toll,ticketRoute,ticketFixture,ticketProof,changedIdentity),"ticket evidence is graph-version bound");
     check(!ticketRoute.tollPriceExact&&routeJson(ticketRoute).find("\"tollAmount\":null")!=std::string::npos,
           "a failed graph identity cannot retain a previously exact quote");

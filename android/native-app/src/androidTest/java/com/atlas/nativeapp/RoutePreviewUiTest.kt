@@ -11,6 +11,8 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
@@ -76,10 +78,15 @@ class RoutePreviewUiTest {
                         window!!.setLayout(ui.dp(320),ViewGroup.LayoutParams.WRAP_CONTENT)
                     }
                 }
-                onView(withText("Recommended")).check(matches(isDisplayed()))
-                onView(withText("Alternative")).check(matches(isDisplayed()))
-                onView(withText(if(verifiedFree)"No tolls" else "Avoid tolls")).check(matches(isDisplayed()))
-                onView(withText("Start navigation")).check(matches(isDisplayed()))
+                // This presentation fixture is a separate Dialog window.
+                // Waiting for the covered Activity root to regain focus can
+                // deadlock Espresso even though the actual planner is visible.
+                val plannerRoot=withDecorView(org.hamcrest.Matchers.`is`(dialog!!.window!!.decorView))
+                val detailsRoot=org.hamcrest.Matchers.allOf(isDialog(),org.hamcrest.Matchers.not(plannerRoot))
+                onView(withText("Recommended")).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText("Alternative")).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(if(verifiedFree)"No tolls" else "Avoid tolls")).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText("Start navigation")).inRoot(plannerRoot).check(matches(isDisplayed()))
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
@@ -111,11 +118,11 @@ class RoutePreviewUiTest {
                 automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}.png").use {
                     java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                 }
-                onView(withText("Toll details")).perform(click())
-                onView(withText(org.hamcrest.Matchers.containsString("Class 1")))
+                onView(withText("Toll details")).inRoot(plannerRoot).perform(click())
+                onView(withText(org.hamcrest.Matchers.containsString("Class 1"))).inRoot(detailsRoot)
                     .check(matches(isDisplayed()))
-                onView(withText("Close")).perform(click())
-                onView(withText("Alternative")).check(matches(isDisplayed()))
+                onView(withText("Close")).inRoot(detailsRoot).perform(click())
+                onView(withText("Alternative")).inRoot(plannerRoot).check(matches(isDisplayed()))
             } finally {
                 scenario.onActivity { activity ->
                     dialog?.dismiss();originalUi?.let { uiField.set(activity,it) }

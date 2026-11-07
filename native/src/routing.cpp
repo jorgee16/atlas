@@ -759,7 +759,8 @@ std::string routeJson(const Route &r) {
   }
   s << ']';
   s << ",\"tollFreeVerified\":" << (freeVerified?"true":"false")
-    << ",\"tollEvidenceStatus\":" << jsonString(r.tollCoverageVerified?"complete":freeVerified?"legal_exemption":r.tollPricingReason=="unreviewed_edge"?"incomplete":"unverified")
+    << ",\"tollEvidenceStatus\":" << jsonString(r.tollCoverageVerified&&r.tollPriceComplete?"complete":freeVerified?"legal_exemption":r.tollCoverageVerified||r.tollPricingReason=="unreviewed_edge"?"incomplete":"unverified")
+    << ",\"tollGeometryVerified\":" << (r.tollCoverageVerified?"true":"false")
     << ",\"tollPricingReason\":" << jsonString(freeVerified?"":r.tollPricingReason)
     << ",\"tollUnreviewedEdges\":" << r.tollUnreviewedEdges
     << ",\"firstUnreviewedTollEdge\":" << r.firstUnreviewedTollEdge;
