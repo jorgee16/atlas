@@ -42,8 +42,9 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 3,622 reviewed directed graph edges (+1,860, 105.6%).
-  This phase adds 1,141 edges to the previously reviewed 2,481.
+- 1,762 -> 3,901 reviewed directed graph edges (+2,139, 121.4%).
+  The original issue phase adds 1,860 edges through A9/A1/access reviews; the
+  national Ascendi extension adds another 279 around fixed facilities.
 - 410 additional A14/A1/Fatima edges, 408 bounded paid-network intervals and two
   physical entry/exit events. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
@@ -69,6 +70,9 @@ change. Pricing itself changes none of these fields.
   physical node; genuine later crossings are not globally deduplicated.
 - All original A5/A28/A16 physical bindings and original fare cells are preserved.
   `composed-binding-proof.json` records every stage, source/seed digest and witness.
+- Twelve additional facilities on A4, A17, A29 and A42 contribute 24 directed
+  graph crossings. Each is tied to an explicit OSM collection node and its
+  official 2026 Ascendi identity. A41 conflict rows are deliberately inactive.
 
 ## Before/after measured matrix
 
@@ -96,10 +100,12 @@ Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
 ## Validation and reproducibility
 
 Local: five C++ suites, 55 Python toll/section-provider tests, 33 JS routing/toll/ETA/UI tests.
-222 actual native route/class cases pass against the distributed mainland graph,
+314 actual native route/class cases pass against the distributed mainland graph,
 including the original 91 CSV cases, eight new public approaches, four A1 classes,
 one start-inside-network case 28 Oeiras/Carcavelos access cases and 90 A9/A16 cases. The two original unavailable-class/tariff JNI
-regressions remain mandatory, making **224 Android price cases**. All original
+regressions remain mandatory, making **316 Android price cases**. The additional
+92 cases cover all four classes and all 12 activated A4/A17/A29/A42 facilities
+across 23 real directed crossings. All original
 93 cases are retained. Android execution and screenshots must be checked in the
 PR CI; local native results alone are not emulator evidence.
 

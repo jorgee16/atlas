@@ -45,10 +45,20 @@ A28 adds 918 edges and four collection nodes at Angeiras/Póvoa. A16 adds 315
 main-carriageway edges and six nodes at Idanha/Sacotes/Ranholas. The composed
 proof originally had 1,762 edges and 14 crossing rows. Issue #2 extends it
 with the A14/A1 Coimbra Norte–Fatima ticket corridor, public approaches and
-reviewed Oeiras I / Carcavelos I ramps, reaching **2,481 edges and 20 physical
-event rows**. IC16 trunk continuations, IC23, unreviewed A9 boundaries and the
-Oeiras II / Carcavelos II facilities remain excluded. This is
+reviewed Oeiras I / Carcavelos I ramps. The A9 network phase and the national
+Ascendi phase now bring the composed proof to **3,901 directed coverage edges,
+944 paid-network intervals and 81 physical event rows**. The latest phase adds
+279 witnessed edges and 24 directed crossings for 12 facilities on A4, A17,
+A29 and A42. IC16 trunk continuations, IC23 and the Oeiras II / Carcavelos II
+facilities remain excluded. A41 remains excluded because 36 supplied price rows
+conflict; choosing one would manufacture an official price. This is
 increased functional coverage, not complete nationwide confirmed pricing.
+
+Each new facility has an explicit original OSM collection node in each travel
+direction and a stable ID from the official 2026 Ascendi catalog. The compiler
+requires all 24 nodes to match exactly once on the immutable distributed graph.
+It ignores the graph's legacy event identities, which conflate some northern
+facilities. No road-number or nearest-road fallback is used.
 
 The A16 identity review is explicit:
 
@@ -87,8 +97,8 @@ native engine requires complete applicable evidence before confirming a total.
 
 Avoid-tolls now consults physically reviewed collection points and paid-network
 intervals instead of relying solely on obsolete flags. Ordinary routing costs,
-GPS and map matching are unchanged. A9 entry/exit pricing and complete national
-collection matching remain open.
+GPS and map matching are unchanged. Complete national collection matching
+remains open.
 
 Collection evidence is also independent of tariff availability. If an updated
 table omits a proven collection ID, or a vehicle class is unsupported, the
@@ -168,3 +178,22 @@ interchange. Idanha remains a separate fixed facility; its A9 sums begin at the
 actual A16/A9 access and exclude that fixed fee. Other country providers use the
 same compiler and native matcher through configuration. No GPS, camera, map
 matching, route cost or geometry algorithm is involved.
+
+## A4, A17, A29 and A42 fixed facilities (2026-11-08)
+
+The supplied 2026 evidence contains 967 price rows but does not itself prove
+where a route crosses a charge. `prepare-reviewed-ascendi-corridors.py` converts
+explicitly reviewed OSM API captures into four source/review stages. The mapping
+from a physical node to a stable charge ID is input to the generator; it never
+discovers a price or assigns the nearest motorway. Bounded directed context is
+included before and after each facility and stops at any other collection point.
+
+The resulting stages cover two A4 facilities, three A17 facilities, four A29
+facilities and three A42 facilities. All four vehicle classes use the independent
+published values in `toll-charges/Portugal.csv`. Ninety-two actual native routes
+exercise 23 of the 24 directed crossings and all 12 price identities. All 92
+produce exact totals while route points, edge indexes, maneuvers, distance, ETA
+and protected visual points remain unchanged. The remaining A29 direction is
+geometrically certified, but an endpoint-only runtime fixture snaps to a parallel
+edge with the same synthetic junction; it is therefore not counted as runtime
+route evidence.

@@ -7,12 +7,14 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 222:
+if len(cases) < 314:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
 new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv','a9-network-cases.csv')
               for r in csv.DictReader((fixture_root/name).open(),delimiter=';')}
 new_cases=set()
+ascendi_expected={r['id']:r for r in csv.DictReader((fixture_root/'ascendi-national-fixed-cases.csv').open(),delimiter=';')}
+ascendi_cases=set()
 classes = set()
 ikea_cases = set()
 a28_expected = {r['id']: r for r in csv.DictReader((Path(__file__).resolve().parents[1] /
@@ -88,10 +90,23 @@ for case in cases:
         if case['id'].startswith('a16-local-idanha-') and [v['chargeId'] for v in after['tollRoads']]!=['ascendi:grande-lisboa:01']:
             raise ValueError('Wrong local Idanha plaza: '+case['id'])
         new_cases.add(case['id'])
+    elif case['id'] in ascendi_expected:
+        expected=ascendi_expected[case['id']]
+        charge_parts=case['id'].removeprefix('national-').split('-edge-',1)[0].split('-')
+        expected_charge='ascendi:'+ '-'.join(charge_parts[1:-1]) + ':' + charge_parts[-1]
+        if (after['tollPricing']!='exact'
+                or abs(after['tollAmount']-float(expected['expectedAmount']))>1e-9
+                or after['tollVehicleClass']!=int(expected['class'])):
+            raise ValueError('Incorrect national Ascendi physical crossing quote: '+case['id'])
+        if [v['chargeId'] for v in after['tollRoads']] != [expected_charge]:
+            raise ValueError('Wrong national Ascendi collection point: '+case['id'])
+        ascendi_cases.add(case['id'])
     elif after['tollPricing'] == 'exact':
         raise ValueError('Unreviewed city approaches were certified')
 if new_cases!=set(new_expected):
     raise ValueError('Missing A1/approach proof cases')
+if ascendi_cases!=set(ascendi_expected):
+    raise ValueError('Missing national Ascendi road/direction/class proof cases')
 if classes != {1, 2, 3, 4}:
     raise ValueError('Missing vehicle classes')
 expected_ikea={f'ikea-loures-2645-575-{origin}-class-{klass}' for origin in ('south','north') for klass in (1,2,3,4)}

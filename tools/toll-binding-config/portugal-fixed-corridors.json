@@ -32,6 +32,22 @@
       "kind": "free",
       "review": "portugal-a9-approaches.json",
       "source": "portugal-a9-approaches.source.json"
+    },
+    {
+      "review": "portugal-a4-fixed.json",
+      "source": "portugal-a4-fixed.source.json"
+    },
+    {
+      "review": "portugal-a17-fixed.json",
+      "source": "portugal-a17-fixed.source.json"
+    },
+    {
+      "review": "portugal-a29-fixed.json",
+      "source": "portugal-a29-fixed.source.json"
+    },
+    {
+      "review": "portugal-a42-fixed.json",
+      "source": "portugal-a42-fixed.source.json"
     }
   ]
 }

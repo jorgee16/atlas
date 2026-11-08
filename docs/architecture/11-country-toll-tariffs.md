@@ -103,8 +103,10 @@ without changes to navigation fields. This is not full official-price coverage.
 ### A28 directed fixed corridors, 2026-11-01
 
 The subsequent A16 extension composes country review stages without adding a
-checked-in intermediate CSV per motorway. The final proof has 1,762 edges,
-14 crossings and 91 real C++/JNI cases. It also fixes a confirmed Ranholas
+checked-in intermediate CSV per motorway. That historical stage had 1,762 edges,
+14 crossings and 91 real C++/JNI cases; the current composed proof has 3,901
+coverage edges, 944 network intervals and 81 crossing rows after A9 and the
+A4/A17/A29/A42 reviews. It also fixes a confirmed Ranholas
 charge hidden by an old untolled graph flag, changing monetary presentation
 only. See [the current fixed-corridor architecture](14-reviewed-fixed-toll-corridors.md)
 for the active scope, stale-flag regression and remaining route-selection limit.

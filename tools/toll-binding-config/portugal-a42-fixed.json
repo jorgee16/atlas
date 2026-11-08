@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "region": "portugal",
+  "partition": "mainland",
+  "reviewed": true,
+  "reviewedOn": "2026-11-08",
+  "geometrySimplificationMeters": 2.0,
+  "allowedHighways": [
+    "motorway"
+  ],
+  "wayIds": [
+    95519000,
+    95519002,
+    95519008,
+    95519023,
+    95519045,
+    95519046,
+    95519048,
+    96094960,
+    96096197,
+    138913390,
+    150237220,
+    150604764,
+    944464888,
+    944464889,
+    944464890,
+    1352410248
+  ],
+  "sourceSha256": "b69f97f4f0fe15d14201806fa60d5f8339eeb39191ac559134e1d82230a4c64a",
+  "seedSha256": "7e404d8549b5fe826d238abe6a0e0557d2a0a8cfb622c8968b4279d53ef592ab",
+  "scope": "A42 IC24/IC25–Lordelo, Paços de Ferreira–EN106 Sul and EN106 Norte–Lousada electronic facilities, both directed carriageways.",
+  "sources": [
+    "https://ascendi.pt/portagens-eletronicas/",
+    "https://api.openstreetmap.org/api/0.6/map.json",
+    "https://api.openstreetmap.org/api/0.6/map.json",
+    "https://api.openstreetmap.org/api/0.6/map.json"
+  ],
+  "chargePoints": {
+    "2869384457": "ascendi:grande-porto:10",
+    "2869384458": "ascendi:grande-porto:10",
+    "264119862": "ascendi:grande-porto:11",
+    "2869381630": "ascendi:grande-porto:11",
+    "264117176": "ascendi:grande-porto:12",
+    "264119609": "ascendi:grande-porto:12"
+  },
+  "physicalReview": {
+    "basis": "Official 2026 facility endpoints are bound to the explicit OSM collection nodes on their directed source ways; legacy packaged event identities are ignored.",
+    "limits": "Only the captured whole source ways are certified. Adjacent roads, similarly named facilities and A41 conflict rows are excluded."
+  }
+}

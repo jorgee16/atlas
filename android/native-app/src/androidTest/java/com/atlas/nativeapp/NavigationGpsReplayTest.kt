@@ -990,12 +990,12 @@ class NavigationGpsReplayTest {
      * route preview. The fixture contains graph-node endpoints, not fake routes. */
     @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
         output.listFiles()?.forEach { it.delete() }
-        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","issue-2-approach-cases.csv","a5-access-cases.csv","a9-network-cases.csv").flatMap { name ->
+        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","issue-2-approach-cases.csv","a5-access-cases.csv","a9-network-cases.csv","ascendi-national-fixed-cases.csv").flatMap { name ->
             instrumentation.context.assets.open("tolls/$name")
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("The original 93 cases, reviewed approaches, A1 and A9/A16 network cases are required",cases.size>=222)
+        assertTrue("The original cases plus 92 national Ascendi graph crossings are required",cases.size>=314)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         val unavailableResults=JSONArray()
@@ -1052,6 +1052,12 @@ class NavigationGpsReplayTest {
                                 if(row[0].startsWith("a16-a9-"))
                                     assertEquals("The separate Idanha facility is charged exactly once",1,
                                         (0 until charges.length()).count { charges.getJSONObject(it).getString("chargeId")=="ascendi:grande-lisboa:01" })
+                            } else if(row[0].startsWith("national-ascendi-")) {
+                                assertEquals(1,charges.length())
+                                val parts=row[0].removePrefix("national-").substringBefore("-edge-").split('-')
+                                val expected="ascendi:${parts.drop(1).dropLast(1).joinToString("-")}:${parts.last()}"
+                                assertEquals("The graph route must cross its reviewed national facility",expected,
+                                    charges.getJSONObject(0).getString("chargeId"))
                             } else if(row[0].startsWith("a16-")) {
                                 assertEquals(1,charges.length())
                                 assertTrue(charges.getJSONObject(0).getString("chargeId").startsWith("ascendi:grande-lisboa:"))

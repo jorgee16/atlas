@@ -21,6 +21,23 @@ prices = module('import-vialivre-tolls')
 
 
 class FixedCorridorTests(unittest.TestCase):
+    def test_national_ascendi_reviews_bind_twelve_facilities_without_a41_conflicts(self):
+        cfg = ROOT / 'tools/toll-binding-config'
+        charges = set()
+        directed_nodes = 0
+        for road, expected in (('a4', 2), ('a17', 3), ('a29', 4), ('a42', 3)):
+            review = json.loads((cfg / f'portugal-{road}-fixed.json').read_text())
+            source = json.loads((cfg / f'portugal-{road}-fixed.source.json').read_text())
+            shapes, gates, _ = fixed.source_shapes(review, source)
+            self.assertTrue(shapes)
+            self.assertEqual(expected * 2, len(gates))
+            self.assertEqual(set(gates), {p['id'] for p in source['chargeCandidates']})
+            charges.update(gates.values())
+            directed_nodes += len(gates)
+        self.assertEqual(12, len(charges))
+        self.assertEqual(24, directed_nodes)
+        self.assertFalse(any(':a41:' in charge for charge in charges))
+
     def test_barrier_free_access_is_a_directed_paid_boundary_not_a_fake_booth(self):
         cfg = ROOT / 'tools/toll-binding-config'
         review = json.loads((cfg / 'portugal-a9-linear.json').read_text())

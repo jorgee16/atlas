@@ -1,0 +1,943 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "capture": "OSM API responses; exact nodes and whole directed source ways",
+  "apiResponses": [
+    {
+      "file": "a4-0.json",
+      "rawSha256": "ca4c8083f9815016e26f495304b7d367977d7c16b4f8c8f7ff3e2486df915ec0"
+    }
+  ],
+  "ways": [
+    {
+      "id": 26691497,
+      "version": 13,
+      "timestamp": "2024-01-28T20:14:25Z",
+      "nodes": [
+        263576176,
+        263576177
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 26691499,
+      "version": 13,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        263571912,
+        263571914,
+        263571915
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 26691500,
+      "version": 20,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        263571915,
+        263571919,
+        1110345503
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 34885627,
+      "version": 21,
+      "timestamp": "2026-06-20T19:55:27Z",
+      "nodes": [
+        13265178521,
+        263576191,
+        263576193,
+        263576194,
+        13954445175
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 35731139,
+      "version": 16,
+      "timestamp": "2024-01-28T20:14:30Z",
+      "nodes": [
+        263576177,
+        1520038032
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95791516,
+      "version": 16,
+      "timestamp": "2024-01-26T20:07:09Z",
+      "nodes": [
+        263576159,
+        263576160,
+        263576161,
+        263576162,
+        263576164,
+        263576166,
+        263576167,
+        263576169,
+        263576170,
+        263576171,
+        4699555595,
+        9923191475,
+        1110345507
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95802465,
+      "version": 12,
+      "timestamp": "2024-01-28T20:14:19Z",
+      "nodes": [
+        1110345507,
+        1110345499
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95802466,
+      "version": 16,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        1110345495,
+        9923191474,
+        263571928,
+        10164008166,
+        263571931,
+        10164008165,
+        10164008164,
+        263571940,
+        263571944,
+        263571958,
+        263571971
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95802467,
+      "version": 12,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        1110345503,
+        1110345495
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95802468,
+      "version": 12,
+      "timestamp": "2024-02-18T19:18:09Z",
+      "nodes": [
+        1110345499,
+        263576173,
+        263576174,
+        263576176
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95804506,
+      "version": 12,
+      "timestamp": "2024-01-26T20:59:42Z",
+      "nodes": [
+        1110360319,
+        263576187
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 138624727,
+      "version": 13,
+      "timestamp": "2024-01-28T20:14:55Z",
+      "nodes": [
+        1520037701,
+        1110360319
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 138624736,
+      "version": 13,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        1520038081,
+        263571912
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "minspeed": "50",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 138624737,
+      "version": 13,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        1520037768,
+        263571900,
+        1520038081
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "100",
+        "minspeed": "50",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 141661697,
+      "version": 13,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        4956880862,
+        263571852,
+        263571857,
+        4956880860,
+        263571864,
+        263571869,
+        4956880859
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505855213,
+      "version": 4,
+      "timestamp": "2022-07-09T22:02:43Z",
+      "nodes": [
+        263576183,
+        1520037701
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505855214,
+      "version": 6,
+      "timestamp": "2024-01-28T20:14:37Z",
+      "nodes": [
+        1520038032,
+        4956880858
+      ],
+      "tags": {
+        "bridge": "yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505855215,
+      "version": 6,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        1143933747,
+        263571879,
+        409125212
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505855216,
+      "version": 8,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        11756508421,
+        263571874,
+        1143933747
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 505855218,
+      "version": 8,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        292258006,
+        278726362,
+        263571849,
+        12518112131,
+        4956880862
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxheight": "5.71",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "|||merge_to_left"
+      }
+    },
+    {
+      "id": 506648727,
+      "version": 5,
+      "timestamp": "2024-01-26T21:00:39Z",
+      "nodes": [
+        705402217,
+        3295143301,
+        3295143302,
+        4963428547
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 1265629619,
+      "version": 2,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        4956880859,
+        11756508421
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "lit": "no",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 1445791813,
+      "version": 1,
+      "timestamp": "2025-10-28T15:46:38Z",
+      "nodes": [
+        263576187,
+        5472586920,
+        263576189,
+        13265178521
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "100",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1531085844,
+      "version": 1,
+      "timestamp": "2026-06-20T19:55:27Z",
+      "nodes": [
+        13954445175,
+        263576196,
+        263576197,
+        12518112130,
+        705402217
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "name": "Autoestrada de Trás-os-Montes e Alto Douro",
+        "nat_ref": "IP 4",
+        "oneway": "yes",
+        "ref": "A 4;IP 4",
+        "source": "bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    }
+  ],
+  "coordinates": {
+    "263571849": [
+      41.2007874,
+      -8.6094199
+    ],
+    "263571852": [
+      41.2009477,
+      -8.6109828
+    ],
+    "263571857": [
+      41.2011083,
+      -8.6120133
+    ],
+    "263571864": [
+      41.2014683,
+      -8.6138817
+    ],
+    "263571869": [
+      41.2017158,
+      -8.6148235
+    ],
+    "263571874": [
+      41.2022378,
+      -8.6164843
+    ],
+    "263571879": [
+      41.2028782,
+      -8.6182073
+    ],
+    "263571900": [
+      41.2052833,
+      -8.6237017
+    ],
+    "263571912": [
+      41.2065835,
+      -8.626782
+    ],
+    "263571914": [
+      41.2067577,
+      -8.6273344
+    ],
+    "263571915": [
+      41.2069174,
+      -8.6278693
+    ],
+    "263571919": [
+      41.2071134,
+      -8.6287098
+    ],
+    "263571928": [
+      41.2072988,
+      -8.6309835
+    ],
+    "263571931": [
+      41.2072283,
+      -8.6320357
+    ],
+    "263571940": [
+      41.2070244,
+      -8.6332747
+    ],
+    "263571944": [
+      41.2068338,
+      -8.6340651
+    ],
+    "263571958": [
+      41.2056639,
+      -8.6380569
+    ],
+    "263571971": [
+      41.2045323,
+      -8.6420935
+    ],
+    "263576159": [
+      41.2032668,
+      -8.6468566
+    ],
+    "263576160": [
+      41.2035644,
+      -8.6453702
+    ],
+    "263576161": [
+      41.2042762,
+      -8.6424951
+    ],
+    "263576162": [
+      41.2046319,
+      -8.6410477
+    ],
+    "263576164": [
+      41.2054919,
+      -8.6379705
+    ],
+    "263576166": [
+      41.2066659,
+      -8.6339785
+    ],
+    "263576167": [
+      41.2068324,
+      -8.6333053
+    ],
+    "263576169": [
+      41.207007,
+      -8.6323545
+    ],
+    "263576170": [
+      41.2070483,
+      -8.6319695
+    ],
+    "263576171": [
+      41.2070942,
+      -8.631226
+    ],
+    "263576173": [
+      41.206997,
+      -8.6291352
+    ],
+    "263576174": [
+      41.2069097,
+      -8.6285897
+    ],
+    "263576176": [
+      41.2067493,
+      -8.6278727
+    ],
+    "263576177": [
+      41.2063976,
+      -8.6267555
+    ],
+    "263576183": [
+      41.2046041,
+      -8.6226369
+    ],
+    "263576187": [
+      41.2036614,
+      -8.6204357
+    ],
+    "263576189": [
+      41.2023809,
+      -8.6175061
+    ],
+    "263576191": [
+      41.2020546,
+      -8.6165914
+    ],
+    "263576193": [
+      41.2015967,
+      -8.6151135
+    ],
+    "263576194": [
+      41.201263,
+      -8.6139203
+    ],
+    "263576196": [
+      41.2008874,
+      -8.6119854
+    ],
+    "263576197": [
+      41.2007401,
+      -8.6110194
+    ],
+    "278726362": [
+      41.2007148,
+      -8.6088485
+    ],
+    "292258006": [
+      41.2005741,
+      -8.6079651
+    ],
+    "409125212": [
+      41.2038174,
+      -8.6203315
+    ],
+    "705402217": [
+      41.2006445,
+      -8.6100416
+    ],
+    "1110345495": [
+      41.2072706,
+      -8.6299551
+    ],
+    "1110345499": [
+      41.2070495,
+      -8.6295515
+    ],
+    "1110345503": [
+      41.2072286,
+      -8.6295544
+    ],
+    "1110345507": [
+      41.2070946,
+      -8.629986
+    ],
+    "1110360319": [
+      41.2038935,
+      -8.6209714
+    ],
+    "1143933747": [
+      41.2027961,
+      -8.6179162
+    ],
+    "1520037701": [
+      41.2044906,
+      -8.6223717
+    ],
+    "1520037768": [
+      41.2046614,
+      -8.6222576
+    ],
+    "1520038032": [
+      41.2058658,
+      -8.6255048
+    ],
+    "1520038081": [
+      41.2060168,
+      -8.6254069
+    ],
+    "3295143301": [
+      41.200509,
+      -8.6088667
+    ],
+    "3295143302": [
+      41.2003662,
+      -8.6079732
+    ],
+    "4699555595": [
+      41.2071085,
+      -8.6307677
+    ],
+    "4956880858": [
+      41.2054157,
+      -8.6244817
+    ],
+    "4956880859": [
+      41.2017905,
+      -8.6150845
+    ],
+    "4956880860": [
+      41.2012646,
+      -8.6129513
+    ],
+    "4956880862": [
+      41.2008731,
+      -8.6102933
+    ],
+    "4963428547": [
+      41.2002729,
+      -8.6075641
+    ],
+    "5472586920": [
+      41.2029947,
+      -8.6189189
+    ],
+    "9923191474": [
+      41.2072986,
+      -8.6304785
+    ],
+    "9923191475": [
+      41.2071085,
+      -8.630383
+    ],
+    "10164008164": [
+      41.2071092,
+      -8.6328148
+    ],
+    "10164008165": [
+      41.2071748,
+      -8.6324266
+    ],
+    "10164008166": [
+      41.2072686,
+      -8.631527
+    ],
+    "11756508421": [
+      41.2021337,
+      -8.6161584
+    ],
+    "12518112130": [
+      41.2006547,
+      -8.6101454
+    ],
+    "12518112131": [
+      41.2008568,
+      -8.6100907
+    ],
+    "13265178521": [
+      41.2022252,
+      -8.6170766
+    ],
+    "13954445175": [
+      41.2011282,
+      -8.6132258
+    ]
+  },
+  "chargeCandidates": [
+    {
+      "id": 263571869,
+      "lat": 41.2017158,
+      "lon": -8.6148235,
+      "tags": {
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
+      }
+    },
+    {
+      "id": 263571919,
+      "lat": 41.2071134,
+      "lon": -8.6287098,
+      "tags": {
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
+      }
+    },
+    {
+      "id": 263576173,
+      "lat": 41.206997,
+      "lon": -8.6291352,
+      "tags": {
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
+      }
+    },
+    {
+      "id": 263576189,
+      "lat": 41.2023809,
+      "lon": -8.6175061,
+      "tags": {
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
+      }
+    }
+  ]
+}
