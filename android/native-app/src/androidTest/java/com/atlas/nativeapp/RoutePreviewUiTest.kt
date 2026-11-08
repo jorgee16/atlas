@@ -83,9 +83,9 @@ class RoutePreviewUiTest {
                 // deadlock Espresso even though the actual planner is visible.
                 val plannerRoot=withDecorView(org.hamcrest.Matchers.`is`(dialog!!.window!!.decorView))
                 val detailsRoot=org.hamcrest.Matchers.allOf(isDialog(),org.hamcrest.Matchers.not(plannerRoot))
-                onView(withText(org.hamcrest.Matchers.startsWith("Recommended ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
-                onView(withText(org.hamcrest.Matchers.startsWith("Alternative ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
-                onView(withText(org.hamcrest.Matchers.startsWith(if(verifiedFree)"No tolls ·" else "Avoid tolls ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.containsString("Recommended"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.containsString("Alternative"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.containsString(if(verifiedFree)"No tolls" else "Avoid tolls"))).inRoot(plannerRoot).check(matches(isDisplayed()))
                 onView(withText("Start navigation")).inRoot(plannerRoot).check(matches(isDisplayed()))
                 val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
                 automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use {
@@ -97,7 +97,7 @@ class RoutePreviewUiTest {
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
-                    labels.filter { listOf("Recommended ·","Alternative ·","No tolls ·","Avoid tolls ·").any { prefix -> it.text.toString().startsWith(prefix) } }.forEach { title ->
+                    labels.filter { listOf("Recommended","Alternative","No tolls","Avoid tolls").any { label -> it.text.toString().contains(label) && it.text.toString().contains("min") } }.forEach { title ->
                         val layout=checkNotNull(title.layout)
                         assertEquals("Route title must remain on one line",1,layout.lineCount)
                         assertEquals("Route title clipped",title.text.length,layout.getLineEnd(0))
@@ -129,7 +129,7 @@ class RoutePreviewUiTest {
                 onView(withText(org.hamcrest.Matchers.containsString("Class 1"))).inRoot(detailsRoot)
                     .check(matches(isDisplayed()))
                 onView(withText("Close")).inRoot(detailsRoot).perform(click())
-                onView(withText(org.hamcrest.Matchers.startsWith("Alternative ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.containsString("Alternative"))).inRoot(plannerRoot).check(matches(isDisplayed()))
             } finally {
                 scenario.onActivity { activity ->
                     dialog?.dismiss();originalUi?.let { uiField.set(activity,it) }

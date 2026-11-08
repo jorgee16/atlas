@@ -3,6 +3,11 @@ package com.atlas.nativeapp
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
+import android.text.Layout
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import org.json.JSONObject
 import kotlin.math.max
 
@@ -14,8 +19,15 @@ internal class RouteOptionView(
     selected: Boolean,
     onSelect: () -> Unit
 ) : LinearLayout(ui.context) {
-    private val time = ui.text(AtlasPages.formatTime(route.optDouble("durationSeconds")), 20f, ui.ink, true)
-    private val summary = ui.text("$label · ${AtlasPages.formatDistance(route.optDouble("distanceMeters"))}", 12f, ui.muted)
+    private val duration = AtlasPages.formatTime(route.optDouble("durationSeconds"))
+    private val roads = RouteChoices.roadSummary(route)
+    private val time = ui.text("", 20f, ui.ink, true).apply {
+        text = SpannableString("$duration  $label").apply {
+            setSpan(RelativeSizeSpan(.6f), duration.length + 2, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(ForegroundColorSpan(ui.muted), duration.length + 2, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+    private val summary = ui.text("${AtlasPages.formatDistance(route.optDouble("distanceMeters"))} · $roads", 12f, ui.muted)
     private val price = RouteChoices.previewPrice(route)
     private val value = ui.text(price.value, 17f, if (selected) ui.blue else ui.ink, true)
     private val status = ui.text(price.status, 11f, ui.muted)
@@ -46,11 +58,8 @@ internal class RouteOptionView(
         minimumHeight = ui.dp(72)
         isSelected = selected
         addView(header, LayoutParams(-1, -2))
-        addView(ui.space(7))
-        val roads = RouteChoices.roadSummary(route)
-        addView(ui.text("Via $roads", 12f, ui.muted))
         // Announce the whole choice once; retain the individual visible labels.
-        contentDescription = "$label, ${time.text}, ${AtlasPages.formatDistance(route.optDouble("distanceMeters"))}, ${RouteChoices.previewTollLabel(route)}, $roads"
+        contentDescription = "$label, $duration, ${AtlasPages.formatDistance(route.optDouble("distanceMeters"))}, ${RouteChoices.previewTollLabel(route)}, $roads"
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         descendantFocusability = FOCUS_BLOCK_DESCENDANTS
         setOnClickListener { onSelect() }
@@ -66,7 +75,7 @@ internal class RouteOptionView(
         // Use the actual text size and available width, including large fonts,
         // rather than truncating a price or letting it cover the journey time.
         val available = MeasureSpec.getSize(widthSpec) - paddingLeft - paddingRight
-        val leftWidth = max(time.paint.measureText(time.text.toString()), summary.paint.measureText(summary.text.toString()))
+        val leftWidth = max(Layout.getDesiredWidth(time.text, time.paint), Layout.getDesiredWidth(summary.text, summary.paint))
         val rightWidth = max(value.paint.measureText(value.text.toString()), status.paint.measureText(status.text.toString()))
         val stacked = MeasureSpec.getMode(widthSpec) != MeasureSpec.UNSPECIFIED &&
             leftWidth + rightWidth + ui.dp(12) > available
