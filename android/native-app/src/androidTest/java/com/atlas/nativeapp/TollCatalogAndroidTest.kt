@@ -17,7 +17,14 @@ class TollCatalogAndroidTest {
         val context=InstrumentationRegistry.getInstrumentation().targetContext
         val bytes=context.assets.open("toll-fares/Portugal.csv").use { it.readBytes() }
         val catalog=TollCatalog.parse("Portugal",bytes,"bundled")
-        assertEquals("entry-exit",catalog.scheme);assertEquals(4166,catalog.entryExitFares.size)
+        assertEquals("entry-exit",catalog.scheme);assertEquals(4220,catalog.entryExitFares.size)
+        assertEquals("All original published pairs must remain",4166,catalog.entryExitFares.count { it.network=="brisa-published" })
+        assertEquals(54,catalog.entryExitFares.count { it.network=="pt-a9-linear" })
+        val a9=catalog.entryExitFares.first { it.network=="pt-a9-linear"&&it.entry=="queluz"&&it.exit=="loures" }
+        assertEquals(java.math.BigDecimal("1.80"),a9.amounts[1])
+        assertEquals(java.math.BigDecimal("3.10"),a9.amounts[2])
+        assertEquals(java.math.BigDecimal("4.00"),a9.amounts[3])
+        assertEquals(java.math.BigDecimal("4.45"),a9.amounts[4])
         val braga=catalog.entryExitFares.first { it.network=="brisa-published"&&it.entry=="0311"&&it.exit=="0316" }
         assertEquals(java.math.BigDecimal("3.85"),braga.amounts[1])
         val south=catalog.entryExitFares.first { it.network=="brisa-published"&&it.entry=="0211"&&it.exit=="0222" }
