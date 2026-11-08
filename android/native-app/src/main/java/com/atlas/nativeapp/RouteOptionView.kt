@@ -21,15 +21,15 @@ internal class RouteOptionView(
 ) : LinearLayout(ui.context) {
     private val duration = AtlasPages.formatTime(route.optDouble("durationSeconds"))
     private val roads = RouteChoices.roadSummary(route)
-    private val time = ui.text("", 20f, ui.ink, true).apply {
+    private val time = ui.text("", 18f, ui.ink, true).apply {
         text = SpannableString("$duration  $label").apply {
-            setSpan(RelativeSizeSpan(.6f), duration.length + 2, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(RelativeSizeSpan(2f / 3f), duration.length + 2, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             setSpan(ForegroundColorSpan(ui.muted), duration.length + 2, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
     }
     private val summary = ui.text("${AtlasPages.formatDistance(route.optDouble("distanceMeters"))} · $roads", 12f, ui.muted)
     private val price = RouteChoices.previewPrice(route)
-    private val value = ui.text(price.value, 17f, if (selected) ui.blue else ui.ink, true)
+    private val value = ui.text(price.value, 16f, if (selected) ui.blue else ui.ink, true)
     private val status = ui.text(price.status, 11f, ui.muted)
     private val journey = ui.column().apply {
         addView(time, LayoutParams(-2, -2))
@@ -54,8 +54,8 @@ internal class RouteOptionView(
         orientation = VERTICAL
         tag = "route-option"
         ui.ripple(this, if (selected) ui.soft else ui.surface, 13)
-        setPadding(ui.dp(12), ui.dp(11), ui.dp(12), ui.dp(11))
-        minimumHeight = ui.dp(72)
+        setPadding(ui.dp(12), ui.dp(10), ui.dp(12), ui.dp(10))
+        minimumHeight = ui.dp(60)
         isSelected = selected
         addView(header, LayoutParams(-1, -2))
         // Announce the whole choice once; retain the individual visible labels.

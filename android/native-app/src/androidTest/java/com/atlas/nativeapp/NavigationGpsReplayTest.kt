@@ -1193,6 +1193,12 @@ class NavigationGpsReplayTest {
                         .first { it.text.toString()=="€ 1,60" }
                     assertTrue("The same price card must retain its confirmation",
                         allViews.any { it.tag=="route-option" && it.contentDescription?.contains("€ 1,60 · confirmed")==true })
+                    val planner=allViews.first { it.tag=="route-option" }.parent as android.view.View
+                    val plannerBounds=android.graphics.Rect()
+                    assertTrue(planner.getGlobalVisibleRect(plannerBounds))
+                    val windowBounds=android.graphics.Rect().also { a.window.decorView.getWindowVisibleDisplayFrame(it) }
+                    assertTrue("Expanded route comparison must preserve visible map above the planner",
+                        plannerBounds.top-windowBounds.top >= (48*a.resources.displayMetrics.density).toInt())
                     val priceBounds=android.graphics.Rect()
                     assertTrue("Confirmed price must be visible",price.getGlobalVisibleRect(priceBounds))
                     val mapActions=setOf("Recenter on my location","Full map","Switch to heading up","Switch to north up")
