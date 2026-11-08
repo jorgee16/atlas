@@ -136,7 +136,7 @@ class TollCatalogTest {
         val known=route.put("tollPricing","estimate").put("tollAmount",230).put("tollCurrency","JPY")
             .put("tollFractionDigits",0)
         assertTrue(RouteChoices.tollLabel(known).startsWith("≈ "))
-        assertTrue(RouteChoices.tollLabel(known).endsWith("estimate (not confirmed)"))
+        assertTrue(RouteChoices.tollLabel(known).endsWith("estimated"))
         known.put("tollPricing","exact")
         assertTrue(RouteChoices.tollLabel(known).contains("230"))
         assertFalse(RouteChoices.tollLabel(known).contains("230,00"))
