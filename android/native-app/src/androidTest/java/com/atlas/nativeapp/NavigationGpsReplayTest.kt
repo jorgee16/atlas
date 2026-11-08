@@ -995,7 +995,7 @@ class NavigationGpsReplayTest {
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("The original cases plus 96 national Ascendi graph crossings are required",cases.size>=318)
+        assertTrue("The original cases, 96 Ascendi crossings and eight full A29 trips are required",cases.size>=326)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         val unavailableResults=JSONArray()
@@ -1052,6 +1052,11 @@ class NavigationGpsReplayTest {
                                 if(row[0].startsWith("a16-a9-"))
                                     assertEquals("The separate Idanha facility is charged exactly once",1,
                                         (0 until charges.length()).count { charges.getJSONObject(it).getString("chargeId")=="ascendi:grande-lisboa:01" })
+                            } else if(row[0].startsWith("a29-corridor-")) {
+                                assertEquals(4,charges.length())
+                                assertTrue("The full A29 trip must connect all four facilities",after.getDouble("distanceMeters")>39000)
+                                val ids=if(row[0].contains("-south-"))listOf(7,6,5,4) else listOf(4,5,6,7)
+                                ids.forEachIndexed { i,id -> assertEquals("ascendi:costa-de-prata:0$id",charges.getJSONObject(i).getString("chargeId")) }
                             } else if(row[0].startsWith("national-ascendi-")) {
                                 assertEquals(1,charges.length())
                                 val parts=row[0].removePrefix("national-").substringBefore("-edge-").split('-')

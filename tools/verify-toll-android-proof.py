@@ -7,7 +7,7 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 318:
+if len(cases) < 326:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
 new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv','a9-network-cases.csv')
@@ -98,7 +98,13 @@ for case in cases:
                 or abs(after['tollAmount']-float(expected['expectedAmount']))>1e-9
                 or after['tollVehicleClass']!=int(expected['class'])):
             raise ValueError('Incorrect national Ascendi physical crossing quote: '+case['id'])
-        if [v['chargeId'] for v in after['tollRoads']] != [expected_charge]:
+        expected_charges=[expected_charge]
+        if case['id'].startswith('a29-corridor-'):
+            expected_charges=['ascendi:costa-de-prata:0'+str(i) for i in (4,5,6,7)]
+            if '-south-' in case['id']: expected_charges.reverse()
+            if after['distanceMeters']<39000:
+                raise ValueError('Missing full A29 mainline traversal: '+case['id'])
+        if [v['chargeId'] for v in after['tollRoads']] != expected_charges:
             raise ValueError('Wrong national Ascendi collection point: '+case['id'])
         ascendi_cases.add(case['id'])
     elif after['tollPricing'] == 'exact':

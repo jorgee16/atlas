@@ -46,9 +46,9 @@ main-carriageway edges and six nodes at Idanha/Sacotes/Ranholas. The composed
 proof originally had 1,762 edges and 14 crossing rows. Issue #2 extends it
 with the A14/A1 Coimbra Norte–Fatima ticket corridor, public approaches and
 reviewed Oeiras I / Carcavelos I ramps. The A9 network phase and the national
-Ascendi phase now bring the composed proof to **3,981 directed coverage edges,
+Ascendi phase now bring the composed proof to **4,414 directed coverage edges,
 944 paid-network intervals and 81 physical event rows**. The latest phase adds
-359 witnessed edges and 24 directed crossings for 12 facilities on A4, A17,
+792 witnessed edges and 24 directed crossings for 12 facilities on A4, A17,
 A29 and A42. IC16 trunk continuations, IC23 and the Oeiras II / Carcavelos II
 facilities remain excluded. A41 remains excluded because 36 supplied price rows
 conflict; choosing one would manufacture an official price. This is
@@ -196,3 +196,12 @@ produce exact totals while route points, edge indexes, maneuvers, distance, ETA
 and protected visual points remain unchanged. See the geographical correction
 in the issue validation report: runtime arithmetic alone cannot validate a
 tariff-to-facility identity.
+
+The A29 stage now includes all 357 original directed main-carriageway ways in
+relation 7301357, excluding its four service areas. All eight collection nodes
+must retain explicit identities; a new unmapped collection node blocks generation.
+This adds 433 graph edges beyond the short facility contexts. Eight additional
+native/Android fixtures connect the four facilities over 39.44/39.54 km in the
+two directions, classes 1–4. Their ordered charges total EUR 1.90/3.35/4.25/4.75.
+Interchange ramps and unreviewed external approaches still cannot inherit full
+coverage merely from joining A29.

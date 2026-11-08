@@ -43,7 +43,8 @@ ROADS = {
     },
     "a29": {
         "road": "A29",
-        "allowed": ["motorway", "motorway_link"],
+        "allowed": ["motorway"],
+        "completeSourceWays": True,
         "raw": ["a29-relation.json"],
         "charges": {
             1563530090: "ascendi:costa-de-prata:04",
@@ -55,7 +56,7 @@ ROADS = {
             1563530097: "ascendi:costa-de-prata:07",
             1563530098: "ascendi:costa-de-prata:07",
         },
-        "scope": "A29 Salreu/Estarreja, Estarreja/Ovar, Arada/Maceda and ER1-18/Miramar facilities, each on its explicit original directed way.",
+        "scope": "A29 original directed main carriageways from road relation 7301357, with all eight collection nodes at Estarreja, Ovar, Arada and Gulpilhares explicitly mapped. Service roads and interchange ramps are excluded.",
     },
     "a42": {
         "road": "A42",
@@ -99,6 +100,8 @@ def normalize(raw_dir, key, definition):
     if any(way.get("tags", {}).get("highway") not in allowed or
            way.get("tags", {}).get("oneway") != "yes" for way in ways.values()):
         raise ValueError("A reviewed collection node is not on an allowed directed road")
+    if definition.get("completeSourceWays"):
+        ways = dict(all_ways)
     def collection(node):
         tags = elements.get(("node", node), {}).get("tags", {})
         return tags.get("barrier") == "toll_booth" or tags.get("highway") == "toll_gantry"

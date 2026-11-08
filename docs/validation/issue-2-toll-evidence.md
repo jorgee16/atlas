@@ -42,9 +42,9 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 3,981 reviewed directed graph edges (+2,219, 125.9%).
+- 1,762 -> 4,414 reviewed directed graph edges (+2,652, 150.5%).
   The original issue phase adds 1,860 edges through A9/A1/access reviews; the
-  national Ascendi extension adds another 359 around fixed facilities.
+  national Ascendi extension adds another 792, including A29 main carriageways.
 - 410 additional A14/A1/Fatima edges, 408 bounded paid-network intervals and two
   physical entry/exit events. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
@@ -100,10 +100,10 @@ Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
 ## Validation and reproducibility
 
 Local: five C++ suites, 55 Python toll/section-provider tests, 33 JS routing/toll/ETA/UI tests.
-318 actual native route/class cases pass against the distributed mainland graph,
+326 actual native route/class cases pass against the distributed mainland graph,
 including the original 91 CSV cases, eight new public approaches, four A1 classes,
 one start-inside-network case 28 Oeiras/Carcavelos access cases and 90 A9/A16 cases. The two original unavailable-class/tariff JNI
-regressions remain mandatory, making **320 Android price cases**. The additional
+regressions remain mandatory, making **328 Android price cases**. The additional
 96 cases cover all four classes and all 12 activated A4/A17/A29/A42 facilities
 across 24 real directed crossings. All original
 93 cases are retained. Android execution and screenshots must be checked in the
@@ -234,3 +234,17 @@ parallel-edge failure concerned the incorrect A1 node and is not a limitation
 of the corrected A29 fixture. Entire-trip confirmation still requires full
 traversal coverage; 12 installations do not mean four whole motorways or a
 national coverage percentage.
+
+## A29 mainline journeys
+
+The A29 source stage includes the complete 357 directed motorway ways from the
+captured relation, with all eight electronic collection nodes reviewed. Four
+service-area ways are excluded. No unknown collection point can disappear from
+this selected source set. The unchanged graph compiler certifies 568 A29 edges,
+433 more than the isolated facility contexts. Eight additional real-graph cases
+cover both directions and all classes across all four facilities over approximately
+39.5 km. The charge order is 04→05→06→07 northbound and reversed southbound.
+Class totals are 1.90/3.35/4.25/4.75 EUR. No endpoint-pair fare or per-km average
+is used for these confirmed prices; all four actual crossings must be present.
+Pricing preserves authoritative navigation fields. Full-trip proof from origins
+outside these reviewed main carriageways remains a separate requirement.
