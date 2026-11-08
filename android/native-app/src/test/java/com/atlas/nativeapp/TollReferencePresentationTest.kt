@@ -11,7 +11,7 @@ class TollReferencePresentationTest {
             .put("tollPricingConfidence","low").put("referenceTollMeters",1000)
             .put("tolledMeters",1000).put("pricedTollMeters",0)
         assertTrue(RouteChoices.tollLabel(route).contains("1,25"))
-        assertTrue(RouteChoices.tollLabel(route).endsWith("estimate (not confirmed)"))
+        assertTrue(RouteChoices.tollLabel(route).endsWith("estimated"))
         assertTrue(RouteChoices.previewTollDetails(route).contains("Low-confidence"))
         assertFalse(RouteChoices.tollLabel(route).contains("exact"))
         assertTrue(RouteChoices.tollProvenance(route).contains("no verified tariff"))

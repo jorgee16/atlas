@@ -23,17 +23,26 @@ internal object RouteChoices {
     fun freeRouteName(route:JSONObject):String = if(verifiedFree(route))"No tolls" else "Avoid tolls"
     /** Estimates and graph detection are never promoted into confirmed prices. */
     fun tollLabel(route:JSONObject):String = previewTollLabel(route)
-    /** Short customer-facing label; tariff provenance remains in the details sheet. */
-    fun previewTollLabel(route: JSONObject): String {
-        if (verifiedFree(route)) return "No tolls · " + money(0.0, route)
-        if (!route.optBoolean("hasTolls")) return "No tolls detected / not verified"
+    data class PreviewPrice(val value: String, val status: String)
+    /** Separate the price from its qualifier so neither crowds out the journey time. */
+    fun previewPrice(route: JSONObject): PreviewPrice {
+        if (verifiedFree(route)) return PreviewPrice(money(0.0, route), "No tolls")
+        val unavailable = PreviewPrice("—", "Price unavailable")
+        if (!route.optBoolean("hasTolls")) return unavailable
         val field = if (route.has("tollAmount")) "tollAmount" else "tollEuros"
         val amount = route.optDouble(field, Double.NaN)
-        val pricing = route.optString("tollPricing")
-        if (route.isNull(field) || !amount.isFinite() || amount < 0) return "Toll price unavailable"
-        if(pricing=="estimate" && amount>0) return "≈ "+money(amount,route)+" · estimate (not confirmed)"
-        if(pricing!="exact")return "Toll price unavailable"
-        return money(amount, route) + " · confirmed"
+        if (route.isNull(field) || !amount.isFinite() || amount < 0) return unavailable
+        return when (route.optString("tollPricing")) {
+            "exact" -> PreviewPrice(money(amount, route), "confirmed")
+            "estimate" -> if (amount > 0) PreviewPrice("≈ " + money(amount, route), "estimated") else unavailable
+            else -> unavailable
+        }
+    }
+    /** Short customer-facing label; tariff provenance remains in the details sheet. */
+    fun previewTollLabel(route: JSONObject): String {
+        val price = previewPrice(route)
+        if (price.value == "—") return "Toll price unavailable"
+        return if (verifiedFree(route)) "No tolls · ${price.value}" else "${price.value} · ${price.status}"
     }
 
     fun previewTollDetails(route: JSONObject): String {

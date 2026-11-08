@@ -1190,7 +1190,9 @@ class NavigationGpsReplayTest {
                     }
                     collect(a.window.decorView)
                     val price=allViews.filterIsInstance<android.widget.TextView>()
-                        .first { it.text.toString().contains("1,60") && it.text.toString().contains("confirmed") }
+                        .first { it.text.toString()=="€ 1,60" }
+                    assertTrue("The same price card must retain its confirmation",
+                        allViews.any { it.tag=="route-option" && it.contentDescription?.contains("€ 1,60 · confirmed")==true })
                     val priceBounds=android.graphics.Rect()
                     assertTrue("Confirmed price must be visible",price.getGlobalVisibleRect(priceBounds))
                     val mapActions=setOf("Recenter on my location","Full map","Switch to heading up","Switch to north up")

@@ -45,7 +45,7 @@ class RoutePreviewTest {
             .put("tollPricingConfidence","low")
         assertTrue(RouteChoices.previewTollLabel(paid).startsWith("≈ "))
         assertTrue(RouteChoices.previewTollLabel(paid).contains("5,80"))
-        assertTrue(RouteChoices.previewTollLabel(paid).endsWith("estimate (not confirmed)"))
+        assertTrue(RouteChoices.previewTollLabel(paid).endsWith("estimated"))
         assertTrue(RouteChoices.previewTollDetails(paid).contains("Low-confidence"))
         assertFalse(RouteChoices.previewTollLabel(paid).contains("confidence"))
         paid.put("tollPricing","exact")
@@ -53,9 +53,34 @@ class RoutePreviewTest {
         paid.put("tollAmount",JSONObject.NULL)
         assertEquals("Toll price unavailable",RouteChoices.previewTollLabel(paid))
         val unverified=route(false,600.0,10000.0,1)
-        assertEquals("No tolls detected / not verified",RouteChoices.previewTollLabel(unverified))
+        assertEquals("Toll price unavailable",RouteChoices.previewTollLabel(unverified))
         assertFalse(RouteChoices.previewTollLabel(unverified).contains("0,00"))
         unverified.put("tollFreeVerified",true).put("tollCurrency","EUR")
         assertEquals("No tolls · € 0,00",RouteChoices.previewTollLabel(unverified))
+    }
+
+    @Test fun compactPriceStatesPreserveFinancialEvidenceAndOriginalRoute() {
+        val original=route(true,900.0,14000.0,1,2).put("tollCurrency","EUR")
+        for (pricing in listOf("exact","estimate","unavailable")) {
+            for (amount in listOf(JSONObject.NULL,-1.0,0.0,1.6)) {
+                val input=JSONObject(original.toString()).put("tollPricing",pricing).put("tollAmount",amount)
+                val before=input.toString()
+                val presentation=RouteChoices.previewPrice(input)
+                assertEquals("Presentation must not rewrite navigation or financial evidence",before,input.toString())
+                if (amount==1.6 && pricing!="unavailable") {
+                    assertTrue(presentation.value.contains("1,60"))
+                    assertEquals(if(pricing=="exact")"confirmed" else "estimated",presentation.status)
+                } else if (amount==0.0 && pricing=="exact") {
+                    assertEquals("No tolls",presentation.status)
+                } else {
+                    assertEquals("Unconfirmed zero must not look free","—",presentation.value)
+                    assertEquals("Price unavailable",presentation.status)
+                }
+            }
+        }
+        val yen=JSONObject(original.toString()).put("tollCurrency","JPY").put("tollFractionDigits",0)
+            .put("tollPricing","exact").put("tollAmount",250)
+        assertTrue(RouteChoices.previewPrice(yen).value.contains("250"))
+        assertFalse(RouteChoices.previewPrice(yen).value.contains("€"))
     }
 }

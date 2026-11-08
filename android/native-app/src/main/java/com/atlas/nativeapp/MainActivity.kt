@@ -1032,26 +1032,8 @@ class MainActivity : ComponentActivity(), LocationListener, SensorEventListener 
                         val selected=choice===route
                         val label=if(!choice.optBoolean("hasTolls")) RouteChoices.freeRouteName(choice)
                             else if(index==0) "Recommended" else "Alternative"
-                        val roads=RouteChoices.roadSummary(choice)
-                        val trip="${AtlasPages.formatTime(choice.optDouble("durationSeconds"))} · ${AtlasPages.formatDistance(choice.optDouble("distanceMeters"))}"
-                        val price=RouteChoices.previewTollLabel(choice)
-                        card.addView(ui.column().apply {
-                            ui.ripple(this,if(selected)ui.soft else ui.surface,13)
-                            setPadding(ui.dp(12),ui.dp(10),ui.dp(12),ui.dp(10))
-                            addView(ui.row().apply {
-                                addView(ui.text(label,14f,ui.ink,true).apply { maxLines=1 },
-                                    LinearLayout.LayoutParams(-2,-2).apply { marginEnd=ui.dp(8) })
-                                addView(ui.text(price,12f,if(selected)ui.blue else ui.ink,true).apply {
-                                    textAlignment=android.view.View.TEXT_ALIGNMENT_VIEW_END
-                                },LinearLayout.LayoutParams(0,-2,1f))
-                            })
-                            addView(ui.space(4))
-                            addView(ui.text("$trip · $roads",12f,ui.muted).apply {
-                                maxLines=1;ellipsize=android.text.TextUtils.TruncateAt.END
-                            })
-                            contentDescription="$label, $trip, $price, $roads"
-                            isSelected=selected
-                            setOnClickListener { model.chooseRoute(choice) }
+                        card.addView(RouteOptionView(ui,choice,label,selected) {
+                            model.chooseRoute(choice)
                         },linear(7))
                     }
                     if(route.optBoolean("hasTolls")) {

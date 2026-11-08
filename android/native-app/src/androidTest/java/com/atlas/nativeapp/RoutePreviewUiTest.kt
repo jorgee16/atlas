@@ -83,14 +83,14 @@ class RoutePreviewUiTest {
                 // deadlock Espresso even though the actual planner is visible.
                 val plannerRoot=withDecorView(org.hamcrest.Matchers.`is`(dialog!!.window!!.decorView))
                 val detailsRoot=org.hamcrest.Matchers.allOf(isDialog(),org.hamcrest.Matchers.not(plannerRoot))
-                onView(withText("Recommended")).inRoot(plannerRoot).check(matches(isDisplayed()))
-                onView(withText("Alternative")).inRoot(plannerRoot).check(matches(isDisplayed()))
-                onView(withText(if(verifiedFree)"No tolls" else "Avoid tolls")).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.startsWith("Recommended ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.startsWith("Alternative ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.startsWith(if(verifiedFree)"No tolls ·" else "Avoid tolls ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
                 onView(withText("Start navigation")).inRoot(plannerRoot).check(matches(isDisplayed()))
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
-                    labels.filter { it.text.toString() in listOf("Recommended","Alternative","No tolls","Avoid tolls") }.forEach { title ->
+                    labels.filter { listOf("Recommended ·","Alternative ·","No tolls ·","Avoid tolls ·").any { prefix -> it.text.toString().startsWith(prefix) } }.forEach { title ->
                         val layout=checkNotNull(title.layout)
                         assertEquals("Route title must remain on one line",1,layout.lineCount)
                         assertEquals("Route title clipped",title.text.length,layout.getLineEnd(0))
@@ -98,12 +98,13 @@ class RoutePreviewUiTest {
                     }
                     val prices=labels.filter { it.text.toString().startsWith("≈ ") }
                     assertEquals("Both useful estimates must be shown",2,prices.size)
-                    assertTrue(values.any { it.contains("5,80") && it.endsWith("estimate (not confirmed)") })
-                    assertTrue(values.any { it.contains("6,20") && it.endsWith("estimate (not confirmed)") })
-                    assertFalse(values.any { it.contains("· confirmed") })
-                    if(verifiedFree)assertTrue(values.any { it=="No tolls · € 0,00" })
+                    assertTrue(values.any { it=="≈ € 5,80" })
+                    assertTrue(values.any { it=="≈ € 6,20" })
+                    assertEquals("Estimates must retain a visible qualifier",2,values.count { it=="estimated" })
+                    assertFalse(values.any { it=="confirmed" })
+                    if(verifiedFree)assertTrue(values.any { it=="€ 0,00" })
                     else {
-                        assertTrue(values.any { it=="No tolls detected / not verified" })
+                        assertTrue(values.any { it=="Price unavailable" })
                         assertFalse(values.any { it.contains("0,00") })
                     }
                     assertFalse(values.any { it.contains("Source:") || it.contains("confidence") ||
@@ -128,7 +129,7 @@ class RoutePreviewUiTest {
                 onView(withText(org.hamcrest.Matchers.containsString("Class 1"))).inRoot(detailsRoot)
                     .check(matches(isDisplayed()))
                 onView(withText("Close")).inRoot(detailsRoot).perform(click())
-                onView(withText("Alternative")).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.startsWith("Alternative ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
             } finally {
                 scenario.onActivity { activity ->
                     dialog?.dismiss();originalUi?.let { uiField.set(activity,it) }
