@@ -87,6 +87,13 @@ class RoutePreviewUiTest {
                 onView(withText(org.hamcrest.Matchers.startsWith("Alternative ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
                 onView(withText(org.hamcrest.Matchers.startsWith(if(verifiedFree)"No tolls ·" else "Avoid tolls ·"))).inRoot(plannerRoot).check(matches(isDisplayed()))
                 onView(withText("Start navigation")).inRoot(plannerRoot).check(matches(isDisplayed()))
+                val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
+                automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use {
+                    java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
+                }
+                automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}${if(verifiedFree)"" else "-unverified"}.png").use {
+                    java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
+                }
                 scenario.onActivity {
                     val labels=texts(card!!)
                     val values=labels.map { it.text.toString() }
@@ -115,15 +122,8 @@ class RoutePreviewUiTest {
                         val layout=checkNotNull(price.layout)
                         assertEquals("Price text truncated",price.text.length,layout.getLineEnd(layout.lineCount-1))
                         for(line in 0 until layout.lineCount)assertEquals("Price ellipsized",0,layout.getEllipsisCount(line))
-                        assertTrue("Price height clipped",price.height>=layout.height)
+                        assertTrue("Price height clipped: ${price.text}, view=${price.width}x${price.height}, layout=${layout.width}x${layout.height}",price.height>=layout.height)
                     }
-                }
-                val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
-                automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use {
-                    java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
-                }
-                automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}${if(verifiedFree)"" else "-unverified"}.png").use {
-                    java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                 }
                 onView(withText("Toll details")).inRoot(plannerRoot).perform(click())
                 onView(withText(org.hamcrest.Matchers.containsString("Class 1"))).inRoot(detailsRoot)

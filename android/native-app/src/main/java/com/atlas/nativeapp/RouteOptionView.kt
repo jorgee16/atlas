@@ -20,14 +20,17 @@ internal class RouteOptionView(
     private val value = ui.text(price.value, 17f, if (selected) ui.blue else ui.ink, true)
     private val status = ui.text(price.status, 11f, ui.muted)
     private val journey = ui.column().apply {
-        addView(time)
+        addView(time, LayoutParams(-2, -2))
         addView(ui.space(4))
-        addView(summary)
+        addView(summary, LayoutParams(-2, -2))
     }
     private val cost = ui.column().apply {
-        addView(value)
+        // MATCH_PARENT text inside a WRAP_CONTENT column gets a uniform-width
+        // remeasure with its previous exact height. A rounding-induced extra
+        // line (notably the approximation glyph) can then be clipped.
+        addView(value, LayoutParams(-2, -2))
         addView(ui.space(4))
-        addView(status)
+        addView(status, LayoutParams(-2, -2))
     }
     private val header = ui.row().apply {
         addView(journey)
