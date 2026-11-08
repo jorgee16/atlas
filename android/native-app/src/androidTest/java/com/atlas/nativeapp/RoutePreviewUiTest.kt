@@ -85,7 +85,7 @@ class RoutePreviewUiTest {
                 val detailsRoot=org.hamcrest.Matchers.allOf(isDialog(),org.hamcrest.Matchers.not(plannerRoot))
                 onView(withText(org.hamcrest.Matchers.containsString("Recommended"))).inRoot(plannerRoot).check(matches(isDisplayed()))
                 onView(withText(org.hamcrest.Matchers.containsString("Alternative"))).inRoot(plannerRoot).check(matches(isDisplayed()))
-                onView(withText(org.hamcrest.Matchers.containsString(if(verifiedFree)"No tolls" else "Avoid tolls"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.allOf(org.hamcrest.Matchers.containsString(if(verifiedFree)"No tolls" else "Avoid tolls"),org.hamcrest.Matchers.containsString("min")))).inRoot(plannerRoot).check(matches(isDisplayed()))
                 onView(withText("Start navigation")).inRoot(plannerRoot).check(matches(isDisplayed()))
                 val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
                 automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use {
