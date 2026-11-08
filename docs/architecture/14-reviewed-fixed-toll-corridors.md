@@ -142,3 +142,29 @@ All 93 original JNI price cases and the 13 earlier issue-2 additions remain,
 bringing required Android coverage to **134 price cases**. Two additional actual
 MapLibre previews show the complete IKEA routes from Oeiras and Carcavelos with
 their own prices. The full GPS Release gate remains separate and unchanged.
+
+## Barrier-free network accesses and official section paths
+
+`networkAccessPoints` describes explicit entry/exit points on original directed
+motorway links, separately from `chargeCandidates` (physical booths/gantries).
+Each must bound a reviewed paid interval. `requiresFixedCharge` is emitted into
+the graph proof as an entry-side or exit-side adjacency requirement. Native
+matching enforces it on the ordered actual crossing sequence. A fare download
+cannot delete this geographical condition. Unknown or out-of-order access
+stays unavailable; it cannot become a partial or zero ticket total.
+
+`compose-reviewed-section-fares.py` compiles explicitly reviewed country data,
+not a routing fallback. It validates every named class cell against a vendored
+SHA-bound official source, preserves the original published catalog byte-for-byte
+at row level, checks independent directed matrix cells and emits only the
+configured ordered section paths. No currency, class multiplier, missing
+reverse pair or same-station zero is guessed. The original PDF importer remains
+unchanged; the separate composition is reproduced after it in the source audit.
+Network/station labels and network-specific source metadata keep internal
+provider IDs out of ordinary route price details.
+
+Portugal's new A9 review binds its eight sections through Alverca and the A16
+interchange. Idanha remains a separate fixed facility; its A9 sums begin at the
+actual A16/A9 access and exclude that fixed fee. Other country providers use the
+same compiler and native matcher through configuration. No GPS, camera, map
+matching, route cost or geometry algorithm is involved.

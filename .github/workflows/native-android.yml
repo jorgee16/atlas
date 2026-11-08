@@ -113,6 +113,8 @@ jobs:
           python3 -m unittest discover -s tools -p test_toll_free_geometry.py
           python3 tools/import-vialivre-tolls.py --report dist/toll-evidence/vialivre-a28.json
           python3 -m unittest discover -s tools -p test_fixed_toll_corridors.py
+          python3 tools/compose-reviewed-section-fares.py --check
+          python3 -m unittest discover -s tools -p test_reviewed_section_fares.py
           node --test tests/toll-aware-routing.test.js tests/country-toll-tariffs.test.js tests/routing.test.js tests/navigation-planner-view.test.js tests/drive-eta.test.js
       - name: Generate fixtures with the existing Atlas packager
         run: node native/tests/generate-fixtures.mjs /tmp/atlas-native-fixtures
@@ -895,6 +897,7 @@ jobs:
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a1-ticket-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/issue-2-approach-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a5-access-cases.csv >> toll-section-audit/real-route-cases.csv
+          tail -n +2 android/native-app/src/androidTest/assets/tolls/a9-network-cases.csv >> toll-section-audit/real-route-cases.csv
           cmake -S native -B /tmp/atlas-toll-proof -DCMAKE_BUILD_TYPE=Release
           cmake --build /tmp/atlas-toll-proof --target atlas_toll_quote atlas_toll_audit -j2
           python3 tools/verify-toll-route-proof.py --binary /tmp/atlas-toll-proof/atlas_toll_quote
@@ -1104,6 +1107,7 @@ jobs:
       - name: Validate original PDF origin/destination cells
         run: |
           python3 tools/import-brisa-fares.py national-toll-audit/brisa-august-pdf.pdf --out national-toll-audit/Portugal-fares.csv --south-corroboration docs/data/toll-evidence/Portugal/2026-11-02/brisa-march-2026.pdf --active-out national-toll-audit/Portugal-active.csv --active-audit national-toll-audit/Portugal-active.audit.json
+          python3 tools/compose-reviewed-section-fares.py --base national-toll-audit/Portugal-active.csv --audit national-toll-audit/Portugal-active.audit.json
           cmp docs/data/toll-candidates/Portugal.csv national-toll-audit/Portugal-fares.csv
           cmp docs/data/toll-candidates/Portugal.audit.json national-toll-audit/Portugal-fares.audit.json
           cmp android/native-app/src/main/assets/toll-fares/Portugal.csv national-toll-audit/Portugal-active.csv

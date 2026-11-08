@@ -21,6 +21,27 @@ prices = module('import-vialivre-tolls')
 
 
 class FixedCorridorTests(unittest.TestCase):
+    def test_barrier_free_access_is_a_directed_paid_boundary_not_a_fake_booth(self):
+        cfg = ROOT / 'tools/toll-binding-config'
+        review = json.loads((cfg / 'portugal-a9-linear.json').read_text())
+        source = json.loads((cfg / 'portugal-a9-linear.source.json').read_text())
+        _, gates, _ = fixed.source_shapes(review, source)
+        physical = {p['id'] for p in source['chargeCandidates']}
+        for node, access in review['networkAccessPoints'].items():
+            self.assertNotIn(int(node), physical)
+            self.assertEqual(access['event'], gates[int(node)])
+            self.assertEqual('ascendi:grande-lisboa:01', access['requiresFixedCharge'])
+        for failure in ('role', 'network', 'source-way', 'paid-boundary', 'fixed-charge'):
+            r = copy.deepcopy(review)
+            first = next(iter(r['networkAccessPoints'].values()))
+            if failure == 'role': first['role'] = 'fixed'
+            elif failure == 'network': r['network'] = 'another-network'
+            elif failure == 'source-way': first['sourceWay'] = -1
+            elif failure == 'paid-boundary': r['networkRanges'] = {}
+            else: first['requiresFixedCharge'] = 'entry:n:fake'
+            with self.subTest(failure=failure), self.assertRaises(ValueError):
+                fixed.source_shapes(r, source)
+
     def test_gate_removed_by_simplification_is_recovered_on_its_source_subpath(self):
         source = [(40., -8.), (40., -7.9995), (40., -7.999)]
         graph = [source[0], source[-1]]

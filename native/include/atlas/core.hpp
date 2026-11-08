@@ -93,6 +93,9 @@ public:
   // Explicit published directed pairs; never infer symmetry or missing-cell zero.
   std::optional<double> entryExitFare(const TollJourney &journey,int vehicleClass) const;
   std::optional<double> sumEntryExitFares(const std::vector<TollJourney> &journeys,int vehicleClass) const;
+  std::string networkName(const std::string &network) const;
+  std::string stationName(const std::string &network,const std::string &station) const;
+  std::string networkSource(const std::string &network) const;
   std::string scheme = "road-average";
   std::string country, currency, year, source, version;
   int fractionDigits = 2;
@@ -106,6 +109,7 @@ private:
   std::unordered_map<std::string,std::unordered_map<int,double>> sectionPrices_;
   std::unordered_map<std::string,std::unordered_map<int,int64_t>> fixedCharges_;
   std::unordered_map<std::string,std::unordered_map<int,int64_t>> entryExitFares_;
+  std::unordered_map<std::string,std::string> networkNames_,stationNames_,networkSources_;
   std::unordered_map<std::string,TollFixedChargeInfo> fixedChargeInfo_;
   bool restrictEstimates_ = false;
   std::unordered_set<std::string> estimateRoads_;

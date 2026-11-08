@@ -1,0 +1,1217 @@
+{
+  "schemaVersion": 1,
+  "reviewed": true,
+  "country": "Portugal",
+  "currency": "EUR",
+  "year": 2026,
+  "revision": 2026110801,
+  "network": "pt-a9-linear",
+  "classes": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "source": "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",
+  "sourceSha256": "1fd83b9f0c87975b2a47ecf9248b41efb431464d47275e74790f33b06cdb3b7e",
+  "snapshot": "docs/data/toll-evidence/Portugal/2026-11-08/imt-tariffs.html.gz",
+  "tableIdentity": "Estádio Nacional (A5/A9) / Queluz",
+  "sections": [
+    {
+      "id": 1,
+      "name": "Estádio Nacional (A5/A9) / Queluz",
+      "km": "3.4",
+      "classes": [
+        "0.35",
+        "0.65",
+        "0.85",
+        "0.95"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Queluz / A9/A16",
+      "km": "2.9",
+      "classes": [
+        "0.30",
+        "0.55",
+        "0.70",
+        "0.80"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "A9/A16 / Radial da Pontinha",
+      "km": "3.1",
+      "classes": [
+        "0.35",
+        "0.60",
+        "0.75",
+        "0.85"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Radial Pontinha / Radial Odivelas",
+      "km": "6.8",
+      "classes": [
+        "0.75",
+        "1.30",
+        "1.70",
+        "1.85"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Radial Odivelas / A8/A9",
+      "km": "3.5",
+      "classes": [
+        "0.40",
+        "0.65",
+        "0.85",
+        "0.95"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "A8/A9 / Bucelas (Zambujal)",
+      "km": "3.4",
+      "classes": [
+        "0.35",
+        "0.65",
+        "0.85",
+        "0.95"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Bucelas (Zambujal) / A9/A10",
+      "km": "8.3",
+      "classes": [
+        "0.90",
+        "1.60",
+        "2.05",
+        "2.30"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "A9/A10 / Alverca",
+      "km": "3.0",
+      "classes": [
+        "0.35",
+        "0.60",
+        "0.75",
+        "0.80"
+      ]
+    }
+  ],
+  "stations": {
+    "estadio": 0,
+    "queluz": 1,
+    "a16": 2,
+    "pontinha": 3,
+    "odivelas": 4,
+    "loures": 5,
+    "zambujal": 6,
+    "alverca": 8
+  },
+  "crosschecks": [
+    {
+      "entry": "estadio",
+      "exit": "pontinha",
+      "publishedEntry": "0911",
+      "publishedExit": "0913",
+      "classes": [
+        "1.00",
+        "1.80",
+        "2.30",
+        "2.60"
+      ]
+    },
+    {
+      "entry": "estadio",
+      "exit": "odivelas",
+      "publishedEntry": "0911",
+      "publishedExit": "0914",
+      "classes": [
+        "1.75",
+        "3.10",
+        "4.00",
+        "4.45"
+      ]
+    },
+    {
+      "entry": "estadio",
+      "exit": "zambujal",
+      "publishedEntry": "0911",
+      "publishedExit": "0915",
+      "classes": [
+        "2.50",
+        "4.40",
+        "5.70",
+        "6.35"
+      ]
+    },
+    {
+      "entry": "estadio",
+      "exit": "alverca",
+      "publishedEntry": "0911",
+      "publishedExit": "0128",
+      "classes": [
+        "3.75",
+        "6.60",
+        "8.50",
+        "9.45"
+      ],
+      "alsoPublished": [
+        [
+          "0911",
+          "0129"
+        ]
+      ]
+    },
+    {
+      "entry": "queluz",
+      "exit": "pontinha",
+      "publishedEntry": "0912",
+      "publishedExit": "0913",
+      "classes": [
+        "0.65",
+        "1.15",
+        "1.45",
+        "1.65"
+      ]
+    },
+    {
+      "entry": "queluz",
+      "exit": "odivelas",
+      "publishedEntry": "0912",
+      "publishedExit": "0914",
+      "classes": [
+        "1.40",
+        "2.45",
+        "3.15",
+        "3.50"
+      ]
+    },
+    {
+      "entry": "queluz",
+      "exit": "zambujal",
+      "publishedEntry": "0912",
+      "publishedExit": "0915",
+      "classes": [
+        "2.15",
+        "3.75",
+        "4.85",
+        "5.40"
+      ]
+    },
+    {
+      "entry": "queluz",
+      "exit": "alverca",
+      "publishedEntry": "0912",
+      "publishedExit": "0128",
+      "classes": [
+        "3.40",
+        "5.95",
+        "7.65",
+        "8.50"
+      ],
+      "alsoPublished": [
+        [
+          "0912",
+          "0129"
+        ]
+      ]
+    },
+    {
+      "entry": "pontinha",
+      "exit": "estadio",
+      "publishedEntry": "0913",
+      "publishedExit": "0911",
+      "classes": [
+        "1.00",
+        "1.80",
+        "2.30",
+        "2.60"
+      ]
+    },
+    {
+      "entry": "pontinha",
+      "exit": "queluz",
+      "publishedEntry": "0913",
+      "publishedExit": "0912",
+      "classes": [
+        "0.65",
+        "1.15",
+        "1.45",
+        "1.65"
+      ]
+    },
+    {
+      "entry": "pontinha",
+      "exit": "odivelas",
+      "publishedEntry": "0913",
+      "publishedExit": "0914",
+      "classes": [
+        "0.75",
+        "1.30",
+        "1.70",
+        "1.85"
+      ]
+    },
+    {
+      "entry": "pontinha",
+      "exit": "zambujal",
+      "publishedEntry": "0913",
+      "publishedExit": "0915",
+      "classes": [
+        "1.50",
+        "2.60",
+        "3.40",
+        "3.75"
+      ]
+    },
+    {
+      "entry": "pontinha",
+      "exit": "alverca",
+      "publishedEntry": "0913",
+      "publishedExit": "0128",
+      "classes": [
+        "2.75",
+        "4.80",
+        "6.20",
+        "6.85"
+      ],
+      "alsoPublished": [
+        [
+          "0913",
+          "0129"
+        ]
+      ]
+    },
+    {
+      "entry": "odivelas",
+      "exit": "estadio",
+      "publishedEntry": "0914",
+      "publishedExit": "0911",
+      "classes": [
+        "1.75",
+        "3.10",
+        "4.00",
+        "4.45"
+      ]
+    },
+    {
+      "entry": "odivelas",
+      "exit": "queluz",
+      "publishedEntry": "0914",
+      "publishedExit": "0912",
+      "classes": [
+        "1.40",
+        "2.45",
+        "3.15",
+        "3.50"
+      ]
+    },
+    {
+      "entry": "odivelas",
+      "exit": "pontinha",
+      "publishedEntry": "0914",
+      "publishedExit": "0913",
+      "classes": [
+        "0.75",
+        "1.30",
+        "1.70",
+        "1.85"
+      ]
+    },
+    {
+      "entry": "odivelas",
+      "exit": "zambujal",
+      "publishedEntry": "0914",
+      "publishedExit": "0915",
+      "classes": [
+        "0.75",
+        "1.30",
+        "1.70",
+        "1.90"
+      ]
+    },
+    {
+      "entry": "odivelas",
+      "exit": "alverca",
+      "publishedEntry": "0914",
+      "publishedExit": "0128",
+      "classes": [
+        "2.00",
+        "3.50",
+        "4.50",
+        "5.00"
+      ],
+      "alsoPublished": [
+        [
+          "0914",
+          "0129"
+        ]
+      ]
+    },
+    {
+      "entry": "loures",
+      "exit": "estadio",
+      "publishedEntry": "0811",
+      "publishedExit": "0911",
+      "classes": [
+        "2.15",
+        "3.75",
+        "4.85",
+        "5.40"
+      ]
+    },
+    {
+      "entry": "loures",
+      "exit": "queluz",
+      "publishedEntry": "0811",
+      "publishedExit": "0912",
+      "classes": [
+        "1.80",
+        "3.10",
+        "4.00",
+        "4.45"
+      ]
+    },
+    {
+      "entry": "loures",
+      "exit": "pontinha",
+      "publishedEntry": "0811",
+      "publishedExit": "0913",
+      "classes": [
+        "1.15",
+        "1.95",
+        "2.55",
+        "2.80"
+      ]
+    },
+    {
+      "entry": "loures",
+      "exit": "odivelas",
+      "publishedEntry": "0811",
+      "publishedExit": "0914",
+      "classes": [
+        "0.40",
+        "0.65",
+        "0.85",
+        "0.95"
+      ]
+    },
+    {
+      "entry": "loures",
+      "exit": "zambujal",
+      "publishedEntry": "0811",
+      "publishedExit": "0915",
+      "classes": [
+        "0.35",
+        "0.65",
+        "0.85",
+        "0.95"
+      ]
+    },
+    {
+      "entry": "loures",
+      "exit": "alverca",
+      "publishedEntry": "0811",
+      "publishedExit": "0128",
+      "classes": [
+        "1.60",
+        "2.85",
+        "3.65",
+        "4.05"
+      ],
+      "alsoPublished": [
+        [
+          "0811",
+          "0129"
+        ]
+      ]
+    },
+    {
+      "entry": "zambujal",
+      "exit": "estadio",
+      "publishedEntry": "0915",
+      "publishedExit": "0911",
+      "classes": [
+        "2.50",
+        "4.40",
+        "5.70",
+        "6.35"
+      ]
+    },
+    {
+      "entry": "zambujal",
+      "exit": "queluz",
+      "publishedEntry": "0915",
+      "publishedExit": "0912",
+      "classes": [
+        "2.15",
+        "3.75",
+        "4.85",
+        "5.40"
+      ]
+    },
+    {
+      "entry": "zambujal",
+      "exit": "pontinha",
+      "publishedEntry": "0915",
+      "publishedExit": "0913",
+      "classes": [
+        "1.50",
+        "2.60",
+        "3.40",
+        "3.75"
+      ]
+    },
+    {
+      "entry": "zambujal",
+      "exit": "odivelas",
+      "publishedEntry": "0915",
+      "publishedExit": "0914",
+      "classes": [
+        "0.75",
+        "1.30",
+        "1.70",
+        "1.90"
+      ]
+    },
+    {
+      "entry": "zambujal",
+      "exit": "alverca",
+      "publishedEntry": "0915",
+      "publishedExit": "0128",
+      "classes": [
+        "1.25",
+        "2.20",
+        "2.80",
+        "3.10"
+      ],
+      "alsoPublished": [
+        [
+          "0915",
+          "0129"
+        ]
+      ]
+    },
+    {
+      "entry": "alverca",
+      "exit": "estadio",
+      "publishedEntry": "0128",
+      "publishedExit": "0911",
+      "classes": [
+        "3.75",
+        "6.60",
+        "8.50",
+        "9.45"
+      ],
+      "alsoPublished": [
+        [
+          "0129",
+          "0911"
+        ]
+      ]
+    },
+    {
+      "entry": "alverca",
+      "exit": "queluz",
+      "publishedEntry": "0128",
+      "publishedExit": "0912",
+      "classes": [
+        "3.40",
+        "5.95",
+        "7.65",
+        "8.50"
+      ],
+      "alsoPublished": [
+        [
+          "0129",
+          "0912"
+        ]
+      ]
+    },
+    {
+      "entry": "alverca",
+      "exit": "pontinha",
+      "publishedEntry": "0128",
+      "publishedExit": "0913",
+      "classes": [
+        "2.75",
+        "4.80",
+        "6.20",
+        "6.85"
+      ],
+      "alsoPublished": [
+        [
+          "0129",
+          "0913"
+        ]
+      ]
+    },
+    {
+      "entry": "alverca",
+      "exit": "odivelas",
+      "publishedEntry": "0128",
+      "publishedExit": "0914",
+      "classes": [
+        "2.00",
+        "3.50",
+        "4.50",
+        "5.00"
+      ],
+      "alsoPublished": [
+        [
+          "0129",
+          "0914"
+        ]
+      ]
+    },
+    {
+      "entry": "alverca",
+      "exit": "zambujal",
+      "publishedEntry": "0128",
+      "publishedExit": "0915",
+      "classes": [
+        "1.25",
+        "2.20",
+        "2.80",
+        "3.10"
+      ],
+      "alsoPublished": [
+        [
+          "0129",
+          "0915"
+        ]
+      ]
+    }
+  ],
+  "baseCatalogSha256": "5ba77770f12caa2c21ce1fffc701780c558813b3f7e0b5820ecd10ed640b5fc7",
+  "baseHeader": [
+    "# atlas-toll-fares-v1",
+    "# country=Portugal",
+    "# currency=EUR",
+    "# year=2026",
+    "# version=2026110201",
+    "# fractionDigits=2",
+    "# scheme=entry-exit",
+    "# status=active",
+    "# source=https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_25082026_v7.pdf",
+    "# sourceSha256=dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274",
+    "# sourceEffectiveFrom=2026-08-26",
+    "# coverage=Published north, center, Brisal and independently 2026-corroborated south pairs",
+    "# source.south2026=https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_04032026_v4.pdf",
+    "# sourceSouthSha256=83e2d5b9f539f52057dd4f58261419c600c9656fd58cd48782eb73f2f60b9752",
+    "# sourceSouthEffectiveFrom=2026-01-08",
+    "network;entry;exit;class1;class2;class3;class4"
+  ],
+  "baseAudit": {
+    "country": "Portugal",
+    "revision": 2026110201,
+    "network": "brisa-published",
+    "sourceSha256": "dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274",
+    "catalogSha256": "5ba77770f12caa2c21ce1fffc701780c558813b3f7e0b5820ecd10ed640b5fc7",
+    "farePairs": 4166,
+    "sourceCells": 16664,
+    "includedDomains": [
+      "brisal",
+      "center",
+      "north",
+      "south"
+    ],
+    "excludedDomains": {},
+    "routePricing": "Exact only with complete reviewed directed entry/exit crossing evidence; no national bindings are activated by this file",
+    "southCorroboration": {
+      "source": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_04032026_v4.pdf",
+      "sourceSha256": "83e2d5b9f539f52057dd4f58261419c600c9656fd58cd48782eb73f2f60b9752",
+      "effectiveFrom": "2026-01-08",
+      "pages": [
+        9,
+        10
+      ],
+      "matchedClassCells": 3600,
+      "publishedDirectedPairs": 900
+    },
+    "consistentOverlappingPairs": 4,
+    "observedSourceClassCells": 16680,
+    "newPublishedPairs": 896
+  },
+  "journeys": [
+    {
+      "entry": "estadio",
+      "exit": "a16",
+      "sections": [
+        1,
+        2
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "estadio",
+      "exit": "pontinha",
+      "sections": [
+        1,
+        2,
+        3
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "estadio",
+      "exit": "odivelas",
+      "sections": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "estadio",
+      "exit": "loures",
+      "sections": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "estadio",
+      "exit": "zambujal",
+      "sections": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "estadio",
+      "exit": "alverca",
+      "sections": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "queluz",
+      "exit": "a16",
+      "sections": [
+        2
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "queluz",
+      "exit": "pontinha",
+      "sections": [
+        2,
+        3
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "queluz",
+      "exit": "odivelas",
+      "sections": [
+        2,
+        3,
+        4
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "queluz",
+      "exit": "loures",
+      "sections": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "queluz",
+      "exit": "zambujal",
+      "sections": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "queluz",
+      "exit": "alverca",
+      "sections": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "estadio",
+      "sections": [
+        2,
+        1
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "queluz",
+      "sections": [
+        2
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "pontinha",
+      "sections": [
+        3
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "odivelas",
+      "sections": [
+        3,
+        4
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "loures",
+      "sections": [
+        3,
+        4,
+        5
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "zambujal",
+      "sections": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "a16",
+      "exit": "alverca",
+      "sections": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "estadio",
+      "sections": [
+        3,
+        2,
+        1
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "queluz",
+      "sections": [
+        3,
+        2
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "a16",
+      "sections": [
+        3
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "odivelas",
+      "sections": [
+        4
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "loures",
+      "sections": [
+        4,
+        5
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "zambujal",
+      "sections": [
+        4,
+        5,
+        6
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "pontinha",
+      "exit": "alverca",
+      "sections": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "estadio",
+      "sections": [
+        4,
+        3,
+        2,
+        1
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "queluz",
+      "sections": [
+        4,
+        3,
+        2
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "a16",
+      "sections": [
+        4,
+        3
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "pontinha",
+      "sections": [
+        4
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "loures",
+      "sections": [
+        5
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "zambujal",
+      "sections": [
+        5,
+        6
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "odivelas",
+      "exit": "alverca",
+      "sections": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "estadio",
+      "sections": [
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "queluz",
+      "sections": [
+        5,
+        4,
+        3,
+        2
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "a16",
+      "sections": [
+        5,
+        4,
+        3
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "pontinha",
+      "sections": [
+        5,
+        4
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "odivelas",
+      "sections": [
+        5
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "zambujal",
+      "sections": [
+        6
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "loures",
+      "exit": "alverca",
+      "sections": [
+        6,
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "estadio",
+      "sections": [
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "queluz",
+      "sections": [
+        6,
+        5,
+        4,
+        3,
+        2
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "a16",
+      "sections": [
+        6,
+        5,
+        4,
+        3
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "pontinha",
+      "sections": [
+        6,
+        5,
+        4
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "odivelas",
+      "sections": [
+        6,
+        5
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "loures",
+      "sections": [
+        6
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "zambujal",
+      "exit": "alverca",
+      "sections": [
+        7,
+        8
+      ],
+      "direction": "increasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "estadio",
+      "sections": [
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "queluz",
+      "sections": [
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "a16",
+      "sections": [
+        8,
+        7,
+        6,
+        5,
+        4,
+        3
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "pontinha",
+      "sections": [
+        8,
+        7,
+        6,
+        5,
+        4
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "odivelas",
+      "sections": [
+        8,
+        7,
+        6,
+        5
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "loures",
+      "sections": [
+        8,
+        7,
+        6
+      ],
+      "direction": "decreasing"
+    },
+    {
+      "entry": "alverca",
+      "exit": "zambujal",
+      "sections": [
+        8,
+        7
+      ],
+      "direction": "decreasing"
+    }
+  ],
+  "scope": "Explicitly reviewed direct A9 section paths only; fixed Idanha remains outside this network. Same-station return circuits, the Queluz PV/II loop and continuations through A1/A10 beyond the Alverca settlement points are not inferred. Every exact quote still requires complete matching of actual directed source geometry, accesses and paid intervals.",
+  "networkName": "A9 / CREL",
+  "stationNames": {
+    "estadio": "Queluz PV",
+    "queluz": "Queluz II",
+    "a16": "A16 / A9",
+    "pontinha": "Pontinha",
+    "odivelas": "Odivelas",
+    "loures": "Loures",
+    "zambujal": "Zambujal",
+    "alverca": "Alverca"
+  }
+}

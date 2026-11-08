@@ -20,8 +20,10 @@ bool validDigests(const TollGraphDigests &digests) {
 }
 }
 TollCrossingMatcher::TollCrossingMatcher(TollGraphDigests graph,std::string country,
-    std::unordered_set<uint32_t> edges,std::vector<TollChargeBinding> bindings,bool reviewed,std::vector<TollNetworkBinding> networks)
-    :graph_(std::move(graph)),country_(std::move(country)),coveredEdges_(std::move(edges)),reviewed_(reviewed) {
+    std::unordered_set<uint32_t> edges,std::vector<TollChargeBinding> bindings,bool reviewed,std::vector<TollNetworkBinding> networks,
+    std::unordered_map<std::string,std::string> accessRequirements)
+    :graph_(std::move(graph)),country_(std::move(country)),coveredEdges_(std::move(edges)),
+     accessRequirements_(std::move(accessRequirements)),reviewed_(reviewed) {
   if(!validDigests(graph_)||country_.empty()||coveredEdges_.empty()||bindings.empty())throw std::invalid_argument("Missing graph/country/coverage evidence");
   for(auto &binding:bindings) {
     if(binding.from==binding.to||!std::isfinite(binding.offsetMeters)||binding.offsetMeters<0||binding.chargeId.empty()||!std::isfinite(binding.edgeLengthMeters)||binding.edgeLengthMeters<=0||binding.offsetMeters>=binding.edgeLengthMeters||!coveredEdges_.count(binding.edge))throw std::invalid_argument("Invalid directed crossing binding");
@@ -39,6 +41,15 @@ TollCrossingMatcher::TollCrossingMatcher(TollGraphDigests graph,std::string coun
         !std::all_of(v.network.begin(),v.network.end(),[](unsigned char c){return std::isalnum(c)||c=='-'||c=='_';}))throw std::invalid_argument("Invalid ticket-network coverage");
     auto &same=networks_[v.edge];for(const auto &old:same)if(std::max(old.beginMeters,v.beginMeters)<std::min(old.endMeters,v.endMeters))throw std::invalid_argument("Overlapping ticket-network evidence");
     same.push_back(std::move(v));
+  }
+  std::unordered_set<std::string> observed;
+  for(const auto &[edge,values]:bindings_)for(const auto &v:values)observed.insert(v.chargeId);
+  for(const auto &[event,charge]:accessRequirements_) {
+    const auto a=event.find(':'),b=event.find(':',a==std::string::npos?0:a+1);
+    if(a==std::string::npos||b==std::string::npos||event.find(':',b+1)!=std::string::npos||
+       (event.substr(0,a)!="entry"&&event.substr(0,a)!="exit")||
+       !observed.count(event)||!observed.count(charge)||charge.rfind("entry:",0)==0||charge.rfind("exit:",0)==0)
+      throw std::invalid_argument("Invalid graph-bound access requirement");
   }
 }
 std::optional<TollCrossingSequence> TollCrossingMatcher::match(const TollGraphDigests &loaded,
@@ -98,7 +109,15 @@ std::optional<TollCrossingSequence> TollCrossingMatcher::match(const TollGraphDi
           (!openNetwork||*openNetwork!=v.network))result.ticketCoverageComplete=false;
     }
   }
+  for(size_t i=0;i<result.chargeIds.size();++i) {
+    const auto &event=result.chargeIds[i];const auto rule=accessRequirements_.find(event);
+    if(rule==accessRequirements_.end())continue;
+    if(event.rfind("entry:",0)==0) {
+      if(i==0||result.chargeIds[i-1]!=rule->second)result.accessCrossingsComplete=false;
+    } else if(i+1==result.chargeIds.size()||result.chargeIds[i+1]!=rule->second)result.accessCrossingsComplete=false;
+  }
   if(reason&&!result.complete)*reason="unreviewed_edge";
+  else if(reason&&!result.accessCrossingsComplete)*reason="missing_access_crossing";
   return result;
 }
 
@@ -168,8 +187,17 @@ TollCrossingMatcher TollCrossingMatcher::parse(std::string_view csv) {
   }
   TollGraphDigests graph;
   for(const auto &m:metadata)if(m.first.rfind("graph.",0)==0)graph[m.first.substr(6)]=m.second;
+  std::unordered_map<std::string,std::string> requirements;
+  for(const auto &[name,value]:metadata) {
+    const bool before=name.rfind("entryFixedCharge.",0)==0,after=name.rfind("exitFixedCharge.",0)==0;
+    if(!before&&!after)continue;
+    const auto suffix=name.substr(before?17:16);const auto dot=suffix.find('.');
+    if(dot==std::string::npos||dot==0||dot+1==suffix.size()||suffix.find('.',dot+1)!=std::string::npos)
+      throw std::invalid_argument("Invalid graph-bound access metadata");
+    requirements[(before?"entry:":"exit:")+suffix.substr(0,dot)+":"+suffix.substr(dot+1)]=value;
+  }
   if(!header||(metadata["reviewed"]!="true"&&metadata["reviewed"]!="false"))throw std::invalid_argument("Missing crossing review declaration");
-  return TollCrossingMatcher(std::move(graph),metadata["country"],std::move(coverage),std::move(bindings),metadata["reviewed"]=="true",std::move(networks));
+  return TollCrossingMatcher(std::move(graph),metadata["country"],std::move(coverage),std::move(bindings),metadata["reviewed"]=="true",std::move(networks),std::move(requirements));
 }
 void TollCrossingMatcher::validateGraph(const Graph &graph) const {
   for(const auto edge:coveredEdges_)if(edge>=graph.edgeCount())throw std::invalid_argument("Certified edge is absent from loaded graph");
@@ -273,6 +301,7 @@ bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
   if((!fixedIds.empty()&&!hasClass(fixed))||(needsTickets&&!hasClass(fares)))return fail("class");
   std::vector<TollJourney> journeys;
   if(needsTickets){if(!proof->ticketCoverageComplete)return fail("missing_mapping");auto parsed=entryExitJourneys(tickets);if(!parsed)return fail("missing_mapping");journeys=*parsed;
+    if(!proof->accessCrossingsComplete)return fail("missing_access_crossing");
     std::unordered_set<std::string> observed;for(const auto &j:journeys)observed.insert(j.network);
     for(const auto &n:proof->networks)if(!observed.count(n))return fail("missing_mapping");
   }
@@ -287,7 +316,8 @@ bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
   }
   for(const auto &j:journeys){auto value=fares->entryExitFare(j,route.tollVehicleClass);if(!value)return fail("missing_fare");
     units+=std::llround(*value*scale);
-    TollRoadCharge charge;charge.road=j.network;charge.name=j.entry+" → "+j.exit;
+    TollRoadCharge charge;charge.road=fares->networkName(j.network);
+    charge.name=fares->stationName(j.network,j.entry)+" → "+fares->stationName(j.network,j.exit);
     charge.chargeId=j.network+":"+j.entry+":"+j.exit;charge.amount=*value;charge.exact=true;breakdown.push_back(std::move(charge));
   }
   // Preserve the legacy none state for a fully reviewed genuinely free path.
@@ -298,8 +328,18 @@ bool applyTollCharges(const Graph &graph,Route &route,const TollTariffs *fixed,
   route.tollRoads=std::move(breakdown);route.tollCountry=usedIdentity->country;route.tollCurrency=usedIdentity->currency;
   route.tollYear=usedIdentity->year;route.tollFractionDigits=usedIdentity->fractionDigits;
   route.tollVehicleClasses=usedIdentity->classes;route.tollSource=usedIdentity->source;route.tollVersion=usedIdentity->version;
-  if(fixed&&fares&&!fixedIds.empty()&&needsTickets){route.tollSource=fixed->source+"\n"+fares->source;
-    route.tollVersion=fixed->version+"+"+fares->version;}
+  if(fixed&&fares&&!fixedIds.empty()&&needsTickets)
+    route.tollVersion=fixed->version+"+"+fares->version;
+  if(needsTickets) {
+    route.tollSource=fixedIds.empty()?std::string():fixed->source;
+    for(const auto &j:journeys) {
+      const auto source=fares->networkSource(j.network);
+      if(route.tollSource.find(source)==std::string::npos) {
+        if(!route.tollSource.empty())route.tollSource+='\n';
+        route.tollSource+=source;
+      }
+    }
+  }
   return true;
 }
 } // namespace atlas

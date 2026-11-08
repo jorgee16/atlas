@@ -38,6 +38,7 @@ struct TollCrossingSequence {
   std::unordered_set<std::string> networks;
   bool complete=false;
   bool ticketCoverageComplete=true;
+  bool accessCrossingsComplete=true;
 };
 /** Only reviewed, complete mappings can certify crossings. The caller supplies
  * SHA-256 values computed from the loaded graph, not a region name/version.
@@ -46,7 +47,8 @@ class TollCrossingMatcher {
 public:
   TollCrossingMatcher(TollGraphDigests boundGraph,std::string country,
       std::unordered_set<uint32_t> coveredEdges,std::vector<TollChargeBinding> bindings,
-      bool reviewed,std::vector<TollNetworkBinding> networks = {});
+      bool reviewed,std::vector<TollNetworkBinding> networks = {},
+      std::unordered_map<std::string,std::string> accessRequirements = {});
   static TollCrossingMatcher parse(std::string_view csv);
   void validateGraph(const Graph &graph) const;
   std::optional<TollCrossingSequence> match(const TollGraphDigests &loadedGraph,
@@ -60,6 +62,7 @@ private:
   std::unordered_set<uint32_t> coveredEdges_;
   std::unordered_map<uint32_t,std::vector<TollChargeBinding>> bindings_;
   std::unordered_map<uint32_t,std::vector<TollNetworkBinding>> networks_;
+  std::unordered_map<std::string,std::string> accessRequirements_;
   bool reviewed_=false;
 };
 bool applyFixedTollCharges(const Graph &graph,Route &route,const TollTariffs &prices,

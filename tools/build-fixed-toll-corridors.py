@@ -12,6 +12,7 @@ import json
 import math
 import mmap
 from pathlib import Path
+import re
 import struct
 import tempfile
 
@@ -40,6 +41,32 @@ def source_shapes(review, source):
     on_way = {n for w in ways.values() for n in w['nodes']}
     if candidates & on_way != set(gates):
         raise ValueError('Every physical collection node must have a reviewed charge')
+    # A closed network can also have a barrier-free interchange. Keep those
+    # accesses distinct from physical booths: they open/close a reviewed
+    # journey, and never create a fixed charge by themselves.
+    for key, access in review.get('networkAccessPoints', {}).items():
+        node = int(key)
+        way = ways.get(access.get('sourceWay'))
+        role = access.get('role')
+        event = access.get('event', '')
+        if (node in gates or node in candidates or not review.get('network')
+                or role not in ('entry', 'exit') or not access.get('evidence')
+                or not event.startswith(role + ':' + review['network'] + ':')
+                or not event.split(':')[-1] or not way or node not in way['nodes']
+                or way['tags'].get('highway') != 'motorway_link'
+                or way['tags'].get('oneway') != 'yes'):
+            raise ValueError('Unreviewed or invalid barrier-free network access')
+        boundary = 'beginNode' if role == 'entry' else 'endNode'
+        end = 0 if role == 'entry' else -1
+        if not any(int(bounds.get(boundary, ways[int(wid)]['nodes'][end])) == node
+                   for wid, bounds in review.get('networkRanges', {}).items()
+                   if wid.isdigit() and int(wid) in ways):
+            raise ValueError('Network access does not bound a reviewed paid interval')
+        required = access.get('requiresFixedCharge')
+        if required is not None and (not re.fullmatch(r'[A-Za-z0-9:_-]{1,128}', required)
+                                     or required.startswith(('entry:', 'exit:'))):
+            raise ValueError('Invalid adjacent fixed-crossing requirement')
+        gates[node] = event
     coordinates = {int(k): binding.coordinate(v) for k, v in source['coordinates'].items()}
     if len({coordinates[n] for n in gates}) != len(gates):
         raise ValueError('Ambiguous collection coordinates')
@@ -238,6 +265,17 @@ def generate(graph, review_path, source_path, seed_path):
         raise ValueError('Each physical gate must match exactly once: ' + str(matched))
     comments = [line for line in seed if line.startswith('#')]
     comments += ['# reviewedCorridor.' + free.digest(review_path) + '=' + free.digest(source_path)]
+    requirements = {}
+    for access in review.get('networkAccessPoints', {}).values():
+        if 'requiresFixedCharge' not in access:
+            continue
+        role, network, station = access['event'].split(':')
+        key = ('entryFixedCharge.' if role == 'entry' else 'exitFixedCharge.') + network + '.' + station
+        value = access['requiresFixedCharge']
+        if key in requirements and requirements[key] != value:
+            raise ValueError('Conflicting graph-bound access requirement')
+        requirements[key] = value
+    comments += ['# ' + k + '=' + v for k, v in sorted(requirements.items())]
     lines = comments + ['kind;edge;from;to;offsetMeters;edgeLengthMeters;chargeId']
     lines += ['coverage;' + str(edge) + ';;;;;' for edge in sorted(seed_edges | set(covered))]
     old_events = [line for line in seed if line.startswith('crossing;')]

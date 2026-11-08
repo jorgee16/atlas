@@ -2,7 +2,7 @@
 # country=Portugal
 # currency=EUR
 # year=2026
-# version=2026110201
+# version=2026110801
 # fractionDigits=2
 # scheme=entry-exit
 # status=active
@@ -13,6 +13,18 @@
 # source.south2026=https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_04032026_v4.pdf
 # sourceSouthSha256=83e2d5b9f539f52057dd4f58261419c600c9656fd58cd48782eb73f2f60b9752
 # sourceSouthEffectiveFrom=2026-01-08
+# source.sections=https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/
+# sourceSectionsSha256=1fd83b9f0c87975b2a47ecf9248b41efb431464d47275e74790f33b06cdb3b7e
+# networkSource.pt-a9-linear=https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/
+# networkName.pt-a9-linear=A9 / CREL
+# stationName.pt-a9-linear.a16=A16 / A9
+# stationName.pt-a9-linear.alverca=Alverca
+# stationName.pt-a9-linear.estadio=Queluz PV
+# stationName.pt-a9-linear.loures=Loures
+# stationName.pt-a9-linear.odivelas=Odivelas
+# stationName.pt-a9-linear.pontinha=Pontinha
+# stationName.pt-a9-linear.queluz=Queluz II
+# stationName.pt-a9-linear.zambujal=Zambujal
 network;entry;exit;class1;class2;class3;class4
 brisa-published;0112;0112;47.70;83.30;107.40;119.10
 brisa-published;0112;0113;1.45;2.50;3.25;3.60
@@ -4180,3 +4192,57 @@ brisa-published;4301;0416;3.15;5.55;4.50;5.00
 brisa-published;4301;0417;3.45;6.05;5.15;5.70
 brisa-published;4301;0418;3.65;6.40;5.60;6.20
 brisa-published;4301;0420;5.95;10.45;10.85;12.00
+pt-a9-linear;a16;alverca;3.10;5.40;6.95;7.70
+pt-a9-linear;a16;estadio;0.65;1.20;1.55;1.75
+pt-a9-linear;a16;loures;1.50;2.55;3.30;3.65
+pt-a9-linear;a16;odivelas;1.10;1.90;2.45;2.70
+pt-a9-linear;a16;pontinha;0.35;0.60;0.75;0.85
+pt-a9-linear;a16;queluz;0.30;0.55;0.70;0.80
+pt-a9-linear;a16;zambujal;1.85;3.20;4.15;4.60
+pt-a9-linear;alverca;a16;3.10;5.40;6.95;7.70
+pt-a9-linear;alverca;estadio;3.75;6.60;8.50;9.45
+pt-a9-linear;alverca;loures;1.60;2.85;3.65;4.05
+pt-a9-linear;alverca;odivelas;2.00;3.50;4.50;5.00
+pt-a9-linear;alverca;pontinha;2.75;4.80;6.20;6.85
+pt-a9-linear;alverca;queluz;3.40;5.95;7.65;8.50
+pt-a9-linear;alverca;zambujal;1.25;2.20;2.80;3.10
+pt-a9-linear;estadio;a16;0.65;1.20;1.55;1.75
+pt-a9-linear;estadio;alverca;3.75;6.60;8.50;9.45
+pt-a9-linear;estadio;loures;2.15;3.75;4.85;5.40
+pt-a9-linear;estadio;odivelas;1.75;3.10;4.00;4.45
+pt-a9-linear;estadio;pontinha;1.00;1.80;2.30;2.60
+pt-a9-linear;estadio;zambujal;2.50;4.40;5.70;6.35
+pt-a9-linear;loures;a16;1.50;2.55;3.30;3.65
+pt-a9-linear;loures;alverca;1.60;2.85;3.65;4.05
+pt-a9-linear;loures;estadio;2.15;3.75;4.85;5.40
+pt-a9-linear;loures;odivelas;0.40;0.65;0.85;0.95
+pt-a9-linear;loures;pontinha;1.15;1.95;2.55;2.80
+pt-a9-linear;loures;queluz;1.80;3.10;4.00;4.45
+pt-a9-linear;loures;zambujal;0.35;0.65;0.85;0.95
+pt-a9-linear;odivelas;a16;1.10;1.90;2.45;2.70
+pt-a9-linear;odivelas;alverca;2.00;3.50;4.50;5.00
+pt-a9-linear;odivelas;estadio;1.75;3.10;4.00;4.45
+pt-a9-linear;odivelas;loures;0.40;0.65;0.85;0.95
+pt-a9-linear;odivelas;pontinha;0.75;1.30;1.70;1.85
+pt-a9-linear;odivelas;queluz;1.40;2.45;3.15;3.50
+pt-a9-linear;odivelas;zambujal;0.75;1.30;1.70;1.90
+pt-a9-linear;pontinha;a16;0.35;0.60;0.75;0.85
+pt-a9-linear;pontinha;alverca;2.75;4.80;6.20;6.85
+pt-a9-linear;pontinha;estadio;1.00;1.80;2.30;2.60
+pt-a9-linear;pontinha;loures;1.15;1.95;2.55;2.80
+pt-a9-linear;pontinha;odivelas;0.75;1.30;1.70;1.85
+pt-a9-linear;pontinha;queluz;0.65;1.15;1.45;1.65
+pt-a9-linear;pontinha;zambujal;1.50;2.60;3.40;3.75
+pt-a9-linear;queluz;a16;0.30;0.55;0.70;0.80
+pt-a9-linear;queluz;alverca;3.40;5.95;7.65;8.50
+pt-a9-linear;queluz;loures;1.80;3.10;4.00;4.45
+pt-a9-linear;queluz;odivelas;1.40;2.45;3.15;3.50
+pt-a9-linear;queluz;pontinha;0.65;1.15;1.45;1.65
+pt-a9-linear;queluz;zambujal;2.15;3.75;4.85;5.40
+pt-a9-linear;zambujal;a16;1.85;3.20;4.15;4.60
+pt-a9-linear;zambujal;alverca;1.25;2.20;2.80;3.10
+pt-a9-linear;zambujal;estadio;2.50;4.40;5.70;6.35
+pt-a9-linear;zambujal;loures;0.35;0.65;0.85;0.95
+pt-a9-linear;zambujal;odivelas;0.75;1.30;1.70;1.90
+pt-a9-linear;zambujal;pontinha;1.50;2.60;3.40;3.75
+pt-a9-linear;zambujal;queluz;2.15;3.75;4.85;5.40

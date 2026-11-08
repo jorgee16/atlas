@@ -170,7 +170,7 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage.get('edgeWitnesses',stage.get('freeEdgeWitnesses',{}))},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual([4,6,2,0,4],[len(s.get('crossings',[])) for s in report['stages']])
+        self.assertEqual([4,6,2,0,4,37,0],[len(s.get('crossings',[])) for s in report['stages']])
         self.assertEqual(410,report['stages'][2]['additionalCoveredEdges'])
         self.assertEqual(408,len(report['stages'][2]['networks']))
         self.assertEqual({'entry:brisa-published:0117','exit:brisa-published:0122'},
@@ -210,14 +210,17 @@ class OfficialMatrixCellTests(unittest.TestCase):
         assets=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
         audit=json.loads((ROOT.parent/'docs/data/portugal-entry-exit-2026-audit.json').read_text())
         self.assertEqual(hashlib.sha256(assets.read_bytes()).hexdigest(),audit['catalogSha256'])
-        self.assertEqual(4166,audit['farePairs']);self.assertEqual(16664,audit['sourceCells'])
+        self.assertEqual(4220,audit['farePairs']);self.assertEqual(16664,audit['sourceCells'])
+        self.assertEqual(4166,audit['publishedFarePairs'])
+        self.assertEqual(54,audit['reviewedSectionPairs'])
+        self.assertEqual(180,audit['corroboratingClassCells'])
         self.assertEqual({},audit['excludedDomains'])
         self.assertEqual(3600,audit['southCorroboration']['matchedClassCells'])
         self.assertEqual(4,audit['consistentOverlappingPairs'])
         self.assertEqual(896,audit['newPublishedPairs'])
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);manifest=pack.package(assets,root,'toll-fares')
-            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(4166,manifest['journeyCount'])
+            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(4220,manifest['journeyCount'])
             storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-fares')
             self.assertEqual('toll-fares/Portugal/manifest.json',storage.writes[-1])
             self.assertTrue(all(k.startswith('toll-fares/') for k in storage.writes))

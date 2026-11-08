@@ -42,7 +42,8 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 2,481 reviewed directed graph edges (+719, 40.8%).
+- 1,762 -> 3,622 reviewed directed graph edges (+1,860, 105.6%).
+  This phase adds 1,141 edges to the previously reviewed 2,481.
 - 410 additional A14/A1/Fatima edges, 408 bounded paid-network intervals and two
   physical entry/exit events. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
@@ -77,8 +78,8 @@ as forty visible UI alternatives, or as the reporter's private GPS origin.
 
 | State | Release baseline | This change |
 |---|---:|---:|
-| Confirmed exact | 2/40 (5%) | 6/40 (15%) |
-| Estimate | 28/40 (70%) | 24/40 (60%) |
+| Confirmed exact | 2/40 (5%) | 14/40 (35%) |
+| Estimate | 28/40 (70%) | 16/40 (40%) |
 | Verified free | 0/40 | 0/40 |
 | Unavailable / unverified free | 10/40 (25%)* | 10/40 (25%) |
 
@@ -94,11 +95,11 @@ Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
 
 ## Validation and reproducibility
 
-Local: five C++ suites, 50 Python toll tests, 33 JS routing/toll/ETA/UI tests.
-132 actual native route/class cases pass against the distributed mainland graph,
+Local: five C++ suites, 55 Python toll/section-provider tests, 33 JS routing/toll/ETA/UI tests.
+222 actual native route/class cases pass against the distributed mainland graph,
 including the original 91 CSV cases, eight new public approaches, four A1 classes,
-one start-inside-network case and 28 Oeiras/Carcavelos access cases. The two original unavailable-class/tariff JNI
-regressions remain mandatory, making **134 Android price cases**. All original
+one start-inside-network case 28 Oeiras/Carcavelos access cases and 90 A9/A16 cases. The two original unavailable-class/tariff JNI
+regressions remain mandatory, making **224 Android price cases**. All original
 93 cases are retained. Android execution and screenshots must be checked in the
 PR CI; local native results alone are not emulator evidence.
 
@@ -119,10 +120,19 @@ this PR; no key, application ID or version identity is replaced.
 
 This is not exact nationwide pricing and must not close the issue on that claim.
 A9/A16 alternatives have different physical itineraries despite similar road
-summaries. Ranholas fixed charges remain verified, but the A9 connection requires
-independent plaza identification and an applicable **published directed** fare;
-the matrix's outside-operator rows must not be reversed by assumed symmetry.
-The screenshot's 4.00 EUR cannot simply be copied to A16 -> IC19 -> A9.
+summaries. The actual accepted public-origin alternative through Ranholas,
+IC19, Queluz II and Loures now has a class-1 total of 3.00 EUR: 1.20 + 1.80.
+It is not the Waze screenshot's different A16-through-A9 itinerary; its 4.00 EUR
+was not copied into the catalog. Normal routing/ETA and alternative generation
+are unchanged. Some other origins still have unreviewed municipal approaches,
+so containing A9 does not certify their entire trip.
+
+The eight A9 section tariffs and 54 reviewed directed section paths now cover
+the actual access sequence through Alverca PV/node, including its distinct lane
+geometries. Continuations inside the A1/A10 ticket network beyond the reviewed
+settlement points, and same-station or Queluz PV/II return circuits, remain
+unavailable unless their entire actual itinerary has independent proof. No
+return-loop zero or maximum fare is inferred from section distances.
 
 Oeiras I and Carcavelos I are now reviewed, including all four vehicle
 classes, both Oeiras I directions, traditional/Via Verde Carcavelos I approaches,
@@ -139,3 +149,41 @@ from its road reference. No new bridge coverage is claimed.
 
 No simulator quote, Via Verde API validation, real driving, tunnel, or national
 offline field test is claimed by these results.
+
+## A9/A16 completion of the reviewed corridors (2026-11-08)
+
+The new source review adds 33 physical points (including the local Idanha lanes)
+and four barrier-free A16/A9 access boundaries. Those boundaries are explicitly
+not booths. Their graph-bound adjacent-facility requirements prevent a start
+inside the system or an internal turn-around from creating a fictional partial
+ticket. An entry requires the preceding Idanha crossing; an exit requires the
+following crossing. Real repeated physical passages remain chargeable.
+
+The tariff compiler reproduces all 32 class cells of the IMT's eight 2026 A9
+sections from the vendored SHA-bound official snapshot. Its 54 explicitly
+reviewed directed paths are finite section sums, never per-kilometre estimates.
+It independently checks 180 class cells in the already published Brisa directed
+matrix, including both Alverca PV and Alverca node settlement identities. All
+4,166 original published fare rows remain unchanged. The composite offline
+catalog contains 4,220 rows, revision 2026110801. No missing reverse matrix cell
+is filled by symmetry. Original section order and explicit travel direction
+are recorded in the review.
+
+Native quotes use the source and public network/station names of the provider
+actually used. The A16 fixed facilities remain separate from the A9-only sums:
+Idanha is neither silently removed nor charged twice. C++ tests cover missing,
+out-of-order and exit-side adjacent collection, and preserve authoritative
+navigation data on both successful and rejected prices.
+
+The 90 added real-graph cases include classes 1–4, both A9 directions, Alverca
+PV/node, selected Via Verde lane endpoints, local Idanha access, A16/A9 trips,
+and unavailable internal starts. Android verifies the actual accepted 3.00 EUR
+IKEA alternative and captures the Sacotes/A16/A9-to-IKEA 2.80 EUR preview and
+A9-through-Alverca 3.75 EUR preview. These are distinct origins/itineraries,
+not quotations for every trip from the reporter's postcode.
+
+The historical IMT DDIE document identifies facilities, not 2026 prices or
+lane-level GPS coordinates. Original directed OSM geometry supplies the latter;
+shared/erroneous DDIE coordinate groups are not used to snap a gate. The current
+IMT and Ascendi tariffs supply the monetary values. No successful Via Verde or
+IP simulator quote is claimed in this phase.

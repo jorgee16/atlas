@@ -7,10 +7,10 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 132:
+if len(cases) < 222:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
-new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv')
+new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv','a9-network-cases.csv')
               for r in csv.DictReader((fixture_root/name).open(),delimiter=';')}
 new_cases=set()
 classes = set()
@@ -53,7 +53,7 @@ for case in cases:
             if after['distanceMeters'] < 20000 or {r['chargeId'] for r in after['tollRoads']} != {'vialivre:a28:angeiras','vialivre:a28:povoa'}:
                 raise ValueError('Both A28 collection facilities and the real intervening route are required')
         a28_cases.add(case['id'])
-    elif case['id'].startswith('a16-'):
+    elif case['id'] in a16_expected:
         expected = a16_expected[case['id']]
         if (after['tollPricing'] != expected['expectedPricing'] or abs(after['tollAmount'] - float(expected['expectedAmount'])) > 1e-9
                 or after['tollVehicleClass'] != int(expected['class'])):
@@ -80,6 +80,13 @@ for case in cases:
             charge='brisa:0504' if case['id'].startswith('a5-oeiras-i-') else 'brisa:0502'
             if [v['chargeId'] for v in after['tollRoads']]!=[charge]:
                 raise ValueError('Wrong physical access plaza: '+case['id'])
+        if case['id'].startswith(('a9-','a16-a9-')) and expected['expectedPricing']=='exact':
+            if not any(v['chargeId'].startswith('pt-a9-linear:') and v['road']=='A9 / CREL' for v in after['tollRoads']):
+                raise ValueError('Missing reviewed, named A9 network charge: '+case['id'])
+            if case['id'].startswith('a16-a9-') and sum(v['chargeId']=='ascendi:grande-lisboa:01' for v in after['tollRoads'])!=1:
+                raise ValueError('Idanha must remain one separate physical charge: '+case['id'])
+        if case['id'].startswith('a16-local-idanha-') and [v['chargeId'] for v in after['tollRoads']]!=['ascendi:grande-lisboa:01']:
+            raise ValueError('Wrong local Idanha plaza: '+case['id'])
         new_cases.add(case['id'])
     elif after['tollPricing'] == 'exact':
         raise ValueError('Unreviewed city approaches were certified')
@@ -115,4 +122,15 @@ if not ikea_png.is_file() or ikea_png.read_bytes()[:8]!=b'\x89PNG\r\n\x1a\n':
     raise ValueError('Missing full IKEA route Android screenshot')
 if 'confirmed' not in (root / 'a5-preview-text.txt').read_text():
     raise ValueError('Confirmed pricing is absent from the Android UI')
+options=json.loads((root/'issue-2-ui-options.json').read_text())
+if not any(r['tollPricing']=='exact' and abs(r['tollAmount']-3.)<1e-9 and
+           any(t['chargeId']=='pt-a9-linear:queluz:loures' for t in r['tollRoads']) for r in options):
+    raise ValueError('The actual accepted A16/IC19/A9 Android alternative is not confirmed')
+for name,amount in [('issue-2-a16-a9',2.80),('issue-2-a9-alverca',3.75)]:
+    checked=json.loads((root/(name+'-route.json')).read_text())
+    if checked['tollPricing']!='exact' or abs(checked['tollAmount']-amount)>1e-9:
+        raise ValueError('Actual Android network preview differs from its verified fare: '+name)
+    screenshot=root/(name+'-preview.png')
+    if not screenshot.is_file() or screenshot.read_bytes()[:8]!=b'\x89PNG\r\n\x1a\n':
+        raise ValueError('Missing actual Android network screenshot: '+name)
 print(f'Validated {len(cases)+len(unavailable)} actual Portugal JNI price cases and Android preview evidence')

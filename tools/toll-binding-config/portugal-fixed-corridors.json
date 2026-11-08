@@ -23,6 +23,15 @@
     {
       "review": "portugal-a5-reviewed-accesses.json",
       "source": "portugal-a5-reviewed-accesses.source.json"
+    },
+    {
+      "review": "portugal-a9-linear.json",
+      "source": "portugal-a9-linear.source.json"
+    },
+    {
+      "kind": "free",
+      "review": "portugal-a9-approaches.json",
+      "source": "portugal-a9-approaches.source.json"
     }
   ]
 }

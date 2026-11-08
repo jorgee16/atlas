@@ -990,12 +990,12 @@ class NavigationGpsReplayTest {
      * route preview. The fixture contains graph-node endpoints, not fake routes. */
     @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
         output.listFiles()?.forEach { it.delete() }
-        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","issue-2-approach-cases.csv","a5-access-cases.csv").flatMap { name ->
+        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","issue-2-approach-cases.csv","a5-access-cases.csv","a9-network-cases.csv").flatMap { name ->
             instrumentation.context.assets.open("tolls/$name")
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("The original 93 cases plus reviewed approaches and A1 ticket cases are required",cases.size>=132)
+        assertTrue("The original 93 cases, reviewed approaches, A1 and A9/A16 network cases are required",cases.size>=222)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         val unavailableResults=JSONArray()
@@ -1044,6 +1044,14 @@ class NavigationGpsReplayTest {
                                 assertEquals(if(row[0].startsWith("a28-both-"))2 else 1,charges.length())
                                 for(i in 0 until charges.length())
                                     assertTrue(charges.getJSONObject(i).getString("chargeId").startsWith("vialivre:a28:"))
+                            } else if(row[0].startsWith("a9-") || row[0].startsWith("a16-a9-")) {
+                                assertTrue("The real A9 itinerary must contain its reviewed network charge",
+                                    (0 until charges.length()).any { charges.getJSONObject(it).getString("chargeId").startsWith("pt-a9-linear:") })
+                                assertTrue("A9 labels must describe the road, not a provider identifier",
+                                    (0 until charges.length()).any { charges.getJSONObject(it).optString("road")=="A9 / CREL" })
+                                if(row[0].startsWith("a16-a9-"))
+                                    assertEquals("The separate Idanha facility is charged exactly once",1,
+                                        (0 until charges.length()).count { charges.getJSONObject(it).getString("chargeId")=="ascendi:grande-lisboa:01" })
                             } else if(row[0].startsWith("a16-")) {
                                 assertEquals(1,charges.length())
                                 assertTrue(charges.getJSONObject(0).getString("chargeId").startsWith("ascendi:grande-lisboa:"))
@@ -1080,6 +1088,12 @@ class NavigationGpsReplayTest {
                         assertTrue("The graph proof loads independently of route completeness",accepted)
                         assertNotEquals("exact",after.getString("tollPricing"))
                         assertNotEquals("complete",after.getString("tollEvidenceStatus"))
+                        if(row[0].startsWith("a16-a9-missing-") || row[0].startsWith("a9-start-inside-")) {
+                            assertEquals("unavailable",after.getString("tollPricing"))
+                            assertTrue("An unobserved physical entry must not become zero or a partial price",after.isNull("tollAmount"))
+                            assertEquals(if(row[0].startsWith("a16-a9-"))"missing_access_crossing" else "missing_mapping",
+                                after.getString("tollPricingReason"))
+                        }
                     }
                     if(row==cases.first() && input!=null) {
                         // Rejecting evidence after a successful quote must also
@@ -1202,6 +1216,11 @@ class NavigationGpsReplayTest {
                 capture(s,"a5-exact-route-preview")
                 capture(s,"ikea-loures-exact-route-preview")
                 File(output,"issue-2-ui-options.json").writeText(JSONArray(appModel.updates.value.routeOptions).toString(2))
+                assertTrue("The actual A16/IC19/A9 alternative must be confirmed",appModel.updates.value.routeOptions.any { option ->
+                    option.optString("tollPricing")=="exact" && abs(option.optDouble("tollAmount")-3.0)<1e-9 &&
+                        option.optJSONArray("tollRoads")?.let { roads -> (0 until roads.length()).any {
+                            roads.getJSONObject(it).optString("chargeId")=="pt-a9-linear:queluz:loures" } }==true
+                })
                 var openedDetails=false
                 s.onActivity { a ->
                     fun open(v:android.view.View):Boolean {
@@ -1248,8 +1267,29 @@ class NavigationGpsReplayTest {
                     assertTrue("The confirmed access must include the actual IKEA trip",accessRoute.getDouble("distanceMeters")>20000)
                     await("MapLibre must finish the access preview",45){!snapshot(s).optBoolean("styleLoading",true)}
                     instrumentation.waitForIdleSync()
-                    File(output,"issue-2-$access-preview.json").writeText(accessRoute.toString(2))
+                    File(output,"issue-2-$access-route.json").writeText(accessRoute.toString(2))
                     capture(s,"issue-2-$access-preview")
+                }
+                for((caseId,expected,destinationName) in listOf(
+                    Triple("a16-a9-sacotes-ikea-class-1",2.80,"IKEA Loures"),
+                    Triple("a9-queluz-pv-alverca-class-1",3.75,"Alverca"))) {
+                    val checked=cases.first { it[0]==caseId }
+                    s.onActivity {
+                        appModel.origin(Coordinate(checked[1].toDouble(),checked[2].toDouble()))
+                        appModel.select(JSONObject().put("id",caseId).put("name",destinationName)
+                            .put("lat",checked[3].toDouble()).put("lon",checked[4].toDouble()))
+                        appModel.calculate(false)
+                    }
+                    await("Actual A9/A16 preview must finish",90) {
+                        !appModel.updates.value.busy && appModel.updates.value.route?.optString("tollPricing")=="exact"
+                    }
+                    val checkedRoute=appModel.updates.value.route!!
+                    assertEquals(caseId,expected,checkedRoute.getDouble("tollAmount"),1e-9)
+                    await("MapLibre must finish the A9/A16 preview",45){!snapshot(s).optBoolean("styleLoading",true)}
+                    instrumentation.waitForIdleSync()
+                    val name=if(destinationName=="Alverca")"issue-2-a9-alverca" else "issue-2-a16-a9"
+                    File(output,"$name-route.json").writeText(checkedRoute.toString(2))
+                    capture(s,"$name-preview")
                 }
             }
         } finally {

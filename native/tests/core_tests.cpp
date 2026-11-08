@@ -180,6 +180,17 @@ int main(int argc, char **argv) {
     check(applyEntryExitTollCharges(toll,ticketRoute,ticketFixture,ticketProof,identity),"complete directed entry/exit proof enables a published pair");
     check(ticketRoute.tollPriceExact&&ticketRoute.tollEuros==125&&ticketRoute.tollCurrency=="JPY","ticket fares keep independent currency and class amounts");
     check(ticketRoute.edges==tolled->edges&&ticketRoute.meters==tolled->meters&&ticketRoute.seconds==tolled->seconds&&ticketRoute.maneuvers.size()==tolled->maneuvers.size(),"ticket pricing never changes navigation");
+    const auto namedTickets=TollTariffs::parse(
+      "# country=Testland\n# currency=JPY\n# year=2026\n# version=2\n# fractionDigits=0\n"
+      "# scheme=entry-exit\n# source=https://example.test/base\n"
+      "# networkName.network=T1\n# stationName.network.one=First entrance\n# stationName.network.two=Last exit\n"
+      "# networkSource.network=https://example.test/actual-sections\n"
+      "network;entry;exit;class1;class4\nnetwork;one;two;125;811\n","Testland");
+    auto namedTrip=*tolled;namedTrip.tollCountry="Testland";
+    check(applyEntryExitTollCharges(toll,namedTrip,namedTickets,ticketProof,identity)&&
+          namedTrip.tollSource=="https://example.test/actual-sections"&&
+          namedTrip.tollRoads[0].road=="T1"&&namedTrip.tollRoads[0].name=="First entrance → Last exit",
+          "composed catalogs report the source and public labels of the network actually used");
     for(std::size_t i=0;i<tolled->points.size();++i)check(ticketRoute.points[i].lat==tolled->points[i].lat&&ticketRoute.points[i].lon==tolled->points[i].lon,"ticket pricing preserves authoritative geometry");
     auto incompleteTicket=*tolled;incompleteTicket.tollCountry="Testland";
     TollCrossingMatcher exitOnly(identity,"Testland",certified,{{last.edge,last.from,last.to,lastFull/2,"exit:network:two",lastFull}},true);
@@ -205,6 +216,40 @@ int main(int argc, char **argv) {
           "one ordered proof composes fixed and ticket charges exactly once");
     check(combined.tollRoads.size()==2&&combined.edges==tolled->edges&&combined.meters==tolled->meters&&combined.seconds==tolled->seconds,
           "mixed pricing is atomic and preserves the actual route");
+    // A barrier-free interchange cannot settle a ticket on an internal start
+    // or U-turn. The adjacent facility requirement belongs to the graph proof,
+    // so downloading a newer fare table cannot accidentally remove it.
+    const std::unordered_map<std::string,std::string> accessRule={{"entry:network:one","fixed:one"}};
+    TollCrossingMatcher guardedAccess(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/4,"fixed:one",full},
+       {first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,
+      {{first.edge,first.from,first.to,full/3,full,"network"},
+       {last.edge,last.from,last.to,0,lastFull/3,"network"}},accessRule);
+    auto accessTrip=*tolled;accessTrip.tollCountry="Testland";
+    check(applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,guardedAccess,identity)&&accessTrip.tollEuros==165,
+          "observed adjacent fixed facility and section journey are composed once");
+    accessTrip=*tolled;accessTrip.tollCountry="Testland";accessTrip.legs.front().distance=full*.70;
+    check(!applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,guardedAccess,identity)&&
+          accessTrip.tollPricingReason=="missing_access_crossing"&&
+          routeJson(accessTrip).find("\"tollAmount\":null")!=std::string::npos,
+          "starting after the required collection cannot certify a fictitious partial ticket");
+    TollCrossingMatcher wrongAccessOrder(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {first.edge,first.from,first.to,full/2,"fixed:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,{},accessRule);
+    accessTrip=*tolled;accessTrip.tollCountry="Testland";
+    check(!applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,wrongAccessOrder,identity)&&
+          accessTrip.tollPricingReason=="missing_access_crossing",
+          "seeing the required facility later or on another leg is insufficient");
+    TollCrossingMatcher guardedExit(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull},
+       {last.edge,last.from,last.to,lastFull/2,"fixed:one",lastFull}},true,{},
+      {{"exit:network:two","fixed:one"}});
+    accessTrip=*tolled;accessTrip.tollCountry="Testland";
+    check(applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,guardedExit,identity)&&accessTrip.tollEuros==165,
+          "exit-side adjacent physical collection is required and not deducted or duplicated");
     auto inside=*tolled;inside.tollCountry="Testland";inside.legs={first};inside.legs[0].distance=full/4;inside.tolledMeters=0;
     TollCrossingMatcher ticketNetwork(identity,"Testland",certified,
       {{first.edge,first.from,first.to,full/3,"entry:network:one",full},

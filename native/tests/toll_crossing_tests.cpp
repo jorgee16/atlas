@@ -36,6 +36,9 @@ int main(){try{
  check(q&&!q->complete&&q->chargeIds.size()==5,"uncertified edge makes total incomplete, genuine repeats preserved");
  rejects([&]{TollCrossingMatcher m(graph,"Testland",{7,8},{{7,1,2,30,"one",100},{7,1,2,30,"two",100}},true);});
  rejects([&]{TollCrossingMatcher m({},"Testland",{7,8},bindings,true);});
+ rejects([&]{TollCrossingMatcher m(graph,"Testland",{7,8},
+   {{7,1,2,30,"entry:n:a",100},{7,1,2,70,"gate:2",100}},true,{},
+   {{"entry:n:a","missing:facility"}});});
  const auto journeys=entryExitJourneys({"entry:network:one","exit:network:two","entry:network:one","exit:network:two"});
  check(journeys&&journeys->size()==2&&journeys->front().entry=="one"&&journeys->front().exit=="two","explicit repeated ticket journeys are preserved");
  const std::vector<std::vector<std::string>> incomplete={ {},{"entry:n:a"},{"exit:n:b"},
