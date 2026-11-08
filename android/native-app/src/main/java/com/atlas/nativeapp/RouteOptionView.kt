@@ -57,12 +57,18 @@ internal class RouteOptionView(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // This is a full-width planner choice. Resolve AT_MOST to that width
+        // before deciding how the text flows; otherwise wrap-content can shrink
+        // the header after its height was measured inside a ScrollView/Dialog.
+        val widthSpec = if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST)
+            MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY)
+            else widthMeasureSpec
         // Use the actual text size and available width, including large fonts,
         // rather than truncating a price or letting it cover the journey time.
-        val available = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
+        val available = MeasureSpec.getSize(widthSpec) - paddingLeft - paddingRight
         val leftWidth = max(time.paint.measureText(time.text.toString()), summary.paint.measureText(summary.text.toString()))
         val rightWidth = max(value.paint.measureText(value.text.toString()), status.paint.measureText(status.text.toString()))
-        val stacked = MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED &&
+        val stacked = MeasureSpec.getMode(widthSpec) != MeasureSpec.UNSPECIFIED &&
             leftWidth + rightWidth + ui.dp(12) > available
         if (previousStacked != stacked) {
             previousStacked = stacked
@@ -74,6 +80,6 @@ internal class RouteOptionView(
             }
             cost.gravity = if (stacked) Gravity.START else Gravity.END
         }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        super.onMeasure(widthSpec, heightMeasureSpec)
     }
 }
