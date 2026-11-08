@@ -894,6 +894,7 @@ jobs:
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a16-mainline-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a1-ticket-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/issue-2-approach-cases.csv >> toll-section-audit/real-route-cases.csv
+          tail -n +2 android/native-app/src/androidTest/assets/tolls/a5-access-cases.csv >> toll-section-audit/real-route-cases.csv
           cmake -S native -B /tmp/atlas-toll-proof -DCMAKE_BUILD_TYPE=Release
           cmake --build /tmp/atlas-toll-proof --target atlas_toll_quote atlas_toll_audit -j2
           python3 tools/verify-toll-route-proof.py --binary /tmp/atlas-toll-proof/atlas_toll_quote

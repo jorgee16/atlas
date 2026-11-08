@@ -16,6 +16,7 @@
 # reviewedCorridor.4b35466669cf0ec090e387d21345363eada83ca2a3772d716cce93b66732b184=d8d8d1dace82e44df17c3e2b050617103ee4754098004b412246f2efa3a6d58e
 # reviewedCorridor.c4e2d0347b4f470a0257abf778d34a5c487ee80532c8d9a1f3f0b6045f19ffec=438ed9c9acdf04e9856853557ef404fa42ea53e3fcdc7016fd7ef3cad5397f24
 # freeCorridor.7f7a9dc407ab94ecadb26b5774cb54e4b16ad2f8b29ac3d9e07d89c75bfaf32c=720c89ba17944888775d4da6ab9bbb88410fdeb03e0f11a1264b06ff0bc5585b
+# reviewedCorridor.c48e25875c6daf333f632dfbccd8346c533dff4f5b20a7569181493b77533f2c=a00ced82b581e8fdc1974082ea16fce1ff81dcef9d51fc6e6cc9792cf7ab31ce
 kind;edge;from;to;offsetMeters;edgeLengthMeters;chargeId
 coverage;243;;;;;
 coverage;963;;;;;
@@ -172,6 +173,9 @@ coverage;59509;;;;;
 coverage;59510;;;;;
 coverage;59511;;;;;
 coverage;59512;;;;;
+coverage;59517;;;;;
+coverage;59518;;;;;
+coverage;59519;;;;;
 coverage;59665;;;;;
 coverage;59666;;;;;
 coverage;59667;;;;;
@@ -230,6 +234,11 @@ coverage;59937;;;;;
 coverage;59938;;;;;
 coverage;59939;;;;;
 coverage;59940;;;;;
+coverage;59945;;;;;
+coverage;59946;;;;;
+coverage;59947;;;;;
+coverage;59950;;;;;
+coverage;59951;;;;;
 coverage;59953;;;;;
 coverage;59957;;;;;
 coverage;59961;;;;;
@@ -1661,11 +1670,18 @@ coverage;3440902;;;;;
 coverage;3440903;;;;;
 coverage;3440904;;;;;
 coverage;3440905;;;;;
+coverage;3528047;;;;;
+coverage;3528049;;;;;
+coverage;3528050;;;;;
+coverage;3528051;;;;;
+coverage;3528406;;;;;
 coverage;3528407;;;;;
 coverage;3528408;;;;;
 coverage;3528409;;;;;
 coverage;3528410;;;;;
 coverage;3528412;;;;;
+coverage;3528414;;;;;
+coverage;3528415;;;;;
 coverage;3528423;;;;;
 coverage;3530607;;;;;
 coverage;3535986;;;;;
@@ -1800,6 +1816,9 @@ coverage;4067700;;;;;
 coverage;4067701;;;;;
 coverage;4067702;;;;;
 coverage;4067708;;;;;
+coverage;4067731;;;;;
+coverage;4067732;;;;;
+coverage;4070142;;;;;
 coverage;4074847;;;;;
 coverage;4074849;;;;;
 coverage;4075087;;;;;
@@ -1859,6 +1878,9 @@ coverage;4215674;;;;;
 coverage;4215675;;;;;
 coverage;4215676;;;;;
 coverage;4215677;;;;;
+coverage;4215681;;;;;
+coverage;4215682;;;;;
+coverage;4215684;;;;;
 coverage;4215698;;;;;
 coverage;4215699;;;;;
 coverage;4215701;;;;;
@@ -1896,6 +1918,10 @@ coverage;4217460;;;;;
 coverage;4217461;;;;;
 coverage;4217462;;;;;
 coverage;4217463;;;;;
+coverage;4217475;;;;;
+coverage;4217477;;;;;
+coverage;4217481;;;;;
+coverage;4217482;;;;;
 coverage;4218974;;;;;
 coverage;4218975;;;;;
 coverage;4218976;;;;;
@@ -2897,3 +2923,7 @@ network;7099171;2919458;1192944;0.000000000;68.400000000;brisa-published
 network;7201099;2967315;2967316;0.000000000;259.800000000;brisa-published
 network;7201100;2967316;2967317;0.000000000;46.500000000;brisa-published
 network;7201101;2967317;37478;0.000000000;93.700000000;brisa-published
+crossing;59945;21759;21760;0.000000000;104.6;brisa:0502
+crossing;3528050;1354824;1354825;0.000000000;79.7;brisa:0504
+crossing;4215682;1640463;1640465;81.779963825;236.3;brisa:0502
+crossing;4217482;1641234;1354985;0.000000000;93.0;brisa:0504

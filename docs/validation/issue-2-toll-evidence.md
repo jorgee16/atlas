@@ -42,7 +42,7 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 2,456 reviewed directed graph edges (+694, 39.4%).
+- 1,762 -> 2,481 reviewed directed graph edges (+719, 40.8%).
 - 410 additional A14/A1/Fatima edges, 408 bounded paid-network intervals and two
   physical entry/exit events. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
@@ -54,6 +54,18 @@ change. Pricing itself changes none of these fields.
   Cascais, Oeiras and Carcavelos. The independent 735-point collection census
   guards the complete source geometries. Paid motorway connectors and private
   service roads remain excluded.
+- The Oeiras I entrance/exit and Carcavelos I Lisbon-bound booth/Via Verde
+  approaches add 25 edges and four physical events. Brisa's Oeiras access notice
+  distinguishes Oeiras/Paco de Arcos from Porto Salvo/Cacem; the A5 traffic study
+  identifies the Lisbon-bound Carcavelos I entrance. Their current prices come
+  exclusively from the official 2026 fixed catalog, not historical OSM fee tags
+  or the traffic study's proposed dynamic prices.
+- A real Oeiras source split exposed a floating-point boundary: projection sums
+  could put the same gate at the incoming edge's end and outgoing edge's start.
+  The compiler now uses the packager's exact float32 source-node identity to
+  assign that boundary only to the outgoing edge. The continuous geometric
+  bound is unchanged. The regression and graph audit require one assignment per
+  physical node; genuine later crossings are not globally deduplicated.
 - All original A5/A28/A16 physical bindings and original fare cells are preserved.
   `composed-binding-proof.json` records every stage, source/seed digest and witness.
 
@@ -65,8 +77,8 @@ as forty visible UI alternatives, or as the reporter's private GPS origin.
 
 | State | Release baseline | This change |
 |---|---:|---:|
-| Confirmed exact | 2/40 (5%) | 4/40 (10%) |
-| Estimate | 28/40 (70%) | 26/40 (65%) |
+| Confirmed exact | 2/40 (5%) | 6/40 (15%) |
+| Estimate | 28/40 (70%) | 24/40 (60%) |
 | Verified free | 0/40 | 0/40 |
 | Unavailable / unverified free | 10/40 (25%)* | 10/40 (25%) |
 
@@ -74,18 +86,19 @@ as forty visible UI alternatives, or as the reporter's private GPS origin.
 reclassified here to expose the original confidence defect, not credited as
 verified free. Original emitted counts remain in the baseline JSON.
 
-Among the eight recommended routes, confirmed coverage rises from 2/8 to 4/8
-(25% -> 50%). Public south, public north, Manique and Cascais show the actual
-Carcavelos PV 1.60 EUR charge for class 1. Oeiras and Carcavelos do not inherit
-that price merely because their road summary also contains A5.
+Among the eight recommended routes, confirmed coverage rises from 2/8 to 6/8
+(25% -> 75%). Public south, public north, Manique and Cascais show the actual
+Carcavelos PV 1.60 EUR charge for class 1. Oeiras I and Carcavelos I now correctly quote their own entrance fees,
+0.40 and 0.70 EUR in class 1; neither inherits the 1.60 EUR mainline plaza fee.
+Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
 
 ## Validation and reproducibility
 
-Local: five C++ suites, 49 Python toll tests, 33 JS routing/toll/ETA/UI tests.
-104 actual native route/class cases pass against the distributed mainland graph,
-including the original 91 CSV cases, eight new public approaches, four A1 classes
-and one start-inside-network case. The two original unavailable-class/tariff JNI
-regressions remain mandatory, making **106 Android price cases**. All original
+Local: five C++ suites, 50 Python toll tests, 33 JS routing/toll/ETA/UI tests.
+132 actual native route/class cases pass against the distributed mainland graph,
+including the original 91 CSV cases, eight new public approaches, four A1 classes,
+one start-inside-network case and 28 Oeiras/Carcavelos access cases. The two original unavailable-class/tariff JNI
+regressions remain mandatory, making **134 Android price cases**. All original
 93 cases are retained. Android execution and screenshots must be checked in the
 PR CI; local native results alone are not emulator evidence.
 
@@ -111,12 +124,12 @@ independent plaza identification and an applicable **published directed** fare;
 the matrix's outside-operator rows must not be reversed by assumed symmetry.
 The screenshot's 4.00 EUR cannot simply be copied to A16 -> IC19 -> A9.
 
-Oeiras and Carcavelos local accesses contain separate real collection facilities.
-Their paid approach lanes are excluded from free review until each source node,
-direction and published I/II plaza identity is unambiguously matched. The next
-addition should review those facilities individually, then compose them with
-existing corridor evidence. Unknown intervals and first blocking edge IDs are
-exported for every case; do not replace them with national zero prices.
+Oeiras I and Carcavelos I are now reviewed, including all four vehicle
+classes, both Oeiras I directions, traditional/Via Verde Carcavelos I approaches,
+starts after each gate and the full public IKEA trips. Oeiras II and Carcavelos II
+remain outside this review; their identities must not be inferred from the
+nearby reviewed plazas. Source review: `portugal-a5-reviewed-accesses.json`.
+Unknown intervals and first blocking edge IDs remain exported for every case.
 
 Partial A28/A4/A13 exemptions remain scoped. The A41 heavy-vehicle exemption is
 supported by the IP FAQ: its all-day toll exemption must not be confused with the

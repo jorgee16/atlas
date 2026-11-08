@@ -1,10 +1,10 @@
 {
   "country": "Portugal",
-  "catalogSha256": "a682d8bf73979bf831db71fac8dec157b3f2b49acf202875b390b545f63d0ad0",
+  "catalogSha256": "15c050d906c699e86e005c0fc7e830f918891be672f87912b2fd8ea9af8d5fbd",
   "seedSha256": "9dcdc3f76c94632b1d955dc2c701963ceb13d99b70f65c280e68d2c2565478a3",
   "seedCoveredEdges": 529,
-  "additionalCoveredEdges": 1927,
-  "bindingsSha256": "515ad0509404b7cf3d4f2ca7a8cc3d55f04bba4f53ef8bd8ffcaa4e249e97cd7",
+  "additionalCoveredEdges": 1952,
+  "bindingsSha256": "442f403f4416d24910150549d169172220c48f893cc68f0c6f8496672a7b4951",
   "stages": [
     {
       "country": "Portugal",
@@ -32439,6 +32439,459 @@
               "reversed": false,
               "continuousBoundMeters": 2.432655570669822,
               "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "country": "Portugal",
+      "scope": "Oeiras I A5 Lisbon-bound entrance and westbound exit to Oeiras/Paco de Arcos, plus Carcavelos I Lisbon-bound entrance booth/Via Verde lane. Oeiras II and Carcavelos II are excluded. Whole source ways are reviewed and matched independently; old OSM fee tags are not tariff inputs.",
+      "graphDigests": {
+        "nodes.bin": "a7daf7279381128c4f9304a5d27982850f80db0218dfb7978070182ee0f2a294",
+        "edges.bin": "237d893d8358c539a8ad28b656e928137acd07f674d86b6734b1b4158051ea9a",
+        "geometry.bin": "12bc479f95b0add7a32dcc9067b6c7b18caa08ed4c89105993c8666cbf85354f",
+        "roads.bin": "7d9014e15f2ccdbfeefb3586c57c6990567aac23f1d7127de6eba5862427ccbf",
+        "strings.bin": "e8e664f709a48d98d56cb816a098ac6b9e7ece9d0d0a597d3c91415bce0e757b",
+        "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
+        "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
+      },
+      "sourceSha256": "a00ced82b581e8fdc1974082ea16fce1ff81dcef9d51fc6e6cc9792cf7ab31ce",
+      "reviewSha256": "c48e25875c6daf333f632dfbccd8346c533dff4f5b20a7569181493b77533f2c",
+      "seedSha256": "515ad0509404b7cf3d4f2ca7a8cc3d55f04bba4f53ef8bd8ffcaa4e249e97cd7",
+      "seedCoveredEdges": 2456,
+      "additionalCoveredEdges": 25,
+      "chargedCrossingsUnchanged": [
+        "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
+        "crossing;4067702;1578879;1640459;0.000000000;68.7;brisa:0501",
+        "crossing;4215672;1640456;1640457;0.000000000;129.1;brisa:0501",
+        "crossing;4215677;1640460;2509266;130.134960545;238.0;brisa:0501",
+        "crossing;1182605;437651;437652;161.876966756;267.6;vialivre:a28:angeiras",
+        "crossing;2832229;1072662;1072663;75.825773766;223.0;vialivre:a28:povoa",
+        "crossing;2832241;1072674;1072675;71.195924218;321.0;vialivre:a28:angeiras",
+        "crossing;2925153;1110152;1110153;0.000000000;304.0;vialivre:a28:povoa",
+        "crossing;371240;133386;133387;0.000000000;151.9;ascendi:grande-lisboa:03",
+        "crossing;2545774;959267;959264;148.775191785;296.4;ascendi:grande-lisboa:02",
+        "crossing;2546033;959399;959397;148.841928227;297.2;ascendi:grande-lisboa:02",
+        "crossing;4215373;1640330;1640326;0.000000000;133.2;ascendi:grande-lisboa:03",
+        "crossing;4220733;1642572;85918;0.000000000;108.7;ascendi:grande-lisboa:01",
+        "crossing;4220744;1642582;1642577;0.000000000;142.8;ascendi:grande-lisboa:01",
+        "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
+        "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117"
+      ],
+      "bindingsSha256": "442f403f4416d24910150549d169172220c48f893cc68f0c6f8496672a7b4951",
+      "crossings": [
+        {
+          "edge": 59945,
+          "fromNode": 21759,
+          "toNode": 21760,
+          "lengthMeters": 104.6,
+          "osmNodeId": 3950368056,
+          "chargeId": "brisa:0502",
+          "offsetMeters": 0.0
+        },
+        {
+          "edge": 3528050,
+          "fromNode": 1354824,
+          "toNode": 1354825,
+          "lengthMeters": 79.7,
+          "osmNodeId": 3751374533,
+          "chargeId": "brisa:0504",
+          "offsetMeters": 0.0
+        },
+        {
+          "edge": 4215682,
+          "fromNode": 1640463,
+          "toNode": 1640465,
+          "lengthMeters": 236.3,
+          "osmNodeId": 9588718316,
+          "chargeId": "brisa:0502",
+          "offsetMeters": 81.7799638252647
+        },
+        {
+          "edge": 4217482,
+          "fromNode": 1641234,
+          "toNode": 1354985,
+          "lengthMeters": 93.0,
+          "osmNodeId": 3751374537,
+          "chargeId": "brisa:0504",
+          "offsetMeters": 0.0
+        }
+      ],
+      "networks": [],
+      "edgeWitnesses": {
+        "59517": {
+          "fromNode": 21567,
+          "toNode": 21568,
+          "lengthMeters": 44.6,
+          "witnesses": [
+            {
+              "wayId": 23821884,
+              "beginMeters": 0.0,
+              "endMeters": 44.63968014968959,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326573675352985,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "59518": {
+          "fromNode": 21568,
+          "toNode": 21569,
+          "lengthMeters": 159.1,
+          "witnesses": [
+            {
+              "wayId": 23821886,
+              "beginMeters": 0.0,
+              "endMeters": 159.3750566375864,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326573082906,
+              "maxVertexDeviationMeters": 2.022914251948801
+            }
+          ]
+        },
+        "59519": {
+          "fromNode": 21569,
+          "toNode": 1641228,
+          "lengthMeters": 42.4,
+          "witnesses": [
+            {
+              "wayId": 418240482,
+              "beginMeters": 0.0,
+              "endMeters": 42.06699440036513,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657022221493,
+              "maxVertexDeviationMeters": 7.108895957933346e-15
+            }
+          ]
+        },
+        "59945": {
+          "fromNode": 21759,
+          "toNode": 21760,
+          "lengthMeters": 104.6,
+          "witnesses": [
+            {
+              "wayId": 23845214,
+              "beginMeters": 0.0,
+              "endMeters": 104.75059383440326,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657537651488,
+              "maxVertexDeviationMeters": 0.47423366044999776
+            }
+          ]
+        },
+        "59946": {
+          "fromNode": 21760,
+          "toNode": 1578891,
+          "lengthMeters": 26.0,
+          "witnesses": [
+            {
+              "wayId": 417917488,
+              "beginMeters": 0.0,
+              "endMeters": 26.101080577090265,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326575325734083,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "59947": {
+          "fromNode": 21761,
+          "toNode": 21762,
+          "lengthMeters": 202.8,
+          "witnesses": [
+            {
+              "wayId": 23845219,
+              "beginMeters": 0.0,
+              "endMeters": 202.89257588827496,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657946433723,
+              "maxVertexDeviationMeters": 1.5352898691972179
+            }
+          ]
+        },
+        "59950": {
+          "fromNode": 21762,
+          "toNode": 21763,
+          "lengthMeters": 59.4,
+          "witnesses": [
+            {
+              "wayId": 23845219,
+              "beginMeters": 202.89150453082874,
+              "endMeters": 262.61156738447835,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326575968956776,
+              "maxVertexDeviationMeters": 0.8062599233634378
+            }
+          ]
+        },
+        "59951": {
+          "fromNode": 21763,
+          "toNode": 1579858,
+          "lengthMeters": 66.7,
+          "witnesses": [
+            {
+              "wayId": 417917485,
+              "beginMeters": 0.0,
+              "endMeters": 66.76496487339719,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326575334197553,
+              "maxVertexDeviationMeters": 2.0261035994212597
+            }
+          ]
+        },
+        "3528047": {
+          "fromNode": 1354822,
+          "toNode": 1354823,
+          "lengthMeters": 164.2,
+          "witnesses": [
+            {
+              "wayId": 320184774,
+              "beginMeters": 0.0,
+              "endMeters": 164.29963590814276,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657727232433,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3528049": {
+          "fromNode": 1354823,
+          "toNode": 21567,
+          "lengthMeters": 162.5,
+          "witnesses": [
+            {
+              "wayId": 320184774,
+              "beginMeters": 164.2986827629486,
+              "endMeters": 326.9639337551288,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326576078981557,
+              "maxVertexDeviationMeters": 1.648254510497642
+            }
+          ]
+        },
+        "3528050": {
+          "fromNode": 1354824,
+          "toNode": 1354825,
+          "lengthMeters": 79.7,
+          "witnesses": [
+            {
+              "wayId": 320186742,
+              "beginMeters": 0.0,
+              "endMeters": 79.9061127663035,
+              "reversed": false,
+              "continuousBoundMeters": 2.432656786085219,
+              "maxVertexDeviationMeters": 1.6108353141873102
+            }
+          ]
+        },
+        "3528051": {
+          "fromNode": 1354825,
+          "toNode": 1641231,
+          "lengthMeters": 127.2,
+          "witnesses": [
+            {
+              "wayId": 418240490,
+              "beginMeters": 0.0,
+              "endMeters": 127.50821010834635,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326570399951066,
+              "maxVertexDeviationMeters": 1.1942798901199116
+            }
+          ]
+        },
+        "3528406": {
+          "fromNode": 1354978,
+          "toNode": 1354824,
+          "lengthMeters": 58.2,
+          "witnesses": [
+            {
+              "wayId": 418240487,
+              "beginMeters": 0.0,
+              "endMeters": 57.86759029786037,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326566269671264,
+              "maxVertexDeviationMeters": 1.4238583238573986e-14
+            }
+          ]
+        },
+        "3528414": {
+          "fromNode": 1354985,
+          "toNode": 1354986,
+          "lengthMeters": 106.1,
+          "witnesses": [
+            {
+              "wayId": 320210203,
+              "beginMeters": 0.0,
+              "endMeters": 106.27166554701732,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326564458421873,
+              "maxVertexDeviationMeters": 1.1479807302927836
+            }
+          ]
+        },
+        "3528415": {
+          "fromNode": 1354986,
+          "toNode": 97163,
+          "lengthMeters": 199.0,
+          "witnesses": [
+            {
+              "wayId": 389790531,
+              "beginMeters": 0.0,
+              "endMeters": 199.27345792227487,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326562960323153,
+              "maxVertexDeviationMeters": 1.2350728367334387
+            }
+          ]
+        },
+        "4067731": {
+          "fromNode": 1578891,
+          "toNode": 1640465,
+          "lengthMeters": 25.6,
+          "witnesses": [
+            {
+              "wayId": 417917488,
+              "beginMeters": 26.10106450277482,
+              "endMeters": 51.7588133231838,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326575224172466,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4067732": {
+          "fromNode": 1578892,
+          "toNode": 178214,
+          "lengthMeters": 13.6,
+          "witnesses": [
+            {
+              "wayId": 1383882460,
+              "beginMeters": 70.08524092570097,
+              "endMeters": 83.60618653244961,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657486024301,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4070142": {
+          "fromNode": 1579858,
+          "toNode": 1640463,
+          "lengthMeters": 41.5,
+          "witnesses": [
+            {
+              "wayId": 417917482,
+              "beginMeters": 0.0,
+              "endMeters": 41.53959834413245,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326575325734083,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4215681": {
+          "fromNode": 1640463,
+          "toNode": 21759,
+          "lengthMeters": 81.2,
+          "witnesses": [
+            {
+              "wayId": 417917486,
+              "beginMeters": 0.0,
+              "endMeters": 81.24210544638996,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657537651488,
+              "maxVertexDeviationMeters": 0.7787232173980323
+            }
+          ]
+        },
+        "4215682": {
+          "fromNode": 1640463,
+          "toNode": 1640465,
+          "lengthMeters": 236.3,
+          "witnesses": [
+            {
+              "wayId": 1041543301,
+              "beginMeters": 0.0,
+              "endMeters": 236.60265835030566,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326575325734083,
+              "maxVertexDeviationMeters": 1.3683870573570582
+            }
+          ]
+        },
+        "4215684": {
+          "fromNode": 1640465,
+          "toNode": 1578892,
+          "lengthMeters": 70.0,
+          "witnesses": [
+            {
+              "wayId": 1383882460,
+              "beginMeters": 0.0,
+              "endMeters": 70.08532877300301,
+              "reversed": false,
+              "continuousBoundMeters": 2.432657506336649,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4217475": {
+          "fromNode": 1641228,
+          "toNode": 1641230,
+          "lengthMeters": 86.6,
+          "witnesses": [
+            {
+              "wayId": 418240484,
+              "beginMeters": 0.0,
+              "endMeters": 86.7203419993937,
+              "reversed": false,
+              "continuousBoundMeters": 2.432656938431441,
+              "maxVertexDeviationMeters": 1.519301312666781
+            }
+          ]
+        },
+        "4217477": {
+          "fromNode": 1641230,
+          "toNode": 1641233,
+          "lengthMeters": 44.2,
+          "witnesses": [
+            {
+              "wayId": 418240489,
+              "beginMeters": 0.0,
+              "endMeters": 44.178821859152436,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326567657723235,
+              "maxVertexDeviationMeters": 0.39501375497705704
+            }
+          ]
+        },
+        "4217481": {
+          "fromNode": 1641233,
+          "toNode": 1641234,
+          "lengthMeters": 24.2,
+          "witnesses": [
+            {
+              "wayId": 418240489,
+              "beginMeters": 44.17882169269272,
+              "endMeters": 68.4249238807028,
+              "reversed": false,
+              "continuousBoundMeters": 2.4326566777495993,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4217482": {
+          "fromNode": 1641234,
+          "toNode": 1354985,
+          "lengthMeters": 93.0,
+          "witnesses": [
+            {
+              "wayId": 418240491,
+              "beginMeters": 0.0,
+              "endMeters": 93.19758564406683,
+              "reversed": false,
+              "continuousBoundMeters": 2.432656629506252,
+              "maxVertexDeviationMeters": 0.9537917985412919
             }
           ]
         }

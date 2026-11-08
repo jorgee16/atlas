@@ -9,7 +9,7 @@
     "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
     "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
   },
-  "bindingSha256": "515ad0509404b7cf3d4f2ca7a8cc3d55f04bba4f53ef8bd8ffcaa4e249e97cd7",
+  "bindingSha256": "442f403f4416d24910150549d169172220c48f893cc68f0c6f8496672a7b4951",
   "catalogs": {
     "tolls": {
       "sha256": "8f3cb850ad896868560ba6861e145533e8e59f9625f9a66186ab7b440a7786a8",
@@ -69,13 +69,12 @@
     }
   },
   "rawCandidateCounts": {
-    "exact": 4,
-    "estimate": 26,
+    "exact": 6,
+    "estimate": 24,
     "unavailable": 10
   },
   "recommendedCounts": {
-    "exact": 4,
-    "estimate": 2,
+    "exact": 6,
     "unavailable": 2
   },
   "navigationUnchangedByPricing": true,
@@ -1598,89 +1597,20 @@
     {
       "id": "oeiras-access/recommended",
       "distanceMeters": 25908.5,
-      "rawPricing": "estimate",
-      "rawAmount": 0.32,
+      "rawPricing": "exact",
+      "rawAmount": 0.4,
       "navigationSha256": "f1116c08125380f87a2aa1367f08d2711f60a797a9cb478dd9d253d05bf0bc18",
       "navigationChangedFromRelease": false,
-      "evidenceStatus": "incomplete",
-      "pricingReason": "unreviewed_edge",
-      "proofComplete": false,
-      "unreviewedEdges": 11,
-      "firstBlockers": [
-        {
-          "edge": 3528047,
-          "from": 1354822,
-          "to": 1354823,
-          "lat": 38.7067298889,
-          "lon": -9.3025188446,
-          "road": "",
-          "meters": 164.2,
-          "begin": 0,
-          "end": 164.2,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 3528049,
-          "from": 1354823,
-          "to": 21567,
-          "lat": 38.7072677612,
-          "lon": -9.30088424683,
-          "road": "",
-          "meters": 162.5,
-          "begin": 0,
-          "end": 162.5,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 59517,
-          "from": 21567,
-          "to": 21568,
-          "lat": 38.7083511353,
-          "lon": -9.30077648163,
-          "road": "",
-          "meters": 44.6,
-          "begin": 0,
-          "end": 44.6,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 59518,
-          "from": 21568,
-          "to": 21569,
-          "lat": 38.7086181641,
-          "lon": -9.3011598587,
-          "road": "",
-          "meters": 159.1,
-          "begin": 0,
-          "end": 159.1,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 59519,
-          "from": 21569,
-          "to": 1641228,
-          "lat": 38.7099075317,
-          "lon": -9.3016872406,
-          "road": "",
-          "meters": 42.4,
-          "begin": 0,
-          "end": 42.4,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        }
+      "evidenceStatus": "complete",
+      "pricingReason": "",
+      "proofComplete": true,
+      "unreviewedEdges": 0,
+      "firstBlockers": [],
+      "verifiedEvents": [
+        "brisa:0504"
       ],
-      "verifiedEvents": [],
-      "rejectionReason": "unreviewed_edge",
-      "androidPrefilterWouldReject": true,
+      "rejectionReason": "",
+      "androidPrefilterWouldReject": false,
       "freeConfidence": "unverified"
     },
     {
@@ -2038,89 +1968,20 @@
     {
       "id": "carcavelos-access/recommended",
       "distanceMeters": 30278.5,
-      "rawPricing": "estimate",
-      "rawAmount": 0.61,
+      "rawPricing": "exact",
+      "rawAmount": 0.7,
       "navigationSha256": "c04c72e792154c09acce898367ed636c0e4c13c6104ec1b842b9f18e52f74ff3",
       "navigationChangedFromRelease": false,
-      "evidenceStatus": "incomplete",
-      "pricingReason": "unreviewed_edge",
-      "proofComplete": false,
-      "unreviewedEdges": 7,
-      "firstBlockers": [
-        {
-          "edge": 59947,
-          "from": 21761,
-          "to": 21762,
-          "lat": 38.7057418823,
-          "lon": -9.33686637878,
-          "road": "",
-          "meters": 202.8,
-          "begin": 0,
-          "end": 202.8,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 59950,
-          "from": 21762,
-          "to": 21763,
-          "lat": 38.7073173523,
-          "lon": -9.33724212646,
-          "road": "",
-          "meters": 59.4,
-          "begin": 0,
-          "end": 59.4,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 59951,
-          "from": 21763,
-          "to": 1579858,
-          "lat": 38.7076034546,
-          "lon": -9.33666801453,
-          "road": "",
-          "meters": 66.7,
-          "begin": 0,
-          "end": 66.7,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 4070142,
-          "from": 1579858,
-          "to": 1640463,
-          "lat": 38.7076225281,
-          "lon": -9.33590126038,
-          "road": "",
-          "meters": 41.5,
-          "begin": 0,
-          "end": 41.5,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        },
-        {
-          "edge": 4215682,
-          "from": 1640463,
-          "to": 1640465,
-          "lat": 38.7076072693,
-          "lon": -9.33542346954,
-          "road": "",
-          "meters": 236.3,
-          "begin": 0,
-          "end": 236.3,
-          "graphToll": false,
-          "covered": false,
-          "events": []
-        }
+      "evidenceStatus": "complete",
+      "pricingReason": "",
+      "proofComplete": true,
+      "unreviewedEdges": 0,
+      "firstBlockers": [],
+      "verifiedEvents": [
+        "brisa:0502"
       ],
-      "verifiedEvents": [],
-      "rejectionReason": "unreviewed_edge",
-      "androidPrefilterWouldReject": true,
+      "rejectionReason": "",
+      "androidPrefilterWouldReject": false,
       "freeConfidence": "unverified"
     },
     {

@@ -43,8 +43,11 @@ of these graph-specific APK bindings.
 The base has 529 A5/Lisbon directed edges and four Carcavelos crossing rows.
 A28 adds 918 edges and four collection nodes at Angeiras/Póvoa. A16 adds 315
 main-carriageway edges and six nodes at Idanha/Sacotes/Ranholas. The composed
-proof therefore has **1,762 edges and 14 crossing rows**. It excludes ramps,
-IC16 trunk continuations, IC23 and unreviewed A9 ticket boundaries. This is
+proof originally had 1,762 edges and 14 crossing rows. Issue #2 extends it
+with the A14/A1 Coimbra Norte–Fatima ticket corridor, public approaches and
+reviewed Oeiras I / Carcavelos I ramps, reaching **2,481 edges and 20 physical
+event rows**. IC16 trunk continuations, IC23, unreviewed A9 boundaries and the
+Oeiras II / Carcavelos II facilities remain excluded. This is
 increased functional coverage, not complete nationwide confirmed pricing.
 
 The A16 identity review is explicit:
@@ -78,14 +81,14 @@ The provider now considers complete physical proof even with zero flagged toll
 meters. A nonempty proven crossing sequence is priced; a truly free sequence
 retains its original `none` state. JSON price status and `hasTolls` recognize the
 confirmed charge without inventing graph distance or changing graph flags.
-The Android prefilter still rejects any uncovered edge, and JNI still validates
-country, actual graph digests, topology, direction and interval clipping.
+Android loads graph proof independently of route completeness. JNI validates
+country, actual graph digests, topology, direction and interval clipping; the
+native engine requires complete applicable evidence before confirming a total.
 
-This correction does not change avoid-tolls routing weights. A known stale
-graph flag can consequently still affect route selection for very short
-traversals. Broader correction of graph toll flags requires a separately
-validated data update; a confirmed positive charge is no longer displayed as
-free. A9 entry/exit pricing and full national collection matching remain open.
+Avoid-tolls now consults physically reviewed collection points and paid-network
+intervals instead of relying solely on obsolete flags. Ordinary routing costs,
+GPS and map matching are unchanged. A9 entry/exit pricing and complete national
+collection matching remain open.
 
 Collection evidence is also independent of tariff availability. If an updated
 table omits a proven collection ID, or a vehicle class is unsupported, the
@@ -115,3 +118,27 @@ request unsupported class 99. Both require unavailable/null, preserve the known
 collection and all navigation fields, and export
 `unavailable-crossing-quotes.json`. This makes 93 instrumented price cases,
 including the 91 ordinary route/class scenarios.
+
+## Reviewed A5 accesses (2026-11-08)
+
+`portugal-a5-reviewed-accesses.json` adds the Oeiras I entry/exit and the
+Lisbon-bound Carcavelos I entrance, including its traditional and Via Verde lanes.
+The fixed 2026 catalog is unchanged: Oeiras I classes 1–4 cost
+0.40/0.75/0.75/0.75 EUR; Carcavelos I costs 0.70/1.35/1.35/1.35 EUR.
+
+Physical identity and tariff provenance are separate. A Brisa access notice
+identifies Oeiras I by its Oeiras/Paco de Arcos destination; a traffic study names
+the Lisbon-bound Carcavelos I entrance. Historical OSM fees and proposed dynamic
+prices in that study are not used. Original directed source ways match the
+unchanged distributed graph within the existing simplification/quantization bound.
+
+At the Oeiras exit, floating-point projection sums could include a shared gate
+on both adjacent graph edges. Exact float32 source-node identity now gives it
+to the outgoing edge only. This does not relax geometric tolerances or suppress
+real repeated passages. The real-node regression, one-match-per-gate audit and
+28 new actual route/class/after-gate scenarios protect this boundary.
+
+All 93 original JNI price cases and the 13 earlier issue-2 additions remain,
+bringing required Android coverage to **134 price cases**. Two additional actual
+MapLibre previews show the complete IKEA routes from Oeiras and Carcavelos with
+their own prices. The full GPS Release gate remains separate and unchanged.

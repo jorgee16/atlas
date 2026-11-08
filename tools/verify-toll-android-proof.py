@@ -7,10 +7,10 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 104:
+if len(cases) < 132:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
-new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv')
+new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv')
               for r in csv.DictReader((fixture_root/name).open(),delimiter=';')}
 new_cases=set()
 classes = set()
@@ -69,8 +69,17 @@ for case in cases:
                 raise ValueError('Incorrect reviewed approach/ticket quote: '+case['id'])
             if case['id'].startswith('a1-') and [v['chargeId'] for v in after['tollRoads']]!=['brisa-published:0117:0122']:
                 raise ValueError('The A1 ticket must follow the mapped 0117->0122 itinerary')
+        elif expected['expectedPricing']=='none':
+            if after['tollPricing']!='none' or after['tollAmount']!=0 or not after['tollFreeVerified']:
+                raise ValueError('A reviewed start after the access gate was charged: '+case['id'])
         elif after['tollPricing']!='unavailable' or after['tollAmount'] is not None:
             raise ValueError('Starting inside a paid network cannot invent an entry or zero')
+        if after['tollVehicleClass']!=int(expected['class']):
+            raise ValueError('Wrong class in a reviewed quote: '+case['id'])
+        if case['id'].startswith(('a5-oeiras-i-','a5-carcavelos-i-')) and after['tollAmount']>0:
+            charge='brisa:0504' if case['id'].startswith('a5-oeiras-i-') else 'brisa:0502'
+            if [v['chargeId'] for v in after['tollRoads']]!=[charge]:
+                raise ValueError('Wrong physical access plaza: '+case['id'])
         new_cases.add(case['id'])
     elif after['tollPricing'] == 'exact':
         raise ValueError('Unreviewed city approaches were certified')

@@ -170,12 +170,15 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage.get('edgeWitnesses',stage.get('freeEdgeWitnesses',{}))},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual([4,6,2,0],[len(s.get('crossings',[])) for s in report['stages']])
+        self.assertEqual([4,6,2,0,4],[len(s.get('crossings',[])) for s in report['stages']])
         self.assertEqual(410,report['stages'][2]['additionalCoveredEdges'])
         self.assertEqual(408,len(report['stages'][2]['networks']))
         self.assertEqual({'entry:brisa-published:0117','exit:brisa-published:0122'},
             {v['chargeId'] for v in report['stages'][2]['crossings']})
         self.assertEqual(284,report['stages'][3]['additionalFreeEdges'])
+        self.assertEqual(25,report['stages'][4]['additionalCoveredEdges'])
+        self.assertEqual({'brisa:0502','brisa:0504'},
+            {v['chargeId'] for v in report['stages'][4]['crossings']})
         for previous,stage in zip(report['stages'],report['stages'][1:]):
             self.assertEqual(previous['bindingsSha256'],stage['seedSha256'])
         self.assertEqual({'vialivre:a28:angeiras','vialivre:a28:povoa'}, {e['chargeId'] for e in report['stages'][0]['crossings']})

@@ -19,6 +19,10 @@
       "kind": "free",
       "review": "portugal-cascais-approaches.json",
       "source": "portugal-cascais-approaches.source.json"
+    },
+    {
+      "review": "portugal-a5-reviewed-accesses.json",
+      "source": "portugal-a5-reviewed-accesses.source.json"
     }
   ]
 }

@@ -80,8 +80,20 @@ def crossing_offsets(graph, source, source_nodes, gates, witness, length):
     if total <= 0 or length <= 0:
         raise ValueError('Degenerate graph edge')
     result = []
-    for node, p, along in zip(source_nodes, original, cumulative):
-        if node not in gates or not witness['beginMeters'] <= along < witness['endMeters']:
+    quantized = lambda point: struct.unpack('<ff', struct.pack('<ff', *point))
+    for node, raw_point, p, along in zip(source_nodes, source, original, cumulative):
+        if node not in gates:
+            continue
+        # The packager stores source nodes as float32. An original collection
+        # node shared by adjacent graph edges belongs to the outgoing edge,
+        # even when projection sums differ by one floating-point ULP.
+        gate = quantized(raw_point)
+        if gate == quantized(graph[-1]):
+            continue
+        if gate == quantized(graph[0]):
+            result.append(dict(osmNodeId=node, chargeId=gates[node], offsetMeters=0.))
+            continue
+        if not witness['beginMeters'] <= along < witness['endMeters']:
             continue
         positions, _ = _projections(p, rendered)
         positions.sort()

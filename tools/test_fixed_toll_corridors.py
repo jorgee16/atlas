@@ -46,6 +46,26 @@ class FixedCorridorTests(unittest.TestCase):
         self.assertEqual([], fixed.crossing_offsets(graph, source, [1, 2, 3], {2: 'operator:gate'},
             fixed.clipped_way_witness(graph, source), 40))
 
+    def test_real_oeiras_split_owns_the_gate_only_on_its_outgoing_edge(self):
+        import struct
+        cfg=ROOT/'tools/toll-binding-config'
+        source=json.loads((cfg/'portugal-a5-reviewed-accesses.source.json').read_text())
+        nodes={int(k):tuple(v) for k,v in source['coordinates'].items()}
+        ways={w['id']:w for w in source['ways']}
+        gate=3751374533
+        quantized=lambda p:tuple(struct.unpack('<ff',struct.pack('<ff',*p)))
+        events=[]
+        for wid,length in ((418240487,58.2),(320186742,79.7)):
+            ids=ways[wid]['nodes'];original=[nodes[n] for n in ids]
+            graph=[quantized(p) for p in original]
+            witness=fixed.clipped_way_witness(graph,original,tolerance=2.5)
+            self.assertIsNotNone(witness)
+            current=fixed.crossing_offsets(graph,original,ids,{gate:'brisa:0504'},witness,length)
+            events.extend(current)
+            self.assertEqual(0 if wid==418240487 else 1,len(current))
+        self.assertEqual(1,len(events))
+        self.assertEqual(0.,events[0]['offsetMeters'])
+
     def test_unknown_collection_and_changed_direction_block_certification(self):
         cfg = ROOT / 'tools/toll-binding-config'
         review = json.loads((cfg / 'portugal-a28.json').read_text())
