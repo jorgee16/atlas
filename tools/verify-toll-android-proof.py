@@ -7,7 +7,7 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 314:
+if len(cases) < 318:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
 new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv','a9-network-cases.csv')

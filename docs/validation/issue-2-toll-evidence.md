@@ -42,9 +42,9 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 3,901 reviewed directed graph edges (+2,139, 121.4%).
+- 1,762 -> 3,981 reviewed directed graph edges (+2,219, 125.9%).
   The original issue phase adds 1,860 edges through A9/A1/access reviews; the
-  national Ascendi extension adds another 279 around fixed facilities.
+  national Ascendi extension adds another 359 around fixed facilities.
 - 410 additional A14/A1/Fatima edges, 408 bounded paid-network intervals and two
   physical entry/exit events. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
@@ -100,12 +100,12 @@ Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
 ## Validation and reproducibility
 
 Local: five C++ suites, 55 Python toll/section-provider tests, 33 JS routing/toll/ETA/UI tests.
-314 actual native route/class cases pass against the distributed mainland graph,
+318 actual native route/class cases pass against the distributed mainland graph,
 including the original 91 CSV cases, eight new public approaches, four A1 classes,
 one start-inside-network case 28 Oeiras/Carcavelos access cases and 90 A9/A16 cases. The two original unavailable-class/tariff JNI
-regressions remain mandatory, making **316 Android price cases**. The additional
-92 cases cover all four classes and all 12 activated A4/A17/A29/A42 facilities
-across 23 real directed crossings. All original
+regressions remain mandatory, making **320 Android price cases**. The additional
+96 cases cover all four classes and all 12 activated A4/A17/A29/A42 facilities
+across 24 real directed crossings. All original
 93 cases are retained. Android execution and screenshots must be checked in the
 PR CI; local native results alone are not emulator evidence.
 
@@ -193,3 +193,44 @@ lane-level GPS coordinates. Original directed OSM geometry supplies the latter;
 shared/erroneous DDIE coordinate groups are not used to snap a gate. The current
 IMT and Ascendi tariffs supply the monetary values. No successful Via Verde or
 IP simulator quote is claimed in this phase.
+
+## Geographical correction of the national fixed block
+
+Review of commit `a2aed7a` exposed incorrect tariff-to-node identities even
+though its arithmetic, graph containment and Android tests passed. Those tests
+proved that the router crossed a nominated node and applied the nominated price;
+they could not independently prove that the nomination was geographically right.
+The affected associations are replaced rather than retained as confirmed prices.
+
+- A17: the six previously selected nodes were southern collection approaches
+  around latitudes 39.99–40.22. The Costa de Prata electronic sections are north
+  of Mira. The reviewed nodes are now the motorway gantries at latitudes 40.461,
+  40.562 and 40.618, for Mira–Ponte de Vagos, Vagos–Ílhavo and
+  Aveiro Sul–S. Bernardo respectively. The booth and electronic lane nodes near
+  40.442 are not added as Costa de Prata fixed fees.
+- A29 ER1-18–Miramar: nodes 1620526107/4378201267 were on the A1 access near
+  latitude 40.927, not this A29 section. They are removed. The actual A29
+  Gulpilhares gantries 1563530097/1563530098 are at latitude 41.079, north of
+  Miramar. Estarreja, Ovar and Arada identities remain unchanged.
+- A42: all six physical gantries were present but the section order was wrong.
+  The west-to-east order is now IC24/IC25–Lordelo (264117176/264119609),
+  Paços de Ferreira–EN106 Sul (2869384457/2869384458), and EN106 Norte–Lousada
+  (264119862/2869381630). The monetary table itself is unchanged.
+
+Original source geometry was recaptured using complete OSM road relations
+7298451 (A17) and 7301357 (A29), via the official OSM API
+`/api/0.6/relation/<id>/full.json`. Relation 12858855 was also inspected for A42.
+Normalized snapshots retain original node IDs, coordinates, way versions,
+timestamps and raw-response hashes. These relations establish geography,
+not tariff amounts. The supplied, independently reviewed Ascendi tariff records
+remain the monetary source. Only the selected whole directed ways and bounded
+context are certified, with every other collection point excluded.
+
+The new geographical regression checks the actual northern A17 gantry IDs,
+the A29 Miramar corridor, the A42 ordered section identities and the electronic
+collection type. It is separate from the native quote fixtures. All 24 corrected
+directed crossings now have runtime cases for classes 1–4: 96 quotes. The former
+parallel-edge failure concerned the incorrect A1 node and is not a limitation
+of the corrected A29 fixture. Entire-trip confirmation still requires full
+traversal coverage; 12 installations do not mean four whole motorways or a
+national coverage percentage.

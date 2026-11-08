@@ -46,9 +46,9 @@ main-carriageway edges and six nodes at Idanha/Sacotes/Ranholas. The composed
 proof originally had 1,762 edges and 14 crossing rows. Issue #2 extends it
 with the A14/A1 Coimbra Norte–Fatima ticket corridor, public approaches and
 reviewed Oeiras I / Carcavelos I ramps. The A9 network phase and the national
-Ascendi phase now bring the composed proof to **3,901 directed coverage edges,
+Ascendi phase now bring the composed proof to **3,981 directed coverage edges,
 944 paid-network intervals and 81 physical event rows**. The latest phase adds
-279 witnessed edges and 24 directed crossings for 12 facilities on A4, A17,
+359 witnessed edges and 24 directed crossings for 12 facilities on A4, A17,
 A29 and A42. IC16 trunk continuations, IC23 and the Oeiras II / Carcavelos II
 facilities remain excluded. A41 remains excluded because 36 supplied price rows
 conflict; choosing one would manufacture an official price. This is
@@ -190,10 +190,9 @@ included before and after each facility and stops at any other collection point.
 
 The resulting stages cover two A4 facilities, three A17 facilities, four A29
 facilities and three A42 facilities. All four vehicle classes use the independent
-published values in `toll-charges/Portugal.csv`. Ninety-two actual native routes
-exercise 23 of the 24 directed crossings and all 12 price identities. All 92
+published values in `toll-charges/Portugal.csv`. Ninety-six actual native routes
+exercise all 24 directed crossings and all 12 price identities. All 96
 produce exact totals while route points, edge indexes, maneuvers, distance, ETA
-and protected visual points remain unchanged. The remaining A29 direction is
-geometrically certified, but an endpoint-only runtime fixture snaps to a parallel
-edge with the same synthetic junction; it is therefore not counted as runtime
-route evidence.
+and protected visual points remain unchanged. See the geographical correction
+in the issue validation report: runtime arithmetic alone cannot validate a
+tariff-to-facility identity.

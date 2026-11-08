@@ -104,7 +104,7 @@ without changes to navigation fields. This is not full official-price coverage.
 
 The subsequent A16 extension composes country review stages without adding a
 checked-in intermediate CSV per motorway. That historical stage had 1,762 edges,
-14 crossings and 91 real C++/JNI cases; the current composed proof has 3,901
+14 crossings and 91 real C++/JNI cases; the current composed proof has 3,981
 coverage edges, 944 network intervals and 81 crossing rows after A9 and the
 A4/A17/A29/A42 reviews. It also fixes a confirmed Ranholas
 charge hidden by an old untolled graph flag, changing monetary presentation

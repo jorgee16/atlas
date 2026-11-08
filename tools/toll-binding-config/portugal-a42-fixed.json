@@ -28,7 +28,7 @@
     1352410248
   ],
   "sourceSha256": "b69f97f4f0fe15d14201806fa60d5f8339eeb39191ac559134e1d82230a4c64a",
-  "seedSha256": "7e404d8549b5fe826d238abe6a0e0557d2a0a8cfb622c8968b4279d53ef592ab",
+  "seedSha256": "aafd44048dceac2c7327b1c88895ec27d5992c0fbf970149fb748fad011f9710",
   "scope": "A42 IC24/IC25–Lordelo, Paços de Ferreira–EN106 Sul and EN106 Norte–Lousada electronic facilities, both directed carriageways.",
   "sources": [
     "https://ascendi.pt/portagens-eletronicas/",
@@ -37,12 +37,12 @@
     "https://api.openstreetmap.org/api/0.6/map.json"
   ],
   "chargePoints": {
-    "2869384457": "ascendi:grande-porto:10",
-    "2869384458": "ascendi:grande-porto:10",
-    "264119862": "ascendi:grande-porto:11",
-    "2869381630": "ascendi:grande-porto:11",
-    "264117176": "ascendi:grande-porto:12",
-    "264119609": "ascendi:grande-porto:12"
+    "264117176": "ascendi:grande-porto:10",
+    "264119609": "ascendi:grande-porto:10",
+    "2869384457": "ascendi:grande-porto:11",
+    "2869384458": "ascendi:grande-porto:11",
+    "264119862": "ascendi:grande-porto:12",
+    "2869381630": "ascendi:grande-porto:12"
   },
   "physicalReview": {
     "basis": "Official 2026 facility endpoints are bound to the explicit OSM collection nodes on their directed source ways; legacy packaged event identities are ignored.",

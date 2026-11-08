@@ -3,8 +3,8 @@
   "catalogSha256": "ec956bb652af59a59fb1f5ff88fbe95d920619cb910f802a4038777cdda8f1c4",
   "seedSha256": "9dcdc3f76c94632b1d955dc2c701963ceb13d99b70f65c280e68d2c2565478a3",
   "seedCoveredEdges": 529,
-  "additionalCoveredEdges": 3372,
-  "bindingsSha256": "c2699c851e4b2496e194c07808ae727ed8fbc9a35cb3e86b26c30a83c974959b",
+  "additionalCoveredEdges": 3452,
+  "bindingsSha256": "f04198639123eafe8692f6cd30121536451a2e1a2a2ba0ffae9cc747842d0c75",
   "stages": [
     {
       "country": "Portugal",
@@ -55402,11 +55402,11 @@
         "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
-      "sourceSha256": "b2a48ab061dc13e36f32efd3e8ca75e7b0950136f9b880a9f761e6c5b02889e6",
-      "reviewSha256": "084a2ec6f12a7d750e8e4eda7fab21c424a0a797dc27767d6a4139928d7139f5",
+      "sourceSha256": "2dd835647fed2dbae959564529410a629ebfc9eb00d553f89cc752ef1a21594d",
+      "reviewSha256": "0998d4cabfeadf6e4d6d0b0b1051f37295abe2a8dad5167ebb4aa78703a94e1f",
       "seedSha256": "b9ccc15d7df9232ecae94f650f71ec6fd76348d4c84152d28990ffc3ff4a95bf",
       "seedCoveredEdges": 3656,
-      "additionalCoveredEdges": 69,
+      "additionalCoveredEdges": 114,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
         "crossing;4067702;1578879;1640459;0.000000000;68.7;brisa:0501",
@@ -55470,1096 +55470,1771 @@
         "crossing;1356247;502641;502642;164.602698727;187.9;ascendi:grande-porto:02",
         "crossing;4584944;1794867;52952;136.515403987;176.4;ascendi:grande-porto:02"
       ],
-      "bindingsSha256": "8a8b44e91f779a263aea56c1752dbff7a96a308ab6c3889c7ea60e672b174244",
+      "bindingsSha256": "2f79480328fd97644ec9ae955386e59259bc9ef4fd672d1a13bf2ad8d3bbd1ca",
       "crossings": [
         {
-          "edge": 1645889,
-          "fromNode": 612078,
-          "toNode": 612079,
-          "lengthMeters": 46.0,
-          "osmNodeId": 189092488,
-          "chargeId": "ascendi:costa-de-prata:03",
-          "offsetMeters": 0.0
+          "edge": 1722343,
+          "fromNode": 641976,
+          "toNode": 641977,
+          "lengthMeters": 234.6,
+          "osmNodeId": 1563499859,
+          "chargeId": "ascendi:costa-de-prata:01",
+          "offsetMeters": 119.41598568865338
         },
         {
-          "edge": 1717053,
-          "fromNode": 639915,
-          "toNode": 1507863,
-          "lengthMeters": 42.3,
-          "osmNodeId": 530622950,
-          "chargeId": "ascendi:costa-de-prata:02",
-          "offsetMeters": 0.0
-        },
-        {
-          "edge": 1717056,
-          "fromNode": 639917,
-          "toNode": 1507790,
-          "lengthMeters": 42.2,
-          "osmNodeId": 530695809,
-          "chargeId": "ascendi:costa-de-prata:02",
-          "offsetMeters": 0.0
-        },
-        {
-          "edge": 4473300,
-          "fromNode": 1747546,
-          "toNode": 2871270,
-          "lengthMeters": 39.1,
-          "osmNodeId": 808569548,
+          "edge": 1723386,
+          "fromNode": 642436,
+          "toNode": 642437,
+          "lengthMeters": 196.6,
+          "osmNodeId": 1563499866,
           "chargeId": "ascendi:costa-de-prata:01",
           "offsetMeters": 0.0
         },
         {
-          "edge": 4473344,
-          "fromNode": 1747579,
-          "toNode": 1747577,
-          "lengthMeters": 43.0,
-          "osmNodeId": 158749403,
+          "edge": 1756720,
+          "fromNode": 655258,
+          "toNode": 655259,
+          "lengthMeters": 372.8,
+          "osmNodeId": 1563499950,
           "chargeId": "ascendi:costa-de-prata:03",
           "offsetMeters": 0.0
         },
         {
-          "edge": 6998318,
-          "fromNode": 2871269,
-          "toNode": 1747551,
-          "lengthMeters": 32.6,
-          "osmNodeId": 823793223,
-          "chargeId": "ascendi:costa-de-prata:01",
+          "edge": 3758753,
+          "fromNode": 1450457,
+          "toNode": 1450458,
+          "lengthMeters": 488.2,
+          "osmNodeId": 1563499968,
+          "chargeId": "ascendi:costa-de-prata:03",
+          "offsetMeters": 28.76770741671758
+        },
+        {
+          "edge": 4474551,
+          "fromNode": 1748140,
+          "toNode": 1748141,
+          "lengthMeters": 206.2,
+          "osmNodeId": 1563499923,
+          "chargeId": "ascendi:costa-de-prata:02",
           "offsetMeters": 0.0
+        },
+        {
+          "edge": 4474554,
+          "fromNode": 1748143,
+          "toNode": 1748142,
+          "lengthMeters": 612.2,
+          "osmNodeId": 1563499922,
+          "chargeId": "ascendi:costa-de-prata:02",
+          "offsetMeters": 174.60435464772397
         }
       ],
       "networks": [],
       "edgeWitnesses": {
-        "349904": {
-          "fromNode": 125842,
-          "toNode": 1507768,
-          "lengthMeters": 73.0,
+        "350887": {
+          "fromNode": 126187,
+          "toNode": 1748194,
+          "lengthMeters": 246.4,
           "witnesses": [
             {
-              "wayId": 373033559,
+              "wayId": 462393029,
               "beginMeters": 0.0,
-              "endMeters": 73.15785885114047,
+              "endMeters": 246.8044413218854,
               "reversed": false,
-              "continuousBoundMeters": 2.4323595256528034,
+              "continuousBoundMeters": 2.4322677966454265,
+              "maxVertexDeviationMeters": 1.9564170358870878
+            }
+          ]
+        },
+        "350896": {
+          "fromNode": 126193,
+          "toNode": 1748168,
+          "lengthMeters": 222.9,
+          "witnesses": [
+            {
+              "wayId": 462392971,
+              "beginMeters": 0.0,
+              "endMeters": 223.12859155394878,
+              "reversed": false,
+              "continuousBoundMeters": 2.432256746743443,
+              "maxVertexDeviationMeters": 0.40724087952457433
+            }
+          ]
+        },
+        "350952": {
+          "fromNode": 126232,
+          "toNode": 1748173,
+          "lengthMeters": 246.2,
+          "witnesses": [
+            {
+              "wayId": 462392983,
+              "beginMeters": 0.0,
+              "endMeters": 246.5487519969834,
+              "reversed": false,
+              "continuousBoundMeters": 2.432257211401176,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "349908": {
-          "fromNode": 125844,
-          "toNode": 2871268,
-          "lengthMeters": 26.3,
+        "460501": {
+          "fromNode": 166328,
+          "toNode": 1748192,
+          "lengthMeters": 247.1,
           "witnesses": [
             {
-              "wayId": 1383816466,
+              "wayId": 462393023,
               "beginMeters": 0.0,
-              "endMeters": 26.349618586151728,
+              "endMeters": 246.9861985199792,
               "reversed": false,
-              "continuousBoundMeters": 2.432358616106872,
-              "maxVertexDeviationMeters": 7.108895957933346e-15
+              "continuousBoundMeters": 2.432267302980568,
+              "maxVertexDeviationMeters": 0.3888975344672533
             }
           ]
         },
-        "350117": {
-          "fromNode": 125919,
-          "toNode": 125920,
-          "lengthMeters": 210.6,
+        "460505": {
+          "fromNode": 166332,
+          "toNode": 642423,
+          "lengthMeters": 182.8,
           "witnesses": [
             {
-              "wayId": 66967884,
+              "wayId": 462392975,
               "beginMeters": 0.0,
-              "endMeters": 210.88504928851492,
+              "endMeters": 183.03160348133082,
               "reversed": false,
-              "continuousBoundMeters": 2.432371590204228,
-              "maxVertexDeviationMeters": 1.7066603890220584
+              "continuousBoundMeters": 2.4322573579986275,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "350118": {
-          "fromNode": 125919,
-          "toNode": 194985,
-          "lengthMeters": 142.3,
+        "547248": {
+          "fromNode": 199287,
+          "toNode": 199288,
+          "lengthMeters": 48.0,
           "witnesses": [
             {
-              "wayId": 155729464,
+              "wayId": 95365887,
               "beginMeters": 0.0,
-              "endMeters": 142.50669250789082,
+              "endMeters": 47.722298522844376,
               "reversed": false,
-              "continuousBoundMeters": 2.4323717072730973,
-              "maxVertexDeviationMeters": 1.3539728709098986
+              "continuousBoundMeters": 2.432245488597875,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "350119": {
-          "fromNode": 125920,
-          "toNode": 125921,
-          "lengthMeters": 132.3,
+        "547249": {
+          "fromNode": 199288,
+          "toNode": 1748143,
+          "lengthMeters": 933.9,
           "witnesses": [
             {
-              "wayId": 66967884,
-              "beginMeters": 210.88369340816186,
-              "endMeters": 343.1259630071448,
-              "reversed": false,
-              "continuousBoundMeters": 2.432371479971123,
-              "maxVertexDeviationMeters": 1.8146807381116374
-            }
-          ]
-        },
-        "352938": {
-          "fromNode": 126935,
-          "toNode": 194963,
-          "lengthMeters": 54.9,
-          "witnesses": [
-            {
-              "wayId": 95197229,
+              "wayId": 462392944,
               "beginMeters": 0.0,
-              "endMeters": 55.04495912595614,
+              "endMeters": 935.3403225992886,
               "reversed": false,
-              "continuousBoundMeters": 2.432371955936272,
-              "maxVertexDeviationMeters": 0.882725446341098
+              "continuousBoundMeters": 2.4322453951230893,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "352946": {
-          "fromNode": 126941,
-          "toNode": 126942,
-          "lengthMeters": 221.2,
+        "547250": {
+          "fromNode": 199289,
+          "toNode": 199290,
+          "lengthMeters": 500.7,
           "witnesses": [
             {
-              "wayId": 68506620,
+              "wayId": 95365889,
               "beginMeters": 0.0,
-              "endMeters": 221.30980111559737,
+              "endMeters": 501.40138325614373,
               "reversed": false,
-              "continuousBoundMeters": 2.43235937007431,
-              "maxVertexDeviationMeters": 2.842170943040401e-14
+              "continuousBoundMeters": 2.432246455919613,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "352948": {
-          "fromNode": 126942,
-          "toNode": 126943,
-          "lengthMeters": 168.5,
+        "547251": {
+          "fromNode": 199290,
+          "toNode": 199291,
+          "lengthMeters": 297.7,
           "witnesses": [
             {
-              "wayId": 68506620,
-              "beginMeters": 221.31185814579712,
-              "endMeters": 390.1349996109476,
+              "wayId": 95365889,
+              "beginMeters": 501.4030710774707,
+              "endMeters": 799.4771966290388,
               "reversed": false,
-              "continuousBoundMeters": 2.43235937007431,
-              "maxVertexDeviationMeters": 1.5458126889417985
+              "continuousBoundMeters": 2.4322470141763994,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "352949": {
-          "fromNode": 126943,
-          "toNode": 1747545,
-          "lengthMeters": 135.7,
+        "547252": {
+          "fromNode": 199291,
+          "toNode": 199292,
+          "lengthMeters": 290.1,
           "witnesses": [
             {
-              "wayId": 462170569,
+              "wayId": 95365889,
+              "beginMeters": 799.4796884513919,
+              "endMeters": 1089.7585381120284,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322474703800783,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "547253": {
+          "fromNode": 199292,
+          "toNode": 199293,
+          "lengthMeters": 186.5,
+          "witnesses": [
+            {
+              "wayId": 95365889,
+              "beginMeters": 1089.764019081934,
+              "endMeters": 1276.4024762400866,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322477036249275,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "547254": {
+          "fromNode": 199293,
+          "toNode": 1748152,
+          "lengthMeters": 88.8,
+          "witnesses": [
+            {
+              "wayId": 462392952,
               "beginMeters": 0.0,
-              "endMeters": 135.97818608653756,
+              "endMeters": 89.04868994678782,
               "reversed": false,
-              "continuousBoundMeters": 2.432359140979403,
-              "maxVertexDeviationMeters": 0.895733326732712
+              "continuousBoundMeters": 2.432247803954067,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "354451": {
-          "fromNode": 127460,
-          "toNode": 127461,
+        "547257": {
+          "fromNode": 199296,
+          "toNode": 199289,
+          "lengthMeters": 48.3,
+          "witnesses": [
+            {
+              "wayId": 95365898,
+              "beginMeters": 0.0,
+              "endMeters": 48.451560852075836,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322454697314235,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "560864": {
+          "fromNode": 205391,
+          "toNode": 1748193,
+          "lengthMeters": 227.0,
+          "witnesses": [
+            {
+              "wayId": 462393025,
+              "beginMeters": 0.0,
+              "endMeters": 227.31517162617868,
+              "reversed": false,
+              "continuousBoundMeters": 2.432267236129609,
+              "maxVertexDeviationMeters": 1.3210310210000484
+            }
+          ]
+        },
+        "578780": {
+          "fromNode": 212392,
+          "toNode": 1748136,
+          "lengthMeters": 253.7,
+          "witnesses": [
+            {
+              "wayId": 462392932,
+              "beginMeters": 0.0,
+              "endMeters": 253.9337250776353,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322415598838982,
+              "maxVertexDeviationMeters": 1.0621508198916418
+            }
+          ]
+        },
+        "578818": {
+          "fromNode": 212409,
+          "toNode": 1748138,
+          "lengthMeters": 225.4,
+          "witnesses": [
+            {
+              "wayId": 462392940,
+              "beginMeters": 0.0,
+              "endMeters": 225.63253875339524,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322417708665096,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "578822": {
+          "fromNode": 212411,
+          "toNode": 586729,
+          "lengthMeters": 202.4,
+          "witnesses": [
+            {
+              "wayId": 152348491,
+              "beginMeters": 0.0,
+              "endMeters": 202.76330135408884,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322410195571935,
+              "maxVertexDeviationMeters": 1.747044620857057
+            }
+          ]
+        },
+        "1502557": {
+          "fromNode": 557651,
+          "toNode": 1748115,
+          "lengthMeters": 220.0,
+          "witnesses": [
+            {
+              "wayId": 462392907,
+              "beginMeters": 0.0,
+              "endMeters": 220.4194402023475,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322299368702387,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1502560": {
+          "fromNode": 557653,
+          "toNode": 1748112,
+          "lengthMeters": 213.1,
+          "witnesses": [
+            {
+              "wayId": 462392899,
+              "beginMeters": 0.0,
+              "endMeters": 213.24665953547253,
+              "reversed": false,
+              "continuousBoundMeters": 2.43222925310329,
+              "maxVertexDeviationMeters": 1.690803262779692
+            }
+          ]
+        },
+        "1502565": {
+          "fromNode": 557657,
+          "toNode": 1748114,
+          "lengthMeters": 282.3,
+          "witnesses": [
+            {
+              "wayId": 462392905,
+              "beginMeters": 0.0,
+              "endMeters": 282.8960048953402,
+              "reversed": false,
+              "continuousBoundMeters": 2.432229706947463,
+              "maxVertexDeviationMeters": 1.1027849270257755
+            }
+          ]
+        },
+        "1579753": {
+          "fromNode": 586729,
+          "toNode": 212409,
+          "lengthMeters": 171.3,
+          "witnesses": [
+            {
+              "wayId": 152348491,
+              "beginMeters": 202.76435299853696,
+              "endMeters": 374.39040178472715,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322413360352027,
+              "maxVertexDeviationMeters": 0.5177942296529006
+            }
+          ]
+        },
+        "1722342": {
+          "fromNode": 641975,
+          "toNode": 641976,
           "lengthMeters": 251.7,
           "witnesses": [
             {
-              "wayId": 69170046,
+              "wayId": 158018546,
               "beginMeters": 0.0,
-              "endMeters": 252.0474585592287,
+              "endMeters": 252.1013811624291,
               "reversed": false,
-              "continuousBoundMeters": 2.4323202298980204,
+              "continuousBoundMeters": 2.4322665136172708,
+              "maxVertexDeviationMeters": 0.5117718214100933
+            }
+          ]
+        },
+        "1722343": {
+          "fromNode": 641976,
+          "toNode": 641977,
+          "lengthMeters": 234.6,
+          "witnesses": [
+            {
+              "wayId": 158018546,
+              "beginMeters": 252.09869575582422,
+              "endMeters": 486.88177018778777,
+              "reversed": false,
+              "continuousBoundMeters": 2.432266123643274,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "354453": {
-          "fromNode": 127461,
-          "toNode": 127462,
-          "lengthMeters": 202.0,
+        "1722344": {
+          "fromNode": 641977,
+          "toNode": 641978,
+          "lengthMeters": 277.6,
           "witnesses": [
             {
-              "wayId": 69170046,
-              "beginMeters": 252.04546302126886,
-              "endMeters": 454.2110073243224,
+              "wayId": 158018546,
+              "beginMeters": 486.8769541995555,
+              "endMeters": 764.9349294643661,
               "reversed": false,
-              "continuousBoundMeters": 2.432320088690644,
+              "continuousBoundMeters": 2.432265757663922,
+              "maxVertexDeviationMeters": 1.4586417546478194
+            }
+          ]
+        },
+        "1722345": {
+          "fromNode": 641978,
+          "toNode": 641979,
+          "lengthMeters": 285.4,
+          "witnesses": [
+            {
+              "wayId": 158018546,
+              "beginMeters": 764.9262663039453,
+              "endMeters": 1050.616391938285,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322652751141636,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "354454": {
-          "fromNode": 127462,
-          "toNode": 207983,
-          "lengthMeters": 69.1,
+        "1722346": {
+          "fromNode": 641979,
+          "toNode": 641980,
+          "lengthMeters": 257.2,
           "witnesses": [
             {
-              "wayId": 95805705,
-              "beginMeters": 0.0,
-              "endMeters": 69.21077179671518,
+              "wayId": 158018546,
+              "beginMeters": 1050.605442666412,
+              "endMeters": 1308.3495353811736,
               "reversed": false,
-              "continuousBoundMeters": 2.4323198028509414,
+              "continuousBoundMeters": 2.4322647351309254,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "460480": {
-          "fromNode": 166316,
-          "toNode": 166317,
-          "lengthMeters": 223.2,
+        "1722347": {
+          "fromNode": 641980,
+          "toNode": 641981,
+          "lengthMeters": 471.9,
           "witnesses": [
             {
-              "wayId": 88826484,
-              "beginMeters": 0.0,
-              "endMeters": 223.35555643430718,
+              "wayId": 158018546,
+              "beginMeters": 1308.3388756615118,
+              "endMeters": 1780.4484659331922,
               "reversed": false,
-              "continuousBoundMeters": 2.4323198251020197,
-              "maxVertexDeviationMeters": 0.9163279617624226
+              "continuousBoundMeters": 2.43226422342523,
+              "maxVertexDeviationMeters": 4.440892098500626e-16
             }
           ]
         },
-        "460481": {
-          "fromNode": 166316,
-          "toNode": 639907,
-          "lengthMeters": 240.6,
+        "1722348": {
+          "fromNode": 641981,
+          "toNode": 641982,
+          "lengthMeters": 244.4,
           "witnesses": [
             {
-              "wayId": 157743120,
-              "beginMeters": 0.0,
-              "endMeters": 240.75902797224614,
+              "wayId": 158018546,
+              "beginMeters": 1780.428587325435,
+              "endMeters": 2025.4092978651506,
               "reversed": false,
-              "continuousBoundMeters": 2.432319708711607,
-              "maxVertexDeviationMeters": 1.20689080384699
+              "continuousBoundMeters": 2.432263271136618,
+              "maxVertexDeviationMeters": 1.80415660349516
             }
           ]
         },
-        "460482": {
-          "fromNode": 166317,
-          "toNode": 166318,
-          "lengthMeters": 186.0,
+        "1722349": {
+          "fromNode": 641982,
+          "toNode": 641983,
+          "lengthMeters": 279.5,
           "witnesses": [
             {
-              "wayId": 88826484,
-              "beginMeters": 223.3569841200664,
-              "endMeters": 409.70195043312526,
+              "wayId": 158018546,
+              "beginMeters": 2025.3989568298675,
+              "endMeters": 2304.900562866508,
               "reversed": false,
-              "continuousBoundMeters": 2.4323201177879676,
-              "maxVertexDeviationMeters": 7.105427357601002e-14
-            }
-          ]
-        },
-        "536388": {
-          "fromNode": 194963,
-          "toNode": 194984,
-          "lengthMeters": 121.9,
-          "witnesses": [
-            {
-              "wayId": 95197248,
-              "beginMeters": 0.0,
-              "endMeters": 121.968351604079,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323719303009788,
-              "maxVertexDeviationMeters": 1.2452976752231613
-            }
-          ]
-        },
-        "536392": {
-          "fromNode": 194967,
-          "toNode": 194968,
-          "lengthMeters": 76.8,
-          "witnesses": [
-            {
-              "wayId": 95197231,
-              "beginMeters": 0.0,
-              "endMeters": 76.85633276559771,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323718038332434,
+              "continuousBoundMeters": 2.432262778268334,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "536393": {
-          "fromNode": 194968,
-          "toNode": 194979,
-          "lengthMeters": 199.1,
+        "1722350": {
+          "fromNode": 641983,
+          "toNode": 641984,
+          "lengthMeters": 306.3,
           "witnesses": [
             {
-              "wayId": 95197245,
-              "beginMeters": 0.0,
-              "endMeters": 199.30877586811295,
+              "wayId": 158018546,
+              "beginMeters": 2304.888478192146,
+              "endMeters": 2611.7458741283,
               "reversed": false,
-              "continuousBoundMeters": 2.432371719236316,
-              "maxVertexDeviationMeters": 0.7419783855903225
+              "continuousBoundMeters": 2.432262231391137,
+              "maxVertexDeviationMeters": 9.028087887525425e-13
             }
           ]
         },
-        "536400": {
-          "fromNode": 194971,
-          "toNode": 194972,
-          "lengthMeters": 54.1,
+        "1722351": {
+          "fromNode": 641984,
+          "toNode": 641985,
+          "lengthMeters": 673.0,
           "witnesses": [
             {
-              "wayId": 95197234,
-              "beginMeters": 0.0,
-              "endMeters": 54.21869186568259,
+              "wayId": 158018546,
+              "beginMeters": 2611.731436132671,
+              "endMeters": 3285.3902760428946,
               "reversed": false,
-              "continuousBoundMeters": 2.4323719713174388,
-              "maxVertexDeviationMeters": 0.8643022389118712
-            }
-          ]
-        },
-        "536401": {
-          "fromNode": 194972,
-          "toNode": 194978,
-          "lengthMeters": 245.6,
-          "witnesses": [
-            {
-              "wayId": 95197237,
-              "beginMeters": 0.0,
-              "endMeters": 245.96614930123386,
-              "reversed": false,
-              "continuousBoundMeters": 2.432371982426055,
-              "maxVertexDeviationMeters": 1.6635037193151327
-            }
-          ]
-        },
-        "536417": {
-          "fromNode": 194979,
-          "toNode": 1747581,
-          "lengthMeters": 59.2,
-          "witnesses": [
-            {
-              "wayId": 462170593,
-              "beginMeters": 0.0,
-              "endMeters": 59.322509019381876,
-              "reversed": false,
-              "continuousBoundMeters": 2.432371683346646,
-              "maxVertexDeviationMeters": 0.528180749818986
-            }
-          ]
-        },
-        "536423": {
-          "fromNode": 194984,
-          "toNode": 2228867,
-          "lengthMeters": 53.7,
-          "witnesses": [
-            {
-              "wayId": 817414834,
-              "beginMeters": 0.0,
-              "endMeters": 53.65198508172729,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323718354502217,
+              "continuousBoundMeters": 2.432261669933563,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "536424": {
-          "fromNode": 194985,
-          "toNode": 194964,
-          "lengthMeters": 76.4,
+        "1722352": {
+          "fromNode": 641985,
+          "toNode": 641986,
+          "lengthMeters": 244.2,
           "witnesses": [
             {
-              "wayId": 95197250,
+              "wayId": 158018546,
+              "beginMeters": 3285.3467707987597,
+              "endMeters": 3529.7125902689263,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322604947024224,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1722353": {
+          "fromNode": 641986,
+          "toNode": 641987,
+          "lengthMeters": 246.0,
+          "witnesses": [
+            {
+              "wayId": 158018546,
+              "beginMeters": 3529.694849842529,
+              "endMeters": 3776.16048238231,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322600549455133,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1722354": {
+          "fromNode": 641987,
+          "toNode": 641988,
+          "lengthMeters": 824.3,
+          "witnesses": [
+            {
+              "wayId": 158018546,
+              "beginMeters": 3776.1407331451996,
+              "endMeters": 4601.382053368729,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322595877516564,
+              "maxVertexDeviationMeters": 9.374856803373542e-13
+            }
+          ]
+        },
+        "1722355": {
+          "fromNode": 641988,
+          "toNode": 1748174,
+          "lengthMeters": 180.1,
+          "witnesses": [
+            {
+              "wayId": 462392984,
               "beginMeters": 0.0,
-              "endMeters": 76.48798954338608,
+              "endMeters": 180.39048342603252,
               "reversed": false,
-              "continuousBoundMeters": 2.432371791015541,
-              "maxVertexDeviationMeters": 1.5888218580782548e-14
+              "continuousBoundMeters": 2.4322579778165454,
+              "maxVertexDeviationMeters": 1.6320149658237129
             }
           ]
         },
-        "567112": {
-          "fromNode": 207983,
-          "toNode": 207984,
-          "lengthMeters": 213.4,
+        "1723373": {
+          "fromNode": 642423,
+          "toNode": 642424,
+          "lengthMeters": 234.8,
           "witnesses": [
             {
-              "wayId": 95805704,
+              "wayId": 158030290,
               "beginMeters": 0.0,
-              "endMeters": 213.55008128102963,
+              "endMeters": 235.1528306191223,
               "reversed": false,
-              "continuousBoundMeters": 2.43231969929766,
-              "maxVertexDeviationMeters": 0.4703810173997035
+              "continuousBoundMeters": 2.4322577986447937,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "567113": {
-          "fromNode": 207984,
-          "toNode": 639914,
-          "lengthMeters": 177.2,
+        "1723374": {
+          "fromNode": 642424,
+          "toNode": 642425,
+          "lengthMeters": 912.9,
           "witnesses": [
             {
-              "wayId": 157743118,
+              "wayId": 158030290,
+              "beginMeters": 235.15378060277243,
+              "endMeters": 1149.2142199110376,
+              "reversed": false,
+              "continuousBoundMeters": 2.432259579179237,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723375": {
+          "fromNode": 642425,
+          "toNode": 642426,
+          "lengthMeters": 249.3,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 1149.2254952257906,
+              "endMeters": 1398.6436919082848,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322600523738203,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723376": {
+          "fromNode": 642426,
+          "toNode": 642427,
+          "lengthMeters": 238.6,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 1398.6476015136946,
+              "endMeters": 1637.7371686719412,
+              "reversed": false,
+              "continuousBoundMeters": 2.432260481844107,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723377": {
+          "fromNode": 642427,
+          "toNode": 642428,
+          "lengthMeters": 674.0,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 1637.7421330435707,
+              "endMeters": 2312.284050241894,
+              "reversed": false,
+              "continuousBoundMeters": 2.432261658790044,
+              "maxVertexDeviationMeters": 2.2570219718813562e-13
+            }
+          ]
+        },
+        "1723378": {
+          "fromNode": 642428,
+          "toNode": 642429,
+          "lengthMeters": 220.3,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 2312.310965343412,
+              "endMeters": 2532.895801110295,
+              "reversed": false,
+              "continuousBoundMeters": 2.43226205738306,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723379": {
+          "fromNode": 642429,
+          "toNode": 642430,
+          "lengthMeters": 260.6,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 2532.9060724851056,
+              "endMeters": 2794.012549664139,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322625588326874,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723380": {
+          "fromNode": 642430,
+          "toNode": 642431,
+          "lengthMeters": 278.2,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 2794.026292112759,
+              "endMeters": 3072.334441129881,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322631151338028,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723381": {
+          "fromNode": 642431,
+          "toNode": 642432,
+          "lengthMeters": 383.7,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 3072.349885014551,
+              "endMeters": 3456.38477991721,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322638899984383,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723382": {
+          "fromNode": 642432,
+          "toNode": 642433,
+          "lengthMeters": 244.7,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 3456.406306703105,
+              "endMeters": 3701.7322245831215,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322643837090165,
+              "maxVertexDeviationMeters": 1.5243925334538149
+            }
+          ]
+        },
+        "1723383": {
+          "fromNode": 642433,
+          "toNode": 642434,
+          "lengthMeters": 268.7,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 3701.7459878352283,
+              "endMeters": 3970.7149035034827,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322649108406247,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723384": {
+          "fromNode": 642434,
+          "toNode": 642435,
+          "lengthMeters": 285.4,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 3970.7301344762186,
+              "endMeters": 4256.454174850714,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322654379646993,
+              "maxVertexDeviationMeters": 1.3214963787366936
+            }
+          ]
+        },
+        "1723385": {
+          "fromNode": 642435,
+          "toNode": 642436,
+          "lengthMeters": 261.4,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 4256.471043420678,
+              "endMeters": 4518.086994595094,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322658742291687,
+              "maxVertexDeviationMeters": 1.096516304022635
+            }
+          ]
+        },
+        "1723386": {
+          "fromNode": 642436,
+          "toNode": 642437,
+          "lengthMeters": 196.6,
+          "witnesses": [
+            {
+              "wayId": 158030290,
+              "beginMeters": 4518.103351657884,
+              "endMeters": 4714.696497853994,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322661750686527,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1723387": {
+          "fromNode": 642437,
+          "toNode": 1748191,
+          "lengthMeters": 199.2,
+          "witnesses": [
+            {
+              "wayId": 462393020,
               "beginMeters": 0.0,
-              "endMeters": 177.48948895325827,
+              "endMeters": 199.59556165198512,
               "reversed": false,
-              "continuousBoundMeters": 2.43231975749293,
-              "maxVertexDeviationMeters": 0.0
+              "continuousBoundMeters": 2.4322664853335816,
+              "maxVertexDeviationMeters": 0.23792449804347157
             }
           ]
         },
-        "1416661": {
-          "fromNode": 525310,
-          "toNode": 639916,
-          "lengthMeters": 195.3,
+        "1756705": {
+          "fromNode": 655243,
+          "toNode": 655244,
+          "lengthMeters": 237.6,
           "witnesses": [
             {
-              "wayId": 157743119,
+              "wayId": 159253811,
               "beginMeters": 0.0,
-              "endMeters": 195.38003711386122,
+              "endMeters": 237.7853848495015,
               "reversed": false,
-              "continuousBoundMeters": 2.4323200116681987,
+              "continuousBoundMeters": 2.4322374240435827,
+              "maxVertexDeviationMeters": 1.4669806405805066
+            }
+          ]
+        },
+        "1756706": {
+          "fromNode": 655244,
+          "toNode": 655245,
+          "lengthMeters": 231.6,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 237.7841090922012,
+              "endMeters": 469.8029275144048,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322369908777706,
+              "maxVertexDeviationMeters": 1.7674391331334873
+            }
+          ]
+        },
+        "1756707": {
+          "fromNode": 655245,
+          "toNode": 655246,
+          "lengthMeters": 324.4,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 469.8011323952498,
+              "endMeters": 794.3552269593391,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322365379783175,
+              "maxVertexDeviationMeters": 5.6843418860807983e-14
+            }
+          ]
+        },
+        "1756708": {
+          "fromNode": 655246,
+          "toNode": 655247,
+          "lengthMeters": 225.2,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 794.35255226061,
+              "endMeters": 1019.9322216792988,
+              "reversed": false,
+              "continuousBoundMeters": 2.432235884352518,
+              "maxVertexDeviationMeters": 1.7649734567412936
+            }
+          ]
+        },
+        "1756709": {
+          "fromNode": 655247,
+          "toNode": 655248,
+          "lengthMeters": 211.2,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 1019.9302865496219,
+              "endMeters": 1231.3711122996826,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322354314398424,
+              "maxVertexDeviationMeters": 1.9290761943475614
+            }
+          ]
+        },
+        "1756710": {
+          "fromNode": 655248,
+          "toNode": 655249,
+          "lengthMeters": 214.0,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 1231.368926971354,
+              "endMeters": 1445.3286955427304,
+              "reversed": false,
+              "continuousBoundMeters": 2.432235020554157,
+              "maxVertexDeviationMeters": 1.9298214272654428
+            }
+          ]
+        },
+        "1756711": {
+          "fromNode": 655249,
+          "toNode": 655250,
+          "lengthMeters": 241.3,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 1445.3255967754426,
+              "endMeters": 1687.2097547718465,
+              "reversed": false,
+              "continuousBoundMeters": 2.432234630251526,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1645889": {
-          "fromNode": 612078,
-          "toNode": 612079,
-          "lengthMeters": 46.0,
+        "1756712": {
+          "fromNode": 655250,
+          "toNode": 655251,
+          "lengthMeters": 458.7,
           "witnesses": [
             {
-              "wayId": 155729463,
+              "wayId": 159253811,
+              "beginMeters": 1687.2044316625029,
+              "endMeters": 2146.1677398458382,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322342339401324,
+              "maxVertexDeviationMeters": 1.7288753063255995
+            }
+          ]
+        },
+        "1756713": {
+          "fromNode": 655251,
+          "toNode": 655252,
+          "lengthMeters": 248.3,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 2146.148919320111,
+              "endMeters": 2394.8402642033043,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322335948578537,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756714": {
+          "fromNode": 655252,
+          "toNode": 655253,
+          "lengthMeters": 224.8,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 2394.826518568251,
+              "endMeters": 2619.636707859481,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322332216974583,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756715": {
+          "fromNode": 655253,
+          "toNode": 655254,
+          "lengthMeters": 215.3,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 2619.6205721496017,
+              "endMeters": 2835.412166918022,
+              "reversed": false,
+              "continuousBoundMeters": 2.432232817650693,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756716": {
+          "fromNode": 655254,
+          "toNode": 655255,
+          "lengthMeters": 262.4,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 2835.3948865936995,
+              "endMeters": 3097.9948615220305,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322323921530673,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756717": {
+          "fromNode": 655255,
+          "toNode": 655256,
+          "lengthMeters": 231.2,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 3097.9733343512125,
+              "endMeters": 3329.541262384476,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322318645637173,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756718": {
+          "fromNode": 655256,
+          "toNode": 655257,
+          "lengthMeters": 255.2,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 3329.5225696708844,
+              "endMeters": 3585.224476952927,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322314270450507,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756719": {
+          "fromNode": 655257,
+          "toNode": 655258,
+          "lengthMeters": 205.3,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 3585.2042752206444,
+              "endMeters": 3790.566842664383,
+              "reversed": false,
+              "continuousBoundMeters": 2.432231012684502,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756720": {
+          "fromNode": 655258,
+          "toNode": 655259,
+          "lengthMeters": 372.8,
+          "witnesses": [
+            {
+              "wayId": 159253811,
+              "beginMeters": 3790.551349732273,
+              "endMeters": 4163.909757648237,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322307381574326,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1756721": {
+          "fromNode": 655259,
+          "toNode": 1748116,
+          "lengthMeters": 188.1,
+          "witnesses": [
+            {
+              "wayId": 462392909,
               "beginMeters": 0.0,
-              "endMeters": 46.090455029800026,
+              "endMeters": 188.161397601264,
               "reversed": false,
-              "continuousBoundMeters": 2.4323717918700547,
+              "continuousBoundMeters": 2.432230250009102,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1645890": {
-          "fromNode": 612079,
-          "toNode": 612080,
-          "lengthMeters": 22.5,
+        "1756725": {
+          "fromNode": 655262,
+          "toNode": 655263,
+          "lengthMeters": 47.7,
           "witnesses": [
             {
-              "wayId": 155729463,
-              "beginMeters": 46.09054967036685,
-              "endMeters": 68.51835153560873,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323718098148364,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "1645892": {
-          "fromNode": 612080,
-          "toNode": 2228868,
-          "lengthMeters": 14.1,
-          "witnesses": [
-            {
-              "wayId": 817414835,
+              "wayId": 159253813,
               "beginMeters": 0.0,
-              "endMeters": 14.086225944595364,
+              "endMeters": 47.926778302718795,
               "reversed": false,
-              "continuousBoundMeters": 2.432371821778019,
+              "continuousBoundMeters": 2.4322378752169604,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1717024": {
-          "fromNode": 639899,
-          "toNode": 639900,
-          "lengthMeters": 207.8,
+        "1756726": {
+          "fromNode": 655263,
+          "toNode": 655272,
+          "lengthMeters": 24.9,
           "witnesses": [
             {
-              "wayId": 157743113,
+              "wayId": 462392916,
               "beginMeters": 0.0,
-              "endMeters": 208.12869826465038,
+              "endMeters": 24.724820456863235,
               "reversed": false,
-              "continuousBoundMeters": 2.4323195178647268,
-              "maxVertexDeviationMeters": 1.1729546329329434
-            }
-          ]
-        },
-        "1717026": {
-          "fromNode": 639900,
-          "toNode": 639901,
-          "lengthMeters": 215.2,
-          "witnesses": [
-            {
-              "wayId": 157743113,
-              "beginMeters": 208.13057582002853,
-              "endMeters": 423.65036622162927,
-              "reversed": false,
-              "continuousBoundMeters": 2.432319574348665,
-              "maxVertexDeviationMeters": 1.980879226359156
-            }
-          ]
-        },
-        "1717027": {
-          "fromNode": 639901,
-          "toNode": 207984,
-          "lengthMeters": 25.0,
-          "witnesses": [
-            {
-              "wayId": 157743113,
-              "beginMeters": 423.651737277437,
-              "endMeters": 448.6961099556728,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323196000231526,
+              "continuousBoundMeters": 2.432237794589413,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1717028": {
-          "fromNode": 639902,
-          "toNode": 639903,
-          "lengthMeters": 206.9,
+        "1756743": {
+          "fromNode": 655272,
+          "toNode": 655243,
+          "lengthMeters": 193.8,
           "witnesses": [
             {
-              "wayId": 157743114,
+              "wayId": 462392915,
               "beginMeters": 0.0,
-              "endMeters": 207.18350223506468,
+              "endMeters": 194.23609363477453,
               "reversed": false,
-              "continuousBoundMeters": 2.432320070718755,
-              "maxVertexDeviationMeters": 0.0
+              "continuousBoundMeters": 2.432237755133317,
+              "maxVertexDeviationMeters": 1.4970075490104902
             }
           ]
         },
-        "1717029": {
-          "fromNode": 639903,
-          "toNode": 639904,
-          "lengthMeters": 179.5,
+        "3758753": {
+          "fromNode": 1450457,
+          "toNode": 1450458,
+          "lengthMeters": 488.2,
           "witnesses": [
             {
-              "wayId": 157743114,
-              "beginMeters": 207.18501708877537,
-              "endMeters": 386.78324349260544,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323200493236374,
-              "maxVertexDeviationMeters": 7.105427357601002e-14
-            }
-          ]
-        },
-        "1717035": {
-          "fromNode": 639907,
-          "toNode": 639902,
-          "lengthMeters": 69.5,
-          "witnesses": [
-            {
-              "wayId": 157743116,
+              "wayId": 354388193,
               "beginMeters": 0.0,
-              "endMeters": 69.48276235318471,
+              "endMeters": 488.77545878107816,
               "reversed": false,
-              "continuousBoundMeters": 2.432319812264861,
+              "continuousBoundMeters": 2.4322309114528755,
+              "maxVertexDeviationMeters": 0.08849402817940748
+            }
+          ]
+        },
+        "3758754": {
+          "fromNode": 1450458,
+          "toNode": 1450459,
+          "lengthMeters": 257.0,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 488.7875480206117,
+              "endMeters": 746.0871185392155,
+              "reversed": false,
+              "continuousBoundMeters": 2.432231296646358,
+              "maxVertexDeviationMeters": 1.0247593068766006e-13
+            }
+          ]
+        },
+        "3758755": {
+          "fromNode": 1450459,
+          "toNode": 1450460,
+          "lengthMeters": 222.9,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 746.097372184589,
+              "endMeters": 969.3836346219904,
+              "reversed": false,
+              "continuousBoundMeters": 2.432231701567155,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1717052": {
-          "fromNode": 639914,
-          "toNode": 639915,
-          "lengthMeters": 90.4,
+        "3758756": {
+          "fromNode": 1450460,
+          "toNode": 1450461,
+          "lengthMeters": 259.6,
           "witnesses": [
             {
-              "wayId": 157743118,
-              "beginMeters": 177.49097145356816,
-              "endMeters": 267.8067851184511,
+              "wayId": 354388193,
+              "beginMeters": 969.3955764354259,
+              "endMeters": 1229.1512022175177,
               "reversed": false,
-              "continuousBoundMeters": 2.4323198370833636,
+              "continuousBoundMeters": 2.4322322171486306,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1717053": {
-          "fromNode": 639915,
-          "toNode": 1507863,
-          "lengthMeters": 42.3,
+        "3758757": {
+          "fromNode": 1450461,
+          "toNode": 1450462,
+          "lengthMeters": 224.9,
           "witnesses": [
             {
-              "wayId": 373033592,
+              "wayId": 354388193,
+              "beginMeters": 1229.1667143454006,
+              "endMeters": 1454.2499459553846,
+              "reversed": false,
+              "continuousBoundMeters": 2.432232667526066,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3758758": {
+          "fromNode": 1450462,
+          "toNode": 1450463,
+          "lengthMeters": 221.0,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 1454.2636233328406,
+              "endMeters": 1675.7343561979,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322330827264436,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3758759": {
+          "fromNode": 1450463,
+          "toNode": 1450464,
+          "lengthMeters": 232.5,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 1675.747810274714,
+              "endMeters": 1908.2734401926066,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322334550303646,
+              "maxVertexDeviationMeters": 2.4116620165382783e-13
+            }
+          ]
+        },
+        "3758760": {
+          "fromNode": 1450464,
+          "toNode": 1450465,
+          "lengthMeters": 374.9,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 1908.287635724658,
+              "endMeters": 2283.88294233514,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322339723037207,
+              "maxVertexDeviationMeters": 1.0702222679169222
+            }
+          ]
+        },
+        "3758761": {
+          "fromNode": 1450465,
+          "toNode": 1450466,
+          "lengthMeters": 243.3,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 2283.909583227099,
+              "endMeters": 2527.281297994893,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322343300160014,
+              "maxVertexDeviationMeters": 1.9737804758710018
+            }
+          ]
+        },
+        "3758762": {
+          "fromNode": 1450466,
+          "toNode": 1450467,
+          "lengthMeters": 243.7,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 2527.3024400437926,
+              "endMeters": 2771.386732323505,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322347451982123,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3758763": {
+          "fromNode": 1450467,
+          "toNode": 1450468,
+          "lengthMeters": 215.6,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 2771.4132265359717,
+              "endMeters": 2987.153737080228,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322351483666735,
+              "maxVertexDeviationMeters": 1.8105285494975958
+            }
+          ]
+        },
+        "3758764": {
+          "fromNode": 1450468,
+          "toNode": 1450469,
+          "lengthMeters": 214.3,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 2987.1802967268036,
+              "endMeters": 3202.0445523502594,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322355721178432,
+              "maxVertexDeviationMeters": 1.9681996254608292
+            }
+          ]
+        },
+        "3758765": {
+          "fromNode": 1450469,
+          "toNode": 1450470,
+          "lengthMeters": 311.1,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 3202.07275035749,
+              "endMeters": 3513.4617610181185,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322362000157285,
+              "maxVertexDeviationMeters": 1.805501867829406
+            }
+          ]
+        },
+        "3758766": {
+          "fromNode": 1450470,
+          "toNode": 1450471,
+          "lengthMeters": 249.4,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 3513.503588432373,
+              "endMeters": 3763.28661063832,
+              "reversed": false,
+              "continuousBoundMeters": 2.432236699238592,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3758767": {
+          "fromNode": 1450471,
+          "toNode": 1450472,
+          "lengthMeters": 218.2,
+          "witnesses": [
+            {
+              "wayId": 354388193,
+              "beginMeters": 3763.32003945159,
+              "endMeters": 3981.7977621095442,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322371178258884,
+              "maxVertexDeviationMeters": 1.8466008371312561
+            }
+          ]
+        },
+        "3758768": {
+          "fromNode": 1450472,
+          "toNode": 1748125,
+          "lengthMeters": 191.8,
+          "witnesses": [
+            {
+              "wayId": 462392913,
               "beginMeters": 0.0,
-              "endMeters": 42.49225863293465,
+              "endMeters": 191.6454321193715,
               "reversed": false,
-              "continuousBoundMeters": 2.4323198807296538,
+              "continuousBoundMeters": 2.4322374600690306,
+              "maxVertexDeviationMeters": 0.7555247957657089
+            }
+          ]
+        },
+        "4474523": {
+          "fromNode": 1748112,
+          "toNode": 557651,
+          "lengthMeters": 214.3,
+          "witnesses": [
+            {
+              "wayId": 462392899,
+              "beginMeters": 213.24788745670915,
+              "endMeters": 427.73233318943676,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322296220129527,
+              "maxVertexDeviationMeters": 0.1464530625186615
+            }
+          ]
+        },
+        "4474525": {
+          "fromNode": 1748114,
+          "toNode": 557656,
+          "lengthMeters": 25.2,
+          "witnesses": [
+            {
+              "wayId": 462392905,
+              "beginMeters": 282.8931015382222,
+              "endMeters": 308.00408465807675,
+              "reversed": false,
+              "continuousBoundMeters": 2.432229240234284,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1717054": {
-          "fromNode": 639916,
-          "toNode": 639917,
-          "lengthMeters": 69.9,
+        "4474526": {
+          "fromNode": 1748115,
+          "toNode": 1450457,
+          "lengthMeters": 257.0,
           "witnesses": [
             {
-              "wayId": 157743119,
-              "beginMeters": 195.3792844344195,
-              "endMeters": 265.3202400635585,
-              "reversed": false,
-              "continuousBoundMeters": 2.432319926943314,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "1717056": {
-          "fromNode": 639917,
-          "toNode": 1507790,
-          "lengthMeters": 42.2,
-          "witnesses": [
-            {
-              "wayId": 373033561,
+              "wayId": 1315365314,
               "beginMeters": 0.0,
-              "endMeters": 42.471026208274026,
+              "endMeters": 257.1296180615671,
               "reversed": false,
-              "continuousBoundMeters": 2.432319872171562,
+              "continuousBoundMeters": 2.4322302731726966,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1725723": {
-          "fromNode": 643410,
-          "toNode": 643411,
+        "4474527": {
+          "fromNode": 1748116,
+          "toNode": 557657,
+          "lengthMeters": 213.8,
+          "witnesses": [
+            {
+              "wayId": 462392908,
+              "beginMeters": 0.0,
+              "endMeters": 213.93305836148846,
+              "reversed": false,
+              "continuousBoundMeters": 2.432230003787801,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4474536": {
+          "fromNode": 1748125,
+          "toNode": 1748126,
+          "lengthMeters": 181.0,
+          "witnesses": [
+            {
+              "wayId": 462392914,
+              "beginMeters": 0.0,
+              "endMeters": 181.50839149824262,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322377654262155,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4474537": {
+          "fromNode": 1748126,
+          "toNode": 166342,
+          "lengthMeters": 17.1,
+          "witnesses": [
+            {
+              "wayId": 462392917,
+              "beginMeters": 0.0,
+              "endMeters": 16.803043858173545,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322377937316726,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4474547": {
+          "fromNode": 1748136,
+          "toNode": 199294,
+          "lengthMeters": 26.7,
+          "witnesses": [
+            {
+              "wayId": 462392932,
+              "beginMeters": 253.93265986658355,
+              "endMeters": 280.79799678634197,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322410821668745,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4474549": {
+          "fromNode": 1748138,
+          "toNode": 1748140,
+          "lengthMeters": 697.9,
+          "witnesses": [
+            {
+              "wayId": 462392942,
+              "beginMeters": 0.0,
+              "endMeters": 698.6961445055942,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322431439399352,
+              "maxVertexDeviationMeters": 1.3487936584780869
+            }
+          ]
+        },
+        "4474550": {
+          "fromNode": 1748139,
+          "toNode": 212392,
+          "lengthMeters": 225.2,
+          "witnesses": [
+            {
+              "wayId": 462392941,
+              "beginMeters": 0.0,
+              "endMeters": 225.39945844212235,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322419981432053,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4474551": {
+          "fromNode": 1748140,
+          "toNode": 1748141,
           "lengthMeters": 206.2,
           "witnesses": [
             {
-              "wayId": 158067145,
+              "wayId": 462392942,
+              "beginMeters": 698.699534487353,
+              "endMeters": 904.953408870017,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322435495916497,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4474552": {
+          "fromNode": 1748141,
+          "toNode": 199296,
+          "lengthMeters": 927.4,
+          "witnesses": [
+            {
+              "wayId": 462392942,
+              "beginMeters": 904.9546973493528,
+              "endMeters": 1833.2318624617203,
+              "reversed": false,
+              "continuousBoundMeters": 2.432245374541454,
+              "maxVertexDeviationMeters": 1.1368683772161602e-13
+            }
+          ]
+        },
+        "4474553": {
+          "fromNode": 1748142,
+          "toNode": 1748139,
+          "lengthMeters": 179.4,
+          "witnesses": [
+            {
+              "wayId": 462392943,
               "beginMeters": 0.0,
-              "endMeters": 206.51664208079922,
+              "endMeters": 179.7447559818359,
               "reversed": false,
-              "continuousBoundMeters": 2.4323720422416164,
-              "maxVertexDeviationMeters": 1.7050369037603883
-            }
-          ]
-        },
-        "1725725": {
-          "fromNode": 643411,
-          "toNode": 194979,
-          "lengthMeters": 111.4,
-          "witnesses": [
-            {
-              "wayId": 158067145,
-              "beginMeters": 206.5156609482423,
-              "endMeters": 318.0151722787952,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323716713834145,
-              "maxVertexDeviationMeters": 1.1536844274614364
-            }
-          ]
-        },
-        "3895552": {
-          "fromNode": 1507761,
-          "toNode": 1507868,
-          "lengthMeters": 25.1,
-          "witnesses": [
-            {
-              "wayId": 1383840441,
-              "beginMeters": 8.917694091796875,
-              "endMeters": 33.97335417933852,
-              "reversed": false,
-              "continuousBoundMeters": 2.43235862465535,
+              "continuousBoundMeters": 2.432242351491422,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "3895560": {
-          "fromNode": 1507768,
-          "toNode": 1507769,
-          "lengthMeters": 220.6,
+        "4474554": {
+          "fromNode": 1748143,
+          "toNode": 1748142,
+          "lengthMeters": 612.2,
           "witnesses": [
             {
-              "wayId": 373033551,
+              "wayId": 462392944,
+              "beginMeters": 935.3343240225608,
+              "endMeters": 1547.8140227882952,
+              "reversed": false,
+              "continuousBoundMeters": 2.432243556452529,
+              "maxVertexDeviationMeters": 0.5312980616688443
+            }
+          ]
+        },
+        "4474586": {
+          "fromNode": 1748166,
+          "toNode": 126193,
+          "lengthMeters": 207.1,
+          "witnesses": [
+            {
+              "wayId": 462392967,
               "beginMeters": 0.0,
-              "endMeters": 220.75589472800002,
+              "endMeters": 207.60089481787483,
               "reversed": false,
-              "continuousBoundMeters": 2.432359485476008,
-              "maxVertexDeviationMeters": 1.8145607802626065
-            }
-          ]
-        },
-        "3895561": {
-          "fromNode": 1507769,
-          "toNode": 126943,
-          "lengthMeters": 33.3,
-          "witnesses": [
-            {
-              "wayId": 373033551,
-              "beginMeters": 220.7537083922407,
-              "endMeters": 254.30132270488184,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323592085112717,
+              "continuousBoundMeters": 2.432256395245727,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "3895594": {
-          "fromNode": 1507790,
-          "toNode": 1507791,
-          "lengthMeters": 52.2,
+        "4474588": {
+          "fromNode": 1748168,
+          "toNode": 166332,
+          "lengthMeters": 168.4,
           "witnesses": [
             {
-              "wayId": 373033561,
-              "beginMeters": 42.47093472091108,
-              "endMeters": 94.56364822458399,
+              "wayId": 462392971,
+              "beginMeters": 223.13062395217256,
+              "endMeters": 391.40492372463706,
               "reversed": false,
-              "continuousBoundMeters": 2.4323198259578303,
+              "continuousBoundMeters": 2.4322570305111255,
+              "maxVertexDeviationMeters": 0.47812646490314376
+            }
+          ]
+        },
+        "4474593": {
+          "fromNode": 1748173,
+          "toNode": 205374,
+          "lengthMeters": 30.2,
+          "witnesses": [
+            {
+              "wayId": 462392983,
+              "beginMeters": 246.54689401817444,
+              "endMeters": 276.89237412491684,
+              "reversed": false,
+              "continuousBoundMeters": 2.432256785322258,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "3895596": {
-          "fromNode": 1507791,
-          "toNode": 1507792,
-          "lengthMeters": 5.5,
+        "4474594": {
+          "fromNode": 1748174,
+          "toNode": 126232,
+          "lengthMeters": 229.7,
           "witnesses": [
             {
-              "wayId": 373033561,
-              "beginMeters": 94.56340097665081,
-              "endMeters": 100.12599642963366,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323197703301087,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "3895597": {
-          "fromNode": 1507792,
-          "toNode": 166316,
-          "lengthMeters": 127.8,
-          "witnesses": [
-            {
-              "wayId": 373033561,
-              "beginMeters": 100.1259721217295,
-              "endMeters": 228.16722553974154,
-              "reversed": false,
-              "continuousBoundMeters": 2.432319765195238,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "3895737": {
-          "fromNode": 1507863,
-          "toNode": 1507864,
-          "lengthMeters": 29.2,
-          "witnesses": [
-            {
-              "wayId": 373033592,
-              "beginMeters": 42.49234895530533,
-              "endMeters": 71.82761966694423,
-              "reversed": false,
-              "continuousBoundMeters": 2.432319910682959,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "3895740": {
-          "fromNode": 1507864,
-          "toNode": 1507865,
-          "lengthMeters": 18.9,
-          "witnesses": [
-            {
-              "wayId": 373033592,
-              "beginMeters": 71.82772462304919,
-              "endMeters": 90.60958880258431,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323199295107374,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "3895741": {
-          "fromNode": 1507865,
-          "toNode": 525311,
-          "lengthMeters": 155.6,
-          "witnesses": [
-            {
-              "wayId": 373033592,
-              "beginMeters": 90.60967228371948,
-              "endMeters": 246.49436648277236,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323199842823997,
-              "maxVertexDeviationMeters": 1.0679063985657076
-            }
-          ]
-        },
-        "3895746": {
-          "fromNode": 1507868,
-          "toNode": 1507869,
-          "lengthMeters": 203.1,
-          "witnesses": [
-            {
-              "wayId": 373033594,
+              "wayId": 462392985,
               "beginMeters": 0.0,
-              "endMeters": 203.16281122008067,
+              "endMeters": 229.85369501504493,
               "reversed": false,
-              "continuousBoundMeters": 2.4323585742193004,
-              "maxVertexDeviationMeters": 0.06320706330936501
-            }
-          ]
-        },
-        "4473298": {
-          "fromNode": 1747545,
-          "toNode": 1747546,
-          "lengthMeters": 73.3,
-          "witnesses": [
-            {
-              "wayId": 462170568,
-              "beginMeters": 0.0,
-              "endMeters": 73.15426939439907,
-              "reversed": false,
-              "continuousBoundMeters": 2.432358867431216,
-              "maxVertexDeviationMeters": 1.5737480148602079
-            }
-          ]
-        },
-        "4473300": {
-          "fromNode": 1747546,
-          "toNode": 2871270,
-          "lengthMeters": 39.1,
-          "witnesses": [
-            {
-              "wayId": 1383816469,
-              "beginMeters": 0.0,
-              "endMeters": 39.25997727151971,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323587212529976,
-              "maxVertexDeviationMeters": 1.6910533812763842
-            }
-          ]
-        },
-        "4473302": {
-          "fromNode": 1747547,
-          "toNode": 1747549,
-          "lengthMeters": 30.4,
-          "witnesses": [
-            {
-              "wayId": 462170572,
-              "beginMeters": 10.196833497996892,
-              "endMeters": 40.348118325163966,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323588665763745,
+              "continuousBoundMeters": 2.4322576331887724,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4473304": {
-          "fromNode": 1747548,
-          "toNode": 1747550,
-          "lengthMeters": 104.8,
+        "4474613": {
+          "fromNode": 1748191,
+          "toNode": 166328,
+          "lengthMeters": 216.9,
           "witnesses": [
             {
-              "wayId": 462170571,
-              "beginMeters": 14.01940951021609,
-              "endMeters": 118.94071352473831,
+              "wayId": 462393018,
+              "beginMeters": 0.0,
+              "endMeters": 217.26151782485337,
               "reversed": false,
-              "continuousBoundMeters": 2.432359105931165,
-              "maxVertexDeviationMeters": 1.7772239894833365e-15
+              "continuousBoundMeters": 2.432266848734484,
+              "maxVertexDeviationMeters": 1.6374896446434875
             }
           ]
         },
-        "4473305": {
-          "fromNode": 1747549,
-          "toNode": 1747548,
-          "lengthMeters": 13.7,
+        "4474614": {
+          "fromNode": 1748192,
+          "toNode": 166327,
+          "lengthMeters": 158.9,
           "witnesses": [
             {
-              "wayId": 462170571,
-              "beginMeters": 0.0,
-              "endMeters": 14.019409488466351,
+              "wayId": 462393023,
+              "beginMeters": 246.98745746420474,
+              "endMeters": 406.1412467446383,
               "reversed": false,
-              "continuousBoundMeters": 2.432358894786134,
+              "continuousBoundMeters": 2.432267608950714,
+              "maxVertexDeviationMeters": 1.1896974899611044
+            }
+          ]
+        },
+        "4474615": {
+          "fromNode": 1748193,
+          "toNode": 641975,
+          "lengthMeters": 183.4,
+          "witnesses": [
+            {
+              "wayId": 1315367415,
+              "beginMeters": 0.0,
+              "endMeters": 183.52900065829022,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322668213081258,
+              "maxVertexDeviationMeters": 0.34802640722224837
+            }
+          ]
+        },
+        "4474616": {
+          "fromNode": 1748194,
+          "toNode": 205391,
+          "lengthMeters": 43.4,
+          "witnesses": [
+            {
+              "wayId": 462393029,
+              "beginMeters": 246.80390586839894,
+              "endMeters": 290.04500796188563,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322673158365076,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4473306": {
-          "fromNode": 1747550,
-          "toNode": 126939,
-          "lengthMeters": 130.7,
+        "4611452": {
+          "fromNode": 1806412,
+          "toNode": 212411,
+          "lengthMeters": 188.4,
           "witnesses": [
             {
-              "wayId": 462170573,
+              "wayId": 505413593,
               "beginMeters": 0.0,
-              "endMeters": 130.8887950554312,
+              "endMeters": 188.35356195319042,
               "reversed": false,
-              "continuousBoundMeters": 2.432359358106704,
-              "maxVertexDeviationMeters": 1.6519430725806514
-            }
-          ]
-        },
-        "4473307": {
-          "fromNode": 1747551,
-          "toNode": 1747547,
-          "lengthMeters": 9.9,
-          "witnesses": [
-            {
-              "wayId": 462170572,
-              "beginMeters": 0.0,
-              "endMeters": 10.196833484078255,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323588058825694,
+              "continuousBoundMeters": 2.4322406567620636,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4473341": {
-          "fromNode": 1747577,
-          "toNode": 1747580,
-          "lengthMeters": 11.9,
+        "4611455": {
+          "fromNode": 1806415,
+          "toNode": 1806416,
+          "lengthMeters": 214.4,
           "witnesses": [
             {
-              "wayId": 462170591,
-              "beginMeters": 42.93875352350658,
-              "endMeters": 54.87165168362295,
+              "wayId": 505413602,
+              "beginMeters": 0.0,
+              "endMeters": 214.5191505521338,
               "reversed": false,
-              "continuousBoundMeters": 2.4323716850556787,
+              "continuousBoundMeters": 2.4322478614073852,
+              "maxVertexDeviationMeters": 1.1096892786339951
+            }
+          ]
+        },
+        "4611456": {
+          "fromNode": 1806416,
+          "toNode": 1806417,
+          "lengthMeters": 200.1,
+          "witnesses": [
+            {
+              "wayId": 505413602,
+              "beginMeters": 214.51677639405125,
+              "endMeters": 414.76920384601584,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322476153007617,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4473342": {
-          "fromNode": 1747578,
-          "toNode": 125919,
-          "lengthMeters": 114.4,
+        "4611457": {
+          "fromNode": 1806417,
+          "toNode": 1806418,
+          "lengthMeters": 296.6,
           "witnesses": [
             {
-              "wayId": 462170594,
-              "beginMeters": 0.0,
-              "endMeters": 114.63210981226035,
+              "wayId": 505413602,
+              "beginMeters": 414.76458043253933,
+              "endMeters": 711.8548619229151,
               "reversed": false,
-              "continuousBoundMeters": 2.43237165600211,
-              "maxVertexDeviationMeters": 1.502693543900923
-            }
-          ]
-        },
-        "4473344": {
-          "fromNode": 1747579,
-          "toNode": 1747577,
-          "lengthMeters": 43.0,
-          "witnesses": [
-            {
-              "wayId": 462170591,
-              "beginMeters": 0.0,
-              "endMeters": 42.93882422729795,
-              "reversed": false,
-              "continuousBoundMeters": 2.432371713254707,
+              "continuousBoundMeters": 2.432247338321689,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4473345": {
-          "fromNode": 1747580,
-          "toNode": 1747578,
-          "lengthMeters": 26.0,
+        "4611458": {
+          "fromNode": 1806418,
+          "toNode": 1806419,
+          "lengthMeters": 201.4,
           "witnesses": [
             {
-              "wayId": 462170591,
-              "beginMeters": 54.87162190850659,
-              "endMeters": 80.92872590356549,
+              "wayId": 505413602,
+              "beginMeters": 711.8435491297862,
+              "endMeters": 913.4931777468048,
               "reversed": false,
-              "continuousBoundMeters": 2.4323716756559977,
+              "continuousBoundMeters": 2.4322468323794024,
+              "maxVertexDeviationMeters": 2.327502010382318e-13
+            }
+          ]
+        },
+        "4611459": {
+          "fromNode": 1806419,
+          "toNode": 199287,
+          "lengthMeters": 486.1,
+          "witnesses": [
+            {
+              "wayId": 505413602,
+              "beginMeters": 913.4840233462298,
+              "endMeters": 1400.3064442376094,
+              "reversed": false,
+              "continuousBoundMeters": 2.432246446486631,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4473346": {
-          "fromNode": 1747581,
-          "toNode": 612078,
-          "lengthMeters": 73.3,
+        "4611460": {
+          "fromNode": 1806420,
+          "toNode": 1806415,
+          "lengthMeters": 11.3,
           "witnesses": [
             {
-              "wayId": 462170592,
+              "wayId": 505413603,
               "beginMeters": 0.0,
-              "endMeters": 73.43149449862646,
+              "endMeters": 11.320635415241126,
               "reversed": false,
-              "continuousBoundMeters": 2.432371754271433,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "5577986": {
-          "fromNode": 2228867,
-          "toNode": 1747579,
-          "lengthMeters": 66.8,
-          "witnesses": [
-            {
-              "wayId": 817414833,
-              "beginMeters": 0.0,
-              "endMeters": 67.00388216103418,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323717858884586,
-              "maxVertexDeviationMeters": 0.117536318395614
-            }
-          ]
-        },
-        "5577988": {
-          "fromNode": 2228868,
-          "toNode": 2228869,
-          "lengthMeters": 8.5,
-          "witnesses": [
-            {
-              "wayId": 817414835,
-              "beginMeters": 14.086234995846565,
-              "endMeters": 22.70690553884781,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323718294686336,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "5577989": {
-          "fromNode": 2228869,
-          "toNode": 194971,
-          "lengthMeters": 152.2,
-          "witnesses": [
-            {
-              "wayId": 817414835,
-              "beginMeters": 22.706914838669057,
-              "endMeters": 174.93064310250634,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323719473911765,
-              "maxVertexDeviationMeters": 0.33374075279715487
-            }
-          ]
-        },
-        "6998317": {
-          "fromNode": 2871268,
-          "toNode": 2871269,
-          "lengthMeters": 52.0,
-          "witnesses": [
-            {
-              "wayId": 1383816467,
-              "beginMeters": 0.0,
-              "endMeters": 52.25537963479855,
-              "reversed": false,
-              "continuousBoundMeters": 2.4323587203981525,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "6998318": {
-          "fromNode": 2871269,
-          "toNode": 1747551,
-          "lengthMeters": 32.6,
-          "witnesses": [
-            {
-              "wayId": 1383816468,
-              "beginMeters": 0.0,
-              "endMeters": 32.44510866726646,
-              "reversed": false,
-              "continuousBoundMeters": 2.432358785366329,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "6998319": {
-          "fromNode": 2871270,
-          "toNode": 1507761,
-          "lengthMeters": 8.8,
-          "witnesses": [
-            {
-              "wayId": 1383840441,
-              "beginMeters": 0.0,
-              "endMeters": 8.917694091796875,
-              "reversed": false,
-              "continuousBoundMeters": 2.432358642607146,
+              "continuousBoundMeters": 2.4322478742700566,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -56578,11 +57253,11 @@
         "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
-      "sourceSha256": "fdc2aedcf7936653b2265ac569534bfeab406213b6df595476bd40c6e8d70a13",
-      "reviewSha256": "88f48207a4c140afc623dca44b5d7e91afbe94ba6cb925e9aab3d16df736783b",
-      "seedSha256": "8a8b44e91f779a263aea56c1752dbff7a96a308ab6c3889c7ea60e672b174244",
-      "seedCoveredEdges": 3725,
-      "additionalCoveredEdges": 100,
+      "sourceSha256": "6085635d2590ccf3f7b0e8f984b71b59f55b77970b4e857b7a111f8ca99ad43f",
+      "reviewSha256": "4e6f8c8e7d1ca7a3eeb74d4f8b8ce4c334e9bbda9f8971c0650c0fe9c521ac9d",
+      "seedSha256": "2f79480328fd97644ec9ae955386e59259bc9ef4fd672d1a13bf2ad8d3bbd1ca",
+      "seedCoveredEdges": 3770,
+      "additionalCoveredEdges": 135,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
         "crossing;4067702;1578879;1640459;0.000000000;68.7;brisa:0501",
@@ -56645,14 +57320,14 @@
         "crossing;566710;207825;31790;35.332110230;144.5;ascendi:grande-porto:01",
         "crossing;1356247;502641;502642;164.602698727;187.9;ascendi:grande-porto:02",
         "crossing;4584944;1794867;52952;136.515403987;176.4;ascendi:grande-porto:02",
-        "crossing;1645889;612078;612079;0.000000000;46.0;ascendi:costa-de-prata:03",
-        "crossing;1717053;639915;1507863;0.000000000;42.3;ascendi:costa-de-prata:02",
-        "crossing;1717056;639917;1507790;0.000000000;42.2;ascendi:costa-de-prata:02",
-        "crossing;4473300;1747546;2871270;0.000000000;39.1;ascendi:costa-de-prata:01",
-        "crossing;4473344;1747579;1747577;0.000000000;43.0;ascendi:costa-de-prata:03",
-        "crossing;6998318;2871269;1747551;0.000000000;32.6;ascendi:costa-de-prata:01"
+        "crossing;1722343;641976;641977;119.415985689;234.6;ascendi:costa-de-prata:01",
+        "crossing;1723386;642436;642437;0.000000000;196.6;ascendi:costa-de-prata:01",
+        "crossing;1756720;655258;655259;0.000000000;372.8;ascendi:costa-de-prata:03",
+        "crossing;3758753;1450457;1450458;28.767707417;488.2;ascendi:costa-de-prata:03",
+        "crossing;4474551;1748140;1748141;0.000000000;206.2;ascendi:costa-de-prata:02",
+        "crossing;4474554;1748143;1748142;174.604354648;612.2;ascendi:costa-de-prata:02"
       ],
-      "bindingsSha256": "7e404d8549b5fe826d238abe6a0e0557d2a0a8cfb622c8968b4279d53ef592ab",
+      "bindingsSha256": "aafd44048dceac2c7327b1c88895ec27d5992c0fbf970149fb748fad011f9710",
       "crossings": [
         {
           "edge": 332989,
@@ -56664,22 +57339,13 @@
           "offsetMeters": 59.26275941658782
         },
         {
-          "edge": 1505627,
-          "fromNode": 558907,
-          "toNode": 558908,
-          "lengthMeters": 92.8,
-          "osmNodeId": 1620526107,
+          "edge": 1555429,
+          "fromNode": 577541,
+          "toNode": 1764584,
+          "lengthMeters": 92.6,
+          "osmNodeId": 1563530098,
           "chargeId": "ascendi:costa-de-prata:07",
-          "offsetMeters": 42.36833198910633
-        },
-        {
-          "edge": 1505636,
-          "fromNode": 558910,
-          "toNode": 558911,
-          "lengthMeters": 95.7,
-          "osmNodeId": 4378201267,
-          "chargeId": "ascendi:costa-de-prata:07",
-          "offsetMeters": 49.18983961269125
+          "offsetMeters": 65.87931087941126
         },
         {
           "edge": 1570398,
@@ -56709,6 +57375,15 @@
           "offsetMeters": 0.0
         },
         {
+          "edge": 4513558,
+          "fromNode": 1764645,
+          "toNode": 1764646,
+          "lengthMeters": 118.6,
+          "osmNodeId": 1563530097,
+          "chargeId": "ascendi:costa-de-prata:07",
+          "offsetMeters": 61.760997399123795
+        },
+        {
           "edge": 4576965,
           "fromNode": 1791319,
           "toNode": 1791320,
@@ -56729,63 +57404,18 @@
       ],
       "networks": [],
       "edgeWitnesses": {
-        "290451": {
-          "fromNode": 104510,
-          "toNode": 104513,
-          "lengthMeters": 129.0,
+        "76145": {
+          "fromNode": 27660,
+          "toNode": 1920517,
+          "lengthMeters": 144.9,
           "witnesses": [
             {
-              "wayId": 52199098,
+              "wayId": 598399319,
               "beginMeters": 0.0,
-              "endMeters": 129.0688926314944,
+              "endMeters": 145.06967744324876,
               "reversed": false,
-              "continuousBoundMeters": 2.4321614053649774,
-              "maxVertexDeviationMeters": 1.5128346442967255
-            }
-          ]
-        },
-        "290458": {
-          "fromNode": 104512,
-          "toNode": 104513,
-          "lengthMeters": 81.7,
-          "witnesses": [
-            {
-              "wayId": 52199025,
-              "beginMeters": 0.0,
-              "endMeters": 81.48998012556015,
-              "reversed": false,
-              "continuousBoundMeters": 2.432161411380851,
-              "maxVertexDeviationMeters": 1.0150513099492016
-            }
-          ]
-        },
-        "290459": {
-          "fromNode": 104513,
-          "toNode": 558907,
-          "lengthMeters": 113.7,
-          "witnesses": [
-            {
-              "wayId": 149012950,
-              "beginMeters": 0.0,
-              "endMeters": 113.99135699854973,
-              "reversed": false,
-              "continuousBoundMeters": 2.4321612523896046,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "290460": {
-          "fromNode": 104514,
-          "toNode": 27648,
-          "lengthMeters": 67.2,
-          "witnesses": [
-            {
-              "wayId": 52199028,
-              "beginMeters": 0.0,
-              "endMeters": 67.06633699275164,
-              "reversed": false,
-              "continuousBoundMeters": 2.432161427709647,
-              "maxVertexDeviationMeters": 1.5708280713680092
+              "continuousBoundMeters": 2.4321615858408037,
+              "maxVertexDeviationMeters": 0.8742150842053945
             }
           ]
         },
@@ -56879,21 +57509,6 @@
             }
           ]
         },
-        "350892": {
-          "fromNode": 126191,
-          "toNode": 126192,
-          "lengthMeters": 41.7,
-          "witnesses": [
-            {
-              "wayId": 67446135,
-              "beginMeters": 0.0,
-              "endMeters": 41.82630674939942,
-              "reversed": false,
-              "continuousBoundMeters": 2.432165837104452,
-              "maxVertexDeviationMeters": 0.1922578198053709
-            }
-          ]
-        },
         "350893": {
           "fromNode": 126191,
           "toNode": 2824139,
@@ -56906,36 +57521,6 @@
               "reversed": false,
               "continuousBoundMeters": 2.432165818199472,
               "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "350919": {
-          "fromNode": 126211,
-          "toNode": 126212,
-          "lengthMeters": 206.1,
-          "witnesses": [
-            {
-              "wayId": 67446162,
-              "beginMeters": 0.0,
-              "endMeters": 206.44707188170364,
-              "reversed": false,
-              "continuousBoundMeters": 2.4322017293362483,
-              "maxVertexDeviationMeters": 1.0891628241875309
-            }
-          ]
-        },
-        "350922": {
-          "fromNode": 126212,
-          "toNode": 126213,
-          "lengthMeters": 152.5,
-          "witnesses": [
-            {
-              "wayId": 67446162,
-              "beginMeters": 206.44628268316023,
-              "endMeters": 358.82638146808847,
-              "reversed": false,
-              "continuousBoundMeters": 2.432201346423552,
-              "maxVertexDeviationMeters": 0.4144373150220913
             }
           ]
         },
@@ -56954,107 +57539,452 @@
             }
           ]
         },
-        "1505624": {
-          "fromNode": 558905,
-          "toNode": 558906,
-          "lengthMeters": 18.8,
+        "350935": {
+          "fromNode": 126221,
+          "toNode": 2819963,
+          "lengthMeters": 43.7,
           "witnesses": [
             {
-              "wayId": 149012945,
+              "wayId": 1335131738,
               "beginMeters": 0.0,
-              "endMeters": 18.733838991037562,
+              "endMeters": 43.59114790805447,
               "reversed": false,
-              "continuousBoundMeters": 2.432160694626228,
+              "continuousBoundMeters": 2.4321924499513683,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1505626": {
-          "fromNode": 558906,
-          "toNode": 104415,
-          "lengthMeters": 100.0,
+        "566094": {
+          "fromNode": 207528,
+          "toNode": 1716863,
+          "lengthMeters": 320.4,
           "witnesses": [
             {
-              "wayId": 1479369255,
+              "wayId": 447753517,
               "beginMeters": 0.0,
-              "endMeters": 100.10069907560373,
+              "endMeters": 320.8135031707635,
               "reversed": false,
-              "continuousBoundMeters": 2.432160663686896,
+              "continuousBoundMeters": 2.432126591443832,
+              "maxVertexDeviationMeters": 1.409925994011124
+            }
+          ]
+        },
+        "1367866": {
+          "fromNode": 507163,
+          "toNode": 507164,
+          "lengthMeters": 533.1,
+          "witnesses": [
+            {
+              "wayId": 142362576,
+              "beginMeters": 0.0,
+              "endMeters": 533.902106902048,
+              "reversed": false,
+              "continuousBoundMeters": 2.432195055303289,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1505627": {
-          "fromNode": 558907,
-          "toNode": 558908,
-          "lengthMeters": 92.8,
+        "1367867": {
+          "fromNode": 507164,
+          "toNode": 507165,
+          "lengthMeters": 216.8,
           "witnesses": [
             {
-              "wayId": 149012951,
-              "beginMeters": 0.0,
-              "endMeters": 92.97359416130601,
+              "wayId": 142362576,
+              "beginMeters": 533.9026690700545,
+              "endMeters": 750.7063380629343,
               "reversed": false,
-              "continuousBoundMeters": 2.432161033238493,
-              "maxVertexDeviationMeters": 0.9488174288773367
-            }
-          ]
-        },
-        "1505631": {
-          "fromNode": 558908,
-          "toNode": 2721160,
-          "lengthMeters": 57.6,
-          "witnesses": [
-            {
-              "wayId": 1479369244,
-              "beginMeters": 0.0,
-              "endMeters": 57.709190222130864,
-              "reversed": false,
-              "continuousBoundMeters": 2.432160874245774,
+              "continuousBoundMeters": 2.4321954829286767,
               "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "1505636": {
-          "fromNode": 558910,
-          "toNode": 558911,
-          "lengthMeters": 95.7,
+        "1367868": {
+          "fromNode": 507165,
+          "toNode": 507166,
+          "lengthMeters": 228.6,
           "witnesses": [
             {
-              "wayId": 149012957,
-              "beginMeters": 0.0,
-              "endMeters": 95.77059641765328,
+              "wayId": 142362576,
+              "beginMeters": 750.7068621728587,
+              "endMeters": 979.5972346672927,
               "reversed": false,
-              "continuousBoundMeters": 2.432161064177545,
-              "maxVertexDeviationMeters": 0.07768877858915209
+              "continuousBoundMeters": 2.4321958976693523,
+              "maxVertexDeviationMeters": 1.6983428321385565
             }
           ]
         },
-        "1505638": {
-          "fromNode": 558910,
-          "toNode": 558911,
-          "lengthMeters": 98.5,
+        "1367869": {
+          "fromNode": 507166,
+          "toNode": 507167,
+          "lengthMeters": 364.5,
           "witnesses": [
             {
-              "wayId": 1479369249,
-              "beginMeters": 0.0,
-              "endMeters": 98.63694248574498,
+              "wayId": 142362576,
+              "beginMeters": 979.5989864910475,
+              "endMeters": 1344.5479880985254,
               "reversed": false,
-              "continuousBoundMeters": 2.432161064177545,
-              "maxVertexDeviationMeters": 0.14588226201740243
+              "continuousBoundMeters": 2.432196448932813,
+              "maxVertexDeviationMeters": 2.21980646867526e-13
             }
           ]
         },
-        "1505643": {
-          "fromNode": 558911,
-          "toNode": 2721161,
-          "lengthMeters": 4.4,
+        "1367870": {
+          "fromNode": 507167,
+          "toNode": 507168,
+          "lengthMeters": 275.3,
           "witnesses": [
             {
-              "wayId": 1479369243,
-              "beginMeters": 0.0,
-              "endMeters": 4.315992836784568,
+              "wayId": 142362576,
+              "beginMeters": 1344.5562424536654,
+              "endMeters": 1620.421996793487,
               "reversed": false,
-              "continuousBoundMeters": 2.4321610719123044,
+              "continuousBoundMeters": 2.4321968997266397,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1367871": {
+          "fromNode": 507168,
+          "toNode": 507169,
+          "lengthMeters": 200.7,
+          "witnesses": [
+            {
+              "wayId": 142362576,
+              "beginMeters": 1620.4316200994713,
+              "endMeters": 1821.2298289060218,
+              "reversed": false,
+              "continuousBoundMeters": 2.432197250054279,
+              "maxVertexDeviationMeters": 1.153965996238784
+            }
+          ]
+        },
+        "1367872": {
+          "fromNode": 507169,
+          "toNode": 507170,
+          "lengthMeters": 249.5,
+          "witnesses": [
+            {
+              "wayId": 142362576,
+              "beginMeters": 1821.238508844369,
+              "endMeters": 2070.9502526973606,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321976295723706,
+              "maxVertexDeviationMeters": 1.8068702129545775
+            }
+          ]
+        },
+        "1367873": {
+          "fromNode": 507170,
+          "toNode": 507171,
+          "lengthMeters": 231.7,
+          "witnesses": [
+            {
+              "wayId": 142362576,
+              "beginMeters": 2070.9623973306752,
+              "endMeters": 2302.823470713976,
+              "reversed": false,
+              "continuousBoundMeters": 2.432197907768828,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1367874": {
+          "fromNode": 507171,
+          "toNode": 583132,
+          "lengthMeters": 206.7,
+          "witnesses": [
+            {
+              "wayId": 152051296,
+              "beginMeters": 0.0,
+              "endMeters": 206.90262977750086,
+              "reversed": false,
+              "continuousBoundMeters": 2.43219815934603,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1367877": {
+          "fromNode": 507174,
+          "toNode": 126221,
+          "lengthMeters": 42.5,
+          "witnesses": [
+            {
+              "wayId": 1335131740,
+              "beginMeters": 0.0,
+              "endMeters": 42.64012383066134,
+              "reversed": false,
+              "continuousBoundMeters": 2.432192535825955,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1555409": {
+          "fromNode": 577521,
+          "toNode": 577522,
+          "lengthMeters": 163.6,
+          "witnesses": [
+            {
+              "wayId": 151578414,
+              "beginMeters": 0.0,
+              "endMeters": 163.7939227586043,
+              "reversed": false,
+              "continuousBoundMeters": 2.432127202992491,
+              "maxVertexDeviationMeters": 1.6245817384561267
+            }
+          ]
+        },
+        "1555410": {
+          "fromNode": 577522,
+          "toNode": 1764645,
+          "lengthMeters": 161.8,
+          "witnesses": [
+            {
+              "wayId": 1202651585,
+              "beginMeters": 0.0,
+              "endMeters": 161.9273662227559,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321269853819563,
+              "maxVertexDeviationMeters": 0.6409738613948236
+            }
+          ]
+        },
+        "1555428": {
+          "fromNode": 577540,
+          "toNode": 577541,
+          "lengthMeters": 61.3,
+          "witnesses": [
+            {
+              "wayId": 151578427,
+              "beginMeters": 0.0,
+              "endMeters": 61.4460835679586,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321266877783847,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1555429": {
+          "fromNode": 577541,
+          "toNode": 1764584,
+          "lengthMeters": 92.6,
+          "witnesses": [
+            {
+              "wayId": 474423767,
+              "beginMeters": 0.0,
+              "endMeters": 92.68647713194272,
+              "reversed": false,
+              "continuousBoundMeters": 2.432126760029155,
+              "maxVertexDeviationMeters": 0.10999365454489461
+            }
+          ]
+        },
+        "1555431": {
+          "fromNode": 577543,
+          "toNode": 577521,
+          "lengthMeters": 117.2,
+          "witnesses": [
+            {
+              "wayId": 1333307624,
+              "beginMeters": 0.0,
+              "endMeters": 117.45725022470778,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321274042597363,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1555435": {
+          "fromNode": 577547,
+          "toNode": 577548,
+          "lengthMeters": 61.4,
+          "witnesses": [
+            {
+              "wayId": 151578433,
+              "beginMeters": 0.0,
+              "endMeters": 61.53838136883599,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321267221835288,
+              "maxVertexDeviationMeters": 1.5888218580782548e-14
+            }
+          ]
+        },
+        "1555436": {
+          "fromNode": 577548,
+          "toNode": 207510,
+          "lengthMeters": 194.9,
+          "witnesses": [
+            {
+              "wayId": 447753516,
+              "beginMeters": 0.0,
+              "endMeters": 195.06516167824736,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321266731561897,
+              "maxVertexDeviationMeters": 2.196739934661162
+            }
+          ]
+        },
+        "1555448": {
+          "fromNode": 577557,
+          "toNode": 577559,
+          "lengthMeters": 206.5,
+          "witnesses": [
+            {
+              "wayId": 151578444,
+              "beginMeters": 0.0,
+              "endMeters": 206.63470845966592,
+              "reversed": false,
+              "continuousBoundMeters": 2.432127217614503,
+              "maxVertexDeviationMeters": 0.5952023807435484
+            }
+          ]
+        },
+        "1555450": {
+          "fromNode": 577559,
+          "toNode": 577530,
+          "lengthMeters": 101.2,
+          "witnesses": [
+            {
+              "wayId": 151578444,
+              "beginMeters": 206.63683157752195,
+              "endMeters": 308.0871934898142,
+              "reversed": false,
+              "continuousBoundMeters": 2.432127393078248,
+              "maxVertexDeviationMeters": 1.052835955211673
+            }
+          ]
+        },
+        "1570385": {
+          "fromNode": 583123,
+          "toNode": 583124,
+          "lengthMeters": 226.1,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 0.0,
+              "endMeters": 226.36309515997755,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321978854444937,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1570386": {
+          "fromNode": 583124,
+          "toNode": 583125,
+          "lengthMeters": 251.4,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 226.36043477604596,
+              "endMeters": 478.1592867104119,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321976149755886,
+              "maxVertexDeviationMeters": 1.9912242864802772
+            }
+          ]
+        },
+        "1570387": {
+          "fromNode": 583125,
+          "toNode": 583126,
+          "lengthMeters": 295.0,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 478.15273685522226,
+              "endMeters": 773.471693412658,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321972320227854,
+              "maxVertexDeviationMeters": 1.8796209466509033
+            }
+          ]
+        },
+        "1570388": {
+          "fromNode": 583126,
+          "toNode": 583127,
+          "lengthMeters": 376.7,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 773.4602648501847,
+              "endMeters": 1150.3023426834113,
+              "reversed": false,
+              "continuousBoundMeters": 2.432196719409728,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1570389": {
+          "fromNode": 583127,
+          "toNode": 583128,
+          "lengthMeters": 248.0,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 1150.2833239443307,
+              "endMeters": 1398.782230272372,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321961484007297,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1570390": {
+          "fromNode": 583128,
+          "toNode": 583129,
+          "lengthMeters": 220.3,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 1398.7664032130422,
+              "endMeters": 1619.343070821961,
+              "reversed": false,
+              "continuousBoundMeters": 2.432195743966795,
+              "maxVertexDeviationMeters": 1.5738945043704022
+            }
+          ]
+        },
+        "1570391": {
+          "fromNode": 583129,
+          "toNode": 583130,
+          "lengthMeters": 641.0,
+          "witnesses": [
+            {
+              "wayId": 152051288,
+              "beginMeters": 1619.3259883628023,
+              "endMeters": 2260.820637942145,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321953275071344,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1570392": {
+          "fromNode": 583130,
+          "toNode": 2460513,
+          "lengthMeters": 178.7,
+          "witnesses": [
+            {
+              "wayId": 1335131743,
+              "beginMeters": 0.0,
+              "endMeters": 178.96674853716024,
+              "reversed": false,
+              "continuousBoundMeters": 2.432194042035881,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1570393": {
+          "fromNode": 583131,
+          "toNode": 583123,
+          "lengthMeters": 209.3,
+          "witnesses": [
+            {
+              "wayId": 152051294,
+              "beginMeters": 0.0,
+              "endMeters": 209.64703434740852,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321981404563298,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -57130,6 +58060,51 @@
               "endMeters": 92.68757917108937,
               "reversed": false,
               "continuousBoundMeters": 2.432200173622842,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "2832120": {
+          "fromNode": 1072566,
+          "toNode": 1072567,
+          "lengthMeters": 260.2,
+          "witnesses": [
+            {
+              "wayId": 245327091,
+              "beginMeters": 0.0,
+              "endMeters": 260.4444248302351,
+              "reversed": false,
+              "continuousBoundMeters": 2.432177194823211,
+              "maxVertexDeviationMeters": 1.110926721988396
+            }
+          ]
+        },
+        "2832121": {
+          "fromNode": 1072567,
+          "toNode": 1072568,
+          "lengthMeters": 744.5,
+          "witnesses": [
+            {
+              "wayId": 245327091,
+              "beginMeters": 260.44469724733136,
+              "endMeters": 1005.3928150255792,
+              "reversed": false,
+              "continuousBoundMeters": 2.432178700754349,
+              "maxVertexDeviationMeters": 1.961462179126649
+            }
+          ]
+        },
+        "2832122": {
+          "fromNode": 1072568,
+          "toNode": 1818654,
+          "lengthMeters": 50.5,
+          "witnesses": [
+            {
+              "wayId": 516175820,
+              "beginMeters": 0.0,
+              "endMeters": 50.67435848110096,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321788029803697,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -57494,32 +58469,92 @@
             }
           ]
         },
-        "4052627": {
-          "fromNode": 1572672,
-          "toNode": 1572673,
-          "lengthMeters": 76.6,
+        "3137348": {
+          "fromNode": 1195064,
+          "toNode": 577540,
+          "lengthMeters": 31.7,
           "witnesses": [
             {
-              "wayId": 389793393,
+              "wayId": 1333307657,
               "beginMeters": 0.0,
-              "endMeters": 76.80021683082012,
+              "endMeters": 31.625339995584802,
               "reversed": false,
-              "continuousBoundMeters": 2.432160742754031,
-              "maxVertexDeviationMeters": 1.2793199805271953
+              "continuousBoundMeters": 2.432126639611136,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
-        "4052628": {
-          "fromNode": 1572673,
-          "toNode": 2969260,
-          "lengthMeters": 48.4,
+        "4399941": {
+          "fromNode": 1716863,
+          "toNode": 1195064,
+          "lengthMeters": 35.2,
           "witnesses": [
             {
-              "wayId": 1479369246,
-              "beginMeters": 0.0,
-              "endMeters": 48.39619131961133,
+              "wayId": 447753517,
+              "beginMeters": 320.8181379025951,
+              "endMeters": 355.95197501517544,
               "reversed": false,
-              "continuousBoundMeters": 2.432160826977549,
+              "continuousBoundMeters": 2.4321266146673604,
+              "maxVertexDeviationMeters": 1.1292097976900676e-13
+            }
+          ]
+        },
+        "4513447": {
+          "fromNode": 1764583,
+          "toNode": 577557,
+          "lengthMeters": 191.8,
+          "witnesses": [
+            {
+              "wayId": 474423765,
+              "beginMeters": 0.0,
+              "endMeters": 192.03372433950477,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321269372150462,
+              "maxVertexDeviationMeters": 0.1362651170433329
+            }
+          ]
+        },
+        "4513448": {
+          "fromNode": 1764584,
+          "toNode": 1764583,
+          "lengthMeters": 28.0,
+          "witnesses": [
+            {
+              "wayId": 474423766,
+              "beginMeters": 0.0,
+              "endMeters": 28.091675255776043,
+              "reversed": false,
+              "continuousBoundMeters": 2.432126781532337,
+              "maxVertexDeviationMeters": 3.972054645195637e-15
+            }
+          ]
+        },
+        "4513558": {
+          "fromNode": 1764645,
+          "toNode": 1764646,
+          "lengthMeters": 118.6,
+          "witnesses": [
+            {
+              "wayId": 474423867,
+              "beginMeters": 0.0,
+              "endMeters": 118.77925407009907,
+              "reversed": false,
+              "continuousBoundMeters": 2.432126852062696,
+              "maxVertexDeviationMeters": 0.8097526177392631
+            }
+          ]
+        },
+        "4513559": {
+          "fromNode": 1764646,
+          "toNode": 577547,
+          "lengthMeters": 47.5,
+          "witnesses": [
+            {
+              "wayId": 1333307623,
+              "beginMeters": 0.0,
+              "endMeters": 47.57772949458134,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321267591690274,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -57584,6 +58619,21 @@
             }
           ]
         },
+        "4576969": {
+          "fromNode": 1791323,
+          "toNode": 2824103,
+          "lengthMeters": 125.2,
+          "witnesses": [
+            {
+              "wayId": 1338352856,
+              "beginMeters": 0.0,
+              "endMeters": 125.40946584755602,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321617130328113,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
         "4588800": {
           "fromNode": 1796566,
           "toNode": 2819981,
@@ -57595,6 +58645,66 @@
               "endMeters": 29.207157695767332,
               "reversed": false,
               "continuousBoundMeters": 2.4321657674997095,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4639891": {
+          "fromNode": 1818650,
+          "toNode": 1818651,
+          "lengthMeters": 574.9,
+          "witnesses": [
+            {
+              "wayId": 516175818,
+              "beginMeters": 0.0,
+              "endMeters": 575.7129877943429,
+              "reversed": false,
+              "continuousBoundMeters": 2.432178698177219,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4639892": {
+          "fromNode": 1818651,
+          "toNode": 1818652,
+          "lengthMeters": 168.1,
+          "witnesses": [
+            {
+              "wayId": 516175818,
+              "beginMeters": 575.7129395381386,
+              "endMeters": 743.7045182778364,
+              "reversed": false,
+              "continuousBoundMeters": 2.432177534156607,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4639893": {
+          "fromNode": 1818652,
+          "toNode": 2821095,
+          "lengthMeters": 167.2,
+          "witnesses": [
+            {
+              "wayId": 1335131731,
+              "beginMeters": 0.0,
+              "endMeters": 167.54214438577188,
+              "reversed": false,
+              "continuousBoundMeters": 2.432177194823211,
+              "maxVertexDeviationMeters": 0.5836190024090787
+            }
+          ]
+        },
+        "4639894": {
+          "fromNode": 1818653,
+          "toNode": 1818650,
+          "lengthMeters": 50.2,
+          "witnesses": [
+            {
+              "wayId": 516175819,
+              "beginMeters": 0.0,
+              "endMeters": 50.20673002599816,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321787995442055,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -57899,6 +59009,21 @@
             }
           ]
         },
+        "4639915": {
+          "fromNode": 1818674,
+          "toNode": 2821093,
+          "lengthMeters": 188.7,
+          "witnesses": [
+            {
+              "wayId": 1335131737,
+              "beginMeters": 0.0,
+              "endMeters": 189.21065472850074,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321924533863553,
+              "maxVertexDeviationMeters": 0.9344437607925359
+            }
+          ]
+        },
         "4666579": {
           "fromNode": 1830087,
           "toNode": 1830088,
@@ -58019,6 +59144,36 @@
             }
           ]
         },
+        "4666588": {
+          "fromNode": 1830096,
+          "toNode": 1830097,
+          "lengthMeters": 61.1,
+          "witnesses": [
+            {
+              "wayId": 527319202,
+              "beginMeters": 0.0,
+              "endMeters": 61.16289786511783,
+              "reversed": false,
+              "continuousBoundMeters": 2.432192749652866,
+              "maxVertexDeviationMeters": 0.5972605110389614
+            }
+          ]
+        },
+        "4666590": {
+          "fromNode": 1830098,
+          "toNode": 507163,
+          "lengthMeters": 274.4,
+          "witnesses": [
+            {
+              "wayId": 527319203,
+              "beginMeters": 0.0,
+              "endMeters": 274.5731585419931,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321939836434074,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
         "4880137": {
           "fromNode": 1920501,
           "toNode": 1920502,
@@ -58049,6 +59204,66 @@
             }
           ]
         },
+        "4880140": {
+          "fromNode": 1920504,
+          "toNode": 1920505,
+          "lengthMeters": 207.8,
+          "witnesses": [
+            {
+              "wayId": 598399310,
+              "beginMeters": 0.0,
+              "endMeters": 208.0013993064655,
+              "reversed": false,
+              "continuousBoundMeters": 2.432176632983894,
+              "maxVertexDeviationMeters": 1.3841666411464175
+            }
+          ]
+        },
+        "4880141": {
+          "fromNode": 1920505,
+          "toNode": 1072566,
+          "lengthMeters": 21.5,
+          "witnesses": [
+            {
+              "wayId": 598399310,
+              "beginMeters": 208.00192882447584,
+              "endMeters": 229.88588815526649,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321766759382477,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4880153": {
+          "fromNode": 1920517,
+          "toNode": 119748,
+          "lengthMeters": 80.3,
+          "witnesses": [
+            {
+              "wayId": 1338352857,
+              "beginMeters": 0.0,
+              "endMeters": 80.50801048393566,
+              "reversed": false,
+              "continuousBoundMeters": 2.432161707876386,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4880155": {
+          "fromNode": 1920519,
+          "toNode": 27660,
+          "lengthMeters": 36.5,
+          "witnesses": [
+            {
+              "wayId": 1338352861,
+              "beginMeters": 0.0,
+              "endMeters": 36.56197502851244,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321613563785442,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
         "6001910": {
           "fromNode": 2419119,
           "toNode": 2819961,
@@ -58064,66 +59279,6 @@
             }
           ]
         },
-        "6094128": {
-          "fromNode": 2459894,
-          "toNode": 104514,
-          "lengthMeters": 75.8,
-          "witnesses": [
-            {
-              "wayId": 987912383,
-              "beginMeters": 0.0,
-              "endMeters": 75.72487411214385,
-              "reversed": false,
-              "continuousBoundMeters": 2.4321613159861775,
-              "maxVertexDeviationMeters": 1.6314836284186516
-            }
-          ]
-        },
-        "6672165": {
-          "fromNode": 2721160,
-          "toNode": 558905,
-          "lengthMeters": 47.3,
-          "witnesses": [
-            {
-              "wayId": 1479369244,
-              "beginMeters": 57.709089353595466,
-              "endMeters": 105.08003834360775,
-              "reversed": false,
-              "continuousBoundMeters": 2.4321607736933024,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "6672167": {
-          "fromNode": 2721161,
-          "toNode": 2721162,
-          "lengthMeters": 26.2,
-          "witnesses": [
-            {
-              "wayId": 1479369243,
-              "beginMeters": 4.3159933208362355,
-              "endMeters": 30.71821886794017,
-              "reversed": false,
-              "continuousBoundMeters": 2.4321611200396624,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
-        "6672168": {
-          "fromNode": 2721162,
-          "toNode": 2459894,
-          "lengthMeters": 24.2,
-          "witnesses": [
-            {
-              "wayId": 1479369243,
-              "beginMeters": 30.718237988833216,
-              "endMeters": 54.969820928330066,
-              "reversed": false,
-              "continuousBoundMeters": 2.432161164729301,
-              "maxVertexDeviationMeters": 0.0
-            }
-          ]
-        },
         "6888668": {
           "fromNode": 2819961,
           "toNode": 1072611,
@@ -58135,6 +59290,21 @@
               "endMeters": 156.91542059920732,
               "reversed": false,
               "continuousBoundMeters": 2.4322004363469847,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "6888671": {
+          "fromNode": 2819963,
+          "toNode": 1072588,
+          "lengthMeters": 280.6,
+          "witnesses": [
+            {
+              "wayId": 1333815284,
+              "beginMeters": 0.0,
+              "endMeters": 280.96053786103766,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321923623590975,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -58166,6 +59336,21 @@
               "reversed": false,
               "continuousBoundMeters": 2.4321653911164427,
               "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "6888699": {
+          "fromNode": 2819985,
+          "toNode": 2819986,
+          "lengthMeters": 30.3,
+          "witnesses": [
+            {
+              "wayId": 1333815324,
+              "beginMeters": 0.0,
+              "endMeters": 30.097383832166948,
+              "reversed": false,
+              "continuousBoundMeters": 2.432161456070171,
+              "maxVertexDeviationMeters": 5.0242958677880805e-15
             }
           ]
         },
@@ -58214,17 +59399,32 @@
             }
           ]
         },
-        "7205038": {
-          "fromNode": 2969260,
-          "toNode": 558910,
-          "lengthMeters": 42.5,
+        "6890829": {
+          "fromNode": 2821093,
+          "toNode": 1830096,
+          "lengthMeters": 85.6,
           "witnesses": [
             {
-              "wayId": 1479369247,
+              "wayId": 1335131707,
               "beginMeters": 0.0,
-              "endMeters": 42.55445271437164,
+              "endMeters": 85.59985202617847,
               "reversed": false,
-              "continuousBoundMeters": 2.4321609000284194,
+              "continuousBoundMeters": 2.4321926259940705,
+              "maxVertexDeviationMeters": 0.3521134070899819
+            }
+          ]
+        },
+        "6896938": {
+          "fromNode": 2824103,
+          "toNode": 2819985,
+          "lengthMeters": 42.8,
+          "witnesses": [
+            {
+              "wayId": 1338352855,
+              "beginMeters": 0.0,
+              "endMeters": 42.932585301148684,
+              "reversed": false,
+              "continuousBoundMeters": 2.4321615239634675,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -58244,9 +59444,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "b69f97f4f0fe15d14201806fa60d5f8339eeb39191ac559134e1d82230a4c64a",
-      "reviewSha256": "4f120549054c8f11cddb966dcec85332dd123eca039ac1fb740e005b43322f34",
-      "seedSha256": "7e404d8549b5fe826d238abe6a0e0557d2a0a8cfb622c8968b4279d53ef592ab",
-      "seedCoveredEdges": 3825,
+      "reviewSha256": "80fb4f8a05d2d720560e9e1d233d5511b28e54a4e8c84de470b5e6931cfee21e",
+      "seedSha256": "aafd44048dceac2c7327b1c88895ec27d5992c0fbf970149fb748fad011f9710",
+      "seedCoveredEdges": 3905,
       "additionalCoveredEdges": 76,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -58310,22 +59510,22 @@
         "crossing;566710;207825;31790;35.332110230;144.5;ascendi:grande-porto:01",
         "crossing;1356247;502641;502642;164.602698727;187.9;ascendi:grande-porto:02",
         "crossing;4584944;1794867;52952;136.515403987;176.4;ascendi:grande-porto:02",
-        "crossing;1645889;612078;612079;0.000000000;46.0;ascendi:costa-de-prata:03",
-        "crossing;1717053;639915;1507863;0.000000000;42.3;ascendi:costa-de-prata:02",
-        "crossing;1717056;639917;1507790;0.000000000;42.2;ascendi:costa-de-prata:02",
-        "crossing;4473300;1747546;2871270;0.000000000;39.1;ascendi:costa-de-prata:01",
-        "crossing;4473344;1747579;1747577;0.000000000;43.0;ascendi:costa-de-prata:03",
-        "crossing;6998318;2871269;1747551;0.000000000;32.6;ascendi:costa-de-prata:01",
+        "crossing;1722343;641976;641977;119.415985689;234.6;ascendi:costa-de-prata:01",
+        "crossing;1723386;642436;642437;0.000000000;196.6;ascendi:costa-de-prata:01",
+        "crossing;1756720;655258;655259;0.000000000;372.8;ascendi:costa-de-prata:03",
+        "crossing;3758753;1450457;1450458;28.767707417;488.2;ascendi:costa-de-prata:03",
+        "crossing;4474551;1748140;1748141;0.000000000;206.2;ascendi:costa-de-prata:02",
+        "crossing;4474554;1748143;1748142;174.604354648;612.2;ascendi:costa-de-prata:02",
         "crossing;332989;119752;119753;59.262759417;120.9;ascendi:costa-de-prata:06",
-        "crossing;1505627;558907;558908;42.368331989;92.8;ascendi:costa-de-prata:07",
-        "crossing;1505636;558910;558911;49.189839613;95.7;ascendi:costa-de-prata:07",
+        "crossing;1555429;577541;1764584;65.879310879;92.6;ascendi:costa-de-prata:07",
         "crossing;1570398;583136;1920503;0.000000000;92.6;ascendi:costa-de-prata:04",
         "crossing;2832170;1072606;1830091;0.000000000;334.2;ascendi:costa-de-prata:05",
         "crossing;2832178;1072611;1072612;0.000000000;246.0;ascendi:costa-de-prata:04",
+        "crossing;4513558;1764645;1764646;61.760997399;118.6;ascendi:costa-de-prata:07",
         "crossing;4576965;1791319;1791320;22.480019248;693.6;ascendi:costa-de-prata:06",
         "crossing;4639896;1818655;1818656;0.000000000;226.8;ascendi:costa-de-prata:05"
       ],
-      "bindingsSha256": "c2699c851e4b2496e194c07808ae727ed8fbc9a35cb3e86b26c30a83c974959b",
+      "bindingsSha256": "f04198639123eafe8692f6cd30121536451a2e1a2a2ba0ffae9cc747842d0c75",
       "crossings": [
         {
           "edge": 556759,
@@ -58333,7 +59533,7 @@
           "toNode": 203556,
           "lengthMeters": 340.8,
           "osmNodeId": 264119862,
-          "chargeId": "ascendi:grande-porto:11",
+          "chargeId": "ascendi:grande-porto:12",
           "offsetMeters": 71.24219181493328
         },
         {
@@ -58342,7 +59542,7 @@
           "toNode": 203563,
           "lengthMeters": 218.3,
           "osmNodeId": 2869381630,
-          "chargeId": "ascendi:grande-porto:11",
+          "chargeId": "ascendi:grande-porto:12",
           "offsetMeters": 0.0
         },
         {
@@ -58351,7 +59551,7 @@
           "toNode": 213538,
           "lengthMeters": 207.3,
           "osmNodeId": 2869384457,
-          "chargeId": "ascendi:grande-porto:10",
+          "chargeId": "ascendi:grande-porto:11",
           "offsetMeters": 0.0
         },
         {
@@ -58360,7 +59560,7 @@
           "toNode": 213638,
           "lengthMeters": 255.1,
           "osmNodeId": 2869384458,
-          "chargeId": "ascendi:grande-porto:10",
+          "chargeId": "ascendi:grande-porto:11",
           "offsetMeters": 0.0
         },
         {
@@ -58369,7 +59569,7 @@
           "toNode": 482379,
           "lengthMeters": 282.0,
           "osmNodeId": 264119609,
-          "chargeId": "ascendi:grande-porto:12",
+          "chargeId": "ascendi:grande-porto:10",
           "offsetMeters": 155.1879165771442
         },
         {
@@ -58378,7 +59578,7 @@
           "toNode": 567113,
           "lengthMeters": 305.9,
           "osmNodeId": 264117176,
-          "chargeId": "ascendi:grande-porto:12",
+          "chargeId": "ascendi:grande-porto:10",
           "offsetMeters": 88.30119306685233
         }
       ],

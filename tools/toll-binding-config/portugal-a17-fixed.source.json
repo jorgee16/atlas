@@ -4,2273 +4,2373 @@
   "capture": "OSM API responses; exact nodes and whole directed source ways",
   "apiResponses": [
     {
-      "file": "a17-0.json",
-      "rawSha256": "391917fd080cef190f6fad1e56bfd305059096633edd8ee815e82174bb75dc69"
-    },
-    {
-      "file": "a17-1.json",
-      "rawSha256": "b70f05aa2052a5ccb508e6b5a40ec85a521cc190174780543585fa2294d2ffb7"
-    },
-    {
-      "file": "a17-2.json",
-      "rawSha256": "f9d8e376a4599ea26e1177e4ad921014999aa9609a168b45113bd5c581a0a1f4"
+      "file": "a17-relation.json",
+      "rawSha256": "3eca13b90b4244a2131c64adc614ca312d554a676134036e98bfeb63f951f52d"
     }
   ],
   "ways": [
     {
-      "id": 66937026,
-      "version": 15,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        808569502,
-        12875173318,
-        4671981054,
-        12875173319,
-        808861639,
-        808569589,
-        2645445174,
-        823793221,
-        12812141596
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 66967884,
+      "id": 95365887,
       "version": 10,
-      "timestamp": "2025-09-07T01:33:01Z",
+      "timestamp": "2025-05-05T07:59:47Z",
       "nodes": [
-        1104360850,
-        808837301,
-        7633936238,
-        7633936239,
-        808837303,
-        7633936240,
-        7633936241,
-        7633936242,
-        4575731561,
-        7633936243,
-        7633936244,
-        7633936245,
-        808837304,
-        7633936246,
-        7633936247,
-        7633936248,
-        7633936249,
-        1104360811,
-        7633936250,
-        7633936251,
-        7633936252,
-        808837306,
-        7633936253,
-        7633936254,
-        808837270
+        1106029041,
+        1106029045
       ],
       "tags": {
-        "destination": "Aveiro;Figueira da Foz",
-        "destination:ref": "A 17",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 68506620,
-      "version": 9,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        823793025,
-        3765710949,
-        3765710945,
-        823793090,
-        3765710941,
-        823793091,
-        3765710938,
-        3765710939,
-        3765710942,
-        3765710943,
-        3765710946,
-        3765710950,
-        3765710952,
-        808569539
-      ],
-      "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 69170046,
-      "version": 9,
-      "timestamp": "2024-09-09T09:56:15Z",
-      "nodes": [
-        814301306,
-        829528264,
-        1699957548,
-        1699957550,
-        1030807431,
-        1030807409,
-        1030807501,
-        1030807445,
-        1030807450,
-        1699957570,
-        1030807437,
-        1030807473
-      ],
-      "tags": {
-        "destination": "Quiaios",
-        "destination:ref": "N 109",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 88826484,
-      "version": 6,
-      "timestamp": "2025-08-29T10:55:42Z",
-      "nodes": [
-        1699957580,
-        1699957583,
-        1699957587,
-        1030807483,
-        1699957584,
-        1030807478,
-        1030807485,
-        1030807441,
-        1030807468,
-        1030807480,
-        1699957555,
-        1030807453
-      ],
-      "tags": {
-        "destination": "Lisboa;Figueira da Foz;Coimbra",
-        "destination:ref:to": "A 14",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 95197229,
-      "version": 5,
-      "timestamp": "2020-08-02T03:07:16Z",
-      "nodes": [
-        823772465,
-        7634021420,
-        1104360855
-      ],
-      "tags": {
-        "bicycle": "no",
         "bridge": "yes",
-        "destination": "Aveiro;Leiria",
-        "destination:ref": "A 17",
-        "destination:ref:to": "A 14",
-        "destination:to": "Figueira da Foz",
-        "foot": "no",
-        "highway": "trunk",
-        "horse": "no",
-        "lanes": "1",
+        "bridge:ref": "A17.020",
+        "highway": "motorway",
+        "lanes": "2",
         "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt"
-      }
-    },
-    {
-      "id": 95197231,
-      "version": 8,
-      "timestamp": "2025-09-07T01:33:01Z",
-      "nodes": [
-        1104360762,
-        1104360891
-      ],
-      "tags": {
-        "bridge": "yes",
-        "destination": "Pombal;Louriçal;A 1;Carriço",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "1",
-        "layer": "1",
-        "lit": "yes",
-        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 95197234,
-      "version": 7,
-      "timestamp": "2025-09-17T12:44:14Z",
+      "id": 95365889,
+      "version": 12,
+      "timestamp": "2025-05-05T17:25:11Z",
       "nodes": [
-        189092491,
-        7634021419,
-        808837309
+        1106029038,
+        506987336,
+        1702694260,
+        1702694255,
+        1702694253,
+        506987341,
+        506987342,
+        506987343,
+        506987345,
+        506987346
       ],
       "tags": {
-        "bicycle": "no",
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 95365898,
+      "version": 10,
+      "timestamp": "2025-05-05T17:24:36Z",
+      "nodes": [
+        1106029049,
+        1106029038
+      ],
+      "tags": {
         "bridge": "yes",
-        "foot": "no",
-        "highway": "trunk",
-        "horse": "no",
+        "bridge:ref": "A17.020",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 152348491,
+      "version": 12,
+      "timestamp": "2024-09-09T10:23:13Z",
+      "nodes": [
+        1112967171,
+        814271259,
+        1702701555,
+        1702701552,
+        1702701550,
+        1112966888
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 158018546,
+      "version": 15,
+      "timestamp": "2025-05-19T08:10:04Z",
+      "nodes": [
+        530696188,
+        530696197,
+        530696196,
+        530696198,
+        1563499859,
+        530696204,
+        530696206,
+        530696210,
+        530696208,
+        530696211,
+        530696216,
+        530696214,
+        1702567028,
+        1702567030,
+        1702567031,
+        530696222,
+        530696226,
+        530696233,
+        530696236,
+        530696244,
+        530696242,
+        530696239,
+        530696252,
+        530696253,
+        530696249,
+        530696248,
+        814271612,
+        530696250,
+        814271727,
+        530696262,
+        530696266,
+        1702688827,
+        530696258,
+        814271458
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 158030290,
+      "version": 12,
+      "timestamp": "2025-05-05T17:30:15Z",
+      "nodes": [
+        1702688839,
+        1702688838,
+        1702688834,
+        1702688833,
+        530588733,
+        1702688828,
+        530588739,
+        530588741,
+        530588743,
+        530588729,
+        530588704,
+        530588706,
+        530588707,
+        530588709,
+        530588711,
+        530588713,
+        530588717,
+        530588677,
+        530588687,
+        530588692,
+        530588695,
+        530588697,
+        530588659,
+        530588665,
+        1702567029,
+        1702567027,
+        530588641,
+        530588646,
+        530588650,
+        530588653,
+        530588624,
+        530588626,
+        1563499866,
+        530588635
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159253811,
+      "version": 11,
+      "timestamp": "2024-09-13T17:07:57Z",
+      "nodes": [
+        1713468888,
+        1713468892,
+        1713468898,
+        1713468901,
+        1713468908,
+        1713468913,
+        1713468919,
+        1713468933,
+        1713468938,
+        1713468941,
+        1713468945,
+        1713468949,
+        1713468954,
+        1713468957,
+        1713468961,
+        1713468965,
+        1713468969,
+        1713468984,
+        1713468988,
+        1713468993,
+        1713468996,
+        1713469000,
+        1713469014,
+        1713469017,
+        1713469020,
+        1713469024,
+        1713469027,
+        1713469035,
+        1713469037,
+        1713469040,
+        1713469046,
+        1713469051,
+        1713469067,
+        1713469069,
+        1713469075,
+        1713469080,
+        1713469086,
+        1713469096,
+        1713469098,
+        1713469101,
+        1713469107,
+        1713469114,
+        1713469132,
+        1713469137,
+        1563499950,
+        4577922443
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 159253813,
+      "version": 11,
+      "timestamp": "2024-09-13T17:10:25Z",
+      "nodes": [
+        1713468869,
+        1713468881
+      ],
+      "tags": {
+        "bridge": "yes",
+        "bridge:ref": "A17.027",
+        "highway": "motorway",
         "lanes": "2",
         "layer": "1",
         "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt",
-        "turn:lanes": "through|slight_right"
-      }
-    },
-    {
-      "id": 95197237,
-      "version": 8,
-      "timestamp": "2020-08-02T03:07:16Z",
-      "nodes": [
-        808837309,
-        808837311,
-        7634021431,
-        7634021430,
-        1104360748,
-        7634021429,
-        7634021428,
-        7634021427,
-        808837312,
-        7634021426,
-        1104360844,
-        1547776226
-      ],
-      "tags": {
-        "bicycle": "no",
-        "foot": "no",
-        "highway": "trunk",
-        "horse": "no",
-        "lanes": "1",
-        "maxspeed": "100",
-        "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt"
-      }
-    },
-    {
-      "id": 95197245,
-      "version": 8,
-      "timestamp": "2025-09-07T01:33:01Z",
-      "nodes": [
-        1104360891,
-        7633936232,
-        1104360724,
-        7633936231,
-        1104360806,
-        7633936230,
-        1703184720,
-        7633936229,
-        7633936228,
-        7633936227,
-        7633936226,
-        1104360840,
-        7633936225,
-        7633936224,
-        1104360765,
-        7633936223,
-        189092487
-      ],
-      "tags": {
-        "destination": "Pombal;Louriçal;A 1;Carriço",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 95197248,
-      "version": 7,
-      "timestamp": "2025-09-17T12:44:08Z",
+      "id": 354388193,
+      "version": 9,
+      "timestamp": "2024-09-13T17:07:55Z",
       "nodes": [
-        1104360855,
-        823772467,
-        7634021421,
-        1703171967,
-        1703171979
+        12175222100,
+        1563499968,
+        1713469134,
+        1713469130,
+        1713469111,
+        1713469103,
+        1713469099,
+        1713469097,
+        1713469095,
+        1713469083,
+        1713469078,
+        1713469072,
+        1713469070,
+        1713469068,
+        1713469055,
+        1713469049,
+        1713469043,
+        1713469039,
+        1713469036,
+        1713469029,
+        1713469026,
+        1713469022,
+        1713469018,
+        1713469016,
+        1713469003,
+        1713468998,
+        1713468995,
+        1713468991,
+        1713468986,
+        1713468971,
+        1713468966,
+        1713468963,
+        1713468959,
+        1713468955,
+        1713468951,
+        1713468947,
+        1713468943,
+        1713468940,
+        1713468936,
+        1713468921,
+        1713468917,
+        1713468910,
+        1713468904,
+        4577922484
       ],
       "tags": {
-        "bicycle": "no",
-        "foot": "no",
-        "highway": "trunk",
-        "horse": "no",
-        "lanes": "1",
-        "lit": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt"
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
       }
     },
     {
-      "id": 95197250,
-      "version": 7,
-      "timestamp": "2025-09-07T01:33:01Z",
+      "id": 462392899,
+      "version": 6,
+      "timestamp": "2024-09-09T10:27:17Z",
       "nodes": [
-        158749665,
-        158749666
+        1713469191,
+        1713469188,
+        1713469173,
+        1713469167,
+        1713469163,
+        1713469152,
+        1713469148
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392905,
+      "version": 7,
+      "timestamp": "2024-09-09T10:27:14Z",
+      "nodes": [
+        1700570763,
+        1713469150,
+        1713469161,
+        1713469165,
+        1713469169,
+        1713469175,
+        1713469186
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392907,
+      "version": 7,
+      "timestamp": "2024-09-09T10:27:11Z",
+      "nodes": [
+        1713469148,
+        4577922441,
+        1713469145,
+        1713469139
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 462392908,
+      "version": 7,
+      "timestamp": "2024-09-09T10:27:10Z",
+      "nodes": [
+        1713469142,
+        4577922442,
+        1700570763
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
+      }
+    },
+    {
+      "id": 462392909,
+      "version": 6,
+      "timestamp": "2024-09-09T10:27:04Z",
+      "nodes": [
+        4577922443,
+        1713469142
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 462392913,
+      "version": 6,
+      "timestamp": "2024-09-13T17:10:12Z",
+      "nodes": [
+        4577922484,
+        1713468899,
+        1713468894,
+        1713468890
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 462392914,
+      "version": 7,
+      "timestamp": "2024-09-13T17:10:16Z",
+      "nodes": [
+        1713468890,
+        4577922486
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
+      }
+    },
+    {
+      "id": 462392915,
+      "version": 7,
+      "timestamp": "2024-09-13T17:10:19Z",
+      "nodes": [
+        1713468887,
+        4577922485,
+        1713468888
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 462392916,
+      "version": 6,
+      "timestamp": "2024-09-13T17:10:25Z",
+      "nodes": [
+        1713468881,
+        1713468887
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392917,
+      "version": 8,
+      "timestamp": "2024-09-13T17:10:51Z",
+      "nodes": [
+        4577922486,
+        1713468885
       ],
       "tags": {
         "bridge": "yes",
-        "destination": "Lisboa;Leiria",
-        "destination:ref": "A 17",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "1",
+        "bridge:ref": "A17.027",
+        "highway": "motorway",
+        "lanes": "3",
         "layer": "1",
         "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
         "surface": "asphalt",
-        "toll": "yes"
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
       }
     },
     {
-      "id": 95805704,
+      "id": 462392932,
       "version": 6,
-      "timestamp": "2024-09-09T09:56:10Z",
+      "timestamp": "2024-09-09T10:23:09Z",
       "nodes": [
-        1030807447,
-        1030807451,
-        1030807488,
-        1699957594,
-        1699957597,
-        1699957596,
-        1699957591,
-        1699957588
+        1112967307,
+        814271353,
+        1702701547,
+        403621201,
+        1112967139
       ],
       "tags": {
-        "destination": "Quiaios",
-        "highway": "motorway_link",
-        "lanes": "1",
+        "highway": "motorway",
+        "lanes": "2",
         "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 95805705,
-      "version": 6,
-      "timestamp": "2024-09-09T09:56:19Z",
+      "id": 462392940,
+      "version": 8,
+      "timestamp": "2025-05-05T17:23:56Z",
       "nodes": [
-        1030807473,
-        1030807447
+        1112966888,
+        1702701545,
+        4577922523
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 462392941,
+      "version": 8,
+      "timestamp": "2025-05-05T08:00:53Z",
+      "nodes": [
+        403621198,
+        1112967307
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
+      }
+    },
+    {
+      "id": 462392942,
+      "version": 9,
+      "timestamp": "2025-05-05T17:24:32Z",
+      "nodes": [
+        4577922523,
+        1702694265,
+        1563499923,
+        1702694262,
+        1106029049
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392943,
+      "version": 7,
+      "timestamp": "2025-05-05T08:00:47Z",
+      "nodes": [
+        4577922524,
+        403621198
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 462392944,
+      "version": 8,
+      "timestamp": "2025-05-05T08:00:42Z",
+      "nodes": [
+        1106029045,
+        1563499921,
+        1563499922,
+        4577922524
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxheight": "5.49",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392952,
+      "version": 8,
+      "timestamp": "2025-05-05T17:25:15Z",
+      "nodes": [
+        506987346,
+        4577922558
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392967,
+      "version": 6,
+      "timestamp": "2025-05-05T17:28:10Z",
+      "nodes": [
+        4577922582,
+        814271524
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
+      }
+    },
+    {
+      "id": 462392971,
+      "version": 7,
+      "timestamp": "2025-05-05T17:28:25Z",
+      "nodes": [
+        814271524,
+        1702688875,
+        1702688858,
+        1702688851,
+        1702688847,
+        1030837107
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392975,
+      "version": 8,
+      "timestamp": "2025-05-05T17:28:26Z",
+      "nodes": [
+        1030837107,
+        1702688842,
+        1702688839
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 462392983,
+      "version": 8,
+      "timestamp": "2025-05-05T07:56:12Z",
+      "nodes": [
+        530696274,
+        1702688841,
+        1702688846,
+        1702688850,
+        1702688852
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462392984,
+      "version": 8,
+      "timestamp": "2025-05-05T07:56:04Z",
+      "nodes": [
+        814271458,
+        530696268,
+        530696271
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 462392985,
+      "version": 9,
+      "timestamp": "2025-05-05T07:56:09Z",
+      "nodes": [
+        530696271,
+        4577922607,
+        530696274
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
+      }
+    },
+    {
+      "id": 462393018,
+      "version": 9,
+      "timestamp": "2025-05-05T17:30:38Z",
+      "nodes": [
+        530588611,
+        530588613,
+        530588615,
+        530588617,
+        530588602
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||slight_right"
+      }
+    },
+    {
+      "id": 462393020,
+      "version": 7,
+      "timestamp": "2025-05-05T17:30:43Z",
+      "nodes": [
+        530588635,
+        530588619,
+        530588609,
+        530588611
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 462393023,
+      "version": 7,
+      "timestamp": "2025-05-05T17:30:52Z",
+      "nodes": [
+        530588602,
+        1702567026,
+        1702567024,
+        1702567021,
+        1702567019,
+        1702567013
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 462393025,
+      "version": 9,
+      "timestamp": "2025-05-19T08:07:37Z",
+      "nodes": [
+        1030834400,
+        1702567023,
+        530696187,
+        4577922622
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "||merge_to_left"
+      }
+    },
+    {
+      "id": 462393029,
+      "version": 8,
+      "timestamp": "2025-05-19T08:07:33Z",
+      "nodes": [
+        1702566992,
+        1702567011,
+        1702567012,
+        1702567014,
+        1702567020,
+        1030834400
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505413593,
+      "version": 5,
+      "timestamp": "2020-09-16T04:28:02Z",
+      "nodes": [
+        4953738143,
+        1702701559,
+        1112967171
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505413602,
+      "version": 6,
+      "timestamp": "2025-05-05T07:59:11Z",
+      "nodes": [
+        4953738196,
+        403621184,
+        814271349,
+        403621188,
+        814271562,
+        403621191,
+        814271669,
+        403621193,
+        1702694257,
+        403621196,
+        1106029041
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
+        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 505413603,
+      "version": 6,
+      "timestamp": "2025-05-05T07:59:15Z",
+      "nodes": [
+        4953738197,
+        4953738196
       ],
       "tags": {
         "bridge": "viaduct",
-        "destination": "Quiaios",
-        "highway": "motorway_link",
-        "lanes": "1",
+        "bridge:ref": "A17.018",
+        "highway": "motorway",
+        "lanes": "2",
         "layer": "1",
-        "lit": "yes",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 155729463,
-      "version": 7,
-      "timestamp": "2026-07-27T16:49:57Z",
+      "id": 1315365314,
+      "version": 1,
+      "timestamp": "2024-09-13T17:07:50Z",
       "nodes": [
-        189092488,
-        7634124158,
-        7633936190
+        1713469139,
+        12175222100
       ],
       "tags": {
-        "highway": "trunk",
+        "highway": "motorway",
         "lanes": "2",
         "lit": "yes",
-        "maxspeed": "40",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt"
-      }
-    },
-    {
-      "id": 155729464,
-      "version": 7,
-      "timestamp": "2025-09-07T01:33:01Z",
-      "nodes": [
-        1104360850,
-        158749404,
-        7633936237,
-        7633936236,
-        158749405,
-        7633936235,
-        158749690,
-        7633936234,
-        7633936233,
-        1703184715,
-        158749665
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria",
-        "destination:ref": "A 17",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 157743113,
-      "version": 6,
-      "timestamp": "2024-09-09T09:56:42Z",
-      "nodes": [
-        1699957610,
-        1699957608,
-        1699957607,
-        1699957604,
-        1699957603,
-        1699957601,
-        1699957602,
-        1699957600,
-        1699957599,
-        1699957598,
-        1699957595,
-        1699957588
-      ],
-      "tags": {
-        "destination": "Quiaios",
-        "destination:ref": "EN 109",
-        "fixme": "feito.",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 157743114,
-      "version": 5,
-      "timestamp": "2025-08-29T10:55:42Z",
-      "nodes": [
-        1699957575,
-        1699957573,
-        1699957569,
-        1699957565,
-        1699957554,
-        1699957552,
-        1699957551,
-        1699957553,
-        1699957559,
-        1699957568,
-        1699957571,
-        1699957574,
-        1699957577,
-        814301254
-      ],
-      "tags": {
-        "destination": "Aveiro;Mira",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 157743116,
-      "version": 5,
-      "timestamp": "2025-08-29T10:55:42Z",
-      "nodes": [
-        1699957579,
-        1699957575
-      ],
-      "tags": {
-        "bridge": "viaduct",
-        "destination": "Aveiro;Mira",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "layer": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 157743118,
-      "version": 6,
-      "timestamp": "2026-07-27T15:54:11Z",
-      "nodes": [
-        1699957588,
-        14054128046,
-        530622950
-      ],
-      "tags": {
-        "destination": "Quiaios",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 157743119,
-      "version": 8,
-      "timestamp": "2026-07-27T15:54:11Z",
-      "nodes": [
-        1573102681,
-        1699957561,
-        1699957558,
-        1699957557,
-        1699957563,
-        14054128041,
-        530695809
-      ],
-      "tags": {
-        "destination": "Aveiro;Mira;Lisboa;Figueira da Foz;Coimbra",
-        "destination:ref:to": "A 14",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 157743120,
-      "version": 5,
-      "timestamp": "2025-08-29T10:55:42Z",
-      "nodes": [
-        1699957580,
-        1699957585,
-        1699957589,
-        1699957592,
-        1699957593,
-        1699957590,
-        1699957586,
-        1699957582,
-        1699957579
-      ],
-      "tags": {
-        "destination": "Aveiro;Mira",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 158067145,
-      "version": 6,
-      "timestamp": "2025-09-07T01:33:01Z",
-      "nodes": [
-        814301364,
-        1703184691,
-        1703184692,
-        7633936206,
-        7633936207,
-        7633936208,
-        1703184706,
-        7633936209,
-        7633936210,
-        1703184708,
-        7633936211,
-        7633936212,
-        1703184710,
-        7633936213,
-        7633936214,
-        1703184711,
-        7633936215,
-        7633936216,
-        7633936217,
-        1703184713,
-        7633936218,
-        7633936219,
-        1703184717,
-        7633936220,
-        1703184719,
-        7633936221,
-        7633936222,
-        1703184718,
-        189092487
-      ],
-      "tags": {
-        "destination": "Pombal;Louriçal;A 1;Carriço",
-        "destination:ref": "IC 8",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 373033551,
-      "version": 4,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        3765710931,
-        3765710933,
-        3765710935,
-        3765710937,
-        3765710940,
-        3765710944,
-        3765710947,
-        3765710951,
-        808569539
-      ],
-      "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 373033559,
-      "version": 5,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        808569537,
-        3765710931
-      ],
-      "tags": {
-        "bridge": "yes",
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "layer": "1",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 373033561,
-      "version": 5,
-      "timestamp": "2026-07-27T15:54:11Z",
-      "nodes": [
-        530695809,
-        14054128049,
-        14054128042,
-        14054128054,
-        1699957580
-      ],
-      "tags": {
-        "destination": "Aveiro;Mira;Lisboa;Figueira da Foz;Coimbra",
-        "destination:ref:to": "A 14",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 373033592,
-      "version": 7,
-      "timestamp": "2026-07-27T15:54:11Z",
-      "nodes": [
-        530622950,
-        14054128064,
-        14054128043,
-        14054128069,
-        1699957567,
-        1699957562,
-        1699957564,
-        1699957566,
-        1573102665
-      ],
-      "tags": {
-        "destination": "Quiaios",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 373033594,
-      "version": 9,
-      "timestamp": "2026-09-01T11:39:49Z",
-      "nodes": [
-        12812300598,
-        14139880249,
-        808569554,
-        808569556,
-        4671981055,
-        2645445179,
-        808569560,
-        12714642340,
-        808861511
-      ],
-      "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170568,
-      "version": 4,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        4575731512,
-        12812162402,
-        808569548
-      ],
-      "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170569,
+      "id": 1315367415,
       "version": 3,
-      "timestamp": "2025-08-30T16:20:25Z",
+      "timestamp": "2025-05-19T08:07:41Z",
       "nodes": [
-        808569539,
-        808569541,
-        808569545,
-        808569546,
-        4575731512
+        4577922622,
+        530696189,
+        530696190,
+        530696188
       ],
       "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170571,
-      "version": 4,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        4575731519,
-        4575731514,
-        4575731518
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170572,
-      "version": 5,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        12812141598,
-        4575731517,
-        4575731519
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "3",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170573,
-      "version": 4,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        4575731518,
-        823793225,
-        3765710948,
-        823793226,
-        823793075
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes",
-        "turn:lanes": "through|right"
-      }
-    },
-    {
-      "id": 462170591,
-      "version": 7,
-      "timestamp": "2026-07-27T16:49:57Z",
-      "nodes": [
-        158749403,
-        4575731558,
-        14054238861,
-        4575731559
-      ],
-      "tags": {
-        "bicycle": "no",
-        "destination": "Aveiro;Leiria",
-        "destination:ref": "A 17",
-        "destination:ref:to": "A 14",
-        "destination:to": "Figueira da Foz",
-        "foot": "no",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "3",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170592,
-      "version": 6,
-      "timestamp": "2025-09-17T12:43:56Z",
-      "nodes": [
-        4575731560,
-        189092488
-      ],
-      "tags": {
-        "destination": "Pombal;Louriçal;A 1;Carriço",
-        "destination:ref": "IC 8",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "3",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170593,
-      "version": 5,
-      "timestamp": "2025-09-17T12:43:58Z",
-      "nodes": [
-        189092487,
-        1703184716,
-        7633936199,
-        7633936200,
-        4575731560
-      ],
-      "tags": {
-        "destination": "Pombal;Louriçal;A 1;Carriço",
-        "destination:ref": "IC 8",
-        "highway": "motorway_link",
-        "junction:ref": "6",
+        "highway": "motorway",
         "lanes": "2",
         "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada do Litoral Centro",
         "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 462170594,
-      "version": 5,
-      "timestamp": "2025-09-17T12:43:47Z",
-      "nodes": [
-        4575731559,
-        1703184721,
-        7633936205,
-        7633936204,
-        7633936203,
-        7633936202,
-        7633936201,
-        1104360850
-      ],
-      "tags": {
-        "bicycle": "no",
-        "destination": "Aveiro;Leiria",
-        "destination:ref": "A 17",
-        "destination:ref:to": "A 14",
-        "destination:to": "Figueira da Foz",
-        "foot": "no",
-        "highway": "motorway_link",
-        "junction:ref": "6",
-        "lanes": "2",
-        "lit": "yes",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes",
-        "turn:lanes": "through|slight_right"
-      }
-    },
-    {
-      "id": 817414833,
-      "version": 6,
-      "timestamp": "2026-07-27T16:49:57Z",
-      "nodes": [
-        7633936189,
-        14054238859,
-        158749403
-      ],
-      "tags": {
-        "highway": "trunk",
-        "lanes": "2",
-        "lit": "yes",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt"
-      }
-    },
-    {
-      "id": 817414834,
-      "version": 4,
-      "timestamp": "2025-09-17T12:44:03Z",
-      "nodes": [
-        1703171979,
-        7633936189
-      ],
-      "tags": {
-        "bicycle": "no",
-        "foot": "no",
-        "highway": "trunk",
-        "horse": "no",
-        "lanes": "2",
-        "lit": "yes",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt"
-      }
-    },
-    {
-      "id": 817414835,
-      "version": 7,
-      "timestamp": "2026-07-27T16:49:57Z",
-      "nodes": [
-        7633936190,
-        14054238866,
-        7634124164,
-        7634021417,
-        1703171955,
-        7634021418,
-        189092491
-      ],
-      "tags": {
-        "bicycle": "no",
-        "foot": "no",
-        "highway": "trunk",
-        "horse": "no",
-        "lanes": "2",
-        "lit": "yes",
-        "oneway": "yes",
-        "ref": "IC 8",
-        "surface": "asphalt",
-        "turn:lanes": "through|slight_right"
-      }
-    },
-    {
-      "id": 1383816466,
-      "version": 3,
-      "timestamp": "2025-09-07T01:01:24Z",
-      "nodes": [
-        12812141596,
-        12812141597
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "3",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1383816467,
-      "version": 2,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        12812141597,
-        823793223
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1383816468,
-      "version": 2,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        823793223,
-        12812141598
-      ],
-      "tags": {
-        "destination": "Lisboa;Leiria;Aveiro;Figueira da Foz",
-        "destination:symbol": "motorway",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1383816469,
-      "version": 2,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        808569548,
-        12812162403,
-        12812162404
-      ],
-      "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1383840441,
-      "version": 2,
-      "timestamp": "2025-08-30T16:20:25Z",
-      "nodes": [
-        12812162404,
-        3765711076,
-        12812300598
-      ],
-      "tags": {
-        "destination": "Paião;Marinha das Ondas",
-        "destination:ref": "EN 109",
-        "highway": "motorway_link",
-        "lanes": "3",
-        "oneway": "yes",
+        "operator": "BRISAL",
+        "ref": "A 17;IC 1",
+        "smoothness": "excellent",
         "surface": "asphalt",
         "toll": "yes"
       }
     }
   ],
   "coordinates": {
-    "158749403": [
-      39.989467,
-      -8.7913351
-    ],
-    "158749404": [
-      39.9899949,
-      -8.7936038
-    ],
-    "158749405": [
-      39.9899397,
-      -8.7939579
-    ],
-    "158749665": [
-      39.9894956,
-      -8.7950008
-    ],
-    "158749666": [
-      39.989122,
-      -8.7957533
-    ],
-    "158749690": [
-      39.9898651,
-      -8.7942061
-    ],
-    "189092487": [
-      39.9898328,
-      -8.792811
-    ],
-    "189092488": [
-      39.9892847,
-      -8.7914304
-    ],
-    "189092491": [
-      39.9884205,
-      -8.7888095
-    ],
-    "530622950": [
-      40.2208732,
-      -8.8051028
-    ],
-    "530695809": [
-      40.2207199,
-      -8.804949
-    ],
-    "808569502": [
-      40.0494804,
-      -8.8157209
-    ],
-    "808569537": [
-      40.0438657,
-      -8.8119299
-    ],
-    "808569539": [
-      40.0455814,
-      -8.8145492
-    ],
-    "808569541": [
-      40.045723,
-      -8.8145471
-    ],
-    "808569545": [
-      40.0458733,
-      -8.8145296
-    ],
-    "808569546": [
-      40.0461519,
-      -8.8145272
-    ],
-    "808569548": [
-      40.0474548,
-      -8.814414
-    ],
-    "808569554": [
-      40.0487294,
-      -8.8144243
-    ],
-    "808569556": [
-      40.0489755,
-      -8.8144917
-    ],
-    "808569560": [
-      40.0495852,
-      -8.8154015
-    ],
-    "808569589": [
-      40.0491469,
-      -8.8147343
-    ],
-    "808837270": [
-      39.9914482,
-      -8.7967568
-    ],
-    "808837301": [
-      39.9900376,
-      -8.7936446
-    ],
-    "808837303": [
-      39.9900521,
-      -8.7942573
-    ],
-    "808837304": [
-      39.9902413,
-      -8.7952812
-    ],
-    "808837306": [
-      39.9908568,
-      -8.7962644
-    ],
-    "808837309": [
-      39.9883137,
-      -8.7881897
-    ],
-    "808837311": [
-      39.9882949,
-      -8.78789
-    ],
-    "808837312": [
-      39.9882937,
-      -8.7864929
-    ],
-    "808861511": [
-      40.0497237,
-      -8.8155787
-    ],
-    "808861639": [
-      40.0492943,
-      -8.814885
-    ],
-    "814301254": [
-      40.2212335,
-      -8.7996236
-    ],
-    "814301306": [
-      40.2191237,
-      -8.8026716
-    ],
-    "814301364": [
-      39.9879997,
-      -8.7940103
-    ],
-    "823772465": [
-      39.9883831,
-      -8.7881712
-    ],
-    "823772467": [
-      39.9886084,
-      -8.7892321
-    ],
-    "823793025": [
-      40.0458653,
-      -8.8116133
-    ],
-    "823793075": [
-      40.0446144,
-      -8.8143199
-    ],
-    "823793090": [
-      40.0447455,
-      -8.8125164
-    ],
-    "823793091": [
-      40.0445727,
-      -8.8130848
-    ],
-    "823793221": [
-      40.0487188,
-      -8.8145371
-    ],
-    "823793223": [
-      40.0474592,
-      -8.8146583
-    ],
-    "823793225": [
-      40.0452938,
-      -8.8146508
-    ],
-    "823793226": [
-      40.0448298,
-      -8.8144752
-    ],
-    "829528264": [
-      40.219462,
-      -8.802083
-    ],
-    "1030807409": [
-      40.2197543,
-      -8.7999449
-    ],
-    "1030807431": [
-      40.2197935,
-      -8.8007047
-    ],
-    "1030807437": [
-      40.2207059,
-      -8.7991664
-    ],
-    "1030807441": [
-      40.2212162,
-      -8.8009345
-    ],
-    "1030807445": [
-      40.2199423,
-      -8.7992376
-    ],
-    "1030807447": [
-      40.2214887,
-      -8.8000565
-    ],
-    "1030807450": [
-      40.2201792,
-      -8.799053
-    ],
-    "1030807451": [
-      40.2217817,
-      -8.8004144
-    ],
-    "1030807453": [
-      40.2196244,
-      -8.8023927
-    ],
-    "1030807468": [
-      40.2209275,
-      -8.8010299
-    ],
-    "1030807473": [
-      40.2210271,
-      -8.7995109
-    ],
-    "1030807478": [
-      40.2217023,
-      -8.8011599
-    ],
-    "1030807480": [
-      40.2205084,
-      -8.8013744
-    ],
-    "1030807483": [
-      40.2218963,
-      -8.8017055
-    ],
-    "1030807485": [
-      40.2215134,
-      -8.8010037
-    ],
-    "1030807488": [
-      40.2219397,
-      -8.8006996
-    ],
-    "1030807501": [
-      40.2198091,
-      -8.7995262
-    ],
-    "1104360724": [
-      39.9897635,
-      -8.7943088
-    ],
-    "1104360748": [
-      39.988261,
-      -8.7871829
-    ],
-    "1104360762": [
-      39.9890637,
-      -8.7957167
-    ],
-    "1104360765": [
-      39.9899084,
-      -8.7930685
-    ],
-    "1104360806": [
-      39.9898421,
-      -8.7940866
-    ],
-    "1104360811": [
-      39.990508,
-      -8.7958266
-    ],
-    "1104360840": [
-      39.9899395,
-      -8.7933906
-    ],
-    "1104360844": [
-      39.9883488,
-      -8.785993
-    ],
-    "1104360850": [
-      39.9900174,
-      -8.7934969
-    ],
-    "1104360855": [
-      39.9884971,
-      -8.7887985
-    ],
-    "1104360891": [
-      39.9894414,
-      -8.7949621
-    ],
-    "1547776226": [
-      39.9884333,
-      -8.785325
-    ],
-    "1573102665": [
-      40.2204143,
-      -8.8077179
-    ],
-    "1573102681": [
-      40.2201856,
-      -8.8078852
-    ],
-    "1699957548": [
-      40.2196491,
-      -8.8016438
-    ],
-    "1699957550": [
-      40.2197547,
-      -8.8012232
-    ],
-    "1699957551": [
-      40.219835,
-      -8.7998996
-    ],
-    "1699957552": [
-      40.2198705,
-      -8.7995482
-    ],
-    "1699957553": [
-      40.2199276,
-      -8.8001833
-    ],
-    "1699957554": [
-      40.2199955,
-      -8.7993012
-    ],
-    "1699957555": [
-      40.2200494,
-      -8.8018671
-    ],
-    "1699957557": [
-      40.2200979,
-      -8.8068606
-    ],
-    "1699957558": [
-      40.2201065,
-      -8.8073038
-    ],
-    "1699957559": [
-      40.2201108,
-      -8.8003936
-    ],
-    "1699957561": [
-      40.2201701,
-      -8.8075861
-    ],
-    "1699957562": [
-      40.2202175,
-      -8.806887
-    ],
-    "1699957563": [
-      40.2201884,
-      -8.8064217
-    ],
-    "1699957564": [
-      40.2202446,
-      -8.8072724
-    ],
-    "1699957565": [
-      40.2201938,
-      -8.7991417
-    ],
-    "1699957566": [
-      40.2202815,
-      -8.8075333
-    ],
-    "1699957567": [
-      40.2202905,
-      -8.8064904
-    ],
-    "1699957568": [
-      40.2203382,
-      -8.8004712
-    ],
-    "1699957569": [
-      40.2204449,
-      -8.7991304
-    ],
-    "1699957570": [
-      40.2204487,
-      -8.7990412
-    ],
-    "1699957571": [
-      40.2205645,
-      -8.8004162
-    ],
-    "1699957573": [
-      40.2206799,
-      -8.7992504
-    ],
-    "1699957574": [
-      40.2207736,
-      -8.8002214
-    ],
-    "1699957575": [
-      40.2209848,
-      -8.7995722
-    ],
-    "1699957577": [
-      40.2210075,
-      -8.7998827
-    ],
-    "1699957579": [
-      40.2214472,
-      -8.8001226
-    ],
-    "1699957580": [
-      40.2217047,
-      -8.802601
-    ],
-    "1699957582": [
-      40.2217306,
-      -8.8004614
-    ],
-    "1699957583": [
-      40.2218297,
-      -8.8022129
-    ],
-    "1699957584": [
-      40.2218524,
-      -8.8014606
-    ],
-    "1699957585": [
-      40.2218685,
-      -8.8022284
-    ],
-    "1699957586": [
-      40.2218782,
-      -8.8007338
-    ],
-    "1699957587": [
-      40.2218879,
-      -8.801973
-    ],
-    "1699957588": [
-      40.2219316,
-      -8.8022719
-    ],
-    "1699957589": [
-      40.2219504,
-      -8.8019857
-    ],
-    "1699957590": [
-      40.2219795,
-      -8.8010175
-    ],
-    "1699957591": [
-      40.2219984,
-      -8.8020093
-    ],
-    "1699957592": [
-      40.2220183,
-      -8.8016836
-    ],
-    "1699957593": [
-      40.2220313,
-      -8.8013505
-    ],
-    "1699957594": [
-      40.2220458,
-      -8.8010101
-    ],
-    "1699957595": [
-      40.2220458,
-      -8.8020183
-    ],
-    "1699957596": [
-      40.2220706,
-      -8.8017115
-    ],
-    "1699957597": [
-      40.2220889,
-      -8.8013601
-    ],
-    "1699957598": [
-      40.2221482,
-      -8.8017106
-    ],
-    "1699957599": [
-      40.2222322,
-      -8.8013225
-    ],
-    "1699957600": [
-      40.2222947,
-      -8.8008567
-    ],
-    "1699957601": [
-      40.222298,
-      -8.7995342
-    ],
-    "1699957602": [
-      40.222312,
-      -8.8004135
-    ],
-    "1699957603": [
-      40.2223184,
-      -8.7990967
-    ],
-    "1699957604": [
-      40.2224111,
-      -8.7986451
-    ],
-    "1699957607": [
-      40.2225544,
-      -8.7982795
-    ],
-    "1699957608": [
-      40.2227603,
-      -8.7979097
-    ],
-    "1699957610": [
-      40.2230832,
-      -8.7973855
-    ],
-    "1703171955": [
-      39.9885592,
-      -8.7893379
-    ],
-    "1703171967": [
-      39.9888328,
-      -8.7899015
-    ],
-    "1703171979": [
-      39.9889213,
-      -8.7901147
-    ],
-    "1703184691": [
-      39.9882278,
-      -8.7941707
-    ],
-    "1703184692": [
-      39.988358,
-      -8.7942834
-    ],
-    "1703184706": [
-      39.9887081,
-      -8.7944821
-    ],
-    "1703184708": [
-      39.9889602,
-      -8.7945084
-    ],
-    "1703184710": [
-      39.9892215,
-      -8.7944372
-    ],
-    "1703184711": [
-      39.9894767,
-      -8.7942613
-    ],
-    "1703184713": [
-      39.9897061,
-      -8.7939638
-    ],
-    "1703184715": [
-      39.9897298,
-      -8.7945229
-    ],
-    "1703184716": [
-      39.9897738,
-      -8.7926405
-    ],
-    "1703184717": [
-      39.9898234,
-      -8.7936561
-    ],
-    "1703184718": [
-      39.9898647,
-      -8.7930729
-    ],
-    "1703184719": [
-      39.9898635,
-      -8.7934139
-    ],
-    "1703184720": [
-      39.9898973,
-      -8.7938808
-    ],
-    "1703184721": [
-      39.989909,
-      -8.79276
-    ],
-    "2645445174": [
-      40.0489522,
-      -8.8146029
-    ],
-    "2645445179": [
-      40.0493899,
-      -8.8149109
-    ],
-    "3765710931": [
-      40.0440447,
-      -8.8127552
-    ],
-    "3765710933": [
-      40.0441356,
-      -8.8131573
-    ],
-    "3765710935": [
-      40.0442727,
-      -8.8136216
-    ],
-    "3765710937": [
-      40.0444532,
-      -8.813978
-    ],
-    "3765710938": [
-      40.044561,
-      -8.8133346
-    ],
-    "3765710939": [
-      40.0445848,
-      -8.8135558
-    ],
-    "3765710940": [
-      40.044603,
-      -8.814159
-    ],
-    "3765710941": [
-      40.0446309,
-      -8.8127863
-    ],
-    "3765710942": [
-      40.0446449,
-      -8.8137879
-    ],
-    "3765710943": [
-      40.0447205,
-      -8.8139634
-    ],
-    "3765710944": [
-      40.0448045,
-      -8.8143417
-    ],
-    "3765710945": [
-      40.044887,
-      -8.8123202
-    ],
-    "3765710946": [
-      40.044887,
-      -8.8142101
-    ],
-    "3765710947": [
-      40.044978,
-      -8.8144551
-    ],
-    "3765710948": [
-      40.0449976,
-      -8.8145574
-    ],
-    "3765710949": [
-      40.0450549,
-      -8.8121703
-    ],
-    "3765710950": [
-      40.0450745,
-      -8.8143728
-    ],
-    "3765710951": [
-      40.0452816,
-      -8.8145483
-    ],
-    "3765710952": [
-      40.0453208,
-      -8.8144861
-    ],
-    "3765711076": [
-      40.0478841,
-      -8.8144329
-    ],
-    "4575731512": [
-      40.0468009,
-      -8.8145094
-    ],
-    "4575731514": [
-      40.0466819,
-      -8.8146301
-    ],
-    "4575731517": [
-      40.0470781,
-      -8.8146233
-    ],
-    "4575731518": [
-      40.0457394,
-      -8.8146609
-    ],
-    "4575731519": [
-      40.0468051,
-      -8.8146261
-    ],
-    "4575731558": [
-      39.9895953,
-      -8.7918112
-    ],
-    "4575731559": [
-      39.9897245,
-      -8.792223
-    ],
-    "4575731560": [
-      39.9895999,
-      -8.7921862
-    ],
-    "4575731561": [
-      39.9901138,
-      -8.7948117
-    ],
-    "4671981054": [
-      40.0494791,
-      -8.8153284
-    ],
-    "4671981055": [
-      40.0492086,
-      -8.8146491
-    ],
-    "7633936189": [
-      39.9891438,
-      -8.7906736
-    ],
-    "7633936190": [
-      39.9890356,
-      -8.790695
-    ],
-    "7633936199": [
-      39.9897135,
-      -8.7924695
-    ],
-    "7633936200": [
-      39.9896593,
-      -8.7923324
-    ],
-    "7633936201": [
-      39.9900093,
-      -8.7933347
-    ],
-    "7633936202": [
-      39.989997,
-      -8.7931845
-    ],
-    "7633936203": [
-      39.9899806,
-      -8.7930711
-    ],
-    "7633936204": [
-      39.9899586,
-      -8.7929493
-    ],
-    "7633936205": [
-      39.9899355,
-      -8.7928524
-    ],
-    "7633936206": [
-      39.9884518,
-      -8.79436
-    ],
-    "7633936207": [
-      39.9885349,
-      -8.7944123
-    ],
-    "7633936208": [
-      39.9886141,
-      -8.7944507
-    ],
-    "7633936209": [
-      39.9887912,
-      -8.7945032
-    ],
-    "7633936210": [
-      39.9888797,
-      -8.7945102
-    ],
-    "7633936211": [
-      39.9890439,
-      -8.7944956
-    ],
-    "7633936212": [
-      39.98913,
-      -8.7944734
-    ],
-    "7633936213": [
-      39.9893155,
-      -8.7943913
-    ],
-    "7633936214": [
-      39.9893988,
-      -8.7943351
-    ],
-    "7633936215": [
-      39.9895397,
-      -8.7942011
-    ],
-    "7633936216": [
-      39.9896008,
-      -8.7941254
-    ],
-    "7633936217": [
-      39.9896541,
-      -8.7940472
-    ],
-    "7633936218": [
-      39.9897527,
-      -8.7938617
-    ],
-    "7633936219": [
-      39.9897907,
-      -8.7937668
-    ],
-    "7633936220": [
-      39.9898475,
-      -8.7935438
-    ],
-    "7633936221": [
-      39.9898721,
-      -8.7932916
-    ],
-    "7633936222": [
-      39.9898724,
-      -8.7931761
-    ],
-    "7633936223": [
-      39.9898874,
-      -8.7929696
-    ],
-    "7633936224": [
-      39.9899253,
-      -8.7931883
-    ],
-    "7633936225": [
-      39.9899351,
-      -8.7932956
-    ],
-    "7633936226": [
-      39.9899412,
-      -8.7934875
-    ],
-    "7633936227": [
-      39.9899354,
-      -8.7935921
-    ],
-    "7633936228": [
-      39.9899257,
-      -8.7936953
-    ],
-    "7633936229": [
-      39.9899142,
-      -8.7937854
-    ],
-    "7633936230": [
-      39.989871,
-      -8.793989
-    ],
-    "7633936231": [
-      39.9898021,
-      -8.7942047
-    ],
-    "7633936232": [
-      39.9896951,
-      -8.7944599
-    ],
-    "7633936233": [
-      39.9897806,
-      -8.7944153
-    ],
-    "7633936234": [
-      39.9898222,
-      -8.7943177
-    ],
-    "7633936235": [
-      39.9899057,
-      -8.7940872
-    ],
-    "7633936236": [
-      39.9899687,
-      -8.793822
-    ],
-    "7633936237": [
-      39.9899858,
-      -8.7936892
-    ],
-    "7633936238": [
-      39.9900415,
-      -8.7938905
-    ],
-    "7633936239": [
-      39.9900461,
-      -8.7940905
-    ],
-    "7633936240": [
-      39.9900601,
-      -8.7944039
-    ],
-    "7633936241": [
-      39.9900749,
-      -8.794549
-    ],
-    "7633936242": [
-      39.990093,
-      -8.7946812
-    ],
-    "7633936243": [
-      39.990144,
-      -8.7949544
-    ],
-    "7633936244": [
-      39.9901738,
-      -8.7950766
-    ],
-    "7633936245": [
-      39.9902102,
-      -8.7951885
-    ],
-    "7633936246": [
-      39.9902907,
-      -8.7954031
-    ],
-    "7633936247": [
-      39.9903396,
-      -8.7955202
-    ],
-    "7633936248": [
-      39.990399,
-      -8.7956384
-    ],
-    "7633936249": [
-      39.9904488,
-      -8.7957272
-    ],
-    "7633936250": [
-      39.9906032,
-      -8.795971
-    ],
-    "7633936251": [
-      39.9906803,
-      -8.796073
-    ],
-    "7633936252": [
-      39.990774,
-      -8.7961784
-    ],
-    "7633936253": [
-      39.9909423,
-      -8.7963442
-    ],
-    "7633936254": [
-      39.9913057,
-      -8.7966015
-    ],
-    "7634021417": [
-      39.9886383,
-      -8.7895774
-    ],
-    "7634021418": [
-      39.9884898,
-      -8.7890822
-    ],
-    "7634021419": [
-      39.9883606,
-      -8.7885017
-    ],
-    "7634021420": [
-      39.9884352,
-      -8.788487
-    ],
-    "7634021421": [
-      39.9887206,
-      -8.7895753
-    ],
-    "7634021426": [
-      39.9883196,
-      -8.786228
-    ],
-    "7634021427": [
-      39.9882779,
-      -8.786677
-    ],
-    "7634021428": [
-      39.9882678,
-      -8.7868514
-    ],
-    "7634021429": [
-      39.9882627,
-      -8.7870208
-    ],
-    "7634021430": [
-      39.9882644,
-      -8.7873484
-    ],
-    "7634021431": [
-      39.9882729,
-      -8.7875568
-    ],
-    "7634124158": [
-      39.9891169,
-      -8.7909364
-    ],
-    "7634124164": [
-      39.9889502,
-      -8.7904548
-    ],
-    "12714642340": [
-      40.0496529,
-      -8.8154898
-    ],
-    "12812141596": [
-      40.0481591,
-      -8.8145661
-    ],
-    "12812141597": [
-      40.0479231,
-      -8.8145784
-    ],
-    "12812141598": [
-      40.0471675,
-      -8.8146186
-    ],
-    "12812162402": [
-      40.0472742,
-      -8.8144214
-    ],
-    "12812162403": [
-      40.0476808,
-      -8.8144067
-    ],
-    "12812162404": [
-      40.047805,
-      -8.8144335
-    ],
-    "12812300598": [
-      40.0481099,
-      -8.8144306
-    ],
-    "12875173318": [
-      40.0495046,
-      -8.8154998
-    ],
-    "12875173319": [
-      40.0494084,
-      -8.8151191
-    ],
-    "14054128041": [
-      40.2204759,
-      -8.8057071
-    ],
-    "14054128042": [
-      40.221173,
-      -8.8040086
-    ],
-    "14054128043": [
-      40.2205474,
-      -8.8058299
-    ],
-    "14054128046": [
-      40.2212308,
-      -8.8041464
-    ],
-    "14054128049": [
-      40.2209226,
-      -8.8045284
-    ],
-    "14054128054": [
-      40.2211951,
-      -8.8039501
-    ],
-    "14054128064": [
-      40.2206805,
-      -8.8055329
-    ],
-    "14054128069": [
-      40.2204614,
-      -8.8060219
-    ],
-    "14054238859": [
-      39.9894352,
-      -8.79127
-    ],
-    "14054238861": [
-      39.9896358,
-      -8.7919402
-    ],
-    "14054238866": [
-      39.9889824,
-      -8.7905453
-    ],
-    "14139880249": [
-      40.0481924,
-      -8.8144298
+    "403621184": [
+      40.5419886,
+      -8.6247341
+    ],
+    "403621188": [
+      40.5430379,
+      -8.6229664
+    ],
+    "403621191": [
+      40.544466,
+      -8.6213525
+    ],
+    "403621193": [
+      40.5459563,
+      -8.620243
+    ],
+    "403621196": [
+      40.5476727,
+      -8.6194909
+    ],
+    "403621198": [
+      40.5674591,
+      -8.6134008
+    ],
+    "403621201": [
+      40.5715343,
+      -8.6115952
+    ],
+    "506987336": [
+      40.5476299,
+      -8.619671
+    ],
+    "506987341": [
+      40.5445042,
+      -8.6215007
+    ],
+    "506987342": [
+      40.5437934,
+      -8.6222274
+    ],
+    "506987343": [
+      40.5431166,
+      -8.6230958
+    ],
+    "506987345": [
+      40.5425742,
+      -8.6239152
+    ],
+    "506987346": [
+      40.5420782,
+      -8.6248252
+    ],
+    "530588602": [
+      40.4568918,
+      -8.6978873
+    ],
+    "530588609": [
+      40.4587285,
+      -8.6962349
+    ],
+    "530588611": [
+      40.4585086,
+      -8.696464
+    ],
+    "530588613": [
+      40.4578841,
+      -8.6971127
+    ],
+    "530588615": [
+      40.4574929,
+      -8.6974409
+    ],
+    "530588617": [
+      40.457201,
+      -8.697669
+    ],
+    "530588619": [
+      40.4592321,
+      -8.6957257
+    ],
+    "530588624": [
+      40.4620833,
+      -8.6926164
+    ],
+    "530588626": [
+      40.4617803,
+      -8.6928951
+    ],
+    "530588635": [
+      40.4598868,
+      -8.6949621
+    ],
+    "530588641": [
+      40.4646117,
+      -8.6907884
+    ],
+    "530588646": [
+      40.4639377,
+      -8.6912041
+    ],
+    "530588650": [
+      40.4631704,
+      -8.6917135
+    ],
+    "530588653": [
+      40.4627085,
+      -8.6920813
+    ],
+    "530588659": [
+      40.4678628,
+      -8.6896153
+    ],
+    "530588665": [
+      40.467106,
+      -8.6897873
+    ],
+    "530588677": [
+      40.4735061,
+      -8.6895268
+    ],
+    "530588687": [
+      40.4727997,
+      -8.6895417
+    ],
+    "530588692": [
+      40.4700566,
+      -8.6894327
+    ],
+    "530588695": [
+      40.4691546,
+      -8.6894497
+    ],
+    "530588697": [
+      40.4685894,
+      -8.6895034
+    ],
+    "530588704": [
+      40.4789753,
+      -8.6877295
+    ],
+    "530588706": [
+      40.4782134,
+      -8.6881724
+    ],
+    "530588707": [
+      40.4774752,
+      -8.6885505
+    ],
+    "530588709": [
+      40.4767703,
+      -8.6888507
+    ],
+    "530588711": [
+      40.4759838,
+      -8.6891081
+    ],
+    "530588713": [
+      40.4749976,
+      -8.689357
+    ],
+    "530588717": [
+      40.4742423,
+      -8.6894729
+    ],
+    "530588729": [
+      40.4799865,
+      -8.6870158
+    ],
+    "530588733": [
+      40.4892431,
+      -8.6807191
+    ],
+    "530588739": [
+      40.4871356,
+      -8.6817236
+    ],
+    "530588741": [
+      40.4860131,
+      -8.6824317
+    ],
+    "530588743": [
+      40.4852265,
+      -8.6830091
+    ],
+    "530696187": [
+      40.456688,
+      -8.6978256
+    ],
+    "530696188": [
+      40.4583835,
+      -8.6963905
+    ],
+    "530696189": [
+      40.4574336,
+      -8.6972517
+    ],
+    "530696190": [
+      40.4578144,
+      -8.69693
+    ],
+    "530696196": [
+      40.4592475,
+      -8.6954868
+    ],
+    "530696197": [
+      40.4586937,
+      -8.6960715
+    ],
+    "530696198": [
+      40.4601176,
+      -8.6944798
+    ],
+    "530696204": [
+      40.4617473,
+      -8.69272
+    ],
+    "530696206": [
+      40.4620717,
+      -8.6924341
+    ],
+    "530696208": [
+      40.4631427,
+      -8.6915666
+    ],
+    "530696210": [
+      40.4626675,
+      -8.691923
+    ],
+    "530696211": [
+      40.4638939,
+      -8.6910501
+    ],
+    "530696214": [
+      40.4654731,
+      -8.6902092
+    ],
+    "530696216": [
+      40.4645904,
+      -8.6906372
+    ],
+    "530696222": [
+      40.4685729,
+      -8.6893492
+    ],
+    "530696226": [
+      40.469156,
+      -8.689291
+    ],
+    "530696233": [
+      40.4700498,
+      -8.6892769
+    ],
+    "530696236": [
+      40.472814,
+      -8.689381
+    ],
+    "530696239": [
+      40.4750045,
+      -8.6891812
+    ],
+    "530696242": [
+      40.4742412,
+      -8.6893044
+    ],
+    "530696244": [
+      40.4735132,
+      -8.6893643
+    ],
+    "530696248": [
+      40.4781821,
+      -8.6880228
+    ],
+    "530696249": [
+      40.4774413,
+      -8.6883886
+    ],
+    "530696250": [
+      40.4799381,
+      -8.6868718
+    ],
+    "530696252": [
+      40.4759777,
+      -8.6889428
+    ],
+    "530696253": [
+      40.4767512,
+      -8.6886816
+    ],
+    "530696258": [
+      40.4892042,
+      -8.6805673
+    ],
+    "530696262": [
+      40.4859618,
+      -8.6822913
+    ],
+    "530696266": [
+      40.4871271,
+      -8.6815643
+    ],
+    "530696268": [
+      40.497101,
+      -8.6777539
+    ],
+    "530696271": [
+      40.4979008,
+      -8.6773735
+    ],
+    "530696274": [
+      40.4997789,
+      -8.6762426
+    ],
+    "814271259": [
+      40.5730976,
+      -8.610712
+    ],
+    "814271349": [
+      40.5424742,
+      -8.6238332
+    ],
+    "814271353": [
+      40.5696376,
+      -8.6125897
+    ],
+    "814271458": [
+      40.4963681,
+      -8.6780619
+    ],
+    "814271524": [
+      40.503412,
+      -8.6731243
+    ],
+    "814271562": [
+      40.5437068,
+      -8.6221118
+    ],
+    "814271612": [
+      40.4789549,
+      -8.687566
+    ],
+    "814271669": [
+      40.5451215,
+      -8.6208068
+    ],
+    "814271727": [
+      40.4851694,
+      -8.6828688
+    ],
+    "1030834400": [
+      40.4551672,
+      -8.6987358
+    ],
+    "1030837107": [
+      40.5005818,
+      -8.6758631
+    ],
+    "1106029038": [
+      40.5520159,
+      -8.6183271
+    ],
+    "1106029041": [
+      40.5519316,
+      -8.6181952
+    ],
+    "1106029045": [
+      40.5523504,
+      -8.6180583
+    ],
+    "1106029049": [
+      40.5524389,
+      -8.6181948
+    ],
+    "1112966888": [
+      40.570405,
+      -8.612432
+    ],
+    "1112967139": [
+      40.571747,
+      -8.6114473
+    ],
+    "1112967171": [
+      40.5734235,
+      -8.6104931
+    ],
+    "1112967307": [
+      40.5694092,
+      -8.6126792
+    ],
+    "1563499859": [
+      40.4609315,
+      -8.6935574
+    ],
+    "1563499866": [
+      40.4612281,
+      -8.6934489
+    ],
+    "1563499921": [
+      40.560526,
+      -8.6155247
+    ],
+    "1563499922": [
+      40.5620567,
+      -8.6150634
+    ],
+    "1563499923": [
+      40.5623637,
+      -8.6151296
+    ],
+    "1563499950": [
+      40.6175346,
+      -8.5890983
+    ],
+    "1563499968": [
+      40.6194332,
+      -8.5922994
+    ],
+    "1700570763": [
+      40.6221209,
+      -8.5960018
+    ],
+    "1702566992": [
+      40.4526713,
+      -8.699691
+    ],
+    "1702567011": [
+      40.4528807,
+      -8.6996472
+    ],
+    "1702567012": [
+      40.4534027,
+      -8.6994992
+    ],
+    "1702567013": [
+      40.4535054,
+      -8.6996545
+    ],
+    "1702567014": [
+      40.4540593,
+      -8.6992646
+    ],
+    "1702567019": [
+      40.4541168,
+      -8.6994135
+    ],
+    "1702567020": [
+      40.4548106,
+      -8.6989443
+    ],
+    "1702567021": [
+      40.4548665,
+      -8.699083
+    ],
+    "1702567023": [
+      40.4557669,
+      -8.6984127
+    ],
+    "1702567024": [
+      40.4558305,
+      -8.6985739
+    ],
+    "1702567026": [
+      40.4567246,
+      -8.6979884
+    ],
+    "1702567027": [
+      40.4655168,
+      -8.6903566
+    ],
+    "1702567028": [
+      40.4662975,
+      -8.6898793
+    ],
+    "1702567029": [
+      40.4663161,
+      -8.6900302
+    ],
+    "1702567030": [
+      40.4670859,
+      -8.6896365
+    ],
+    "1702567031": [
+      40.467865,
+      -8.689457
+    ],
+    "1702688827": [
+      40.4880061,
+      -8.6810927
+    ],
+    "1702688828": [
+      40.4880512,
+      -8.6812501
+    ],
+    "1702688833": [
+      40.4961761,
+      -8.6783009
+    ],
+    "1702688834": [
+      40.4971648,
+      -8.6778903
+    ],
+    "1702688838": [
+      40.4981881,
+      -8.6774113
+    ],
+    "1702688839": [
+      40.4991249,
+      -8.676862
+    ],
+    "1702688841": [
+      40.5000123,
+      -8.6760994
+    ],
+    "1702688842": [
+      40.5000544,
+      -8.6762686
+    ],
+    "1702688846": [
+      40.5008959,
+      -8.6754255
+    ],
+    "1702688847": [
+      40.5010809,
+      -8.6754408
+    ],
+    "1702688850": [
+      40.5016747,
+      -8.6747437
+    ],
+    "1702688851": [
+      40.5018477,
+      -8.67477
+    ],
+    "1702688852": [
+      40.5018832,
+      -8.6745147
+    ],
+    "1702688858": [
+      40.5027233,
+      -8.673904
+    ],
+    "1702688875": [
+      40.503296,
+      -8.6732604
+    ],
+    "1702694253": [
+      40.5451472,
+      -8.6209591
+    ],
+    "1702694255": [
+      40.5459991,
+      -8.6203905
+    ],
+    "1702694257": [
+      40.546831,
+      -8.6197996
+    ],
+    "1702694260": [
+      40.5468541,
+      -8.6199595
+    ],
+    "1702694262": [
+      40.5605577,
+      -8.6156837
+    ],
+    "1702694265": [
+      40.5678397,
+      -8.6134375
+    ],
+    "1702701545": [
+      40.5691324,
+      -8.6129964
+    ],
+    "1702701547": [
+      40.5705266,
+      -8.6121769
+    ],
+    "1702701550": [
+      40.5705988,
+      -8.6123104
+    ],
+    "1702701552": [
+      40.5718116,
+      -8.6116042
+    ],
+    "1702701555": [
+      40.5724556,
+      -8.6111833
+    ],
+    "1702701559": [
+      40.5740418,
+      -8.6099914
+    ],
+    "1713468869": [
+      40.5857976,
+      -8.5995231
+    ],
+    "1713468881": [
+      40.5861541,
+      -8.5992096
+    ],
+    "1713468885": [
+      40.5861569,
+      -8.5994095
+    ],
+    "1713468887": [
+      40.5863316,
+      -8.5990303
+    ],
+    "1713468888": [
+      40.5878019,
+      -8.5977982
+    ],
+    "1713468890": [
+      40.5876413,
+      -8.5981115
+    ],
+    "1713468892": [
+      40.5882019,
+      -8.5975035
+    ],
+    "1713468894": [
+      40.5882574,
+      -8.597639
+    ],
+    "1713468898": [
+      40.5889063,
+      -8.5970407
+    ],
+    "1713468899": [
+      40.5889548,
+      -8.5971807
+    ],
+    "1713468901": [
+      40.5897297,
+      -8.5965904
+    ],
+    "1713468904": [
+      40.58977,
+      -8.5967349
+    ],
+    "1713468908": [
+      40.5903924,
+      -8.5963109
+    ],
+    "1713468910": [
+      40.5904254,
+      -8.5964585
+    ],
+    "1713468913": [
+      40.591001,
+      -8.5960966
+    ],
+    "1713468917": [
+      40.5910279,
+      -8.5962464
+    ],
+    "1713468919": [
+      40.5917422,
+      -8.5958948
+    ],
+    "1713468921": [
+      40.5917618,
+      -8.5960466
+    ],
+    "1713468933": [
+      40.5924814,
+      -8.5957651
+    ],
+    "1713468936": [
+      40.592493,
+      -8.5959183
+    ],
+    "1713468938": [
+      40.5932418,
+      -8.5956985
+    ],
+    "1713468940": [
+      40.5932472,
+      -8.5958523
+    ],
+    "1713468941": [
+      40.5946506,
+      -8.5956504
+    ],
+    "1713468943": [
+      40.5946553,
+      -8.5958041
+    ],
+    "1713468945": [
+      40.5954476,
+      -8.5955919
+    ],
+    "1713468947": [
+      40.5954569,
+      -8.5957453
+    ],
+    "1713468949": [
+      40.5960253,
+      -8.5955124
+    ],
+    "1713468951": [
+      40.5960405,
+      -8.5956651
+    ],
+    "1713468954": [
+      40.5966634,
+      -8.59538
+    ],
+    "1713468955": [
+      40.5966849,
+      -8.5955313
+    ],
+    "1713468957": [
+      40.597277,
+      -8.5952036
+    ],
+    "1713468959": [
+      40.5973051,
+      -8.595353
+    ],
+    "1713468961": [
+      40.5978878,
+      -8.5949813
+    ],
+    "1713468963": [
+      40.5979224,
+      -8.5951283
+    ],
+    "1713468965": [
+      40.5984907,
+      -8.5947078
+    ],
+    "1713468966": [
+      40.5985317,
+      -8.5948519
+    ],
+    "1713468969": [
+      40.5990844,
+      -8.5943901
+    ],
+    "1713468971": [
+      40.5991315,
+      -8.594531
+    ],
+    "1713468984": [
+      40.5996635,
+      -8.5940282
+    ],
+    "1713468986": [
+      40.5997164,
+      -8.5941654
+    ],
+    "1713468988": [
+      40.6002287,
+      -8.593626
+    ],
+    "1713468991": [
+      40.6002877,
+      -8.5937589
+    ],
+    "1713468993": [
+      40.6008758,
+      -8.5930878
+    ],
+    "1713468995": [
+      40.6009416,
+      -8.593215
+    ],
+    "1713468996": [
+      40.6014901,
+      -8.5924942
+    ],
+    "1713468998": [
+      40.6015617,
+      -8.5926159
+    ],
+    "1713469000": [
+      40.6019881,
+      -8.5919582
+    ],
+    "1713469003": [
+      40.6020653,
+      -8.5920738
+    ],
+    "1713469014": [
+      40.6024597,
+      -8.5913706
+    ],
+    "1713469016": [
+      40.6025419,
+      -8.59148
+    ],
+    "1713469017": [
+      40.6030703,
+      -8.5905398
+    ],
+    "1713469018": [
+      40.6031551,
+      -8.5906455
+    ],
+    "1713469020": [
+      40.6048327,
+      -8.5880259
+    ],
+    "1713469022": [
+      40.6049178,
+      -8.5881313
+    ],
+    "1713469024": [
+      40.605371,
+      -8.5872846
+    ],
+    "1713469026": [
+      40.6054525,
+      -8.5873949
+    ],
+    "1713469027": [
+      40.605861,
+      -8.5866989
+    ],
+    "1713469029": [
+      40.6059358,
+      -8.5868172
+    ],
+    "1713469035": [
+      40.6064903,
+      -8.586065
+    ],
+    "1713469036": [
+      40.6065572,
+      -8.5861913
+    ],
+    "1713469037": [
+      40.6070534,
+      -8.5855935
+    ],
+    "1713469039": [
+      40.6071109,
+      -8.5857277
+    ],
+    "1713469040": [
+      40.6076603,
+      -8.5851964
+    ],
+    "1713469043": [
+      40.6077079,
+      -8.5853372
+    ],
+    "1713469046": [
+      40.6082897,
+      -8.5848689
+    ],
+    "1713469049": [
+      40.6083279,
+      -8.5850144
+    ],
+    "1713469051": [
+      40.6089259,
+      -8.5846191
+    ],
+    "1713469055": [
+      40.6089546,
+      -8.5847683
+    ],
+    "1713469067": [
+      40.6095415,
+      -8.5844489
+    ],
+    "1713469068": [
+      40.6095611,
+      -8.5846007
+    ],
+    "1713469069": [
+      40.6101793,
+      -8.5843385
+    ],
+    "1713469070": [
+      40.6101892,
+      -8.584492
+    ],
+    "1713469072": [
+      40.6109581,
+      -8.5844527
+    ],
+    "1713469075": [
+      40.6109597,
+      -8.5842987
+    ],
+    "1713469078": [
+      40.6117391,
+      -8.5845205
+    ],
+    "1713469080": [
+      40.6117526,
+      -8.5843674
+    ],
+    "1713469083": [
+      40.6125012,
+      -8.5846881
+    ],
+    "1713469086": [
+      40.6125265,
+      -8.5845377
+    ],
+    "1713469095": [
+      40.6132525,
+      -8.5849627
+    ],
+    "1713469096": [
+      40.6132891,
+      -8.5848164
+    ],
+    "1713469097": [
+      40.6138522,
+      -8.5852658
+    ],
+    "1713469098": [
+      40.6138984,
+      -8.5851244
+    ],
+    "1713469099": [
+      40.6144166,
+      -8.5856225
+    ],
+    "1713469101": [
+      40.6144715,
+      -8.5854865
+    ],
+    "1713469103": [
+      40.6150514,
+      -8.5861128
+    ],
+    "1713469107": [
+      40.6151162,
+      -8.5859845
+    ],
+    "1713469111": [
+      40.6156551,
+      -8.5867084
+    ],
+    "1713469114": [
+      40.6157292,
+      -8.5865892
+    ],
+    "1713469130": [
+      40.6162304,
+      -8.587386
+    ],
+    "1713469132": [
+      40.6163124,
+      -8.5872761
+    ],
+    "1713469134": [
+      40.6167637,
+      -8.5881456
+    ],
+    "1713469137": [
+      40.6168512,
+      -8.5880436
+    ],
+    "1713469139": [
+      40.6210991,
+      -8.594878
+    ],
+    "1713469142": [
+      40.6208004,
+      -8.5941628
+    ],
+    "1713469145": [
+      40.6214704,
+      -8.5954591
+    ],
+    "1713469148": [
+      40.6224966,
+      -8.5967163
+    ],
+    "1713469150": [
+      40.6222354,
+      -8.5961575
+    ],
+    "1713469152": [
+      40.6227928,
+      -8.5969683
+    ],
+    "1713469161": [
+      40.6226172,
+      -8.5965985
+    ],
+    "1713469163": [
+      40.6228422,
+      -8.5970095
+    ],
+    "1713469165": [
+      40.6229091,
+      -8.5968833
+    ],
+    "1713469167": [
+      40.6233876,
+      -8.5974821
+    ],
+    "1713469169": [
+      40.6234487,
+      -8.5973508
+    ],
+    "1713469173": [
+      40.6241374,
+      -8.5980455
+    ],
+    "1713469175": [
+      40.6241936,
+      -8.5979106
+    ],
+    "1713469186": [
+      40.6244006,
+      -8.5980318
+    ],
+    "1713469188": [
+      40.6256517,
+      -8.5991082
+    ],
+    "1713469191": [
+      40.6258213,
+      -8.5992505
+    ],
+    "4577922441": [
+      40.621907,
+      -8.5960367
+    ],
+    "4577922442": [
+      40.6214978,
+      -8.5951911
+    ],
+    "4577922443": [
+      40.6197041,
+      -8.592466
+    ],
+    "4577922484": [
+      40.5891666,
+      -8.5970551
+    ],
+    "4577922485": [
+      40.5870666,
+      -8.5983935
+    ],
+    "4577922486": [
+      40.5862864,
+      -8.5992994
+    ],
+    "4577922523": [
+      40.5684705,
+      -8.6132249
+    ],
+    "4577922524": [
+      40.5658889,
+      -8.6138874
+    ],
+    "4577922558": [
+      40.5416355,
+      -8.6256992
+    ],
+    "4577922582": [
+      40.5048049,
+      -8.6714979
+    ],
+    "4577922607": [
+      40.4988954,
+      -8.6768007
+    ],
+    "4577922622": [
+      40.4570134,
+      -8.6975948
+    ],
+    "4953738143": [
+      40.5748417,
+      -8.6092733
+    ],
+    "4953738196": [
+      40.5413778,
+      -8.6259204
+    ],
+    "4953738197": [
+      40.5413207,
+      -8.6260313
+    ],
+    "12175222100": [
+      40.6196009,
+      -8.592559
     ]
   },
   "chargeCandidates": [
     {
-      "id": 158749403,
-      "lat": 39.989467,
-      "lon": -8.7913351,
+      "id": 1563499859,
+      "lat": 40.4609315,
+      "lon": -8.6935574,
       "tags": {
-        "barrier": "toll_booth",
-        "currency:EUR": "yes",
-        "payment:cash": "yes",
-        "payment:credit_cards": "yes",
-        "payment:debit_cards": "yes"
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no",
+        "payment:easytoll": "yes",
+        "payment:toll_card": "yes",
+        "payment:toll_service": "yes",
+        "payment:via_verde": "yes"
       }
     },
     {
-      "id": 189092488,
-      "lat": 39.9892847,
-      "lon": -8.7914304,
+      "id": 1563499866,
+      "lat": 40.4612281,
+      "lon": -8.6934489,
       "tags": {
-        "barrier": "toll_booth",
-        "currency:EUR": "yes",
-        "payment:cash": "yes",
-        "payment:credit_cards": "yes",
-        "payment:debit_cards": "yes"
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no",
+        "payment:easytoll": "yes",
+        "payment:toll_card": "yes",
+        "payment:toll_service": "yes",
+        "payment:via_verde": "yes"
       }
     },
     {
-      "id": 530622950,
-      "lat": 40.2208732,
-      "lon": -8.8051028,
+      "id": 1563499922,
+      "lat": 40.5620567,
+      "lon": -8.6150634,
       "tags": {
-        "barrier": "toll_booth"
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
       }
     },
     {
-      "id": 530695809,
-      "lat": 40.2207199,
-      "lon": -8.804949,
+      "id": 1563499923,
+      "lat": 40.5623637,
+      "lon": -8.6151296,
       "tags": {
-        "barrier": "toll_booth"
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
       }
     },
     {
-      "id": 808569548,
-      "lat": 40.0474548,
-      "lon": -8.814414,
+      "id": 1563499950,
+      "lat": 40.6175346,
+      "lon": -8.5890983,
       "tags": {
-        "barrier": "toll_booth"
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
       }
     },
     {
-      "id": 823793223,
-      "lat": 40.0474592,
-      "lon": -8.8146583,
+      "id": 1563499968,
+      "lat": 40.6194332,
+      "lon": -8.5922994,
       "tags": {
-        "barrier": "toll_booth"
+        "highway": "toll_gantry",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
       }
     }
   ]

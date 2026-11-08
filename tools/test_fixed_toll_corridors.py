@@ -21,6 +21,35 @@ prices = module('import-vialivre-tolls')
 
 
 class FixedCorridorTests(unittest.TestCase):
+    def test_ascendi_facilities_are_in_the_published_geographical_corridors(self):
+        # Independent geographical regression: booth nodes in southern A17
+        # and the A1 Feira access are not northern electronic-toll facilities.
+        expected = {
+            'a17': {
+                'ascendi:costa-de-prata:01': ({1563499859,1563499866},(40.45,40.48)),
+                'ascendi:costa-de-prata:02': ({1563499922,1563499923},(40.55,40.58)),
+                'ascendi:costa-de-prata:03': ({1563499950,1563499968},(40.61,40.63)),
+            },
+            'a29': {'ascendi:costa-de-prata:07': ({1563530097,1563530098},(41.07,41.09))},
+            'a42': {
+                'ascendi:grande-porto:10': ({264117176,264119609},(41.23,41.25)),
+                'ascendi:grande-porto:11': ({2869384457,2869384458},(41.25,41.27)),
+                'ascendi:grande-porto:12': ({264119862,2869381630},(41.28,41.30)),
+            },
+        }
+        cfg = ROOT / 'tools/toll-binding-config'
+        for road, facilities in expected.items():
+            review=json.loads((cfg/f'portugal-{road}-fixed.json').read_text())
+            source=json.loads((cfg/f'portugal-{road}-fixed.source.json').read_text())
+            candidates={p['id']:p for p in source['chargeCandidates']}
+            for charge,(nodes,(south,north)) in facilities.items():
+                actual={int(n) for n,c in review['chargePoints'].items() if c==charge}
+                self.assertEqual(nodes,actual)
+                for node in actual:
+                    p=candidates[node]
+                    self.assertEqual('toll_gantry',p['tags'].get('highway'))
+                    self.assertLess(south,p['lat']);self.assertLess(p['lat'],north)
+
     def test_national_ascendi_reviews_bind_twelve_facilities_without_a41_conflicts(self):
         cfg = ROOT / 'tools/toll-binding-config'
         charges = set()

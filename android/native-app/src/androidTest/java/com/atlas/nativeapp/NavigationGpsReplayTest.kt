@@ -995,7 +995,7 @@ class NavigationGpsReplayTest {
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("The original cases plus 92 national Ascendi graph crossings are required",cases.size>=314)
+        assertTrue("The original cases plus 96 national Ascendi graph crossings are required",cases.size>=318)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         val unavailableResults=JSONArray()

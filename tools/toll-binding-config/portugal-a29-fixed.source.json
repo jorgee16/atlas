@@ -4,97 +4,11 @@
   "capture": "OSM API responses; exact nodes and whole directed source ways",
   "apiResponses": [
     {
-      "file": "a29-0.json",
-      "rawSha256": "66d2021f28db1d99ffbeb43b92d3be57276112afe5337328c17fa2eb4c2c758c"
-    },
-    {
-      "file": "a29-1.json",
-      "rawSha256": "2a911fc8752c5d35374bda2ff94c859cf318d7a0beaefecf55fe759083db8c92"
-    },
-    {
-      "file": "a29-2.json",
-      "rawSha256": "b5b93a46724824501d452480505907952abfeb45ff7634763dc8c5a033a789b0"
-    },
-    {
-      "file": "a29-3.json",
-      "rawSha256": "7a13b266cc69be5bd824764a7216063be4ee79cce1ada8a6a2437e7bf573924b"
+      "file": "a29-relation.json",
+      "rawSha256": "a455ea3b11bf46e7c4be602c48e63d615977304356d22f42065e7717f21430cb"
     }
   ],
   "ways": [
-    {
-      "id": 52199025,
-      "version": 7,
-      "timestamp": "2024-10-16T22:57:00Z",
-      "nodes": [
-        277306572,
-        1620526028,
-        1620526037,
-        1620526041,
-        1620526046,
-        1620526071,
-        1620526076
-      ],
-      "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 52199028,
-      "version": 13,
-      "timestamp": "2024-11-17T16:06:54Z",
-      "nodes": [
-        9131395562,
-        250350204,
-        9131395561,
-        11021246010,
-        277306557
-      ],
-      "tags": {
-        "destination": "Feira",
-        "destination:ref": "EN 223",
-        "foot": "yes",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "oneway": "yes",
-        "sidewalk": "no",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 52199098,
-      "version": 8,
-      "timestamp": "2023-08-11T23:24:51Z",
-      "nodes": [
-        664773970,
-        664773974,
-        664773975,
-        1620526040,
-        1620526044,
-        1620526058,
-        1620526076
-      ],
-      "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "lit": "yes",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
     {
       "id": 61651904,
       "version": 27,
@@ -133,136 +47,254 @@
       }
     },
     {
-      "id": 67446135,
-      "version": 12,
-      "timestamp": "2025-09-19T18:11:21Z",
+      "id": 142362576,
+      "version": 16,
+      "timestamp": "2025-06-30T08:56:40Z",
       "nodes": [
-        263877083,
-        2303266578,
-        12362461832
+        814271448,
+        814271168,
+        814271675,
+        814271277,
+        814271798,
+        814271376,
+        814271193,
+        814271475,
+        814271300,
+        814271583,
+        814271802,
+        814271379,
+        814271197,
+        814271478,
+        814271309,
+        814271586,
+        814271409,
+        1648810894,
+        1648810890,
+        814271707,
+        814271508,
+        814271815
       ],
       "tags": {
-        "destination": "Área de Serviço de Ovar - Sentido norte-sul",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "maxspeed": "60",
-        "oneway": "yes",
-        "surface": "asphalt"
-      }
-    },
-    {
-      "id": 67446162,
-      "version": 9,
-      "timestamp": "2025-06-30T09:05:19Z",
-      "nodes": [
-        1645632633,
-        1645632634,
-        1645632644,
-        1645632653,
-        1645632661,
-        1645632676,
-        1645632681,
-        1645632682,
-        814271322,
-        1645632683,
-        1645632684,
-        814271731,
-        1710130071,
-        12348880444,
-        814271529
-      ],
-      "tags": {
-        "destination": "Porto;Estarreja",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "oneway": "yes",
-        "shoulder": "right",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 149012945,
-      "version": 7,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        1620526114,
-        13570700252
-      ],
-      "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
         "lanes": "2",
-        "maxspeed": "40",
+        "lit": "no",
+        "maxheight": "default",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
         "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "source": "Bing",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 149012950,
-      "version": 10,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        1620526076,
-        13570700235,
-        1620526077,
-        13570700236,
-        1620526084
-      ],
-      "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
-        "lanes": "3",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 149012951,
+      "id": 151578414,
       "version": 11,
-      "timestamp": "2026-02-16T19:00:34Z",
+      "timestamp": "2025-06-29T15:50:36Z",
       "nodes": [
-        1620526084,
-        1620526105,
-        1620526107,
-        13570700243,
-        11569952897
+        12118495969,
+        1533316235,
+        12118495966,
+        1644057479,
+        1533316238,
+        12118495977,
+        1644057536
       ],
       "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "maxheight:signed": "no",
-        "maxspeed": "40",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
         "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through;slight_right"
+      }
+    },
+    {
+      "id": 151578427,
+      "version": 9,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        12335490963,
+        1644057554
+      ],
+      "tags": {
+        "bridge": "yes",
+        "bridge:ref": "A29.079",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "maxspeed:lanes": "100|100|100|80",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
         "surface": "asphalt",
         "toll": "yes"
       }
     },
     {
-      "id": 149012957,
-      "version": 15,
-      "timestamp": "2026-02-16T19:00:34Z",
+      "id": 151578433,
+      "version": 9,
+      "timestamp": "2025-06-29T15:50:36Z",
       "nodes": [
-        250350039,
-        13570700251,
-        4378201267,
-        13570700250,
-        11385857811
+        1644057552,
+        1644057560
       ],
       "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "maxheight:signed": "no",
-        "maxspeed": "40",
+        "bridge": "yes",
+        "bridge:ref": "A29.079",
+        "highway": "motorway",
+        "lanes": "4",
+        "layer": "1",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
         "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 151578444,
+      "version": 10,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        263876525,
+        1533316239,
+        12118495976,
+        1533316237,
+        1644057497,
+        12118495967,
+        4309176982,
+        1533316234,
+        12118495968,
+        1533316232,
+        1644057396
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "100",
+        "maxspeed:advisory": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 152051288,
+      "version": 13,
+      "timestamp": "2025-06-30T08:56:40Z",
+      "nodes": [
+        814271522,
+        814271639,
+        1490656738,
+        814271754,
+        1490656727,
+        814271151,
+        814271261,
+        814271361,
+        814271457,
+        814271267,
+        1492522797,
+        814271371,
+        814271580,
+        814271694,
+        814271811,
+        814271212,
+        1492522807,
+        814271319,
+        814271750,
+        814271143,
+        814271256,
+        12351895216
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxheight": "default",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 152051294,
+      "version": 8,
+      "timestamp": "2025-06-30T08:56:40Z",
+      "nodes": [
+        814271700,
+        814271417,
+        814271522
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 152051296,
+      "version": 8,
+      "timestamp": "2025-06-30T08:56:40Z",
+      "nodes": [
+        814271815,
+        814271619,
+        814271223
+      ],
+      "tags": {
+        "bridge": "yes",
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "1",
+        "lit": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "source": "Bing",
         "surface": "asphalt",
         "toll": "yes"
       }
@@ -300,6 +332,35 @@
         "shoulder": "right",
         "smoothness": "good",
         "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 245327091,
+      "version": 15,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        12348620246,
+        263877453,
+        12118495923,
+        12118495921,
+        263877454,
+        12340226940,
+        5039311230
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxheight:signed": "no",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
         "surface": "asphalt",
         "toll": "yes"
       }
@@ -409,21 +470,143 @@
       }
     },
     {
-      "id": 389793393,
+      "id": 447753516,
       "version": 6,
-      "timestamp": "2026-02-16T19:00:34Z",
+      "timestamp": "2025-06-29T15:50:36Z",
       "nodes": [
-        13570700238,
-        13570700227,
-        13570700228
+        1644057560,
+        4448278411,
+        4448278422,
+        1527411606
       ],
       "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "2",
+        "highway": "motorway",
+        "lanes": "3",
+        "loc_ref": "ER 1-18",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
         "oneway": "yes",
+        "ref": "A 29",
+        "source": "Bing",
         "surface": "asphalt",
         "toll": "yes"
+      }
+    },
+    {
+      "id": 447753517,
+      "version": 6,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        263876511,
+        4448278452,
+        4448278446,
+        4448278416,
+        1533316209
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "loc_ref": "ER 1-18",
+        "maxheight": "default",
+        "maxspeed": "100",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 474423765,
+      "version": 7,
+      "timestamp": "2025-12-29T10:32:02Z",
+      "nodes": [
+        4683840052,
+        13415369048,
+        13415369047,
+        263876525
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "80",
+        "maxspeed:advisory": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through;slight_right|slight_right"
+      }
+    },
+    {
+      "id": 474423766,
+      "version": 5,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        4683840053,
+        4683840052
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "80",
+        "maxspeed:advisory": "50",
+        "maxspeed:lanes": "100|100|100|80",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through;slight_right|slight_right"
+      }
+    },
+    {
+      "id": 474423767,
+      "version": 5,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        1644057554,
+        1563530098,
+        4683840053
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed:lanes": "100|100|100|80",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 474423867,
+      "version": 6,
+      "timestamp": "2025-07-07T15:31:54Z",
+      "nodes": [
+        11149164578,
+        1563530097,
+        12335490852
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
       }
     },
     {
@@ -461,6 +644,81 @@
         "ref": "A 29;IC 1",
         "surface": "asphalt",
         "toll": "yes"
+      }
+    },
+    {
+      "id": 516175818,
+      "version": 5,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        263908553,
+        263908559,
+        263908560
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 516175819,
+      "version": 4,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        263908552,
+        263908553
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "-1",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes",
+        "tunnel": "yes"
+      }
+    },
+    {
+      "id": 516175820,
+      "version": 5,
+      "timestamp": "2025-10-08T09:40:00Z",
+      "nodes": [
+        5039311230,
+        263877477
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "layer": "-1",
+        "maxheight": "5.52",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes",
+        "tunnel": "yes"
       }
     },
     {
@@ -603,6 +861,60 @@
       }
     },
     {
+      "id": 527319202,
+      "version": 7,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        263877787,
+        12118495913,
+        4091450420
+      ],
+      "tags": {
+        "change:lanes": "no|not_left|yes",
+        "destination:lanes": "Lisboa;Aveiro;Viseu|Lisboa;Aveiro;Viseu|Estarreja;Murtosa;Avanca",
+        "destination:ref": "A29;A17;A25|A29;A17;A25|N109",
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed:lanes": "120|100|80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "left_of:2",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 527319203,
+      "version": 8,
+      "timestamp": "2025-06-30T08:56:40Z",
+      "nodes": [
+        814271613,
+        814271448
+      ],
+      "tags": {
+        "change:lanes": "yes|yes|yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "no",
+        "maxheight": "default",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "left_of:2",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 598399307,
       "version": 7,
       "timestamp": "2025-06-30T08:56:40Z",
@@ -654,6 +966,59 @@
       }
     },
     {
+      "id": 598399310,
+      "version": 6,
+      "timestamp": "2025-06-30T08:30:58Z",
+      "nodes": [
+        12379385820,
+        1113105248,
+        5695374640,
+        12118495922,
+        12348620246
+      ],
+      "tags": {
+        "change:lanes": "yes|yes|yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "right_of:1",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 598399319,
+      "version": 6,
+      "timestamp": "2025-06-30T07:58:20Z",
+      "nodes": [
+        263877048,
+        12340226972,
+        263877049,
+        12379385821,
+        12379385823
+      ],
+      "tags": {
+        "change:lanes": "yes|yes|yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "default",
+        "maxspeed": "100",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "right_of:1",
+        "ref": "A 29;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 945577774,
       "version": 6,
       "timestamp": "2025-06-30T08:56:40Z",
@@ -679,20 +1044,90 @@
       }
     },
     {
-      "id": 987912383,
-      "version": 5,
-      "timestamp": "2026-02-16T19:00:34Z",
+      "id": 1202651585,
+      "version": 7,
+      "timestamp": "2025-12-29T10:21:49Z",
       "nodes": [
-        250350203,
-        9131395563,
-        1620526069,
-        9131395562
+        1644057536,
+        4683840364,
+        263908973,
+        13415369737,
+        11149164578
       ],
       "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "3",
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
         "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 1333307623,
+      "version": 2,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        12335490852,
+        1644057552
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through|through|slight_right"
+      }
+    },
+    {
+      "id": 1333307624,
+      "version": 3,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        1644057393,
+        1533316233,
+        12118495969
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1333307657,
+      "version": 2,
+      "timestamp": "2025-06-29T15:50:36Z",
+      "nodes": [
+        1533316209,
+        12335490963
+      ],
+      "tags": {
+        "highway": "motorway",
+        "lanes": "4",
+        "maxspeed:lanes": "100|100|100|80",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "source": "Bing",
         "surface": "asphalt",
         "toll": "yes"
       }
@@ -717,6 +1152,32 @@
         "shoulder": "right",
         "smoothness": "good",
         "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1333815284,
+      "version": 3,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        12340226842,
+        263908471,
+        263908472,
+        263908473
+      ],
+      "tags": {
+        "change:lanes": "yes|yes|yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "left_of:2",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
         "surface": "asphalt",
         "toll": "yes"
       }
@@ -762,6 +1223,29 @@
         "oneway": "yes",
         "placement": "right_of:1",
         "ref": "A 29;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1333815324,
+      "version": 4,
+      "timestamp": "2025-06-30T07:58:20Z",
+      "nodes": [
+        263908621,
+        12340226971
+      ],
+      "tags": {
+        "change:lanes": "no|no",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxheight:signed": "no",
+        "maxspeed:lanes": "120|80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
         "surface": "asphalt",
         "toll": "yes"
       }
@@ -890,6 +1374,253 @@
       }
     },
     {
+      "id": 1335131707,
+      "version": 2,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        12348620092,
+        12118495912,
+        263877787
+      ],
+      "tags": {
+        "change:lanes": "no|not_left|yes",
+        "destination:lanes": "Lisboa;Aveiro;Viseu|Lisboa;Aveiro;Viseu|Estarreja;Murtosa;Avanca",
+        "destination:ref": "A29;A17;A25|A29;A17;A25|N109",
+        "highway": "motorway",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed:lanes": "120|120|100",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "left_of:2",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1335131731,
+      "version": 2,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        263908560,
+        263908561,
+        263908562,
+        12348620247
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 1335131737,
+      "version": 2,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        12351895211,
+        263877780,
+        263877786,
+        12348620092
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 1335131738,
+      "version": 2,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        814271477,
+        12340226842
+      ],
+      "tags": {
+        "change:lanes": "yes|not_right|no",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "left_of:2",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1335131740,
+      "version": 3,
+      "timestamp": "2025-06-30T08:39:05Z",
+      "nodes": [
+        1490656730,
+        814271477
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "no",
+        "smoothness": "good",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1335131743,
+      "version": 2,
+      "timestamp": "2025-06-30T08:56:40Z",
+      "nodes": [
+        12351895216,
+        263908460
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "lit": "no",
+        "maxheight": "default",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "smoothness": "good",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 1338352855,
+      "version": 2,
+      "timestamp": "2025-06-30T07:58:20Z",
+      "nodes": [
+        12379385822,
+        263908621
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "maxspeed:lanes": "120|80",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 1338352856,
+      "version": 2,
+      "timestamp": "2025-06-30T07:58:20Z",
+      "nodes": [
+        263908619,
+        12379385822
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "right",
+        "surface": "asphalt",
+        "toll": "yes",
+        "turn:lanes": "through|through;right"
+      }
+    },
+    {
+      "id": 1338352857,
+      "version": 2,
+      "timestamp": "2025-06-30T07:58:20Z",
+      "nodes": [
+        12379385823,
+        5695374645
+      ],
+      "tags": {
+        "change:lanes": "yes|yes|yes",
+        "highway": "motorway",
+        "lanes": "3",
+        "maxheight": "default",
+        "maxspeed": "120",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "placement": "right_of:1",
+        "ref": "A 29;IC 1",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1338352861,
+      "version": 2,
+      "timestamp": "2025-06-30T07:58:20Z",
+      "nodes": [
+        263877047,
+        263877048
+      ],
+      "tags": {
+        "change:lanes": "yes|yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxspeed": "100",
+        "minspeed": "50",
+        "name": "Autoestrada da Costa de Prata",
+        "oneway": "yes",
+        "ref": "A 29;IC 1",
+        "shoulder": "no",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 1338352900,
       "version": 2,
       "timestamp": "2025-06-30T07:58:20Z",
@@ -958,138 +1689,28 @@
         "surface": "asphalt",
         "toll": "yes"
       }
-    },
-    {
-      "id": 1479369243,
-      "version": 1,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        11385857811,
-        11385857812,
-        11385857815,
-        250350203
-      ],
-      "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "5",
-        "maxheight:signed": "no",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1479369244,
-      "version": 1,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        11569952897,
-        11385857777,
-        1620526114
-      ],
-      "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
-        "lanes": "4",
-        "maxheight:signed": "no",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1479369246,
-      "version": 1,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        13570700228,
-        13570700229
-      ],
-      "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "4",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1479369247,
-      "version": 1,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        13570700229,
-        250350039
-      ],
-      "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "6",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1479369249,
-      "version": 1,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        250350039,
-        13570700245,
-        13570700232,
-        13570700244,
-        11385857811
-      ],
-      "tags": {
-        "destination": "Santa Maria da Feira;São João da Madeira;Ovar",
-        "highway": "motorway_link",
-        "lanes": "1",
-        "maxheight:signed": "no",
-        "maxspeed": "40",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
-    },
-    {
-      "id": 1479369255,
-      "version": 1,
-      "timestamp": "2026-02-16T19:00:34Z",
-      "nodes": [
-        13570700252,
-        1620526134,
-        1620526166
-      ],
-      "tags": {
-        "destination": "Lisboa;Porto",
-        "destination:ref": "A 1",
-        "highway": "motorway_link",
-        "lanes": "2",
-        "maxspeed": "60",
-        "oneway": "yes",
-        "surface": "asphalt",
-        "toll": "yes"
-      }
     }
   ],
   "coordinates": {
-    "250350039": [
-      40.9277957,
-      -8.5656721
+    "263876511": [
+      41.0811343,
+      -8.6288554
     ],
-    "250350203": [
-      40.9266222,
-      -8.56481
+    "263876525": [
+      41.0784834,
+      -8.6372239
     ],
-    "250350204": [
-      40.9258181,
-      -8.5648167
+    "263877047": [
+      40.9260511,
+      -8.6030436
+    ],
+    "263877048": [
+      40.9257688,
+      -8.6032656
+    ],
+    "263877049": [
+      40.9253664,
+      -8.6036363
     ],
     "263877055": [
       40.9235168,
@@ -1138,6 +1759,14 @@
     "263877083": [
       40.9062546,
       -8.6051733
+    ],
+    "263877453": [
+      40.8573729,
+      -8.5699396
+    ],
+    "263877454": [
+      40.855455,
+      -8.5695454
     ],
     "263877477": [
       40.8483115,
@@ -1290,6 +1919,30 @@
     "263877779": [
       40.7897145,
       -8.5621558
+    ],
+    "263877780": [
+      40.7886665,
+      -8.5624824
+    ],
+    "263877786": [
+      40.7878543,
+      -8.5626548
+    ],
+    "263877787": [
+      40.7869194,
+      -8.5627528
+    ],
+    "263908460": [
+      40.7822227,
+      -8.5620662
+    ],
+    "263908471": [
+      40.788649,
+      -8.562326
+    ],
+    "263908472": [
+      40.7896377,
+      -8.5620165
     ],
     "263908473": [
       40.7905283,
@@ -1467,6 +2120,26 @@
       40.848327,
       -8.5690216
     ],
+    "263908553": [
+      40.8487776,
+      -8.5690582
+    ],
+    "263908559": [
+      40.8539452,
+      -8.5692826
+    ],
+    "263908560": [
+      40.8554548,
+      -8.5693926
+    ],
+    "263908561": [
+      40.8562947,
+      -8.5695117
+    ],
+    "263908562": [
+      40.8566241,
+      -8.5695749
+    ],
     "263908598": [
       40.9061878,
       -8.6049666
@@ -1523,65 +2196,153 @@
       40.9241862,
       -8.6048648
     ],
-    "277306557": [
-      40.9254522,
-      -8.565192
+    "263908621": [
+      40.9253254,
+      -8.6035515
     ],
-    "277306572": [
-      40.9255243,
-      -8.5646123
-    ],
-    "664773970": [
-      40.9255527,
-      -8.5635013
-    ],
-    "664773974": [
-      40.9255975,
-      -8.5638487
-    ],
-    "664773975": [
-      40.9256419,
-      -8.5640766
+    "263908973": [
+      41.0785352,
+      -8.636617
     ],
     "814271137": [
       40.759083,
       -8.5439914
     ],
+    "814271143": [
+      40.7755382,
+      -8.560973
+    ],
+    "814271151": [
+      40.7659079,
+      -8.5528669
+    ],
     "814271162": [
       40.7565995,
       -8.5426961
+    ],
+    "814271168": [
+      40.7761278,
+      -8.561242
     ],
     "814271169": [
       40.7582813,
       -8.5433086
     ],
+    "814271193": [
+      40.7730224,
+      -8.5600272
+    ],
+    "814271197": [
+      40.7686591,
+      -8.5553246
+    ],
+    "814271212": [
+      40.7730671,
+      -8.5598743
+    ],
     "814271223": [
       40.762336,
       -8.5474117
+    ],
+    "814271256": [
+      40.7761411,
+      -8.5610794
+    ],
+    "814271261": [
+      40.7664549,
+      -8.5533928
     ],
     "814271266": [
       40.7548965,
       -8.542277
     ],
+    "814271267": [
+      40.7687325,
+      -8.5551876
+    ],
+    "814271277": [
+      40.7748829,
+      -8.560957
+    ],
     "814271278": [
       40.7591472,
       -8.5438642
     ],
-    "814271322": [
-      40.7481747,
-      -8.5408302
+    "814271300": [
+      40.7717601,
+      -8.5589132
+    ],
+    "814271309": [
+      40.7670066,
+      -8.5540273
+    ],
+    "814271319": [
+      40.7742508,
+      -8.5605424
     ],
     "814271327": [
       40.7605582,
       -8.5452255
     ],
+    "814271361": [
+      40.7670657,
+      -8.5539039
+    ],
+    "814271371": [
+      40.7700217,
+      -8.5565339
+    ],
+    "814271376": [
+      40.7736098,
+      -8.5603774
+    ],
     "814271378": [
       40.7599376,
       -8.5444613
     ],
+    "814271379": [
+      40.7692422,
+      -8.5558722
+    ],
+    "814271409": [
+      40.7658305,
+      -8.5529999
+    ],
+    "814271417": [
+      40.7630967,
+      -8.5484304
+    ],
     "814271427": [
       40.7581764,
       -8.5434218
+    ],
+    "814271448": [
+      40.7808869,
+      -8.5620098
+    ],
+    "814271457": [
+      40.7679754,
+      -8.5545772
+    ],
+    "814271475": [
+      40.7723835,
+      -8.5595122
+    ],
+    "814271477": [
+      40.7877006,
+      -8.5625108
+    ],
+    "814271478": [
+      40.7679347,
+      -8.5547284
+    ],
+    "814271508": [
+      40.7641702,
+      -8.5507306
+    ],
+    "814271522": [
+      40.7635525,
+      -8.5492739
     ],
     "814271529": [
       40.7493526,
@@ -1591,6 +2352,30 @@
       40.7574654,
       -8.5430561
     ],
+    "814271580": [
+      40.7712725,
+      -8.5581364
+    ],
+    "814271583": [
+      40.7711996,
+      -8.5582662
+    ],
+    "814271586": [
+      40.7663776,
+      -8.5535246
+    ],
+    "814271613": [
+      40.7833375,
+      -8.5623967
+    ],
+    "814271619": [
+      40.7629813,
+      -8.5484956
+    ],
+    "814271639": [
+      40.764265,
+      -8.5506268
+    ],
     "814271651": [
       40.7566175,
       -8.5425382
@@ -1599,17 +2384,33 @@
       40.7558044,
       -8.5424572
     ],
+    "814271675": [
+      40.7755205,
+      -8.5611386
+    ],
+    "814271694": [
+      40.771819,
+      -8.5587674
+    ],
     "814271700": [
       40.7624216,
       -8.5472882
     ],
-    "814271731": [
-      40.7489036,
-      -8.5414934
+    "814271707": [
+      40.7646908,
+      -8.5515837
     ],
     "814271740": [
       40.7612483,
       -8.5459616
+    ],
+    "814271750": [
+      40.7749165,
+      -8.5607978
+    ],
+    "814271754": [
+      40.7651495,
+      -8.5519949
     ],
     "814271766": [
       40.7548982,
@@ -1618,6 +2419,34 @@
     "814271774": [
       40.7575085,
       -8.5429034
+    ],
+    "814271798": [
+      40.7742257,
+      -8.5607002
+    ],
+    "814271802": [
+      40.7699348,
+      -8.5566455
+    ],
+    "814271811": [
+      40.7724448,
+      -8.5593659
+    ],
+    "814271815": [
+      40.7634535,
+      -8.549372
+    ],
+    "1113105248": [
+      40.8590663,
+      -8.5705849
+    ],
+    "1490656727": [
+      40.7654808,
+      -8.5524051
+    ],
+    "1490656730": [
+      40.7873196,
+      -8.5625563
     ],
     "1490656731": [
       40.8020415,
@@ -1635,6 +2464,10 @@
       40.7613332,
       -8.5458352
     ],
+    "1490656738": [
+      40.7647551,
+      -8.5514371
+    ],
     "1490656739": [
       40.7620167,
       -8.5467003
@@ -1647,9 +2480,53 @@
       40.7606058,
       -8.5450782
     ],
+    "1492522797": [
+      40.7693256,
+      -8.555756
+    ],
+    "1492522807": [
+      40.7736389,
+      -8.5602174
+    ],
     "1492522816": [
       40.8012343,
       -8.5576447
+    ],
+    "1527411606": [
+      41.0803273,
+      -8.6308988
+    ],
+    "1533316209": [
+      41.0799135,
+      -8.6327752
+    ],
+    "1533316232": [
+      41.0770659,
+      -8.6391833
+    ],
+    "1533316233": [
+      41.0770113,
+      -8.639038
+    ],
+    "1533316234": [
+      41.0774753,
+      -8.6387929
+    ],
+    "1533316235": [
+      41.0774043,
+      -8.6386589
+    ],
+    "1533316237": [
+      41.0780818,
+      -8.6379841
+    ],
+    "1533316238": [
+      41.0779724,
+      -8.6378968
+    ],
+    "1533316239": [
+      41.0783175,
+      -8.6375305
     ],
     "1563530090": [
       40.7536294,
@@ -1675,117 +2552,53 @@
       40.9084703,
       -8.6061802
     ],
-    "1620526028": [
-      40.9255969,
-      -8.5646618
+    "1563530097": [
+      41.0790813,
+      -8.6348701
     ],
-    "1620526037": [
-      40.9256872,
-      -8.564693
+    "1563530098": [
+      41.079362,
+      -8.6345224
     ],
-    "1620526040": [
-      40.9257247,
-      -8.5642473
+    "1644057393": [
+      41.076413,
+      -8.6395036
     ],
-    "1620526041": [
-      40.9257581,
-      -8.5646918
+    "1644057396": [
+      41.0764622,
+      -8.6396549
     ],
-    "1620526044": [
-      40.9258601,
-      -8.5643893
+    "1644057479": [
+      41.0777321,
+      -8.638269
     ],
-    "1620526046": [
-      40.9258636,
-      -8.5646569
+    "1644057497": [
+      41.0778148,
+      -8.6383815
     ],
-    "1620526058": [
-      40.9259937,
-      -8.5644614
+    "1644057536": [
+      41.0782683,
+      -8.6373067
     ],
-    "1620526069": [
-      40.9260817,
-      -8.5647174
+    "1644057552": [
+      41.0794381,
+      -8.6337172
     ],
-    "1620526071": [
-      40.9260339,
-      -8.564604
+    "1644057554": [
+      41.079588,
+      -8.6337973
     ],
-    "1620526076": [
-      40.9262328,
-      -8.5645384
+    "1644057560": [
+      41.0796533,
+      -8.6330429
     ],
-    "1620526077": [
-      40.926702,
-      -8.5645932
+    "1648810890": [
+      40.7650643,
+      -8.5521108
     ],
-    "1620526084": [
-      40.9272043,
-      -8.5648795
-    ],
-    "1620526105": [
-      40.9273662,
-      -8.5650434
-    ],
-    "1620526107": [
-      40.9275167,
-      -8.5651668
-    ],
-    "1620526114": [
-      40.928706,
-      -8.5661343
-    ],
-    "1620526134": [
-      40.9292306,
-      -8.5667244
-    ],
-    "1620526166": [
-      40.9294495,
-      -8.5671329
-    ],
-    "1645632633": [
-      40.7464748,
-      -8.5400576
-    ],
-    "1645632634": [
-      40.7467112,
-      -8.5401831
-    ],
-    "1645632644": [
-      40.7469395,
-      -8.5402239
-    ],
-    "1645632653": [
-      40.7472052,
-      -8.5402394
-    ],
-    "1645632661": [
-      40.7474756,
-      -8.5402763
-    ],
-    "1645632676": [
-      40.7476551,
-      -8.5403376
-    ],
-    "1645632681": [
-      40.7478441,
-      -8.5404704
-    ],
-    "1645632682": [
-      40.7479543,
-      -8.5405561
-    ],
-    "1645632683": [
-      40.7485103,
-      -8.5412224
-    ],
-    "1645632684": [
-      40.7487036,
-      -8.541389
-    ],
-    "1710130071": [
-      40.7490767,
-      -8.5415753
+    "1648810894": [
+      40.7654112,
+      -8.5525413
     ],
     "1710130072": [
       40.7490174,
@@ -1798,10 +2611,6 @@
     "1710130075": [
       40.7619104,
       -8.546783
-    ],
-    "2303266578": [
-      40.9060542,
-      -8.6052015
     ],
     "2525439121": [
       40.8214318,
@@ -1819,6 +2628,10 @@
       40.8260597,
       -8.5598219
     ],
+    "4091450420": [
+      40.7863696,
+      -8.5627577
+    ],
     "4091450422": [
       40.802089,
       -8.5576844
@@ -1827,61 +2640,77 @@
       40.8085635,
       -8.5545301
     ],
-    "4378201267": [
-      40.9274453,
-      -8.5653193
+    "4309176982": [
+      41.0775892,
+      -8.6386763
+    ],
+    "4448278411": [
+      41.0798481,
+      -8.6325039
+    ],
+    "4448278416": [
+      41.0800182,
+      -8.6323795
+    ],
+    "4448278422": [
+      41.0802329,
+      -8.6312785
+    ],
+    "4448278446": [
+      41.0807772,
+      -8.6299431
+    ],
+    "4448278452": [
+      41.0809537,
+      -8.6293963
     ],
     "4655861538": [
       40.9174574,
       -8.6088878
     ],
+    "4683840052": [
+      41.0791737,
+      -8.6351273
+    ],
+    "4683840053": [
+      41.0792677,
+      -8.6348176
+    ],
+    "4683840364": [
+      41.0784694,
+      -8.6368193
+    ],
+    "5039311230": [
+      40.8487645,
+      -8.5692155
+    ],
     "5695374629": [
       40.7517439,
       -8.5420405
+    ],
+    "5695374640": [
+      40.8583969,
+      -8.5703043
     ],
     "5695374645": [
       40.9242099,
       -8.6049715
     ],
-    "9131395561": [
-      40.9257111,
-      -8.5649066
-    ],
-    "9131395562": [
-      40.9259499,
-      -8.5647529
-    ],
-    "9131395563": [
-      40.9262403,
-      -8.5647178
-    ],
-    "11021246010": [
-      40.9255738,
-      -8.56506
-    ],
-    "11385857777": [
-      40.9283551,
-      -8.5658164
-    ],
-    "11385857811": [
-      40.9270667,
-      -8.5650888
-    ],
-    "11385857812": [
-      40.9270317,
-      -8.5650654
-    ],
-    "11385857815": [
-      40.9268201,
-      -8.5649292
-    ],
-    "11569952897": [
-      40.9279094,
-      -8.5654669
+    "11149164578": [
+      41.0788628,
+      -8.635547
     ],
     "12118495910": [
       40.7542308,
       -8.5420458
+    ],
+    "12118495912": [
+      40.7873146,
+      -8.5627179
+    ],
+    "12118495913": [
+      40.786636,
+      -8.5627622
     ],
     "12118495917": [
       40.8471175,
@@ -1899,6 +2728,42 @@
       40.8466773,
       -8.5686872
     ],
+    "12118495921": [
+      40.8562969,
+      -8.5696707
+    ],
+    "12118495922": [
+      40.8579468,
+      -8.5701251
+    ],
+    "12118495923": [
+      40.8566274,
+      -8.5697383
+    ],
+    "12118495966": [
+      41.0775759,
+      -8.6384741
+    ],
+    "12118495967": [
+      41.0777136,
+      -8.6385239
+    ],
+    "12118495968": [
+      41.0772388,
+      -8.6390263
+    ],
+    "12118495969": [
+      41.0773045,
+      -8.6387596
+    ],
+    "12118495976": [
+      41.0782212,
+      -8.637732
+    ],
+    "12118495977": [
+      41.0781086,
+      -8.6376658
+    ],
     "12119301583": [
       40.8417917,
       -8.5665659
@@ -1914,6 +2779,14 @@
     "12119301586": [
       40.8337073,
       -8.5628538
+    ],
+    "12335490852": [
+      41.0792738,
+      -8.6342408
+    ],
+    "12335490963": [
+      41.079802,
+      -8.6331229
     ],
     "12340226836": [
       40.754391,
@@ -1934,6 +2807,10 @@
     "12340226840": [
       40.7623394,
       -8.5471689
+    ],
+    "12340226842": [
+      40.7880913,
+      -8.562452
     ],
     "12340226844": [
       40.7938,
@@ -1979,6 +2856,10 @@
       40.8450903,
       -8.5680364
     ],
+    "12340226940": [
+      40.8539362,
+      -8.5694473
+    ],
     "12340226955": [
       40.9080477,
       -8.6058153
@@ -2003,9 +2884,29 @@
       40.9176969,
       -8.6086428
     ],
+    "12340226971": [
+      40.9255457,
+      -8.6033392
+    ],
+    "12340226972": [
+      40.925688,
+      -8.603335
+    ],
     "12348620080": [
       40.9079474,
       -8.6059387
+    ],
+    "12348620092": [
+      40.7876872,
+      -8.562676
+    ],
+    "12348620246": [
+      40.8577593,
+      -8.5700615
+    ],
+    "12348620247": [
+      40.8569449,
+      -8.5696514
     ],
     "12348880439": [
       40.751002,
@@ -2018,10 +2919,6 @@
     "12348880442": [
       40.753388,
       -8.5421478
-    ],
-    "12348880444": [
-      40.7491776,
-      -8.5416238
     ],
     "12348880445": [
       40.7497,
@@ -2043,9 +2940,25 @@
       40.7912572,
       -8.561229
     ],
-    "12362461832": [
-      40.9058817,
-      -8.6052226
+    "12351895216": [
+      40.7806292,
+      -8.5617952
+    ],
+    "12379385820": [
+      40.859725,
+      -8.5708849
+    ],
+    "12379385821": [
+      40.9250803,
+      -8.6039498
+    ],
+    "12379385822": [
+      40.9250256,
+      -8.6038707
+    ],
+    "12379385823": [
+      40.92475,
+      -8.6043374
     ],
     "12379386013": [
       40.906621,
@@ -2059,57 +2972,17 @@
       40.9059658,
       -8.6050402
     ],
-    "13570700227": [
-      40.9288163,
-      -8.5664982
+    "13415369047": [
+      41.0790835,
+      -8.6354013
     ],
-    "13570700228": [
-      40.9284951,
-      -8.566234
+    "13415369048": [
+      41.0791533,
+      -8.6351893
     ],
-    "13570700229": [
-      40.9281205,
-      -8.5659395
-    ],
-    "13570700232": [
-      40.9273711,
-      -8.5654778
-    ],
-    "13570700235": [
-      40.9264635,
-      -8.5645401
-    ],
-    "13570700236": [
-      40.9269671,
-      -8.5647011
-    ],
-    "13570700238": [
-      40.9290706,
-      -8.5667355
-    ],
-    "13570700243": [
-      40.9276672,
-      -8.5652902
-    ],
-    "13570700244": [
-      40.9272207,
-      -8.5653545
-    ],
-    "13570700245": [
-      40.9275216,
-      -8.5656012
-    ],
-    "13570700250": [
-      40.9272949,
-      -8.5651959
-    ],
-    "13570700251": [
-      40.9275958,
-      -8.5654427
-    ],
-    "13570700252": [
-      40.9288441,
-      -8.5662628
+    "13415369737": [
+      41.0787401,
+      -8.6359478
     ]
   },
   "chargeCandidates": [
@@ -2186,23 +3059,25 @@
       }
     },
     {
-      "id": 1620526107,
-      "lat": 40.9275167,
-      "lon": -8.5651668,
+      "id": 1563530097,
+      "lat": 41.0790813,
+      "lon": -8.6348701,
       "tags": {
-        "barrier": "toll_booth",
-        "payment:cash": "yes",
-        "payment:credit_cards": "yes"
+        "highway": "toll_gantry",
+        "name": "Pórtico de Portagem de Gulpilhares",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
       }
     },
     {
-      "id": 4378201267,
-      "lat": 40.9274453,
-      "lon": -8.5653193,
+      "id": 1563530098,
+      "lat": 41.079362,
+      "lon": -8.6345224,
       "tags": {
-        "barrier": "toll_booth",
-        "payment:cash": "yes",
-        "payment:credit_cards": "yes"
+        "highway": "toll_gantry",
+        "name": "Pórtico de Portagem de Gulpilhares",
+        "note": "Electronic toll only",
+        "payment:cash": "no"
       }
     }
   ]

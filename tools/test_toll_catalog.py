@@ -179,7 +179,7 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual(25,report['stages'][4]['additionalCoveredEdges'])
         self.assertEqual({'brisa:0502','brisa:0504'},
             {v['chargeId'] for v in report['stages'][4]['crossings']})
-        self.assertEqual([34,69,100,76],
+        self.assertEqual([34,114,135,76],
             [stage['additionalCoveredEdges'] for stage in report['stages'][7:]])
         self.assertEqual(12,len({event['chargeId'] for stage in report['stages'][7:]
             for event in stage['crossings']}))
