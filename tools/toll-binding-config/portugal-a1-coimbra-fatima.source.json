@@ -8162,6 +8162,29 @@
       }
     },
     {
+      "id": 159108756,
+      "version": 12,
+      "timestamp": "2025-11-19T10:39:38Z",
+      "nodes": [
+        8501324198,
+        1712101261,
+        1357199983
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "2",
+        "maxheight:signed": "no",
+        "maxspeed": "60",
+        "name": "Autoestrada do Baixo Mondego",
+        "note": "Via Verde",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt"
+      }
+    },
+    {
       "id": 159220061,
       "version": 9,
       "timestamp": "2025-01-03T11:08:40Z",
@@ -10940,6 +10963,27 @@
       }
     },
     {
+      "id": 319624705,
+      "version": 6,
+      "timestamp": "2025-11-19T10:39:37Z",
+      "nodes": [
+        208625130,
+        1357199984
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "1",
+        "maxheight:signed": "no",
+        "name": "Autoestrada do Baixo Mondego",
+        "note": "Via Verde",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 319624711,
       "version": 8,
       "timestamp": "2025-07-17T01:52:58Z",
@@ -10961,6 +11005,55 @@
         "surface": "asphalt",
         "toll": "yes",
         "turn:lanes": "through|through"
+      }
+    },
+    {
+      "id": 354388234,
+      "version": 9,
+      "timestamp": "2025-07-05T21:48:04Z",
+      "nodes": [
+        3601228874,
+        3601228856,
+        3601228838,
+        9030327057
+      ],
+      "tags": {
+        "destination": "Aveiro;Viseu;Espanha",
+        "destination:ref": "A25",
+        "highway": "motorway_link",
+        "lanes": "2",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "maxspeed": "40",
+        "name": "Via Verde",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 354388235,
+      "version": 7,
+      "timestamp": "2025-07-05T21:48:04Z",
+      "nodes": [
+        3601228826,
+        3601228836,
+        1109585655,
+        3601228867,
+        265660487
+      ],
+      "tags": {
+        "destination": "Lisboa;Porto",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "lit": "yes",
+        "maxheight:signed": "no",
+        "maxspeed": "40",
+        "name": "Via Verde",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
       }
     },
     {
@@ -13161,6 +13254,49 @@
         "ref": "A 1",
         "surface": "asphalt",
         "toll": "yes"
+      }
+    },
+    {
+      "id": 506213763,
+      "version": 5,
+      "timestamp": "2025-11-19T10:39:37Z",
+      "nodes": [
+        1357199983,
+        1712101265,
+        8501324193
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "2",
+        "maxheight:signed": "no",
+        "name": "Autoestrada do Baixo Mondego",
+        "note": "Via Verde",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "source": "Bing",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 506213764,
+      "version": 6,
+      "timestamp": "2025-11-19T10:39:38Z",
+      "nodes": [
+        1357199984,
+        8501324173
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "1",
+        "maxheight:signed": "no",
+        "name": "Autoestrada do Baixo Mondego",
+        "note": "Via Verde",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "surface": "asphalt"
       }
     },
     {
@@ -15407,6 +15543,28 @@
       }
     },
     {
+      "id": 915196801,
+      "version": 5,
+      "timestamp": "2025-11-19T10:39:37Z",
+      "nodes": [
+        8501324180,
+        8501324179,
+        8501324178,
+        8501324177,
+        8501324173
+      ],
+      "tags": {
+        "highway": "motorway",
+        "int_ref": "E 801",
+        "lanes": "1",
+        "maxheight:signed": "no",
+        "note": "Via Verde",
+        "oneway": "yes",
+        "ref": "A 14;IP 3",
+        "surface": "asphalt"
+      }
+    },
+    {
       "id": 915196805,
       "version": 3,
       "timestamp": "2025-07-17T01:52:58Z",
@@ -16833,6 +16991,27 @@
       }
     },
     {
+      "id": 1275098515,
+      "version": 4,
+      "timestamp": "2025-07-05T21:48:04Z",
+      "nodes": [
+        3601228875,
+        3601228874
+      ],
+      "tags": {
+        "destination": "Aveiro;Viseu;Espanha",
+        "destination:ref": "A25",
+        "highway": "motorway_link",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "60",
+        "name": "Via Verde",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 1275452784,
       "version": 2,
       "timestamp": "2024-04-24T02:24:42Z",
@@ -17944,6 +18123,42 @@
       }
     },
     {
+      "id": 1383806015,
+      "version": 2,
+      "timestamp": "2025-07-12T15:53:01Z",
+      "nodes": [
+        12811985681,
+        12811985680,
+        503706153
+      ],
+      "tags": {
+        "destination": "Aveiro;Águeda;Anadia",
+        "destination:ref": "EN 235",
+        "destination:ref:to": "EN 333",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "oneway": "yes",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1383806016,
+      "version": 2,
+      "timestamp": "2025-07-12T15:53:01Z",
+      "nodes": [
+        12811985684,
+        12811985682,
+        719013740
+      ],
+      "tags": {
+        "destination": "Porto;Lisboa",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "oneway": "yes",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 1383806017,
       "version": 4,
       "timestamp": "2025-07-12T15:56:42Z",
@@ -18057,6 +18272,90 @@
       }
     },
     {
+      "id": 1383814523,
+      "version": 1,
+      "timestamp": "2025-05-05T17:13:10Z",
+      "nodes": [
+        12812114643,
+        12812114640,
+        12812114645,
+        12812114639,
+        185839381
+      ],
+      "tags": {
+        "destination": "Lisboa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1383814524,
+      "version": 1,
+      "timestamp": "2025-05-05T17:13:10Z",
+      "nodes": [
+        12812114643,
+        12812114642,
+        12812114644,
+        12812114641,
+        185839381
+      ],
+      "tags": {
+        "destination": "Lisboa",
+        "destination:ref": "A 1",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1383814526,
+      "version": 1,
+      "timestamp": "2025-05-05T17:13:10Z",
+      "nodes": [
+        12812114652,
+        12812114649,
+        12812114647,
+        12812114648,
+        12812114653
+      ],
+      "tags": {
+        "destination": "Coimbra Sul;Taveiro;Alfarelos",
+        "destination:ref": "EN 341",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1383814527,
+      "version": 1,
+      "timestamp": "2025-05-05T17:13:10Z",
+      "nodes": [
+        12812114652,
+        12812114651,
+        12812114646,
+        12812114650,
+        12812114653
+      ],
+      "tags": {
+        "destination": "Coimbra Sul;Taveiro;Alfarelos",
+        "destination:ref": "EN 341",
+        "highway": "motorway_link",
+        "lanes": "1",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
       "id": 1383814528,
       "version": 1,
       "timestamp": "2025-05-05T17:13:10Z",
@@ -18088,6 +18387,25 @@
         "destination:ref": "A 1",
         "highway": "motorway_link",
         "lanes": "2",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "toll": "yes"
+      }
+    },
+    {
+      "id": 1383814534,
+      "version": 3,
+      "timestamp": "2026-02-24T00:04:23Z",
+      "nodes": [
+        1355396571,
+        12812114657,
+        12812114656,
+        1551764411
+      ],
+      "tags": {
+        "destination": "Porto",
+        "highway": "motorway_link",
+        "lanes": "1",
         "oneway": "yes",
         "surface": "asphalt",
         "toll": "yes"
@@ -29559,6 +29877,10 @@
       40.2738447,
       -8.4822979
     ],
+    "1109585655": [
+      40.6891067,
+      -8.5246863
+    ],
     "1109611857": [
       40.7820501,
       -8.545858
@@ -29847,9 +30169,21 @@
       40.2029483,
       -8.4884926
     ],
+    "1355396571": [
+      40.2022539,
+      -8.4884191
+    ],
     "1355491833": [
       40.1307759,
       -8.4966805
+    ],
+    "1357199983": [
+      40.2711027,
+      -8.4733202
+    ],
+    "1357199984": [
+      40.2708754,
+      -8.4733933
     ],
     "1359875708": [
       40.1234738,
@@ -31883,9 +32217,17 @@
       40.2707177,
       -8.4833425
     ],
+    "1712101261": [
+      40.2709689,
+      -8.4727941
+    ],
     "1712101264": [
       40.2711422,
       -8.4831151
+    ],
+    "1712101265": [
+      40.271255,
+      -8.4743428
     ],
     "1712101268": [
       40.2714293,
@@ -32939,6 +33281,10 @@
       40.3932527,
       -8.4890611
     ],
+    "3601228826": [
+      40.6884447,
+      -8.5247797
+    ],
     "3601228827": [
       40.6882808,
       -8.525135
@@ -32946,6 +33292,14 @@
     "3601228834": [
       40.6886376,
       -8.5247159
+    ],
+    "3601228836": [
+      40.6886587,
+      -8.5248303
+    ],
+    "3601228838": [
+      40.6887205,
+      -8.5249071
     ],
     "3601228842": [
       40.6887239,
@@ -32955,6 +33309,10 @@
       40.6890835,
       -8.524567
     ],
+    "3601228856": [
+      40.689125,
+      -8.5247723
+    ],
     "3601228860": [
       40.6891556,
       -8.5249459
@@ -32963,9 +33321,17 @@
       40.6894656,
       -8.5244396
     ],
+    "3601228867": [
+      40.6895137,
+      -8.5245344
+    ],
     "3601228871": [
       40.6895422,
       -8.524813
+    ],
+    "3601228874": [
+      40.6895391,
+      -8.524628
     ],
     "3601228875": [
       40.6898572,
@@ -37955,6 +38321,18 @@
       40.2710182,
       -8.4737842
     ],
+    "8501324177": [
+      40.2708835,
+      -8.4728279
+    ],
+    "8501324178": [
+      40.2710204,
+      -8.4733466
+    ],
+    "8501324179": [
+      40.2710825,
+      -8.4737684
+    ],
     "8501324180": [
       40.2710823,
       -8.4741104
@@ -38447,9 +38825,17 @@
       40.3737142,
       -8.4869813
     ],
+    "12811985680": [
+      40.5704798,
+      -8.5648271
+    ],
     "12811985681": [
       40.5705763,
       -8.5637493
+    ],
+    "12811985682": [
+      40.5704207,
+      -8.5648339
     ],
     "12811985684": [
       40.5703677,
@@ -38459,9 +38845,57 @@
       40.1986056,
       -8.4882942
     ],
+    "12812114639": [
+      40.2001048,
+      -8.4897307
+    ],
+    "12812114640": [
+      40.2004521,
+      -8.4898688
+    ],
+    "12812114641": [
+      40.2000669,
+      -8.4898983
+    ],
+    "12812114642": [
+      40.2004234,
+      -8.4900324
+    ],
     "12812114643": [
       40.200594,
       -8.4899904
+    ],
+    "12812114644": [
+      40.2002411,
+      -8.4899707
+    ],
+    "12812114645": [
+      40.2002749,
+      -8.4898017
+    ],
+    "12812114646": [
+      40.2002832,
+      -8.4897389
+    ],
+    "12812114647": [
+      40.2003266,
+      -8.4895646
+    ],
+    "12812114648": [
+      40.2005023,
+      -8.4896328
+    ],
+    "12812114649": [
+      40.200153,
+      -8.4894973
+    ],
+    "12812114650": [
+      40.2004633,
+      -8.4898098
+    ],
+    "12812114651": [
+      40.2001192,
+      -8.4896743
     ],
     "12812114652": [
       40.1999902,
@@ -38474,6 +38908,14 @@
     "12812114654": [
       40.2005043,
       -8.4899721
+    ],
+    "12812114656": [
+      40.2029534,
+      -8.4885833
+    ],
+    "12812114657": [
+      40.2026451,
+      -8.488521
     ],
     "12812123742": [
       40.131511,
@@ -38982,11 +39424,44 @@
       }
     },
     {
+      "id": 1109585655,
+      "lat": 40.6891067,
+      "lon": -8.5246863,
+      "tags": {
+        "highway": "toll_gantry",
+        "operator": "BRISA",
+        "payment:via_verde": "only",
+        "toll:automatic": "Via Verde"
+      }
+    },
+    {
       "id": 1114722528,
       "lat": 40.7827073,
       "lon": -8.5479913,
       "tags": {
         "barrier": "toll_booth"
+      }
+    },
+    {
+      "id": 1357199983,
+      "lat": 40.2711027,
+      "lon": -8.4733202,
+      "tags": {
+        "highway": "toll_gantry",
+        "name": "Coimbra Norte",
+        "operator": "Brisa",
+        "payment:via_verde": "only"
+      }
+    },
+    {
+      "id": 1357199984,
+      "lat": 40.2708754,
+      "lon": -8.4733933,
+      "tags": {
+        "highway": "toll_gantry",
+        "name": "Coimbra Norte",
+        "operator": "Brisa",
+        "payment:via_verde": "only"
       }
     },
     {
@@ -39039,6 +39514,17 @@
       "tags": {
         "barrier": "toll_booth",
         "operator": "BRISA"
+      }
+    },
+    {
+      "id": 3601228856,
+      "lat": 40.689125,
+      "lon": -8.5247723,
+      "tags": {
+        "highway": "toll_gantry",
+        "operator": "BRISA",
+        "payment:via_verde": "only",
+        "toll:automatic": "Via Verde"
       }
     },
     {
@@ -39109,6 +39595,17 @@
       }
     },
     {
+      "id": 8501324178,
+      "lat": 40.2710204,
+      "lon": -8.4733466,
+      "tags": {
+        "highway": "toll_gantry",
+        "name": "Coimbra Norte",
+        "operator": "Brisa",
+        "payment:via_verde": "only"
+      }
+    },
+    {
       "id": 8501324196,
       "lat": 40.2711935,
       "lon": -8.4732909,
@@ -39117,6 +39614,62 @@
         "name": "Coimbra Norte",
         "opening_hours": "24/7",
         "operator": "Brisa"
+      }
+    },
+    {
+      "id": 12811985680,
+      "lat": 40.5704798,
+      "lon": -8.5648271,
+      "tags": {
+        "highway": "toll_gantry"
+      }
+    },
+    {
+      "id": 12811985682,
+      "lat": 40.5704207,
+      "lon": -8.5648339,
+      "tags": {
+        "highway": "toll_gantry"
+      }
+    },
+    {
+      "id": 12812114644,
+      "lat": 40.2002411,
+      "lon": -8.4899707,
+      "tags": {
+        "highway": "toll_gantry"
+      }
+    },
+    {
+      "id": 12812114645,
+      "lat": 40.2002749,
+      "lon": -8.4898017,
+      "tags": {
+        "highway": "toll_gantry"
+      }
+    },
+    {
+      "id": 12812114646,
+      "lat": 40.2002832,
+      "lon": -8.4897389,
+      "tags": {
+        "highway": "toll_gantry"
+      }
+    },
+    {
+      "id": 12812114647,
+      "lat": 40.2003266,
+      "lon": -8.4895646,
+      "tags": {
+        "highway": "toll_gantry"
+      }
+    },
+    {
+      "id": 12812114657,
+      "lat": 40.2026451,
+      "lon": -8.488521,
+      "tags": {
+        "highway": "toll_gantry"
       }
     },
     {

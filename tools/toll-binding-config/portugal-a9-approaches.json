@@ -5,7 +5,7 @@
   "reviewedOn": "2026-11-08",
   "geometrySimplificationMeters": 2.0,
   "sourceSha256": "c8c5abb53e6caf4fa5247e50cff5c89646d6a4c9a04d4cf2a815eb998445e107",
-  "seedSha256": "844b236cb2412bd358a6776b796388db4d5b210be594e55fbe5271eecff12a78",
+  "seedSha256": "f40c0a11b99411474d9e84a7f51ba0449ede96efc60f6c8be2e4d2ba78e74b72",
   "scope": "Specific public access streets, IC19 and post-Loures A8 approach geometry for A9 alternatives. Physical collection approaches and paid-network membership are handled by the preceding fixed/network proof, not waived by this stage. No whole-road or country exemption.",
   "sources": [
     "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",

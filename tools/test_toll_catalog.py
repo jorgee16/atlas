@@ -196,9 +196,9 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage.get('edgeWitnesses',stage.get('freeEdgeWitnesses',{}))},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual([4,6,32,0,4,37,0,4,6,8,6],[len(s.get('crossings',[])) for s in report['stages']])
-        self.assertEqual(1916,report['stages'][2]['additionalCoveredEdges'])
-        self.assertEqual(1889,len(report['stages'][2]['networks']))
+        self.assertEqual([4,6,44,0,4,37,0,4,6,8,6],[len(s.get('crossings',[])) for s in report['stages']])
+        self.assertEqual(1931,report['stages'][2]['additionalCoveredEdges'])
+        self.assertEqual(1902,len(report['stages'][2]['networks']))
         self.assertTrue({'entry:brisa-published:0117','exit:brisa-published:0122'} <=
             {v['chargeId'] for v in report['stages'][2]['crossings']})
         self.assertEqual(13,len({v['chargeId'].split(':')[-1] for v in report['stages'][2]['crossings']}))

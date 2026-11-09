@@ -22,6 +22,18 @@ ticket_review = module('prepare-reviewed-a1-network')
 
 
 class FixedCorridorTests(unittest.TestCase):
+    def test_review_includes_electronic_gantries_and_keeps_foreign_facilities_as_barriers(self):
+        nodes=[{'type':'node','id':1,'tags':{'barrier':'toll_booth'}},
+               {'type':'node','id':2,'tags':{'highway':'toll_gantry'}},
+               {'type':'node','id':3,'tags':{'highway':'toll_gantry','toll':'no'}},
+               {'type':'node','id':4,'tags':{'highway':'bus_stop'}}]
+        captured,reviewed=ticket_review.collection_nodes(nodes,[1,2])
+        self.assertEqual({1,2,3},captured)
+        self.assertEqual([1,2],reviewed)
+        for invalid in (None,[1,1],[1,4],[99]):
+            with self.subTest(approved=invalid),self.assertRaises(ValueError):
+                ticket_review.collection_nodes(nodes,invalid)
+
     def test_station_review_keeps_both_mainline_directions_without_crossing_other_booths(self):
         edges={1:[(2,10)],2:[(3,20),(4,30),(7,40),(8,50)],
                3:[(5,21)],4:[(6,31)],7:[(9,41)],8:[(8,51)]}
@@ -35,7 +47,8 @@ class FixedCorridorTests(unittest.TestCase):
         review=json.loads((cfg/'portugal-a1-coimbra-fatima.json').read_text())
         source=json.loads((cfg/'portugal-a1-coimbra-fatima.source.json').read_text())
         _,gates,_=fixed.source_shapes(review,source)
-        self.assertEqual(32,len(gates))
+        self.assertEqual(44,len(gates))
+        self.assertEqual(44,len(source['chargeCandidates']))
         ids={'0134',*[str(i).zfill(4) for i in range(112,124)]}
         self.assertEqual({f'{role}:brisa-published:{i}' for i in ids for role in ('entry','exit')},set(gates.values()))
         self.assertEqual({'endNode':255584272},review['networkRanges']['19900140'])
@@ -194,7 +207,7 @@ class FixedCorridorTests(unittest.TestCase):
         shapes,gates,_=fixed.source_shapes(review,source)
         self.assertIn('chain:392905851+392905864',shapes)
         self.assertTrue({'entry:brisa-published:0117','exit:brisa-published:0122'} <= set(gates.values()))
-        self.assertEqual(32,len(gates))
+        self.assertEqual(44,len(gates))
         for ids in ([392905864,392905851],[392905851,392905851],[392905851,999]):
             bad=copy.deepcopy(review);bad['directedChains']=[dict(wayIds=ids)]
             with self.subTest(ids=ids),self.assertRaises(ValueError):
