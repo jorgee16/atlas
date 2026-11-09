@@ -18,28 +18,55 @@ internal object RouteChoices {
             catch(_:Exception) { code }
         return if(symbol.isBlank())number else "$symbol $number"
     }
-    /** Customer-visible labels never promote an internal estimate into a quote. */
+    fun verifiedFree(route:JSONObject):Boolean = route.optBoolean("tollFreeVerified") ||
+        (route.optString("tollPricing")=="exact" && !route.isNull("tollAmount") && route.optDouble("tollAmount",Double.NaN)==0.0)
+    fun freeRouteName(route:JSONObject):String = if(verifiedFree(route))"No tolls" else "Avoid tolls"
+    /** Estimates and graph detection are never promoted into confirmed prices. */
     fun tollLabel(route:JSONObject):String = previewTollLabel(route)
-    /** Short customer-facing label; tariff provenance remains in the details sheet. */
-    fun previewTollLabel(route: JSONObject): String {
-        if (!route.optBoolean("hasTolls")) return "No tolls · " + money(0.0, route)
+    data class PreviewPrice(val value: String, val status: String)
+    /** Separate the price from its qualifier so neither crowds out the journey time. */
+    fun previewPrice(route: JSONObject): PreviewPrice {
+        if (verifiedFree(route)) return PreviewPrice(money(0.0, route), "No tolls")
+        val unavailable = PreviewPrice("—", "Price unavailable")
+        if (!route.optBoolean("hasTolls")) return unavailable
         val field = if (route.has("tollAmount")) "tollAmount" else "tollEuros"
         val amount = route.optDouble(field, Double.NaN)
-        val pricing = route.optString("tollPricing")
-        if (pricing != "exact" || route.isNull(field) ||
-            !amount.isFinite() || amount < 0) return "Toll price not confirmed"
-        return money(amount, route) + " · confirmed"
+        if (route.isNull(field) || !amount.isFinite() || amount < 0) return unavailable
+        return when (route.optString("tollPricing")) {
+            "exact" -> PreviewPrice(money(amount, route), "confirmed")
+            "estimate" -> if (amount > 0) PreviewPrice("≈ " + money(amount, route), "estimated") else unavailable
+            else -> unavailable
+        }
+    }
+    /** Short customer-facing label; tariff provenance remains in the details sheet. */
+    fun previewTollLabel(route: JSONObject): String {
+        val price = previewPrice(route)
+        if (price.value == "—") return "Toll price unavailable"
+        return if (verifiedFree(route)) "No tolls · ${price.value}" else "${price.value} · ${price.status}"
     }
 
     fun previewTollDetails(route: JSONObject): String {
         val metadata = listOf("Class ${route.optInt("tollVehicleClass",1)}",
-            route.optString("tollCountry"), route.optString("tollTariffYear"))
+            route.optString("tollCountry"), route.optString("tollTariffYear"),
+            route.optString("tollTariffVersion").takeIf { it.isNotBlank() }?.let { "Revision $it" }.orEmpty())
             .filter { it.isNotBlank() }.joinToString(" · ")
         val confirmed=route.optString("tollPricing")=="exact"
         val roads=if(confirmed) tollRoadSummary(route) else emptyList()
         val notice=if(confirmed) "Published prices; special discounts are not included."
-            else "The toll price for this route has not been confirmed yet."
-        return (listOf(previewTollLabel(route),metadata) + roads + notice).joinToString("\n\n")
+            else if(route.optString("tollPricing")=="estimate")
+                "${if(route.optString("tollPricingConfidence")=="low")"Low-confidence reference" else "Section-average"} estimate, not a confirmed trip price. Fixed fees and exemptions can change the total."
+            else pricingReason(route)
+        return (listOf(previewTollLabel(route),metadata) + roads + notice +
+            listOf(route.optString("tollTariffSource")).filter { it.isNotBlank() }).joinToString("\n\n")
+    }
+    private fun pricingReason(route:JSONObject):String = when(route.optString("tollPricingReason")) {
+        "unreviewed_edge","missing_mapping" -> "Some crossings or entry/exit points have not been verified for this route."
+        "missing_fare","missing_fare_provider" -> "No applicable published fare is available."
+        "class" -> "This vehicle class has no applicable price."
+        "graph_hash" -> "The toll mapping does not match the installed road data."
+        "direction" -> "The crossing direction has not been verified."
+        "catalog_identity" -> "The tariff tables are incompatible."
+        else -> "No toll total has been verified for this route."
     }
 
     /** Two real paid corridors, then a real free route; never invent alternatives. */

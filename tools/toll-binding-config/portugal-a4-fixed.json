@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "region": "portugal",
+  "partition": "mainland",
+  "reviewed": true,
+  "reviewedOn": "2026-11-08",
+  "geometrySimplificationMeters": 2.0,
+  "allowedHighways": [
+    "motorway"
+  ],
+  "wayIds": [
+    26691497,
+    26691499,
+    26691500,
+    34885627,
+    35731139,
+    95791516,
+    95802465,
+    95802466,
+    95802467,
+    95802468,
+    95804506,
+    138624727,
+    138624736,
+    138624737,
+    141661697,
+    505855213,
+    505855214,
+    505855215,
+    505855216,
+    505855218,
+    506648727,
+    1265629619,
+    1445791813,
+    1531085844
+  ],
+  "sourceSha256": "3052bfd35471acff2a4aed91fdfbf4f8a1c63a0d48d057683bdee27ee8462041",
+  "seedSha256": "8fd7de749b4b6e8ed9df6d158e9acdb2dcf21df87d28aa5d8c0ffb2dc9f7471e",
+  "scope": "A4 Custóias/Via Norte and Via Norte/Ponte da Pedra electronic facilities, both original directed carriageways only.",
+  "sources": [
+    "https://ascendi.pt/portagens-eletronicas/",
+    "https://api.openstreetmap.org/api/0.6/map.json"
+  ],
+  "chargePoints": {
+    "263571919": "ascendi:grande-porto:01",
+    "263576173": "ascendi:grande-porto:01",
+    "263571869": "ascendi:grande-porto:02",
+    "263576189": "ascendi:grande-porto:02"
+  },
+  "physicalReview": {
+    "basis": "Official 2026 facility endpoints are bound to the explicit OSM collection nodes on their directed source ways; legacy packaged event identities are ignored.",
+    "limits": "Only the captured whole source ways are certified. Adjacent roads, similarly named facilities and A41 conflict rows are excluded."
+  }
+}

@@ -341,6 +341,8 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                     core.tariffs(country,TollTableAssets.read(getApplication(),country))
                     core.fixedTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.FIXED_CROSSING).load(country)?.csv)
                     core.entryExitTariffs(country,TollTableAssets.repository(getApplication(),TollCatalogKind.ENTRY_EXIT).load(country)?.csv)
+                    core.tollBindings(country,graphDirectory.path,
+                        TollBindingAssets.loadForGraph(getApplication(),country,graphDirectory))
                     val roadLabels=CountryRoadLabels.read(getApplication(),country)
                     fun displayed(route:JSONObject):JSONObject = route.put("displayMainRoads",
                         org.json.JSONArray(roadLabels.resolve(route.optJSONArray("mainRoads"))))
@@ -355,7 +357,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         snapshot.walking, snapshot.avoidTolls, 0.0, vehicleClass, routingHeading))
                     core.remember(0)
                     primary.put("key",0)
-                        .put("label",if(!primary.optBoolean("hasTolls")) "No tolls" else "Recommended")
+                        .put("label",if(!primary.optBoolean("hasTolls")) RouteChoices.freeRouteName(primary) else "Recommended")
                         .put("avoidTolls",snapshot.avoidTolls)
                     val choices = mutableListOf(primary)
                     // Let queued GPS filtering run between native searches.
@@ -416,7 +418,7 @@ class AtlasModel(application: Application) : AndroidViewModel(application) {
                         }
                         if(!snapshot.avoidTolls) {
                             candidate(true)?.takeIf { !it.optBoolean("hasTolls") }
-                                ?.let { addChoice(it,"No tolls",true) }
+                                ?.let { addChoice(it,RouteChoices.freeRouteName(it),true) }
                         }
                     }
                     // Presentation order never changes native saved-route keys.

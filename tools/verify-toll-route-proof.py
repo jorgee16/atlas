@@ -10,7 +10,8 @@ if __name__=='__main__':
     root=Path('toll-section-audit')
     command=[args.binary,'.toll-binding-graph/graph','Portugal',
         'android/native-app/src/main/assets/tolls/Portugal.csv','android/native-app/src/main/assets/toll-charges/Portugal.csv',
-        str(root/'Portugal-mainland.csv'),str(root/'actual-graph-digests.csv'),str(root/'real-route-cases.csv')]
+        str(root/'Portugal-mainland.csv'),str(root/'actual-graph-digests.csv'),str(root/'real-route-cases.csv'),
+        'android/native-app/src/main/assets/toll-fares/Portugal.csv']
     result=subprocess.check_output(command,text=True);(root/'native-real-route-results.json').write_text(result)
     cases=json.loads(result)
     if len(cases)<9: raise ValueError('Insufficient actual route/class/direction/after-gate cases')

@@ -11,6 +11,8 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
@@ -43,7 +45,9 @@ class RoutePreviewUiTest {
     @Test fun lightPreviewShowsTwoPaidAndOneFreeWithoutTariffJargon() = preview(false)
     @Test fun darkPreviewShowsTwoPaidAndOneFreeWithoutTariffJargon() = preview(true)
 
-    private fun preview(dark:Boolean) {
+    @Test fun unverifiedAvoidanceNeverShowsACertifiedZero() = preview(false,false)
+
+    private fun preview(dark:Boolean,verifiedFree:Boolean=true) {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             var dialog:Dialog?=null
             var card:View?=null
@@ -59,6 +63,10 @@ class RoutePreviewUiTest {
                     val paid=route(0,true,2520,64400,"A8",5.80)
                     val alternate=route(1,true,2820,68000,"A1",6.20)
                     val free=route(2,false,5280,73700,"EN8",0.0)
+                        // Presentation-only explicit evidence. A graph flag or
+                        // this artificial fixture is never routing proof.
+                        .put("tollFreeVerified",verifiedFree)
+                    if(!verifiedFree)free.put("tollAmount",JSONObject.NULL).put("tollPricing","unavailable")
                     val state=AtlasState(destination=JSONObject().put("name","IKEA Loures"),
                         route=paid,routeOptions=listOf(paid,alternate,free),tab="Navigate")
                     val planner=MainActivity::class.java.getDeclaredMethod("planner",AtlasState::class.java)
@@ -70,35 +78,58 @@ class RoutePreviewUiTest {
                         window!!.setLayout(ui.dp(320),ViewGroup.LayoutParams.WRAP_CONTENT)
                     }
                 }
-                onView(withText("Recommended")).check(matches(isDisplayed()))
-                onView(withText("Alternative")).check(matches(isDisplayed()))
-                onView(withText("No tolls")).check(matches(isDisplayed()))
-                onView(withText("Start navigation")).check(matches(isDisplayed()))
-                scenario.onActivity {
-                    val labels=texts(card!!)
-                    val values=labels.map { it.text.toString() }
-                    assertEquals(2,values.count { it=="Toll price not confirmed" })
-                    assertFalse(values.any { it.contains("estimated") || it.contains("5,80") || it.contains("6,20") })
-                    assertTrue(values.any { it.startsWith("No tolls · ") })
-                    assertFalse(values.any { it.contains("Source:") || it.contains("confidence") ||
-                        it.contains("BREAKDOWN") || it.contains("tariffs") })
-                    // Prices must retain enough horizontal space on a narrow phone.
-                    labels.filter { it.text.toString()=="Toll price not confirmed" }.forEach { price ->
-                        assertTrue("Price clipped: ${price.text}",price.width >= price.paint.measureText(price.text.toString()))
-                    }
-                }
+                // This presentation fixture is a separate Dialog window.
+                // Waiting for the covered Activity root to regain focus can
+                // deadlock Espresso even though the actual planner is visible.
+                val plannerRoot=withDecorView(org.hamcrest.Matchers.`is`(dialog!!.window!!.decorView))
+                val detailsRoot=org.hamcrest.Matchers.allOf(isDialog(),org.hamcrest.Matchers.not(plannerRoot))
+                onView(withText(org.hamcrest.Matchers.containsString("Recommended"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.containsString("Alternative"))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText(org.hamcrest.Matchers.allOf(org.hamcrest.Matchers.containsString(if(verifiedFree)"No tolls" else "Avoid tolls"),org.hamcrest.Matchers.containsString("min")))).inRoot(plannerRoot).check(matches(isDisplayed()))
+                onView(withText("Start navigation")).inRoot(plannerRoot).check(matches(isDisplayed()))
                 val automation=InstrumentationRegistry.getInstrumentation().uiAutomation
                 automation.executeShellCommand("mkdir -p /sdcard/Download/atlas-ui-preview").use {
                     java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                 }
-                automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}.png").use {
+                automation.executeShellCommand("screencap -p /sdcard/Download/atlas-ui-preview/route-options-${if(dark)"dark" else "light"}${if(verifiedFree)"" else "-unverified"}.png").use {
                     java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                 }
-                onView(withText("Toll details")).perform(click())
-                onView(withText(org.hamcrest.Matchers.containsString("Class 1")))
+                scenario.onActivity {
+                    val labels=texts(card!!)
+                    val values=labels.map { it.text.toString() }
+                    labels.filter { listOf("Recommended","Alternative","No tolls","Avoid tolls").any { label -> it.text.toString().contains(label) && it.text.toString().contains("min") } }.forEach { title ->
+                        val layout=checkNotNull(title.layout)
+                        assertEquals("Route title must remain on one line",1,layout.lineCount)
+                        assertEquals("Route title clipped",title.text.length,layout.getLineEnd(0))
+                        assertEquals("Route title ellipsized",0,layout.getEllipsisCount(0))
+                    }
+                    val prices=labels.filter { it.text.toString().startsWith("≈ ") }
+                    assertEquals("Both useful estimates must be shown",2,prices.size)
+                    assertTrue(values.any { it=="≈ € 5,80" })
+                    assertTrue(values.any { it=="≈ € 6,20" })
+                    assertEquals("Estimates must retain a visible qualifier",2,values.count { it=="estimated" })
+                    assertFalse(values.any { it=="confirmed" })
+                    if(verifiedFree)assertTrue(values.any { it=="€ 0,00" })
+                    else {
+                        assertTrue(values.any { it=="Price unavailable" })
+                        assertFalse(values.any { it.contains("0,00") })
+                    }
+                    assertFalse(values.any { it.contains("Source:") || it.contains("confidence") ||
+                        it.contains("BREAKDOWN") || it.contains("tariffs") })
+                    // Wrapped prices must be complete and visible on a 320dp
+                    // dialog, rather than forcing the route title off-screen.
+                    prices.forEach { price ->
+                        val layout=checkNotNull(price.layout)
+                        assertEquals("Price text truncated",price.text.length,layout.getLineEnd(layout.lineCount-1))
+                        for(line in 0 until layout.lineCount)assertEquals("Price ellipsized",0,layout.getEllipsisCount(line))
+                        assertTrue("Price height clipped: ${price.text}, view=${price.width}x${price.height}, layout=${layout.width}x${layout.height}",price.height>=layout.height)
+                    }
+                }
+                onView(withText("Toll details")).inRoot(plannerRoot).perform(click())
+                onView(withText(org.hamcrest.Matchers.containsString("Class 1"))).inRoot(detailsRoot)
                     .check(matches(isDisplayed()))
-                onView(withText("Close")).perform(click())
-                onView(withText("Alternative")).check(matches(isDisplayed()))
+                onView(withText("Close")).inRoot(detailsRoot).perform(click())
+                onView(withText(org.hamcrest.Matchers.containsString("Alternative"))).inRoot(plannerRoot).check(matches(isDisplayed()))
             } finally {
                 scenario.onActivity { activity ->
                     dialog?.dismiss();originalUi?.let { uiField.set(activity,it) }

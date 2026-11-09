@@ -14,18 +14,18 @@ internal object TollBindingAssets {
     private data class Cached(val signature:List<Pair<Long,Long>>,val input:TollBindingInput)
     private val cache=linkedMapOf<String,Cached>()
     @Synchronized fun loadForRoute(context:Context,country:String,directory:File,route:org.json.JSONObject):TollBindingInput? {
+        if((route.optJSONArray("edgeIndexes")?.length()?:0)==0)return null
+        return loadForGraph(context,country,directory)
+    }
+    @Synchronized fun loadForGraph(context:Context,country:String,directory:File):TollBindingInput? {
         if(!TollTableAssets.safeCountry(country)||!directory.name.matches(Regex("[a-z0-9-]{1,64}")))return null
         return try {
             val bytes=context.assets.open("toll-bindings/$country/${directory.name}.csv").use { input ->
                 input.readBytes().also { require(it.size in 1..2*1024*1024) }
             }
-            val edges=route.optJSONArray("edgeIndexes") ?: return null
-            if(edges.length()==0)return null
-            val coverage=bytes.toString(Charsets.UTF_8).lineSequence().filter { it.startsWith("coverage;") }
-                .mapNotNull { it.split(';').getOrNull(1)?.toIntOrNull() }.toHashSet()
-            // This is only a cheap negative prefilter. JNI verifies all graph
-            // hashes, topology, direction, clipping and review before repricing.
-            if((0 until edges.length()).any { edges.optInt(it,-1) !in coverage })return null
+            // Loading authentic graph evidence is not a price decision. The
+            // native matcher retains uncovered intervals and rejects exact
+            // pricing while still detecting known physical collection points.
             val files=graphFiles.map { File(directory,it) }
             require(files.all { it.isFile && it.length()>0 })
             val signature=files.map { it.length() to it.lastModified() }

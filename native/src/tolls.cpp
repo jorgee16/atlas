@@ -114,6 +114,18 @@ TollTariffs TollTariffs::parse(std::string_view csv,std::string country) {
       prices[charge.first][price.first]=int64_t(std::llround(scaled));
     }
   }
+  for(const auto &[name,value]:metadata) {
+    const bool network=name.rfind("networkName.",0)==0;
+    const bool station=name.rfind("stationName.",0)==0;
+    const bool provenance=name.rfind("networkSource.",0)==0;
+    if(!network&&!station&&!provenance)continue;
+    const auto id=name.substr(provenance?14:12);
+    if(!ticket||value.empty()||value.size()>(provenance?2048u:256u)||id.empty()||id.size()>257||
+       (provenance&&value.rfind("https://",0)!=0)||
+       !std::all_of(id.begin(),id.end(),[](unsigned char c){return std::isalnum(c)||c=='-'||c=='_'||c=='.';}))
+      throw std::invalid_argument("Invalid network/station display label");
+    (provenance?table.networkSources_:network?table.networkNames_:table.stationNames_)[id]=value;
+  }
   if(metadata.count("freeRoads")) {
     if(fixed || ticket || metadata["freeRoadSource"].substr(0,8)!="https://")throw std::invalid_argument("Missing explicit free-road provenance");
     table.freeRoadSource=metadata["freeRoadSource"];
@@ -246,6 +258,15 @@ std::optional<double> TollTariffs::sumFixedCharges(const std::vector<std::string
 }
 std::optional<double> TollTariffs::entryExitFare(const TollJourney &journey,int vehicleClass) const {
   return sumEntryExitFares({journey},vehicleClass);
+}
+std::string TollTariffs::networkName(const std::string &network) const {
+  const auto label=networkNames_.find(network);return label==networkNames_.end()?network:label->second;
+}
+std::string TollTariffs::stationName(const std::string &network,const std::string &station) const {
+  const auto label=stationNames_.find(network+"."+station);return label==stationNames_.end()?station:label->second;
+}
+std::string TollTariffs::networkSource(const std::string &network) const {
+  const auto known=networkSources_.find(network);return known==networkSources_.end()?source:known->second;
 }
 std::optional<double> TollTariffs::sumEntryExitFares(const std::vector<TollJourney> &journeys,int vehicleClass) const {
   if(scheme!="entry-exit"||std::find(classes.begin(),classes.end(),vehicleClass)==classes.end())return std::nullopt;

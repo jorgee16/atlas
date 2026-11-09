@@ -1,0 +1,9 @@
+id;fromLat;fromLon;toLat;toLon;class;expectedPricing;expectedAmount
+manique-reviewed-approach-class-1;38.7165;-9.415;38.81741;-9.14814;1;exact;1.60
+manique-reviewed-approach-class-2;38.7165;-9.415;38.81741;-9.14814;2;exact;3.10
+manique-reviewed-approach-class-3;38.7165;-9.415;38.81741;-9.14814;3;exact;3.10
+manique-reviewed-approach-class-4;38.7165;-9.415;38.81741;-9.14814;4;exact;3.10
+cascais-reviewed-approach-class-1;38.6996;-9.4204;38.81741;-9.14814;1;exact;1.60
+cascais-reviewed-approach-class-2;38.6996;-9.4204;38.81741;-9.14814;2;exact;3.10
+cascais-reviewed-approach-class-3;38.6996;-9.4204;38.81741;-9.14814;3;exact;3.10
+cascais-reviewed-approach-class-4;38.6996;-9.4204;38.81741;-9.14814;4;exact;3.10

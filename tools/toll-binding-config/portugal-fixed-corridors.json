@@ -10,6 +10,44 @@
     {
       "review": "portugal-a16.json",
       "source": "portugal-a16.source.json"
+    },
+    {
+      "review": "portugal-a1-coimbra-fatima.json",
+      "source": "portugal-a1-coimbra-fatima.source.json"
+    },
+    {
+      "kind": "free",
+      "review": "portugal-cascais-approaches.json",
+      "source": "portugal-cascais-approaches.source.json"
+    },
+    {
+      "review": "portugal-a5-reviewed-accesses.json",
+      "source": "portugal-a5-reviewed-accesses.source.json"
+    },
+    {
+      "review": "portugal-a9-linear.json",
+      "source": "portugal-a9-linear.source.json"
+    },
+    {
+      "kind": "free",
+      "review": "portugal-a9-approaches.json",
+      "source": "portugal-a9-approaches.source.json"
+    },
+    {
+      "review": "portugal-a4-fixed.json",
+      "source": "portugal-a4-fixed.source.json"
+    },
+    {
+      "review": "portugal-a17-fixed.json",
+      "source": "portugal-a17-fixed.source.json"
+    },
+    {
+      "review": "portugal-a29-fixed.json",
+      "source": "portugal-a29-fixed.source.json"
+    },
+    {
+      "review": "portugal-a42-fixed.json",
+      "source": "portugal-a42-fixed.source.json"
     }
   ]
 }

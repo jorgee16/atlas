@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "reviewed": true,
+  "reviewedOn": "2026-11-08",
+  "geometrySimplificationMeters": 2.0,
+  "allowedHighways": [
+    "motorway_link"
+  ],
+  "sourceSha256": "a00ced82b581e8fdc1974082ea16fce1ff81dcef9d51fc6e6cc9792cf7ab31ce",
+  "seedSha256": "e490971065803c63006b62c50b3110770ddb381008696c792250e25a3c536712",
+  "wayIds": [
+    23821884,
+    23821886,
+    23845214,
+    23845219,
+    320184774,
+    320186742,
+    320210203,
+    389790531,
+    417917482,
+    417917485,
+    417917486,
+    417917488,
+    418240482,
+    418240484,
+    418240487,
+    418240489,
+    418240490,
+    418240491,
+    1041543301,
+    1383882460
+  ],
+  "chargePoints": {
+    "3751374533": "brisa:0504",
+    "3751374537": "brisa:0504",
+    "3950368056": "brisa:0502",
+    "9588718316": "brisa:0502"
+  },
+  "scope": "Oeiras I A5 Lisbon-bound entrance and westbound exit to Oeiras/Paco de Arcos, plus Carcavelos I Lisbon-bound entrance booth/Via Verde lane. Oeiras II and Carcavelos II are excluded. Whole source ways are reviewed and matched independently; old OSM fee tags are not tariff inputs.",
+  "identityEvidence": [
+    {
+      "chargeId": "brisa:0504",
+      "name": "Oeiras I",
+      "nodes": [
+        3751374533,
+        3751374537
+      ],
+      "source": "https://www.brisaconcessao.pt/noticias/detalhe-de-noticia/id/320/saida-para-oeiras-ii-da-a5-cortada-este-fim-de-semana",
+      "sourceDate": "2019-05-09",
+      "basis": "Brisa distinguishes Oeiras I (Oeiras/Paco de Arcos) from Oeiras II (Porto Salvo/Cacem). Original OSM exit ways 418240487/320186742 carry Oeiras/Paco de Arcos; the opposite adjacent entrance is directed toward Lisboa. Geography is reviewed separately from the current 2026 fare."
+    },
+    {
+      "chargeId": "brisa:0502",
+      "name": "Carcavelos I",
+      "nodes": [
+        3950368056,
+        9588718316
+      ],
+      "source": "https://10crp.crp.pt/wp-content/uploads/2022/07/paper_21.pdf",
+      "sourceSha256": "5f034c921ecc57913950ba25f54924f111561d34531feebc4e0a0eb0bb57446e",
+      "page": 2,
+      "basis": "The traffic study identifies the Carcavelos I entrance at km 14.5 on the eastbound A5 corridor toward Lisbon/CRIL. Original OSM directed booth and Via Verde ways have Lisboa/Oeiras as destination. Only this entrance is activated; proposed dynamic prices in the paper are not used."
+    }
+  ],
+  "tariffEvidence": {
+    "catalog": "android/native-app/src/main/assets/toll-charges/Portugal.csv",
+    "catalogSha256": "e784e40e9928416812b509ede1f6ef5075468a714de936b0df9cb2ea11ef3dd2",
+    "source": "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910",
+    "classes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prices": {
+      "brisa:0504": [
+        "0.40",
+        "0.75",
+        "0.75",
+        "0.75"
+      ],
+      "brisa:0502": [
+        "0.70",
+        "1.35",
+        "1.35",
+        "1.35"
+      ]
+    }
+  }
+}

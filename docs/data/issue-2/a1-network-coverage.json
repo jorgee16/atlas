@@ -1,0 +1,2678 @@
+{
+  "scope": "13 explicitly reviewed A1 stations, 156 directed pairs; class 1 for every pair and classes 1–4 on adjacent/end-to-end pairs. Not national coverage.",
+  "cases": 234,
+  "exact": 177,
+  "incomplete": 57,
+  "pairs": 156,
+  "graphBindingsSha256": "e586ada5ae9b62b74378a3a41d65649cc3e3087da05cb78ed04db486126a13b2",
+  "results": [
+    {
+      "id": "a1-network-0134-0112-class-1",
+      "publishedAmount": 1.65,
+      "pricing": "exact",
+      "amount": 1.65,
+      "reason": "",
+      "distanceMeters": 11075.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0112-class-2",
+      "publishedAmount": 2.95,
+      "pricing": "exact",
+      "amount": 2.95,
+      "reason": "",
+      "distanceMeters": 11075.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0112-class-3",
+      "publishedAmount": 3.75,
+      "pricing": "exact",
+      "amount": 3.75,
+      "reason": "",
+      "distanceMeters": 11075.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0112-class-4",
+      "publishedAmount": 4.2,
+      "pricing": "exact",
+      "amount": 4.2,
+      "reason": "",
+      "distanceMeters": 11075.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0113-class-1",
+      "publishedAmount": 3.1,
+      "pricing": "exact",
+      "amount": 3.1,
+      "reason": "",
+      "distanceMeters": 27526.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0114-class-1",
+      "publishedAmount": 4.05,
+      "pricing": "estimate",
+      "amount": 3.45,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 38121.6,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0115-class-1",
+      "publishedAmount": 5.3,
+      "pricing": "exact",
+      "amount": 5.3,
+      "reason": "",
+      "distanceMeters": 52743.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0116-class-1",
+      "publishedAmount": 7.4,
+      "pricing": "exact",
+      "amount": 7.4,
+      "reason": "",
+      "distanceMeters": 76719.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0117-class-1",
+      "publishedAmount": 8.25,
+      "pricing": "estimate",
+      "amount": 8.03,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 88911.4,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0118-class-1",
+      "publishedAmount": 8.8,
+      "pricing": "exact",
+      "amount": 8.8,
+      "reason": "",
+      "distanceMeters": 96172.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0119-class-1",
+      "publishedAmount": 9.3,
+      "pricing": "exact",
+      "amount": 9.3,
+      "reason": "",
+      "distanceMeters": 104455.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0120-class-1",
+      "publishedAmount": 12.0,
+      "pricing": "exact",
+      "amount": 12,
+      "reason": "",
+      "distanceMeters": 132236,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0121-class-1",
+      "publishedAmount": 14.45,
+      "pricing": "exact",
+      "amount": 14.45,
+      "reason": "",
+      "distanceMeters": 155892.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0122-class-1",
+      "publishedAmount": 15.9,
+      "pricing": "exact",
+      "amount": 15.9,
+      "reason": "",
+      "distanceMeters": 171705.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0123-class-1",
+      "publishedAmount": 17.95,
+      "pricing": "exact",
+      "amount": 17.95,
+      "reason": "",
+      "distanceMeters": 192085.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0123-class-2",
+      "publishedAmount": 31.4,
+      "pricing": "exact",
+      "amount": 31.4,
+      "reason": "",
+      "distanceMeters": 192085.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0123-class-3",
+      "publishedAmount": 40.5,
+      "pricing": "exact",
+      "amount": 40.5,
+      "reason": "",
+      "distanceMeters": 192085.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0134-0123-class-4",
+      "publishedAmount": 44.85,
+      "pricing": "exact",
+      "amount": 44.85,
+      "reason": "",
+      "distanceMeters": 192085.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0134-class-1",
+      "publishedAmount": 1.65,
+      "pricing": "exact",
+      "amount": 1.65,
+      "reason": "",
+      "distanceMeters": 11009.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0134-class-2",
+      "publishedAmount": 2.95,
+      "pricing": "exact",
+      "amount": 2.95,
+      "reason": "",
+      "distanceMeters": 11009.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0134-class-3",
+      "publishedAmount": 3.75,
+      "pricing": "exact",
+      "amount": 3.75,
+      "reason": "",
+      "distanceMeters": 11009.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0134-class-4",
+      "publishedAmount": 4.2,
+      "pricing": "exact",
+      "amount": 4.2,
+      "reason": "",
+      "distanceMeters": 11009.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0113-class-1",
+      "publishedAmount": 1.45,
+      "pricing": "exact",
+      "amount": 1.45,
+      "reason": "",
+      "distanceMeters": 18012.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0113-class-2",
+      "publishedAmount": 2.5,
+      "pricing": "exact",
+      "amount": 2.5,
+      "reason": "",
+      "distanceMeters": 18012.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0113-class-3",
+      "publishedAmount": 3.25,
+      "pricing": "exact",
+      "amount": 3.25,
+      "reason": "",
+      "distanceMeters": 18012.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0113-class-4",
+      "publishedAmount": 3.6,
+      "pricing": "exact",
+      "amount": 3.6,
+      "reason": "",
+      "distanceMeters": 18012.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0114-class-1",
+      "publishedAmount": 2.4,
+      "pricing": "estimate",
+      "amount": 2.6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 28607.9,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0115-class-1",
+      "publishedAmount": 3.65,
+      "pricing": "exact",
+      "amount": 3.65,
+      "reason": "",
+      "distanceMeters": 43229.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0116-class-1",
+      "publishedAmount": 5.75,
+      "pricing": "exact",
+      "amount": 5.75,
+      "reason": "",
+      "distanceMeters": 67206.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0117-class-1",
+      "publishedAmount": 6.6,
+      "pricing": "estimate",
+      "amount": 7.18,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 79397.7,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0118-class-1",
+      "publishedAmount": 7.15,
+      "pricing": "exact",
+      "amount": 7.15,
+      "reason": "",
+      "distanceMeters": 86658.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0119-class-1",
+      "publishedAmount": 7.65,
+      "pricing": "exact",
+      "amount": 7.65,
+      "reason": "",
+      "distanceMeters": 94942.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0120-class-1",
+      "publishedAmount": 10.35,
+      "pricing": "exact",
+      "amount": 10.35,
+      "reason": "",
+      "distanceMeters": 122722.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0121-class-1",
+      "publishedAmount": 12.8,
+      "pricing": "exact",
+      "amount": 12.8,
+      "reason": "",
+      "distanceMeters": 146378.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0122-class-1",
+      "publishedAmount": 14.25,
+      "pricing": "exact",
+      "amount": 14.25,
+      "reason": "",
+      "distanceMeters": 162191.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0112-0123-class-1",
+      "publishedAmount": 16.3,
+      "pricing": "exact",
+      "amount": 16.3,
+      "reason": "",
+      "distanceMeters": 182571.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0134-class-1",
+      "publishedAmount": 3.1,
+      "pricing": "exact",
+      "amount": 3.1,
+      "reason": "",
+      "distanceMeters": 28290.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0112-class-1",
+      "publishedAmount": 1.45,
+      "pricing": "exact",
+      "amount": 1.45,
+      "reason": "",
+      "distanceMeters": 18064.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0112-class-2",
+      "publishedAmount": 2.5,
+      "pricing": "exact",
+      "amount": 2.5,
+      "reason": "",
+      "distanceMeters": 18064.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0112-class-3",
+      "publishedAmount": 3.25,
+      "pricing": "exact",
+      "amount": 3.25,
+      "reason": "",
+      "distanceMeters": 18064.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0112-class-4",
+      "publishedAmount": 3.6,
+      "pricing": "exact",
+      "amount": 3.6,
+      "reason": "",
+      "distanceMeters": 18064.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0114-class-1",
+      "publishedAmount": 0.95,
+      "pricing": "estimate",
+      "amount": 1.02,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 11151.6,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0114-class-2",
+      "publishedAmount": 1.7,
+      "pricing": "estimate",
+      "amount": 1.79,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 11151.6,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0114-class-3",
+      "publishedAmount": 2.15,
+      "pricing": "estimate",
+      "amount": 2.3,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 11151.6,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0114-class-4",
+      "publishedAmount": 2.4,
+      "pricing": "estimate",
+      "amount": 2.55,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 11151.6,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0115-class-1",
+      "publishedAmount": 2.2,
+      "pricing": "exact",
+      "amount": 2.2,
+      "reason": "",
+      "distanceMeters": 25773.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0116-class-1",
+      "publishedAmount": 4.3,
+      "pricing": "exact",
+      "amount": 4.3,
+      "reason": "",
+      "distanceMeters": 49749.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0117-class-1",
+      "publishedAmount": 5.15,
+      "pricing": "estimate",
+      "amount": 5.6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 61941.4,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0118-class-1",
+      "publishedAmount": 5.7,
+      "pricing": "exact",
+      "amount": 5.7,
+      "reason": "",
+      "distanceMeters": 69202.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0119-class-1",
+      "publishedAmount": 6.2,
+      "pricing": "exact",
+      "amount": 6.2,
+      "reason": "",
+      "distanceMeters": 77485.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0120-class-1",
+      "publishedAmount": 8.9,
+      "pricing": "exact",
+      "amount": 8.9,
+      "reason": "",
+      "distanceMeters": 105266,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0121-class-1",
+      "publishedAmount": 11.35,
+      "pricing": "exact",
+      "amount": 11.35,
+      "reason": "",
+      "distanceMeters": 128922.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0122-class-1",
+      "publishedAmount": 12.8,
+      "pricing": "exact",
+      "amount": 12.8,
+      "reason": "",
+      "distanceMeters": 144735.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0113-0123-class-1",
+      "publishedAmount": 14.85,
+      "pricing": "exact",
+      "amount": 14.85,
+      "reason": "",
+      "distanceMeters": 165115.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0134-class-1",
+      "publishedAmount": 4.05,
+      "pricing": "exact",
+      "amount": 4.05,
+      "reason": "",
+      "distanceMeters": 38475.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0112-class-1",
+      "publishedAmount": 2.4,
+      "pricing": "exact",
+      "amount": 2.4,
+      "reason": "",
+      "distanceMeters": 28249.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0113-class-1",
+      "publishedAmount": 0.95,
+      "pricing": "exact",
+      "amount": 0.95,
+      "reason": "",
+      "distanceMeters": 11601.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0113-class-2",
+      "publishedAmount": 1.7,
+      "pricing": "exact",
+      "amount": 1.7,
+      "reason": "",
+      "distanceMeters": 11601.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0113-class-3",
+      "publishedAmount": 2.15,
+      "pricing": "exact",
+      "amount": 2.15,
+      "reason": "",
+      "distanceMeters": 11601.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0113-class-4",
+      "publishedAmount": 2.4,
+      "pricing": "exact",
+      "amount": 2.4,
+      "reason": "",
+      "distanceMeters": 11601.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0115-class-1",
+      "publishedAmount": 1.25,
+      "pricing": "exact",
+      "amount": 1.25,
+      "reason": "",
+      "distanceMeters": 15357,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0115-class-2",
+      "publishedAmount": 2.2,
+      "pricing": "exact",
+      "amount": 2.2,
+      "reason": "",
+      "distanceMeters": 15357,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0115-class-3",
+      "publishedAmount": 2.85,
+      "pricing": "exact",
+      "amount": 2.85,
+      "reason": "",
+      "distanceMeters": 15357,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0115-class-4",
+      "publishedAmount": 3.15,
+      "pricing": "exact",
+      "amount": 3.15,
+      "reason": "",
+      "distanceMeters": 15357,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0116-class-1",
+      "publishedAmount": 3.35,
+      "pricing": "exact",
+      "amount": 3.35,
+      "reason": "",
+      "distanceMeters": 39333.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0117-class-1",
+      "publishedAmount": 4.2,
+      "pricing": "estimate",
+      "amount": 4.66,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 51524.9,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0118-class-1",
+      "publishedAmount": 4.75,
+      "pricing": "exact",
+      "amount": 4.75,
+      "reason": "",
+      "distanceMeters": 58785.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0119-class-1",
+      "publishedAmount": 5.25,
+      "pricing": "exact",
+      "amount": 5.25,
+      "reason": "",
+      "distanceMeters": 67069.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0120-class-1",
+      "publishedAmount": 7.95,
+      "pricing": "exact",
+      "amount": 7.95,
+      "reason": "",
+      "distanceMeters": 94849.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0121-class-1",
+      "publishedAmount": 10.4,
+      "pricing": "exact",
+      "amount": 10.4,
+      "reason": "",
+      "distanceMeters": 118505.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0122-class-1",
+      "publishedAmount": 11.85,
+      "pricing": "exact",
+      "amount": 11.85,
+      "reason": "",
+      "distanceMeters": 134318.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0114-0123-class-1",
+      "publishedAmount": 13.9,
+      "pricing": "exact",
+      "amount": 13.9,
+      "reason": "",
+      "distanceMeters": 154699,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0134-class-1",
+      "publishedAmount": 5.3,
+      "pricing": "estimate",
+      "amount": 4.83,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 53413.7,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0112-class-1",
+      "publishedAmount": 3.65,
+      "pricing": "estimate",
+      "amount": 3.92,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 43188,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0113-class-1",
+      "publishedAmount": 2.2,
+      "pricing": "estimate",
+      "amount": 2.42,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 26539.6,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0114-class-1",
+      "publishedAmount": 1.25,
+      "pricing": "estimate",
+      "amount": 1.51,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 16500.1,
+      "blockingEdges": [
+        1417345,
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0114-class-2",
+      "publishedAmount": 2.2,
+      "pricing": "estimate",
+      "amount": 2.64,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 16500.1,
+      "blockingEdges": [
+        1417345,
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0114-class-3",
+      "publishedAmount": 2.85,
+      "pricing": "estimate",
+      "amount": 3.4,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 16500.1,
+      "blockingEdges": [
+        1417345,
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0114-class-4",
+      "publishedAmount": 3.15,
+      "pricing": "estimate",
+      "amount": 3.78,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 16500.1,
+      "blockingEdges": [
+        1417345,
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0116-class-1",
+      "publishedAmount": 2.1,
+      "pricing": "estimate",
+      "amount": 2.24,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 24613.1,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0116-class-2",
+      "publishedAmount": 3.7,
+      "pricing": "estimate",
+      "amount": 3.92,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 24613.1,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0116-class-3",
+      "publishedAmount": 4.75,
+      "pricing": "estimate",
+      "amount": 5.04,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 24613.1,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0116-class-4",
+      "publishedAmount": 5.25,
+      "pricing": "estimate",
+      "amount": 5.6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 24613.1,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0117-class-1",
+      "publishedAmount": 2.95,
+      "pricing": "estimate",
+      "amount": 3.33,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 36804.6,
+      "blockingEdges": [
+        23122,
+        23123,
+        1417345,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0118-class-1",
+      "publishedAmount": 3.5,
+      "pricing": "estimate",
+      "amount": 3.99,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 44065.4,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0119-class-1",
+      "publishedAmount": 4.0,
+      "pricing": "estimate",
+      "amount": 4.74,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 52349,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0120-class-1",
+      "publishedAmount": 6.7,
+      "pricing": "estimate",
+      "amount": 7.25,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 80129.2,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0121-class-1",
+      "publishedAmount": 9.15,
+      "pricing": "estimate",
+      "amount": 9.38,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 103785.3,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0122-class-1",
+      "publishedAmount": 10.6,
+      "pricing": "estimate",
+      "amount": 10.82,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 119598.5,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0115-0123-class-1",
+      "publishedAmount": 12.65,
+      "pricing": "estimate",
+      "amount": 12.56,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 139978.7,
+      "blockingEdges": [
+        1417345
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0134-class-1",
+      "publishedAmount": 7.4,
+      "pricing": "exact",
+      "amount": 7.4,
+      "reason": "",
+      "distanceMeters": 76594.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0112-class-1",
+      "publishedAmount": 5.75,
+      "pricing": "exact",
+      "amount": 5.75,
+      "reason": "",
+      "distanceMeters": 66368.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0113-class-1",
+      "publishedAmount": 4.3,
+      "pricing": "exact",
+      "amount": 4.3,
+      "reason": "",
+      "distanceMeters": 49720.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0114-class-1",
+      "publishedAmount": 3.35,
+      "pricing": "estimate",
+      "amount": 3.6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 39680.6,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0115-class-1",
+      "publishedAmount": 2.1,
+      "pricing": "exact",
+      "amount": 2.1,
+      "reason": "",
+      "distanceMeters": 24546.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0115-class-2",
+      "publishedAmount": 3.7,
+      "pricing": "exact",
+      "amount": 3.7,
+      "reason": "",
+      "distanceMeters": 24546.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0115-class-3",
+      "publishedAmount": 4.75,
+      "pricing": "exact",
+      "amount": 4.75,
+      "reason": "",
+      "distanceMeters": 24546.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0115-class-4",
+      "publishedAmount": 5.25,
+      "pricing": "exact",
+      "amount": 5.25,
+      "reason": "",
+      "distanceMeters": 24546.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0117-class-1",
+      "publishedAmount": 0.85,
+      "pricing": "estimate",
+      "amount": 1.26,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 13831.6,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0117-class-2",
+      "publishedAmount": 1.45,
+      "pricing": "estimate",
+      "amount": 2.21,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 13831.6,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0117-class-3",
+      "publishedAmount": 1.9,
+      "pricing": "estimate",
+      "amount": 2.84,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 13831.6,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0117-class-4",
+      "publishedAmount": 2.1,
+      "pricing": "estimate",
+      "amount": 3.16,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 13831.6,
+      "blockingEdges": [
+        23122,
+        23123,
+        5930453
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0118-class-1",
+      "publishedAmount": 1.4,
+      "pricing": "exact",
+      "amount": 1.4,
+      "reason": "",
+      "distanceMeters": 21092.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0119-class-1",
+      "publishedAmount": 1.9,
+      "pricing": "exact",
+      "amount": 1.9,
+      "reason": "",
+      "distanceMeters": 29376,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0120-class-1",
+      "publishedAmount": 4.6,
+      "pricing": "exact",
+      "amount": 4.6,
+      "reason": "",
+      "distanceMeters": 57156.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0121-class-1",
+      "publishedAmount": 7.05,
+      "pricing": "exact",
+      "amount": 7.05,
+      "reason": "",
+      "distanceMeters": 80812.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0122-class-1",
+      "publishedAmount": 8.5,
+      "pricing": "exact",
+      "amount": 8.5,
+      "reason": "",
+      "distanceMeters": 96625.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0116-0123-class-1",
+      "publishedAmount": 10.55,
+      "pricing": "exact",
+      "amount": 10.55,
+      "reason": "",
+      "distanceMeters": 117005.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0134-class-1",
+      "publishedAmount": 8.25,
+      "pricing": "exact",
+      "amount": 8.25,
+      "reason": "",
+      "distanceMeters": 88387.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0112-class-1",
+      "publishedAmount": 6.6,
+      "pricing": "exact",
+      "amount": 6.6,
+      "reason": "",
+      "distanceMeters": 78162.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0113-class-1",
+      "publishedAmount": 5.15,
+      "pricing": "exact",
+      "amount": 5.15,
+      "reason": "",
+      "distanceMeters": 61513.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0114-class-1",
+      "publishedAmount": 4.2,
+      "pricing": "estimate",
+      "amount": 4.65,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 51474.2,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0115-class-1",
+      "publishedAmount": 2.95,
+      "pricing": "exact",
+      "amount": 2.95,
+      "reason": "",
+      "distanceMeters": 36340.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0116-class-1",
+      "publishedAmount": 0.85,
+      "pricing": "exact",
+      "amount": 0.85,
+      "reason": "",
+      "distanceMeters": 12638.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0116-class-2",
+      "publishedAmount": 1.45,
+      "pricing": "exact",
+      "amount": 1.45,
+      "reason": "",
+      "distanceMeters": 12638.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0116-class-3",
+      "publishedAmount": 1.9,
+      "pricing": "exact",
+      "amount": 1.9,
+      "reason": "",
+      "distanceMeters": 12638.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0116-class-4",
+      "publishedAmount": 2.1,
+      "pricing": "exact",
+      "amount": 2.1,
+      "reason": "",
+      "distanceMeters": 12638.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0118-class-1",
+      "publishedAmount": 0.55,
+      "pricing": "exact",
+      "amount": 0.55,
+      "reason": "",
+      "distanceMeters": 9564.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0118-class-2",
+      "publishedAmount": 1.0,
+      "pricing": "exact",
+      "amount": 1,
+      "reason": "",
+      "distanceMeters": 9564.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0118-class-3",
+      "publishedAmount": 1.3,
+      "pricing": "exact",
+      "amount": 1.3,
+      "reason": "",
+      "distanceMeters": 9564.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0118-class-4",
+      "publishedAmount": 1.4,
+      "pricing": "exact",
+      "amount": 1.4,
+      "reason": "",
+      "distanceMeters": 9564.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0119-class-1",
+      "publishedAmount": 1.05,
+      "pricing": "exact",
+      "amount": 1.05,
+      "reason": "",
+      "distanceMeters": 17847.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0120-class-1",
+      "publishedAmount": 3.75,
+      "pricing": "exact",
+      "amount": 3.75,
+      "reason": "",
+      "distanceMeters": 45628.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0121-class-1",
+      "publishedAmount": 6.2,
+      "pricing": "exact",
+      "amount": 6.2,
+      "reason": "",
+      "distanceMeters": 69284.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0122-class-1",
+      "publishedAmount": 7.65,
+      "pricing": "exact",
+      "amount": 7.65,
+      "reason": "",
+      "distanceMeters": 85097.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0117-0123-class-1",
+      "publishedAmount": 9.7,
+      "pricing": "exact",
+      "amount": 9.7,
+      "reason": "",
+      "distanceMeters": 105477.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0134-class-1",
+      "publishedAmount": 8.8,
+      "pricing": "estimate",
+      "amount": 10.27,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 114882.4,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0112-class-1",
+      "publishedAmount": 7.15,
+      "pricing": "estimate",
+      "amount": 9.36,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 104656.7,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0113-class-1",
+      "publishedAmount": 5.7,
+      "pricing": "estimate",
+      "amount": 7.85,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 88008.3,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0114-class-1",
+      "publishedAmount": 4.75,
+      "pricing": "estimate",
+      "amount": 6.95,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 77968.8,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        3758843,
+        3758881,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0115-class-1",
+      "publishedAmount": 3.5,
+      "pricing": "estimate",
+      "amount": 5.58,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 62834.9,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0116-class-1",
+      "publishedAmount": 1.4,
+      "pricing": "estimate",
+      "amount": 3.43,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 39133.5,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0117-class-1",
+      "publishedAmount": 0.55,
+      "pricing": "estimate",
+      "amount": 2.4,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 27759.2,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0117-class-2",
+      "publishedAmount": 1.0,
+      "pricing": "estimate",
+      "amount": 4.2,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 27759.2,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0117-class-3",
+      "publishedAmount": 1.3,
+      "pricing": "estimate",
+      "amount": 5.4,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 27759.2,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0117-class-4",
+      "publishedAmount": 1.4,
+      "pricing": "estimate",
+      "amount": 6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 27759.2,
+      "blockingEdges": [
+        176099,
+        542449,
+        542450,
+        542452,
+        542453,
+        542457,
+        542458,
+        542459,
+        998951,
+        998953,
+        1715205,
+        2322405,
+        2322408,
+        2322413,
+        2322414,
+        5806776,
+        5813793,
+        5813794
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0119-class-1",
+      "publishedAmount": 0.5,
+      "pricing": "estimate",
+      "amount": 0.78,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 8610.7,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0119-class-2",
+      "publishedAmount": 0.85,
+      "pricing": "estimate",
+      "amount": 1.37,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 8610.7,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0119-class-3",
+      "publishedAmount": 1.1,
+      "pricing": "estimate",
+      "amount": 1.77,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 8610.7,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0119-class-4",
+      "publishedAmount": 1.2,
+      "pricing": "estimate",
+      "amount": 1.96,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 8610.7,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0120-class-1",
+      "publishedAmount": 3.2,
+      "pricing": "estimate",
+      "amount": 3.3,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 36390.9,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0121-class-1",
+      "publishedAmount": 5.65,
+      "pricing": "estimate",
+      "amount": 5.43,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 60047,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0122-class-1",
+      "publishedAmount": 7.1,
+      "pricing": "estimate",
+      "amount": 6.86,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 75860.2,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0118-0123-class-1",
+      "publishedAmount": 9.15,
+      "pricing": "estimate",
+      "amount": 8.6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 96240.4,
+      "blockingEdges": [
+        176099
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0134-class-1",
+      "publishedAmount": 9.3,
+      "pricing": "exact",
+      "amount": 9.3,
+      "reason": "",
+      "distanceMeters": 104128.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0112-class-1",
+      "publishedAmount": 7.65,
+      "pricing": "exact",
+      "amount": 7.65,
+      "reason": "",
+      "distanceMeters": 93902.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0113-class-1",
+      "publishedAmount": 6.2,
+      "pricing": "exact",
+      "amount": 6.2,
+      "reason": "",
+      "distanceMeters": 77254.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0114-class-1",
+      "publishedAmount": 5.25,
+      "pricing": "estimate",
+      "amount": 6.09,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 67214.7,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0115-class-1",
+      "publishedAmount": 4.0,
+      "pricing": "exact",
+      "amount": 4,
+      "reason": "",
+      "distanceMeters": 52080.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0116-class-1",
+      "publishedAmount": 1.9,
+      "pricing": "exact",
+      "amount": 1.9,
+      "reason": "",
+      "distanceMeters": 28379.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0117-class-1",
+      "publishedAmount": 1.05,
+      "pricing": "exact",
+      "amount": 1.05,
+      "reason": "",
+      "distanceMeters": 17005.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0118-class-1",
+      "publishedAmount": 0.5,
+      "pricing": "exact",
+      "amount": 0.5,
+      "reason": "",
+      "distanceMeters": 8537.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0118-class-2",
+      "publishedAmount": 0.85,
+      "pricing": "exact",
+      "amount": 0.85,
+      "reason": "",
+      "distanceMeters": 8537.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0118-class-3",
+      "publishedAmount": 1.1,
+      "pricing": "exact",
+      "amount": 1.1,
+      "reason": "",
+      "distanceMeters": 8537.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0118-class-4",
+      "publishedAmount": 1.2,
+      "pricing": "exact",
+      "amount": 1.2,
+      "reason": "",
+      "distanceMeters": 8537.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0120-class-1",
+      "publishedAmount": 2.7,
+      "pricing": "exact",
+      "amount": 2.7,
+      "reason": "",
+      "distanceMeters": 29066.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0120-class-2",
+      "publishedAmount": 4.75,
+      "pricing": "exact",
+      "amount": 4.75,
+      "reason": "",
+      "distanceMeters": 29066.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0120-class-3",
+      "publishedAmount": 6.15,
+      "pricing": "exact",
+      "amount": 6.15,
+      "reason": "",
+      "distanceMeters": 29066.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0120-class-4",
+      "publishedAmount": 6.8,
+      "pricing": "exact",
+      "amount": 6.8,
+      "reason": "",
+      "distanceMeters": 29066.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0121-class-1",
+      "publishedAmount": 5.15,
+      "pricing": "exact",
+      "amount": 5.15,
+      "reason": "",
+      "distanceMeters": 52722.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0122-class-1",
+      "publishedAmount": 6.6,
+      "pricing": "exact",
+      "amount": 6.6,
+      "reason": "",
+      "distanceMeters": 68535.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0119-0123-class-1",
+      "publishedAmount": 8.65,
+      "pricing": "exact",
+      "amount": 8.65,
+      "reason": "",
+      "distanceMeters": 88915.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0134-class-1",
+      "publishedAmount": 12.0,
+      "pricing": "exact",
+      "amount": 12,
+      "reason": "",
+      "distanceMeters": 131981.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0112-class-1",
+      "publishedAmount": 10.35,
+      "pricing": "exact",
+      "amount": 10.35,
+      "reason": "",
+      "distanceMeters": 121756,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0113-class-1",
+      "publishedAmount": 8.9,
+      "pricing": "exact",
+      "amount": 8.9,
+      "reason": "",
+      "distanceMeters": 105107.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0114-class-1",
+      "publishedAmount": 7.95,
+      "pricing": "estimate",
+      "amount": 8.6,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 95068.1,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0115-class-1",
+      "publishedAmount": 6.7,
+      "pricing": "exact",
+      "amount": 6.7,
+      "reason": "",
+      "distanceMeters": 79934.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0116-class-1",
+      "publishedAmount": 4.6,
+      "pricing": "exact",
+      "amount": 4.6,
+      "reason": "",
+      "distanceMeters": 56232.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0117-class-1",
+      "publishedAmount": 3.75,
+      "pricing": "exact",
+      "amount": 3.75,
+      "reason": "",
+      "distanceMeters": 44858.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0118-class-1",
+      "publishedAmount": 3.2,
+      "pricing": "exact",
+      "amount": 3.2,
+      "reason": "",
+      "distanceMeters": 36390.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0119-class-1",
+      "publishedAmount": 2.7,
+      "pricing": "exact",
+      "amount": 2.7,
+      "reason": "",
+      "distanceMeters": 28484,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0119-class-2",
+      "publishedAmount": 4.75,
+      "pricing": "exact",
+      "amount": 4.75,
+      "reason": "",
+      "distanceMeters": 28484,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0119-class-3",
+      "publishedAmount": 6.15,
+      "pricing": "exact",
+      "amount": 6.15,
+      "reason": "",
+      "distanceMeters": 28484,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0119-class-4",
+      "publishedAmount": 6.8,
+      "pricing": "exact",
+      "amount": 6.8,
+      "reason": "",
+      "distanceMeters": 28484,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0121-class-1",
+      "publishedAmount": 2.45,
+      "pricing": "exact",
+      "amount": 2.45,
+      "reason": "",
+      "distanceMeters": 25087.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0121-class-2",
+      "publishedAmount": 4.25,
+      "pricing": "exact",
+      "amount": 4.25,
+      "reason": "",
+      "distanceMeters": 25087.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0121-class-3",
+      "publishedAmount": 5.45,
+      "pricing": "exact",
+      "amount": 5.45,
+      "reason": "",
+      "distanceMeters": 25087.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0121-class-4",
+      "publishedAmount": 6.05,
+      "pricing": "exact",
+      "amount": 6.05,
+      "reason": "",
+      "distanceMeters": 25087.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0122-class-1",
+      "publishedAmount": 3.9,
+      "pricing": "exact",
+      "amount": 3.9,
+      "reason": "",
+      "distanceMeters": 40900.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0120-0123-class-1",
+      "publishedAmount": 5.95,
+      "pricing": "exact",
+      "amount": 5.95,
+      "reason": "",
+      "distanceMeters": 61280.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0134-class-1",
+      "publishedAmount": 14.45,
+      "pricing": "exact",
+      "amount": 14.45,
+      "reason": "",
+      "distanceMeters": 156540.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0112-class-1",
+      "publishedAmount": 12.8,
+      "pricing": "exact",
+      "amount": 12.8,
+      "reason": "",
+      "distanceMeters": 146314.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0113-class-1",
+      "publishedAmount": 11.35,
+      "pricing": "exact",
+      "amount": 11.35,
+      "reason": "",
+      "distanceMeters": 129666,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0114-class-1",
+      "publishedAmount": 10.4,
+      "pricing": "estimate",
+      "amount": 10.82,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 119626.5,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0115-class-1",
+      "publishedAmount": 9.15,
+      "pricing": "exact",
+      "amount": 9.15,
+      "reason": "",
+      "distanceMeters": 104492.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0116-class-1",
+      "publishedAmount": 7.05,
+      "pricing": "exact",
+      "amount": 7.05,
+      "reason": "",
+      "distanceMeters": 80791.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0117-class-1",
+      "publishedAmount": 6.2,
+      "pricing": "exact",
+      "amount": 6.2,
+      "reason": "",
+      "distanceMeters": 69416.9,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0118-class-1",
+      "publishedAmount": 5.65,
+      "pricing": "exact",
+      "amount": 5.65,
+      "reason": "",
+      "distanceMeters": 60949.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0119-class-1",
+      "publishedAmount": 5.15,
+      "pricing": "exact",
+      "amount": 5.15,
+      "reason": "",
+      "distanceMeters": 53042.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0120-class-1",
+      "publishedAmount": 2.45,
+      "pricing": "exact",
+      "amount": 2.45,
+      "reason": "",
+      "distanceMeters": 25216,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0120-class-2",
+      "publishedAmount": 4.25,
+      "pricing": "exact",
+      "amount": 4.25,
+      "reason": "",
+      "distanceMeters": 25216,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0120-class-3",
+      "publishedAmount": 5.45,
+      "pricing": "exact",
+      "amount": 5.45,
+      "reason": "",
+      "distanceMeters": 25216,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0120-class-4",
+      "publishedAmount": 6.05,
+      "pricing": "exact",
+      "amount": 6.05,
+      "reason": "",
+      "distanceMeters": 25216,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0122-class-1",
+      "publishedAmount": 1.45,
+      "pricing": "exact",
+      "amount": 1.45,
+      "reason": "",
+      "distanceMeters": 16643,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0122-class-2",
+      "publishedAmount": 2.5,
+      "pricing": "exact",
+      "amount": 2.5,
+      "reason": "",
+      "distanceMeters": 16643,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0122-class-3",
+      "publishedAmount": 3.25,
+      "pricing": "exact",
+      "amount": 3.25,
+      "reason": "",
+      "distanceMeters": 16643,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0122-class-4",
+      "publishedAmount": 3.6,
+      "pricing": "exact",
+      "amount": 3.6,
+      "reason": "",
+      "distanceMeters": 16643,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0121-0123-class-1",
+      "publishedAmount": 3.5,
+      "pricing": "exact",
+      "amount": 3.5,
+      "reason": "",
+      "distanceMeters": 37023.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0134-class-1",
+      "publishedAmount": 15.9,
+      "pricing": "exact",
+      "amount": 15.9,
+      "reason": "",
+      "distanceMeters": 171523.7,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0112-class-1",
+      "publishedAmount": 14.25,
+      "pricing": "exact",
+      "amount": 14.25,
+      "reason": "",
+      "distanceMeters": 161298,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0113-class-1",
+      "publishedAmount": 12.8,
+      "pricing": "exact",
+      "amount": 12.8,
+      "reason": "",
+      "distanceMeters": 144649.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0114-class-1",
+      "publishedAmount": 11.85,
+      "pricing": "estimate",
+      "amount": 12.18,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 134610.1,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0115-class-1",
+      "publishedAmount": 10.6,
+      "pricing": "exact",
+      "amount": 10.6,
+      "reason": "",
+      "distanceMeters": 119476.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0116-class-1",
+      "publishedAmount": 8.5,
+      "pricing": "exact",
+      "amount": 8.5,
+      "reason": "",
+      "distanceMeters": 95774.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0117-class-1",
+      "publishedAmount": 7.65,
+      "pricing": "exact",
+      "amount": 7.65,
+      "reason": "",
+      "distanceMeters": 84400.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0118-class-1",
+      "publishedAmount": 7.1,
+      "pricing": "exact",
+      "amount": 7.1,
+      "reason": "",
+      "distanceMeters": 75932.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0119-class-1",
+      "publishedAmount": 6.6,
+      "pricing": "exact",
+      "amount": 6.6,
+      "reason": "",
+      "distanceMeters": 68026,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0120-class-1",
+      "publishedAmount": 3.9,
+      "pricing": "exact",
+      "amount": 3.9,
+      "reason": "",
+      "distanceMeters": 40199.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0121-class-1",
+      "publishedAmount": 1.45,
+      "pricing": "exact",
+      "amount": 1.45,
+      "reason": "",
+      "distanceMeters": 16564,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0121-class-2",
+      "publishedAmount": 2.5,
+      "pricing": "exact",
+      "amount": 2.5,
+      "reason": "",
+      "distanceMeters": 16564,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0121-class-3",
+      "publishedAmount": 3.25,
+      "pricing": "exact",
+      "amount": 3.25,
+      "reason": "",
+      "distanceMeters": 16564,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0121-class-4",
+      "publishedAmount": 3.6,
+      "pricing": "exact",
+      "amount": 3.6,
+      "reason": "",
+      "distanceMeters": 16564,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0123-class-1",
+      "publishedAmount": 2.05,
+      "pricing": "exact",
+      "amount": 2.05,
+      "reason": "",
+      "distanceMeters": 22505.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0123-class-2",
+      "publishedAmount": 3.55,
+      "pricing": "exact",
+      "amount": 3.55,
+      "reason": "",
+      "distanceMeters": 22505.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0123-class-3",
+      "publishedAmount": 4.6,
+      "pricing": "exact",
+      "amount": 4.6,
+      "reason": "",
+      "distanceMeters": 22505.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0122-0123-class-4",
+      "publishedAmount": 5.1,
+      "pricing": "exact",
+      "amount": 5.1,
+      "reason": "",
+      "distanceMeters": 22505.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0134-class-1",
+      "publishedAmount": 17.95,
+      "pricing": "exact",
+      "amount": 17.95,
+      "reason": "",
+      "distanceMeters": 191482.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0134-class-2",
+      "publishedAmount": 31.4,
+      "pricing": "exact",
+      "amount": 31.4,
+      "reason": "",
+      "distanceMeters": 191482.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0134-class-3",
+      "publishedAmount": 40.5,
+      "pricing": "exact",
+      "amount": 40.5,
+      "reason": "",
+      "distanceMeters": 191482.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0134-class-4",
+      "publishedAmount": 44.85,
+      "pricing": "exact",
+      "amount": 44.85,
+      "reason": "",
+      "distanceMeters": 191482.3,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0112-class-1",
+      "publishedAmount": 16.3,
+      "pricing": "exact",
+      "amount": 16.3,
+      "reason": "",
+      "distanceMeters": 181256.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0113-class-1",
+      "publishedAmount": 14.85,
+      "pricing": "exact",
+      "amount": 14.85,
+      "reason": "",
+      "distanceMeters": 164608.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0114-class-1",
+      "publishedAmount": 13.9,
+      "pricing": "estimate",
+      "amount": 13.96,
+      "reason": "unreviewed_edge",
+      "distanceMeters": 154568.7,
+      "blockingEdges": [
+        3758843,
+        3758881
+      ],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0115-class-1",
+      "publishedAmount": 12.65,
+      "pricing": "exact",
+      "amount": 12.65,
+      "reason": "",
+      "distanceMeters": 139434.8,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0116-class-1",
+      "publishedAmount": 10.55,
+      "pricing": "exact",
+      "amount": 10.55,
+      "reason": "",
+      "distanceMeters": 115733.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0117-class-1",
+      "publishedAmount": 9.7,
+      "pricing": "exact",
+      "amount": 9.7,
+      "reason": "",
+      "distanceMeters": 104359.1,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0118-class-1",
+      "publishedAmount": 9.15,
+      "pricing": "exact",
+      "amount": 9.15,
+      "reason": "",
+      "distanceMeters": 95891.4,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0119-class-1",
+      "publishedAmount": 8.65,
+      "pricing": "exact",
+      "amount": 8.65,
+      "reason": "",
+      "distanceMeters": 87984.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0120-class-1",
+      "publishedAmount": 5.95,
+      "pricing": "exact",
+      "amount": 5.95,
+      "reason": "",
+      "distanceMeters": 60158.2,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0121-class-1",
+      "publishedAmount": 3.5,
+      "pricing": "exact",
+      "amount": 3.5,
+      "reason": "",
+      "distanceMeters": 36522.6,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0122-class-1",
+      "publishedAmount": 2.05,
+      "pricing": "exact",
+      "amount": 2.05,
+      "reason": "",
+      "distanceMeters": 21299.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0122-class-2",
+      "publishedAmount": 3.55,
+      "pricing": "exact",
+      "amount": 3.55,
+      "reason": "",
+      "distanceMeters": 21299.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0122-class-3",
+      "publishedAmount": 4.6,
+      "pricing": "exact",
+      "amount": 4.6,
+      "reason": "",
+      "distanceMeters": 21299.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    },
+    {
+      "id": "a1-network-0123-0122-class-4",
+      "publishedAmount": 5.1,
+      "pricing": "exact",
+      "amount": 5.1,
+      "reason": "",
+      "distanceMeters": 21299.5,
+      "blockingEdges": [],
+      "navigationUnchanged": true
+    }
+  ],
+  "finalBindingsSha256": "9a0a6c3a4862fc40524a73007689ff96fa1330ca0d2d48273ce4aebc10674fe8",
+  "catalogSha256": "f459c3bb22edd942b457df4cfb3dc3b69b7db607b2b10315bf30f9212a154449"
+}

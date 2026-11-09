@@ -98,6 +98,10 @@ int main(int argc, char **argv) {
     check(exempt&&exempt->tollEuros==0&&exempt->tollPriceExact&&exempt->tollPriceComplete,"explicit statutory zero overrides stale graph flags");
     check(exempt->edges==tolled->edges&&exempt->meters==tolled->meters&&exempt->seconds==tolled->seconds,"free-road pricing never changes routing");
     check(exempt->tollRoads.front().exact&&routeJson(*exempt).find("https://example.test/statute")!=std::string::npos,"zero price retains official provenance");
+    freeOptions.avoidTolls=true;
+    const auto legallyFreeAvoid=route(toll,0,2,freeOptions);
+    check(legallyFreeAvoid&&legallyFreeAvoid->edges==exempt->edges,
+          "Avoid tolls preserves a genuinely exempt road despite obsolete toll flags");
     const auto referenceTable=TollTariffs::parse(
       "# country=Testland\n# currency=JPY\n# year=2026\n# fractionDigits=0\n# source=https://example.test/prices\n"
       "# referenceEstimate=road-then-country-average\n# referenceSourceRoads=T1\n"
@@ -129,6 +133,24 @@ int main(int argc, char **argv) {
           "pricing never changes path, distance or ETA");
     for(std::size_t i=0;i<originalPoints.size();++i)check(exact.points[i].lat==originalPoints[i].lat && exact.points[i].lon==originalPoints[i].lon,"pricing never changes geographic geometry");
     check(routeJson(exact).find("\"tollPricing\":\"exact\"")!=std::string::npos,"exact quote is serialized only after full evidence");
+    auto revoked=exact;
+    invalidateTollQuote(revoked,"graph_hash",true);
+    check(!revoked.tollCoverageVerified&&!revoked.tollPriceExact&&revoked.edges==exact.edges&&
+          revoked.meters==exact.meters&&revoked.seconds==exact.seconds&&
+          routeJson(revoked).find("\"tollAmount\":null")!=std::string::npos,
+          "revoking graph proof clears an old exact amount while retaining the actual navigation route");
+    auto partlyReviewed=*tolled;partlyReviewed.tollCountry="Testland";
+    partlyReviewed.legs.front().distance=full/4;
+    for(size_t i=1;i<partlyReviewed.legs.size();++i)partlyReviewed.legs[i].road.flags&=~4u;
+    TollCrossingMatcher passedGateOnly(identity,"Testland",{first.edge},
+      {{first.edge,first.from,first.to,full/2,"gate:1",full}},true);
+    check(!applyFixedTollCharges(toll,partlyReviewed,fixedFixture,passedGateOnly,identity)&&partlyReviewed.tollFlagsDisproved,
+          "reviewed passage after a gate disproves its stale charge flag without certifying the unknown rest");
+    const auto partialFreeJson=routeJson(partlyReviewed);
+    check(partialFreeJson.find("\"hasTolls\":false")!=std::string::npos&&
+          partialFreeJson.find("\"tollFreeVerified\":false")!=std::string::npos&&
+          partialFreeJson.find("\"tollAmount\":null")!=std::string::npos,
+          "partial free evidence cannot produce a zero total or certified free journey");
     auto staleFlags=*tolled;staleFlags.tollCountry="Testland";staleFlags.tolledMeters=0;
     for(auto &leg:staleFlags.legs)leg.road.flags&=~4u;
     check(applyFixedTollCharges(toll,staleFlags,fixedFixture,fixedProof,identity),"proven collection overrides an old untolled flag for pricing");
@@ -158,12 +180,97 @@ int main(int argc, char **argv) {
     check(applyEntryExitTollCharges(toll,ticketRoute,ticketFixture,ticketProof,identity),"complete directed entry/exit proof enables a published pair");
     check(ticketRoute.tollPriceExact&&ticketRoute.tollEuros==125&&ticketRoute.tollCurrency=="JPY","ticket fares keep independent currency and class amounts");
     check(ticketRoute.edges==tolled->edges&&ticketRoute.meters==tolled->meters&&ticketRoute.seconds==tolled->seconds&&ticketRoute.maneuvers.size()==tolled->maneuvers.size(),"ticket pricing never changes navigation");
+    const auto namedTickets=TollTariffs::parse(
+      "# country=Testland\n# currency=JPY\n# year=2026\n# version=2\n# fractionDigits=0\n"
+      "# scheme=entry-exit\n# source=https://example.test/base\n"
+      "# networkName.network=T1\n# stationName.network.one=First entrance\n# stationName.network.two=Last exit\n"
+      "# networkSource.network=https://example.test/actual-sections\n"
+      "network;entry;exit;class1;class4\nnetwork;one;two;125;811\n","Testland");
+    auto namedTrip=*tolled;namedTrip.tollCountry="Testland";
+    check(applyEntryExitTollCharges(toll,namedTrip,namedTickets,ticketProof,identity)&&
+          namedTrip.tollSource=="https://example.test/actual-sections"&&
+          namedTrip.tollRoads[0].road=="T1"&&namedTrip.tollRoads[0].name=="First entrance → Last exit",
+          "composed catalogs report the source and public labels of the network actually used");
     for(std::size_t i=0;i<tolled->points.size();++i)check(ticketRoute.points[i].lat==tolled->points[i].lat&&ticketRoute.points[i].lon==tolled->points[i].lon,"ticket pricing preserves authoritative geometry");
     auto incompleteTicket=*tolled;incompleteTicket.tollCountry="Testland";
-    const auto beforeIncomplete=routeJson(incompleteTicket);
     TollCrossingMatcher exitOnly(identity,"Testland",certified,{{last.edge,last.from,last.to,lastFull/2,"exit:network:two",lastFull}},true);
-    check(!applyEntryExitTollCharges(toll,incompleteTicket,ticketFixture,exitOnly,identity)&&routeJson(incompleteTicket)==beforeIncomplete,"missing entry never publishes a partial or zero ticket price");
+    check(!applyEntryExitTollCharges(toll,incompleteTicket,ticketFixture,exitOnly,identity),"missing entry cannot apply a published fare");
+    const auto incompleteJson=routeJson(incompleteTicket);
+    check(incompleteJson.find("\"tollAmount\":null")!=std::string::npos&&
+          incompleteJson.find("\"tollPricingReason\":\"missing_mapping\"")!=std::string::npos,
+          "missing entry explicitly reports unknown, never a partial or zero ticket total");
+    check(incompleteTicket.edges==tolled->edges&&incompleteTicket.meters==tolled->meters&&incompleteTicket.seconds==tolled->seconds,
+          "rejection metadata cannot alter navigation");
+    const auto fixedYen=TollTariffs::parse("# country=Testland\n# currency=JPY\n# year=2026\n# version=1\n# fractionDigits=0\n# scheme=fixed-crossing\n# source=https://example.test/fixed\ncharge;road;name;class1;class4\nfixed:one;T1;Separate facility;40;90\n","Testland");
+    TollCrossingMatcher mixed(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {first.edge,first.from,first.to,full/2,"fixed:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,
+      {{first.edge,first.from,first.to,full/3,full,"network"},{last.edge,last.from,last.to,0,lastFull/3,"network"}});
+    auto pureTicket=*tolled;pureTicket.tollCountry="Testland";
+    check(applyTollCharges(toll,pureTicket,&fixedYen,&ticketFixture,ticketProof,identity)&&
+          pureTicket.tollSource==ticketFixture.source&&pureTicket.tollVersion==ticketFixture.version,
+          "a ticket-only trip reports the fare provider actually used, not the unrelated fixed catalog");
+    auto combined=*tolled;combined.tollCountry="Testland";
+    check(applyTollCharges(toll,combined,&fixedYen,&ticketFixture,mixed,identity)&&combined.tollEuros==165,
+          "one ordered proof composes fixed and ticket charges exactly once");
+    check(combined.tollRoads.size()==2&&combined.edges==tolled->edges&&combined.meters==tolled->meters&&combined.seconds==tolled->seconds,
+          "mixed pricing is atomic and preserves the actual route");
+    // A barrier-free interchange cannot settle a ticket on an internal start
+    // or U-turn. The adjacent facility requirement belongs to the graph proof,
+    // so downloading a newer fare table cannot accidentally remove it.
+    const std::unordered_map<std::string,std::string> accessRule={{"entry:network:one","fixed:one"}};
+    TollCrossingMatcher guardedAccess(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/4,"fixed:one",full},
+       {first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,
+      {{first.edge,first.from,first.to,full/3,full,"network"},
+       {last.edge,last.from,last.to,0,lastFull/3,"network"}},accessRule);
+    auto accessTrip=*tolled;accessTrip.tollCountry="Testland";
+    check(applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,guardedAccess,identity)&&accessTrip.tollEuros==165,
+          "observed adjacent fixed facility and section journey are composed once");
+    accessTrip=*tolled;accessTrip.tollCountry="Testland";accessTrip.legs.front().distance=full*.70;
+    check(!applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,guardedAccess,identity)&&
+          accessTrip.tollPricingReason=="missing_access_crossing"&&
+          routeJson(accessTrip).find("\"tollAmount\":null")!=std::string::npos,
+          "starting after the required collection cannot certify a fictitious partial ticket");
+    TollCrossingMatcher wrongAccessOrder(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {first.edge,first.from,first.to,full/2,"fixed:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,{},accessRule);
+    accessTrip=*tolled;accessTrip.tollCountry="Testland";
+    check(!applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,wrongAccessOrder,identity)&&
+          accessTrip.tollPricingReason=="missing_access_crossing",
+          "seeing the required facility later or on another leg is insufficient");
+    TollCrossingMatcher guardedExit(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull},
+       {last.edge,last.from,last.to,lastFull/2,"fixed:one",lastFull}},true,{},
+      {{"exit:network:two","fixed:one"}});
+    accessTrip=*tolled;accessTrip.tollCountry="Testland";
+    check(applyTollCharges(toll,accessTrip,&fixedYen,&ticketFixture,guardedExit,identity)&&accessTrip.tollEuros==165,
+          "exit-side adjacent physical collection is required and not deducted or duplicated");
+    auto inside=*tolled;inside.tollCountry="Testland";inside.legs={first};inside.legs[0].distance=full/4;inside.tolledMeters=0;
+    TollCrossingMatcher ticketNetwork(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,{{first.edge,first.from,first.to,0,full,"network"}});
+    check(!applyTollCharges(toll,inside,&fixedYen,&ticketFixture,ticketNetwork,identity)&&
+          routeJson(inside).find("\"tollAmount\":null")!=std::string::npos&&
+          routeJson(inside).find("\"hasTolls\":true")!=std::string::npos,
+          "starting inside a ticket network without observed gates is unavailable, never certified free");
+    check(routeJson(inside).find("\"tollGeometryVerified\":true")!=std::string::npos&&
+          routeJson(inside).find("\"tollEvidenceStatus\":\"incomplete\"")!=std::string::npos,
+          "complete geometry without an observed ticket entry is incomplete pricing evidence");
     check(!applyEntryExitTollCharges(toll,ticketRoute,ticketFixture,ticketProof,changedIdentity),"ticket evidence is graph-version bound");
+    check(!ticketRoute.tollPriceExact&&routeJson(ticketRoute).find("\"tollAmount\":null")!=std::string::npos,
+          "a failed graph identity cannot retain a previously exact quote");
+    TollCrossingMatcher afterExitNetwork(identity,"Testland",certified,
+      {{first.edge,first.from,first.to,full/3,"entry:network:one",full},
+       {last.edge,last.from,last.to,lastFull/3,"exit:network:two",lastFull}},true,
+      {{first.edge,first.from,first.to,full/3,full,"network"},{last.edge,last.from,last.to,0,lastFull,"network"}});
+    auto beyond=*tolled;beyond.tollCountry="Testland";
+    check(!applyTollCharges(toll,beyond,&fixedYen,&ticketFixture,afterExitNetwork,identity),
+          "a valid completed ticket cannot certify an unobserved later paid interval");
 
     const auto ukTariffs=TollTariffs::parse(
       "# country=United Kingdom\n# currency=GBP\n# year=2026\n"

@@ -1,0 +1,291 @@
+# Issue #2: graph-bound toll evidence
+
+Base: `eb647fd7c11b61b822fb5e0712d88b064ed296ea` (v0.2.17).
+The seven distributed mainland graph files are unchanged. Their actual SHA-256
+values, the catalog hashes/revisions, public origins and per-candidate blockers
+are in `../data/issue-2/{baseline-summary,after-summary}.json`.
+
+## Findings and implementation
+
+The Android loader rejected the entire graph proof if one route edge lacked a
+manual coverage row. The C++ matcher also required completeness; removing only
+the Android check would not have extended confirmed prices. Graph evidence now
+loads before the route search, independently of pricing completeness. Native
+matching retains uncovered edges, known crossings and explicit failure reasons.
+Unknown sections still prevent an exact trip total.
+
+The published graph has synthetic edge endpoints and can merge consecutive OSM
+ways across a source attribute split. Requiring a source vertex at every graph
+endpoint or treating every unmatched street as a toll prevented valid prices.
+The compiler retains the existing continuous geometric bound (2 m plus measured
+float quantization), supports explicitly reviewed node-connected directed chains,
+and adds independently reviewed local approaches. It does not certify all roads
+near a GPS route, infer free passage from `toll=no`, or increase the geometry error
+bound. Paid/private approach ways are excluded from the local-street review.
+
+Fixed and entry/exit providers previously ran separately. One atomic provider now
+validates country, scheme, class, currency, year, network, ordered entry/exit,
+actual clipped traversal, catalog fare and graph identity before summing minor
+currency units. Paid-network intervals prevent a trip starting inside a ticket
+system, or continuing beyond an observed exit, from becoming a fictional free or
+fully priced trip. Missing fares never become a partial total. A failed recheck
+cannot retain an old exact quote.
+
+Avoid tolls now checks known physical collection points and paid-network
+intervals before accepting an edge, including initial GPS clipping. It preserves
+explicit legal class exemptions. Proven free intervals may disprove obsolete
+paid flags; unknown remaining streets still do not certify the trip as free.
+Only this explicit avoidance correction changes route selection. The 32 ordinary
+search candidates retain exactly their Release geometry, edges, distance, ETA,
+maneuvers and protected visual points. Four avoidance searches intentionally
+change. Pricing itself changes none of these fields.
+
+## Added geographical evidence
+
+- 1,762 -> 5,920 reviewed directed graph edges (+4,158, 236.0%).
+  The original issue phase adds 1,860 edges through A9/A1/access reviews; the
+  national Ascendi extension adds another 792, including A29 main carriageways.
+- 1,916 A1/station-approach edges, 1,889 bounded paid-network intervals and 32
+  physical entry/exit events across 13 stations. Coimbra Norte is the A14/IP3 entry into the A1
+  network, not an arbitrary nearest A1 point.
+- Station 0117 at OSM node 8501324196 -> station 0122 at node 319886078 follows
+  the actual 85.15 km route. Classes 1–4: 7.65 / 13.35 / 17.25 / 19.05 EUR.
+  The original direction/corridor remains covered within the expanded block. Starting inside the network
+  without an observed entry remains unavailable.
+- 114 reviewed public approach source ways add 284 graph edges around Manique,
+  Cascais, Oeiras and Carcavelos. The independent 735-point collection census
+  guards the complete source geometries. Paid motorway connectors and private
+  service roads remain excluded.
+- The Oeiras I entrance/exit and Carcavelos I Lisbon-bound booth/Via Verde
+  approaches add 25 edges and four physical events. Brisa's Oeiras access notice
+  distinguishes Oeiras/Paco de Arcos from Porto Salvo/Cacem; the A5 traffic study
+  identifies the Lisbon-bound Carcavelos I entrance. Their current prices come
+  exclusively from the official 2026 fixed catalog, not historical OSM fee tags
+  or the traffic study's proposed dynamic prices.
+- A real Oeiras source split exposed a floating-point boundary: projection sums
+  could put the same gate at the incoming edge's end and outgoing edge's start.
+  The compiler now uses the packager's exact float32 source-node identity to
+  assign that boundary only to the outgoing edge. The continuous geometric
+  bound is unchanged. The regression and graph audit require one assignment per
+  physical node; genuine later crossings are not globally deduplicated.
+- All original A5/A28/A16 physical bindings and original fare cells are preserved.
+  `composed-binding-proof.json` records every stage, source/seed digest and witness.
+- Twelve additional facilities on A4, A17, A29 and A42 contribute 24 directed
+  graph crossings. Each is tied to an explicit OSM collection node and its
+  official 2026 Ascendi identity. A41 conflict rows are deliberately inactive.
+
+## Before/after measured matrix
+
+Eight public origins to IKEA Loures; **40 raw native search candidates**, including
+candidates Android may reject for duplication or detour. These are not claimed
+as forty visible UI alternatives, or as the reporter's private GPS origin.
+
+| State | Release baseline | This change |
+|---|---:|---:|
+| Confirmed exact | 2/40 (5%) | 14/40 (35%) |
+| Estimate | 28/40 (70%) | 16/40 (40%) |
+| Verified free | 0/40 | 0/40 |
+| Unavailable / unverified free | 10/40 (25%)* | 10/40 (25%) |
+
+*The old renderer presented these ten unverified paths as `none/0`. They are
+reclassified here to expose the original confidence defect, not credited as
+verified free. Original emitted counts remain in the baseline JSON.
+
+Among the eight recommended routes, confirmed coverage rises from 2/8 to 6/8
+(25% -> 75%). Public south, public north, Manique and Cascais show the actual
+Carcavelos PV 1.60 EUR charge for class 1. Oeiras I and Carcavelos I now correctly quote their own entrance fees,
+0.40 and 0.70 EUR in class 1; neither inherits the 1.60 EUR mainline plaza fee.
+Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
+
+## Validation and reproducibility
+
+Local: five C++ suites, 55 Python toll/section-provider tests, 33 JS routing/toll/ETA/UI tests.
+560 actual native route/class cases pass against the distributed mainland graph,
+including the original 91 CSV cases, eight new public approaches, four A1 classes,
+one start-inside-network case 28 Oeiras/Carcavelos access cases and 90 A9/A16 cases. The two original unavailable-class/tariff JNI
+regressions remain mandatory, making **562 Android price cases**. The additional
+96 cases cover all four classes and all 12 activated A4/A17/A29/A42 facilities
+across 24 real directed crossings. All original
+93 cases are retained. Android execution and screenshots must be checked in the
+PR CI; local native results alone are not emulator evidence.
+
+```
+python3 tools/build-free-toll-corridors.py --graph GRAPH --check
+python3 tools/build-fixed-toll-corridors.py --graph GRAPH --check
+python3 tools/diagnose-toll-routes.py --binary BUILD/atlas_toll_audit \
+  --graph GRAPH --output REPORT
+```
+
+Android artifacts record the real accepted UI options separately from raw
+search candidates, confirmed detail, A1 preview, MapLibre screenshots, unchanged
+navigation fields and the existing HUD collision assertions. Existing GPS/camera
+smoke and full-trip release gates remain mandatory. No Release is published by
+this PR; no key, application ID or version identity is replaced.
+
+## Remaining limits and concrete next evidence
+
+This is not exact nationwide pricing and must not close the issue on that claim.
+A9/A16 alternatives have different physical itineraries despite similar road
+summaries. The actual accepted public-origin alternative through Ranholas,
+IC19, Queluz II and Loures now has a class-1 total of 3.00 EUR: 1.20 + 1.80.
+It is not the Waze screenshot's different A16-through-A9 itinerary; its 4.00 EUR
+was not copied into the catalog. Normal routing/ETA and alternative generation
+are unchanged. Some other origins still have unreviewed municipal approaches,
+so containing A9 does not certify their entire trip.
+
+The eight A9 section tariffs and 54 reviewed directed section paths now cover
+the actual access sequence through Alverca PV/node, including its distinct lane
+geometries. Continuations inside the A1/A10 ticket network beyond the reviewed
+settlement points, and same-station or Queluz PV/II return circuits, remain
+unavailable unless their entire actual itinerary has independent proof. No
+return-loop zero or maximum fare is inferred from section distances.
+
+Oeiras I and Carcavelos I are now reviewed, including all four vehicle
+classes, both Oeiras I directions, traditional/Via Verde Carcavelos I approaches,
+starts after each gate and the full public IKEA trips. Oeiras II and Carcavelos II
+remain outside this review; their identities must not be inferred from the
+nearby reviewed plazas. Source review: `portugal-a5-reviewed-accesses.json`.
+Unknown intervals and first blocking edge IDs remain exported for every case.
+
+Partial A28/A4/A13 exemptions remain scoped. The A41 heavy-vehicle exemption is
+supported by the IP FAQ: its all-day toll exemption must not be confused with the
+07–21 weekday VCI circulation restriction. Source conflicts are not resolved by
+choosing the cheaper number. No bridge direction or partial exemption is inferred
+from its road reference. No new bridge coverage is claimed.
+
+No simulator quote, Via Verde API validation, real driving, tunnel, or national
+offline field test is claimed by these results.
+
+## A9/A16 completion of the reviewed corridors (2026-11-08)
+
+The new source review adds 33 physical points (including the local Idanha lanes)
+and four barrier-free A16/A9 access boundaries. Those boundaries are explicitly
+not booths. Their graph-bound adjacent-facility requirements prevent a start
+inside the system or an internal turn-around from creating a fictional partial
+ticket. An entry requires the preceding Idanha crossing; an exit requires the
+following crossing. Real repeated physical passages remain chargeable.
+
+The tariff compiler reproduces all 32 class cells of the IMT's eight 2026 A9
+sections from the vendored SHA-bound official snapshot. Its 54 explicitly
+reviewed directed paths are finite section sums, never per-kilometre estimates.
+It independently checks 180 class cells in the already published Brisa directed
+matrix, including both Alverca PV and Alverca node settlement identities. All
+4,166 original published fare rows remain unchanged. The composite offline
+catalog contains 4,220 rows, revision 2026110801. No missing reverse matrix cell
+is filled by symmetry. Original section order and explicit travel direction
+are recorded in the review.
+
+Native quotes use the source and public network/station names of the provider
+actually used. The A16 fixed facilities remain separate from the A9-only sums:
+Idanha is neither silently removed nor charged twice. C++ tests cover missing,
+out-of-order and exit-side adjacent collection, and preserve authoritative
+navigation data on both successful and rejected prices.
+
+The 90 added real-graph cases include classes 1–4, both A9 directions, Alverca
+PV/node, selected Via Verde lane endpoints, local Idanha access, A16/A9 trips,
+and unavailable internal starts. Android verifies the actual accepted 3.00 EUR
+IKEA alternative and captures the Sacotes/A16/A9-to-IKEA 2.80 EUR preview and
+A9-through-Alverca 3.75 EUR preview. These are distinct origins/itineraries,
+not quotations for every trip from the reporter's postcode.
+
+The historical IMT DDIE document identifies facilities, not 2026 prices or
+lane-level GPS coordinates. Original directed OSM geometry supplies the latter;
+shared/erroneous DDIE coordinate groups are not used to snap a gate. The current
+IMT and Ascendi tariffs supply the monetary values. No successful Via Verde or
+IP simulator quote is claimed in this phase.
+
+## Geographical correction of the national fixed block
+
+Review of commit `a2aed7a` exposed incorrect tariff-to-node identities even
+though its arithmetic, graph containment and Android tests passed. Those tests
+proved that the router crossed a nominated node and applied the nominated price;
+they could not independently prove that the nomination was geographically right.
+The affected associations are replaced rather than retained as confirmed prices.
+
+- A17: the six previously selected nodes were southern collection approaches
+  around latitudes 39.99–40.22. The Costa de Prata electronic sections are north
+  of Mira. The reviewed nodes are now the motorway gantries at latitudes 40.461,
+  40.562 and 40.618, for Mira–Ponte de Vagos, Vagos–Ílhavo and
+  Aveiro Sul–S. Bernardo respectively. The booth and electronic lane nodes near
+  40.442 are not added as Costa de Prata fixed fees.
+- A29 ER1-18–Miramar: nodes 1620526107/4378201267 were on the A1 access near
+  latitude 40.927, not this A29 section. They are removed. The actual A29
+  Gulpilhares gantries 1563530097/1563530098 are at latitude 41.079, north of
+  Miramar. Estarreja, Ovar and Arada identities remain unchanged.
+- A42: all six physical gantries were present but the section order was wrong.
+  The west-to-east order is now IC24/IC25–Lordelo (264117176/264119609),
+  Paços de Ferreira–EN106 Sul (2869384457/2869384458), and EN106 Norte–Lousada
+  (264119862/2869381630). The monetary table itself is unchanged.
+
+Original source geometry was recaptured using complete OSM road relations
+7298451 (A17) and 7301357 (A29), via the official OSM API
+`/api/0.6/relation/<id>/full.json`. Relation 12858855 was also inspected for A42.
+Normalized snapshots retain original node IDs, coordinates, way versions,
+timestamps and raw-response hashes. These relations establish geography,
+not tariff amounts. The supplied, independently reviewed Ascendi tariff records
+remain the monetary source. Only the selected whole directed ways and bounded
+context are certified, with every other collection point excluded.
+
+The new geographical regression checks the actual northern A17 gantry IDs,
+the A29 Miramar corridor, the A42 ordered section identities and the electronic
+collection type. It is separate from the native quote fixtures. All 24 corrected
+directed crossings now have runtime cases for classes 1–4: 96 quotes. The former
+parallel-edge failure concerned the incorrect A1 node and is not a limitation
+of the corrected A29 fixture. Entire-trip confirmation still requires full
+traversal coverage; 12 installations do not mean four whole motorways or a
+national coverage percentage.
+
+## A29 mainline journeys
+
+The A29 source stage includes the complete 357 directed motorway ways from the
+captured relation, with all eight electronic collection nodes reviewed. Four
+service-area ways are excluded. No unknown collection point can disappear from
+this selected source set. The unchanged graph compiler certifies 568 A29 edges,
+433 more than the isolated facility contexts. Eight additional real-graph cases
+cover both directions and all classes across all four facilities over approximately
+39.5 km. The charge order is 04→05→06→07 northbound and reversed southbound.
+Class totals are 1.90/3.35/4.25/4.75 EUR. No endpoint-pair fare or per-km average
+is used for these confirmed prices; all four actual crossings must be present.
+Pricing preserves authoritative navigation fields. Full-trip proof from origins
+outside these reviewed main carriageways remains a separate requirement.
+
+## A1 bulk correspondence review
+
+The A1 block replaces the single Coimbra Norte→Fátima stage with 13 named
+stations, 32 directed collection nodes, 1,916 witnessed edges and 1,889 paid
+intervals. The original 85 km regression and all previous A5/A9/A16/A29 cases
+are retained. Only geography and monetary display metadata change; no native
+routing, GPS, camera or matching algorithm is modified.
+
+The station source review is `portugal-a1-station-review.json`. It uses the
+published station codes 0134 and 0112–0123, the complete original A1 relation
+1502233 and independently captured station approaches. `prepare-reviewed-a1-network.py`
+keeps all directed paths from a reviewed booth to the main carriageways, stops
+at other booths, excludes paths that do not reach the mainline and requires
+explicit direction evidence where a local turn-around makes reachability
+ambiguous. The original compiler still requires each booth exactly once and
+preserves the continuous geometry bound. Private approaches remain excluded.
+
+All 156 directed pairs between these stations were attempted in class 1:
+**117 exact (75%), 39 incomplete (25%)**. Adjacent pairs and both end-to-end
+directions additionally cover classes 2–4: **177 exact and 57 incomplete cases
+out of 234**. `a1-network-coverage.json` records every case, its independently
+published fare and the blocking edge IDs. The 57 incomplete cases remain tests
+of the refusal contract; they do not gain confirmation by lowering tolerances
+or by replacing the expected fare with a partial sum. The fixture's unused zero
+expected-amount column on incomplete cases is a CLI-format placeholder, never
+the amount displayed to a user. Runtime values remain qualified estimates or
+unavailable.
+
+Both Grijó PV→Torres Novas and the reverse are confirmed over approximately
+192 km, with 17.95/31.40/40.50/44.85 EUR in classes 1–4. This does not cover
+every A1 interchange. Remaining source/graph gaps are concentrated in some
+approach lanes around Albergaria, Aveiro Sul and Coimbra. Alverca's shared A9/A1
+settlement boundary and the southern A1 continuation are outside this review;
+no second event is invented at a shared physical booth.
+
+Catalog revision 2026110802 adds human-readable Brisa/station names, so details
+show Coimbra Norte→Fátima rather than provider codes. All 4,220 monetary rows
+are unchanged. The composer verifies that every label refers to an existing
+published provider/station and rejects malformed metadata. Offline/web catalog
+generation and the catalog audit are reproduced in CI.

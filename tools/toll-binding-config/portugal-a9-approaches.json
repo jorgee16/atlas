@@ -1,0 +1,1545 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "reviewed": true,
+  "reviewedOn": "2026-11-08",
+  "geometrySimplificationMeters": 2.0,
+  "sourceSha256": "c8c5abb53e6caf4fa5247e50cff5c89646d6a4c9a04d4cf2a815eb998445e107",
+  "seedSha256": "844b236cb2412bd358a6776b796388db4d5b210be594e55fbe5271eecff12a78",
+  "scope": "Specific public access streets, IC19 and post-Loures A8 approach geometry for A9 alternatives. Physical collection approaches and paid-network membership are handled by the preceding fixed/network proof, not waived by this stage. No whole-road or country exemption.",
+  "sources": [
+    "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",
+    "https://www.openstreetmap.org/copyright"
+  ],
+  "exclusions": [],
+  "ways": [
+    {
+      "wayId": 4813164,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 8169604,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 23688139,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 23688268,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 23688732,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 23688756,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 23688887,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 24649289,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua 28 de Setembro",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 24710608,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua dos Bombeiros Voluntários",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 24710610,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua dos Bombeiros Voluntários",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 24710614,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada da Cruz dos Cavalinhos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 30801481,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 30801482,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 30801634,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 30801635,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 36738719,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Costa Pinto",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 36738768,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Oeiras do Piauí",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 36739683,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Cândido dos Reis",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 36997051,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Constituição",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 38762967,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Moinho Vermelho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 39229869,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 39324997,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 42066556,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 46886059,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Lino de Assunção",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 53862315,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 53862319,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Lisboa",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 54039959,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Professor Armando dos Santos Ferreira",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 54039963,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Professor Armando dos Santos Ferreira",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 55688876,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro António de Azevedo Coutinho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 55688881,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Henrique de Seixas",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 66448706,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada das Águas Livres",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 73581485,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 75236909,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua do Alto do Moinho Velho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 75793220,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro António de A Coutinho",
+      "ref": "EM 593",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 92879234,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 92879235,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 95251850,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 121667827,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 121667829,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 147215556,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Henrique de Seixas",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 151730476,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 151733470,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 151733479,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 151733481,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua do Bom Jardim",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 155186808,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 168117692,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 169793311,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 172456298,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Alcabideche",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 172959275,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Moinho Vermelho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 179262229,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 179951979,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Embaixador Assis Chateaubriand",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 190514282,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Copacabana",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 221973619,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Copacabana",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 228666999,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 228691579,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda José Roquette",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 228691586,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 228691595,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 228816196,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 229616466,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Lino de Assunção",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 232429247,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Professor Armando dos Santos Ferreira",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 232429250,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Professor Armando dos Santos Ferreira",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 235584374,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro António de Azevedo Coutinho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 235586268,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 239880316,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Cândido dos Reis",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 241719061,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Copacabana",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 256787715,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Acesso de Massamá",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 258711995,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 258711998,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 267430090,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 344848734,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 346013346,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro António de Azevedo Coutinho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 371606974,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 383428535,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Costa Pinto",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 388309514,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 391343019,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 416813723,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 416813746,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417058436,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417636237,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417636243,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417636257,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417675026,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417675032,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417680737,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida São Francisco Xavier",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744960,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744961,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744962,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744968,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744969,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744971,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744972,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744980,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744983,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744990,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417744995,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746854,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746861,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746862,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746864,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746866,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746867,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417746868,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417751929,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417751931,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417751933,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417751934,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417755824,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417755827,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417759409,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417759410,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417759411,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417759413,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417759414,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 417759417,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 418118503,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "A 16",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 419037534,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 430019424,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 432771508,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Escola",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 432771509,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 432771512,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 432771513,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Escola",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 432771518,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro António de Azevedo Coutinho",
+      "ref": "EM 593",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 432771519,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 473682458,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 473682459,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 501240356,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 516255396,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Largo dos Combatentes do Ultramar",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 671503429,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 695860940,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Oeiras do Piauí",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 695860941,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Oeiras do Piauí",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 839490655,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Oeiras do Piauí",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 839490657,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Oeiras do Piauí",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 840580440,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 903609792,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 938619039,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 938619040,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 938619041,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 952105130,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 952105131,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 952105133,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991056018,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "A 16",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991056019,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Padre Luis Jesus Fialho de Almeida",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991086916,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda José Roquette",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991328622,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda José Roquette",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991368535,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991368547,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda José Roquette",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991372702,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda José Roquette",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991372724,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Henrique de Seixas",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991372729,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua do Alto do Moinho Velho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 991372730,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Costa Pinto",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 992086270,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 992086277,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 992086278,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 992086301,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1014094208,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1040207165,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua dos Bombeiros Voluntários",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1067309276,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1072725528,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Jorge V",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1125076540,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Escola",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1125076543,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua de Alvide",
+      "ref": "EM 592",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1125076544,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1125145310,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1125145311,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Moinho Vermelho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1133552374,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Doutor Francisco de Sá Carneiro",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1154739380,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1154739383,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 250",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1159414863,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Moinho Vermelho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1297793008,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Palmeira",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1298845998,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1302143543,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Santo António de Tercena",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1302143544,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Infante Dom Henrique",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1302143547,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada da Cruz dos Cavalinhos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1302963423,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1304336551,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Autoestrada do Oeste",
+      "ref": "A 8",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1305880420,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1305884513,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1305884542,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EM 6-5",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1308816742,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro António de Azevedo Coutinho",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1334528474,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Fernando Maia",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1364253228,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "IC 19;A 37",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1383880508,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053201,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Doutor Guilherme Cardoso",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053202,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Alegria",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053204,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053206,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Carlos Anjos",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053208,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Doutor Guilherme Cardoso",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053209,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Doutor Guilherme Cardoso",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1423053213,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Doutor Guilherme Cardoso",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1442866776,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua do Bom Jardim",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1442866778,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua do Bom Jardim",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    },
+    {
+      "wayId": 1558521004,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific original public geometry outside the mapped physical plazas; checked against the national collection census and official charging locations. A16 connectors remain outside the reviewed A9 ticket boundaries; no fixed plaza or paid interval is removed."
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import json
 import math
 import mmap
 from pathlib import Path
+import re
 import struct
 import tempfile
 
@@ -40,16 +41,54 @@ def source_shapes(review, source):
     on_way = {n for w in ways.values() for n in w['nodes']}
     if candidates & on_way != set(gates):
         raise ValueError('Every physical collection node must have a reviewed charge')
+    # A closed network can also have a barrier-free interchange. Keep those
+    # accesses distinct from physical booths: they open/close a reviewed
+    # journey, and never create a fixed charge by themselves.
+    for key, access in review.get('networkAccessPoints', {}).items():
+        node = int(key)
+        way = ways.get(access.get('sourceWay'))
+        role = access.get('role')
+        event = access.get('event', '')
+        if (node in gates or node in candidates or not review.get('network')
+                or role not in ('entry', 'exit') or not access.get('evidence')
+                or not event.startswith(role + ':' + review['network'] + ':')
+                or not event.split(':')[-1] or not way or node not in way['nodes']
+                or way['tags'].get('highway') != 'motorway_link'
+                or way['tags'].get('oneway') != 'yes'):
+            raise ValueError('Unreviewed or invalid barrier-free network access')
+        boundary = 'beginNode' if role == 'entry' else 'endNode'
+        end = 0 if role == 'entry' else -1
+        if not any(int(bounds.get(boundary, ways[int(wid)]['nodes'][end])) == node
+                   for wid, bounds in review.get('networkRanges', {}).items()
+                   if wid.isdigit() and int(wid) in ways):
+            raise ValueError('Network access does not bound a reviewed paid interval')
+        required = access.get('requiresFixedCharge')
+        if required is not None and (not re.fullmatch(r'[A-Za-z0-9:_-]{1,128}', required)
+                                     or required.startswith(('entry:', 'exit:'))):
+            raise ValueError('Invalid adjacent fixed-crossing requirement')
+        gates[node] = event
     coordinates = {int(k): binding.coordinate(v) for k, v in source['coordinates'].items()}
     if len({coordinates[n] for n in gates}) != len(gates):
         raise ValueError('Ambiguous collection coordinates')
     shapes = {}
     for wid, way in ways.items():
         t = way['tags']
-        if (t.get('highway') != 'motorway' or t.get('oneway') != 'yes'
+        if (t.get('highway') not in review.get('allowedHighways', ['motorway']) or t.get('oneway') != 'yes'
                 or t.get('access') in ('private', 'no') or t.get('motor_vehicle') in ('private', 'no')):
             raise ValueError('Unreviewed road type/direction/access')
         shapes[wid] = [coordinates[n] for n in way['nodes']]
+    # Only explicitly reviewed, node-connected directed chains may bridge an
+    # OSM way split that did not create a routing junction in the older graph.
+    for chain in review.get('directedChains', []):
+        ids = chain['wayIds']
+        if len(ids) < 2 or len(set(ids)) != len(ids) or any(i not in ways for i in ids):
+            raise ValueError('Invalid directed source chain')
+        nodes = list(ways[ids[0]]['nodes'])
+        for wid in ids[1:]:
+            if nodes[-1] != ways[wid]['nodes'][0]:
+                raise ValueError('Disconnected directed source chain')
+            nodes.extend(ways[wid]['nodes'][1:])
+        shapes['chain:' + '+'.join(map(str, ids))] = [coordinates[n] for n in nodes]
     return shapes, gates, coordinates
 
 
@@ -68,8 +107,20 @@ def crossing_offsets(graph, source, source_nodes, gates, witness, length):
     if total <= 0 or length <= 0:
         raise ValueError('Degenerate graph edge')
     result = []
-    for node, p, along in zip(source_nodes, original, cumulative):
-        if node not in gates or not witness['beginMeters'] <= along < witness['endMeters']:
+    quantized = lambda point: struct.unpack('<ff', struct.pack('<ff', *point))
+    for node, raw_point, p, along in zip(source_nodes, source, original, cumulative):
+        if node not in gates:
+            continue
+        # The packager stores source nodes as float32. An original collection
+        # node shared by adjacent graph edges belongs to the outgoing edge,
+        # even when projection sums differ by one floating-point ULP.
+        gate = quantized(raw_point)
+        if gate == quantized(graph[-1]):
+            continue
+        if gate == quantized(graph[0]):
+            result.append(dict(osmNodeId=node, chargeId=gates[node], offsetMeters=0.))
+            continue
+        if not witness['beginMeters'] <= along < witness['endMeters']:
             continue
         positions, _ = _projections(p, rendered)
         positions.sort()
@@ -81,12 +132,59 @@ def crossing_offsets(graph, source, source_nodes, gates, witness, length):
     return result
 
 
+def network_offsets(shape, original, nodes, witness, length, bounds):
+    """Project an explicitly reviewed paid interval; a road ref is no proof.
+
+    Gate boundaries are half-open and use the same continuous source witness
+    as collection events. Pre-entry and post-exit portions stay outside.
+    """
+    source = _project(original, shape[0])
+    cumulative = [0.]
+    for a, b in zip(source, source[1:]):
+        cumulative.append(cumulative[-1] + math.hypot(b[0]-a[0], b[1]-a[1]))
+    begin = cumulative[nodes.index(bounds['beginNode'])] if 'beginNode' in bounds else 0.
+    end = cumulative[nodes.index(bounds['endNode'])] if 'endNode' in bounds else cumulative[-1]
+    if end < begin:
+        raise ValueError('Reversed paid source interval')
+    lo, hi = max(begin, witness['beginMeters']), min(end, witness['endMeters'])
+    if hi <= lo:
+        return None
+    # Complete witnessed edges need no boundary projection, avoiding floating
+    # endpoint drift. Only a gate inside the source subpath splits an edge.
+    rendered = _project(shape, shape[0])
+    total = sum(math.hypot(b[0]-a[0], b[1]-a[1]) for a,b in zip(rendered, rendered[1:]))
+    def offset(value, default):
+        if value == default[0]:
+            return default[1]
+        index = next(i for i in range(len(cumulative)-1) if cumulative[i] <= value <= cumulative[i+1])
+        fraction = (value-cumulative[index])/(cumulative[index+1]-cumulative[index])
+        a,b = source[index:index+2]
+        point = (a[0]+fraction*(b[0]-a[0]), a[1]+fraction*(b[1]-a[1]))
+        positions,_ = _projections(point, rendered)
+        positions.sort()
+        if not positions or positions[0][0] > witness['continuousBoundMeters']:
+            raise ValueError('Network boundary outside source witness')
+        return max(0., min(length, positions[0][1]/total*length))
+    first = offset(lo, (witness['beginMeters'], 0.))
+    last = offset(hi, (witness['endMeters'], length))
+    return (first, last) if last > first else None
+
+
 def generate(graph, review_path, source_path, seed_path):
     review, source = json.loads(review_path.read_text()), json.loads(source_path.read_text())
     if free.digest(source_path) != review['sourceSha256'] or free.digest(seed_path) != review['seedSha256']:
         raise ValueError('Source or seed integrity failure')
     shapes, gates, _ = source_shapes(review, source)
     ways = {w['id']: w for w in source['ways']}
+    for chain in review.get('directedChains', []):
+        ids = chain['wayIds']
+        nodes = list(ways[ids[0]]['nodes'])
+        for wid in ids[1:]:
+            nodes.extend(ways[wid]['nodes'][1:])
+        ways['chain:' + '+'.join(map(str, ids))] = dict(nodes=nodes)
+    paid = review.get('networkRanges', {})
+    if paid and (not review.get('network') or set(paid) - {str(w) for w in ways}):
+        raise ValueError('Unknown reviewed network source geometry')
     seed = seed_path.read_text().splitlines()
     metadata = dict(line[1:].strip().split('=', 1) for line in seed if line.startswith('#') and '=' in line)
     hashes = {name: free.digest(graph / name) for name in free.FILES}
@@ -108,7 +206,7 @@ def generate(graph, review_path, source_path, seed_path):
     seed_edges = {int(line.split(';')[1]) for line in seed if line.startswith('coverage;')}
     streams = [(graph / name).open('rb') for name in free.FILES[:3]]
     maps = [mmap.mmap(s.fileno(), 0, access=mmap.ACCESS_READ) for s in streams]
-    covered, events = {}, []
+    covered, events, networks = {}, [], []
     try:
         n, e, g = maps
         for data, magic in ((n, b'RNOD'), (e, b'REDG'), (g, b'RGEO')):
@@ -136,18 +234,25 @@ def generate(graph, review_path, source_path, seed_path):
                 shape = [start] + shape + [end]
                 tolerance = 2 + 2 * max(binding.quantization_radius(p) for p in shape)
                 matches = []
-                for wid in sorted(candidates):
+                for wid in sorted(candidates, key=str):
                     witness = clipped_way_witness(shape, shapes[wid], tolerance=tolerance)
                     if witness:
                         charges = crossing_offsets(shape, shapes[wid], ways[wid]['nodes'], gates, witness, dm / 10)
-                        matches.append((wid, witness, charges))
+                        interval = network_offsets(shape, shapes[wid], ways[wid]['nodes'], witness, dm/10,
+                            paid[str(wid)]) if str(wid) in paid else None
+                        matches.append((wid, witness, charges, interval))
                 if not matches:
                     continue
                 identities = {tuple((v['osmNodeId'], v['chargeId'], round(v['offsetMeters'], 5)) for v in match[2]) for match in matches}
-                if len(identities) != 1 or edge in seed_edges:
+                intervals = {tuple(round(v, 5) for v in m[3]) if m[3] else None for m in matches}
+                if len(identities) != 1 or len(intervals) != 1 or edge in seed_edges:
                     raise ValueError('Conflicting or overlapping reviewed corridor evidence')
                 covered[edge] = dict(fromNode=node, toNode=target, lengthMeters=dm / 10,
                     witnesses=[dict(wayId=m[0], **m[1]) for m in matches])
+                if matches[0][3]:
+                    begin, end = matches[0][3]
+                    networks.append(dict(edge=edge, fromNode=node, toNode=target,
+                        beginMeters=begin, endMeters=end, network=review['network']))
                 for charge in matches[0][2]:
                     events.append(dict(edge=edge, fromNode=node, toNode=target, lengthMeters=dm / 10, **charge))
     finally:
@@ -160,16 +265,29 @@ def generate(graph, review_path, source_path, seed_path):
         raise ValueError('Each physical gate must match exactly once: ' + str(matched))
     comments = [line for line in seed if line.startswith('#')]
     comments += ['# reviewedCorridor.' + free.digest(review_path) + '=' + free.digest(source_path)]
+    requirements = {}
+    for access in review.get('networkAccessPoints', {}).values():
+        if 'requiresFixedCharge' not in access:
+            continue
+        role, network, station = access['event'].split(':')
+        key = ('entryFixedCharge.' if role == 'entry' else 'exitFixedCharge.') + network + '.' + station
+        value = access['requiresFixedCharge']
+        if key in requirements and requirements[key] != value:
+            raise ValueError('Conflicting graph-bound access requirement')
+        requirements[key] = value
+    comments += ['# ' + k + '=' + v for k, v in sorted(requirements.items())]
     lines = comments + ['kind;edge;from;to;offsetMeters;edgeLengthMeters;chargeId']
     lines += ['coverage;' + str(edge) + ';;;;;' for edge in sorted(seed_edges | set(covered))]
     old_events = [line for line in seed if line.startswith('crossing;')]
     lines += old_events
+    lines += [line for line in seed if line.startswith('network;')]
+    lines += ['network;{edge};{fromNode};{toNode};{beginMeters:.9f};{endMeters:.9f};{network}'.format(**v) for v in networks]
     lines += ['crossing;{edge};{fromNode};{toNode};{offsetMeters:.9f};{lengthMeters:.1f};{chargeId}'.format(**v) for v in events]
     text = '\n'.join(lines) + '\n'
     report = dict(country=review['country'], scope=review['scope'], graphDigests=hashes,
         sourceSha256=free.digest(source_path), reviewSha256=free.digest(review_path), seedSha256=free.digest(seed_path),
         seedCoveredEdges=len(seed_edges), additionalCoveredEdges=len(covered), chargedCrossingsUnchanged=old_events,
-        bindingsSha256=hashlib.sha256(text.encode()).hexdigest(), crossings=events, edgeWitnesses=covered)
+        bindingsSha256=hashlib.sha256(text.encode()).hexdigest(), crossings=events, networks=networks, edgeWitnesses=covered)
     return text, report
 
 
@@ -187,13 +305,13 @@ def generate_catalog(graph, catalog_path):
             review, source = directory / entry['review'], directory / entry['source']
             if json.loads(review.read_text())['country'] != catalog['country']:
                 raise ValueError('Cross-country corridor composition')
-            text, stage = generate(graph, review, source, seed)
+            text, stage = (free.generate if entry.get('kind') == 'free' else generate)(graph, review, source, seed)
             stages.append(stage)
             seed = Path(tmp) / (str(i) + '.csv')
             seed.write_text(text)
     report = dict(country=catalog['country'], catalogSha256=free.digest(catalog_path), seedSha256=seed_hash,
         seedCoveredEdges=stages[0]['seedCoveredEdges'],
-        additionalCoveredEdges=sum(s['additionalCoveredEdges'] for s in stages),
+        additionalCoveredEdges=sum(s.get('additionalCoveredEdges', s.get('additionalFreeEdges', 0)) for s in stages),
         bindingsSha256=stages[-1]['bindingsSha256'], stages=stages)
     return text, report
 

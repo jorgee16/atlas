@@ -129,6 +129,32 @@ class DirectedSourceGeometryTests(unittest.TestCase):
         self.assertIsNone(builder.source_path(a,b,{a:{p},p:{(38.,-8.99995)},(38.,-8.99995):{b}},2.))
 
 class ActivatedBindingIntegrityTests(unittest.TestCase):
+    def test_a1_matrix_retains_every_attempt_and_refuses_known_source_gaps(self):
+        import csv
+        audit=json.loads((ROOT.parent/'docs/data/issue-2/a1-network-coverage.json').read_text())
+        fixture=ROOT.parent/'android/native-app/src/androidTest/assets/tolls/a1-network-cases.csv'
+        with fixture.open() as stream:
+            cases={r['id']:r for r in csv.DictReader(stream,delimiter=';')}
+        results={r['id']:r for r in audit['results']}
+        self.assertEqual(set(results),set(cases));self.assertEqual(234,len(cases))
+        self.assertEqual(156,sum(r['class']=='1' for r in cases.values()))
+        fares=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
+        with fares.open() as stream:
+            published={(r['entry'],r['exit']):r for r in csv.DictReader((l for l in stream if not l.startswith('#')),delimiter=';') if r['network']=='brisa-published'}
+        for identity,row in cases.items():
+            _,_,entry,exit,_,_=identity.split('-');result=results[identity]
+            self.assertEqual(float(published[entry,exit]['class'+row['class']]),result['publishedAmount'])
+            if row['expectedPricing']=='exact':
+                self.assertEqual(result['publishedAmount'],float(row['expectedAmount']))
+                self.assertEqual([],result['blockingEdges'])
+            else:
+                self.assertEqual('incomplete',row['expectedPricing'])
+                self.assertEqual('unreviewed_edge',result['reason'])
+                self.assertTrue(result['blockingEdges'])
+        proof=json.loads((ROOT.parent/'docs/data/issue-2/composed-binding-proof.json').read_text())
+        self.assertEqual(proof['bindingsSha256'],audit['finalBindingsSha256'])
+        self.assertEqual(proof['stages'][2]['bindingsSha256'],audit['graphBindingsSha256'])
+
     def test_apk_proof_matches_reviewed_report_and_actual_region_identity(self):
         asset=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
         report=json.loads((ROOT.parent/'docs/data/a5-mainline-binding-audit-20261026.json').read_text())
@@ -158,17 +184,34 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
     def test_fixed_corridor_extension_preserves_all_existing_evidence(self):
         asset=ROOT.parent/'android/native-app/src/main/assets/toll-bindings/Portugal/mainland.csv'
         seed=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
-        report=json.loads((ROOT.parent/'docs/data/portugal-fixed-binding-audit-20261101.json').read_text())
+        report=json.loads((ROOT.parent/'docs/data/issue-2/composed-binding-proof.json').read_text())
+        original=json.loads((ROOT.parent/'docs/data/portugal-fixed-binding-audit-20261101.json').read_text())
+        self.assertEqual(original['bindingsSha256'], report['stages'][1]['bindingsSha256'])
         self.assertEqual(report['bindingsSha256'],hashlib.sha256(asset.read_bytes()).hexdigest())
         self.assertEqual(report['seedSha256'],hashlib.sha256(seed.read_bytes()).hexdigest())
         lines=asset.read_text().splitlines()
         old=seed.read_text().splitlines()
         old_edges={int(s.split(';')[1]) for s in old if s.startswith('coverage;')}
         new_edges={int(s.split(';')[1]) for s in lines if s.startswith('coverage;')}
-        self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage['edgeWitnesses']},new_edges)
+        self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage.get('edgeWitnesses',stage.get('freeEdgeWitnesses',{}))},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual([4,6],[len(s['crossings']) for s in report['stages']])
+        self.assertEqual([4,6,32,0,4,37,0,4,6,8,6],[len(s.get('crossings',[])) for s in report['stages']])
+        self.assertEqual(1916,report['stages'][2]['additionalCoveredEdges'])
+        self.assertEqual(1889,len(report['stages'][2]['networks']))
+        self.assertTrue({'entry:brisa-published:0117','exit:brisa-published:0122'} <=
+            {v['chargeId'] for v in report['stages'][2]['crossings']})
+        self.assertEqual(13,len({v['chargeId'].split(':')[-1] for v in report['stages'][2]['crossings']}))
+        self.assertEqual(284,report['stages'][3]['additionalFreeEdges'])
+        self.assertEqual(25,report['stages'][4]['additionalCoveredEdges'])
+        self.assertEqual({'brisa:0502','brisa:0504'},
+            {v['chargeId'] for v in report['stages'][4]['crossings']})
+        self.assertEqual([34,114,568,76],
+            [stage['additionalCoveredEdges'] for stage in report['stages'][7:]])
+        self.assertEqual(12,len({event['chargeId'] for stage in report['stages'][7:]
+            for event in stage['crossings']}))
+        for previous,stage in zip(report['stages'],report['stages'][1:]):
+            self.assertEqual(previous['bindingsSha256'],stage['seedSha256'])
         self.assertEqual({'vialivre:a28:angeiras','vialivre:a28:povoa'}, {e['chargeId'] for e in report['stages'][0]['crossings']})
         self.assertEqual({'ascendi:grande-lisboa:01','ascendi:grande-lisboa:02','ascendi:grande-lisboa:03'},
             {e['chargeId'] for e in report['stages'][1]['crossings']})
@@ -198,14 +241,17 @@ class OfficialMatrixCellTests(unittest.TestCase):
         assets=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
         audit=json.loads((ROOT.parent/'docs/data/portugal-entry-exit-2026-audit.json').read_text())
         self.assertEqual(hashlib.sha256(assets.read_bytes()).hexdigest(),audit['catalogSha256'])
-        self.assertEqual(4166,audit['farePairs']);self.assertEqual(16664,audit['sourceCells'])
+        self.assertEqual(4220,audit['farePairs']);self.assertEqual(16664,audit['sourceCells'])
+        self.assertEqual(4166,audit['publishedFarePairs'])
+        self.assertEqual(54,audit['reviewedSectionPairs'])
+        self.assertEqual(180,audit['corroboratingClassCells'])
         self.assertEqual({},audit['excludedDomains'])
         self.assertEqual(3600,audit['southCorroboration']['matchedClassCells'])
         self.assertEqual(4,audit['consistentOverlappingPairs'])
         self.assertEqual(896,audit['newPublishedPairs'])
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);manifest=pack.package(assets,root,'toll-fares')
-            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(4166,manifest['journeyCount'])
+            self.assertEqual('entry-exit',manifest['scheme']);self.assertEqual(4220,manifest['journeyCount'])
             storage=Storage();publisher.publish(storage,'atlas-regions',root,'toll-fares')
             self.assertEqual('toll-fares/Portugal/manifest.json',storage.writes[-1])
             self.assertTrue(all(k.startswith('toll-fares/') for k in storage.writes))

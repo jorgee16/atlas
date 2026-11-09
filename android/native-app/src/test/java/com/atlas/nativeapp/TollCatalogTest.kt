@@ -132,10 +132,11 @@ class TollCatalogTest {
     @Test fun unknownPriceCannotLookFreeInRoutePreview() {
         val route=JSONObject().put("hasTolls",true).put("tollPricing","unavailable")
             .put("tollAmount",JSONObject.NULL).put("tollEuros",0)
-        assertEquals("Toll price not confirmed",RouteChoices.tollLabel(route))
+        assertEquals("Toll price unavailable",RouteChoices.tollLabel(route))
         val known=route.put("tollPricing","estimate").put("tollAmount",230).put("tollCurrency","JPY")
             .put("tollFractionDigits",0)
-        assertEquals("Toll price not confirmed",RouteChoices.tollLabel(known))
+        assertTrue(RouteChoices.tollLabel(known).startsWith("≈ "))
+        assertTrue(RouteChoices.tollLabel(known).endsWith("estimated"))
         known.put("tollPricing","exact")
         assertTrue(RouteChoices.tollLabel(known).contains("230"))
         assertFalse(RouteChoices.tollLabel(known).contains("230,00"))

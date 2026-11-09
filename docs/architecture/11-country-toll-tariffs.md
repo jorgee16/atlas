@@ -15,14 +15,21 @@ each class uses independent published prices, never guessed multipliers.
 web/PWA uses the same canonical CSVs via `bundled-toll-tables.js`; regenerate with
 `python3 tools/generate-toll-bundle.py`. CI `--check` prevents data drift.
 
-Only OSM toll-marked edges contribute costs. An untolled route costs zero.
+OSM toll flags seed estimates; reviewed physical crossings and paid-network
+intervals can override obsolete flags. A route with no detected tolls has a zero
+price only when the complete passage is verified free; otherwise its amount is
+null and the UI says that the absence of tolls has not been verified.
 An explicit, sourced whole-road exemption can also override stale toll flags;
 this changes pricing only, not route selection or the graph.
 Missing table or unsupported class yields `tollPricing=unavailable` and
 `tollAmount=null`, never a fictional zero. Unpriced roads also remain unavailable
 unless the country explicitly enables the low-confidence reference policy below. Available
 costs are section-average distance estimates: sum(section prices)/sum(lengths).
-C++ emits `exact` only with complete reviewed directed-crossing evidence. Avoid-tolls still uses graph flags independently.
+C++ emits `exact` only with complete reviewed directed-crossing evidence.
+Avoid-tolls consults reviewed physical collection and paid-network intervals,
+falling back conservatively to graph flags for unreviewed edges. See
+[issue #2 evidence](../validation/issue-2-toll-evidence.md) for the scope and
+remaining source gaps.
 Navigation/GPS, map matching, geometry, distance and ETA algorithms are unchanged.
 Updates apply to the next route calculation, not to the current route.
 
@@ -96,8 +103,10 @@ without changes to navigation fields. This is not full official-price coverage.
 ### A28 directed fixed corridors, 2026-11-01
 
 The subsequent A16 extension composes country review stages without adding a
-checked-in intermediate CSV per motorway. The final proof has 1,762 edges,
-14 crossings and 91 real C++/JNI cases. It also fixes a confirmed Ranholas
+checked-in intermediate CSV per motorway. That historical stage had 1,762 edges,
+14 crossings and 91 real C++/JNI cases; the current composed proof has 5,920
+coverage edges, 2,425 network intervals and 111 crossing rows after A9, the
+A4/A17/A29/A42 reviews and the thirteen-station A1 block. It also fixes a confirmed Ranholas
 charge hidden by an old untolled graph flag, changing monetary presentation
 only. See [the current fixed-corridor architecture](14-reviewed-fixed-toll-corridors.md)
 for the active scope, stale-flag regression and remaining route-selection limit.

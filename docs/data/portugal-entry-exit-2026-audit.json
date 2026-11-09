@@ -1,10 +1,10 @@
 {
   "country": "Portugal",
-  "revision": 2026110201,
+  "revision": 2026110802,
   "network": "brisa-published",
   "sourceSha256": "dca8323f964ff6702a984a1afa1737a3a32cac1b21934b46ca1d0924e0b26274",
-  "catalogSha256": "5ba77770f12caa2c21ce1fffc701780c558813b3f7e0b5820ecd10ed640b5fc7",
-  "farePairs": 4166,
+  "catalogSha256": "f459c3bb22edd942b457df4cfb3dc3b69b7db607b2b10315bf30f9212a154449",
+  "farePairs": 4220,
   "sourceCells": 16664,
   "includedDomains": [
     "brisal",
@@ -27,5 +27,13 @@
   },
   "consistentOverlappingPairs": 4,
   "observedSourceClassCells": 16680,
-  "newPublishedPairs": 896
+  "newPublishedPairs": 896,
+  "publishedFarePairs": 4166,
+  "reviewedSectionPairs": 54,
+  "sectionNetwork": "pt-a9-linear",
+  "sectionSourceSha256": "1fd83b9f0c87975b2a47ecf9248b41efb431464d47275e74790f33b06cdb3b7e",
+  "sectionReviewSha256": "7f2ccfa73b6f3ee9a9de0e2e469fb6640e97b2a58a167b3658c887ea6b268791",
+  "corroboratingDirectedJourneys": 34,
+  "additionalPublishedPairs": 11,
+  "corroboratingClassCells": 180
 }

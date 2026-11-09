@@ -1,0 +1,946 @@
+{
+  "schemaVersion": 1,
+  "country": "Portugal",
+  "reviewed": true,
+  "reviewedOn": "2026-11-07",
+  "geometrySimplificationMeters": 2.0,
+  "sourceSha256": "720c89ba17944888775d4da6ab9bbb88410fdeb03e0f11a1264b06ff0bc5585b",
+  "seedSha256": "e586ada5ae9b62b74378a3a41d65649cc3e3087da05cb78ed04db486126a13b2",
+  "scope": "Selected public municipal streets and EN9/EN6-7/EN249-3 approach geometries in Cascais, Manique, Oeiras and Carcavelos, outside motorway collection lanes. Physical toll approaches are explicitly excluded and remain unpriced unless independently reviewed. No route, whole-road or country exemption.",
+  "sources": [
+    "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",
+    "https://www.brisaconcessao.pt/Portals/0/Documentos/TabelaEcadaTaxas_23iva_01012026.pdf?ver=2025-12-30-185537-910",
+    "https://www.openstreetmap.org/copyright"
+  ],
+  "exclusions": [
+    23821884,
+    23821886,
+    23845219,
+    320184774,
+    320210203,
+    389790531,
+    417917482,
+    417917485,
+    418240482,
+    418240484,
+    418240489,
+    418240491,
+    432773023,
+    1041543301,
+    1383882460
+  ],
+  "ways": [
+    {
+      "wayId": 22696524,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Marginal",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 23844808,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 23844817,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 23845420,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 23845511,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à Nacional 6-7",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 23845775,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida do Conselho da Europa",
+      "ref": "EN 249-3",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 23870690,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Jorge V",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 28205475,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Largo da Estação",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 28205478,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Sebastião José Carvalho e Melo",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 28206150,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Valbom",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 28206157,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua José Félix de Moura e Lima",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 29734635,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Figueirinha",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 40726120,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Tenente Coronel Melo Antunes",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 53893593,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua das Calçadas",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 101276942,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à Nacional 6-7",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 138929339,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 138929343,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 147215547,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 147215548,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 147215551,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 167195874,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Embaixador Assis Chateaubriand",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 172456282,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 172456284,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 185012423,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida General Eduardo Galhardo",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 190304092,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Rio de Janeiro",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 190337686,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Embaixador Assis Chateaubriand",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 194561500,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à EN 9",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 194561506,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à EN 9",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 213532455,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua José Malhoa",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 213532456,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 221973615,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Embaixador Assis Chateaubriand",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 228691593,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 235062917,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 235790050,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 240282772,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Embaixador Assis Chateaubriand",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 320705268,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 320705269,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 320705270,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 320705271,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 320705272,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 320705273,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 389790545,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida do Conselho da Europa",
+      "ref": "EN 249-3",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 391786854,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda do Barão",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 392984234,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda de Carcavelos",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 392984236,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda dos Lombos",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 392984282,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à Nacional 6-7",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 392984283,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à Nacional 6-7",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 418125855,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 418240471,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida do Conselho da Europa",
+      "ref": "EN 249-3",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 458765020,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 477359863,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Largo da Estação",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 495845267,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Largo da Estação",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 631812904,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda dos Lombos",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 631812905,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda dos Lombos",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 631812930,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda da Quinta Nova",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 686117387,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda dos Lombos",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 686117390,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda dos Lombos",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 701612725,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Sebastião José Carvalho e Melo",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 948962633,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 948962634,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 949003169,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368479,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368488,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368490,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368505,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Estrada da Ribeira",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368519,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368522,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua das Calçadas",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368523,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368527,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Variante à EN 9",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991368531,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 991372709,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 992275617,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 992275618,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 992275619,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 992275620,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 992494142,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Marginal",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 998903069,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Tenente Coronel Melo Antunes",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1072725527,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Jorge V",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1072725531,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Jorge V",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1123776640,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1123776990,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1134683680,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Tenente Coronel Melo Antunes",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1176471129,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Rio de Janeiro",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1230023487,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Figueirinha",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1275025323,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1275025325,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Marginal",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1278203945,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Figueirinha",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1278237588,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1278237620,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1297793007,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Travessa da Palmeira",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1297820014,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Sebastião José Carvalho e Melo",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1297867074,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua Sebastião José Carvalho e Melo",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1298908445,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Largo da Estação",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1298995653,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1298995654,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1299671388,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Marginal",
+      "ref": "EN 6",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1301420879,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda do Barão",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1301420881,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda Jorge V",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1301420886,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda do Barão",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1301420887,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda do Barão",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1301420888,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rotunda do Barão",
+      "ref": "EN 6-7",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1305884546,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Figueirinha",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1305884547,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Rua da Figueirinha",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1309087525,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1338665000,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1366214779,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1385169843,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1385169844,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida de Sintra",
+      "ref": "EN 9",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1415587246,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Engenheiro Álvaro Roquette",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1415592928,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Rio de Janeiro",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1415592930,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Rio de Janeiro",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1415592931,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Rio de Janeiro",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1415592932,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Avenida Rio de Janeiro",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    },
+    {
+      "wayId": 1480633166,
+      "reviewed": true,
+      "kind": "reviewed-approach",
+      "name": "Largo da Estação",
+      "ref": "",
+      "reason": "Specific public local street/EN approach outside the Brisa motorway collection lanes, checked against the published Brisa open-system charging locations and independent national collection census. Certification is confined to this original directed geometry; paid connectors, private/service roads and unknown facilities are excluded."
+    }
+  ]
+}
