@@ -5,7 +5,7 @@
   "reviewedOn": "2026-11-07",
   "geometrySimplificationMeters": 2.0,
   "sourceSha256": "720c89ba17944888775d4da6ab9bbb88410fdeb03e0f11a1264b06ff0bc5585b",
-  "seedSha256": "ac227a071dc7e02d5037bfbff77dcce3978034b39812e4aac7deb0c894444412",
+  "seedSha256": "e586ada5ae9b62b74378a3a41d65649cc3e3087da05cb78ed04db486126a13b2",
   "scope": "Selected public municipal streets and EN9/EN6-7/EN249-3 approach geometries in Cascais, Manique, Oeiras and Carcavelos, outside motorway collection lanes. Physical toll approaches are explicitly excluded and remain unpriced unless independently reviewed. No route, whole-road or country exemption.",
   "sources": [
     "https://www.imt-ip.pt/rodoviario/infraestruturas-rodoviarias/rede-rodoviaria/taxas-de-portagem/",

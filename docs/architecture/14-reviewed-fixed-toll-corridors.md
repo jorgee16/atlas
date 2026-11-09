@@ -46,8 +46,8 @@ main-carriageway edges and six nodes at Idanha/Sacotes/Ranholas. The composed
 proof originally had 1,762 edges and 14 crossing rows. Issue #2 extends it
 with the A14/A1 Coimbra Norte–Fatima ticket corridor, public approaches and
 reviewed Oeiras I / Carcavelos I ramps. The A9 network phase and the national
-Ascendi phase now bring the composed proof to **4,414 directed coverage edges,
-944 paid-network intervals and 81 physical event rows**. The latest phase adds
+Ascendi and expanded A1 phases now bring the composed proof to **5,920 directed coverage edges,
+2,425 paid-network intervals and 111 physical event rows**. The Ascendi phase adds
 792 witnessed edges and 24 directed crossings for 12 facilities on A4, A17,
 A29 and A42. IC16 trunk continuations, IC23 and the Oeiras II / Carcavelos II
 facilities remain excluded. A41 remains excluded because 36 supplied price rows
@@ -205,3 +205,22 @@ native/Android fixtures connect the four facilities over 39.44/39.54 km in the
 two directions, classes 1–4. Their ordered charges total EUR 1.90/3.35/4.25/4.75.
 Interchange ramps and unreviewed external approaches still cannot inherit full
 coverage merely from joining A29.
+
+## A1 station block
+
+The A1 stage now binds 32 directed collection nodes at 13 reviewed stations
+between Grijó PV and Torres Novas. Its 1,916 graph edges include all legal
+captured branches between each gate and the main carriageways, rather than
+only the first branch found. Directed source traversal stops at other gates.
+Pombal's local turn-arounds require explicitly reviewed entry/exit signage;
+reachability alone is ambiguous there. The Leiria exit's outgoing IC36 source
+way owns its booth under the existing half-open interval rule. Paid membership
+ends at the booth and does not extend along the free side of the exit.
+
+All 156 directed station pairs were attempted in class 1: 117 confirmed, 39
+incomplete. Adjacent and end-to-end pairs also exercise classes 2–4, producing
+234 cases: 177 confirmed and 57 with known source/graph gaps. These gaps remain
+regression cases requiring incomplete evidence, never exact or a fictional zero.
+The Grijó–Torres Novas journeys cover 191–192 km in both directions and all
+classes: 17.95/31.40/40.50/44.85 EUR. This is measured partial A1 coverage,
+not a whole-country percentage. Alverca's shared A9 boundary is outside this block.

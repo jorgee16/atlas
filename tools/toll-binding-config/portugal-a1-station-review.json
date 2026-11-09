@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "reviewed": true,
+  "country": "Portugal",
+  "network": "brisa-published",
+  "reviewedOn": "2026-11-08",
+  "southLatitude": 39.474,
+  "northLatitude": 41.017,
+  "seedSha256": "2b33646e3f23dd006e0c398c14e96c4f75ef809fac784351f0cdfa7c13de3bcc",
+  "scope": "A1 Grijo to Torres Novas main carriageways and explicitly reviewed station approaches. Northern terminal is station 0134 Grijo PV. Alverca/A9 shared boundary and unreviewed southern continuations are excluded. Prices remain the independently published directed Brisa matrix.",
+  "fareEvidence": "docs/data/portugal-entry-exit-2026-audit.json",
+  "boundaryWayIds": [19900140],
+  "freeApproachWayIds": [915196808],
+  "freeApproachEvidence": "Preserve the independently reviewed original Coimbra Norte approach east of entry booth 8501324196. Way 915196808 was already certified in the original A1 source review; it contains no collection node and is outside the paid interval.",
+  "boundaryEvidence": "Original IC36 way 19900140 starts at the Leiria exit booth 255584272. The outgoing half-open graph interval owns the booth; its downstream source geometry is outside the paid network. No other trunk road is selected.",
+  "stations": [
+    {"id":"0134","name":"Grijó PV","capture":"grijo.json","terminal":true},
+    {"id":"0112","name":"Sta. M. Feira","capture":"feira.json"},
+    {"id":"0113","name":"Estarreja","capture":"estarreja.json"},
+    {"id":"0114","name":"Albergaria","capture":"albergaria.json"},
+    {"id":"0115","name":"Aveiro Sul","capture":"aveiro-sul.json"},
+    {"id":"0116","name":"Mealhada-Cant.","capture":"mealhada.json"},
+    {"id":"0117","name":"Coimbra Norte","capture":"coimbra-norte.json"},
+    {"id":"0118","name":"Coimbra Sul","capture":"coimbra-sul.json"},
+    {"id":"0119","name":"Condeixa","capture":"condeixa.json"},
+    {"id":"0120","name":"Pombal","capture":"pombal.json","nodeRoles":{"2548494699":"exit","12954695156":"entry"},"directionEvidence":"Original directed collection ways: 155729997 destination IC8/Figueira da Foz/Castelo Branco/Pombal; 1409828660 destination A1/Lisboa/Porto/Coimbra. Both graph directions can otherwise reach a mainline through local turn-around connections."},
+    {"id":"0121","name":"Leiria","capture":"leiria.json"},
+    {"id":"0122","name":"Fátima","capture":"fatima.json"},
+    {"id":"0123","name":"Torres Novas","capture":"torres-novas.json"}
+  ],
+  "directedChains": [{"wayIds":[392905851,392905864]}]
+}

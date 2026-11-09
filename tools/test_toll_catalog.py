@@ -129,6 +129,32 @@ class DirectedSourceGeometryTests(unittest.TestCase):
         self.assertIsNone(builder.source_path(a,b,{a:{p},p:{(38.,-8.99995)},(38.,-8.99995):{b}},2.))
 
 class ActivatedBindingIntegrityTests(unittest.TestCase):
+    def test_a1_matrix_retains_every_attempt_and_refuses_known_source_gaps(self):
+        import csv
+        audit=json.loads((ROOT.parent/'docs/data/issue-2/a1-network-coverage.json').read_text())
+        fixture=ROOT.parent/'android/native-app/src/androidTest/assets/tolls/a1-network-cases.csv'
+        with fixture.open() as stream:
+            cases={r['id']:r for r in csv.DictReader(stream,delimiter=';')}
+        results={r['id']:r for r in audit['results']}
+        self.assertEqual(set(results),set(cases));self.assertEqual(234,len(cases))
+        self.assertEqual(156,sum(r['class']=='1' for r in cases.values()))
+        fares=ROOT.parent/'android/native-app/src/main/assets/toll-fares/Portugal.csv'
+        with fares.open() as stream:
+            published={(r['entry'],r['exit']):r for r in csv.DictReader((l for l in stream if not l.startswith('#')),delimiter=';') if r['network']=='brisa-published'}
+        for identity,row in cases.items():
+            _,_,entry,exit,_,_=identity.split('-');result=results[identity]
+            self.assertEqual(float(published[entry,exit]['class'+row['class']]),result['publishedAmount'])
+            if row['expectedPricing']=='exact':
+                self.assertEqual(result['publishedAmount'],float(row['expectedAmount']))
+                self.assertEqual([],result['blockingEdges'])
+            else:
+                self.assertEqual('incomplete',row['expectedPricing'])
+                self.assertEqual('unreviewed_edge',result['reason'])
+                self.assertTrue(result['blockingEdges'])
+        proof=json.loads((ROOT.parent/'docs/data/issue-2/composed-binding-proof.json').read_text())
+        self.assertEqual(proof['bindingsSha256'],audit['finalBindingsSha256'])
+        self.assertEqual(proof['stages'][2]['bindingsSha256'],audit['graphBindingsSha256'])
+
     def test_apk_proof_matches_reviewed_report_and_actual_region_identity(self):
         asset=ROOT/'toll-binding-config/portugal-lisbon-reviewed.csv'
         report=json.loads((ROOT.parent/'docs/data/a5-mainline-binding-audit-20261026.json').read_text())
@@ -170,11 +196,12 @@ class ActivatedBindingIntegrityTests(unittest.TestCase):
         self.assertEqual(old_edges|{int(e) for stage in report['stages'] for e in stage.get('edgeWitnesses',stage.get('freeEdgeWitnesses',{}))},new_edges)
         old_events=[s for s in old if s.startswith('crossing;')]
         self.assertEqual(old_events,[s for s in lines if s.startswith('crossing;')][:len(old_events)])
-        self.assertEqual([4,6,2,0,4,37,0,4,6,8,6],[len(s.get('crossings',[])) for s in report['stages']])
-        self.assertEqual(410,report['stages'][2]['additionalCoveredEdges'])
-        self.assertEqual(408,len(report['stages'][2]['networks']))
-        self.assertEqual({'entry:brisa-published:0117','exit:brisa-published:0122'},
+        self.assertEqual([4,6,32,0,4,37,0,4,6,8,6],[len(s.get('crossings',[])) for s in report['stages']])
+        self.assertEqual(1916,report['stages'][2]['additionalCoveredEdges'])
+        self.assertEqual(1889,len(report['stages'][2]['networks']))
+        self.assertTrue({'entry:brisa-published:0117','exit:brisa-published:0122'} <=
             {v['chargeId'] for v in report['stages'][2]['crossings']})
+        self.assertEqual(13,len({v['chargeId'].split(':')[-1] for v in report['stages'][2]['crossings']}))
         self.assertEqual(284,report['stages'][3]['additionalFreeEdges'])
         self.assertEqual(25,report['stages'][4]['additionalCoveredEdges'])
         self.assertEqual({'brisa:0502','brisa:0504'},

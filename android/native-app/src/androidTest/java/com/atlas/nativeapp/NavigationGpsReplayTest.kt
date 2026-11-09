@@ -990,12 +990,12 @@ class NavigationGpsReplayTest {
      * route preview. The fixture contains graph-node endpoints, not fake routes. */
     @Test fun a5MainlineTollsThroughJniAndMapLibrePreview() {
         output.listFiles()?.forEach { it.delete() }
-        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","issue-2-approach-cases.csv","a5-access-cases.csv","a9-network-cases.csv","ascendi-national-fixed-cases.csv").flatMap { name ->
+        val cases=listOf("a5-mainline-cases.csv","a28-mainline-cases.csv","a16-mainline-cases.csv","a1-ticket-cases.csv","a1-network-cases.csv","issue-2-approach-cases.csv","a5-access-cases.csv","a9-network-cases.csv","ascendi-national-fixed-cases.csv").flatMap { name ->
             instrumentation.context.assets.open("tolls/$name")
                 .bufferedReader().use { it.readLines() }.drop(1).filter { it.isNotBlank() }
                 .map { it.split(';').also { row -> require(row.size==8) } }
         }
-        assertTrue("The original cases, 96 Ascendi crossings and eight full A29 trips are required",cases.size>=326)
+        assertTrue("All original cases and 234 A1 station/network scenarios are required",cases.size>=560)
         val appModel=(context.applicationContext as AtlasApplication).model
         val results=JSONArray()
         val unavailableResults=JSONArray()
@@ -1078,7 +1078,8 @@ class NavigationGpsReplayTest {
                                     charges.getJSONObject(0).getString("chargeId"))
                             } else if(row[0].startsWith("a1-")) {
                                 assertEquals(1,charges.length())
-                                assertEquals("brisa-published:0117:0122",charges.getJSONObject(0).getString("chargeId"))
+                                val pair=if(row[0].startsWith("a1-network-"))row[0].split('-').let { "${it[2]}:${it[3]}" } else "0117:0122"
+                                assertEquals("brisa-published:$pair",charges.getJSONObject(0).getString("chargeId"))
                                 assertTrue(after.getBoolean("tollFreeVerified").not())
                             } else {
                                 assertEquals("One physical plaza, independent of lane",1,charges.length())
@@ -1099,6 +1100,11 @@ class NavigationGpsReplayTest {
                         assertTrue("The graph proof loads independently of route completeness",accepted)
                         assertNotEquals("exact",after.getString("tollPricing"))
                         assertNotEquals("complete",after.getString("tollEvidenceStatus"))
+                        if(row[6]=="incomplete") {
+                            assertEquals("unreviewed_edge",after.getString("tollPricingReason"))
+                            assertTrue("Known A1 source gaps cannot be shown as a free trip",
+                                after.isNull("tollAmount") || after.getDouble("tollAmount")>0)
+                        }
                         if(row[0].startsWith("a16-a9-missing-") || row[0].startsWith("a9-start-inside-")) {
                             assertEquals("unavailable",after.getString("tollPricing"))
                             assertTrue("An unobserved physical entry must not become zero or a partial price",after.isNull("tollAmount"))
@@ -1133,7 +1139,10 @@ class NavigationGpsReplayTest {
                     Log.i("ATLAS_GPS_REPLAY","ATLAS_TOLL_CASE_END id=${row[0]} elapsedMs=$caseMillis pricing=${after.optString("tollPricing")}")
                     results.put(JSONObject().put("id",row[0]).put("elapsedMs",caseMillis)
                         .put("before",before).put("after",after))
-                    File(output,"a5-native-quotes.json").writeText(results.toString(2))
+                    // Bound checkpoint I/O as station-pair coverage grows;
+                    // the complete array is always written after the loop.
+                    if(results.length()%25==0)
+                        File(output,"a5-native-quotes.json").writeText(results.toString(2))
                     if(row[0]=="a16-unflagged-ranholas-class-1") {
                         fun unavailableCase(id:String,csv:ByteArray,vehicle:Int) {
                             core.tollBindings("Portugal",directory.path,null)

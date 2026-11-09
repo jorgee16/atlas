@@ -137,6 +137,15 @@ def compile_catalog(text, review, snapshot):
                      for l in header[:-1]]
     merged_header += ['# source.sections=' + review['source'], '# sourceSectionsSha256=' + review['sourceSha256']]
     merged_header.append('# networkSource.' + network + '=' + review['source'])
+    for provider, labels in sorted(review.get('publishedLabels', {}).items()):
+        provider_rows=[r for r in base_rows if r['network']==provider]
+        identities={r[k] for r in provider_rows for k in ('entry','exit')}
+        names=[labels.get('name','')]+list(labels.get('stations',{}).values())
+        if (not provider_rows or set(labels.get('stations',{}))-identities
+                or any(not isinstance(v,str) or not v or len(v.encode())>256 or '\n' in v or '\r' in v for v in names)):
+            raise ValueError('Invalid published network/station display labels')
+        merged_header.append('# networkName.'+provider+'='+labels['name'])
+        merged_header += ['# stationName.'+provider+'.'+k+'='+v for k,v in sorted(labels.get('stations',{}).items())]
     if review.get('networkName'):
         merged_header.append('# networkName.' + network + '=' + review['networkName'])
     merged_header += ['# stationName.' + network + '.' + k + '=' + v for k, v in sorted(review.get('stationNames', {}).items())]

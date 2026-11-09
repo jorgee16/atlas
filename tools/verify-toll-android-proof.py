@@ -7,10 +7,10 @@ import sys
 
 root = Path(sys.argv[1])
 cases = json.loads((root / 'a5-native-quotes.json').read_text())
-if len(cases) < 326:
+if len(cases) < 560:
     raise ValueError('Missing carriageway/class/after-plaza/full-IKEA cases')
 fixture_root=Path(__file__).resolve().parents[1]/'android/native-app/src/androidTest/assets/tolls'
-new_expected={r['id']:r for name in ('a1-ticket-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv','a9-network-cases.csv')
+new_expected={r['id']:r for name in ('a1-ticket-cases.csv','a1-network-cases.csv','issue-2-approach-cases.csv','a5-access-cases.csv','a9-network-cases.csv')
               for r in csv.DictReader((fixture_root/name).open(),delimiter=';')}
 new_cases=set()
 ascendi_expected={r['id']:r for r in csv.DictReader((fixture_root/'ascendi-national-fixed-cases.csv').open(),delimiter=';')}
@@ -69,8 +69,16 @@ for case in cases:
         if expected['expectedPricing']=='exact':
             if after['tollPricing']!='exact' or abs(after['tollAmount']-float(expected['expectedAmount']))>1e-9:
                 raise ValueError('Incorrect reviewed approach/ticket quote: '+case['id'])
-            if case['id'].startswith('a1-') and [v['chargeId'] for v in after['tollRoads']]!=['brisa-published:0117:0122']:
-                raise ValueError('The A1 ticket must follow the mapped 0117->0122 itinerary')
+            if case['id'].startswith('a1-'):
+                parts=case['id'].split('-')
+                charge='brisa-published:'+parts[2]+':'+parts[3] if case['id'].startswith('a1-network-') else 'brisa-published:0117:0122'
+                if [v['chargeId'] for v in after['tollRoads']]!=[charge]:
+                    raise ValueError('The A1 ticket must follow its actual mapped entry/exit')
+        elif expected['expectedPricing']=='incomplete':
+            if after['tollPricing']=='exact' or after.get('tollPricingReason')!='unreviewed_edge':
+                raise ValueError('A known A1 graph/source gap was incorrectly confirmed: '+case['id'])
+            if after.get('hasTolls') and after.get('tollAmount')==0:
+                raise ValueError('An incomplete A1 toll trip was represented as zero')
         elif expected['expectedPricing']=='none':
             if after['tollPricing']!='none' or after['tollAmount']!=0 or not after['tollFreeVerified']:
                 raise ValueError('A reviewed start after the access gate was charged: '+case['id'])

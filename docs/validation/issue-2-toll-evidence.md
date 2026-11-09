@@ -42,15 +42,15 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 4,414 reviewed directed graph edges (+2,652, 150.5%).
+- 1,762 -> 5,920 reviewed directed graph edges (+4,158, 236.0%).
   The original issue phase adds 1,860 edges through A9/A1/access reviews; the
   national Ascendi extension adds another 792, including A29 main carriageways.
-- 410 additional A14/A1/Fatima edges, 408 bounded paid-network intervals and two
-  physical entry/exit events. Coimbra Norte is the A14/IP3 entry into the A1
+- 1,916 A1/station-approach edges, 1,889 bounded paid-network intervals and 32
+  physical entry/exit events across 13 stations. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
 - Station 0117 at OSM node 8501324196 -> station 0122 at node 319886078 follows
   the actual 85.15 km route. Classes 1–4: 7.65 / 13.35 / 17.25 / 19.05 EUR.
-  Only this reviewed direction/corridor is activated. Starting inside the network
+  The original direction/corridor remains covered within the expanded block. Starting inside the network
   without an observed entry remains unavailable.
 - 114 reviewed public approach source ways add 284 graph edges around Manique,
   Cascais, Oeiras and Carcavelos. The independent 735-point collection census
@@ -100,10 +100,10 @@ Classes 2/3/4 are respectively 0.75/0.75/0.75 and 1.35/1.35/1.35 EUR.
 ## Validation and reproducibility
 
 Local: five C++ suites, 55 Python toll/section-provider tests, 33 JS routing/toll/ETA/UI tests.
-326 actual native route/class cases pass against the distributed mainland graph,
+560 actual native route/class cases pass against the distributed mainland graph,
 including the original 91 CSV cases, eight new public approaches, four A1 classes,
 one start-inside-network case 28 Oeiras/Carcavelos access cases and 90 A9/A16 cases. The two original unavailable-class/tariff JNI
-regressions remain mandatory, making **328 Android price cases**. The additional
+regressions remain mandatory, making **562 Android price cases**. The additional
 96 cases cover all four classes and all 12 activated A4/A17/A29/A42 facilities
 across 24 real directed crossings. All original
 93 cases are retained. Android execution and screenshots must be checked in the
@@ -248,3 +248,44 @@ Class totals are 1.90/3.35/4.25/4.75 EUR. No endpoint-pair fare or per-km averag
 is used for these confirmed prices; all four actual crossings must be present.
 Pricing preserves authoritative navigation fields. Full-trip proof from origins
 outside these reviewed main carriageways remains a separate requirement.
+
+## A1 bulk correspondence review
+
+The A1 block replaces the single Coimbra Norte→Fátima stage with 13 named
+stations, 32 directed collection nodes, 1,916 witnessed edges and 1,889 paid
+intervals. The original 85 km regression and all previous A5/A9/A16/A29 cases
+are retained. Only geography and monetary display metadata change; no native
+routing, GPS, camera or matching algorithm is modified.
+
+The station source review is `portugal-a1-station-review.json`. It uses the
+published station codes 0134 and 0112–0123, the complete original A1 relation
+1502233 and independently captured station approaches. `prepare-reviewed-a1-network.py`
+keeps all directed paths from a reviewed booth to the main carriageways, stops
+at other booths, excludes paths that do not reach the mainline and requires
+explicit direction evidence where a local turn-around makes reachability
+ambiguous. The original compiler still requires each booth exactly once and
+preserves the continuous geometry bound. Private approaches remain excluded.
+
+All 156 directed pairs between these stations were attempted in class 1:
+**117 exact (75%), 39 incomplete (25%)**. Adjacent pairs and both end-to-end
+directions additionally cover classes 2–4: **177 exact and 57 incomplete cases
+out of 234**. `a1-network-coverage.json` records every case, its independently
+published fare and the blocking edge IDs. The 57 incomplete cases remain tests
+of the refusal contract; they do not gain confirmation by lowering tolerances
+or by replacing the expected fare with a partial sum. The fixture's unused zero
+expected-amount column on incomplete cases is a CLI-format placeholder, never
+the amount displayed to a user. Runtime values remain qualified estimates or
+unavailable.
+
+Both Grijó PV→Torres Novas and the reverse are confirmed over approximately
+192 km, with 17.95/31.40/40.50/44.85 EUR in classes 1–4. This does not cover
+every A1 interchange. Remaining source/graph gaps are concentrated in some
+approach lanes around Albergaria, Aveiro Sul and Coimbra. Alverca's shared A9/A1
+settlement boundary and the southern A1 continuation are outside this review;
+no second event is invented at a shared physical booth.
+
+Catalog revision 2026110802 adds human-readable Brisa/station names, so details
+show Coimbra Norte→Fátima rather than provider codes. All 4,220 monetary rows
+are unchanged. The composer verifies that every label refers to an existing
+published provider/station and rejects malformed metadata. Offline/web catalog
+generation and the catalog audit are reproduced in CI.

@@ -4,7 +4,27 @@
   "country": "Portugal",
   "currency": "EUR",
   "year": 2026,
-  "revision": 2026110801,
+  "revision": 2026110802,
+  "publishedLabels": {
+    "brisa-published": {
+      "name": "Brisa",
+      "stations": {
+        "0134": "Grijó PV",
+        "0112": "Santa Maria da Feira",
+        "0113": "Estarreja",
+        "0114": "Albergaria",
+        "0115": "Aveiro Sul",
+        "0116": "Mealhada / Cantanhede",
+        "0117": "Coimbra Norte",
+        "0118": "Coimbra Sul",
+        "0119": "Condeixa",
+        "0120": "Pombal",
+        "0121": "Leiria",
+        "0122": "Fátima",
+        "0123": "Torres Novas"
+      }
+    }
+  },
   "network": "pt-a9-linear",
   "classes": [
     1,

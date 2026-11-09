@@ -18,9 +18,29 @@ def module(name):
 
 fixed = module('build-fixed-toll-corridors')
 prices = module('import-vialivre-tolls')
+ticket_review = module('prepare-reviewed-a1-network')
 
 
 class FixedCorridorTests(unittest.TestCase):
+    def test_station_review_keeps_both_mainline_directions_without_crossing_other_booths(self):
+        edges={1:[(2,10)],2:[(3,20),(4,30),(7,40),(8,50)],
+               3:[(5,21)],4:[(6,31)],7:[(9,41)],8:[(8,51)]}
+        paths=ticket_review.station_paths(1,edges,{5,6,9},{1,7})
+        self.assertEqual({10,20,21,30,31},{p[2] for p in paths})
+        self.assertIsNone(ticket_review.station_paths(1,edges,{9},{1,7}))
+        self.assertIsNone(ticket_review.station_paths(5,edges,{1},{5}))
+
+    def test_a1_network_preserves_legal_station_identity_and_free_side_of_exit(self):
+        cfg=ROOT/'tools/toll-binding-config'
+        review=json.loads((cfg/'portugal-a1-coimbra-fatima.json').read_text())
+        source=json.loads((cfg/'portugal-a1-coimbra-fatima.source.json').read_text())
+        _,gates,_=fixed.source_shapes(review,source)
+        self.assertEqual(32,len(gates))
+        ids={'0134',*[str(i).zfill(4) for i in range(112,124)]}
+        self.assertEqual({f'{role}:brisa-published:{i}' for i in ids for role in ('entry','exit')},set(gates.values()))
+        self.assertEqual({'endNode':255584272},review['networkRanges']['19900140'])
+        self.assertEqual('exit:brisa-published:0121',gates[255584272])
+
     def test_ascendi_facilities_are_in_the_published_geographical_corridors(self):
         # Independent geographical regression: booth nodes in southern A17
         # and the A1 Feira access are not northern electronic-toll facilities.
@@ -173,7 +193,8 @@ class FixedCorridorTests(unittest.TestCase):
         source=json.loads((cfg/'portugal-a1-coimbra-fatima.source.json').read_text())
         shapes,gates,_=fixed.source_shapes(review,source)
         self.assertIn('chain:392905851+392905864',shapes)
-        self.assertEqual({'entry:brisa-published:0117','exit:brisa-published:0122'},set(gates.values()))
+        self.assertTrue({'entry:brisa-published:0117','exit:brisa-published:0122'} <= set(gates.values()))
+        self.assertEqual(32,len(gates))
         for ids in ([392905864,392905851],[392905851,392905851],[392905851,999]):
             bad=copy.deepcopy(review);bad['directedChains']=[dict(wayIds=ids)]
             with self.subTest(ids=ids),self.assertRaises(ValueError):

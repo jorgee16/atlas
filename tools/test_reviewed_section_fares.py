@@ -53,6 +53,19 @@ class ReviewedSectionFaresTests(unittest.TestCase):
         self.assertNotEqual(self.base, broken)
         with self.assertRaises(ValueError): provider.compile_catalog(broken, self.review, self.source)
 
+    def test_published_labels_use_existing_identities_without_changing_prices(self):
+        text,_=provider.compile_catalog(self.base,self.review,self.source)
+        self.assertIn('# networkName.brisa-published=Brisa\n',text)
+        self.assertIn('# stationName.brisa-published.0117=Coimbra Norte\n',text)
+        self.assertIn('brisa-published;0134;0123;17.95;31.40;40.50;44.85\n',text)
+        for identity in ('unknown-station','newline'):
+            bad=copy.deepcopy(self.review)
+            labels=bad['publishedLabels']['brisa-published']['stations']
+            if identity=='unknown-station': labels['never-published']='Fake station'
+            else: labels['0117']='Coimbra\n# country=Elsewhere'
+            with self.subTest(identity=identity),self.assertRaises(ValueError):
+                provider.compile_catalog(self.base,bad,self.source)
+
     def test_common_provider_supports_another_country_currency_and_classes(self):
         header = ['# country=Testland', '# currency=JPY', '# year=2026', '# version=1',
                   '# fractionDigits=0', '# scheme=entry-exit', '# source=https://example.test/matrix',

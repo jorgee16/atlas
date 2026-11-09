@@ -895,6 +895,7 @@ jobs:
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a28-mainline-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a16-mainline-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a1-ticket-cases.csv >> toll-section-audit/real-route-cases.csv
+          tail -n +2 android/native-app/src/androidTest/assets/tolls/a1-network-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/issue-2-approach-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a5-access-cases.csv >> toll-section-audit/real-route-cases.csv
           tail -n +2 android/native-app/src/androidTest/assets/tolls/a9-network-cases.csv >> toll-section-audit/real-route-cases.csv
