@@ -42,10 +42,10 @@ change. Pricing itself changes none of these fields.
 
 ## Added geographical evidence
 
-- 1,762 -> 5,920 reviewed directed graph edges (+4,158, 236.0%).
+- 1,762 -> 5,935 reviewed directed graph edges (+4,173, 236.8%).
   The original issue phase adds 1,860 edges through A9/A1/access reviews; the
   national Ascendi extension adds another 792, including A29 main carriageways.
-- 1,916 A1/station-approach edges, 1,889 bounded paid-network intervals and 32
+- 1,931 A1/station-approach edges, 1,902 bounded paid-network intervals and 44
   physical entry/exit events across 13 stations. Coimbra Norte is the A14/IP3 entry into the A1
   network, not an arbitrary nearest A1 point.
 - Station 0117 at OSM node 8501324196 -> station 0122 at node 319886078 follows
@@ -252,7 +252,7 @@ outside these reviewed main carriageways remains a separate requirement.
 ## A1 bulk correspondence review
 
 The A1 block replaces the single Coimbra Norte→Fátima stage with 13 named
-stations, 32 directed collection nodes, 1,916 witnessed edges and 1,889 paid
+stations, 44 directed collection nodes, 1,931 witnessed edges and 1,902 paid
 intervals. The original 85 km regression and all previous A5/A9/A16/A29 cases
 are retained. Only geography and monetary display metadata change; no native
 routing, GPS, camera or matching algorithm is modified.
@@ -267,10 +267,10 @@ ambiguous. The original compiler still requires each booth exactly once and
 preserves the continuous geometry bound. Private approaches remain excluded.
 
 All 156 directed pairs between these stations were attempted in class 1:
-**117 exact (75%), 39 incomplete (25%)**. Adjacent pairs and both end-to-end
-directions additionally cover classes 2–4: **177 exact and 57 incomplete cases
+**138 exact (88.5%), 18 incomplete (11.5%)**. Adjacent pairs and both end-to-end
+directions additionally cover classes 2–4: **207 exact and 27 incomplete cases
 out of 234**. `a1-network-coverage.json` records every case, its independently
-published fare and the blocking edge IDs. The 57 incomplete cases remain tests
+published fare and the blocking edge IDs. The 27 incomplete cases remain tests
 of the refusal contract; they do not gain confirmation by lowering tolerances
 or by replacing the expected fare with a partial sum. The fixture's unused zero
 expected-amount column on incomplete cases is a CLI-format placeholder, never
@@ -289,3 +289,22 @@ show Coimbra Norte→Fátima rather than provider codes. All 4,220 monetary rows
 are unchanged. The composer verifies that every label refers to an existing
 published provider/station and rejects malformed metadata. Offline/web catalog
 generation and the catalog audit are reproduced in CI.
+
+## Electronic station lanes after v0.2.18
+
+The v0.2.18 APK retains the previously validated 117/156 result. The separate
+follow-up fixes the source-preparation filter that considered `barrier=toll_booth`
+but omitted `highway=toll_gantry` on parallel electronic lanes. These are real
+OSM collection nodes, not synthetic access points. Twelve additional directed
+nodes at Albergaria, Aveiro Sul and Coimbra expand the reviewed A1 block to 44.
+Each station explicitly lists the accepted node IDs. Every other collection
+point in the capture remains a traversal barrier, including nearby A25 gantries;
+no operator or tariff is assigned merely from proximity or a road reference.
+
+The unchanged graph compiler witnesses every new point once under the same
+geometry bound. Fifteen additional graph edges and thirteen paid intervals
+restore thirty previously incomplete class/direction scenarios, including
+twenty-one class-1 station pairs. Every original fixture is retained, and all
+newly confirmed amounts equal their independently published directed matrix
+cells. The remaining 27 scenarios still require refusal of confirmation.
+The v0.2.18 release candidate and its signed APK are not changed by this work.

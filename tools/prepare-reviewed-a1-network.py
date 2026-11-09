@@ -20,6 +20,15 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def collection_nodes(elements, approved):
+    captured={e['id'] for e in elements if e['type']=='node'
+              and (e.get('tags',{}).get('barrier')=='toll_booth'
+                   or e.get('tags',{}).get('highway')=='toll_gantry')}
+    if approved is None or len(set(approved))!=len(approved) or set(approved)-captured:
+        raise ValueError('Explicit reviewed collection nodes differ from captured source')
+    return captured,approved
+
+
 def station_paths(gate, adjacency, targets, collection_nodes):
     """All directed station branches to the mainline, excluding other booths."""
     queue=deque([(gate,0)]); seen={gate}; links=[]; ends=set()
@@ -65,10 +74,11 @@ def prepare(review_path, raw_dir, relation_path, output):
     main = {e['id']: e for e in relation['elements'] if e['type']=='way'
             and e.get('tags', {}).get('highway')=='motorway'}
     station_gates = {}
+    captured_collection_nodes = set()
     for station in review['stations']:
         data = ingest(raw_dir / station['capture'])
-        gates = [e['id'] for e in data['elements'] if e['type']=='node'
-                 and e.get('tags', {}).get('barrier')=='toll_booth']
+        captured,gates=collection_nodes(data['elements'],station.get('collectionNodeIds'))
+        captured_collection_nodes.update(captured)
         station_gates[station['id']] = gates
     coords = {k[1]: (e['lat'], e['lon']) for k,e in elements.items() if k[0]=='node'}
     ways = {k[1]: e for k,e in elements.items() if k[0]=='way'
@@ -81,7 +91,7 @@ def prepare(review_path, raw_dir, relation_path, output):
     selected = {wid for wid,w in main.items() if any(
         review['southLatitude'] <= coords[n][0] <= review['northLatitude'] for n in w['nodes'])}
     targets = {n for wid in selected for n in ways[wid]['nodes']}
-    all_gates = {n for gates in station_gates.values() for n in gates}
+    all_gates = captured_collection_nodes
     forward, backward = defaultdict(list), defaultdict(list)
     for wid,w in ways.items():
         for a,b in zip(w['nodes'],w['nodes'][1:]):

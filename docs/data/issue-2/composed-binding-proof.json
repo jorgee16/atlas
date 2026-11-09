@@ -3,8 +3,8 @@
   "catalogSha256": "ec956bb652af59a59fb1f5ff88fbe95d920619cb910f802a4038777cdda8f1c4",
   "seedSha256": "9dcdc3f76c94632b1d955dc2c701963ceb13d99b70f65c280e68d2c2565478a3",
   "seedCoveredEdges": 529,
-  "additionalCoveredEdges": 5391,
-  "bindingsSha256": "9a0a6c3a4862fc40524a73007689ff96fa1330ca0d2d48273ce4aebc10674fe8",
+  "additionalCoveredEdges": 5406,
+  "bindingsSha256": "22f43c0899f78a20fa2397658045e581cfd52e8b4bde4c4a5d7d0501dcb1af04",
   "stages": [
     {
       "country": "Portugal",
@@ -18667,11 +18667,11 @@
         "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
-      "sourceSha256": "3b5d934620ae1260205404b463c76f39266838c825d2d0f836583472259ccf0e",
-      "reviewSha256": "d2fdd6ad9e90d5d973b640512f9f42ed6374f9efabc4dd8548dfd402629b4eb0",
+      "sourceSha256": "5eb5c8b0b54197bf8d5484ab2c2245132c5a7cf427e51ba755fa53e586ab8adf",
+      "reviewSha256": "da2442b44787598fe050fc5779d040505dfda8839ffa108f0a8d8f88f069ffbc",
       "seedSha256": "2b33646e3f23dd006e0c398c14e96c4f75ef809fac784351f0cdfa7c13de3bcc",
       "seedCoveredEdges": 1762,
-      "additionalCoveredEdges": 1916,
+      "additionalCoveredEdges": 1931,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
         "crossing;4067702;1578879;1640459;0.000000000;68.7;brisa:0501",
@@ -18688,7 +18688,7 @@
         "crossing;4220733;1642572;85918;0.000000000;108.7;ascendi:grande-lisboa:01",
         "crossing;4220744;1642582;1642577;0.000000000;142.8;ascendi:grande-lisboa:01"
       ],
-      "bindingsSha256": "e586ada5ae9b62b74378a3a41d65649cc3e3087da05cb78ed04db486126a13b2",
+      "bindingsSha256": "ef7860e479ac3e32dd4e88e9b103113a98b7bde7a156c9afcf3117bb56e6f572",
       "crossings": [
         {
           "edge": 10364,
@@ -18745,6 +18745,15 @@
           "offsetMeters": 81.91153676701109
         },
         {
+          "edge": 998716,
+          "fromNode": 368775,
+          "toNode": 1611021,
+          "lengthMeters": 97.3,
+          "osmNodeId": 12812114657,
+          "chargeId": "entry:brisa-published:0118",
+          "offsetMeters": 44.189870568557616
+        },
+        {
           "edge": 1350056,
           "fromNode": 500315,
           "toNode": 37716,
@@ -18752,6 +18761,15 @@
           "osmNodeId": 633709536,
           "chargeId": "entry:brisa-published:0123",
           "offsetMeters": 0.0
+        },
+        {
+          "edge": 1417345,
+          "fromNode": 525535,
+          "toNode": 2871244,
+          "lengthMeters": 97.0,
+          "osmNodeId": 12811985682,
+          "chargeId": "entry:brisa-published:0115",
+          "offsetMeters": 53.3804270992809
         },
         {
           "edge": 1417346,
@@ -18826,6 +18844,15 @@
           "offsetMeters": 7.402290884659319
         },
         {
+          "edge": 1751408,
+          "fromNode": 653255,
+          "toNode": 1808019,
+          "lengthMeters": 127.6,
+          "osmNodeId": 1357199983,
+          "chargeId": "entry:brisa-published:0117",
+          "offsetMeters": 0.0
+        },
+        {
           "edge": 3523346,
           "fromNode": 1352796,
           "toNode": 1352797,
@@ -18833,6 +18860,33 @@
           "osmNodeId": 1114722528,
           "chargeId": "exit:brisa-published:0113",
           "offsetMeters": 65.01376634062359
+        },
+        {
+          "edge": 3523813,
+          "fromNode": 1353065,
+          "toNode": 1808020,
+          "lengthMeters": 95.3,
+          "osmNodeId": 1357199984,
+          "chargeId": "exit:brisa-published:0117",
+          "offsetMeters": 0.0
+        },
+        {
+          "edge": 3758843,
+          "fromNode": 1450540,
+          "toNode": 1450541,
+          "lengthMeters": 129.1,
+          "osmNodeId": 3601228856,
+          "chargeId": "exit:brisa-published:0114",
+          "offsetMeters": 47.69491637273748
+        },
+        {
+          "edge": 3758846,
+          "fromNode": 1450542,
+          "toNode": 1450543,
+          "lengthMeters": 146.3,
+          "osmNodeId": 1109585655,
+          "chargeId": "entry:brisa-published:0114",
+          "offsetMeters": 75.30748689577173
         },
         {
           "edge": 3758882,
@@ -18878,6 +18932,24 @@
           "osmNodeId": 1108961109,
           "chargeId": "exit:brisa-published:0118",
           "offsetMeters": 0.0
+        },
+        {
+          "edge": 4144817,
+          "fromNode": 1611018,
+          "toNode": 1581908,
+          "lengthMeters": 83.8,
+          "osmNodeId": 12812114647,
+          "chargeId": "exit:brisa-published:0118",
+          "offsetMeters": 38.329866414118925
+        },
+        {
+          "edge": 4144818,
+          "fromNode": 1611018,
+          "toNode": 1581908,
+          "lengthMeters": 82.6,
+          "osmNodeId": 12812114646,
+          "chargeId": "exit:brisa-published:0118",
+          "offsetMeters": 37.717369007614394
         },
         {
           "edge": 5390485,
@@ -18934,6 +19006,15 @@
           "offsetMeters": 64.56012694909835
         },
         {
+          "edge": 5930460,
+          "fromNode": 2387593,
+          "toNode": 1808020,
+          "lengthMeters": 162.9,
+          "osmNodeId": 8501324178,
+          "chargeId": "exit:brisa-published:0117",
+          "offsetMeters": 65.50423489510867
+        },
+        {
           "edge": 5930463,
           "fromNode": 2387596,
           "toNode": 2387595,
@@ -18941,6 +19022,15 @@
           "osmNodeId": 8501324196,
           "chargeId": "entry:brisa-published:0117",
           "offsetMeters": 64.6233283932733
+        },
+        {
+          "edge": 6998272,
+          "fromNode": 2871239,
+          "toNode": 655007,
+          "lengthMeters": 185.4,
+          "osmNodeId": 12811985680,
+          "chargeId": "exit:brisa-published:0115",
+          "offsetMeters": 91.67962959306377
         },
         {
           "edge": 6998274,
@@ -18959,6 +19049,24 @@
           "osmNodeId": 1108961488,
           "chargeId": "entry:brisa-published:0118",
           "offsetMeters": 0.0
+        },
+        {
+          "edge": 6998300,
+          "fromNode": 2871257,
+          "toNode": 2871255,
+          "lengthMeters": 76.8,
+          "osmNodeId": 12812114645,
+          "chargeId": "entry:brisa-published:0118",
+          "offsetMeters": 39.34527995598209
+        },
+        {
+          "edge": 6998301,
+          "fromNode": 2871257,
+          "toNode": 2871255,
+          "lengthMeters": 78.3,
+          "osmNodeId": 12812114644,
+          "chargeId": "entry:brisa-published:0118",
+          "offsetMeters": 40.28756075347157
         },
         {
           "edge": 6998303,
@@ -25885,6 +25993,14 @@
           "network": "brisa-published"
         },
         {
+          "edge": 998716,
+          "fromNode": 368775,
+          "toNode": 1611021,
+          "beginMeters": 44.189870568557616,
+          "endMeters": 97.3,
+          "network": "brisa-published"
+        },
+        {
           "edge": 999056,
           "fromNode": 368933,
           "toNode": 368934,
@@ -26546,6 +26662,14 @@
           "toNode": 37716,
           "beginMeters": 0.0,
           "endMeters": 199.8,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 1417345,
+          "fromNode": 525535,
+          "toNode": 2871244,
+          "beginMeters": 53.3804270992809,
+          "endMeters": 97.0,
           "network": "brisa-published"
         },
         {
@@ -28069,6 +28193,14 @@
           "network": "brisa-published"
         },
         {
+          "edge": 1751408,
+          "fromNode": 653255,
+          "toNode": 1808019,
+          "beginMeters": 0.0,
+          "endMeters": 127.6,
+          "network": "brisa-published"
+        },
+        {
           "edge": 1755005,
           "fromNode": 654604,
           "toNode": 654605,
@@ -29042,6 +29174,14 @@
           "toNode": 12417,
           "beginMeters": 0.0,
           "endMeters": 111.0,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 2949907,
+          "fromNode": 1119821,
+          "toNode": 1353065,
+          "beginMeters": 0.0,
+          "endMeters": 95.8,
           "network": "brisa-published"
         },
         {
@@ -30621,11 +30761,35 @@
           "network": "brisa-published"
         },
         {
+          "edge": 3758843,
+          "fromNode": 1450540,
+          "toNode": 1450541,
+          "beginMeters": 0.0,
+          "endMeters": 47.69491637273748,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 3758846,
+          "fromNode": 1450542,
+          "toNode": 1450543,
+          "beginMeters": 75.30748689577173,
+          "endMeters": 146.3,
+          "network": "brisa-published"
+        },
+        {
           "edge": 3758849,
           "fromNode": 1450543,
           "toNode": 1450559,
           "beginMeters": 0.0,
           "endMeters": 66.6,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 3758881,
+          "fromNode": 1450558,
+          "toNode": 1450540,
+          "beginMeters": 0.0,
+          "endMeters": 35.7,
           "network": "brisa-published"
         },
         {
@@ -31130,6 +31294,22 @@
           "toNode": 1581907,
           "beginMeters": 0.0,
           "endMeters": 37.2,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 4144817,
+          "fromNode": 1611018,
+          "toNode": 1581908,
+          "beginMeters": 0.0,
+          "endMeters": 38.329866414118925,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 4144818,
+          "fromNode": 1611018,
+          "toNode": 1581908,
+          "beginMeters": 0.0,
+          "endMeters": 37.717369007614394,
           "network": "brisa-published"
         },
         {
@@ -32525,6 +32705,14 @@
           "network": "brisa-published"
         },
         {
+          "edge": 5930460,
+          "fromNode": 2387593,
+          "toNode": 1808020,
+          "beginMeters": 0.0,
+          "endMeters": 65.50423489510867,
+          "network": "brisa-published"
+        },
+        {
           "edge": 5930462,
           "fromNode": 2387595,
           "toNode": 1808019,
@@ -33733,6 +33921,14 @@
           "network": "brisa-published"
         },
         {
+          "edge": 6998272,
+          "fromNode": 2871239,
+          "toNode": 655007,
+          "beginMeters": 0.0,
+          "endMeters": 91.67962959306377,
+          "network": "brisa-published"
+        },
+        {
           "edge": 6998273,
           "fromNode": 2871239,
           "toNode": 2871240,
@@ -33794,6 +33990,22 @@
           "toNode": 2871255,
           "beginMeters": 0.0,
           "endMeters": 36.5,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 6998300,
+          "fromNode": 2871257,
+          "toNode": 2871255,
+          "beginMeters": 39.34527995598209,
+          "endMeters": 76.8,
+          "network": "brisa-published"
+        },
+        {
+          "edge": 6998301,
+          "fromNode": 2871257,
+          "toNode": 2871255,
+          "beginMeters": 40.28756075347157,
+          "endMeters": 78.3,
           "network": "brisa-published"
         },
         {
@@ -47227,6 +47439,21 @@
             }
           ]
         },
+        "998716": {
+          "fromNode": 368775,
+          "toNode": 1611021,
+          "lengthMeters": 97.3,
+          "witnesses": [
+            {
+              "wayId": 1383814534,
+              "beginMeters": 0.0,
+              "endMeters": 97.23258611628115,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323240140436266,
+              "maxVertexDeviationMeters": 0.8085582491690918
+            }
+          ]
+        },
         "999056": {
           "fromNode": 368933,
           "toNode": 368934,
@@ -48484,6 +48711,21 @@
               "reversed": false,
               "continuousBoundMeters": 2.432485698206543,
               "maxVertexDeviationMeters": 1.3307887870436637
+            }
+          ]
+        },
+        "1417345": {
+          "fromNode": 525535,
+          "toNode": 2871244,
+          "lengthMeters": 97.0,
+          "witnesses": [
+            {
+              "wayId": 1383806016,
+              "beginMeters": 0.0,
+              "endMeters": 97.0406746530781,
+              "reversed": false,
+              "continuousBoundMeters": 2.432241344611805,
+              "maxVertexDeviationMeters": 1.977857545218239
             }
           ]
         },
@@ -51337,6 +51579,21 @@
             }
           ]
         },
+        "1751406": {
+          "fromNode": 653254,
+          "toNode": 653255,
+          "lengthMeters": 117.7,
+          "witnesses": [
+            {
+              "wayId": 159108756,
+              "beginMeters": 0.0,
+              "endMeters": 117.84684036021305,
+              "reversed": false,
+              "continuousBoundMeters": 2.43230864301802,
+              "maxVertexDeviationMeters": 0.23613715572775815
+            }
+          ]
+        },
         "1751407": {
           "fromNode": 653254,
           "toNode": 2387596,
@@ -51349,6 +51606,21 @@
               "reversed": false,
               "continuousBoundMeters": 2.43230864301802,
               "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "1751408": {
+          "fromNode": 653255,
+          "toNode": 1808019,
+          "lengthMeters": 127.6,
+          "witnesses": [
+            {
+              "wayId": 506213763,
+              "beginMeters": 0.0,
+              "endMeters": 127.79895272635757,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323085668266424,
+              "maxVertexDeviationMeters": 0.8290758496458941
             }
           ]
         },
@@ -53179,6 +53451,21 @@
               "reversed": false,
               "continuousBoundMeters": 2.4323083553733102,
               "maxVertexDeviationMeters": 1.8932423761750286
+            }
+          ]
+        },
+        "2949907": {
+          "fromNode": 1119821,
+          "toNode": 1353065,
+          "lengthMeters": 95.8,
+          "witnesses": [
+            {
+              "wayId": 319624705,
+              "beginMeters": 0.0,
+              "endMeters": 95.93307092587992,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323086181916342,
+              "maxVertexDeviationMeters": 0.0
             }
           ]
         },
@@ -56137,6 +56424,36 @@
             }
           ]
         },
+        "3523813": {
+          "fromNode": 1353065,
+          "toNode": 1808020,
+          "lengthMeters": 95.3,
+          "witnesses": [
+            {
+              "wayId": 506213764,
+              "beginMeters": 0.0,
+              "endMeters": 95.46204514363924,
+              "reversed": false,
+              "continuousBoundMeters": 2.432308666988307,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3758843": {
+          "fromNode": 1450540,
+          "toNode": 1450541,
+          "lengthMeters": 129.1,
+          "witnesses": [
+            {
+              "wayId": 354388234,
+              "beginMeters": 0.0,
+              "endMeters": 129.5923653873198,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322147873297784,
+              "maxVertexDeviationMeters": 0.2693452322295972
+            }
+          ]
+        },
         "3758844": {
           "fromNode": 1450541,
           "toNode": 1450560,
@@ -56152,6 +56469,21 @@
             }
           ]
         },
+        "3758846": {
+          "fromNode": 1450542,
+          "toNode": 1450543,
+          "lengthMeters": 146.3,
+          "witnesses": [
+            {
+              "wayId": 354388235,
+              "beginMeters": 0.0,
+              "endMeters": 146.30457944526245,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322147873297784,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
         "3758849": {
           "fromNode": 1450543,
           "toNode": 1450559,
@@ -56163,6 +56495,21 @@
               "endMeters": 66.58659841956663,
               "reversed": false,
               "continuousBoundMeters": 2.432214508395366,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "3758881": {
+          "fromNode": 1450558,
+          "toNode": 1450540,
+          "lengthMeters": 35.7,
+          "witnesses": [
+            {
+              "wayId": 1275098515,
+              "beginMeters": 0.0,
+              "endMeters": 35.56467284554294,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322145410093396,
               "maxVertexDeviationMeters": 0.0
             }
           ]
@@ -57169,6 +57516,36 @@
               "reversed": false,
               "continuousBoundMeters": 2.4323245223305014,
               "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "4144817": {
+          "fromNode": 1611018,
+          "toNode": 1581908,
+          "lengthMeters": 83.8,
+          "witnesses": [
+            {
+              "wayId": 1383814526,
+              "beginMeters": 0.0,
+              "endMeters": 84.09024211798044,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323245223305014,
+              "maxVertexDeviationMeters": 0.06063132775200635
+            }
+          ]
+        },
+        "4144818": {
+          "fromNode": 1611018,
+          "toNode": 1581908,
+          "lengthMeters": 82.6,
+          "witnesses": [
+            {
+              "wayId": 1383814527,
+              "beginMeters": 0.0,
+              "endMeters": 82.95072002438438,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323245223305014,
+              "maxVertexDeviationMeters": 0.06556255852442038
             }
           ]
         },
@@ -59827,6 +60204,21 @@
             }
           ]
         },
+        "5930460": {
+          "fromNode": 2387593,
+          "toNode": 1808020,
+          "lengthMeters": 162.9,
+          "witnesses": [
+            {
+              "wayId": 915196801,
+              "beginMeters": 0.0,
+              "endMeters": 163.1456558400517,
+              "reversed": false,
+              "continuousBoundMeters": 2.432308666988307,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
         "5930462": {
           "fromNode": 2387595,
           "toNode": 1808019,
@@ -62107,6 +62499,21 @@
             }
           ]
         },
+        "6998272": {
+          "fromNode": 2871239,
+          "toNode": 655007,
+          "lengthMeters": 185.4,
+          "witnesses": [
+            {
+              "wayId": 1383806015,
+              "beginMeters": 0.0,
+              "endMeters": 185.52571577519916,
+              "reversed": false,
+              "continuousBoundMeters": 2.432241326600937,
+              "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
         "6998273": {
           "fromNode": 2871239,
           "toNode": 2871240,
@@ -62179,6 +62586,14 @@
               "reversed": false,
               "continuousBoundMeters": 2.432241326600937,
               "maxVertexDeviationMeters": 0.0
+            },
+            {
+              "wayId": 1383806015,
+              "beginMeters": 170.38925502048474,
+              "endMeters": 185.52603068900822,
+              "reversed": false,
+              "continuousBoundMeters": 2.432241326600937,
+              "maxVertexDeviationMeters": 1.0826570976803958
             }
           ]
         },
@@ -62217,6 +62632,14 @@
           "toNode": 2871244,
           "lengthMeters": 19.8,
           "witnesses": [
+            {
+              "wayId": 1383806016,
+              "beginMeters": 77.36614645161275,
+              "endMeters": 97.04061973315568,
+              "reversed": false,
+              "continuousBoundMeters": 2.4322413360352027,
+              "maxVertexDeviationMeters": 2.3993213136379734
+            },
             {
               "wayId": 1383806018,
               "beginMeters": 77.39179444283604,
@@ -62269,6 +62692,36 @@
               "reversed": false,
               "continuousBoundMeters": 2.4323245317431517,
               "maxVertexDeviationMeters": 0.0
+            }
+          ]
+        },
+        "6998300": {
+          "fromNode": 2871257,
+          "toNode": 2871255,
+          "lengthMeters": 76.8,
+          "witnesses": [
+            {
+              "wayId": 1383814523,
+              "beginMeters": 0.0,
+              "endMeters": 77.11654082343226,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323245317431517,
+              "maxVertexDeviationMeters": 0.17816676412731064
+            }
+          ]
+        },
+        "6998301": {
+          "fromNode": 2871257,
+          "toNode": 2871255,
+          "lengthMeters": 78.3,
+          "witnesses": [
+            {
+              "wayId": 1383814524,
+              "beginMeters": 0.0,
+              "endMeters": 78.6605955760447,
+              "reversed": false,
+              "continuousBoundMeters": 2.4323245317431517,
+              "maxVertexDeviationMeters": 3.351623381340333e-14
             }
           ]
         },
@@ -62848,8 +63301,8 @@
       "country": "Portugal",
       "reviewedSourceWays": 114,
       "sourceSha256": "720c89ba17944888775d4da6ab9bbb88410fdeb03e0f11a1264b06ff0bc5585b",
-      "reviewSha256": "df85cea41bd1e4a9806d8707ef024aba98434bbd6aa35b3bd344cb68217ccbee",
-      "seedSha256": "e586ada5ae9b62b74378a3a41d65649cc3e3087da05cb78ed04db486126a13b2",
+      "reviewSha256": "a90d5202347cfa38f17c51d5b795345bef65ae919960cbd4c661577257a76933",
+      "seedSha256": "ef7860e479ac3e32dd4e88e9b103113a98b7bde7a156c9afcf3117bb56e6f572",
       "graphDigests": {
         "nodes.bin": "a7daf7279381128c4f9304a5d27982850f80db0218dfb7978070182ee0f2a294",
         "edges.bin": "237d893d8358c539a8ad28b656e928137acd07f674d86b6734b1b4158051ea9a",
@@ -62859,7 +63312,7 @@
         "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
-      "seedCoveredEdges": 3678,
+      "seedCoveredEdges": 3693,
       "additionalFreeEdges": 284,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -62882,7 +63335,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -62891,25 +63346,35 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119"
       ],
-      "bindingsSha256": "e490971065803c63006b62c50b3110770ddb381008696c792250e25a3c536712",
+      "bindingsSha256": "b4295237bf836f8d68cc31627dcad9594ee2c1cf370b097c5c91cd14cfe44587",
       "scope": "Selected public municipal streets and EN9/EN6-7/EN249-3 approach geometries in Cascais, Manique, Oeiras and Carcavelos, outside motorway collection lanes. Physical toll approaches are explicitly excluded and remain unpriced unless independently reviewed. No route, whole-road or country exemption.",
       "freeEdgeWitnesses": {
         "16937": {
@@ -67195,9 +67660,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "a00ced82b581e8fdc1974082ea16fce1ff81dcef9d51fc6e6cc9792cf7ab31ce",
-      "reviewSha256": "c8ebca33ebc43ae87fff4fe153adaddcafef12ab51f424e4abed88a990e2d76d",
-      "seedSha256": "e490971065803c63006b62c50b3110770ddb381008696c792250e25a3c536712",
-      "seedCoveredEdges": 3962,
+      "reviewSha256": "2f7347c0005a45ad961a5f64a2f42171bcf327a2bb56a5ea15693e808c8609cd",
+      "seedSha256": "b4295237bf836f8d68cc31627dcad9594ee2c1cf370b097c5c91cd14cfe44587",
+      "seedCoveredEdges": 3977,
       "additionalCoveredEdges": 25,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -67220,7 +67685,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -67229,25 +67696,35 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119"
       ],
-      "bindingsSha256": "3b9a3ba8501a2e1c043b1262a75f92027e388427b83a6332dc2d8aeaa2ee2e90",
+      "bindingsSha256": "71623b131d2028245220911739a845c16c09c086aac1812d26697dfd989f3434",
       "crossings": [
         {
           "edge": 59945,
@@ -67678,9 +68155,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "f59267d3e7347aee59b74884a8249905737e0cef333cccbeab434ebb69f9c4de",
-      "reviewSha256": "5c144e1270b8937f77f72e6d1b8d0d133288fa6a1b47f8549b2eff76bdb601ab",
-      "seedSha256": "3b9a3ba8501a2e1c043b1262a75f92027e388427b83a6332dc2d8aeaa2ee2e90",
-      "seedCoveredEdges": 3987,
+      "reviewSha256": "b71ede848978d98831f63343e857dd7332df8dd40d49f2034644e3346ea7fd10",
+      "seedSha256": "71623b131d2028245220911739a845c16c09c086aac1812d26697dfd989f3434",
+      "seedCoveredEdges": 4002,
       "additionalCoveredEdges": 651,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -67703,7 +68180,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -67712,21 +68191,31 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119",
         "crossing;59945;21759;21760;0.000000000;104.6;brisa:0502",
@@ -67734,7 +68223,7 @@
         "crossing;4215682;1640463;1640465;81.779963825;236.3;brisa:0502",
         "crossing;4217482;1641234;1354985;0.000000000;93.0;brisa:0504"
       ],
-      "bindingsSha256": "844b236cb2412bd358a6776b796388db4d5b210be594e55fbe5271eecff12a78",
+      "bindingsSha256": "f40c0a11b99411474d9e84a7f51ba0449ede96efc60f6c8be2e4d2ba78e74b72",
       "crossings": [
         {
           "edge": 35565,
@@ -82132,8 +82621,8 @@
       "country": "Portugal",
       "reviewedSourceWays": 191,
       "sourceSha256": "c8c5abb53e6caf4fa5247e50cff5c89646d6a4c9a04d4cf2a815eb998445e107",
-      "reviewSha256": "173a79b9600b166fb804ca9b4c762ae531c7ae81855189fd5071df9e3315489b",
-      "seedSha256": "844b236cb2412bd358a6776b796388db4d5b210be594e55fbe5271eecff12a78",
+      "reviewSha256": "346f1e8255dae66a39a78a521f80de866f9b3a924b17039676285d3a304cf055",
+      "seedSha256": "f40c0a11b99411474d9e84a7f51ba0449ede96efc60f6c8be2e4d2ba78e74b72",
       "graphDigests": {
         "nodes.bin": "a7daf7279381128c4f9304a5d27982850f80db0218dfb7978070182ee0f2a294",
         "edges.bin": "237d893d8358c539a8ad28b656e928137acd07f674d86b6734b1b4158051ea9a",
@@ -82143,7 +82632,7 @@
         "restrictions.bin": "a19d718fe405319d95a9330518a8217a2b89940c1b3bcecd357f92155bbb19c1",
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
-      "seedCoveredEdges": 4638,
+      "seedCoveredEdges": 4653,
       "additionalFreeEdges": 490,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -82166,7 +82655,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -82175,21 +82666,31 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119",
         "crossing;59945;21759;21760;0.000000000;104.6;brisa:0502",
@@ -82234,7 +82735,7 @@
         "crossing;6303209;2554763;2554765;0.000000000;80.5;entry:pt-a9-linear:alverca",
         "crossing;6303212;2554766;642720;0.000000000;144.1;exit:pt-a9-linear:alverca"
       ],
-      "bindingsSha256": "8fd7de749b4b6e8ed9df6d158e9acdb2dcf21df87d28aa5d8c0ffb2dc9f7471e",
+      "bindingsSha256": "d3f008bbf859500d71e69ddcca70235e7d9ba27f220c37ea8ea841889abdf44c",
       "scope": "Specific public access streets, IC19 and post-Loures A8 approach geometry for A9 alternatives. Physical collection approaches and paid-network membership are handled by the preceding fixed/network proof, not waived by this stage. No whole-road or country exemption.",
       "freeEdgeWitnesses": {
         "2412": {
@@ -89602,9 +90103,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "3052bfd35471acff2a4aed91fdfbf4f8a1c63a0d48d057683bdee27ee8462041",
-      "reviewSha256": "fb153cbbcd89f4568924701e060dea759220ff7f9a26debeefaabcc825aa23e3",
-      "seedSha256": "8fd7de749b4b6e8ed9df6d158e9acdb2dcf21df87d28aa5d8c0ffb2dc9f7471e",
-      "seedCoveredEdges": 5128,
+      "reviewSha256": "762ca87a8f345408fa1a6ac62ea39c6fe9fac9c2093733f4fc73be21e5c214ff",
+      "seedSha256": "d3f008bbf859500d71e69ddcca70235e7d9ba27f220c37ea8ea841889abdf44c",
+      "seedCoveredEdges": 5143,
       "additionalCoveredEdges": 34,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -89627,7 +90128,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -89636,21 +90139,31 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119",
         "crossing;59945;21759;21760;0.000000000;104.6;brisa:0502",
@@ -89695,7 +90208,7 @@
         "crossing;6303209;2554763;2554765;0.000000000;80.5;entry:pt-a9-linear:alverca",
         "crossing;6303212;2554766;642720;0.000000000;144.1;exit:pt-a9-linear:alverca"
       ],
-      "bindingsSha256": "f9217f532095ac7ecebe358ef58717f3bb8624b3c604e2630e92e646792a038d",
+      "bindingsSha256": "e3dddb2c6c108d7421acdee5601e115f1013c09d4807e023d9cb915a6f94d3c4",
       "crossings": [
         {
           "edge": 87640,
@@ -90261,9 +90774,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "2dd835647fed2dbae959564529410a629ebfc9eb00d553f89cc752ef1a21594d",
-      "reviewSha256": "520c8790771963328d86557731b7158795ef35a328d3f3fc73c17e820f2e5b95",
-      "seedSha256": "f9217f532095ac7ecebe358ef58717f3bb8624b3c604e2630e92e646792a038d",
-      "seedCoveredEdges": 5162,
+      "reviewSha256": "289cd9782fa4107530ad2dca17f5a5be4b75f2b794e4f5f524442c05689412b1",
+      "seedSha256": "e3dddb2c6c108d7421acdee5601e115f1013c09d4807e023d9cb915a6f94d3c4",
+      "seedCoveredEdges": 5177,
       "additionalCoveredEdges": 114,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -90286,7 +90799,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -90295,21 +90810,31 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119",
         "crossing;59945;21759;21760;0.000000000;104.6;brisa:0502",
@@ -90358,7 +90883,7 @@
         "crossing;1356247;502641;502642;164.602698727;187.9;ascendi:grande-porto:02",
         "crossing;4584944;1794867;52952;136.515403987;176.4;ascendi:grande-porto:02"
       ],
-      "bindingsSha256": "9fa7c282021191f24c0d3ef512189ea0c9cedb8df91e2dfc462c26efb32f0fb0",
+      "bindingsSha256": "61c811fe31942962f2ea2e2a4c620764f4e31197da659dc840f8f4f2836dde9b",
       "crossings": [
         {
           "edge": 1722343,
@@ -92142,9 +92667,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "7ac8b223b86798db44396d9fe8a84522c09dbb56bddd3c3c4626f84f26c3fde3",
-      "reviewSha256": "46ab7234a9309c25f8f89e3095218d55b1203c93cb3e2b79f3246a2022130b64",
-      "seedSha256": "9fa7c282021191f24c0d3ef512189ea0c9cedb8df91e2dfc462c26efb32f0fb0",
-      "seedCoveredEdges": 5276,
+      "reviewSha256": "29b7e634053c4dacb4b01069265df6a57e5015a8e644573422a3b38a765b43f9",
+      "seedSha256": "61c811fe31942962f2ea2e2a4c620764f4e31197da659dc840f8f4f2836dde9b",
+      "seedCoveredEdges": 5291,
       "additionalCoveredEdges": 568,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -92167,7 +92692,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -92176,21 +92703,31 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119",
         "crossing;59945;21759;21760;0.000000000;104.6;brisa:0502",
@@ -92245,7 +92782,7 @@
         "crossing;4474551;1748140;1748141;0.000000000;206.2;ascendi:costa-de-prata:02",
         "crossing;4474554;1748143;1748142;174.604354648;612.2;ascendi:costa-de-prata:02"
       ],
-      "bindingsSha256": "82303d645df3835c757f4bc2a69d57c08d6f18695f25cc6087ba0e5a415224e9",
+      "bindingsSha256": "687a7c38b69b6170f3db4a49e6f783bdc0a8919fa6f82e97582fab83b0790681",
       "crossings": [
         {
           "edge": 332989,
@@ -100857,9 +101394,9 @@
         "spatial-index.bin": "dd79c45eee7f259c6e31ec42f5e1c6becb0b07a75679503bb6143f92bdf78daf"
       },
       "sourceSha256": "b69f97f4f0fe15d14201806fa60d5f8339eeb39191ac559134e1d82230a4c64a",
-      "reviewSha256": "126e5748a6f4c4be5f2d43053d81f84f8e5bb1c4a44d2b73a8e481b8d60764b4",
-      "seedSha256": "82303d645df3835c757f4bc2a69d57c08d6f18695f25cc6087ba0e5a415224e9",
-      "seedCoveredEdges": 5844,
+      "reviewSha256": "39ef4aa1c8555ac84822864e054233a2f60cc37223d72801d86085b929bdb5cc",
+      "seedSha256": "687a7c38b69b6170f3db4a49e6f783bdc0a8919fa6f82e97582fab83b0790681",
+      "seedCoveredEdges": 5859,
       "additionalCoveredEdges": 76,
       "chargedCrossingsUnchanged": [
         "crossing;4067701;1578878;2509265;123.501807598;236.1;brisa:0501",
@@ -100882,7 +101419,9 @@
         "crossing;183137;66341;66342;0.000000000;34.7;exit:brisa-published:0116",
         "crossing;460906;166493;1572639;0.000000000;65.5;entry:brisa-published:0116",
         "crossing;563578;206517;206518;81.911536767;148.8;entry:brisa-published:0113",
+        "crossing;998716;368775;1611021;44.189870569;97.3;entry:brisa-published:0118",
         "crossing;1350056;500315;37716;0.000000000;199.8;entry:brisa-published:0123",
+        "crossing;1417345;525535;2871244;53.380427099;97.0;entry:brisa-published:0115",
         "crossing;1417346;525535;2871246;52.518073688;77.3;entry:brisa-published:0115",
         "crossing;1505627;558907;558908;42.368331989;92.8;entry:brisa-published:0112",
         "crossing;1505629;558907;558908;43.408459772;95.1;entry:brisa-published:0112",
@@ -100891,21 +101430,31 @@
         "crossing;1505639;558910;558911;49.100020227;95.6;exit:brisa-published:0112",
         "crossing;1505640;558910;558911;48.859079147;94.7;exit:brisa-published:0112",
         "crossing;1645896;612083;612084;7.402290885;16.0;exit:brisa-published:0120",
+        "crossing;1751408;653255;1808019;0.000000000;127.6;entry:brisa-published:0117",
         "crossing;3523346;1352796;1352797;65.013766341;129.0;exit:brisa-published:0113",
+        "crossing;3523813;1353065;1808020;0.000000000;95.3;exit:brisa-published:0117",
+        "crossing;3758843;1450540;1450541;47.694916373;129.1;exit:brisa-published:0114",
+        "crossing;3758846;1450542;1450543;75.307486896;146.3;entry:brisa-published:0114",
         "crossing;3758882;1450558;1450541;81.014612435;161.3;exit:brisa-published:0114",
         "crossing;3758892;1450565;1450543;51.145210822;120.2;entry:brisa-published:0114",
         "crossing;4052715;1572708;1572719;84.650015611;263.6;exit:brisa-published:0134",
         "crossing;4054436;1573452;1573453;0.000000000;268.0;entry:brisa-published:0134",
         "crossing;4075243;1581907;1581908;0.000000000;43.0;exit:brisa-published:0118",
+        "crossing;4144817;1611018;1581908;38.329866414;83.8;exit:brisa-published:0118",
+        "crossing;4144818;1611018;1581908;37.717369008;82.6;exit:brisa-published:0118",
         "crossing;5390485;2143952;2143953;0.000000000;225.9;entry:brisa-published:0121",
         "crossing;5426841;2160253;2160252;0.000000000;79.8;exit:brisa-published:0122",
         "crossing;5536615;2209926;2230239;65.872702045;91.8;entry:brisa-published:0120",
         "crossing;5813792;2334642;2334643;0.000000000;51.4;exit:brisa-published:0119",
         "crossing;5930455;2387590;2387591;52.228533271;97.4;exit:brisa-published:0117",
         "crossing;5930459;2387593;1808020;64.560126949;160.5;exit:brisa-published:0117",
+        "crossing;5930460;2387593;1808020;65.504234895;162.9;exit:brisa-published:0117",
         "crossing;5930463;2387596;2387595;64.623328393;150.7;entry:brisa-published:0117",
+        "crossing;6998272;2871239;655007;91.679629593;185.4;exit:brisa-published:0115",
         "crossing;6998274;2871240;2871241;37.163207198;73.1;exit:brisa-published:0115",
         "crossing;6998299;2871256;2871255;0.000000000;36.5;entry:brisa-published:0118",
+        "crossing;6998300;2871257;2871255;39.345279956;76.8;entry:brisa-published:0118",
+        "crossing;6998301;2871257;2871255;40.287560753;78.3;entry:brisa-published:0118",
         "crossing;6998303;2871258;1611021;0.000000000;53.3;entry:brisa-published:0118",
         "crossing;6998305;2871260;2871261;0.000000000;33.5;entry:brisa-published:0119",
         "crossing;59945;21759;21760;0.000000000;104.6;brisa:0502",
@@ -100968,7 +101517,7 @@
         "crossing;4576965;1791319;1791320;22.480019248;693.6;ascendi:costa-de-prata:06",
         "crossing;4639896;1818655;1818656;0.000000000;226.8;ascendi:costa-de-prata:05"
       ],
-      "bindingsSha256": "9a0a6c3a4862fc40524a73007689ff96fa1330ca0d2d48273ce4aebc10674fe8",
+      "bindingsSha256": "22f43c0899f78a20fa2397658045e581cfd52e8b4bde4c4a5d7d0501dcb1af04",
       "crossings": [
         {
           "edge": 556759,
